@@ -112,9 +112,18 @@ export default function MainScreen() {
               </p>
             </div>
           </div>
-          <div className="text-right font-mono flex flex-col items-end gap-0.5">
-            <div className="text-sm font-semibold text-[#B8860B]">{char.money}€</div>
-            <div className="text-[10px] text-[#7B68EE] font-medium">⭐ {char.respect}</div>
+          <div className="flex items-center gap-2">
+            <div className="text-right font-mono flex flex-col items-end gap-0.5">
+              <div className="text-sm font-semibold text-[#B8860B]">{char.money}€</div>
+              <div className="text-[10px] text-[#7B68EE] font-medium">⭐ {char.respect}</div>
+            </div>
+            <button
+              onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'settings' })}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm text-[#8B6B4A] hover:bg-[#F5EDE4] transition-colors"
+              aria-label="Options"
+            >
+              ⚙️
+            </button>
           </div>
         </div>
       </motion.div>
@@ -219,6 +228,21 @@ export default function MainScreen() {
             }}
           />
         </div>
+
+        {/* Action risquée : Voler */}
+        <motion.button
+          whileHover={actionsLeft <= 0 ? {} : { scale: 1.01 }}
+          whileTap={actionsLeft <= 0 ? {} : { scale: 0.98 }}
+          onClick={actionsLeft <= 0 ? undefined : () => dispatch({ type: 'STEAL' })}
+          disabled={actionsLeft <= 0}
+          className={`action-btn p-2.5 flex items-center justify-center gap-2 border-[#D94F4F]/30 ${
+            actionsLeft <= 0 ? 'opacity-35 pointer-events-none' : ''
+          }`}
+        >
+          <span className="text-lg">🥷</span>
+          <span className="text-xs font-medium text-[#3D3020]">Voler</span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#D94F4F]/10 text-[#D94F4F] font-mono">risqué</span>
+        </motion.button>
 
         {/* Secondary actions */}
         <div className="flex gap-2">

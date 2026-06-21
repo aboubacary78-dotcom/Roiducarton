@@ -98,6 +98,7 @@ actives les pubs personnalisées.
 |---|---|---|
 | Interstitiel | À l'écran de fin de partie (Game Over) | `GameOverScreen.tsx` |
 | Récompensée | Bouton « Seconde chance » pour ressusciter (1×/partie) | `GameOverScreen.tsx` → action `REVIVE` |
+| Récompensée | Bouton « Doubler mes gains » quand on gagne de l'argent | `EventResultOverlay.tsx` → action `DOUBLE_REWARD` |
 | Bannière | Disponible via `showBanner()` (non activée par défaut) | `client/src/lib/ads.ts` |
 
 Toute la logique est centralisée dans **`client/src/lib/ads.ts`**. Pour ajouter
@@ -149,7 +150,8 @@ Dans Xcode :
 - [ ] Icône et écran de démarrage (splash) personnalisés
 - [ ] Vrais ID AdMob en place, `USE_TEST_ADS = false`
 - [ ] App ID AdMob déclaré dans les fichiers natifs
-- [ ] Politique de confidentialité en ligne (obligatoire avec des pubs)
+- [ ] Politique de confidentialité en ligne (obligatoire avec des pubs) — mets
+      son URL dans `PRIVACY_URL` (`client/src/components/game/SettingsScreen.tsx`)
 - [ ] Captures d'écran pour chaque taille demandée
 - [ ] Numéro de version incrémenté (`package.json` + projets natifs)
 - [ ] Testé sur un vrai appareil
