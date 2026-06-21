@@ -662,14 +662,14 @@ export interface WeaponProfile {
 export function getWeaponProfile(weapon?: InventoryItem): WeaponProfile {
   switch (weapon?.combatStyle) {
     case 'precise':
-      return { style: 'precise', label: '🔪 Arme précise', note: 'Critiques dévastateurs — mais un raté ne fait presque rien et vous expose.',
-        critMin: 2.2, critRange: 0.9, stunChance: 0.75, missMin: 0.15, missRange: 0.2, riposteMin: 1.0, riposteRange: 0.6 };
+      return { style: 'precise', label: '🔪 Arme précise', note: 'Critiques marqués — mais un raté ne fait presque rien et vous expose.',
+        critMin: 1.6, critRange: 0.5, stunChance: 0.45, missMin: 0.15, missRange: 0.2, riposteMin: 1.0, riposteRange: 0.6 };
     case 'heavy':
       return { style: 'heavy', label: '🏏 Arme lourde', note: 'Même un coup mal ajusté fait mal et tient l\'ennemi à distance. Critiques plus modestes.',
-        critMin: 1.5, critRange: 0.5, stunChance: 0.45, missMin: 0.6, missRange: 0.4, riposteMin: 0.4, riposteRange: 0.4 };
+        critMin: 1.3, critRange: 0.3, stunChance: 0.25, missMin: 0.6, missRange: 0.4, riposteMin: 0.4, riposteRange: 0.4 };
     default:
       return { style: 'balanced', label: '✊ Coup équilibré', note: 'Sans arme spécialisée : visée standard.',
-        critMin: 1.8, critRange: 0.6, stunChance: 0.6, missMin: 0.3, missRange: 0.3, riposteMin: 1.0, riposteRange: 0.6 };
+        critMin: 1.4, critRange: 0.4, stunChance: 0.35, missMin: 0.3, missRange: 0.3, riposteMin: 1.0, riposteRange: 0.6 };
   }
 }
 
