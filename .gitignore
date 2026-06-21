@@ -114,3 +114,6 @@ temp/
 /android
 /ios
 .gradle/
+
+# Navigateur Chrome for Testing téléchargé pour les captures d'écran (lourd).
+/chrome
