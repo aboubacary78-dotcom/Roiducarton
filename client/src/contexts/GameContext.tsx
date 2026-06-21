@@ -88,6 +88,12 @@ export interface EventOutcome {
   followUpEventId?: string;
 }
 
+export interface CombatZone {
+  id: string;
+  label: string;
+  emoji: string;
+}
+
 export interface CombatState {
   enemyName: string;
   enemyEmoji: string;
@@ -96,6 +102,9 @@ export interface CombatState {
   enemyAttack: number;
   description: string;
   playerWeapon?: InventoryItem;
+  zones: CombatZone[];
+  weakPointId: string;
+  weakPointHint: string;
 }
 
 export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings';
@@ -591,6 +600,47 @@ const ENEMIES: Enemy[] = [
   { name: 'Raton Laveur Alpha', emoji: '🦝', health: 30, attack: 10, description: 'Le boss des ratons. Il porte un masque naturel de bandit.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-raton-laveur-DV28WgnY4Dw7WEQpakPMzH.webp', loot: { money: 5, respect: 3 } },
   { name: 'Chat Sauvage', emoji: '🐈', health: 18, attack: 9, description: 'Pas de collier, pas de maître, pas de pitié.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-chat-sauvage-fFoiY6tVx6eNamsMbyGbNq.webp', loot: { money: 2, respect: 2 } },
 ];
+
+// ============ POINTS FAIBLES (ciblage en combat) ============
+// Pour chaque ennemi : 3 zones à viser, l'id de la zone "point faible",
+// et un indice pour aider le joueur à le deviner.
+interface Targeting { zones: CombatZone[]; weak: string; hint: string; }
+
+const Z = {
+  tete: { id: 'tete', label: 'Tête', emoji: '🎯' },
+  torse: { id: 'torse', label: 'Torse', emoji: '🫁' },
+  jambes: { id: 'jambes', label: 'Jambes', emoji: '🦵' },
+  ailes: { id: 'ailes', label: 'Ailes', emoji: '🪽' },
+  pattes: { id: 'pattes', label: 'Pattes', emoji: '🐾' },
+  queue: { id: 'queue', label: 'Queue', emoji: '🌀' },
+  bec: { id: 'bec', label: 'Bec', emoji: '🔻' },
+  museau: { id: 'museau', label: 'Museau', emoji: '👃' },
+  ventre: { id: 'ventre', label: 'Ventre', emoji: '🎈' },
+  mains: { id: 'mains', label: 'Mains', emoji: '✋' },
+} as const;
+
+const WEAK_POINTS: Record<string, Targeting> = {
+  'Pigeon Alpha':        { zones: [Z.bec, Z.ailes, Z.pattes], weak: 'ailes', hint: 'Coupez-lui les ailes, il ne pourra plus voltiger.' },
+  'Mouette Furibonde':   { zones: [Z.bec, Z.ailes, Z.ventre], weak: 'ailes', hint: 'Tout est dans le vol : visez les ailes.' },
+  'Mouette Géante':      { zones: [Z.bec, Z.ailes, Z.ventre], weak: 'ailes', hint: 'Une si grande envergure... visez les ailes.' },
+  'Chat de Gouttière':   { zones: [Z.tete, Z.pattes, Z.queue], weak: 'queue', hint: 'Attrapez la queue, il déteste ça.' },
+  'Chat Sauvage':        { zones: [Z.tete, Z.pattes, Z.queue], weak: 'queue', hint: 'Sa queue est son point sensible.' },
+  'Voyou du Coin':       { zones: [Z.tete, Z.torse, Z.jambes], weak: 'tete', hint: 'Un bon crochet au menton et il tombe.' },
+  'Squatteur Territorial':{ zones: [Z.tete, Z.torse, Z.jambes], weak: 'tete', hint: 'Visez la tête, il ne s\'y attend pas.' },
+  'Concurrent Agressif': { zones: [Z.tete, Z.torse, Z.jambes], weak: 'torse', hint: 'Coupez-lui le souffle : droit au plexus.' },
+  'Agent de Sécurité':   { zones: [Z.tete, Z.ventre, Z.jambes], weak: 'ventre', hint: 'Sous le gilet, le ventre est à nu.' },
+  'Ivrogne Agressif':    { zones: [Z.tete, Z.torse, Z.jambes], weak: 'jambes', hint: 'Il tient à peine debout : fauchez ses jambes.' },
+  'Pickpocket':          { zones: [Z.tete, Z.mains, Z.jambes], weak: 'jambes', hint: 'Il mise tout sur sa vitesse : brisez son élan.' },
+  'Rat Géant':           { zones: [Z.tete, Z.pattes, Z.queue], weak: 'queue', hint: 'Marchez sur sa queue pour le clouer sur place.' },
+  'Chien Errant':        { zones: [Z.museau, Z.pattes, Z.torse], weak: 'museau', hint: 'Le museau est ultra-sensible : frappez là.' },
+  'Raton Laveur':        { zones: [Z.tete, Z.pattes, Z.queue], weak: 'tete', hint: 'Visez entre les yeux, sous le masque.' },
+};
+
+const DEFAULT_TARGETING: Targeting = { zones: [Z.tete, Z.torse, Z.jambes], weak: 'tete', hint: 'Cherchez l\'ouverture... la tête semble vulnérable.' };
+
+function getTargeting(enemyName: string): Targeting {
+  return WEAK_POINTS[enemyName] || DEFAULT_TARGETING;
+}
 
 // ============ EXPLORE EVENTS (30) ============
 const EXPLORE_EVENTS: GameEvent[] = [
@@ -2285,6 +2335,7 @@ type GameAction =
   | { type: 'CONTINUE_SAVE' }
   | { type: 'START_COMBAT'; enemy: Enemy }
   | { type: 'COMBAT_ATTACK' }
+  | { type: 'COMBAT_AIM'; targetId: string }
   | { type: 'COMBAT_INTIMIDATE' }
   | { type: 'COMBAT_FLEE' }
   | { type: 'BUY_ITEM'; shopItem: ShopItem; actualPrice: number }
@@ -2487,6 +2538,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'START_COMBAT': {
       if (!state.character) return state;
       const weapon = state.character.inventory.find(i => i.type === 'weapon');
+      const targeting = getTargeting(action.enemy.name);
       const combat: CombatState = {
         enemyName: action.enemy.name,
         enemyEmoji: action.enemy.emoji,
@@ -2495,6 +2547,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         enemyAttack: action.enemy.attack,
         description: action.enemy.description,
         playerWeapon: weapon,
+        zones: targeting.zones,
+        weakPointId: targeting.weak,
+        weakPointHint: targeting.hint,
       };
       return { ...state, screen: 'combat', currentCombat: combat, combatLog: [`${action.enemy.emoji} ${action.enemy.name} apparaît ! ${action.enemy.description}`] };
     }
@@ -2538,6 +2593,73 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         character: { ...state.character, stats: newStats2 },
         currentCombat: { ...state.currentCombat, enemyHealth: newEnemyHp },
+        combatLog: logs,
+      };
+    }
+
+    case 'COMBAT_AIM': {
+      if (!state.character || !state.currentCombat) return state;
+      const combat = state.currentCombat;
+      const zone = combat.zones.find(z => z.id === action.targetId);
+      if (!zone) return state;
+      const isCritical = action.targetId === combat.weakPointId;
+
+      const isMilitaire = state.character.job.id === 'militaire';
+      const hasForce = state.character.traits.some(t => t.id === 'costaud');
+      const weapon = combat.playerWeapon;
+      const baseDmg = 6 + (isMilitaire ? 4 : 0) + (hasForce ? 3 : 0) + (weapon ? weapon.effect?.health ? Math.abs(weapon.effect.health) : 4 : 0);
+
+      const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
+      let playerDmg: number;
+      let enemyDmg: number;
+      const logs = [...state.combatLog];
+
+      if (isCritical) {
+        // Coup critique : gros dégâts + chance d'étourdir (pas de riposte).
+        playerDmg = Math.floor(baseDmg * (1.8 + Math.random() * 0.6));
+        const stunned = Math.random() < 0.6;
+        enemyDmg = stunned ? 0 : Math.floor(combat.enemyAttack * (0.6 + Math.random() * 0.5) * (hasOsMousse ? 1.5 : 1));
+        logs.push(`🎯 COUP CRITIQUE sur ${zone.label.toLowerCase()} ! ${playerDmg} dégâts !`);
+        if (stunned) logs.push(`💫 ${combat.enemyName} est sonné et ne riposte pas !`);
+      } else {
+        // Mauvaise zone : coup qui glisse, l'ennemi en profite.
+        playerDmg = Math.floor(baseDmg * (0.3 + Math.random() * 0.3));
+        enemyDmg = Math.floor(combat.enemyAttack * (1.0 + Math.random() * 0.6) * (hasOsMousse ? 1.5 : 1));
+        logs.push(`😬 Mauvaise cible (${zone.label.toLowerCase()}) ! Coup qui glisse : ${playerDmg} dégâts.`);
+      }
+
+      const newEnemyHp = Math.max(0, combat.enemyHealth - playerDmg);
+      const newHp = Math.max(0, state.character.stats.health - enemyDmg);
+      if (enemyDmg > 0 && newEnemyHp > 0) logs.push(`💥 ${combat.enemyName} riposte ! ${enemyDmg} dégâts !`);
+
+      // Mémorise le point faible découvert (pour l'afficher les fois suivantes).
+      let newFlags = [...state.character.activeFlags];
+      const wpFlag = `wp:${combat.enemyName}`;
+      if (isCritical && !newFlags.includes(wpFlag)) newFlags.push(wpFlag);
+
+      if (newEnemyHp <= 0) {
+        const enemy = ENEMIES.find(e => e.name === combat.enemyName);
+        const lootMoney = enemy?.loot?.money || 0;
+        const lootRespect = (enemy?.loot?.respect || 0) + (isCritical ? 1 : 0);
+        logs.push(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`);
+        const newStats = clampStats({ ...state.character.stats, health: newHp });
+        return {
+          ...state,
+          character: { ...state.character, stats: newStats, money: state.character.money + lootMoney, respect: state.character.respect + lootRespect, activeFlags: newFlags },
+          currentCombat: null,
+          combatLog: logs,
+          eventResult: { text: `Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`, moneyChange: lootMoney, respectChange: lootRespect },
+          screen: 'main',
+        };
+      }
+      if (newHp <= 0) {
+        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'] };
+      }
+      const newStats2 = clampStats({ ...state.character.stats, health: newHp });
+      return {
+        ...state,
+        character: { ...state.character, stats: newStats2, activeFlags: newFlags },
+        currentCombat: { ...combat, enemyHealth: newEnemyHp },
         combatLog: logs,
       };
     }

@@ -1,11 +1,20 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 
 export default function CombatScreen() {
   const { state, dispatch } = useGame();
   const { currentCombat, combatLog, character } = state;
+  const [aiming, setAiming] = useState(false);
 
   if (!currentCombat || !character) return null;
+
+  const weakDiscovered = character.activeFlags.includes(`wp:${currentCombat.enemyName}`);
+
+  function aimAt(targetId: string) {
+    setAiming(false);
+    dispatch({ type: 'COMBAT_AIM', targetId });
+  }
 
   const hpPercent = (currentCombat.enemyHealth / currentCombat.enemyMaxHealth) * 100;
   const playerHpPercent = character.stats.health;
@@ -136,40 +145,107 @@ export default function CombatScreen() {
 
       {/* Actions */}
       <div className="flex flex-col gap-2 mt-auto">
-        <motion.button
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => dispatch({ type: 'COMBAT_ATTACK' })}
-          className="w-full py-3.5 rounded-xl text-sm font-semibold text-white"
-          style={{ background: 'linear-gradient(135deg, #B84A3A, #8B2020)', boxShadow: '0 4px 12px rgba(184, 74, 58, 0.3)' }}
-        >
-          Attaquer {weapon ? `(${weapon.name})` : '(mains nues)'}
-          {(isMilitaire || hasForce) && <span className="text-xs ml-1 opacity-60">+bonus</span>}
-        </motion.button>
+        <AnimatePresence mode="wait">
+          {aiming ? (
+            <motion.div
+              key="aim-panel"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="flex flex-col gap-2"
+            >
+              <div className="rounded-xl p-2.5 border border-[#5C4A38]" style={{ background: '#1A120C' }}>
+                <p className="text-[11px] text-[#E8A87C] text-center">
+                  🔎 {weakDiscovered
+                    ? 'Point faible connu — la cible 🎯 marque la zone.'
+                    : currentCombat.weakPointHint}
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {currentCombat.zones.map((zone) => {
+                  const showMark = weakDiscovered && zone.id === currentCombat.weakPointId;
+                  return (
+                    <motion.button
+                      key={zone.id}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => aimAt(zone.id)}
+                      className={`py-3 rounded-xl text-xs font-semibold text-[#F0D9C4] flex flex-col items-center gap-1 border ${
+                        showMark ? 'border-[#E8A87C]' : 'border-[#3D2A1A]'
+                      }`}
+                      style={{ background: showMark ? 'linear-gradient(135deg, #3A2614, #2A1C12)' : 'linear-gradient(135deg, #2A1C12, #1E1410)' }}
+                    >
+                      <span className="text-xl">{showMark ? '🎯' : zone.emoji}</span>
+                      <span>{zone.label}</span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+              <button
+                onClick={() => setAiming(false)}
+                className="w-full py-2 rounded-xl text-xs font-medium text-[#A08060]"
+                style={{ background: '#1A120C', border: '1px solid #3D2A1A' }}
+              >
+                Annuler
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="main-actions"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col gap-2"
+            >
+              <div className="flex gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => dispatch({ type: 'COMBAT_ATTACK' })}
+                  className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white"
+                  style={{ background: 'linear-gradient(135deg, #B84A3A, #8B2020)', boxShadow: '0 4px 12px rgba(184, 74, 58, 0.3)' }}
+                >
+                  Attaquer
+                  {(isMilitaire || hasForce) && <span className="text-xs ml-1 opacity-60">+bonus</span>}
+                </motion.button>
 
-        <div className="flex gap-2">
-          <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => dispatch({ type: 'COMBAT_INTIMIDATE' })}
-            className="flex-1 py-3 rounded-xl text-sm font-semibold text-white"
-            style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)', boxShadow: '0 4px 12px rgba(212, 135, 77, 0.2)' }}
-          >
-            Intimider
-            {(hasCharisme || hasHaleine) && <span className="text-[10px] ml-1 opacity-60">+</span>}
-          </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setAiming(true)}
+                  className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white"
+                  style={{ background: 'linear-gradient(135deg, #C99A3A, #9B7209)', boxShadow: '0 4px 12px rgba(201, 154, 58, 0.25)' }}
+                >
+                  🎯 Viser
+                </motion.button>
+              </div>
 
-          <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => dispatch({ type: 'COMBAT_FLEE' })}
-            className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#E8D5C0]"
-            style={{ background: 'linear-gradient(135deg, #3D2A1A, #2A1C12)', border: '1px solid #5C4A38' }}
-          >
-            Fuir
-            {(hasAgile || isCascadeur) && <span className="text-[10px] ml-1 opacity-60">+</span>}
-          </motion.button>
-        </div>
+              <div className="flex gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => dispatch({ type: 'COMBAT_INTIMIDATE' })}
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold text-white"
+                  style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)', boxShadow: '0 4px 12px rgba(212, 135, 77, 0.2)' }}
+                >
+                  Intimider
+                  {(hasCharisme || hasHaleine) && <span className="text-[10px] ml-1 opacity-60">+</span>}
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => dispatch({ type: 'COMBAT_FLEE' })}
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#E8D5C0]"
+                  style={{ background: 'linear-gradient(135deg, #3D2A1A, #2A1C12)', border: '1px solid #5C4A38' }}
+                >
+                  Fuir
+                  {(hasAgile || isCascadeur) && <span className="text-[10px] ml-1 opacity-60">+</span>}
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
