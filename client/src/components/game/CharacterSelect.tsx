@@ -1,0 +1,103 @@
+import { useGame, type Character } from '@/contexts/GameContext';
+import { motion } from 'framer-motion';
+
+function CharacterCard({ char, index, onSelect }: { char: Character; index: number; onSelect: () => void }) {
+  return (
+    <motion.div
+      initial={{ y: 30, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, delay: index * 0.15 }}
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onSelect}
+      className="craft-card p-4 cursor-pointer"
+    >
+      {/* Character header */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E8D5C0] to-[#D4B896] flex items-center justify-center shadow-sm">
+          <span className="text-2xl">{char.job.emoji}</span>
+        </div>
+        <div>
+          <h3 className="text-xl text-[#2A1F1A]">{char.name}</h3>
+          <p className="text-xs text-[#8B6B4A]">{char.job.name}</p>
+        </div>
+      </div>
+
+      {/* Job description */}
+      <p className="text-xs text-[#6B5740] italic mb-3 pb-2 border-b border-[#E8D5C0]">
+        "{char.job.description}"
+      </p>
+
+      {/* Traits */}
+      <div className="flex flex-col gap-1.5 mb-3">
+        {char.traits.map((trait, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs">
+            <span>{trait.emoji}</span>
+            <span className={`font-medium ${trait.positive ? 'text-[#4A9B5F]' : 'text-[#D94F4F]'}`}>
+              {trait.name}
+            </span>
+            <span className="text-[#A08B70]">— {trait.description}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-1.5 text-[10px] font-mono text-[#6B5740]">
+        <span>❤️ {char.stats.health}</span>
+        <span>🧠 {char.stats.mental}</span>
+        <span>🍖 {char.stats.hunger}</span>
+        <span>💧 {char.stats.thirst}</span>
+        <span>😴 {char.stats.sleep}</span>
+        <span>👑 {char.stats.dignity}</span>
+      </div>
+
+      {/* Money */}
+      <div className="mt-2 text-right text-xs font-semibold text-[#B8860B] font-mono">
+        {char.money}€
+      </div>
+    </motion.div>
+  );
+}
+
+export default function CharacterSelect() {
+  const { state, dispatch } = useGame();
+
+  return (
+    <div className="min-h-screen bg-texture p-4 flex flex-col gap-4">
+      {/* Header */}
+      <motion.div
+        initial={{ y: -15, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="text-center pt-2"
+      >
+        <h2 className="text-2xl text-[#2A1F1A]">Choisissez votre Destin</h2>
+        <p className="text-xs text-[#8B6B4A] mt-1">
+          3 âmes perdues. 1 seul survivant.
+        </p>
+      </motion.div>
+
+      {/* Character Cards */}
+      <div className="flex flex-col gap-3">
+        {state.characterChoices.map((char, i) => (
+          <CharacterCard
+            key={i}
+            char={char}
+            index={i}
+            onSelect={() => dispatch({ type: 'SELECT_CHARACTER', index: i })}
+          />
+        ))}
+      </div>
+
+      {/* Reroll */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.7 }}
+        onClick={() => dispatch({ type: 'START_GAME' })}
+        className="text-sm text-[#A08B70] font-medium text-center py-2 hover:text-[#6B5740] transition-colors"
+      >
+        Relancer les dés
+      </motion.button>
+    </div>
+  );
+}
