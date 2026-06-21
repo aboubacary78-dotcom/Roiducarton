@@ -214,11 +214,11 @@ export default function MainScreen() {
 
         {/* Main actions grid */}
         <div className="grid grid-cols-2 gap-2">
-          <ActionTile emoji="🔍" title="Explorer" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
-          <ActionTile emoji="🎩" title="Mendier" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })} />
-          <ActionTile emoji="😴" title="Dormir" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
+          <ActionTile emoji="🔍" title="Explorer" desc="Tenter une rencontre" accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
+          <ActionTile emoji="🎩" title="Mendier" desc="Récolter des pièces" accent="#B8860B" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })} />
+          <ActionTile emoji="😴" title="Dormir" desc="Récupérer du sommeil" accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
           <ActionTile
-            emoji="⚔️" title="Bagarre" disabled={actionsLeft <= 0} danger
+            emoji="⚔️" title="Bagarre" desc="Provoquer un combat" accent="#D94F4F" disabled={actionsLeft <= 0} danger
             onClick={() => {
               const enemies = getLocationEnemies(char.location);
               if (enemies.length > 0) {
@@ -268,8 +268,8 @@ export default function MainScreen() {
   );
 }
 
-function ActionTile({ emoji, title, disabled, onClick, danger, small }: {
-  emoji: string; title: string; disabled: boolean; onClick: () => void; danger?: boolean; small?: boolean;
+function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small }: {
+  emoji: string; title: string; desc?: string; accent?: string; disabled: boolean; onClick: () => void; danger?: boolean; small?: boolean;
 }) {
   return (
     <motion.button
@@ -281,10 +281,22 @@ function ActionTile({ emoji, title, disabled, onClick, danger, small }: {
         disabled ? 'opacity-35 pointer-events-none' : ''
       } ${danger && !disabled ? 'border-[#D94F4F]/30' : ''}`}
     >
-      <span className={small ? 'text-lg' : 'text-xl'}>{emoji}</span>
-      <span className={`${small ? 'text-[10px]' : 'text-xs'} font-medium text-[#3D3020] text-center leading-tight`}>
+      {accent && !small ? (
+        <span
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-0.5"
+          style={{ background: `${accent}1A` }}
+        >
+          {emoji}
+        </span>
+      ) : (
+        <span className={small ? 'text-lg' : 'text-xl'}>{emoji}</span>
+      )}
+      <span className={`${small ? 'text-[10px]' : 'text-sm'} font-semibold text-[#3D3020] text-center leading-tight`}>
         {title}
       </span>
+      {desc && !small && (
+        <span className="text-[10px] text-[#A08B70] text-center leading-tight">{desc}</span>
+      )}
     </motion.button>
   );
 }

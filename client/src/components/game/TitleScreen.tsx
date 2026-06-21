@@ -2,8 +2,6 @@ import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
-const HERO_IMG = 'https://private-us-east-1.manuscdn.com/sessionFile/IEX0yCKgQPAC1tCVyeLNRB/sandbox/5lqRDFcTLj7trFCP2zuZbn-img-1_1770979933000_na1fn_aGVyby1jYXJkYm9hcmQtY2l0eQ.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvSUVYMHlDS2dRUEFDMXRDVnllTE5SQi9zYW5kYm94LzVscVJERmNUTGo3dHJGQ1AyenVaYm4taW1nLTFfMTc3MDk3OTkzMzAwMF9uYTFmbl9hR1Z5YnkxallYSmtZbTloY21RdFkybDBlUS5wbmc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=r1WeZvkNVc3K1ijLRCcylXkytw-88JbOMcV9xQmv9Sft7-0L9z6U1v4T3ugQgH7vWWZydN1AuVR~y4Dv-Yl1-kV65VscCenjCLxO0FixMS~wXg1qcRNGSwysZNKllKpk9ajOArUtHxSgqXwJOFROdSiolmPCaCp4z~4G~XEX0t9Bws7iEgCv~PROC2jVC84VQH6HDI-bJiM-3EXtlqaMnsJvQD-SIwFFgsVsDY9swm0WWKIm~1WHaLBUfhHKq2vkwf5R9CGIEYPiVKlTXpNSGqvL9lktFCPEZfp3mJaBA2h-wfYnXP9rH0zrLQL4ibKRd4NRtRn3JcA~rGjOrOlorw__';
-
 const SAVE_KEY = 'roi-du-carton-save';
 
 export default function TitleScreen() {
@@ -31,7 +29,7 @@ export default function TitleScreen() {
         transition={{ duration: 0.7 }}
         className="w-full rounded-xl overflow-hidden shadow-[0_8px_32px_rgba(42,31,26,0.12)]"
       >
-        <img src={HERO_IMG} alt="Ville en carton" className="w-full h-48 object-cover" />
+        <CardboardCityHero />
       </motion.div>
 
       {/* Title */}
@@ -107,5 +105,82 @@ export default function TitleScreen() {
         "La rue est dure, mais l'humour est plus dur."
       </motion.p>
     </div>
+  );
+}
+
+// Illustration "ville en carton" entièrement intégrée (SVG) :
+// pas de dépendance à un CDN externe, donc elle s'affiche toujours.
+function CardboardBuilding({ x, w, top, fill }: { x: number; w: number; top: number; fill: string }) {
+  const h = 192 - top;
+  const cols = Math.max(2, Math.floor(w / 18));
+  const rows = Math.max(2, Math.floor((h - 18) / 22));
+  const winW = 7;
+  const gap = 6;
+  const padX = (w - (cols * (winW + gap) - gap)) / 2;
+  const wins = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const lit = (r * 7 + c * 3) % 4 !== 0;
+      wins.push(
+        <rect
+          key={`${r}-${c}`}
+          x={x + padX + c * (winW + gap)}
+          y={top + 12 + r * 22}
+          width={winW}
+          height={9}
+          rx={1}
+          fill={lit ? '#FBE3A8' : '#6E4F38'}
+          opacity={lit ? 0.95 : 0.55}
+        />,
+      );
+    }
+  }
+  return (
+    <g>
+      <rect x={x} y={top} width={w} height={h} rx={2} fill={fill} />
+      <rect x={x} y={top} width={w} height={5} fill="#00000022" />
+      {/* bande de scotch */}
+      <rect x={x} y={top + h * 0.42} width={w} height={9} fill="#EAD3B0" opacity={0.4} />
+      {wins}
+    </g>
+  );
+}
+
+function CardboardCityHero() {
+  return (
+    <svg viewBox="0 0 390 192" className="w-full h-48" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Une ville faite de cartons au coucher du soleil">
+      <defs>
+        <linearGradient id="rdc-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F7E3C6" />
+          <stop offset="55%" stopColor="#EBB387" />
+          <stop offset="100%" stopColor="#D88B57" />
+        </linearGradient>
+      </defs>
+      <rect width="390" height="192" fill="url(#rdc-sky)" />
+      {/* soleil bas */}
+      <circle cx="316" cy="58" r="34" fill="#FBE7C0" opacity="0.85" />
+      <circle cx="316" cy="58" r="22" fill="#FCEFD4" opacity="0.9" />
+      {/* immeubles lointains, brumeux */}
+      <g opacity="0.45">
+        <rect x="0" y="110" width="60" height="82" fill="#C98A56" />
+        <rect x="150" y="118" width="70" height="74" fill="#C98A56" />
+        <rect x="300" y="112" width="90" height="80" fill="#C98A56" />
+      </g>
+      {/* immeubles en carton au premier plan */}
+      <CardboardBuilding x={6} w={52} top={92} fill="#B97C49" />
+      <CardboardBuilding x={62} w={42} top={122} fill="#A86C3C" />
+      <CardboardBuilding x={108} w={58} top={70} fill="#C0814E" />
+      <CardboardBuilding x={172} w={46} top={112} fill="#A86C3C" />
+      <CardboardBuilding x={222} w={52} top={88} fill="#B97C49" />
+      <CardboardBuilding x={278} w={42} top={126} fill="#9B5B3A" />
+      <CardboardBuilding x={324} w={60} top={100} fill="#B97C49" />
+      {/* couronne sur l'immeuble le plus haut (le Roi du Carton) */}
+      <g transform="translate(0,-2)">
+        <path d="M122 70 L122 56 L130 63 L137 51 L144 63 L152 56 L152 70 Z" fill="#E8B84B" stroke="#9B7209" strokeWidth="1.4" strokeLinejoin="round" />
+        <circle cx="137" cy="50" r="2.6" fill="#F2D27A" stroke="#9B7209" strokeWidth="1" />
+      </g>
+      {/* rue */}
+      <rect x="0" y="180" width="390" height="12" fill="#5A4636" />
+    </svg>
   );
 }
