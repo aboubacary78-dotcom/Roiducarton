@@ -1,4 +1,4 @@
-import { useGame } from '@/contexts/GameContext';
+import { useGame, getWeaponProfile } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
@@ -19,6 +19,7 @@ export default function CombatScreen() {
   const hpPercent = (currentCombat.enemyHealth / currentCombat.enemyMaxHealth) * 100;
   const playerHpPercent = character.stats.health;
   const weapon = character.inventory.find(i => i.type === 'weapon');
+  const weaponProfile = getWeaponProfile(weapon);
 
   const isMilitaire = character.job.id === 'militaire';
   const hasForce = character.traits.some(t => t.id === 'costaud');
@@ -154,11 +155,14 @@ export default function CombatScreen() {
               exit={{ opacity: 0, y: 10 }}
               className="flex flex-col gap-2"
             >
-              <div className="rounded-xl p-2.5 border border-[#5C4A38]" style={{ background: '#1A120C' }}>
+              <div className="rounded-xl p-2.5 border border-[#5C4A38] flex flex-col gap-1.5" style={{ background: '#1A120C' }}>
                 <p className="text-[11px] text-[#E8A87C] text-center">
                   🔎 {weakDiscovered
                     ? 'Point faible connu — la cible 🎯 marque la zone.'
                     : currentCombat.weakPointHint}
+                </p>
+                <p className="text-[10px] text-[#A08060] text-center border-t border-[#3D2A1A] pt-1.5">
+                  {weaponProfile.label} — {weaponProfile.note}
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-2">

@@ -53,6 +53,11 @@ export interface InventoryItem {
   effect?: Partial<Stats>;
   attackBonus?: number;
   defenseBonus?: number;
+  // Style de combat de l'arme (influence le ciblage des points faibles) :
+  // 'precise' = lames (critiques renforcés, ratés coûteux),
+  // 'heavy'   = armes contondantes (même un raté fait mal, critiques moindres).
+  // Absent = équilibré (mains nues / arme passe-partout).
+  combatStyle?: 'precise' | 'heavy';
 }
 
 export interface GameEvent {
@@ -419,8 +424,8 @@ export const SHOPS: Shop[] = [
     description: 'Il vend de tout. Surtout du n\'importe quoi.',
     locations: ['zone-industrielle', 'gare'],
     items: [
-      { id: 'batte-baseball', name: 'Batte de baseball fissurée', emoji: '🏏', price: 6, description: 'Elle a connu des jours meilleurs. Et des crânes.', category: 'weapon', giveItem: { id: 'batte-baseball', name: 'Batte de baseball fissurée', emoji: '🏏', type: 'weapon', value: 10, attackBonus: 6 } },
-      { id: 'couteau-rouille', name: 'Couteau rouillé', emoji: '🔪', price: 4, description: 'Rouillé mais tranchant. Tétanos en bonus.', category: 'weapon', giveItem: { id: 'couteau-rouille', name: 'Couteau rouillé', emoji: '🔪', type: 'weapon', value: 7, attackBonus: 5 } },
+      { id: 'batte-baseball', name: 'Batte de baseball fissurée', emoji: '🏏', price: 6, description: 'Arme lourde : même un coup mal ajusté fait mal. Elle a connu des crânes.', category: 'weapon', giveItem: { id: 'batte-baseball', name: 'Batte de baseball fissurée', emoji: '🏏', type: 'weapon', value: 10, attackBonus: 6, combatStyle: 'heavy' } },
+      { id: 'couteau-rouille', name: 'Couteau rouillé', emoji: '🔪', price: 4, description: 'Arme précise : critiques dévastateurs, mais il faut viser juste. Tétanos en bonus.', category: 'weapon', giveItem: { id: 'couteau-rouille', name: 'Couteau rouillé', emoji: '🔪', type: 'weapon', value: 7, attackBonus: 5, combatStyle: 'precise' } },
       { id: 'gilet-protection', name: 'Gilet de protection', emoji: '🦺', price: 8, description: 'Ancien gilet de chantier. Absorbe les coups.', category: 'clothing', giveItem: { id: 'gilet-protection', name: 'Gilet de protection', emoji: '🦺', type: 'armor', value: 12, defenseBonus: 5 } },
       { id: 'lampe-torche', name: 'Lampe torche', emoji: '🔦', price: 3, description: 'Les piles sont presque mortes.', category: 'tool', giveItem: { id: 'lampe-torche', name: 'Lampe torche', emoji: '🔦', type: 'tool', value: 5 } },
     ],
@@ -550,19 +555,19 @@ export const LOCATIONS: Record<string, { name: string; emoji: string; danger: nu
 
 const STARTING_ITEMS: Record<string, InventoryItem> = {
   'calculatrice': { id: 'calculatrice', name: 'Calculatrice solaire', emoji: '🧮', type: 'tool', value: 5 },
-  'cle-molette': { id: 'cle-molette', name: 'Clé à molette rouillée', emoji: '🔧', type: 'weapon', value: 8, attackBonus: 3 },
+  'cle-molette': { id: 'cle-molette', name: 'Clé à molette rouillée', emoji: '🔧', type: 'weapon', value: 8, attackBonus: 3, combatStyle: 'heavy' },
   'livre': { id: 'livre', name: 'Livre de philo', emoji: '📚', type: 'tool', value: 3, effect: { mental: 5 } },
   'tire-bouchon': { id: 'tire-bouchon', name: 'Tire-bouchon de sommelier', emoji: '🍷', type: 'tool', value: 6 },
   'genouillere': { id: 'genouillere', name: 'Genouillère usée', emoji: '🦵', type: 'armor', value: 4, defenseBonus: 2 },
   'cable-usb': { id: 'cable-usb', name: 'Câble USB mystérieux', emoji: '🔌', type: 'junk', value: 2 },
-  'couteau-suisse': { id: 'couteau-suisse', name: 'Couteau suisse', emoji: '🔪', type: 'weapon', value: 12, attackBonus: 4 },
+  'couteau-suisse': { id: 'couteau-suisse', name: 'Couteau suisse', emoji: '🔪', type: 'weapon', value: 12, attackBonus: 4, combatStyle: 'precise' },
   'bandage': { id: 'bandage', name: 'Bandage propre', emoji: '🩹', type: 'tool', value: 5, effect: { health: 15 } },
   'crayon': { id: 'crayon', name: 'Crayon à papier', emoji: '✏️', type: 'tool', value: 1 },
   'couverture-survie': { id: 'couverture-survie', name: 'Couverture de survie', emoji: '🛡️', type: 'armor', value: 10, defenseBonus: 3 },
   'carte-ville': { id: 'carte-ville', name: 'Carte de la ville', emoji: '🗺️', type: 'tool', value: 4 },
   'cravate': { id: 'cravate', name: 'Cravate en soie', emoji: '👔', type: 'junk', value: 8 },
   'graines': { id: 'graines', name: 'Sachet de graines', emoji: '🌱', type: 'tool', value: 3 },
-  'code-civil': { id: 'code-civil', name: 'Code Civil (édition 1987)', emoji: '📕', type: 'weapon', value: 6, attackBonus: 2 },
+  'code-civil': { id: 'code-civil', name: 'Code Civil (édition 1987)', emoji: '📕', type: 'weapon', value: 6, attackBonus: 2, combatStyle: 'heavy' },
   'harmonica-casse': { id: 'harmonica-casse', name: 'Harmonica cassé', emoji: '🎵', type: 'special', value: 5 },
 };
 
@@ -640,6 +645,32 @@ const DEFAULT_TARGETING: Targeting = { zones: [Z.tete, Z.torse, Z.jambes], weak:
 
 function getTargeting(enemyName: string): Targeting {
   return WEAK_POINTS[enemyName] || DEFAULT_TARGETING;
+}
+
+// Profil de combat selon le style de l'arme — c'est ce qui fait que
+// "viser" se joue différemment avec un couteau ou une batte.
+export interface WeaponProfile {
+  style: 'precise' | 'heavy' | 'balanced';
+  label: string;
+  note: string;
+  critMin: number; critRange: number;   // multiplicateur critique = critMin + alea*critRange
+  stunChance: number;                    // chance d'étourdir sur un critique
+  missMin: number; missRange: number;    // multiplicateur de dégâts sur mauvaise zone
+  riposteMin: number; riposteRange: number; // riposte ennemie sur mauvaise zone
+}
+
+export function getWeaponProfile(weapon?: InventoryItem): WeaponProfile {
+  switch (weapon?.combatStyle) {
+    case 'precise':
+      return { style: 'precise', label: '🔪 Arme précise', note: 'Critiques dévastateurs — mais un raté ne fait presque rien et vous expose.',
+        critMin: 2.2, critRange: 0.9, stunChance: 0.75, missMin: 0.15, missRange: 0.2, riposteMin: 1.0, riposteRange: 0.6 };
+    case 'heavy':
+      return { style: 'heavy', label: '🏏 Arme lourde', note: 'Même un coup mal ajusté fait mal et tient l\'ennemi à distance. Critiques plus modestes.',
+        critMin: 1.5, critRange: 0.5, stunChance: 0.45, missMin: 0.6, missRange: 0.4, riposteMin: 0.4, riposteRange: 0.4 };
+    default:
+      return { style: 'balanced', label: '✊ Coup équilibré', note: 'Sans arme spécialisée : visée standard.',
+        critMin: 1.8, critRange: 0.6, stunChance: 0.6, missMin: 0.3, missRange: 0.3, riposteMin: 1.0, riposteRange: 0.6 };
+  }
 }
 
 // ============ EXPLORE EVENTS (30) ============
@@ -2559,7 +2590,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const isMilitaire = state.character.job.id === 'militaire';
       const hasForce = state.character.traits.some(t => t.id === 'costaud');
       const weapon = state.currentCombat.playerWeapon;
-      const baseDmg = 6 + (isMilitaire ? 4 : 0) + (hasForce ? 3 : 0) + (weapon ? weapon.effect?.health ? Math.abs(weapon.effect.health) : 4 : 0);
+      const baseDmg = 6 + (isMilitaire ? 4 : 0) + (hasForce ? 3 : 0) + (weapon ? (weapon.attackBonus ?? 4) : 0);
       const playerDmg = Math.floor(baseDmg * (0.6 + Math.random() * 0.5));
       const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
       const enemyDmg = Math.floor(state.currentCombat.enemyAttack * (0.7 + Math.random() * 0.8) * (hasOsMousse ? 1.5 : 1));
@@ -2607,7 +2638,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const isMilitaire = state.character.job.id === 'militaire';
       const hasForce = state.character.traits.some(t => t.id === 'costaud');
       const weapon = combat.playerWeapon;
-      const baseDmg = 6 + (isMilitaire ? 4 : 0) + (hasForce ? 3 : 0) + (weapon ? weapon.effect?.health ? Math.abs(weapon.effect.health) : 4 : 0);
+      const baseDmg = 6 + (isMilitaire ? 4 : 0) + (hasForce ? 3 : 0) + (weapon ? (weapon.attackBonus ?? 4) : 0);
+      const profile = getWeaponProfile(weapon);
 
       const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
       let playerDmg: number;
@@ -2616,16 +2648,21 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       if (isCritical) {
         // Coup critique : gros dégâts + chance d'étourdir (pas de riposte).
-        playerDmg = Math.floor(baseDmg * (1.8 + Math.random() * 0.6));
-        const stunned = Math.random() < 0.6;
+        // L'arme précise frappe plus fort et sonne plus souvent.
+        playerDmg = Math.floor(baseDmg * (profile.critMin + Math.random() * profile.critRange));
+        const stunned = Math.random() < profile.stunChance;
         enemyDmg = stunned ? 0 : Math.floor(combat.enemyAttack * (0.6 + Math.random() * 0.5) * (hasOsMousse ? 1.5 : 1));
         logs.push(`🎯 COUP CRITIQUE sur ${zone.label.toLowerCase()} ! ${playerDmg} dégâts !`);
         if (stunned) logs.push(`💫 ${combat.enemyName} est sonné et ne riposte pas !`);
       } else {
-        // Mauvaise zone : coup qui glisse, l'ennemi en profite.
-        playerDmg = Math.floor(baseDmg * (0.3 + Math.random() * 0.3));
-        enemyDmg = Math.floor(combat.enemyAttack * (1.0 + Math.random() * 0.6) * (hasOsMousse ? 1.5 : 1));
-        logs.push(`😬 Mauvaise cible (${zone.label.toLowerCase()}) ! Coup qui glisse : ${playerDmg} dégâts.`);
+        // Mauvaise zone : avec une arme lourde le coup porte quand même,
+        // avec une lame il glisse dans le vide et l'ennemi en profite.
+        playerDmg = Math.floor(baseDmg * (profile.missMin + Math.random() * profile.missRange));
+        enemyDmg = Math.floor(combat.enemyAttack * (profile.riposteMin + Math.random() * profile.riposteRange) * (hasOsMousse ? 1.5 : 1));
+        const missMsg = profile.style === 'heavy'
+          ? `🪓 Pas le point faible (${zone.label.toLowerCase()}), mais ça cogne quand même : ${playerDmg} dégâts.`
+          : `😬 Mauvaise cible (${zone.label.toLowerCase()}) ! Le coup glisse : ${playerDmg} dégâts.`;
+        logs.push(missMsg);
       }
 
       const newEnemyHp = Math.max(0, combat.enemyHealth - playerDmg);
