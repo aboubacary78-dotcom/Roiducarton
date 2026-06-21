@@ -2186,6 +2186,7 @@ type GameAction =
   | { type: 'USE_ITEM'; itemId: string }
   | { type: 'GAME_OVER' }
   | { type: 'RESTART' }
+  | { type: 'REVIVE' }
   | { type: 'CONTINUE_SAVE' }
   | { type: 'START_COMBAT'; enemy: Enemy }
   | { type: 'COMBAT_ATTACK' }
@@ -2549,6 +2550,34 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           statChanges: outcome.statChanges,
           moneyChange: outcome.moneyChange,
           respectChange: outcome.respectChange,
+        },
+      };
+    }
+
+    case 'REVIVE': {
+      // Seconde chance (via pub récompensée) : on remet le personnage
+      // dans un état survivable et on relance la journée. Utilisable
+      // une seule fois par partie (flag 'revived').
+      if (!state.character) return state;
+      const revivedStats: Stats = {
+        ...state.character.stats,
+        health: Math.max(state.character.stats.health, 50),
+        mental: Math.max(state.character.stats.mental, 50),
+        hunger: Math.max(state.character.stats.hunger, 40),
+        thirst: Math.max(state.character.stats.thirst, 40),
+        sleep: Math.max(state.character.stats.sleep, 40),
+      };
+      return {
+        ...state,
+        screen: 'main',
+        currentCombat: null,
+        combatLog: [],
+        eventResult: { text: '🌅 Une âme charitable vous a porté secours. Vous reprenez vos esprits. La rue ne vous a pas encore eu...' },
+        character: {
+          ...state.character,
+          stats: revivedStats,
+          alive: true,
+          activeFlags: [...state.character.activeFlags, 'revived'],
         },
       };
     }

@@ -27,7 +27,7 @@ export default function Home() {
         backgroundAttachment: 'fixed',
       }}
     >
-      <div className="w-full max-w-md mx-auto min-h-screen relative">
+      <div className="w-full max-w-md mx-auto min-h-screen relative safe-area">
         {state.screen === 'title' && <TitleScreen />}
         {state.screen === 'character-select' && <CharacterSelect />}
         {state.screen === 'main' && <MainScreen />}

@@ -1,6 +1,7 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { showInterstitial, showRewarded } from '@/lib/ads';
 
 const DEATH_MESSAGES = [
   'La rue a eu raison de vous. Mais votre légende perdure.',
@@ -14,6 +15,25 @@ export default function GameOverScreen() {
   const { state, dispatch } = useGame();
   const char = state.character;
   const [deathMsg] = useState(() => DEATH_MESSAGES[Math.floor(Math.random() * DEATH_MESSAGES.length)]);
+  const [reviving, setReviving] = useState(false);
+
+  // Pub interstitielle à l'arrivée sur l'écran de fin (entre deux parties).
+  useEffect(() => {
+    showInterstitial();
+  }, []);
+
+  const canRevive = !!char && !char.activeFlags.includes('revived');
+
+  async function handleRevive() {
+    if (reviving) return;
+    setReviving(true);
+    const rewarded = await showRewarded();
+    if (rewarded) {
+      dispatch({ type: 'REVIVE' });
+    } else {
+      setReviving(false);
+    }
+  }
 
   if (!char) return null;
 
@@ -128,6 +148,26 @@ export default function GameOverScreen() {
             ))}
           </div>
         </motion.div>
+      )}
+
+      {/* Seconde chance (pub récompensée) — une fois par partie */}
+      {canRevive && (
+        <motion.button
+          initial={{ y: 15, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1.3 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          disabled={reviving}
+          onClick={handleRevive}
+          className="w-full max-w-sm py-3.5 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
+          style={{
+            background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)',
+            boxShadow: '0 4px 16px rgba(74, 155, 95, 0.3)',
+          }}
+        >
+          {reviving ? '⏳ Chargement…' : '🎬 Seconde chance (regarder une pub)'}
+        </motion.button>
       )}
 
       {/* Restart */}

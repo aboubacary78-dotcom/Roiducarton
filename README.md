@@ -32,3 +32,21 @@ Incarnez un SDF dans une ville française et survivez en gérant vos stats vital
 pnpm install
 pnpm dev
 ```
+
+## Mobile & publication (Play Store / App Store)
+
+Le jeu est emballé en app native Android + iOS avec **Capacitor**, et monétisé
+avec **Google AdMob** :
+
+- Pub interstitielle à la fin de partie.
+- Pub récompensée « Seconde chance » pour ressusciter une fois par partie.
+- Toute la logique pub est centralisée dans `client/src/lib/ads.ts` (no-op sur le web).
+
+👉 Guide complet pas à pas : **[STORE_PUBLISHING.md](./STORE_PUBLISHING.md)**
+
+```bash
+pnpm build            # construit le jeu web
+pnpm cap:add:android  # ajoute la plateforme Android (Android Studio requis)
+pnpm cap:add:ios      # ajoute la plateforme iOS (Mac + Xcode requis)
+pnpm cap:sync         # synchronise le web vers les projets natifs
+```
