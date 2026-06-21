@@ -98,7 +98,7 @@ export interface CombatState {
   playerWeapon?: InventoryItem;
 }
 
-export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop';
+export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings';
 
 // ============ MÉTÉO ============
 export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm' | 'heatwave' | 'fog' | 'snow';
@@ -474,7 +474,7 @@ export interface GameState {
   characterChoices: Character[];
   currentEvent: GameEvent | null;
   currentCombat: CombatState | null;
-  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number } | null;
+  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean } | null;
   combatLog: string[];
   dayActions: number;
   maxDayActions: number;
@@ -1406,6 +1406,93 @@ const BEG_EVENTS: GameEvent[] = [
   },
 ];
 
+// ============ STEAL EVENTS — action "Voler" (haut risque / haute récompense) ============
+const STEAL_EVENTS: GameEvent[] = [
+  {
+    id: 'steal-etal-marche', title: 'L\'Étal du Marché', type: 'discovery',
+    description: 'Un primeur a le dos tourné. Ses fruits sont à portée de main. Personne ne regarde... ou presque.',
+    choices: [
+      { text: 'Chiper deux pommes vite fait', risk: 'normal', emoji: '🍎', outcomes: [
+        { probability: 0.6, text: 'Mission accomplie ! Deux belles pommes dans la poche. Discret comme un chat.', statChanges: { hunger: 18, dignity: -6 } },
+        { probability: 0.4, text: '"HÉ ! Le voleur !" Le primeur vous attrape par le col et vous secoue.', statChanges: { health: -8, dignity: -14, mental: -6 }, respectChange: -2 },
+      ]},
+      { text: 'Rafler toute la caisse de fruits', risk: 'risky', emoji: '🧺', outcomes: [
+        { probability: 0.3, text: 'Jackpot ! Vous filez avec une caisse entière. Festin pour des jours.', statChanges: { hunger: 35, mental: 8, dignity: -10 }, itemGain: { id: 'caisse-fruits', name: 'Caisse de fruits', emoji: '🧺', type: 'food', value: 12, effect: { hunger: 20 } } },
+        { probability: 0.7, text: 'Trop gourmand. Le marché entier vous tombe dessus. On vous reprend tout et un peu plus.', statChanges: { health: -15, dignity: -18, mental: -10 }, moneyChange: -3, respectChange: -3 },
+      ]},
+    ],
+  },
+  {
+    id: 'steal-poche-costard', title: 'La Poche du Costard', type: 'discovery',
+    description: 'Un homme d\'affaires dort dans le train, portefeuille qui dépasse. La tentation est énorme.',
+    choices: [
+      { text: 'Faire les poches en douceur', risk: 'risky', emoji: '🤏', outcomes: [
+        { probability: 0.45, text: 'Vos doigts de fée font merveille. 15€ et il ronfle toujours.', moneyChange: 15, statChanges: { dignity: -8, mental: 4 }, respectChange: 1 },
+        { probability: 0.55, text: 'Il se réveille en sursaut ! "Au voleur !" Vous courez, le cœur battant.', statChanges: { health: -6, mental: -10, dignity: -12 }, respectChange: -2 },
+      ]},
+      { text: 'Renoncer, c\'est trop risqué', risk: 'safe', emoji: '🙅', outcomes: [
+        { probability: 1, text: 'Vous vous éloignez. Votre estomac grogne, mais votre conscience est tranquille.', statChanges: { mental: 3, dignity: 2 } },
+      ]},
+    ],
+  },
+  {
+    id: 'steal-supermarche', title: 'Le Supermarché', type: 'discovery',
+    description: 'Rayons remplis, vigile à moitié endormi. Une boîte de conserve glisserait si bien sous la veste.',
+    choices: [
+      { text: 'Glisser de la nourriture sous la veste', risk: 'normal', emoji: '🥫', outcomes: [
+        { probability: 0.55, text: 'Vous passez les portiques l\'air de rien. Conserves et chocolat : repas assuré.', statChanges: { hunger: 25, thirst: 8, dignity: -8 }, itemGain: { id: 'conserve-volee', name: 'Conserve volée', emoji: '🥫', type: 'food', value: 5, effect: { hunger: 30 } } },
+        { probability: 0.45, text: 'Le portique sonne. Le vigile se réveille enfin. Fouille humiliante devant tout le monde.', statChanges: { dignity: -18, mental: -10, health: -4 }, respectChange: -2 },
+      ]},
+      { text: 'Voler une bouteille d\'alcool à revendre', risk: 'risky', emoji: '🍾', outcomes: [
+        { probability: 0.35, text: 'Bouteille de vin sous le bras, vous filez. Revendue au coin de la rue : 8€.', moneyChange: 8, statChanges: { dignity: -10, mental: 3 } },
+        { probability: 0.65, text: 'Le vigile était bien réveillé. Il vous plaque au sol et appelle la police.', statChanges: { health: -18, dignity: -20, mental: -12 }, moneyChange: -5, respectChange: -4 },
+      ]},
+    ],
+  },
+  {
+    id: 'steal-velo', title: 'Le Vélo Mal Attaché', type: 'discovery',
+    description: 'Un vélo électrique, antivol bon marché à peine fermé. Il vaut une petite fortune à la revente.',
+    choices: [
+      { text: 'Forcer l\'antivol et filer', risk: 'risky', emoji: '🚲', outcomes: [
+        { probability: 0.4, text: 'Clic ! L\'antivol cède. Revendu à un receleur : 20€. Belle prise.', moneyChange: 20, statChanges: { dignity: -12, mental: 5 }, respectChange: 2 },
+        { probability: 0.6, text: 'Le propriétaire surgit du café d\'à côté. La poursuite tourne mal pour vous.', statChanges: { health: -20, dignity: -15, mental: -8 }, respectChange: -3 },
+      ]},
+      { text: 'Voler juste la sacoche', risk: 'normal', emoji: '👜', outcomes: [
+        { probability: 0.55, text: 'La sacoche contient un casse-croûte et 4€ de monnaie. Pas mal.', moneyChange: 4, statChanges: { hunger: 12, dignity: -6 } },
+        { probability: 0.45, text: 'Un passant crie pour alerter. Vous lâchez tout et détalez.', statChanges: { mental: -6, dignity: -10 }, respectChange: -1 },
+      ]},
+    ],
+  },
+  {
+    id: 'steal-tronc-eglise', title: 'Le Tronc de l\'Église', type: 'discovery',
+    description: 'L\'église est vide. Le tronc des offrandes déborde de pièces. Dieu regarde, paraît-il.',
+    choices: [
+      { text: 'Se servir dans le tronc', risk: 'risky', emoji: '⛪', outcomes: [
+        { probability: 0.5, text: 'Vous récupérez 12€ en pièces. Personne, sauf peut-être le Tout-Puissant.', moneyChange: 12, statChanges: { dignity: -15, mental: -5 } },
+        { probability: 0.5, text: 'Le curé sort de la sacristie. "Mon fils, que fais-tu ?" La honte vous écrase.', statChanges: { dignity: -20, mental: -12 }, respectChange: -2 },
+      ]},
+      { text: 'Demander l\'aumône au curé à la place', risk: 'safe', emoji: '🙏', outcomes: [
+        { probability: 0.7, text: 'Le curé vous offre un repas chaud et 5€ du tronc, de bon cœur. "Reviens quand tu veux."', moneyChange: 5, statChanges: { hunger: 20, mental: 12, dignity: 8 }, respectChange: 2 },
+        { probability: 0.3, text: 'Il est absent. Mais une bénévole vous donne une soupe.', statChanges: { hunger: 12, mental: 5 } },
+      ]},
+    ],
+  },
+  {
+    id: 'steal-etendage', title: 'Le Linge qui Sèche', type: 'discovery',
+    description: 'Au rez-de-chaussée, du linge sèche à une fenêtre ouverte. Un manteau chaud vous ferait du bien.',
+    choices: [
+      { text: 'Décrocher le manteau', risk: 'normal', emoji: '🧥', outcomes: [
+        { probability: 0.55, text: 'Un bon manteau de laine, encore tiède du soleil. Vos nuits seront moins rudes.', statChanges: { dignity: 4, sleep: 6, health: 4 }, itemGain: { id: 'manteau-vole', name: 'Manteau volé', emoji: '🧥', type: 'armor', value: 7, defenseBonus: 2 } },
+        { probability: 0.45, text: 'Une grand-mère hurle à la fenêtre : "Au secours, on me vole !" Tout le quartier se réveille.', statChanges: { mental: -8, dignity: -14 }, respectChange: -2 },
+      ]},
+      { text: 'Prendre les chaussettes et les sous-vêtements', risk: 'safe', emoji: '🧦', outcomes: [
+        { probability: 0.8, text: 'Pas glorieux, mais des chaussettes sèches changent une vie dans la rue.', statChanges: { dignity: -4, mental: 4, health: 3 } },
+        { probability: 0.2, text: 'Un chien de garde aboie. Vous filez avec une seule chaussette. Mieux que rien.', statChanges: { dignity: -6, mental: -2 } },
+      ]},
+    ],
+  },
+];
+
 // ============ REST EVENTS (30) ============
 const REST_EVENTS: GameEvent[] = [
   {
@@ -2046,6 +2133,11 @@ function generateRestEvents(_location: string, character: Character): GameEvent[
   return shuffled.slice(0, 5);
 }
 
+function generateStealEvents(_location: string, _character: Character): GameEvent[] {
+  const shuffled = [...STEAL_EVENTS].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 5);
+}
+
 function generateTravelEvent(_from: string, _to: string, _character: Character): GameEvent | null {
   if (Math.random() > 0.5) return null;
   return randomFromArray(TRAVEL_EVENTS);
@@ -2177,7 +2269,9 @@ type GameAction =
   | { type: 'SELECT_CHARACTER'; index: number }
   | { type: 'EXPLORE' }
   | { type: 'BEG' }
+  | { type: 'STEAL' }
   | { type: 'REST' }
+  | { type: 'DOUBLE_REWARD' }
   | { type: 'TRAVEL'; location: string }
   | { type: 'CHOOSE_EVENT'; choiceIndex: number }
   | { type: 'DISMISS_RESULT' }
@@ -2187,6 +2281,7 @@ type GameAction =
   | { type: 'GAME_OVER' }
   | { type: 'RESTART' }
   | { type: 'REVIVE' }
+  | { type: 'RESET_SCORES' }
   | { type: 'CONTINUE_SAVE' }
   | { type: 'START_COMBAT'; enemy: Enemy }
   | { type: 'COMBAT_ATTACK' }
@@ -2233,12 +2328,33 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, screen: 'event', currentEvent: begEvent, dayActions: state.dayActions + 1 };
     }
 
+    case 'STEAL': {
+      if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      const stealEvents = generateStealEvents(state.character.location, state.character);
+      if (stealEvents.length === 0) return state;
+      const stealEvent = randomFromArray(stealEvents);
+      return { ...state, screen: 'event', currentEvent: stealEvent, dayActions: state.dayActions + 1 };
+    }
+
     case 'REST': {
       if (!state.character || state.dayActions >= state.maxDayActions) return state;
       const restEvents = generateRestEvents(state.character.location, state.character);
       if (restEvents.length === 0) return state;
       const restEvent = randomFromArray(restEvents);
       return { ...state, screen: 'event', currentEvent: restEvent, dayActions: state.dayActions + 1 };
+    }
+
+    case 'DOUBLE_REWARD': {
+      // Doubler les gains via pub récompensée : ajoute une seconde fois
+      // l'argent gagné dans le résultat courant. Utilisable une fois par résultat.
+      if (!state.character || !state.eventResult) return state;
+      const gain = state.eventResult.moneyChange || 0;
+      if (gain <= 0 || state.eventResult.doubled) return state;
+      return {
+        ...state,
+        character: { ...state.character, money: state.character.money + gain },
+        eventResult: { ...state.eventResult, doubled: true },
+      };
     }
 
     case 'TRAVEL': {
@@ -2580,6 +2696,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           activeFlags: [...state.character.activeFlags, 'revived'],
         },
       };
+    }
+
+    case 'RESET_SCORES': {
+      try { localStorage.removeItem(SCORES_KEY); } catch { /* silent */ }
+      return { ...state, highScores: [] };
     }
 
     case 'RESTART':

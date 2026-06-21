@@ -1,5 +1,7 @@
 import { useGame, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { showRewarded } from '@/lib/ads';
 
 const STAT_EMOJIS: Record<keyof Stats, string> = {
   health: '❤️', mental: '🧠', hunger: '🍖', thirst: '💧', sleep: '😴', dignity: '👑',
@@ -25,8 +27,21 @@ const FLAG_LABELS: Record<string, string> = {
 export default function EventResultOverlay() {
   const { state, dispatch } = useGame();
   const result = state.eventResult;
+  const [doubling, setDoubling] = useState(false);
 
   if (!result) return null;
+
+  const canDouble = !!result.moneyChange && result.moneyChange > 0 && !result.doubled;
+
+  async function handleDouble() {
+    if (doubling) return;
+    setDoubling(true);
+    const rewarded = await showRewarded();
+    if (rewarded) {
+      dispatch({ type: 'DOUBLE_REWARD' });
+    }
+    setDoubling(false);
+  }
 
   const hasChanges = result.statChanges || result.moneyChange || result.respectChange;
   const lastFlag = state.character?.activeFlags?.slice(-1)[0];
@@ -132,6 +147,36 @@ export default function EventResultOverlay() {
                 Cette rencontre pourrait avoir une suite...
               </p>
             </motion.div>
+          )}
+
+          {/* Doubler les gains (pub récompensée) */}
+          {canDouble && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.38 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={doubling}
+              onClick={handleDouble}
+              className="w-full py-3 text-sm font-semibold text-white rounded-xl mb-2 disabled:opacity-60"
+              style={{
+                background: 'linear-gradient(135deg, #B8860B, #9B7209)',
+                boxShadow: '0 4px 16px rgba(184, 134, 11, 0.3)',
+              }}
+            >
+              {doubling ? '⏳ Chargement…' : `🎬 Doubler mes gains (+${result.moneyChange}€)`}
+            </motion.button>
+          )}
+
+          {result.doubled && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-xs text-[#8B6B4A] font-semibold mb-2"
+            >
+              ✅ Gains doublés !
+            </motion.p>
           )}
 
           {/* Dismiss */}

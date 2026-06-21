@@ -83,6 +83,18 @@ export default function TitleScreen() {
         >
           Nouvelle Partie
         </motion.button>
+
+        <motion.button
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: hasSave ? 0.7 : 0.6 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'settings' })}
+          className="action-btn w-full py-3 text-sm text-[#6B5740] font-medium"
+        >
+          ⚙️ Options
+        </motion.button>
       </div>
 
       {/* Footer */}

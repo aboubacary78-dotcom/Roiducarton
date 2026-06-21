@@ -14,6 +14,7 @@ import GameOverScreen from '@/components/game/GameOverScreen';
 import CombatScreen from '@/components/game/CombatScreen';
 import EventResultOverlay from '@/components/game/EventResultOverlay';
 import ShopScreen from '@/components/game/ShopScreen';
+import SettingsScreen from '@/components/game/SettingsScreen';
 import WeatherOverlay from '@/components/game/WeatherOverlay';
 
 export default function Home() {
@@ -36,10 +37,11 @@ export default function Home() {
         {state.screen === 'inventory' && <InventoryScreen />}
         {state.screen === 'combat' && <CombatScreen />}
         {state.screen === 'shop' && <ShopScreen />}
+        {state.screen === 'settings' && <SettingsScreen />}
         {state.screen === 'game-over' && <GameOverScreen />}
 
         {/* Overlay météo : actif sur tous les écrans de jeu sauf titre et sélection */}
-        {state.character && !['title', 'character-select', 'game-over'].includes(state.screen) && (
+        {state.character && !['title', 'character-select', 'game-over', 'settings'].includes(state.screen) && (
           <WeatherOverlay />
         )}
 
