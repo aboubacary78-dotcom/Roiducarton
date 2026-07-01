@@ -1,4 +1,4 @@
-import { useGame } from '@/contexts/GameContext';
+import { useGame, getSellPrice } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 
 const TYPE_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -81,15 +81,24 @@ export default function InventoryScreen() {
                     })}
                   </div>
                 </div>
-                {hasEffect && (
+                <div className="shrink-0 flex flex-col gap-1.5">
+                  {hasEffect && (
+                    <button
+                      onClick={() => dispatch({ type: 'USE_ITEM', itemId: item.id })}
+                      className="px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg"
+                      style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)', boxShadow: '0 2px 6px rgba(74, 155, 95, 0.25)' }}
+                    >
+                      Utiliser
+                    </button>
+                  )}
                   <button
-                    onClick={() => dispatch({ type: 'USE_ITEM', itemId: item.id })}
-                    className="shrink-0 px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg"
-                    style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)', boxShadow: '0 2px 6px rgba(74, 155, 95, 0.25)' }}
+                    onClick={() => dispatch({ type: 'SELL_ITEM', itemId: item.id })}
+                    className="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-[#8B6B4A]"
+                    style={{ background: '#F5EDE4', border: '1px solid #E8D5C0' }}
                   >
-                    Utiliser
+                    Vendre {getSellPrice(item)}€
                   </button>
-                )}
+                </div>
               </motion.div>
             );
           })}
