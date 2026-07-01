@@ -613,7 +613,7 @@ interface Targeting { zones: CombatZone[]; weak: string; hint: string; }
 
 const Z = {
   tete: { id: 'tete', label: 'Tête', emoji: '🤕' },
-  torse: { id: 'torse', label: 'Torse', emoji: '🫁' },
+  torse: { id: 'torse', label: 'Torse', emoji: '🎽' },
   jambes: { id: 'jambes', label: 'Jambes', emoji: '🦵' },
   ailes: { id: 'ailes', label: 'Ailes', emoji: '🪽' },
   pattes: { id: 'pattes', label: 'Pattes', emoji: '🐾' },
