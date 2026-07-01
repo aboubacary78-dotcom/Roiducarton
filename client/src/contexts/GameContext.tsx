@@ -554,21 +554,21 @@ export const LOCATIONS: Record<string, { name: string; emoji: string; danger: nu
 };
 
 const STARTING_ITEMS: Record<string, InventoryItem> = {
-  'calculatrice': { id: 'calculatrice', name: 'Calculatrice solaire', emoji: '🧮', type: 'tool', value: 5 },
+  'calculatrice': { id: 'calculatrice', name: 'Calculatrice solaire', emoji: '🧮', type: 'tool', value: 5, effect: { mental: 8 } },
   'cle-molette': { id: 'cle-molette', name: 'Clé à molette rouillée', emoji: '🔧', type: 'weapon', value: 8, attackBonus: 3, combatStyle: 'heavy' },
   'livre': { id: 'livre', name: 'Livre de philo', emoji: '📚', type: 'tool', value: 3, effect: { mental: 5 } },
-  'tire-bouchon': { id: 'tire-bouchon', name: 'Tire-bouchon de sommelier', emoji: '🍷', type: 'tool', value: 6 },
+  'tire-bouchon': { id: 'tire-bouchon', name: 'Tire-bouchon de sommelier', emoji: '🍷', type: 'tool', value: 6, effect: { thirst: 10, mental: 5 } },
   'genouillere': { id: 'genouillere', name: 'Genouillère usée', emoji: '🦵', type: 'armor', value: 4, defenseBonus: 2 },
-  'cable-usb': { id: 'cable-usb', name: 'Câble USB mystérieux', emoji: '🔌', type: 'junk', value: 2 },
+  'cable-usb': { id: 'cable-usb', name: 'Câble USB mystérieux', emoji: '🔌', type: 'junk', value: 2, effect: { mental: 4 } },
   'couteau-suisse': { id: 'couteau-suisse', name: 'Couteau suisse', emoji: '🔪', type: 'weapon', value: 12, attackBonus: 4, combatStyle: 'precise' },
   'bandage': { id: 'bandage', name: 'Bandage propre', emoji: '🩹', type: 'tool', value: 5, effect: { health: 15 } },
-  'crayon': { id: 'crayon', name: 'Crayon à papier', emoji: '✏️', type: 'tool', value: 1 },
+  'crayon': { id: 'crayon', name: 'Crayon à papier', emoji: '✏️', type: 'tool', value: 1, effect: { mental: 6 } },
   'couverture-survie': { id: 'couverture-survie', name: 'Couverture de survie', emoji: '🛡️', type: 'armor', value: 10, defenseBonus: 3 },
-  'carte-ville': { id: 'carte-ville', name: 'Carte de la ville', emoji: '🗺️', type: 'tool', value: 4 },
-  'cravate': { id: 'cravate', name: 'Cravate en soie', emoji: '👔', type: 'junk', value: 8 },
-  'graines': { id: 'graines', name: 'Sachet de graines', emoji: '🌱', type: 'tool', value: 3 },
+  'carte-ville': { id: 'carte-ville', name: 'Carte de la ville', emoji: '🗺️', type: 'tool', value: 4, effect: { mental: 6 } },
+  'cravate': { id: 'cravate', name: 'Cravate en soie', emoji: '👔', type: 'junk', value: 8, effect: { dignity: 10 } },
+  'graines': { id: 'graines', name: 'Sachet de graines', emoji: '🌱', type: 'tool', value: 3, effect: { hunger: 12, mental: 4 } },
   'code-civil': { id: 'code-civil', name: 'Code Civil (édition 1987)', emoji: '📕', type: 'weapon', value: 6, attackBonus: 2, combatStyle: 'heavy' },
-  'harmonica-casse': { id: 'harmonica-casse', name: 'Harmonica cassé', emoji: '🎵', type: 'special', value: 5 },
+  'harmonica-casse': { id: 'harmonica-casse', name: 'Harmonica cassé', emoji: '🎵', type: 'special', value: 5, effect: { mental: 12 } },
 };
 
 // ============ ENEMIES ============
@@ -657,6 +657,12 @@ export interface WeaponProfile {
   stunChance: number;                    // chance d'étourdir sur un critique
   missMin: number; missRange: number;    // multiplicateur de dégâts sur mauvaise zone
   riposteMin: number; riposteRange: number; // riposte ennemie sur mauvaise zone
+}
+
+// Prix de revente d'un objet : 60% de sa valeur (empêche tout aller-retour
+// achat→revente rentable, tout en donnant une utilité à chaque objet).
+export function getSellPrice(item: InventoryItem): number {
+  return Math.max(1, Math.round((item.value || 1) * 0.6));
 }
 
 export function getWeaponProfile(weapon?: InventoryItem): WeaponProfile {
@@ -2359,6 +2365,7 @@ type GameAction =
   | { type: 'NEXT_DAY' }
   | { type: 'SET_SCREEN'; screen: GameScreen }
   | { type: 'USE_ITEM'; itemId: string }
+  | { type: 'SELL_ITEM'; itemId: string }
   | { type: 'GAME_OVER' }
   | { type: 'RESTART' }
   | { type: 'REVIVE' }
@@ -2551,18 +2558,35 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'USE_ITEM': {
       if (!state.character) return state;
-      const item = state.character.inventory.find(i => i.id === action.itemId);
-      if (!item || !item.effect) return state;
+      const idx = state.character.inventory.findIndex(i => i.id === action.itemId);
+      if (idx === -1) return state;
+      const item = state.character.inventory[idx];
+      if (!item.effect) return state;
       let newStats = { ...state.character.stats };
       Object.entries(item.effect).forEach(([key, val]) => {
         if (val) newStats[key as keyof Stats] += val;
       });
       newStats = clampStats(newStats);
-      const newInv = state.character.inventory.filter(i => i.id !== action.itemId);
+      // Retire un seul exemplaire (pas tous les objets du même type).
+      const newInv = [...state.character.inventory.slice(0, idx), ...state.character.inventory.slice(idx + 1)];
       return {
         ...state,
         character: { ...state.character, stats: newStats, inventory: newInv },
         eventResult: { text: `Vous utilisez ${item.name}. Ça fait du bien !`, statChanges: item.effect },
+      };
+    }
+
+    case 'SELL_ITEM': {
+      if (!state.character) return state;
+      const idx = state.character.inventory.findIndex(i => i.id === action.itemId);
+      if (idx === -1) return state;
+      const item = state.character.inventory[idx];
+      const price = getSellPrice(item);
+      const newInv = [...state.character.inventory.slice(0, idx), ...state.character.inventory.slice(idx + 1)];
+      return {
+        ...state,
+        character: { ...state.character, money: state.character.money + price, inventory: newInv },
+        eventResult: { text: `Vous revendez ${item.name} pour ${price}€. Chaque euro compte.`, moneyChange: price },
       };
     }
 
