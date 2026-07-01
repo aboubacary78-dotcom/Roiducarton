@@ -79,26 +79,25 @@ export default function BegMinigame() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen p-5 flex flex-col gap-4"
-      style={{ background: 'radial-gradient(95% 50% at 50% 6%, rgba(242,193,78,0.16), transparent 60%), linear-gradient(180deg, #3A3226 0%, #201B14 100%)' }}
+      className="min-h-screen bg-texture p-5 flex flex-col gap-4"
     >
       <div className="text-center">
         <div className="text-4xl mb-1">🎩</div>
-        <h1 className="text-2xl text-[#F2E8D8]">La manche</h1>
-        <p className="text-sm text-[#B8A98E] mt-1">Ramasse les pièces 🪙 et billets 💶. Ne touche pas le policier 👮 !</p>
-        {charisma && <p className="text-[11px] text-[#D9B96A] mt-1">✨ Charismatique : les passants donnent plus souvent.</p>}
+        <h1 className="text-2xl text-[#2A1F1A]">La manche</h1>
+        <p className="text-sm text-[#8B6B4A] mt-1">Ramasse les pièces 🪙 et billets 💶. Ne touche pas le policier 👮 !</p>
+        {charisma && <p className="text-[11px] text-[#B8860B] mt-1">✨ Charismatique : les passants donnent plus souvent.</p>}
       </div>
 
       {/* Timer + compteur */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: '#171310' }}>
-          <div className="h-full rounded-full transition-[width] duration-100" style={{ width: `${pct}%`, background: pct > 30 ? 'linear-gradient(90deg,#D9B96A,#C99A3A)' : '#D94F4F' }} />
+        <div className="flex-1 stat-bar-track" style={{ height: '10px' }}>
+          <div className="h-full rounded-full transition-[width] duration-100" style={{ width: `${pct}%`, background: pct > 30 ? 'linear-gradient(90deg, #C4723A, #9B5B3A)' : '#D94F4F' }} />
         </div>
-        <span className="text-sm font-bold font-mono text-[#F2C14E] w-14 text-right">🪙 {coins}</span>
+        <span className="text-sm font-bold font-mono text-[#B8860B] w-14 text-right">🪙 {coins}</span>
       </div>
 
       {/* Aire de jeu */}
-      <div className="relative flex-1 rounded-2xl border border-[#4A3F2E] overflow-hidden" style={{ background: 'rgba(20,16,12,0.5)' }}>
+      <div className="craft-card relative flex-1 overflow-hidden">
         <AnimatePresence>
           {items.map(item => (
             <motion.button
@@ -109,7 +108,7 @@ export default function BegMinigame() {
               transition={{ type: 'spring', damping: 16, stiffness: 400 }}
               onClick={() => tap(item)}
               className="absolute text-3xl leading-none select-none"
-              style={{ left: `${item.x}%`, top: `${item.y}%`, filter: item.kind === 'bill' ? 'drop-shadow(0 0 6px rgba(242,193,78,0.8))' : undefined }}
+              style={{ left: `${item.x}%`, top: `${item.y}%`, filter: item.kind === 'bill' ? 'drop-shadow(0 0 6px rgba(184,134,11,0.55))' : undefined }}
               aria-label={item.kind}
             >
               {item.kind === 'coin' ? '🪙' : item.kind === 'bill' ? '💶' : '👮'}
@@ -123,10 +122,10 @@ export default function BegMinigame() {
             initial={{ opacity: 0, scale: 0.7 }}
             animate={{ opacity: 1, scale: 1 }}
             className="absolute inset-0 flex flex-col items-center justify-center gap-2"
-            style={{ background: 'rgba(20,14,10,0.72)' }}
+            style={{ background: 'rgba(251,246,240,0.88)' }}
           >
             <span className="text-4xl">{ended === 'cop' ? '👮' : '🎩'}</span>
-            <span className="text-xl font-extrabold" style={{ color: ended === 'cop' ? '#F27575' : '#F2C14E' }}>
+            <span className="text-xl font-extrabold" style={{ color: ended === 'cop' ? '#D94F4F' : '#B8860B' }}>
               {ended === 'cop' ? 'Circulez !' : `${coins} pièce${coins > 1 ? 's' : ''} !`}
             </span>
           </motion.div>
