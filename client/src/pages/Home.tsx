@@ -16,6 +16,7 @@ import EventResultOverlay from '@/components/game/EventResultOverlay';
 import ShopScreen from '@/components/game/ShopScreen';
 import SettingsScreen from '@/components/game/SettingsScreen';
 import StealMinigame from '@/components/game/StealMinigame';
+import BegMinigame from '@/components/game/BegMinigame';
 import WeatherOverlay from '@/components/game/WeatherOverlay';
 
 export default function Home() {
@@ -41,11 +42,12 @@ export default function Home() {
         {state.screen === 'combat' && <CombatScreen />}
         {state.screen === 'shop' && <ShopScreen />}
         {state.screen === 'steal-game' && <StealMinigame />}
+        {state.screen === 'beg-game' && <BegMinigame />}
         {state.screen === 'settings' && <SettingsScreen />}
         {state.screen === 'game-over' && <GameOverScreen />}
 
         {/* Overlay météo : actif sur tous les écrans de jeu sauf titre et sélection */}
-        {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game'].includes(state.screen) && (
+        {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game'].includes(state.screen) && (
           <WeatherOverlay />
         )}
 

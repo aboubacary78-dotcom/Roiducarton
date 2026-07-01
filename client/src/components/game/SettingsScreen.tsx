@@ -7,7 +7,7 @@ import { isAdsRemoved, purchaseRemoveAds } from '@/lib/ads';
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
 const PRIVACY_URL = 'https://example.com/roi-du-carton/confidentialite';
-const APP_VERSION = '1.10.0';
+const APP_VERSION = '1.11.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
