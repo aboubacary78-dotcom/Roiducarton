@@ -10,6 +10,15 @@ const TYPE_LABELS: Record<string, { label: string; color: string; bg: string }> 
   special: { label: 'Spécial', color: '#7B68EE', bg: '#7B68EE15' },
 };
 
+const STAT_META: Record<string, { emoji: string; label: string }> = {
+  health: { emoji: '❤️', label: 'Santé' },
+  mental: { emoji: '🧠', label: 'Mental' },
+  hunger: { emoji: '🍖', label: 'Faim' },
+  thirst: { emoji: '💧', label: 'Soif' },
+  sleep: { emoji: '😴', label: 'Sommeil' },
+  dignity: { emoji: '👑', label: 'Dignité' },
+};
+
 export default function InventoryScreen() {
   const { state, dispatch } = useGame();
   const char = state.character!;
@@ -59,14 +68,17 @@ export default function InventoryScreen() {
                       {typeInfo.label}
                     </span>
                   </div>
-                  <div className="flex gap-2 text-[10px] text-[#6B5740] mt-0.5 font-mono">
-                    {item.attackBonus && <span>⚔️+{item.attackBonus}</span>}
-                    {item.defenseBonus && <span>🛡️+{item.defenseBonus}</span>}
-                    {item.effect && Object.entries(item.effect).map(([k, v]) => (
-                      <span key={k} className={v! > 0 ? 'text-[#3d8b4f]' : 'text-[#B84A3A]'}>
-                        {k}: {v! > 0 ? '+' : ''}{v}
-                      </span>
-                    ))}
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-[#6B5740] mt-0.5 font-mono">
+                    {item.attackBonus && <span className="text-[#B84A3A]">🥊 +{item.attackBonus} att.</span>}
+                    {item.defenseBonus && <span className="text-[#4A8FBF]">🛡️ +{item.defenseBonus} déf.</span>}
+                    {item.effect && Object.entries(item.effect).map(([k, v]) => {
+                      const meta = STAT_META[k];
+                      return (
+                        <span key={k} className={v! > 0 ? 'text-[#3d8b4f]' : 'text-[#B84A3A]'}>
+                          {meta ? meta.emoji : ''} {meta ? meta.label : k} {v! > 0 ? '+' : ''}{v}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
                 {hasEffect && (
