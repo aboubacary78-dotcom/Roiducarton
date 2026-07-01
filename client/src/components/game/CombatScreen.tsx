@@ -1,6 +1,7 @@
 import { useGame, getWeaponProfile } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
+import { playHit, playCrit, playHurt } from '@/lib/sound';
 
 interface DmgFloat { id: number; target: 'enemy' | 'player'; value: number; crit: boolean; }
 
@@ -13,6 +14,7 @@ export default function CombatScreen() {
   const prevPlayerHp = useRef<number | null>(null);
   const floatId = useRef(0);
   const enemyCtrl = useAnimationControls();
+  const enemyLungeCtrl = useAnimationControls();
   const playerCtrl = useAnimationControls();
   const critCtrl = useAnimationControls();
 
@@ -32,11 +34,19 @@ export default function CombatScreen() {
     if (prevEnemyHp.current !== null && eHp < prevEnemyHp.current) {
       pushFloat('enemy', prevEnemyHp.current - eHp, crit);
       enemyCtrl.start({ x: [0, -9, 9, -6, 6, 0], transition: { duration: 0.38 } });
-      if (crit) critCtrl.start({ opacity: [0, 0.55, 0], transition: { duration: 0.5 } });
+      if (crit) {
+        critCtrl.start({ opacity: [0, 0.55, 0], transition: { duration: 0.5 } });
+        playCrit();
+      } else {
+        playHit();
+      }
     }
     if (prevPlayerHp.current !== null && pHp < prevPlayerHp.current) {
       pushFloat('player', prevPlayerHp.current - pHp, false);
       playerCtrl.start({ x: [0, -7, 7, -4, 4, 0], transition: { duration: 0.35 } });
+      // L'ennemi charge vers le joueur quand il riposte.
+      enemyLungeCtrl.start({ y: [0, 16, 0], scale: [1, 1.12, 1], transition: { duration: 0.32 } });
+      playHurt();
     }
     prevEnemyHp.current = eHp;
     prevPlayerHp.current = pHp;
@@ -110,18 +120,20 @@ export default function CombatScreen() {
       >
         {renderFloats('enemy')}
         <div className="flex items-center gap-3 mb-3">
-          <motion.div
-            animate={enemyCtrl}
-            className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 border border-[#4A2A1A]"
-            style={{ background: 'radial-gradient(circle at 50% 40%, rgba(217,79,79,0.22), rgba(26,14,8,0.4) 72%)' }}
-          >
-            <motion.span
-              className="text-4xl"
-              animate={{ rotate: [0, -3, 3, 0] }}
-              transition={{ repeat: Infinity, duration: 2.5 }}
+          <motion.div animate={enemyLungeCtrl} className="shrink-0">
+            <motion.div
+              animate={enemyCtrl}
+              className="w-16 h-16 rounded-2xl flex items-center justify-center border border-[#4A2A1A]"
+              style={{ background: 'radial-gradient(circle at 50% 40%, rgba(217,79,79,0.22), rgba(26,14,8,0.4) 72%)' }}
             >
-              {currentCombat.enemyEmoji}
-            </motion.span>
+              <motion.span
+                className="text-4xl"
+                animate={{ rotate: [0, -3, 3, 0] }}
+                transition={{ repeat: Infinity, duration: 2.5 }}
+              >
+                {currentCombat.enemyEmoji}
+              </motion.span>
+            </motion.div>
           </motion.div>
           <div className="flex-1">
             <h3 className="text-lg text-[#F0D9C4] font-bold">{currentCombat.enemyName}</h3>
@@ -130,16 +142,22 @@ export default function CombatScreen() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-semibold text-[#D94F4F] font-mono w-6">PV</span>
-          <div className="flex-1 h-3 bg-[#1A0E08] rounded-full overflow-hidden">
+          <div className="flex-1 h-3 bg-[#1A0E08] rounded-full overflow-hidden relative">
             <motion.div
-              className="h-full rounded-full"
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{ background: 'rgba(255,240,220,0.5)' }}
+              animate={{ width: `${hpPercent}%` }}
+              transition={{ duration: 0.75, delay: 0.18 }}
+            />
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full"
               style={{
                 background: hpPercent > 50 ? 'linear-gradient(90deg, #D94F4F, #E86B5A)'
                   : hpPercent > 25 ? 'linear-gradient(90deg, #D4874D, #E8A060)'
                   : 'linear-gradient(90deg, #8B2020, #D94F4F)',
               }}
               animate={{ width: `${hpPercent}%` }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.3 }}
             />
           </div>
           <span className="text-[10px] font-semibold text-[#D94F4F] font-mono w-14 text-right">
@@ -173,9 +191,15 @@ export default function CombatScreen() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-semibold text-[#4A9B5F] font-mono w-6">PV</span>
-            <div className="flex-1 h-3 bg-[#0A1408] rounded-full overflow-hidden">
+            <div className="flex-1 h-3 bg-[#0A1408] rounded-full overflow-hidden relative">
               <motion.div
-                className="h-full rounded-full"
+                className="absolute inset-y-0 left-0 rounded-full"
+                style={{ background: 'rgba(255,180,160,0.5)' }}
+                animate={{ width: `${playerHpPercent}%` }}
+                transition={{ duration: 0.75, delay: 0.18 }}
+              />
+              <motion.div
+                className="absolute inset-y-0 left-0 rounded-full"
                 style={{
                   background: playerHpPercent > 50 ? 'linear-gradient(90deg, #4A9B5F, #5CB870)'
                     : playerHpPercent > 25 ? 'linear-gradient(90deg, #D4874D, #E8A060)'
@@ -185,7 +209,7 @@ export default function CombatScreen() {
                   width: `${playerHpPercent}%`,
                   opacity: playerInDanger ? [0.6, 1, 0.6] : 1,
                 }}
-                transition={playerInDanger ? { opacity: { repeat: Infinity, duration: 0.8 } } : { duration: 0.4 }}
+                transition={playerInDanger ? { opacity: { repeat: Infinity, duration: 0.8 } } : { duration: 0.3 }}
               />
             </div>
             <span className="text-[10px] font-semibold text-[#4A9B5F] font-mono w-14 text-right">

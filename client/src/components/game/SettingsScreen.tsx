@@ -1,15 +1,17 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { isMuted, setMuted } from '@/lib/sound';
 
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
 const PRIVACY_URL = 'https://example.com/roi-du-carton/confidentialite';
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.5.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [muted, setMutedState] = useState(isMuted());
 
   return (
     <div className="min-h-screen bg-texture p-5 flex flex-col gap-4">
@@ -51,10 +53,30 @@ export default function SettingsScreen() {
         <ul className="text-sm text-[#6B5740] leading-relaxed flex flex-col gap-1.5">
           <li>❤️ Surveillez vos 6 jauges : santé, mental, faim, soif, sommeil, dignité.</li>
           <li>🎯 Chaque jour, vous avez un nombre limité d'actions.</li>
-          <li>🔍 <strong>Explorer</strong>, 🎩 <strong>Mendier</strong>, 😴 <strong>Dormir</strong>, ⚔️ <strong>Bagarre</strong> et 🥷 <strong>Voler</strong> (risqué) font avancer la journée.</li>
+          <li>🔍 <strong>Explorer</strong>, 🙏 <strong>Mendier</strong>, 😴 <strong>Dormir</strong>, 🥊 <strong>Bagarre</strong> et 🥷 <strong>Voler</strong> (risqué) font avancer la journée.</li>
           <li>🌦️ La météo influence vos jauges : préparez-vous au pire.</li>
           <li>💀 Si la santé ou le mental tombe à zéro, c'est la fin… sauf seconde chance !</li>
         </ul>
+      </motion.section>
+
+      {/* Son */}
+      <motion.section
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.08 }}
+        className="craft-card p-4"
+      >
+        <button
+          onClick={() => { const v = !muted; setMuted(v); setMutedState(v); }}
+          className="w-full flex items-center justify-between"
+        >
+          <span className="text-base font-semibold text-[#2A1F1A]">{muted ? '🔇' : '🔊'} Son</span>
+          <span
+            className={`text-xs font-semibold px-3 py-1.5 rounded-full ${muted ? 'bg-[#E8D5C0] text-[#8B6B4A]' : 'bg-[#4A9B5F]/15 text-[#3d8b4f]'}`}
+          >
+            {muted ? 'Coupé' : 'Activé'}
+          </span>
+        </button>
       </motion.section>
 
       {/* Données */}
