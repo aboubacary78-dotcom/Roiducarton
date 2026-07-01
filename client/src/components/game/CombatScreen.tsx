@@ -183,7 +183,7 @@ export default function CombatScreen() {
           {renderFloats('player')}
           <div className="flex items-center gap-3 mb-3">
             <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-[#43764F]">
-              <CardboardAvatar seed={character.seed} size={48} />
+              <CardboardAvatar seed={character.seed} gender={character.gender} size={48} />
             </div>
             <div className="flex-1">
               <h3 className="text-lg text-[#C4E0B8] font-bold">{character.name}</h3>

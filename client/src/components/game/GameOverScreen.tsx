@@ -100,7 +100,7 @@ export default function GameOverScreen() {
         style={{ background: 'linear-gradient(135deg, #2A1C12, #1E1410)' }}
       >
         <div className="w-14 h-14 rounded-xl overflow-hidden mx-auto mb-2 border border-[#3D2A1A]">
-          <CardboardAvatar seed={char.seed} size={56} />
+          <CardboardAvatar seed={char.seed} gender={char.gender} size={56} />
         </div>
         <h3 className="text-base font-semibold text-[#F0D9C4] text-center mb-1">
           {char.job.emoji} {char.name}
