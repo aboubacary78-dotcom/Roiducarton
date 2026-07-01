@@ -43,7 +43,7 @@ export default function Home() {
         {state.screen === 'game-over' && <GameOverScreen />}
 
         {/* Overlay météo : actif sur tous les écrans de jeu sauf titre et sélection */}
-        {state.character && !['title', 'character-select', 'game-over', 'settings'].includes(state.screen) && (
+        {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel'].includes(state.screen) && (
           <WeatherOverlay />
         )}
 
