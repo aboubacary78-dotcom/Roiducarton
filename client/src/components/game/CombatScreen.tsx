@@ -51,7 +51,8 @@ export default function CombatScreen() {
       >
         <div className="flex items-center gap-3 mb-3">
           <motion.span
-            className="text-4xl"
+            className="w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shrink-0 border border-[#4A2A1A]"
+            style={{ background: 'radial-gradient(circle at 50% 40%, rgba(217,79,79,0.22), rgba(26,14,8,0.4) 72%)' }}
             animate={{ rotate: [0, -3, 3, 0] }}
             transition={{ repeat: Infinity, duration: 2.5 }}
           >
@@ -127,15 +128,16 @@ export default function CombatScreen() {
       </motion.div>
 
       {/* Combat Log */}
-      <div className="rounded-xl p-3 flex-1 max-h-24 overflow-y-auto border border-[#2A2018]" style={{ background: '#140E0A' }}>
+      <div className="rounded-xl p-3 flex-1 min-h-0 overflow-y-auto border border-[#2A2018]" style={{ background: '#140E0A' }}>
+        <p className="text-[9px] uppercase tracking-widest text-[#5C4A38] mb-1.5">Journal du combat</p>
         <AnimatePresence>
-          {combatLog.slice(-4).map((log, i) => (
+          {combatLog.slice(-6).map((log, i) => (
             <motion.p
-              key={`${combatLog.length - 4 + i}`}
+              key={`${combatLog.length - 6 + i}`}
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               className={`text-xs mb-1 ${
-                i === Math.min(combatLog.length, 4) - 1 ? 'text-[#F0D9C4] font-medium' : 'text-[#7A6050]'
+                i === Math.min(combatLog.length, 6) - 1 ? 'text-[#F0D9C4] font-medium' : 'text-[#7A6050]'
               }`}
             >
               {log}
