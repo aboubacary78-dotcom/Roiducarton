@@ -49,7 +49,7 @@ export default function GameOverScreen() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="min-h-screen p-5 flex flex-col items-center justify-center gap-4"
-      style={{ background: 'linear-gradient(180deg, #1C1410 0%, #0A0806 100%)' }}
+      style={{ background: 'radial-gradient(95% 45% at 50% 0%, rgba(217,79,79,0.16), transparent 60%), linear-gradient(180deg, #3A2436 0%, #1C1322 100%)' }}
     >
       {/* Death Icon */}
       <motion.div
@@ -96,10 +96,10 @@ export default function GameOverScreen() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 1 }}
-        className="w-full max-w-sm rounded-xl p-4 border border-[#3D2A1A]"
-        style={{ background: 'linear-gradient(135deg, #2A1C12, #1E1410)' }}
+        className="w-full max-w-sm rounded-xl p-4 border border-[#4A3048]"
+        style={{ background: 'linear-gradient(135deg, #362232, #26182A)' }}
       >
-        <div className="w-14 h-14 rounded-xl overflow-hidden mx-auto mb-2 border border-[#3D2A1A]">
+        <div className="w-14 h-14 rounded-xl overflow-hidden mx-auto mb-2 border border-[#4A3048]">
           <CardboardAvatar seed={char.seed} gender={char.gender} size={56} />
         </div>
         <h3 className="text-base font-semibold text-[#F0D9C4] text-center mb-1">
@@ -110,19 +110,19 @@ export default function GameOverScreen() {
         </p>
 
         <div className="grid grid-cols-2 gap-2">
-          <div className="p-2.5 rounded-lg text-center" style={{ background: '#1A0E0A' }}>
+          <div className="p-2.5 rounded-lg text-center" style={{ background: '#231525' }}>
             <p className="text-xl font-bold text-[#E8A87C]">{char.day}</p>
             <p className="text-[10px] text-[#A08060]">Jours</p>
           </div>
-          <div className="p-2.5 rounded-lg text-center" style={{ background: '#1A0E0A' }}>
+          <div className="p-2.5 rounded-lg text-center" style={{ background: '#231525' }}>
             <p className="text-xl font-bold text-[#7B68EE]">{char.respect}</p>
             <p className="text-[10px] text-[#A08060]">Respect</p>
           </div>
-          <div className="p-2.5 rounded-lg text-center" style={{ background: '#1A0E0A' }}>
+          <div className="p-2.5 rounded-lg text-center" style={{ background: '#231525' }}>
             <p className="text-xl font-bold text-[#B8860B]">{char.money}€</p>
             <p className="text-[10px] text-[#A08060]">Fortune</p>
           </div>
-          <div className="p-2.5 rounded-lg text-center border border-[#D4874D]/30" style={{ background: '#1A0E0A' }}>
+          <div className="p-2.5 rounded-lg text-center border border-[#D4874D]/30" style={{ background: '#231525' }}>
             <p className="text-xl font-bold text-[#D4874D]">{score}</p>
             <p className="text-[10px] text-[#A08060]">Score</p>
           </div>
@@ -135,11 +135,11 @@ export default function GameOverScreen() {
           initial={{ y: 15, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.2 }}
-          className="w-full max-w-sm rounded-xl p-3 border border-[#3D2A1A]"
-          style={{ background: 'linear-gradient(135deg, #2A1C12, #1E1410)' }}
+          className="w-full max-w-sm rounded-xl p-3 border border-[#4A3048]"
+          style={{ background: 'linear-gradient(135deg, #362232, #26182A)' }}
         >
           <h4 className="text-sm font-semibold text-[#F0D9C4] text-center mb-2">
-            Hall of Fame
+            🏆 Meilleurs scores
           </h4>
           <div className="flex flex-col gap-1.5">
             {state.highScores.slice(0, 5).map((hs, i) => (
