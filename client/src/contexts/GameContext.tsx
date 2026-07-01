@@ -116,7 +116,7 @@ export interface CombatState {
   weakPointHint: string;
 }
 
-export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings';
+export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings' | 'steal-game';
 
 // ============ MÉTÉO ============
 export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm' | 'heatwave' | 'fog' | 'snow';
@@ -2234,9 +2234,16 @@ function generateRestEvents(_location: string, character: Character): GameEvent[
   return shuffled.slice(0, 5);
 }
 
-function generateStealEvents(_location: string, _character: Character): GameEvent[] {
-  const shuffled = [...STEAL_EVENTS].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 5);
+// Habillage textuel du mini-jeu de vol : réutilise les issues des STEAL_EVENTS.
+function stealFlavor(positive: boolean): string {
+  const texts: string[] = [];
+  for (const e of STEAL_EVENTS)
+    for (const c of e.choices)
+      for (const o of c.outcomes) {
+        const good = (o.moneyChange || 0) > 0 || Object.values(o.statChanges || {}).reduce((a, b) => a + (b || 0), 0) > 0;
+        if (good === positive) texts.push(o.text);
+      }
+  return texts.length ? randomFromArray(texts) : '';
 }
 
 function generateTravelEvent(_from: string, _to: string, _character: Character): GameEvent | null {
@@ -2375,6 +2382,7 @@ type GameAction =
   | { type: 'EXPLORE' }
   | { type: 'BEG' }
   | { type: 'STEAL' }
+  | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot' }
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
   | { type: 'TRAVEL'; location: string }
@@ -2437,10 +2445,48 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'STEAL': {
       if (!state.character || state.dayActions >= state.maxDayActions) return state;
-      const stealEvents = generateStealEvents(state.character.location, state.character);
-      if (stealEvents.length === 0) return state;
-      const stealEvent = randomFromArray(stealEvents);
-      return { ...state, screen: 'event', currentEvent: stealEvent, dayActions: state.dayActions + 1 };
+      // Ouvre le mini-jeu d'adresse (voir StealMinigame).
+      return { ...state, screen: 'steal-game', dayActions: state.dayActions + 1 };
+    }
+
+    case 'RESOLVE_STEAL': {
+      if (!state.character) return state;
+      const c = state.character;
+      let moneyDelta = 0;
+      let respectDelta = 0;
+      let statDelta: Partial<Stats> = {};
+      let prefix = '';
+      if (action.tier === 'jackpot') {
+        moneyDelta = 10 + Math.floor(Math.random() * 9);   // 10-18€
+        respectDelta = 2;
+        statDelta = { dignity: -4, mental: 6 };
+        prefix = '💎 Coup de maître ! ';
+      } else if (action.tier === 'ok') {
+        moneyDelta = 3 + Math.floor(Math.random() * 5);    // 3-7€
+        statDelta = { dignity: -6, mental: 2 };
+        prefix = '🤫 Vol réussi. ';
+      } else {
+        moneyDelta = -Math.min(c.money, 3);
+        respectDelta = -3;
+        statDelta = { dignity: -12, health: -6, mental: -6 };
+        prefix = '🚨 Pris la main dans le sac ! ';
+      }
+      let newStats = { ...c.stats };
+      Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
+      newStats = clampStats(newStats);
+      const newMoney = Math.max(0, c.money + moneyDelta);
+      const newRespect = c.respect + respectDelta;
+      const isAlive = newStats.health > 0 && newStats.mental > 0;
+      if (!isAlive) {
+        saveHighScore(c.name, c.day, c.day * 10 + newRespect * 5 + newMoney * 2);
+        clearSave();
+      }
+      return {
+        ...state,
+        character: { ...c, stats: newStats, money: newMoney, respect: newRespect, alive: isAlive },
+        eventResult: { text: prefix + stealFlavor(action.tier !== 'fail'), statChanges: statDelta, moneyChange: moneyDelta, respectChange: respectDelta },
+        screen: isAlive ? 'main' : 'game-over',
+      };
     }
 
     case 'REST': {
