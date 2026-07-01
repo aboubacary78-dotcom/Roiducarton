@@ -1,4 +1,4 @@
-import { useGame } from '@/contexts/GameContext';
+import { useGame, BEG_SPOTS } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
@@ -20,6 +20,7 @@ export default function BegMinigame() {
   const char = state.character;
   const charisma = !!char?.traits.some(t => t.id === 'charismatique');
 
+  const [spot] = useState(() => BEG_SPOTS[Math.floor(Math.random() * BEG_SPOTS.length)]);
   const [items, setItems] = useState<Item[]>([]);
   const [coins, setCoins] = useState(0);
   const [timeLeft, setTimeLeft] = useState(ROUND_MS);
@@ -84,7 +85,8 @@ export default function BegMinigame() {
       <div className="text-center">
         <div className="text-4xl mb-1">🎩</div>
         <h1 className="text-2xl text-[#2A1F1A]">La manche</h1>
-        <p className="text-sm text-[#8B6B4A] mt-1">Ramasse les pièces 🪙 et billets 💶. Ne touche pas le policier 👮 !</p>
+        <p className="text-sm text-[#6B5740] mt-1.5">Vous tendez votre chapeau <strong>{spot}</strong>.</p>
+        <p className="text-xs text-[#8B6B4A] mt-1">Ramasse les pièces 🪙 et billets 💶. Ne touche pas le policier 👮, sinon c'est l'amende !</p>
         {charisma && <p className="text-[11px] text-[#B8860B] mt-1">✨ Charismatique : les passants donnent plus souvent.</p>}
       </div>
 

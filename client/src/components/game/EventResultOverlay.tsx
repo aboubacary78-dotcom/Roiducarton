@@ -108,7 +108,7 @@ export default function EventResultOverlay() {
                     </motion.span>
                   );
                 })}
-                {result.moneyChange && result.moneyChange !== 0 && (
+                {!!result.moneyChange && (
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -120,14 +120,16 @@ export default function EventResultOverlay() {
                     💰 {result.moneyChange > 0 ? '+' : ''}{result.moneyChange}€
                   </motion.span>
                 )}
-                {result.respectChange && result.respectChange !== 0 && (
+                {!!result.respectChange && (
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', delay: 0.3 }}
-                    className="text-[11px] px-2 py-1 rounded-full font-semibold font-mono bg-[#7B68EE]/10 text-[#7B68EE]"
+                    className={`text-[11px] px-2 py-1 rounded-full font-semibold font-mono ${
+                      result.respectChange! > 0 ? 'bg-[#7B68EE]/10 text-[#7B68EE]' : 'bg-[#D94F4F]/10 text-[#B84A3A]'
+                    }`}
                   >
-                    ⭐ +{result.respectChange} Respect
+                    ⭐ {result.respectChange! > 0 ? '+' : ''}{result.respectChange} Respect
                   </motion.span>
                 )}
               </div>
