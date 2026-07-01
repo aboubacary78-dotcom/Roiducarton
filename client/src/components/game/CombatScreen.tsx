@@ -96,7 +96,7 @@ export default function CombatScreen() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="min-h-screen p-4 flex flex-col gap-3 relative overflow-hidden"
-      style={{ background: 'linear-gradient(180deg, #1C1410 0%, #0A0806 100%)' }}
+      style={{ background: 'radial-gradient(95% 55% at 50% 4%, rgba(242,193,78,0.14), transparent 58%), linear-gradient(180deg, #5C3A34 0%, #3A2438 55%, #1E1426 100%)' }}
     >
       {/* Flash de coup critique */}
       <motion.div
@@ -108,23 +108,23 @@ export default function CombatScreen() {
 
       {/* Header */}
       <div className="text-center py-1">
-        <h2 className="text-sm font-semibold text-[#E8A87C] tracking-wide uppercase">Combat</h2>
+        <h2 className="text-sm font-semibold text-[#F2C14E] tracking-[0.2em] uppercase">Combat</h2>
       </div>
 
       {/* Enemy Card */}
       <motion.div
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="rounded-xl p-4 border border-[#3D2A1A] relative"
-        style={{ background: 'linear-gradient(135deg, #2A1C12, #1E1410)' }}
+        className="rounded-xl p-4 border border-[#8A424C] relative"
+        style={{ background: 'linear-gradient(135deg, #4C2A32, #331E2A)', boxShadow: '0 0 24px rgba(200,70,70,0.12)' }}
       >
         {renderFloats('enemy')}
         <div className="flex items-center gap-3 mb-3">
           <motion.div animate={enemyLungeCtrl} className="shrink-0">
             <motion.div
               animate={enemyCtrl}
-              className="w-16 h-16 rounded-2xl flex items-center justify-center border border-[#4A2A1A]"
-              style={{ background: 'radial-gradient(circle at 50% 40%, rgba(217,79,79,0.22), rgba(26,14,8,0.4) 72%)' }}
+              className="w-16 h-16 rounded-2xl flex items-center justify-center border border-[#8A424C]"
+              style={{ background: 'radial-gradient(circle at 50% 40%, rgba(230,90,90,0.28), rgba(40,16,24,0.5) 72%)' }}
             >
               <motion.span
                 className="text-4xl"
@@ -136,13 +136,13 @@ export default function CombatScreen() {
             </motion.div>
           </motion.div>
           <div className="flex-1">
-            <h3 className="text-lg text-[#F0D9C4] font-bold">{currentCombat.enemyName}</h3>
-            <p className="text-xs text-[#A08060] italic">{currentCombat.description}</p>
+            <h3 className="text-lg text-[#F8E6D2] font-bold">{currentCombat.enemyName}</h3>
+            <p className="text-xs text-[#D6A896] italic">{currentCombat.description}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold text-[#D94F4F] font-mono w-6">PV</span>
-          <div className="flex-1 h-3 bg-[#1A0E08] rounded-full overflow-hidden relative">
+          <span className="text-[10px] font-semibold text-[#F27575] font-mono w-6">PV</span>
+          <div className="flex-1 h-3 bg-[#2A1622] rounded-full overflow-hidden relative">
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full"
               style={{ background: 'rgba(255,240,220,0.5)' }}
@@ -160,7 +160,7 @@ export default function CombatScreen() {
               transition={{ duration: 0.3 }}
             />
           </div>
-          <span className="text-[10px] font-semibold text-[#D94F4F] font-mono w-14 text-right">
+          <span className="text-[10px] font-semibold text-[#F27575] font-mono w-14 text-right">
             {currentCombat.enemyHealth}/{currentCombat.enemyMaxHealth}
           </span>
         </div>
@@ -168,7 +168,7 @@ export default function CombatScreen() {
 
       {/* VS */}
       <div className="text-center">
-        <span className="text-sm font-bold text-[#5C4A38] tracking-widest">VS</span>
+        <span className="text-sm font-bold text-[#B98CA0] tracking-widest">VS</span>
       </div>
 
       {/* Player Card */}
@@ -176,22 +176,22 @@ export default function CombatScreen() {
         <motion.div
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className={`rounded-xl p-4 border relative ${playerInDanger ? 'border-[#8B2020]' : 'border-[#3D5A2A]'}`}
-          style={{ background: 'linear-gradient(135deg, #1A2A14, #141E10)' }}
+          className={`rounded-xl p-4 border relative ${playerInDanger ? 'border-[#C24A4A]' : 'border-[#43764F]'}`}
+          style={{ background: 'linear-gradient(135deg, #23392E, #172A26)', boxShadow: '0 0 24px rgba(74,155,95,0.10)' }}
         >
           {renderFloats('player')}
           <div className="flex items-center gap-3 mb-3">
             <span className="text-3xl">{character.job.emoji}</span>
             <div className="flex-1">
               <h3 className="text-lg text-[#C4E0B8] font-bold">{character.name}</h3>
-              <p className="text-xs text-[#80A070]">
+              <p className="text-xs text-[#93B89E]">
                 {character.job.name}{weapon && ` · ${weapon.emoji} ${weapon.name}`}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold text-[#4A9B5F] font-mono w-6">PV</span>
-            <div className="flex-1 h-3 bg-[#0A1408] rounded-full overflow-hidden relative">
+            <span className="text-[10px] font-semibold text-[#5FBE76] font-mono w-6">PV</span>
+            <div className="flex-1 h-3 bg-[#142622] rounded-full overflow-hidden relative">
               <motion.div
                 className="absolute inset-y-0 left-0 rounded-full"
                 style={{ background: 'rgba(255,180,160,0.5)' }}
@@ -212,7 +212,7 @@ export default function CombatScreen() {
                 transition={playerInDanger ? { opacity: { repeat: Infinity, duration: 0.8 } } : { duration: 0.3 }}
               />
             </div>
-            <span className="text-[10px] font-semibold text-[#4A9B5F] font-mono w-14 text-right">
+            <span className="text-[10px] font-semibold text-[#5FBE76] font-mono w-14 text-right">
               {character.stats.health}/100
             </span>
           </div>
@@ -220,8 +220,8 @@ export default function CombatScreen() {
       </motion.div>
 
       {/* Combat Log */}
-      <div className="rounded-xl p-3 flex-1 min-h-0 overflow-y-auto border border-[#2A2018]" style={{ background: '#140E0A' }}>
-        <p className="text-[9px] uppercase tracking-widest text-[#5C4A38] mb-1.5">Journal du combat</p>
+      <div className="rounded-xl p-3 flex-1 min-h-0 overflow-y-auto border border-[#412B41]" style={{ background: 'rgba(38,24,42,0.55)' }}>
+        <p className="text-[9px] uppercase tracking-widest text-[#9A7788] mb-1.5">Journal du combat</p>
         <AnimatePresence>
           {combatLog.slice(-6).map((log, i) => (
             <motion.p
@@ -229,7 +229,7 @@ export default function CombatScreen() {
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               className={`text-xs mb-1 ${
-                i === Math.min(combatLog.length, 6) - 1 ? 'text-[#F0D9C4] font-medium' : 'text-[#7A6050]'
+                i === Math.min(combatLog.length, 6) - 1 ? 'text-[#F6E3D2] font-medium' : 'text-[#A98A98]'
               }`}
             >
               {log}
@@ -249,13 +249,13 @@ export default function CombatScreen() {
               exit={{ opacity: 0, y: 10 }}
               className="flex flex-col gap-2"
             >
-              <div className="rounded-xl p-2.5 border border-[#5C4A38] flex flex-col gap-1.5" style={{ background: '#1A120C' }}>
-                <p className="text-[11px] text-[#E8A87C] text-center">
+              <div className="rounded-xl p-2.5 border border-[#5C3A54] flex flex-col gap-1.5" style={{ background: '#2C1A2A' }}>
+                <p className="text-[11px] text-[#F2C14E] text-center">
                   🔎 {weakDiscovered
                     ? 'Point faible connu — la cible 🎯 marque la zone.'
                     : currentCombat.weakPointHint}
                 </p>
-                <p className="text-[10px] text-[#A08060] text-center border-t border-[#3D2A1A] pt-1.5">
+                <p className="text-[10px] text-[#D6A896] text-center border-t border-[#4E3448] pt-1.5">
                   {weaponProfile.label} — {weaponProfile.note}
                 </p>
               </div>
@@ -268,10 +268,10 @@ export default function CombatScreen() {
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => aimAt(zone.id)}
-                      className={`py-3 rounded-xl text-xs font-semibold text-[#F0D9C4] flex flex-col items-center gap-1 border ${
-                        showMark ? 'border-[#E8A87C]' : 'border-[#3D2A1A]'
+                      className={`py-3 rounded-xl text-xs font-semibold text-[#F6E3D2] flex flex-col items-center gap-1 border ${
+                        showMark ? 'border-[#F2C14E]' : 'border-[#4E2E44]'
                       }`}
-                      style={{ background: showMark ? 'linear-gradient(135deg, #3A2614, #2A1C12)' : 'linear-gradient(135deg, #2A1C12, #1E1410)' }}
+                      style={{ background: showMark ? 'linear-gradient(135deg, #46283C, #34202E)' : 'linear-gradient(135deg, #34202E, #281A26)' }}
                     >
                       <span className="text-xl">{showMark ? '🎯' : zone.emoji}</span>
                       <span>{zone.label}</span>
@@ -281,8 +281,8 @@ export default function CombatScreen() {
               </div>
               <button
                 onClick={() => setAiming(false)}
-                className="w-full py-2 rounded-xl text-xs font-medium text-[#A08060]"
-                style={{ background: '#1A120C', border: '1px solid #3D2A1A' }}
+                className="w-full py-2 rounded-xl text-xs font-medium text-[#B98CA0]"
+                style={{ background: '#2C1A2A', border: '1px solid #4E3448' }}
               >
                 Annuler
               </button>
@@ -335,7 +335,7 @@ export default function CombatScreen() {
                   whileTap={{ scale: 0.94 }}
                   onClick={() => dispatch({ type: 'COMBAT_FLEE' })}
                   className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#E8D5C0]"
-                  style={{ background: 'linear-gradient(135deg, #3D2A1A, #2A1C12)', border: '1px solid #5C4A38' }}
+                  style={{ background: 'linear-gradient(135deg, #3E2A3E, #2A1A2A)', border: '1px solid #5C4A5C' }}
                 >
                   Fuir
                   {(hasAgile || isCascadeur) && <span className="text-[10px] ml-1 opacity-60">+</span>}
