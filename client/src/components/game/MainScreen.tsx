@@ -215,10 +215,10 @@ export default function MainScreen() {
         {/* Main actions grid */}
         <div className="grid grid-cols-2 gap-2">
           <ActionTile emoji="🔍" title="Explorer" desc="Tenter une rencontre" accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
-          <ActionTile emoji="🎩" title="Mendier" desc="Récolter des pièces" accent="#B8860B" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })} />
+          <ActionTile emoji="🙏" title="Mendier" desc="Récolter des pièces" accent="#B8860B" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })} />
           <ActionTile emoji="😴" title="Dormir" desc="Récupérer du sommeil" accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
           <ActionTile
-            emoji="⚔️" title="Bagarre" desc="Provoquer un combat" accent="#D94F4F" disabled={actionsLeft <= 0} danger
+            emoji="🥊" title="Bagarre" desc="Provoquer un combat" accent="#D94F4F" disabled={actionsLeft <= 0} danger
             onClick={() => {
               const enemies = getLocationEnemies(char.location);
               if (enemies.length > 0) {
