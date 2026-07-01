@@ -1,4 +1,4 @@
-import { useGame } from '@/contexts/GameContext';
+import { useGame, STEAL_TARGETS } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
@@ -9,6 +9,8 @@ export default function StealMinigame() {
   const { state, dispatch } = useGame();
   const char = state.character;
   const agile = !!char?.traits.some(t => t.id === 'agile');
+  // La cible du vol, tirée une fois à l'ouverture.
+  const [target] = useState(() => STEAL_TARGETS[Math.floor(Math.random() * STEAL_TARGETS.length)]);
 
   // Zones (en %) centrées : jackpot au milieu de la zone de réussite.
   const greenHalf = 17 + (agile ? 7 : 0);
@@ -48,7 +50,7 @@ export default function StealMinigame() {
     else if (p >= greenStart && p <= greenEnd) { t = 'ok'; playHit(); }
     else { t = 'fail'; playHurt(); }
     setTier(t);
-    setTimeout(() => dispatch({ type: 'RESOLVE_STEAL', tier: t }), 1150);
+    setTimeout(() => dispatch({ type: 'RESOLVE_STEAL', tier: t, targetId: target.id }), 1150);
   }
 
   if (!char) return null;
@@ -63,9 +65,17 @@ export default function StealMinigame() {
       className="min-h-screen bg-texture p-5 flex flex-col items-center justify-center gap-5"
     >
       <div className="text-center">
-        <div className="text-5xl mb-2">🥷</div>
+        <div className="text-5xl mb-2">{target.emoji}</div>
         <h1 className="text-2xl text-[#2A1F1A]">Vol à l'arraché</h1>
-        <p className="text-sm text-[#8B6B4A] mt-1">Arrête le curseur dans la zone. Vise le cœur doré.</p>
+        <p className="text-sm text-[#6B5740] mt-2 max-w-xs mx-auto">
+          Vous tentez de voler <strong>{target.label}</strong>…
+        </p>
+        <p className="text-xs text-[#8B6B4A] mt-1">Arrête le curseur dans la zone. Vise le cœur doré.</p>
+        <p className="text-[11px] text-[#D94F4F] mt-2">
+          {target.catcher === 'commercant'
+            ? '⚠️ Si le commerçant vous attrape, ça peut finir en bagarre.'
+            : '⚠️ La police rôde : pris sur le fait, c\'est la garde à vue.'}
+        </p>
       </div>
 
       {/* Barre de visée */}

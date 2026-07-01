@@ -597,6 +597,7 @@ interface Enemy {
 }
 
 const ENEMIES: Enemy[] = [
+  { name: 'Commerçant Furieux', emoji: '😡', health: 32, attack: 11, description: 'Il vous a pris la main dans le sac. Et il a de la poigne.', loot: { respect: 2 } },
   { name: 'Rat Géant', emoji: '🐀', health: 20, attack: 8, description: "Un rat de la taille d'un chihuahua. Il n'a pas peur.", loot: { money: 2, respect: 1 } },
   { name: 'Mouette Furibonde', emoji: '🦅', health: 15, attack: 6, description: 'Elle veut votre sandwich. Elle aura votre sandwich.', loot: { respect: 2 } },
   { name: 'Chien Errant', emoji: '🐕', health: 30, attack: 12, description: 'Un molosse sans collier. Ses crocs brillent au clair de lune.', loot: { money: 3, respect: 3 } },
@@ -644,6 +645,7 @@ const WEAK_POINTS: Record<string, Targeting> = {
   'Mouette Géante':      { zones: [Z.bec, Z.ailes, Z.ventre], weak: 'ailes', hint: 'Une si grande envergure... visez les ailes.' },
   'Chat de Gouttière':   { zones: [Z.tete, Z.pattes, Z.queue], weak: 'queue', hint: 'Attrapez la queue, il déteste ça.' },
   'Chat Sauvage':        { zones: [Z.tete, Z.pattes, Z.queue], weak: 'queue', hint: 'Sa queue est son point sensible.' },
+  'Commerçant Furieux':  { zones: [Z.tete, Z.torse, Z.jambes], weak: 'torse', hint: 'Un bon ventre sous le tablier : coupez-lui le souffle.' },
   'Voyou du Coin':       { zones: [Z.tete, Z.torse, Z.jambes], weak: 'tete', hint: 'Un bon crochet au menton et il tombe.' },
   'Squatteur Territorial':{ zones: [Z.tete, Z.torse, Z.jambes], weak: 'tete', hint: 'Visez la tête, il ne s\'y attend pas.' },
   'Concurrent Agressif': { zones: [Z.tete, Z.torse, Z.jambes], weak: 'torse', hint: 'Coupez-lui le souffle : droit au plexus.' },
@@ -2247,9 +2249,36 @@ function flavorFrom(events: GameEvent[], positive: boolean): string {
   return texts.length ? randomFromArray(texts) : '';
 }
 
-function stealFlavor(positive: boolean): string {
-  return flavorFrom(STEAL_EVENTS, positive);
+// ============ CIBLES DU MINI-JEU DE VOL ============
+// Chaque tentative de vol a une cible concrète, et qui vous attrape en cas
+// d'échec en dépend : un commerçant se bat, la police vous embarque.
+export interface StealTarget {
+  id: string;
+  label: string;      // "l'étal du primeur" (s'insère dans une phrase)
+  emoji: string;
+  catcher: 'commercant' | 'police';
 }
+
+export const STEAL_TARGETS: StealTarget[] = [
+  { id: 'etal', label: "l'étal du primeur", emoji: '🍎', catcher: 'commercant' },
+  { id: 'baguette', label: 'une baguette à la boulangerie', emoji: '🥖', catcher: 'commercant' },
+  { id: 'conserves', label: 'des conserves au supermarché', emoji: '🥫', catcher: 'commercant' },
+  { id: 'kebab', label: 'un kebab sur le comptoir', emoji: '🥙', catcher: 'commercant' },
+  { id: 'portefeuille', label: "le portefeuille d'un passant distrait", emoji: '👛', catcher: 'police' },
+  { id: 'velo', label: 'un vélo mal attaché', emoji: '🚲', catcher: 'police' },
+  { id: 'pourboire', label: 'le pourboire laissé sur une terrasse', emoji: '☕', catcher: 'police' },
+  { id: 'sacoche', label: 'une sacoche oubliée sur un banc', emoji: '👜', catcher: 'police' },
+];
+
+// Lieux où tendre le chapeau (mini-jeu de mendicité).
+export const BEG_SPOTS: string[] = [
+  'devant la boulangerie',
+  'à la sortie du métro',
+  'sur le parvis de la gare',
+  'devant le supermarché',
+  "à la terrasse d'un café",
+  'sous les arcades du centre-ville',
+];
 
 function generateTravelEvent(_from: string, _to: string, _character: Character): GameEvent | null {
   if (Math.random() > 0.5) return null;
@@ -2387,7 +2416,7 @@ type GameAction =
   | { type: 'EXPLORE' }
   | { type: 'BEG' }
   | { type: 'STEAL' }
-  | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot' }
+  | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot'; targetId: string }
   | { type: 'RESOLVE_BEG'; coins: number; copTapped: boolean }
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
@@ -2459,20 +2488,38 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const c = state.character;
       // La météo module la générosité des passants (comme les anciens events).
       const modifier = WEATHER_TYPES[state.weather].actionModifier;
+
+      // Répercussion : le policier vous verbalise pour mendicité (amende),
+      // et confisque la récolte du jour.
+      if (action.copTapped) {
+        const amende = Math.min(c.money, 4 + Math.floor(Math.random() * 4)); // 4-7€ selon les moyens
+        const statDelta: Partial<Stats> = { dignity: -10, mental: -6 };
+        let newStats = { ...c.stats };
+        Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
+        newStats = clampStats(newStats);
+        const isAlive = newStats.health > 0 && newStats.mental > 0;
+        if (!isAlive) { saveHighScore(c.name, c.day, c.day * 10 + c.respect * 5 + (c.money - amende) * 2); clearSave(); }
+        return {
+          ...state,
+          character: { ...c, stats: newStats, money: c.money - amende, alive: isAlive },
+          eventResult: {
+            text: `👮 « Mendicité sur la voie publique, circulez ! » Le policier confisque votre récolte${amende > 0 ? ` et vous colle ${amende}€ d'amende` : ' — insolvable, vous repartez avec un avertissement'}.`,
+            statChanges: statDelta, moneyChange: -amende,
+          },
+          screen: isAlive ? 'main' : 'game-over',
+        };
+      }
+
       const money = Math.round(action.coins * modifier);
-      const statDelta: Partial<Stats> = action.copTapped
-        ? { dignity: -10, mental: -6 }
-        : money >= 6
-          ? { dignity: -3, mental: 6 }
-          : { dignity: -4, mental: money > 0 ? 2 : -4 };
+      const statDelta: Partial<Stats> = money >= 6
+        ? { dignity: -3, mental: 6 }
+        : { dignity: -4, mental: money > 0 ? 2 : -4 };
       const respectDelta = money >= 8 ? 1 : 0;
       let newStats = { ...c.stats };
       Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
       newStats = clampStats(newStats);
       const isAlive = newStats.health > 0 && newStats.mental > 0;
-      const prefix = action.copTapped
-        ? '👮 La police vous a délogé ! '
-        : money >= 8 ? '🎩 Manche exceptionnelle ! '
+      const prefix = money >= 8 ? '🎩 Manche exceptionnelle ! '
         : money > 0 ? '🪙 Quelques pièces au fond du chapeau. '
         : '💨 Pas un sou aujourd\'hui. ';
       const weatherNote = modifier !== 1 ? (modifier > 1 ? ' Le beau temps a rendu les passants généreux.' : ' Le mauvais temps a fait fuir les passants.') : '';
@@ -2483,7 +2530,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive },
-        eventResult: { text: prefix + flavorFrom(BEG_EVENTS, !action.copTapped && money > 0) + weatherNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta },
+        eventResult: { text: prefix + flavorFrom(BEG_EVENTS, money > 0) + weatherNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta },
         screen: isAlive ? 'main' : 'game-over',
       };
     }
@@ -2497,40 +2544,80 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'RESOLVE_STEAL': {
       if (!state.character) return state;
       const c = state.character;
-      let moneyDelta = 0;
-      let respectDelta = 0;
-      let statDelta: Partial<Stats> = {};
-      let prefix = '';
-      if (action.tier === 'jackpot') {
-        moneyDelta = 10 + Math.floor(Math.random() * 9);   // 10-18€
-        respectDelta = 2;
-        statDelta = { dignity: -4, mental: 6 };
-        prefix = '💎 Coup de maître ! ';
-      } else if (action.tier === 'ok') {
-        moneyDelta = 3 + Math.floor(Math.random() * 5);    // 3-7€
-        statDelta = { dignity: -6, mental: 2 };
-        prefix = '🤫 Vol réussi. ';
-      } else {
-        moneyDelta = -Math.min(c.money, 3);
-        respectDelta = -3;
-        statDelta = { dignity: -12, health: -6, mental: -6 };
-        prefix = '🚨 Pris la main dans le sac ! ';
+      const target = STEAL_TARGETS.find(t => t.id === action.targetId) || STEAL_TARGETS[0];
+
+      // Échec : répercussions selon qui vous attrape.
+      if (action.tier === 'fail') {
+        const repercussion = Math.random();
+        if (target.catcher === 'commercant' && repercussion < 0.5) {
+          // Le commerçant veut en découdre : bagarre immédiate !
+          const enemy: Enemy = { name: 'Commerçant Furieux', emoji: '😡', health: 32, attack: 11, description: 'Il vous a pris la main dans le sac. Et il a de la poigne.', loot: { respect: 2 } };
+          const weapon = c.inventory.find(i => i.type === 'weapon');
+          const targeting = getTargeting(enemy.name);
+          return {
+            ...state,
+            screen: 'combat',
+            currentCombat: {
+              enemyName: enemy.name, enemyEmoji: enemy.emoji,
+              enemyHealth: enemy.health, enemyMaxHealth: enemy.health,
+              enemyAttack: enemy.attack, description: enemy.description,
+              playerWeapon: weapon, zones: targeting.zones,
+              weakPointId: targeting.weak, weakPointHint: targeting.hint,
+            },
+            combatLog: [`😡 Vous êtes surpris la main sur ${target.label} ! Le commerçant retrousse ses manches...`],
+          };
+        }
+        if (target.catcher === 'police' && repercussion < 0.5) {
+          // La police vous embarque : garde à vue, journée finie + amende.
+          const amende = Math.min(c.money, 5);
+          const statDelta: Partial<Stats> = { dignity: -15, mental: -8 };
+          let newStats = { ...c.stats };
+          Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
+          newStats = clampStats(newStats);
+          const isAlive = newStats.health > 0 && newStats.mental > 0;
+          if (!isAlive) { saveHighScore(c.name, c.day, c.day * 10 + c.respect * 5 + (c.money - amende) * 2); clearSave(); }
+          return {
+            ...state,
+            character: { ...c, stats: newStats, money: c.money - amende, respect: c.respect - 3, alive: isAlive },
+            dayActions: state.maxDayActions,
+            eventResult: {
+              text: `🚔 Un policier vous cueille la main sur ${target.label}. Garde à vue ! Vous perdez le reste de la journée${amende > 0 ? ` et ${amende}€ d'amende` : ' — insolvable, il vous laisse filer avec un avertissement'}.`,
+              statChanges: statDelta, moneyChange: -amende, respectChange: -3,
+            },
+            screen: isAlive ? 'main' : 'game-over',
+          };
+        }
+        // Sinon : simple raclée / fuite honteuse.
+        const statDelta: Partial<Stats> = { dignity: -12, health: -6, mental: -6 };
+        let newStats = { ...c.stats };
+        Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
+        newStats = clampStats(newStats);
+        const isAlive = newStats.health > 0 && newStats.mental > 0;
+        if (!isAlive) { saveHighScore(c.name, c.day, c.day * 10 + c.respect * 5 + c.money * 2); clearSave(); }
+        return {
+          ...state,
+          character: { ...c, stats: newStats, respect: c.respect - 2, alive: isAlive },
+          eventResult: { text: `🚨 Raté ! Repéré en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoché.`, statChanges: statDelta, respectChange: -2 },
+          screen: isAlive ? 'main' : 'game-over',
+        };
       }
+
+      // Réussite (ok / jackpot).
+      const jackpot = action.tier === 'jackpot';
+      const moneyDelta = jackpot ? 10 + Math.floor(Math.random() * 9) : 3 + Math.floor(Math.random() * 5);
+      const respectDelta = jackpot ? 2 : 0;
+      const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 6 } : { dignity: -6, mental: 2 };
       let newStats = { ...c.stats };
       Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
       newStats = clampStats(newStats);
-      const newMoney = Math.max(0, c.money + moneyDelta);
-      const newRespect = c.respect + respectDelta;
-      const isAlive = newStats.health > 0 && newStats.mental > 0;
-      if (!isAlive) {
-        saveHighScore(c.name, c.day, c.day * 10 + newRespect * 5 + newMoney * 2);
-        clearSave();
-      }
+      const text = jackpot
+        ? `💎 Coup de maître ! Vous repartez avec ${target.label} sans que personne ne remarque rien. Revente express au coin de la rue : ${moneyDelta}€.`
+        : `🤫 Vol réussi. Vous filez avec ${target.label}, le cœur battant. Ça vaut bien ${moneyDelta}€.`;
       return {
         ...state,
-        character: { ...c, stats: newStats, money: newMoney, respect: newRespect, alive: isAlive },
-        eventResult: { text: prefix + stealFlavor(action.tier !== 'fail'), statChanges: statDelta, moneyChange: moneyDelta, respectChange: respectDelta },
-        screen: isAlive ? 'main' : 'game-over',
+        character: { ...c, stats: newStats, money: c.money + moneyDelta, respect: c.respect + respectDelta },
+        eventResult: { text, statChanges: statDelta, moneyChange: moneyDelta, respectChange: respectDelta },
+        screen: 'main',
       };
     }
 
