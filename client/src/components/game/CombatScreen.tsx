@@ -84,7 +84,7 @@ export default function CombatScreen() {
         initial={{ y: 4, opacity: 0, scale: 0.5 }}
         animate={{ y: -44, opacity: [0, 1, 1, 0], scale: f.crit ? 1.5 : 1 }}
         transition={{ duration: 0.9, ease: 'easeOut' }}
-        className="absolute left-1/2 -translate-x-1/2 top-1 pointer-events-none font-extrabold text-center leading-none"
+        className="absolute left-1/2 -translate-x-1/2 top-1 pointer-events-none font-bold text-center leading-none"
         style={{ color: f.crit ? '#F2C14E' : target === 'enemy' ? '#FF7A5A' : '#FF5A5A', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}
       >
         {f.crit && <span className="block text-[9px] tracking-wider">CRITIQUE&nbsp;!</span>}
