@@ -1,5 +1,7 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { showRewarded } from '@/lib/ads';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.png';
 
@@ -13,6 +15,16 @@ const TYPE_LABELS: Record<string, { label: string; color: string }> = {
 export default function EventScreen() {
   const { state, dispatch } = useGame();
   const event = state.currentEvent;
+  const [boosted, setBoosted] = useState(false);
+  const [loadingBoost, setLoadingBoost] = useState(false);
+
+  async function activateBoost() {
+    if (loadingBoost || boosted) return;
+    setLoadingBoost(true);
+    const rewarded = await showRewarded();
+    if (rewarded) setBoosted(true);
+    setLoadingBoost(false);
+  }
 
   if (!event) {
     dispatch({ type: 'SET_SCREEN', screen: 'main' });
@@ -88,14 +100,31 @@ export default function EventScreen() {
               transition={{ delay: 0.2 + i * 0.1 }}
               whileHover={{ scale: 1.01, x: 2 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => dispatch({ type: 'CHOOSE_EVENT', choiceIndex: i })}
-              className="action-btn p-3 text-left flex items-start gap-2.5"
+              onClick={() => dispatch({ type: 'CHOOSE_EVENT', choiceIndex: i, boosted })}
+              className={`action-btn p-3 text-left flex items-start gap-2.5 ${boosted ? 'border-[#B8860B]/60' : ''}`}
             >
               <span className="text-lg mt-0.5">{choice.emoji}</span>
               <span className="text-sm text-[#3D3020] font-medium flex-1">{choice.text}</span>
+              {boosted && <span className="text-[10px] text-[#B8860B] font-semibold mt-1">✨ garanti</span>}
             </motion.button>
           ))}
         </div>
+
+        {/* Coup de pouce par pub */}
+        {boosted ? (
+          <div className="mt-3 text-center text-xs font-semibold text-[#B8860B]">
+            ✨ Coup de pouce actif : ton prochain choix réussira au mieux.
+          </div>
+        ) : (
+          <button
+            onClick={activateBoost}
+            disabled={loadingBoost}
+            className="mt-3 w-full py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-60"
+            style={{ background: 'linear-gradient(135deg, #B8860B, #9B7209)' }}
+          >
+            {loadingBoost ? '⏳ Chargement…' : '🎬 Coup de pouce (pub) — garantir le meilleur résultat'}
+          </button>
+        )}
       </motion.div>
 
       {/* Back */}
