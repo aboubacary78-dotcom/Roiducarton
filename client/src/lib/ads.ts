@@ -22,6 +22,39 @@
 import { Capacitor } from '@capacitor/core';
 
 // ─────────────────────────────────────────────────────────────────────────
+// Achat "Sans pub" : supprime les pubs intrusives (interstitielles + bannière).
+// Les pubs récompensées (facultatives, choisies par le joueur pour un bonus)
+// restent disponibles.
+// ─────────────────────────────────────────────────────────────────────────
+const NOADS_KEY = 'roi-du-carton-noads';
+let adsRemoved = (() => {
+  try { return localStorage.getItem(NOADS_KEY) === '1'; } catch { return false; }
+})();
+
+export function isAdsRemoved(): boolean {
+  return adsRemoved;
+}
+
+export function setAdsRemoved(v: boolean): void {
+  adsRemoved = v;
+  try { localStorage.setItem(NOADS_KEY, v ? '1' : '0'); } catch { /* silent */ }
+}
+
+/**
+ * Lance l'achat "Sans pub". Renvoie true si l'achat a réussi.
+ *
+ * ⚠️ PRODUCTION : brancher ici un vrai achat in-app (RevenueCat ou
+ * @capacitor-community/in-app-purchases) avec un produit non consommable
+ * « remove_ads », puis appeler setAdsRemoved(true) seulement après confirmation.
+ * En l'état, la fonction active directement le mode sans pub (placeholder de
+ * démonstration) — À REMPLACER avant publication (voir STORE_PUBLISHING.md).
+ */
+export async function purchaseRemoveAds(): Promise<boolean> {
+  setAdsRemoved(true);
+  return true;
+}
+
+// ─────────────────────────────────────────────────────────────────────────
 // Configuration des blocs d'annonces
 // Les ID ci-dessous sont les ID de TEST officiels de Google.
 // Remplace-les par les tiens pour la production.
@@ -83,7 +116,7 @@ export async function initAds(): Promise<void> {
  * Sur le web : no-op.
  */
 export async function showBanner(): Promise<void> {
-  if (!isNative()) return;
+  if (adsRemoved || !isNative()) return;
   try {
     const { AdMob, BannerAdPosition, BannerAdSize } = await import('@capacitor-community/admob');
     await AdMob.showBanner({
@@ -114,7 +147,7 @@ export async function hideBanner(): Promise<void> {
  * Résout toujours, même en cas d'erreur, pour ne jamais bloquer le jeu.
  */
 export async function showInterstitial(): Promise<void> {
-  if (!isNative()) return;
+  if (adsRemoved || !isNative()) return;
   try {
     const { AdMob } = await import('@capacitor-community/admob');
     await AdMob.prepareInterstitial({

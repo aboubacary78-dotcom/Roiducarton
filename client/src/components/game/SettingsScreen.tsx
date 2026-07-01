@@ -2,16 +2,27 @@ import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { isMuted, setMuted } from '@/lib/sound';
+import { isAdsRemoved, purchaseRemoveAds } from '@/lib/ads';
 
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
 const PRIVACY_URL = 'https://example.com/roi-du-carton/confidentialite';
-const APP_VERSION = '1.9.0';
+const APP_VERSION = '1.10.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
   const [confirmReset, setConfirmReset] = useState(false);
   const [muted, setMutedState] = useState(isMuted());
+  const [noAds, setNoAds] = useState(isAdsRemoved());
+  const [buying, setBuying] = useState(false);
+
+  async function handleBuyNoAds() {
+    if (buying || noAds) return;
+    setBuying(true);
+    const ok = await purchaseRemoveAds();
+    if (ok) setNoAds(true);
+    setBuying(false);
+  }
 
   return (
     <div className="min-h-screen bg-texture p-5 flex flex-col gap-4">
@@ -77,6 +88,41 @@ export default function SettingsScreen() {
             {muted ? 'Coupé' : 'Activé'}
           </span>
         </button>
+      </motion.section>
+
+      {/* Sans pub */}
+      <motion.section
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.09 }}
+        className="craft-card p-4"
+      >
+        {noAds ? (
+          <div className="flex items-center justify-between">
+            <span className="text-base font-semibold text-[#2A1F1A]">🚫 Sans pub</span>
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#4A9B5F]/15 text-[#3d8b4f]">
+              ✅ Actif — merci !
+            </span>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-base font-semibold text-[#2A1F1A]">🚫 Supprimer les pubs</span>
+            </div>
+            <p className="text-xs text-[#8B6B4A] mb-3">
+              Supprime les publicités imposées (plein écran). Les bonus vidéo
+              facultatifs (seconde chance, gains doublés…) restent disponibles.
+            </p>
+            <button
+              onClick={handleBuyNoAds}
+              disabled={buying}
+              className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg, #7B68EE, #5A4ABB)', boxShadow: '0 4px 12px rgba(123,104,238,0.25)' }}
+            >
+              {buying ? '⏳ Achat en cours…' : 'Acheter « Sans pub »'}
+            </button>
+          </>
+        )}
       </motion.section>
 
       {/* Données */}

@@ -99,7 +99,26 @@ actives les pubs personnalisées.
 | Interstitiel | À l'écran de fin de partie (Game Over) | `GameOverScreen.tsx` |
 | Récompensée | Bouton « Seconde chance » pour ressusciter (1×/partie) | `GameOverScreen.tsx` → action `REVIVE` |
 | Récompensée | Bouton « Doubler mes gains » quand on gagne de l'argent | `EventResultOverlay.tsx` → action `DOUBLE_REWARD` |
+| Récompensée | « Coup de pouce » dans un événement : garantit la meilleure issue du choix | `EventScreen.tsx` (option `boosted` de `CHOOSE_EVENT`) |
 | Bannière | Disponible via `showBanner()` (non activée par défaut) | `client/src/lib/ads.ts` |
+
+### Achat « Sans pub » (in-app)
+
+Un bouton « Supprimer les pubs » existe dans l'écran Options : il désactive
+les pubs imposées (interstitielles + bannière) mais garde les bonus vidéo
+facultatifs. **Avant publication**, remplace le placeholder
+`purchaseRemoveAds()` dans `client/src/lib/ads.ts` par un vrai achat in-app :
+
+1. Crée un produit **non consommable** `remove_ads` dans Google Play Console
+   et App Store Connect.
+2. Intègre un SDK de facturation — le plus simple : [RevenueCat](https://www.revenuecat.com)
+   (`@revenuecat/purchases-capacitor`), sinon `cordova-plugin-purchase`.
+3. Dans `purchaseRemoveAds()`, lance l'achat, attends la confirmation du
+   store, puis appelle `setAdsRemoved(true)` **seulement si l'achat réussit**.
+   Prévois aussi la **restauration d'achat** (obligatoire chez Apple).
+
+⚠️ Tant que ce n'est pas fait, le bouton active le mode sans pub gratuitement
+(placeholder de démonstration).
 
 Toute la logique est centralisée dans **`client/src/lib/ads.ts`**. Pour ajouter
 une pub ailleurs, importe `showInterstitial`, `showRewarded` ou `showBanner`.

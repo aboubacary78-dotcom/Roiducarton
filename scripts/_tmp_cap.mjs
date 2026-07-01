@@ -10,6 +10,12 @@ await p.setViewport({width:390,height:844,deviceScaleFactor:2,isMobile:true});
 await p.goto('http://localhost:4173/',{waitUntil:'networkidle2'}); await sleep(900);
 await click(p,'Nouvelle Partie'); await sleep(800);
 await p.click('.cursor-pointer'); await sleep(800);
-await click(p,'Voler'); await sleep(700);
-await p.screenshot({path:'/tmp/15-steal.png'});
+// Événement avec coup de pouce
+await click(p,'Explorer'); await sleep(1100);
+await click(p,'Coup de pouce'); await sleep(700);   // showRewarded no-op web => true
+await p.screenshot({path:'/tmp/16-boost.png'});
+// Options -> Sans pub
+await p.goto('http://localhost:4173/',{waitUntil:'networkidle2'}); await sleep(800);
+await click(p,'Options'); await sleep(800);
+await p.screenshot({path:'/tmp/17-noads.png', fullPage:true});
 await b.close(); console.log('OK');

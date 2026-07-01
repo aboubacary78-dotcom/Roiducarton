@@ -2386,7 +2386,7 @@ type GameAction =
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
   | { type: 'TRAVEL'; location: string }
-  | { type: 'CHOOSE_EVENT'; choiceIndex: number }
+  | { type: 'CHOOSE_EVENT'; choiceIndex: number; boosted?: boolean }
   | { type: 'DISMISS_RESULT' }
   | { type: 'NEXT_DAY' }
   | { type: 'SET_SCREEN'; screen: GameScreen }
@@ -2523,13 +2523,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'CHOOSE_EVENT': {
       if (!state.currentEvent || !state.character) return state;
       const choice = state.currentEvent.choices[action.choiceIndex];
-      const roll = Math.random();
 
-      let cumProb = 0;
       let outcome = choice.outcomes[0];
-      for (const o of choice.outcomes) {
-        cumProb += o.probability;
-        if (roll <= cumProb) { outcome = o; break; }
+      if (action.boosted) {
+        // Coup de pouce (pub) : on force la meilleure issue du choix.
+        const score = (o: EventOutcome) =>
+          (o.moneyChange || 0) + (o.respectChange || 0) * 2 +
+          Object.values(o.statChanges || {}).reduce((a, b) => a + (b || 0), 0) +
+          (o.itemGain ? 5 : 0) - (o.itemLoss ? 3 : 0);
+        outcome = [...choice.outcomes].sort((a, b) => score(b) - score(a))[0];
+      } else {
+        const roll = Math.random();
+        let cumProb = 0;
+        for (const o of choice.outcomes) {
+          cumProb += o.probability;
+          if (roll <= cumProb) { outcome = o; break; }
+        }
       }
 
       let newStats = { ...state.character.stats };
