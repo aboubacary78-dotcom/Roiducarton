@@ -591,19 +591,19 @@ const ENEMIES: Enemy[] = [
   { name: 'Agent de Sécurité', emoji: '👮', health: 35, attack: 10, description: 'Il fait du zèle. Beaucoup de zèle.', loot: { respect: 4 } },
   { name: 'Chat de Gouttière', emoji: '🐱', health: 12, attack: 7, description: 'Petit mais vicieux. Ses griffes sont des rasoirs.', loot: { money: 1 } },
   { name: 'Raton Laveur', emoji: '🦝', health: 25, attack: 9, description: "Il fouille VOTRE poubelle. L'affront.", loot: { money: 3, respect: 2 } },
-  { name: 'Corbeau Géant', emoji: '🐦‍⬛', health: 18, attack: 7, description: 'Noir comme la nuit, méchant comme le jour.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-corbeau-fjv5mmnWmHHKd72RfGopfD.webp', loot: { money: 2, respect: 2 } },
-  { name: 'Ivrogne Agressif', emoji: '🍺', health: 35, attack: 11, description: 'Il titube mais frappe fort. Très fort.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-ivrogne-fnqUTa9w2g29Z7Y8UCPEJQ.webp', loot: { money: 5, respect: 3 } },
-  { name: 'Vigile Zélé', emoji: '🔦', health: 38, attack: 12, description: 'Badge, lampe torche, ego surdimensionné.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-vigile-8AYmxD2oRKZLSGj3y3tgdy.webp', loot: { money: 4, respect: 4 } },
-  { name: 'Cygne Furieux', emoji: '🦢', health: 22, attack: 9, description: 'Élégant mais mortel. Ne jamais sous-estimer un cygne.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-cygne-Do53kfaKnGAeMKwxEmgUi4.webp', loot: { respect: 3 } },
-  { name: 'Clown Sinistre', emoji: '🤡', health: 28, attack: 10, description: 'Son rire résonne dans la nuit. Personne ne rit avec lui.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-clown-Lauu92h5boZ4Z4nRnyDEaT.webp', loot: { money: 6, respect: 4 } },
-  { name: 'Écureuil Enragé', emoji: '🐿️', health: 8, attack: 5, description: 'Petit, rapide, et il veut vos noisettes. Vous avez pas de noisettes.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-ecureuil-AN8vTTKVptLec9zLjTGRNw.webp', loot: { money: 1 } },
-  { name: 'Oie Territoriale', emoji: '🪿', health: 16, attack: 8, description: 'HONK. Elle défend son territoire avec une rage ancestrale.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-oie-LUVjnB536FgK83afqjVs7X.webp', loot: { respect: 2 } },
-  { name: 'Canard Psychopathe', emoji: '🦆', health: 14, attack: 6, description: 'Coin coin... COIN COIN ! Il charge !', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-canard-gMZvQxLn7Yofnd5dnr3dZM.webp', loot: { money: 1, respect: 1 } },
-  { name: 'Coq de Combat', emoji: '🐓', health: 20, attack: 10, description: 'Réveillé à 4h du matin. Et il est furieux.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-coq-URw8wuYwXEgZPMq4wFjJu2.webp', loot: { money: 3, respect: 2 } },
-  { name: 'Chat Territorial', emoji: '😾', health: 15, attack: 8, description: 'Ce coin est à LUI. Et il va vous le prouver.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-chat-territorial-2N2qDLSJ5PEDpR4bibLqqR.webp', loot: { money: 2, respect: 1 } },
-  { name: 'Mouette Géante', emoji: '🦅', health: 24, attack: 11, description: 'La mère de toutes les mouettes. Envergure impressionnante.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-mouette-geante-msASE7NG2HZ8VNUAwFqgA3.webp', loot: { money: 4, respect: 3 } },
-  { name: 'Raton Laveur Alpha', emoji: '🦝', health: 30, attack: 10, description: 'Le boss des ratons. Il porte un masque naturel de bandit.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-raton-laveur-DV28WgnY4Dw7WEQpakPMzH.webp', loot: { money: 5, respect: 3 } },
-  { name: 'Chat Sauvage', emoji: '🐈', health: 18, attack: 9, description: 'Pas de collier, pas de maître, pas de pitié.', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/combat-chat-sauvage-fFoiY6tVx6eNamsMbyGbNq.webp', loot: { money: 2, respect: 2 } },
+  { name: 'Corbeau Géant', emoji: '🐦‍⬛', health: 18, attack: 7, description: 'Noir comme la nuit, méchant comme le jour.', image: '/assets/combat-corbeau-fjv5mmnWmHHKd72RfGopfD.webp', loot: { money: 2, respect: 2 } },
+  { name: 'Ivrogne Agressif', emoji: '🍺', health: 35, attack: 11, description: 'Il titube mais frappe fort. Très fort.', image: '/assets/combat-ivrogne-fnqUTa9w2g29Z7Y8UCPEJQ.webp', loot: { money: 5, respect: 3 } },
+  { name: 'Vigile Zélé', emoji: '🔦', health: 38, attack: 12, description: 'Badge, lampe torche, ego surdimensionné.', image: '/assets/combat-vigile-8AYmxD2oRKZLSGj3y3tgdy.webp', loot: { money: 4, respect: 4 } },
+  { name: 'Cygne Furieux', emoji: '🦢', health: 22, attack: 9, description: 'Élégant mais mortel. Ne jamais sous-estimer un cygne.', image: '/assets/combat-cygne-Do53kfaKnGAeMKwxEmgUi4.webp', loot: { respect: 3 } },
+  { name: 'Clown Sinistre', emoji: '🤡', health: 28, attack: 10, description: 'Son rire résonne dans la nuit. Personne ne rit avec lui.', image: '/assets/combat-clown-Lauu92h5boZ4Z4nRnyDEaT.webp', loot: { money: 6, respect: 4 } },
+  { name: 'Écureuil Enragé', emoji: '🐿️', health: 8, attack: 5, description: 'Petit, rapide, et il veut vos noisettes. Vous avez pas de noisettes.', image: '/assets/combat-ecureuil-AN8vTTKVptLec9zLjTGRNw.webp', loot: { money: 1 } },
+  { name: 'Oie Territoriale', emoji: '🪿', health: 16, attack: 8, description: 'HONK. Elle défend son territoire avec une rage ancestrale.', image: '/assets/combat-oie-LUVjnB536FgK83afqjVs7X.webp', loot: { respect: 2 } },
+  { name: 'Canard Psychopathe', emoji: '🦆', health: 14, attack: 6, description: 'Coin coin... COIN COIN ! Il charge !', image: '/assets/combat-canard-gMZvQxLn7Yofnd5dnr3dZM.webp', loot: { money: 1, respect: 1 } },
+  { name: 'Coq de Combat', emoji: '🐓', health: 20, attack: 10, description: 'Réveillé à 4h du matin. Et il est furieux.', image: '/assets/combat-coq-URw8wuYwXEgZPMq4wFjJu2.webp', loot: { money: 3, respect: 2 } },
+  { name: 'Chat Territorial', emoji: '😾', health: 15, attack: 8, description: 'Ce coin est à LUI. Et il va vous le prouver.', image: '/assets/combat-chat-territorial-2N2qDLSJ5PEDpR4bibLqqR.webp', loot: { money: 2, respect: 1 } },
+  { name: 'Mouette Géante', emoji: '🦅', health: 24, attack: 11, description: 'La mère de toutes les mouettes. Envergure impressionnante.', image: '/assets/combat-mouette-geante-msASE7NG2HZ8VNUAwFqgA3.webp', loot: { money: 4, respect: 3 } },
+  { name: 'Raton Laveur Alpha', emoji: '🦝', health: 30, attack: 10, description: 'Le boss des ratons. Il porte un masque naturel de bandit.', image: '/assets/combat-raton-laveur-DV28WgnY4Dw7WEQpakPMzH.webp', loot: { money: 5, respect: 3 } },
+  { name: 'Chat Sauvage', emoji: '🐈', health: 18, attack: 9, description: 'Pas de collier, pas de maître, pas de pitié.', image: '/assets/combat-chat-sauvage-fFoiY6tVx6eNamsMbyGbNq.webp', loot: { money: 2, respect: 2 } },
 ];
 
 // ============ POINTS FAIBLES (ciblage en combat) ============
@@ -677,7 +677,7 @@ export function getWeaponProfile(weapon?: InventoryItem): WeaponProfile {
 const EXPLORE_EVENTS: GameEvent[] = [
   {
     id: 'exp-jardinier', title: 'Le Jardinier Clandestin', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-jardinier-CR6HfMPJyNzdVNNx5SD2YN.webp',
+    image: '/assets/exp-jardinier-CR6HfMPJyNzdVNNx5SD2YN.webp',
     description: 'Un vieil homme cultive des légumes en cachette dans un coin du parc. Il vous repère.',
     choices: [
       { text: 'Proposer votre aide', risk: 'safe', emoji: '🌱', outcomes: [
@@ -695,7 +695,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-enfant-perdu', title: 'L\'Enfant Perdu', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-enfant-perdu-A9tLX2MXC6uiVEZLziz2AV.webp',
+    image: '/assets/exp-enfant-perdu-A9tLX2MXC6uiVEZLziz2AV.webp',
     description: 'Un gamin de 6 ans pleure sur un banc. Il a perdu sa maman dans le parc.',
     choices: [
       { text: 'L\'aider à retrouver sa mère', risk: 'safe', emoji: '👩‍👦', outcomes: [
@@ -713,7 +713,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-skateur', title: 'Le Skateur Cascadeur', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-skateur-BRXHRUvw2hTywwb7KYwfjU.webp',
+    image: '/assets/exp-skateur-BRXHRUvw2hTywwb7KYwfjU.webp',
     description: 'Un ado fait des figures de skate devant vous. Il rate un trick et son skate roule vers vous.',
     choices: [
       { text: 'Lui renvoyer le skate avec style', risk: 'normal', emoji: '🛹', outcomes: [
@@ -728,7 +728,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-mariage', title: 'Le Mariage en Plein Air', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-mariage-YCDbQUMdsv52wEtgeLS3bm.webp',
+    image: '/assets/exp-mariage-YCDbQUMdsv52wEtgeLS3bm.webp',
     description: 'Un mariage se déroule dans le parc. Buffet, musique, gens bien habillés. Vous bavez.',
     choices: [
       { text: 'Se faufiler discrètement au buffet', risk: 'risky', emoji: '🍰', outcomes: [
@@ -743,7 +743,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-artiste-rue', title: 'L\'Artiste de Rue', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-artiste-rue-8igrUxzSFhRMd2FECQMv7h.webp',
+    image: '/assets/exp-artiste-rue-8igrUxzSFhRMd2FECQMv7h.webp',
     description: 'Un artiste peint votre portrait à la craie sur le trottoir sans vous demander.',
     choices: [
       { text: 'Poser fièrement', risk: 'safe', emoji: '🎨', outcomes: [
@@ -758,7 +758,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-chantier', title: 'Le Chantier Abandonné', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-chantier-6FzS2TzBL94xF7YBmdTXUz.webp',
+    image: '/assets/exp-chantier-6FzS2TzBL94xF7YBmdTXUz.webp',
     description: 'Un chantier abandonné. Des matériaux traînent partout. Mais des bruits suspects viennent du fond.',
     choices: [
       { text: 'Explorer prudemment', risk: 'normal', emoji: '🔦', outcomes: [
@@ -774,7 +774,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-marche-puces', title: 'Le Marché aux Puces', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-marche-puces-HsE9Jibo2Ryfm6oCMCsSB6.webp',
+    image: '/assets/exp-marche-puces-HsE9Jibo2Ryfm6oCMCsSB6.webp',
     description: 'Le marché aux puces du dimanche. Des trésors cachés parmi les déchets.',
     choices: [
       { text: 'Fouiller les invendus en fin de marché', risk: 'safe', emoji: '🔍', outcomes: [
@@ -789,7 +789,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-graffiti', title: 'Le Mur de Graffitis', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-graffiti-cRcu5Bo3BmUZPkaiCwvrUp.webp',
+    image: '/assets/exp-graffiti-cRcu5Bo3BmUZPkaiCwvrUp.webp',
     description: 'Un mur couvert de graffitis colorés. Un tagueur est en pleine action.',
     choices: [
       { text: 'Faire le guet pour lui', risk: 'normal', emoji: '👁️', outcomes: [
@@ -804,7 +804,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-bibliotheque', title: 'La Bibliothèque Municipale', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-bibliotheque-2De3rMKZBHpbKjGy3dHVbf.webp',
+    image: '/assets/exp-bibliotheque-2De3rMKZBHpbKjGy3dHVbf.webp',
     description: 'La bibliothèque est ouverte. Chaleur, silence, et des toilettes gratuites.',
     choices: [
       { text: 'Lire tranquillement au chaud', risk: 'safe', emoji: '📖', outcomes: [
@@ -822,7 +822,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-concert', title: 'Le Concert Improvisé', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-concert-ju77ceA9zWrNxQaKrRPUVF.webp',
+    image: '/assets/exp-concert-ju77ceA9zWrNxQaKrRPUVF.webp',
     description: 'Des musiciens de rue jouent du jazz. La foule s\'amasse. L\'ambiance est magique.',
     choices: [
       { text: 'Danser comme si personne ne regardait', risk: 'normal', emoji: '💃', outcomes: [
@@ -836,7 +836,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-metro', title: 'La Station de Métro', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-metro-oXzk6PRiafCRXLVLnLSSVq.webp',
+    image: '/assets/exp-metro-oXzk6PRiafCRXLVLnLSSVq.webp',
     description: 'Vous descendez dans la station de métro. Il fait chaud, mais c\'est le territoire d\'autres SDF.',
     choices: [
       { text: 'Explorer les couloirs', risk: 'normal', emoji: '🚇', outcomes: [
@@ -852,7 +852,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-eglise', title: 'L\'Église du Quartier', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-eglise-2mK4FcdNW7pYwWeFopWXmF.webp',
+    image: '/assets/exp-eglise-2mK4FcdNW7pYwWeFopWXmF.webp',
     description: 'L\'église est ouverte. Un prêtre balaie l\'entrée.',
     choices: [
       { text: 'Entrer et s\'asseoir au calme', risk: 'safe', emoji: '⛪', outcomes: [
@@ -867,7 +867,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-bagarre-chats', title: 'La Bagarre de Chats', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-bagarre-chats-Dgd3ncPRiSTGHjXXHy6SUT.webp',
+    image: '/assets/exp-bagarre-chats-Dgd3ncPRiSTGHjXXHy6SUT.webp',
     description: 'Deux chats se battent férocement dans une ruelle. Les miaulements sont terrifiants.',
     choices: [
       { text: 'Les séparer bravement', risk: 'risky', emoji: '🐱', outcomes: [
@@ -882,7 +882,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-fontaine-parc', title: 'La Fontaine aux Pièces', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-fontaine-parc-BiqrfcY6htgsTAbKRTaDWN.webp',
+    image: '/assets/exp-fontaine-parc-BiqrfcY6htgsTAbKRTaDWN.webp',
     description: 'La fontaine du parc brille de pièces jetées par les touristes. Des voeux et de l\'argent.',
     choices: [
       { text: 'Plonger la main pour récupérer des pièces', risk: 'risky', emoji: '💰', outcomes: [
@@ -901,7 +901,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-velo-casse', title: 'Le Vélo Abandonné', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-velo-casse-bdxwNqE2XebzwjmU9nEovY.webp',
+    image: '/assets/exp-velo-casse-bdxwNqE2XebzwjmU9nEovY.webp',
     description: 'Un vélo cassé est attaché à un poteau. La roue avant est voilée, mais le reste semble OK.',
     choices: [
       { text: 'Tenter de le réparer', risk: 'normal', emoji: '🔧', outcomes: [
@@ -916,7 +916,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-pharmacie', title: 'La Pharmacie de Garde', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-pharmacie-SW5iVopihwHZPnwrHk4DRV.webp',
+    image: '/assets/exp-pharmacie-SW5iVopihwHZPnwrHk4DRV.webp',
     description: 'La pharmacie est ouverte. La pharmacienne vous regarde avec un mélange de pitié et de méfiance.',
     choices: [
       { text: 'Demander poliment des pansements', risk: 'safe', emoji: '🩹', outcomes: [
@@ -931,7 +931,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-terrain-vague', title: 'Le Terrain Vague', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-terrain-vague-cuw8m9fnHsQZS3zjSQE96n.webp',
+    image: '/assets/exp-terrain-vague-cuw8m9fnHsQZS3zjSQE96n.webp',
     description: 'Un terrain vague entre deux immeubles. Des herbes folles, des déchets, et... des bruits.',
     choices: [
       { text: 'Explorer les décombres', risk: 'risky', emoji: '🏚️', outcomes: [
@@ -947,7 +947,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-animalerie', title: 'L\'Animalerie du Coin', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-animalerie-f88YtDyyP69PRN9fqoBdd2.webp',
+    image: '/assets/exp-animalerie-f88YtDyyP69PRN9fqoBdd2.webp',
     description: 'L\'animalerie a mis des chiots en vitrine. Vous vous arrêtez, hypnotisé.',
     choices: [
       { text: 'Regarder les chiots et sourire', risk: 'safe', emoji: '🐶', outcomes: [
@@ -962,7 +962,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-cimetiere', title: 'Le Cimetière Paisible', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-cimetiere-VKuW5e5DjqSmF5TNCdnKkA.webp',
+    image: '/assets/exp-cimetiere-VKuW5e5DjqSmF5TNCdnKkA.webp',
     description: 'Le cimetière est calme. Des fleurs fraîches sur certaines tombes. Un robinet coule.',
     choices: [
       { text: 'Se recueillir et réfléchir', risk: 'safe', emoji: '🕯️', outcomes: [
@@ -979,7 +979,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-aire-jeux', title: 'L\'Aire de Jeux Déserte', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-aire-jeux-Q8McpHycnXNkdRnaXA3fDZ.webp',
+    image: '/assets/exp-aire-jeux-Q8McpHycnXNkdRnaXA3fDZ.webp',
     description: 'L\'aire de jeux est vide. Les balançoires grincent dans le vent. Nostalgie.',
     choices: [
       { text: 'Faire de la balançoire', risk: 'safe', emoji: '🎠', outcomes: [
@@ -994,7 +994,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-brocante', title: 'La Brocante du Quartier', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-brocante-m4p7AaRkiCTHLZmNAAEVB6.webp',
+    image: '/assets/exp-brocante-m4p7AaRkiCTHLZmNAAEVB6.webp',
     description: 'Une brocante de quartier. Des objets hétéroclites s\'entassent sur les tables.',
     choices: [
       { text: 'Négocier un objet utile', risk: 'normal', emoji: '🤝', outcomes: [
@@ -1009,7 +1009,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-toit-vue', title: 'Le Toit avec Vue', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-toit-vue-TJnJZcBsariLEwBL2R7huu.webp',
+    image: '/assets/exp-toit-vue-TJnJZcBsariLEwBL2R7huu.webp',
     description: 'Vous trouvez l\'accès à un toit d\'immeuble. La vue sur la ville est époustouflante.',
     choices: [
       { text: 'Contempler la vue et méditer', risk: 'safe', emoji: '🌅', outcomes: [
@@ -1023,7 +1023,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-salon-coiffure', title: 'Le Salon de Coiffure', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-salon-coiffure-hsCZe2EwRcYAdN4ZmNo9Bf.webp',
+    image: '/assets/exp-salon-coiffure-hsCZe2EwRcYAdN4ZmNo9Bf.webp',
     description: 'Un salon de coiffure cherche un modèle pour ses apprentis. Gratuit.',
     choices: [
       { text: 'Se porter volontaire', risk: 'normal', emoji: '💇', outcomes: [
@@ -1038,7 +1038,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-fete-foraine', title: 'La Fête Foraine', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-fete-foraine-oFFfjEfH7yPSChUUtdKfFj.webp',
+    image: '/assets/exp-fete-foraine-oFFfjEfH7yPSChUUtdKfFj.webp',
     description: 'La fête foraine est installée ! Lumières, odeurs de barbe à papa, musique criarde.',
     choices: [
       { text: 'Chercher des pièces tombées par terre', risk: 'safe', emoji: '🔍', outcomes: [
@@ -1053,7 +1053,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-pecheur-canal', title: 'Le Pêcheur du Canal', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-pecheur-canal-Fq76sjmm34RTZJ7qBYMRq5.webp',
+    image: '/assets/exp-pecheur-canal-Fq76sjmm34RTZJ7qBYMRq5.webp',
     description: 'Un vieux pêcheur est assis au bord du canal. Il a l\'air de s\'ennuyer ferme.',
     choices: [
       { text: 'Lui tenir compagnie', risk: 'safe', emoji: '🎣', outcomes: [
@@ -1068,7 +1068,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-cave-vin', title: 'La Cave à Vin Oubliée', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-cave-vin-k2iibzQsEoFfpyRmaG7X9t.webp',
+    image: '/assets/exp-cave-vin-k2iibzQsEoFfpyRmaG7X9t.webp',
     description: 'Une porte de cave entrouverte dans une ruelle. Des bouteilles poussiéreuses à l\'intérieur.',
     choices: [
       { text: 'Explorer la cave', risk: 'risky', emoji: '🍷', outcomes: [
@@ -1083,7 +1083,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-magasin-ferme', title: 'Le Magasin Fermé', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-magasin-fermé-6eecqa7F4eaw5q482jWUCU.webp',
+    image: '/assets/exp-magasin-ferme-6eecqa7F4eaw5q482jWUCU.webp',
     description: 'Un magasin a fermé définitivement. La vitrine est encore pleine de marchandises.',
     choices: [
       { text: 'Regarder à travers la vitrine', risk: 'safe', emoji: '👀', outcomes: [
@@ -1098,7 +1098,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-hopital', title: 'Les Urgences de l\'Hôpital', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-hopital-h7QXk7kd9iu8CG5kPG7P6Y.webp',
+    image: '/assets/exp-hopital-h7QXk7kd9iu8CG5kPG7P6Y.webp',
     description: 'L\'hôpital est bondé. La salle d\'attente des urgences est chaude et il y a un distributeur d\'eau.',
     choices: [
       { text: 'S\'installer discrètement en salle d\'attente', risk: 'normal', emoji: '🏥', outcomes: [
@@ -1113,7 +1113,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-dechetterie', title: 'La Déchetterie Municipale', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-dechetterie-ik2udBVSfScmWvCMJtUpZE.webp',
+    image: '/assets/exp-dechetterie-ik2udBVSfScmWvCMJtUpZE.webp',
     description: 'La déchetterie est ouverte. Les gens jettent des choses incroyables.',
     choices: [
       { text: 'Fouiller les bennes', risk: 'normal', emoji: '🗑️', outcomes: [
@@ -1129,7 +1129,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
   },
   {
     id: 'exp-camion-pizza', title: 'Le Camion Pizza', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-camion-pizza-gRv6sJgQcz26Svyj68t2oD.webp',
+    image: '/assets/exp-camion-pizza-gRv6sJgQcz26Svyj68t2oD.webp',
     description: 'Un camion pizza est garé. L\'odeur est divine. Le pizzaiolo ferme pour la nuit.',
     choices: [
       { text: 'Demander les invendus', risk: 'safe', emoji: '🍕', outcomes: [
@@ -1149,7 +1149,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
 const BEG_EVENTS: GameEvent[] = [
   {
     id: 'beg-couple-riche', title: 'Le Couple de Riches', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-couple-riche-fGABmQHzGdaNfYfNeimiRm.webp',
+    image: '/assets/beg-couple-riche-fGABmQHzGdaNfYfNeimiRm.webp',
     description: 'Un couple en manteau de fourrure passe devant vous. Ils sentent le parfum cher.',
     choices: [
       { text: 'Tendre la main poliment', risk: 'safe', emoji: '🙏', outcomes: [
@@ -1165,7 +1165,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-boulangerie', title: 'La Boulangerie', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-boulangerie-UTiJnojsDppWgqBkgPD7iy.webp',
+    image: '/assets/beg-boulangerie-UTiJnojsDppWgqBkgPD7iy.webp',
     description: 'La boulangerie ferme dans 10 minutes. L\'odeur du pain chaud vous torture.',
     choices: [
       { text: 'Demander le pain invendu', risk: 'safe', emoji: '🥖', outcomes: [
@@ -1180,7 +1180,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-terrasse-cafe', title: 'La Terrasse de Café', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-terrasse-cafe-4C6DR278ZzSCErovRVBHdM.webp',
+    image: '/assets/beg-terrasse-cafe-4C6DR278ZzSCErovRVBHdM.webp',
     description: 'Un café avec terrasse. Des gens sirotent leur expresso à 4€. Vous avez soif.',
     choices: [
       { text: 'S\'asseoir et attendre les restes', risk: 'safe', emoji: '☕', outcomes: [
@@ -1195,7 +1195,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-ecole-sortie', title: 'La Sortie d\'École', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-ecole-sortie-MRgU7z3Vkq86je5Q4bCAvb.webp',
+    image: '/assets/beg-ecole-sortie-MRgU7z3Vkq86je5Q4bCAvb.webp',
     description: 'C\'est l\'heure de la sortie. Parents et enfants affluent.',
     choices: [
       { text: 'Mendier discrètement', risk: 'safe', emoji: '🎒', outcomes: [
@@ -1211,7 +1211,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-supermarche', title: 'Le Supermarché', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-supermarche-4TENQwAV5hiGXPKER2Gy6s.webp',
+    image: '/assets/beg-supermarche-4TENQwAV5hiGXPKER2Gy6s.webp',
     description: 'Devant le supermarché, les clients entrent et sortent avec leurs courses.',
     choices: [
       { text: 'S\'installer à l\'entrée avec un gobelet', risk: 'safe', emoji: '🥤', outcomes: [
@@ -1227,7 +1227,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-musicien-metro', title: 'Le Musicien du Métro', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-musicien-metro-HSvL64qd5MQEG4Qnsz4oiV.webp',
+    image: '/assets/beg-musicien-metro-HSvL64qd5MQEG4Qnsz4oiV.webp',
     description: 'Un musicien joue de l\'accordéon dans le métro. Il gagne bien sa vie.',
     choices: [
       { text: 'Lui demander des conseils', risk: 'safe', emoji: '🎵', outcomes: [
@@ -1242,7 +1242,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-touriste-asiatique', title: 'Le Groupe de Touristes', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-touriste-asiatique-mKRWQ8vLKuJpHegK2ZAxpm.webp',
+    image: '/assets/beg-touriste-asiatique-mKRWQ8vLKuJpHegK2ZAxpm.webp',
     description: 'Un groupe de touristes asiatiques prend des photos de tout. Absolument tout.',
     choices: [
       { text: 'Proposer de prendre leur photo', risk: 'safe', emoji: '📸', outcomes: [
@@ -1257,7 +1257,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-mariage-sortie', title: 'La Sortie de Mariage', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-mariage-sortie-63dqzL4mxrcYYsqMVAza6U.webp',
+    image: '/assets/beg-mariage-sortie-63dqzL4mxrcYYsqMVAza6U.webp',
     description: 'Un mariage se termine. Les invités sortent, éméchés et généreux.',
     choices: [
       { text: 'Féliciter les mariés', risk: 'safe', emoji: '💒', outcomes: [
@@ -1272,7 +1272,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-jogger-parc', title: 'Le Jogger du Parc', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-jogger-parc-ek7sxZH6KdbP9SnStbrn8P.webp',
+    image: '/assets/beg-jogger-parc-ek7sxZH6KdbP9SnStbrn8P.webp',
     description: 'Un jogger fait sa pause stretching près de vous. Il a l\'air sympathique.',
     choices: [
       { text: 'Engager la conversation', risk: 'safe', emoji: '🏃', outcomes: [
@@ -1287,7 +1287,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-restaurant-poubelle', title: 'Les Poubelles du Restaurant', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-restaurant-poubelle-HSuTGsFVRJkb2zg2xouMyC.webp',
+    image: '/assets/beg-restaurant-poubelle-HSuTGsFVRJkb2zg2xouMyC.webp',
     description: 'Le restaurant gastronomique vient de sortir ses poubelles. Ça sent le gourmet.',
     choices: [
       { text: 'Fouiller les poubelles', risk: 'normal', emoji: '🗑️', outcomes: [
@@ -1302,7 +1302,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-cinema', title: 'Le Cinéma', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-cinema-5SKZPaM25U4pgFRPzwkrku.webp',
+    image: '/assets/beg-cinema-5SKZPaM25U4pgFRPzwkrku.webp',
     description: 'Le cinéma vient de projeter un film. Les spectateurs sortent.',
     choices: [
       { text: 'Mendier à la sortie', risk: 'safe', emoji: '🎬', outcomes: [
@@ -1317,7 +1317,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-eglise-dimanche', title: 'La Messe du Dimanche', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-eglise-dimanche-MT7XJz2j3QPsWbbzddy6W2.webp',
+    image: '/assets/beg-eglise-dimanche-MT7XJz2j3QPsWbbzddy6W2.webp',
     description: 'C\'est dimanche. Les fidèles sortent de la messe, l\'âme charitable.',
     choices: [
       { text: 'Demander l\'aumône', risk: 'safe', emoji: '⛪', outcomes: [
@@ -1332,7 +1332,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-mairie', title: 'La Mairie', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-mairie-eey6rmfrqRvxmw634LjgzZ.webp',
+    image: '/assets/beg-mairie-eey6rmfrqRvxmw634LjgzZ.webp',
     description: 'La mairie est ouverte. Des gens font la queue pour des papiers.',
     choices: [
       { text: 'Demander des informations sur les aides sociales', risk: 'safe', emoji: '🏛️', outcomes: [
@@ -1347,7 +1347,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-gare-tgv', title: 'La Gare TGV', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-gare-tgv-GVKJko8WAfiNoRKBN7oVPn.webp',
+    image: '/assets/beg-gare-tgv-GVKJko8WAfiNoRKBN7oVPn.webp',
     description: 'La gare TGV est bondée. Voyageurs pressés, valises à roulettes, stress ambiant.',
     choices: [
       { text: 'Proposer de porter les valises', risk: 'normal', emoji: '🧳', outcomes: [
@@ -1363,7 +1363,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-distributeur-billets', title: 'Le Distributeur de Billets', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-distributeur-billets-G85Evn8NyawUD4iF3YYLdL.webp',
+    image: '/assets/beg-distributeur-billets-G85Evn8NyawUD4iF3YYLdL.webp',
     description: 'Un distributeur automatique de billets. Des gens retirent de l\'argent.',
     choices: [
       { text: 'Attendre près du distributeur', risk: 'safe', emoji: '🏧', outcomes: [
@@ -1379,7 +1379,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-fleuriste', title: 'Le Fleuriste', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-fleuriste-bxNwHDonMVDteRKwkBfphr.webp',
+    image: '/assets/beg-fleuriste-bxNwHDonMVDteRKwkBfphr.webp',
     description: 'Le fleuriste jette ses fleurs fanées. Elles sont encore belles.',
     choices: [
       { text: 'Demander les fleurs invendues', risk: 'safe', emoji: '💐', outcomes: [
@@ -1394,7 +1394,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-station-metro', title: 'La Station de Métro', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-station-metro-7k2mmvWMW6cQbjMKeQ3nba.webp',
+    image: '/assets/beg-station-metro-7k2mmvWMW6cQbjMKeQ3nba.webp',
     description: 'L\'entrée du métro. Flux constant de passagers pressés.',
     choices: [
       { text: 'Faire la manche avec un panneau', risk: 'safe', emoji: '📝', outcomes: [
@@ -1410,7 +1410,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-parc-chien', title: 'Le Parc à Chiens', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-parc-chien-hP9gE8EtKnSHykQy4QSKpy.webp',
+    image: '/assets/beg-parc-chien-hP9gE8EtKnSHykQy4QSKpy.webp',
     description: 'Le parc à chiens est animé. Des propriétaires discutent pendant que leurs chiens jouent.',
     choices: [
       { text: 'Proposer de garder les chiens', risk: 'normal', emoji: '🐕', outcomes: [
@@ -1425,7 +1425,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-lavage-voiture', title: 'La Station de Lavage', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-lavage-voiture-jio2DxY23xqhxu63ZuyVTv.webp',
+    image: '/assets/beg-lavage-voiture-jio2DxY23xqhxu63ZuyVTv.webp',
     description: 'Une station de lavage automatique. Des gens attendent que leur voiture soit propre.',
     choices: [
       { text: 'Proposer un lavage à la main', risk: 'normal', emoji: '🧽', outcomes: [
@@ -1440,7 +1440,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-taxi-arret', title: 'L\'Arrêt de Taxi', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-taxi-arret-fGsAqfVEcKEJAiddtE6GrC.webp',
+    image: '/assets/beg-taxi-arret-fGsAqfVEcKEJAiddtE6GrC.webp',
     description: 'Une file de taxis attend des clients. Les chauffeurs discutent entre eux.',
     choices: [
       { text: 'Demander un petit quelque chose aux chauffeurs', risk: 'safe', emoji: '🚕', outcomes: [
@@ -1456,7 +1456,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-concert-sortie', title: 'La Sortie de Concert', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-concert-sortie-VPCD4nBdsydTGMi5TPfd8i.webp',
+    image: '/assets/beg-concert-sortie-VPCD4nBdsydTGMi5TPfd8i.webp',
     description: 'Un concert vient de se terminer. Les spectateurs sortent, euphoriques.',
     choices: [
       { text: 'Mendier dans l\'euphorie générale', risk: 'safe', emoji: '🎸', outcomes: [
@@ -1471,7 +1471,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
   {
     id: 'beg-match-foot', title: 'La Sortie du Match', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-match-foot-PvcoeSj4wSQHaeZetgnJEk.webp',
+    image: '/assets/beg-match-foot-PvcoeSj4wSQHaeZetgnJEk.webp',
     description: 'Le match de foot est fini. Les supporters envahissent les rues.',
     choices: [
       { text: 'Mendier auprès des supporters', risk: 'normal', emoji: '⚽', outcomes: [
@@ -1578,7 +1578,7 @@ const STEAL_EVENTS: GameEvent[] = [
 const REST_EVENTS: GameEvent[] = [
   {
     id: 'rest-pont-riviere', title: 'Le Pont sur la Rivière', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-pont-riviere-ZkfvuMX445ho8WdARa8BGq.webp',
+    image: '/assets/rest-pont-riviere-ZkfvuMX445ho8WdARa8BGq.webp',
     description: 'Sous le pont, c\'est sec et abrité. Le bruit de l\'eau est apaisant.',
     choices: [
       { text: 'S\'installer pour la nuit', risk: 'safe', emoji: '🌉', outcomes: [
@@ -1593,7 +1593,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-lavomatic', title: 'Le Lavomatic 24h', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-lavomatic-koaRprcJ9mvGN9vvKFySBu.webp',
+    image: '/assets/rest-lavomatic-koaRprcJ9mvGN9vvKFySBu.webp',
     description: 'Le lavomatic est ouvert toute la nuit. Chaud, éclairé, avec des chaises.',
     choices: [
       { text: 'Dormir sur les chaises', risk: 'safe', emoji: '🧺', outcomes: [
@@ -1608,7 +1608,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-parking-souterrain', title: 'Le Parking Souterrain', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-parking-souterrain-Rgkuiwyd7ZtiJ3qQzx2dHW.webp',
+    image: '/assets/rest-parking-souterrain-Rgkuiwyd7ZtiJ3qQzx2dHW.webp',
     description: 'Le parking souterrain est presque vide la nuit. Sec, à l\'abri du vent.',
     choices: [
       { text: 'Se cacher entre les voitures', risk: 'normal', emoji: '🅿️', outcomes: [
@@ -1624,7 +1624,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-cabane-carton', title: 'Le Château de Carton', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-cabane-carton-Q65zGixABM5SKqrjKEaS4x.webp',
+    image: '/assets/rest-cabane-carton-Q65zGixABM5SKqrjKEaS4x.webp',
     description: 'Vous avez assez de cartons pour construire un véritable palace.',
     choices: [
       { text: 'Construire un abri élaboré', risk: 'normal', emoji: '🏗️', outcomes: [
@@ -1639,7 +1639,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-banc-eglise', title: 'Le Banc de l\'Église', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-banc-eglise-ZdyDwJEYtPgNBbSofzbiyw.webp',
+    image: '/assets/rest-banc-eglise-ZdyDwJEYtPgNBbSofzbiyw.webp',
     description: 'Le banc devant l\'église est large et abrité par un auvent.',
     choices: [
       { text: 'S\'allonger sur le banc', risk: 'safe', emoji: '⛪', outcomes: [
@@ -1654,7 +1654,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-toit-immeuble', title: 'Le Toit de l\'Immeuble', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-toit-immeuble-6ryUDQFMVD6QoZDFqJj4s7.webp',
+    image: '/assets/rest-toit-immeuble-6ryUDQFMVD6QoZDFqJj4s7.webp',
     description: 'Vous avez trouvé l\'accès au toit. Vue sur les étoiles.',
     choices: [
       { text: 'Dormir à la belle étoile', risk: 'normal', emoji: '⭐', outcomes: [
@@ -1670,7 +1670,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-abribus', title: 'L\'Abribus', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-abribus-T6i3s6bQ4qyZfBauUNWeu6.webp',
+    image: '/assets/rest-abribus-T6i3s6bQ4qyZfBauUNWeu6.webp',
     description: 'L\'abribus est vide. Le plexiglas protège du vent. Presque confortable.',
     choices: [
       { text: 'Dormir assis sur le banc', risk: 'safe', emoji: '🚌', outcomes: [
@@ -1685,7 +1685,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-cave-abandonnee', title: 'La Cave Abandonnée', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-cave-abandonnee-PoPAKkfwWsspJhMjvZym9q.webp',
+    image: '/assets/rest-cave-abandonnee-PoPAKkfwWsspJhMjvZym9q.webp',
     description: 'Une cave d\'immeuble dont la porte ne ferme plus. Sombre mais sec.',
     choices: [
       { text: 'S\'installer dans la cave', risk: 'normal', emoji: '🏚️', outcomes: [
@@ -1701,7 +1701,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-hamac-parc', title: 'Le Hamac Improvisé', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-hamac-parc-JKRnP6QzCq5LRVcbHvvA62.webp',
+    image: '/assets/rest-hamac-parc-JKRnP6QzCq5LRVcbHvvA62.webp',
     description: 'Deux arbres parfaitement espacés. Avec une couverture, vous pouvez faire un hamac.',
     choices: [
       { text: 'Installer le hamac', risk: 'normal', emoji: '🌴', outcomes: [
@@ -1716,7 +1716,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-combat-reveil', title: 'Le Réveil Brutal', type: 'combat',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-combat-reveil-nz6rPGatE5MccSSp5M9iMT.webp',
+    image: '/assets/rest-combat-reveil-nz6rPGatE5MccSSp5M9iMT.webp',
     description: 'Vous dormez paisiblement quand un bruit vous réveille. Quelqu\'un fouille vos affaires !',
     choices: [
       { text: 'Confronter le voleur', risk: 'risky', emoji: '😤', outcomes: [
@@ -1731,7 +1731,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-jardin-secret', title: 'Le Jardin Secret', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-jardin-secret-D3emeTRZCkD6yK6fmxucMr.webp',
+    image: '/assets/rest-jardin-secret-D3emeTRZCkD6yK6fmxucMr.webp',
     description: 'Derrière un mur, un jardin abandonné. Herbes folles, banc en pierre, fontaine tarie.',
     choices: [
       { text: 'S\'installer dans le jardin', risk: 'safe', emoji: '🌿', outcomes: [
@@ -1746,7 +1746,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-grenier', title: 'Le Grenier Oublié', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-grenier-m7geqfLCEDsNwCuwNMJhXK.webp',
+    image: '/assets/rest-grenier-m7geqfLCEDsNwCuwNMJhXK.webp',
     description: 'Un escalier mène à un grenier dont la porte est entrouverte.',
     choices: [
       { text: 'Monter explorer', risk: 'normal', emoji: '🪜', outcomes: [
@@ -1762,7 +1762,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-fourgon-abandonne', title: 'Le Fourgon Abandonné', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-fourgon-abandonne-XoJDy85GdkXUPTQXiCseeQ.webp',
+    image: '/assets/rest-fourgon-abandonne-XoJDy85GdkXUPTQXiCseeQ.webp',
     description: 'Un vieux fourgon de livraison rouillé. La porte arrière est ouverte.',
     choices: [
       { text: 'Dormir dans le fourgon', risk: 'normal', emoji: '🚐', outcomes: [
@@ -1777,7 +1777,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-wagon-train', title: 'Le Wagon de Train', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-wagon-train-Nh3WT9QiYunMe4t55bsuDu.webp',
+    image: '/assets/rest-wagon-train-Nh3WT9QiYunMe4t55bsuDu.webp',
     description: 'Un wagon de marchandises est ouvert sur une voie de garage.',
     choices: [
       { text: 'Dormir dans le wagon', risk: 'normal', emoji: '🚃', outcomes: [
@@ -1793,7 +1793,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-tente-fortune', title: 'La Tente de Fortune', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-tente-fortune-3Wjo7we5oS4ENU5hbyn6xd.webp',
+    image: '/assets/rest-tente-fortune-3Wjo7we5oS4ENU5hbyn6xd.webp',
     description: 'Avec des sacs poubelle et des bâtons, vous pouvez construire une tente.',
     choices: [
       { text: 'Construire la tente', risk: 'normal', emoji: '⛺', outcomes: [
@@ -1808,7 +1808,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-musee-nuit', title: 'Le Musée la Nuit', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-musee-nuit-TRWpZcKL5eRM9F6cUsu5qv.webp',
+    image: '/assets/rest-musee-nuit-TRWpZcKL5eRM9F6cUsu5qv.webp',
     description: 'Le musée ferme ses portes. Mais vous connaissez une entrée de service...',
     choices: [
       { text: 'Se cacher dans le musée', risk: 'risky', emoji: '🏛️', outcomes: [
@@ -1824,7 +1824,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-bibliotheque-nuit', title: 'La Bibliothèque la Nuit', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-bibliotheque-nuit-e4GzMrQe5jEJDeQou4BxEF.webp',
+    image: '/assets/rest-bibliotheque-nuit-e4GzMrQe5jEJDeQou4BxEF.webp',
     description: 'La bibliothèque ferme. Mais la porte de derrière ne ferme pas bien...',
     choices: [
       { text: 'Se cacher dans la bibliothèque', risk: 'risky', emoji: '📚', outcomes: [
@@ -1839,7 +1839,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-container', title: 'Le Container Maritime', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-container-BMckVJDeMBxYKECCiDfLup.webp',
+    image: '/assets/rest-container-BMckVJDeMBxYKECCiDfLup.webp',
     description: 'Un container de chantier est ouvert. Sec, solide, à l\'abri de tout.',
     choices: [
       { text: 'Dormir dans le container', risk: 'normal', emoji: '📦', outcomes: [
@@ -1855,7 +1855,7 @@ const REST_EVENTS: GameEvent[] = [
   },
   {
     id: 'rest-cabine-telephone', title: 'La Cabine Téléphonique', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/rest-cabine-telephone-oCcEKE3RxAKWGf5xrjeMLz.webp',
+    image: '/assets/rest-cabine-telephone-oCcEKE3RxAKWGf5xrjeMLz.webp',
     description: 'Une vieille cabine téléphonique. Étroite mais à l\'abri du vent et de la pluie.',
     choices: [
       { text: 'Dormir debout dans la cabine', risk: 'safe', emoji: '📞', outcomes: [
@@ -1874,7 +1874,7 @@ const REST_EVENTS: GameEvent[] = [
 const TRAVEL_EVENTS: GameEvent[] = [
   {
     id: 'travel-ruelle-sombre', title: 'La Ruelle Sombre', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-ruelle-sombre-kkju3xeeLBCHpbj63J2v27.webp',
+    image: '/assets/travel-ruelle-sombre-kkju3xeeLBCHpbj63J2v27.webp',
     description: 'Un raccourci par une ruelle sombre. Ça sent le danger... et les poubelles.',
     choices: [
       { text: 'Prendre la ruelle', risk: 'risky', emoji: '🌑', outcomes: [
@@ -1889,7 +1889,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-tunnel-metro', title: 'Le Tunnel de Métro', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-tunnel-metro-8zaoahxSXU8Wrt9wxJGRRX.webp',
+    image: '/assets/travel-tunnel-metro-8zaoahxSXU8Wrt9wxJGRRX.webp',
     description: 'Un tunnel de métro désaffecté. Sombre, humide, mais c\'est un raccourci.',
     choices: [
       { text: 'Traverser le tunnel', risk: 'risky', emoji: '🚇', outcomes: [
@@ -1905,7 +1905,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-parc-nuit', title: 'Le Parc la Nuit', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-parc-nuit-HKdnTyPJxjUGL9aq8yv6ym.webp',
+    image: '/assets/travel-parc-nuit-HKdnTyPJxjUGL9aq8yv6ym.webp',
     description: 'Traverser le parc de nuit. Les lampadaires sont en panne.',
     choices: [
       { text: 'Traverser dans le noir', risk: 'normal', emoji: '🌙', outcomes: [
@@ -1920,7 +1920,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-pont-autoroute', title: 'Le Pont de l\'Autoroute', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-pont-autoroute-Kp7ZJJXx5GyopiPDDNjVhC.webp',
+    image: '/assets/travel-pont-autoroute-Kp7ZJJXx5GyopiPDDNjVhC.webp',
     description: 'Le pont au-dessus de l\'autoroute. Bruyant, venteux, mais c\'est le chemin le plus court.',
     choices: [
       { text: 'Traverser le pont', risk: 'safe', emoji: '🌉', outcomes: [
@@ -1935,7 +1935,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-marche-matin', title: 'Le Marché du Matin', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-marche-matin-UBjudamtA3vaA6pmwtFA3V.webp',
+    image: '/assets/travel-marche-matin-UBjudamtA3vaA6pmwtFA3V.webp',
     description: 'Le marché s\'installe. Les commerçants déchargent leurs camions.',
     choices: [
       { text: 'Aider à décharger', risk: 'normal', emoji: '💪', outcomes: [
@@ -1950,7 +1950,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-gare-routiere', title: 'La Gare Routière', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-gare-routiere-DaYuWGLLqaQsSrZHHQEV8Z.webp',
+    image: '/assets/travel-gare-routiere-DaYuWGLLqaQsSrZHHQEV8Z.webp',
     description: 'La gare routière est animée. Des bus partent vers d\'autres villes.',
     choices: [
       { text: 'Monter dans un bus sans payer', risk: 'risky', emoji: '🚌', outcomes: [
@@ -1965,7 +1965,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-velo-trouve', title: 'Le Vélo Trouvé', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-velo-trouve-Rp3Mv8FMSxvhqiT2kp8SeL.webp',
+    image: '/assets/travel-velo-trouve-Rp3Mv8FMSxvhqiT2kp8SeL.webp',
     description: 'Un vélo sans antivol est posé contre un mur. Tentant...',
     choices: [
       { text: 'Emprunter le vélo', risk: 'risky', emoji: '🚲', outcomes: [
@@ -1979,7 +1979,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-chantier-nuit', title: 'Le Chantier de Nuit', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-chantier-nuit-gB3qPEuPg6F49zbknTKjeU.webp',
+    image: '/assets/travel-chantier-nuit-gB3qPEuPg6F49zbknTKjeU.webp',
     description: 'Un chantier de construction. La nuit, personne ne surveille.',
     choices: [
       { text: 'Traverser le chantier', risk: 'normal', emoji: '🏗️', outcomes: [
@@ -1994,7 +1994,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-riviere', title: 'La Rivière', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-riviere-73CPTDVdUhEB8JSCGFD5xk.webp',
+    image: '/assets/travel-riviere-73CPTDVdUhEB8JSCGFD5xk.webp',
     description: 'La rivière coupe votre chemin. Le pont est à 500m, mais vous pourriez traverser à gué.',
     choices: [
       { text: 'Traverser à gué', risk: 'risky', emoji: '🌊', outcomes: [
@@ -2009,7 +2009,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-tramway', title: 'Le Tramway', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-tramway-RwMPRjHnfokerBZDaByMA9.webp',
+    image: '/assets/travel-tramway-RwMPRjHnfokerBZDaByMA9.webp',
     description: 'Le tramway passe. Vous pourriez monter sans payer...',
     choices: [
       { text: 'Monter sans ticket', risk: 'risky', emoji: '🚊', outcomes: [
@@ -2024,7 +2024,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-skateboard', title: 'Le Skateboard Trouvé', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-skateboard-jb8FwsquDYya2TAppoZNmo.webp',
+    image: '/assets/travel-skateboard-jb8FwsquDYya2TAppoZNmo.webp',
     description: 'Un skateboard abandonné sur le trottoir. Les roues tournent encore.',
     choices: [
       { text: 'Utiliser le skateboard', risk: 'normal', emoji: '🛹', outcomes: [
@@ -2039,7 +2039,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-egout', title: 'Les Égouts', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-egout-EaEg5VZENML2osawgbXA7E.webp',
+    image: '/assets/travel-egout-EaEg5VZENML2osawgbXA7E.webp',
     description: 'Une bouche d\'égout ouverte. Le raccourci ultime... si vous supportez l\'odeur.',
     choices: [
       { text: 'Descendre dans les égouts', risk: 'risky', emoji: '🕳️', outcomes: [
@@ -2054,7 +2054,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
   },
   {
     id: 'travel-bus-nuit', title: 'Le Bus de Nuit', type: 'narrative',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/travel-bus-nuit-QnRsg4teZWjpTKm79GJXx3.webp',
+    image: '/assets/travel-bus-nuit-QnRsg4teZWjpTKm79GJXx3.webp',
     description: 'Le bus de nuit passe. Dernier service. Presque vide.',
     choices: [
       { text: 'Monter et faire semblant de dormir', risk: 'normal', emoji: '🚌', outcomes: [
@@ -2073,7 +2073,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
 const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   'exp-jardin-communautaire-suite': {
     id: 'exp-jardin-communautaire-suite', title: 'Le Retour au Jardin', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-jardin-communautaire-3JrXyisaVTMS5u7ATazzZ7.webp',
+    image: '/assets/exp-jardin-communautaire-3JrXyisaVTMS5u7ATazzZ7.webp',
     isFollowUp: true, requiresFlag: 'ami-jardinier',
     description: 'Le vieux jardinier vous attendait ! "Ah, te revoilà ! J\'ai quelque chose pour toi."',
     choices: [
@@ -2088,7 +2088,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-vieille-dame-suite': {
     id: 'exp-vieille-dame-suite', title: 'La Grand-Mère Reconnaissante', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-salon-coiffure-hsCZe2EwRcYAdN4ZmNo9Bf.webp',
+    image: '/assets/exp-salon-coiffure-hsCZe2EwRcYAdN4ZmNo9Bf.webp',
     isFollowUp: true, requiresFlag: 'hero-enfant',
     description: 'Une vieille dame vous interpelle. "C\'est vous qui avez aidé mon petit-fils ! Je vous ai cherché partout !"',
     choices: [
@@ -2100,7 +2100,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-pecheur-suite': {
     id: 'exp-pecheur-suite', title: 'La Partie de Pêche', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-pecheur-canal-Fq76sjmm34RTZJ7qBYMRq5.webp',
+    image: '/assets/exp-pecheur-canal-Fq76sjmm34RTZJ7qBYMRq5.webp',
     isFollowUp: true, requiresFlag: 'ami-pecheur',
     description: 'Le pêcheur du canal vous fait signe. "Hé ! J\'ai apporté une canne pour toi !"',
     choices: [
@@ -2112,7 +2112,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-brocante-suite': {
     id: 'exp-brocante-suite', title: 'Le Trésor du Brocanteur', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-brocante-m4p7AaRkiCTHLZmNAAEVB6.webp',
+    image: '/assets/exp-brocante-m4p7AaRkiCTHLZmNAAEVB6.webp',
     isFollowUp: true, requiresFlag: 'ami-brocanteur',
     description: 'Le brocanteur vous appelle. "J\'ai trouvé un truc qui pourrait t\'intéresser !"',
     choices: [
@@ -2124,7 +2124,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-musicien-suite': {
     id: 'exp-musicien-suite', title: 'Le Duo Musical', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-musicien-metro-HSvL64qd5MQEG4Qnsz4oiV.webp',
+    image: '/assets/beg-musicien-metro-HSvL64qd5MQEG4Qnsz4oiV.webp',
     isFollowUp: true, requiresFlag: 'ami-musicien',
     description: 'Le musicien du métro vous reconnaît ! "Hé ! On refait un duo ? J\'ai gagné le double la dernière fois !"',
     choices: [
@@ -2136,7 +2136,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-dechetterie-suite': {
     id: 'exp-dechetterie-suite', title: 'Le Roi de la Récup', type: 'discovery',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-dechetterie-ik2udBVSfScmWvCMJtUpZE.webp',
+    image: '/assets/exp-dechetterie-ik2udBVSfScmWvCMJtUpZE.webp',
     isFollowUp: true, requiresFlag: 'roi-dechetterie',
     description: 'Vous retournez à la déchetterie. Le gardien vous fait signe. "J\'ai mis des trucs de côté pour toi !"',
     choices: [
@@ -2148,7 +2148,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-chat-revient': {
     id: 'exp-chat-revient', title: 'Le Retour du Chat', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/exp-bagarre-chats-Dgd3ncPRiSTGHjXXHy6SUT.webp',
+    image: '/assets/exp-bagarre-chats-Dgd3ncPRiSTGHjXXHy6SUT.webp',
     isFollowUp: true, requiresFlag: 'chat-compagnon',
     description: 'Le chat que vous avez sauvé revient ! Il porte quelque chose dans sa gueule...',
     choices: [
@@ -2161,7 +2161,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-foyer-accueil': {
     id: 'exp-foyer-accueil', title: 'Le Foyer d\'Accueil', type: 'social',
-    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663347946607/Hij3EAdQUe3Fzmo72mfQn6/beg-mairie-eey6rmfrqRvxmw634LjgzZ.webp',
+    image: '/assets/beg-mairie-eey6rmfrqRvxmw634LjgzZ.webp',
     isFollowUp: true, requiresFlag: 'aide-mairie',
     description: 'Grâce aux informations de la mairie, vous trouvez un foyer d\'accueil. La porte est ouverte.',
     choices: [

@@ -1,7 +1,7 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 
-const COMBAT_IMG_FALLBACK = 'https://private-us-east-1.manuscdn.com/sessionFile/IEX0yCKgQPAC1tCVyeLNRB/sandbox/5lqRDFcTLj7trFCP2zuZbn-img-3_1770979942000_na1fn_Y29tYmF0LXNjZW5l.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvSUVYMHlDS2dRUEFDMXRDVnllTE5SQi9zYW5kYm94LzVscVJERmNUTGo3dHJGQ1AyenVaYm4taW1nLTNfMTc3MDk3OTk0MjAwMF9uYTFmbl9ZMjl0WW1GMExYTmpaVzVsLnBuZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=POSygRuFbafowk8yUCiQxWUDcO6gNC-MgN0npOf8UcEgAqmG42~u-kCepnMQM7e0hRMVxg4jWd6gxz0y4zNFSxsazX8r~8g1b13bPnThnN6f4nrjAtenuztGg0gFiplsEjH9DObaPqIHWCwc-MdjcvTnNe7WSmHuL2ZJOBAuoPl9yjF5BBkfa32rnIEuC5xfkPicQC8WbTd18SP5Z3BHeipfP6MEjO3CBUh9eKROSEu1XS5buwsg9MaYZX6CR5lcf2vhVgcLSrUNIXWs2TkSXx7LW3wZZpOanBfj-xlgnZj3LdjlVmdmHga91kDP2sVVEf9xUj40YDEXc1t~I9SYMQ__';
+const COMBAT_IMG_FALLBACK = '/assets/combat-scene.png';
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   combat: { label: 'Combat', color: '#D94F4F' },
