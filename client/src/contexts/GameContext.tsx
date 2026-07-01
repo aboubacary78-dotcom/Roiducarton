@@ -44,6 +44,8 @@ export interface Character {
   activeFlags: string[];
   // Graine unique servant à générer le visage du personnage (voir CardboardAvatar).
   seed: string;
+  // Genre déduit du prénom, pour que le visage corresponde (pas de barbe sur une femme, etc.).
+  gender: 'm' | 'f';
 }
 
 export interface InventoryItem {
@@ -505,6 +507,16 @@ const NAMES = [
   'Ginette', 'Maurice', 'Colette', 'Raymond', 'Simone', 'Jean-Claude', 'Bernadette',
   'Didier', 'Monique', 'Thierry', 'Huguette', 'Patrick'
 ];
+
+// Prénoms féminins (pour que le visage corresponde au prénom).
+const FEMALE_NAMES = new Set([
+  'Lucienne', 'Yvette', 'Josette', 'Ginette', 'Colette', 'Simone',
+  'Bernadette', 'Monique', 'Huguette',
+]);
+
+export function genderFromName(name: string): 'm' | 'f' {
+  return FEMALE_NAMES.has(name) ? 'f' : 'm';
+}
 
 export const JOBS: Job[] = [
   { id: 'comptable', name: 'Ancien Comptable', description: 'Les chiffres, ça le connaît. Les poubelles, un peu moins.', bonusStats: { dignity: 10 }, bonusSkills: ['negociation'], startingItems: ['calculatrice'], emoji: '🧮' },
@@ -2270,6 +2282,7 @@ function generateCharacter(): Character {
     alive: true,
     activeFlags: [],
     seed: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`,
+    gender: genderFromName(name),
   };
 }
 
@@ -2321,6 +2334,7 @@ function loadGame(): Partial<GameState> | null {
         // Ensure activeFlags exists for old saves
         if (!data.character.activeFlags) data.character.activeFlags = [];
         if (!data.character.seed) data.character.seed = `${data.character.name || 'sdf'}-${data.character.job?.id || 'x'}`;
+        if (!data.character.gender) data.character.gender = genderFromName(data.character.name || '');
         return {
           character: data.character,
           dayActions: data.dayActions || 0,

@@ -22,8 +22,9 @@ function hashSeed(s: string): number {
   return h >>> 0;
 }
 
-export default function CardboardAvatar({ seed, size = 40, className = '' }: { seed: string; size?: number; className?: string }) {
+export default function CardboardAvatar({ seed, gender, size = 40, className = '' }: { seed: string; gender?: 'm' | 'f'; size?: number; className?: string }) {
   const s = seed || 'anon';
+  const female = gender === 'f';
   // Un tirage indépendant par caractéristique (graine + sel).
   const pick = (salt: string, n: number) => hashSeed(`${s}|${salt}`) % n;
 
@@ -32,15 +33,22 @@ export default function CardboardAvatar({ seed, size = 40, className = '' }: { s
   const bg = BG[pick('bg', BG.length)];
   const hatColor = HAT_COLORS[pick('hatc', HAT_COLORS.length)];
 
-  const hairStyle = pick('hairstyle', 7);    // 0 chauve, 1 court, 2 touffe, 3 raie, 4 volume, 5 dégarni, 6 longs
+  // Coiffure : les femmes ont toujours des cheveux (pas chauve/dégarni).
+  let hairStyle = pick('hairstyle', 7);      // 0 chauve, 1 court, 2 touffe, 3 raie, 4 volume, 5 dégarni, 6 longs
+  if (female) {
+    const femaleHair = [1, 2, 3, 4, 6, 6];   // biais vers volume/longs
+    hairStyle = femaleHair[pick('fhair', femaleHair.length)];
+  }
   const eyeStyle = pick('eyes', 4);          // 0 points, 1 ronds, 2 traits, 3 fatigué
   const browStyle = pick('brow', 3);         // 0 aucun, 1 droit, 2 relevé
   const mouthStyle = pick('mouth', 5);       // 0 neutre, 1 sourire, 2 grimace, 3 "o", 4 rictus
-  const beardStyle = pick('beard', 4);       // 0 aucun, 1 barbe naissante, 2 pleine, 3 moustache
+  const beardStyle = female ? 0 : pick('beard', 4); // pas de barbe/moustache pour les femmes
   const hat = pick('hat', 4);                // 0 aucun, 1 bonnet, 2 casquette, 3 aucun (pondère le "aucun")
   const glasses = pick('glasses', 5);        // 0/1 aucun, 2 rondes, 3 carrées, 4 solaires
   const hasFreckles = pick('freckles', 4) === 0;
-  const hasScar = pick('scar', 7) === 0;
+  const hasScar = !female && pick('scar', 7) === 0;
+  const earrings = female && pick('earring', 3) === 0;
+  const mouthColor = female ? '#B85763' : OUTLINE; // lèvres colorées pour les femmes
   const showHat = hat === 1 || hat === 2;
 
   const eyeL = 40, eyeR = 60, eyeY = 47;
@@ -169,11 +177,19 @@ export default function CardboardAvatar({ seed, size = 40, className = '' }: { s
       )}
 
       {/* Bouche */}
-      {mouthStyle === 0 && <rect x="43" y="65" width="14" height="2.4" rx="1.2" fill={OUTLINE} />}
-      {mouthStyle === 1 && <path d="M42 65 q8 8 16 0" fill="none" stroke={OUTLINE} strokeWidth="2.4" strokeLinecap="round" />}
-      {mouthStyle === 2 && <path d="M42 68 q8 -8 16 0" fill="none" stroke={OUTLINE} strokeWidth="2.4" strokeLinecap="round" />}
-      {mouthStyle === 3 && <ellipse cx="50" cy="66" rx="4" ry="5" fill={OUTLINE} />}
-      {mouthStyle === 4 && <path d="M42 66 q8 6 16 -1" fill="none" stroke={OUTLINE} strokeWidth="2.4" strokeLinecap="round" />}
+      {mouthStyle === 0 && <rect x="43" y="65" width="14" height={female ? 3 : 2.4} rx="1.5" fill={mouthColor} />}
+      {mouthStyle === 1 && <path d="M42 65 q8 8 16 0" fill="none" stroke={mouthColor} strokeWidth="2.6" strokeLinecap="round" />}
+      {mouthStyle === 2 && <path d="M42 68 q8 -8 16 0" fill="none" stroke={mouthColor} strokeWidth="2.4" strokeLinecap="round" />}
+      {mouthStyle === 3 && <ellipse cx="50" cy="66" rx="4" ry="5" fill={mouthColor} />}
+      {mouthStyle === 4 && <path d="M42 66 q8 6 16 -1" fill="none" stroke={mouthColor} strokeWidth="2.4" strokeLinecap="round" />}
+
+      {/* Boucles d'oreilles */}
+      {earrings && (
+        <g fill="#E8B84B" stroke={OUTLINE} strokeWidth="0.8">
+          <circle cx="25" cy="58" r="2.2" />
+          <circle cx="75" cy="58" r="2.2" />
+        </g>
+      )}
 
       {/* Barbe / moustache */}
       {beardStyle === 1 && (

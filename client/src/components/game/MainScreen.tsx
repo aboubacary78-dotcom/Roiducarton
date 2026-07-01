@@ -104,7 +104,7 @@ export default function MainScreen() {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-[#E8D5C0]">
-              <CardboardAvatar seed={char.seed} size={40} />
+              <CardboardAvatar seed={char.seed} gender={char.gender} size={40} />
             </div>
             <div>
               <h2 className="text-base font-semibold text-[#2A1F1A]">{char.name}</h2>
