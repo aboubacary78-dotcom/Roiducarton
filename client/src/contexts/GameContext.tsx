@@ -116,7 +116,7 @@ export interface CombatState {
   weakPointHint: string;
 }
 
-export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings' | 'steal-game';
+export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings' | 'steal-game' | 'beg-game';
 
 // ============ MÉTÉO ============
 export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm' | 'heatwave' | 'fog' | 'snow';
@@ -2234,16 +2234,21 @@ function generateRestEvents(_location: string, character: Character): GameEvent[
   return shuffled.slice(0, 5);
 }
 
-// Habillage textuel du mini-jeu de vol : réutilise les issues des STEAL_EVENTS.
-function stealFlavor(positive: boolean): string {
+// Habillage textuel des mini-jeux : pioche une issue positive/négative
+// dans un lot d'événements existants (réutilise le contenu narratif).
+function flavorFrom(events: GameEvent[], positive: boolean): string {
   const texts: string[] = [];
-  for (const e of STEAL_EVENTS)
+  for (const e of events)
     for (const c of e.choices)
       for (const o of c.outcomes) {
         const good = (o.moneyChange || 0) > 0 || Object.values(o.statChanges || {}).reduce((a, b) => a + (b || 0), 0) > 0;
         if (good === positive) texts.push(o.text);
       }
   return texts.length ? randomFromArray(texts) : '';
+}
+
+function stealFlavor(positive: boolean): string {
+  return flavorFrom(STEAL_EVENTS, positive);
 }
 
 function generateTravelEvent(_from: string, _to: string, _character: Character): GameEvent | null {
@@ -2383,6 +2388,7 @@ type GameAction =
   | { type: 'BEG' }
   | { type: 'STEAL' }
   | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot' }
+  | { type: 'RESOLVE_BEG'; coins: number; copTapped: boolean }
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
   | { type: 'TRAVEL'; location: string }
@@ -2437,10 +2443,49 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'BEG': {
       if (!state.character || state.dayActions >= state.maxDayActions) return state;
-      const begEvents = generateBegEvents(state.character.location, state.character);
-      if (begEvents.length === 0) return state;
-      const begEvent = randomFromArray(begEvents);
-      return { ...state, screen: 'event', currentEvent: begEvent, dayActions: state.dayActions + 1 };
+      // 1 fois sur 3 : un événement narratif de mendicité (garde le contenu
+      // écrit vivant) ; sinon le mini-jeu "attraper les pièces".
+      if (Math.random() < 0.34) {
+        const begEvents = generateBegEvents(state.character.location, state.character);
+        if (begEvents.length > 0) {
+          return { ...state, screen: 'event', currentEvent: randomFromArray(begEvents), dayActions: state.dayActions + 1 };
+        }
+      }
+      return { ...state, screen: 'beg-game', dayActions: state.dayActions + 1 };
+    }
+
+    case 'RESOLVE_BEG': {
+      if (!state.character) return state;
+      const c = state.character;
+      // La météo module la générosité des passants (comme les anciens events).
+      const modifier = WEATHER_TYPES[state.weather].actionModifier;
+      const money = Math.round(action.coins * modifier);
+      const statDelta: Partial<Stats> = action.copTapped
+        ? { dignity: -10, mental: -6 }
+        : money >= 6
+          ? { dignity: -3, mental: 6 }
+          : { dignity: -4, mental: money > 0 ? 2 : -4 };
+      const respectDelta = money >= 8 ? 1 : 0;
+      let newStats = { ...c.stats };
+      Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
+      newStats = clampStats(newStats);
+      const isAlive = newStats.health > 0 && newStats.mental > 0;
+      const prefix = action.copTapped
+        ? '👮 La police vous a délogé ! '
+        : money >= 8 ? '🎩 Manche exceptionnelle ! '
+        : money > 0 ? '🪙 Quelques pièces au fond du chapeau. '
+        : '💨 Pas un sou aujourd\'hui. ';
+      const weatherNote = modifier !== 1 ? (modifier > 1 ? ' Le beau temps a rendu les passants généreux.' : ' Le mauvais temps a fait fuir les passants.') : '';
+      if (!isAlive) {
+        saveHighScore(c.name, c.day, c.day * 10 + c.respect * 5 + (c.money + money) * 2);
+        clearSave();
+      }
+      return {
+        ...state,
+        character: { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive },
+        eventResult: { text: prefix + flavorFrom(BEG_EVENTS, !action.copTapped && money > 0) + weatherNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta },
+        screen: isAlive ? 'main' : 'game-over',
+      };
     }
 
     case 'STEAL': {
