@@ -42,6 +42,8 @@ export interface Character {
   location: string;
   alive: boolean;
   activeFlags: string[];
+  // Graine unique servant à générer le visage du personnage (voir CardboardAvatar).
+  seed: string;
 }
 
 export interface InventoryItem {
@@ -2267,6 +2269,7 @@ function generateCharacter(): Character {
     location: 'parc',
     alive: true,
     activeFlags: [],
+    seed: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`,
   };
 }
 
@@ -2317,6 +2320,7 @@ function loadGame(): Partial<GameState> | null {
       if (data.character && data.character.alive) {
         // Ensure activeFlags exists for old saves
         if (!data.character.activeFlags) data.character.activeFlags = [];
+        if (!data.character.seed) data.character.seed = `${data.character.name || 'sdf'}-${data.character.job?.id || 'x'}`;
         return {
           character: data.character,
           dayActions: data.dayActions || 0,

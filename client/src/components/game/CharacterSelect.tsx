@@ -1,5 +1,6 @@
 import { useGame, type Character } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
+import CardboardAvatar from './CardboardAvatar';
 
 function CharacterCard({ char, index, onSelect }: { char: Character; index: number; onSelect: () => void }) {
   return (
@@ -14,12 +15,12 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
     >
       {/* Character header */}
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#E8D5C0] to-[#D4B896] flex items-center justify-center shadow-sm">
-          <span className="text-2xl">{char.job.emoji}</span>
+        <div className="w-12 h-12 rounded-xl overflow-hidden shadow-sm shrink-0 border border-[#E8D5C0]">
+          <CardboardAvatar seed={char.seed} size={48} />
         </div>
         <div>
           <h3 className="text-xl text-[#2A1F1A]">{char.name}</h3>
-          <p className="text-xs text-[#8B6B4A]">{char.job.name}</p>
+          <p className="text-xs text-[#8B6B4A]">{char.job.emoji} {char.job.name}</p>
         </div>
       </div>
 

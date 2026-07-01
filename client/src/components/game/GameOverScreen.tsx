@@ -2,6 +2,7 @@ import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showInterstitial, showRewarded } from '@/lib/ads';
+import CardboardAvatar from './CardboardAvatar';
 
 const DEATH_MESSAGES = [
   'La rue a eu raison de vous. Mais votre légende perdure.',
@@ -98,6 +99,9 @@ export default function GameOverScreen() {
         className="w-full max-w-sm rounded-xl p-4 border border-[#3D2A1A]"
         style={{ background: 'linear-gradient(135deg, #2A1C12, #1E1410)' }}
       >
+        <div className="w-14 h-14 rounded-xl overflow-hidden mx-auto mb-2 border border-[#3D2A1A]">
+          <CardboardAvatar seed={char.seed} size={56} />
+        </div>
         <h3 className="text-base font-semibold text-[#F0D9C4] text-center mb-1">
           {char.job.emoji} {char.name}
         </h3>

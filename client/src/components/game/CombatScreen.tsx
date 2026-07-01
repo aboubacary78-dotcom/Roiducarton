@@ -2,6 +2,7 @@ import { useGame, getWeaponProfile } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
+import CardboardAvatar from './CardboardAvatar';
 
 interface DmgFloat { id: number; target: 'enemy' | 'player'; value: number; crit: boolean; }
 
@@ -181,7 +182,9 @@ export default function CombatScreen() {
         >
           {renderFloats('player')}
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-3xl">{character.job.emoji}</span>
+            <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-[#43764F]">
+              <CardboardAvatar seed={character.seed} size={48} />
+            </div>
             <div className="flex-1">
               <h3 className="text-lg text-[#C4E0B8] font-bold">{character.name}</h3>
               <p className="text-xs text-[#93B89E]">
