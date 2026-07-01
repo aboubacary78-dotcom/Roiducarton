@@ -86,7 +86,7 @@ export default function BegMinigame() {
         <div className="text-4xl mb-1">🎩</div>
         <h1 className="text-2xl text-[#2A1F1A]">La manche</h1>
         <p className="text-sm text-[#6B5740] mt-1.5">Vous tendez votre chapeau <strong>{spot}</strong>.</p>
-        <p className="text-xs text-[#8B6B4A] mt-1">Ramasse les pièces 🪙 et billets 💶. Ne touche pas le policier 👮, sinon c'est l'amende !</p>
+        <p className="text-xs text-[#8B6B4A] mt-1">Ramassez les pièces 🪙 et billets 💶. Ne touchez pas le policier 👮, sinon c'est l'amende !</p>
         {charisma && <p className="text-[11px] text-[#B8860B] mt-1">✨ Charismatique : les passants donnent plus souvent.</p>}
       </div>
 
@@ -127,7 +127,7 @@ export default function BegMinigame() {
             style={{ background: 'rgba(251,246,240,0.88)' }}
           >
             <span className="text-4xl">{ended === 'cop' ? '👮' : '🎩'}</span>
-            <span className="text-xl font-extrabold" style={{ color: ended === 'cop' ? '#D94F4F' : '#B8860B' }}>
+            <span className="text-xl font-bold" style={{ color: ended === 'cop' ? '#D94F4F' : '#B8860B' }}>
               {ended === 'cop' ? 'Circulez !' : `${coins} pièce${coins > 1 ? 's' : ''} !`}
             </span>
           </motion.div>

@@ -113,7 +113,7 @@ export default function EventScreen() {
         {/* Coup de pouce par pub */}
         {boosted ? (
           <div className="mt-3 text-center text-xs font-semibold text-[#B8860B]">
-            ✨ Coup de pouce actif : ton prochain choix réussira au mieux.
+            ✨ Coup de pouce actif : votre prochain choix réussira au mieux.
           </div>
         ) : (
           <button

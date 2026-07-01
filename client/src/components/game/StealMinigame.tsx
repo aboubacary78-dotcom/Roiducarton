@@ -70,7 +70,7 @@ export default function StealMinigame() {
         <p className="text-sm text-[#6B5740] mt-2 max-w-xs mx-auto">
           Vous tentez de voler <strong>{target.label}</strong>…
         </p>
-        <p className="text-xs text-[#8B6B4A] mt-1">Arrête le curseur dans la zone. Vise le cœur doré.</p>
+        <p className="text-xs text-[#8B6B4A] mt-1">Arrêtez le curseur dans la zone. Visez le cœur doré.</p>
         <p className="text-[11px] text-[#D94F4F] mt-2">
           {target.catcher === 'commercant'
             ? '⚠️ Si le commerçant vous attrape, ça peut finir en bagarre.'
@@ -99,7 +99,7 @@ export default function StealMinigame() {
         <motion.div
           initial={{ scale: 0.6, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="text-xl font-extrabold"
+          className="text-xl font-bold"
           style={{ color: tierColor }}
         >
           {tierLabel}
