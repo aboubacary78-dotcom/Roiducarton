@@ -54,35 +54,34 @@ export default function StealMinigame() {
   if (!char) return null;
 
   const tierLabel = tier === 'jackpot' ? '💎 COUP DE MAÎTRE !' : tier === 'ok' ? '🤫 Réussi !' : tier === 'fail' ? '🚨 Raté !' : '';
-  const tierColor = tier === 'jackpot' ? '#F2C14E' : tier === 'ok' ? '#5FBE76' : '#F27575';
+  const tierColor = tier === 'jackpot' ? '#B8860B' : tier === 'ok' ? '#3d8b4f' : '#D94F4F';
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen p-5 flex flex-col items-center justify-center gap-6"
-      style={{ background: 'radial-gradient(95% 50% at 50% 6%, rgba(120,140,220,0.14), transparent 60%), linear-gradient(180deg, #232338 0%, #14141F 100%)' }}
+      className="min-h-screen bg-texture p-5 flex flex-col items-center justify-center gap-5"
     >
       <div className="text-center">
         <div className="text-5xl mb-2">🥷</div>
-        <h1 className="text-2xl text-[#E6E1F2]">Vol à l'arraché</h1>
-        <p className="text-sm text-[#9A98C0] mt-1">Arrête le curseur dans la zone. Vise le cœur doré.</p>
+        <h1 className="text-2xl text-[#2A1F1A]">Vol à l'arraché</h1>
+        <p className="text-sm text-[#8B6B4A] mt-1">Arrête le curseur dans la zone. Vise le cœur doré.</p>
       </div>
 
       {/* Barre de visée */}
-      <div className="w-full max-w-sm">
-        <div className="relative h-11 rounded-xl overflow-hidden border border-[#3A3A55]" style={{ background: '#1B1B2A' }}>
+      <div className="w-full max-w-sm craft-card p-3">
+        <div className="relative h-10 rounded-lg overflow-hidden" style={{ background: '#F0E6DC' }}>
           {/* zone verte */}
-          <div className="absolute inset-y-0" style={{ left: `${greenStart}%`, width: `${greenEnd - greenStart}%`, background: 'rgba(74,155,95,0.35)' }} />
+          <div className="absolute inset-y-0" style={{ left: `${greenStart}%`, width: `${greenEnd - greenStart}%`, background: 'rgba(74,155,95,0.3)' }} />
           {/* zone or */}
-          <div className="absolute inset-y-0" style={{ left: `${jackStart}%`, width: `${jackEnd - jackStart}%`, background: 'rgba(242,193,78,0.55)' }} />
+          <div className="absolute inset-y-0" style={{ left: `${jackStart}%`, width: `${jackEnd - jackStart}%`, background: 'rgba(184,134,11,0.45)' }} />
           {/* curseur */}
           <motion.div
             className="absolute top-0 bottom-0 w-1 rounded-full"
-            style={{ left: `calc(${pos}% - 2px)`, background: tier ? tierColor : '#F5F0FF', boxShadow: '0 0 8px rgba(255,255,255,0.6)' }}
+            style={{ left: `calc(${pos}% - 2px)`, background: tier ? tierColor : '#2A1F1A', boxShadow: '0 1px 4px rgba(42,31,26,0.35)' }}
           />
         </div>
-        {agile && <p className="text-[11px] text-[#7FB58F] text-center mt-2">🏃 Agile : zone de réussite élargie.</p>}
+        {agile && <p className="text-[11px] text-[#3d8b4f] text-center mt-2">🏃 Agile : zone de réussite élargie.</p>}
       </div>
 
       {/* Résultat / action */}
@@ -99,8 +98,7 @@ export default function StealMinigame() {
         <motion.button
           whileTap={{ scale: 0.94 }}
           onClick={stop}
-          className="w-full max-w-sm py-5 rounded-2xl text-lg font-bold text-white"
-          style={{ background: 'linear-gradient(135deg, #C99A3A, #9B5B3A)', boxShadow: '0 6px 20px rgba(155,91,58,0.4)' }}
+          className="btn-primary w-full max-w-sm py-4 text-lg"
         >
           STOP ✋
         </motion.button>
