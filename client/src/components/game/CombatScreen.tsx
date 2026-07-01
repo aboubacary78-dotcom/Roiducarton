@@ -1,11 +1,47 @@
 import { useGame, getWeaponProfile } from '@/contexts/GameContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+
+interface DmgFloat { id: number; target: 'enemy' | 'player'; value: number; crit: boolean; }
 
 export default function CombatScreen() {
   const { state, dispatch } = useGame();
   const { currentCombat, combatLog, character } = state;
   const [aiming, setAiming] = useState(false);
+  const [floats, setFloats] = useState<DmgFloat[]>([]);
+  const prevEnemyHp = useRef<number | null>(null);
+  const prevPlayerHp = useRef<number | null>(null);
+  const floatId = useRef(0);
+  const enemyCtrl = useAnimationControls();
+  const playerCtrl = useAnimationControls();
+  const critCtrl = useAnimationControls();
+
+  function pushFloat(target: 'enemy' | 'player', value: number, crit: boolean) {
+    const id = ++floatId.current;
+    setFloats((f) => [...f, { id, target, value, crit }]);
+    setTimeout(() => setFloats((f) => f.filter((x) => x.id !== id)), 950);
+  }
+
+  // Détecte les variations de PV pour déclencher impacts + chiffres de dégâts.
+  useEffect(() => {
+    if (!currentCombat || !character) return;
+    const eHp = currentCombat.enemyHealth;
+    const pHp = character.stats.health;
+    const crit = /CRITIQUE/i.test(combatLog.slice(-2).join(' '));
+
+    if (prevEnemyHp.current !== null && eHp < prevEnemyHp.current) {
+      pushFloat('enemy', prevEnemyHp.current - eHp, crit);
+      enemyCtrl.start({ x: [0, -9, 9, -6, 6, 0], transition: { duration: 0.38 } });
+      if (crit) critCtrl.start({ opacity: [0, 0.55, 0], transition: { duration: 0.5 } });
+    }
+    if (prevPlayerHp.current !== null && pHp < prevPlayerHp.current) {
+      pushFloat('player', prevPlayerHp.current - pHp, false);
+      playerCtrl.start({ x: [0, -7, 7, -4, 4, 0], transition: { duration: 0.35 } });
+    }
+    prevEnemyHp.current = eHp;
+    prevPlayerHp.current = pHp;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentCombat?.enemyHealth, character?.stats.health, combatLog.length]);
 
   if (!currentCombat || !character) return null;
 
@@ -30,13 +66,36 @@ export default function CombatScreen() {
 
   const playerInDanger = playerHpPercent <= 30;
 
+  const renderFloats = (target: 'enemy' | 'player') =>
+    floats.filter((f) => f.target === target).map((f) => (
+      <motion.div
+        key={f.id}
+        initial={{ y: 4, opacity: 0, scale: 0.5 }}
+        animate={{ y: -44, opacity: [0, 1, 1, 0], scale: f.crit ? 1.5 : 1 }}
+        transition={{ duration: 0.9, ease: 'easeOut' }}
+        className="absolute left-1/2 -translate-x-1/2 top-1 pointer-events-none font-extrabold text-center leading-none"
+        style={{ color: f.crit ? '#F2C14E' : target === 'enemy' ? '#FF7A5A' : '#FF5A5A', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}
+      >
+        {f.crit && <span className="block text-[9px] tracking-wider">CRITIQUE&nbsp;!</span>}
+        <span className="text-lg">-{f.value}</span>
+      </motion.div>
+    ));
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen p-4 flex flex-col gap-3"
+      className="min-h-screen p-4 flex flex-col gap-3 relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #1C1410 0%, #0A0806 100%)' }}
     >
+      {/* Flash de coup critique */}
+      <motion.div
+        animate={critCtrl}
+        initial={{ opacity: 0 }}
+        className="absolute inset-0 z-20 pointer-events-none"
+        style={{ background: 'radial-gradient(circle at 50% 35%, rgba(242,193,78,0.6), transparent 65%)' }}
+      />
+
       {/* Header */}
       <div className="text-center py-1">
         <h2 className="text-sm font-semibold text-[#E8A87C] tracking-wide uppercase">Combat</h2>
@@ -46,18 +105,24 @@ export default function CombatScreen() {
       <motion.div
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="rounded-xl p-4 border border-[#3D2A1A]"
+        className="rounded-xl p-4 border border-[#3D2A1A] relative"
         style={{ background: 'linear-gradient(135deg, #2A1C12, #1E1410)' }}
       >
+        {renderFloats('enemy')}
         <div className="flex items-center gap-3 mb-3">
-          <motion.span
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-4xl shrink-0 border border-[#4A2A1A]"
+          <motion.div
+            animate={enemyCtrl}
+            className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 border border-[#4A2A1A]"
             style={{ background: 'radial-gradient(circle at 50% 40%, rgba(217,79,79,0.22), rgba(26,14,8,0.4) 72%)' }}
-            animate={{ rotate: [0, -3, 3, 0] }}
-            transition={{ repeat: Infinity, duration: 2.5 }}
           >
-            {currentCombat.enemyEmoji}
-          </motion.span>
+            <motion.span
+              className="text-4xl"
+              animate={{ rotate: [0, -3, 3, 0] }}
+              transition={{ repeat: Infinity, duration: 2.5 }}
+            >
+              {currentCombat.enemyEmoji}
+            </motion.span>
+          </motion.div>
           <div className="flex-1">
             <h3 className="text-lg text-[#F0D9C4] font-bold">{currentCombat.enemyName}</h3>
             <p className="text-xs text-[#A08060] italic">{currentCombat.description}</p>
@@ -89,42 +154,45 @@ export default function CombatScreen() {
       </div>
 
       {/* Player Card */}
-      <motion.div
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className={`rounded-xl p-4 border ${playerInDanger ? 'border-[#8B2020]' : 'border-[#3D5A2A]'}`}
-        style={{ background: 'linear-gradient(135deg, #1A2A14, #141E10)' }}
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-3xl">{character.job.emoji}</span>
-          <div className="flex-1">
-            <h3 className="text-lg text-[#C4E0B8] font-bold">{character.name}</h3>
-            <p className="text-xs text-[#80A070]">
-              {character.job.name}{weapon && ` · ${weapon.emoji} ${weapon.name}`}
-            </p>
+      <motion.div animate={playerCtrl}>
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className={`rounded-xl p-4 border relative ${playerInDanger ? 'border-[#8B2020]' : 'border-[#3D5A2A]'}`}
+          style={{ background: 'linear-gradient(135deg, #1A2A14, #141E10)' }}
+        >
+          {renderFloats('player')}
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-3xl">{character.job.emoji}</span>
+            <div className="flex-1">
+              <h3 className="text-lg text-[#C4E0B8] font-bold">{character.name}</h3>
+              <p className="text-xs text-[#80A070]">
+                {character.job.name}{weapon && ` · ${weapon.emoji} ${weapon.name}`}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold text-[#4A9B5F] font-mono w-6">PV</span>
-          <div className="flex-1 h-3 bg-[#0A1408] rounded-full overflow-hidden">
-            <motion.div
-              className="h-full rounded-full"
-              style={{
-                background: playerHpPercent > 50 ? 'linear-gradient(90deg, #4A9B5F, #5CB870)'
-                  : playerHpPercent > 25 ? 'linear-gradient(90deg, #D4874D, #E8A060)'
-                  : 'linear-gradient(90deg, #8B2020, #D94F4F)',
-              }}
-              animate={{
-                width: `${playerHpPercent}%`,
-                opacity: playerInDanger ? [0.6, 1, 0.6] : 1,
-              }}
-              transition={playerInDanger ? { opacity: { repeat: Infinity, duration: 0.8 } } : { duration: 0.4 }}
-            />
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold text-[#4A9B5F] font-mono w-6">PV</span>
+            <div className="flex-1 h-3 bg-[#0A1408] rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{
+                  background: playerHpPercent > 50 ? 'linear-gradient(90deg, #4A9B5F, #5CB870)'
+                    : playerHpPercent > 25 ? 'linear-gradient(90deg, #D4874D, #E8A060)'
+                    : 'linear-gradient(90deg, #8B2020, #D94F4F)',
+                }}
+                animate={{
+                  width: `${playerHpPercent}%`,
+                  opacity: playerInDanger ? [0.6, 1, 0.6] : 1,
+                }}
+                transition={playerInDanger ? { opacity: { repeat: Infinity, duration: 0.8 } } : { duration: 0.4 }}
+              />
+            </div>
+            <span className="text-[10px] font-semibold text-[#4A9B5F] font-mono w-14 text-right">
+              {character.stats.health}/100
+            </span>
           </div>
-          <span className="text-[10px] font-semibold text-[#4A9B5F] font-mono w-14 text-right">
-            {character.stats.health}/100
-          </span>
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* Combat Log */}
@@ -206,7 +274,7 @@ export default function CombatScreen() {
               <div className="flex gap-2">
                 <motion.button
                   whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={{ scale: 0.94 }}
                   onClick={() => dispatch({ type: 'COMBAT_ATTACK' })}
                   className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #B84A3A, #8B2020)', boxShadow: '0 4px 12px rgba(184, 74, 58, 0.3)' }}
@@ -217,7 +285,7 @@ export default function CombatScreen() {
 
                 <motion.button
                   whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={{ scale: 0.94 }}
                   onClick={() => setAiming(true)}
                   className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #C99A3A, #9B7209)', boxShadow: '0 4px 12px rgba(201, 154, 58, 0.25)' }}
@@ -229,7 +297,7 @@ export default function CombatScreen() {
               <div className="flex gap-2">
                 <motion.button
                   whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={{ scale: 0.94 }}
                   onClick={() => dispatch({ type: 'COMBAT_INTIMIDATE' })}
                   className="flex-1 py-3 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)', boxShadow: '0 4px 12px rgba(212, 135, 77, 0.2)' }}
@@ -240,7 +308,7 @@ export default function CombatScreen() {
 
                 <motion.button
                   whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileTap={{ scale: 0.94 }}
                   onClick={() => dispatch({ type: 'COMBAT_FLEE' })}
                   className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#E8D5C0]"
                   style={{ background: 'linear-gradient(135deg, #3D2A1A, #2A1C12)', border: '1px solid #5C4A38' }}
