@@ -17,6 +17,12 @@ export default function CombatScreen() {
   const strikePosRef = useRef(2);
   const strikeDirRef = useRef(1);
   const strikeRafRef = useRef<number | null>(null);
+  // Mini-jeu de cri (intimidation) : marteler le bouton pour gonfler le cri.
+  const SHOUT_MS = 2500;
+  const [shouting, setShouting] = useState(false);
+  const [shoutPower, setShoutPower] = useState(0);
+  const [shoutLeft, setShoutLeft] = useState(SHOUT_MS);
+  const shoutPowerRef = useRef(0);
   const [floats, setFloats] = useState<DmgFloat[]>([]);
   const prevEnemyHp = useRef<number | null>(null);
   const prevPlayerHp = useRef<number | null>(null);
@@ -79,9 +85,37 @@ export default function CombatScreen() {
     return () => { if (strikeRafRef.current) cancelAnimationFrame(strikeRafRef.current); };
   }, [striking]);
 
+  // Minuterie du cri : à la fin, on résout l'intimidation avec le bonus accumulé.
+  useEffect(() => {
+    if (!shouting) return;
+    shoutPowerRef.current = 0;
+    setShoutPower(0);
+    setShoutLeft(SHOUT_MS);
+    const iv = setInterval(() => {
+      setShoutLeft(prev => {
+        const next = prev - 100;
+        if (next <= 0) {
+          clearInterval(iv);
+          setShouting(false);
+          dispatch({ type: 'COMBAT_INTIMIDATE', bonus: (shoutPowerRef.current / 100) * 0.35 });
+          return 0;
+        }
+        return next;
+      });
+    }, 100);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouting]);
+
   if (!currentCombat || !character) return null;
 
   const weakDiscovered = character.activeFlags.includes(`wp:${currentCombat.enemyName}`);
+
+  function shoutTap() {
+    shoutPowerRef.current = Math.min(100, shoutPowerRef.current + 9);
+    setShoutPower(shoutPowerRef.current);
+    playHit();
+  }
 
   function aimAt(targetId: string) {
     setAiming(false);
@@ -318,6 +352,44 @@ export default function CombatScreen() {
                 Annuler
               </button>
             </motion.div>
+          ) : shouting ? (
+            <motion.div
+              key="shout-panel"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="flex flex-col gap-2"
+            >
+              <div className="rounded-xl p-2.5 border border-[#5C3A54]" style={{ background: '#2C1A2A' }}>
+                <p className="text-[11px] text-[#F2C14E] text-center">
+                  💢 Martelez le bouton pour gonfler votre cri avant la fin du temps !
+                </p>
+              </div>
+              {/* Jauge de cri */}
+              <div className="relative h-10 rounded-xl overflow-hidden border border-[#4E2E44]" style={{ background: '#241726' }}>
+                <motion.div
+                  className="absolute inset-y-0 left-0"
+                  animate={{ width: `${shoutPower}%` }}
+                  transition={{ duration: 0.08 }}
+                  style={{ background: shoutPower >= 70 ? 'linear-gradient(90deg, #C99A3A, #F2C14E)' : 'linear-gradient(90deg, #D4874D, #C99A3A)' }}
+                />
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#F6E3D2]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+                  {shoutPower >= 100 ? 'À PLEINS POUMONS !' : `${shoutPower}%`}
+                </span>
+              </div>
+              {/* Temps restant */}
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#241726' }}>
+                <div className="h-full rounded-full" style={{ width: `${(shoutLeft / SHOUT_MS) * 100}%`, background: '#B98CA0', transition: 'width 0.1s linear' }} />
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={shoutTap}
+                className="w-full py-4 rounded-xl text-base font-bold text-white select-none"
+                style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)', boxShadow: '0 4px 12px rgba(212, 135, 77, 0.3)' }}
+              >
+                CRIEZ ! 💢
+              </motion.button>
+            </motion.div>
           ) : aiming ? (
             <motion.div
               key="aim-panel"
@@ -399,7 +471,7 @@ export default function CombatScreen() {
                 <motion.button
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.94 }}
-                  onClick={() => dispatch({ type: 'COMBAT_INTIMIDATE' })}
+                  onClick={() => setShouting(true)}
                   className="flex-1 py-3 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)', boxShadow: '0 4px 12px rgba(212, 135, 77, 0.2)' }}
                 >

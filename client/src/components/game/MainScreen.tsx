@@ -98,6 +98,7 @@ export default function MainScreen() {
     <div className="min-h-screen bg-texture p-4 flex flex-col gap-3">
       {/* Top Bar */}
       <motion.div
+        id="tuto-header"
         initial={{ y: -15, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="craft-card p-3"
@@ -132,6 +133,7 @@ export default function MainScreen() {
 
       {/* Stats */}
       <motion.div
+        id="tuto-stats"
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.05 }}
@@ -142,6 +144,7 @@ export default function MainScreen() {
 
       {/* Météo */}
       <motion.div
+        id="tuto-weather"
         key={state.weather}
         initial={{ opacity: 0, y: -5 }}
         animate={{ opacity: 1, y: 0 }}
@@ -215,7 +218,7 @@ export default function MainScreen() {
         </div>
 
         {/* Main actions grid */}
-        <div className="grid grid-cols-2 gap-2">
+        <div id="tuto-actions" className="grid grid-cols-2 gap-2">
           <ActionTile emoji="🔍" title="Explorer" desc="Tenter une rencontre" accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
           <ActionTile emoji="🙏" title="Mendier" desc="Récolter des pièces" accent="#B8860B" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })} />
           <ActionTile emoji="😴" title="Dormir" desc="Récupérer du sommeil" accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
@@ -247,7 +250,7 @@ export default function MainScreen() {
         </motion.button>
 
         {/* Secondary actions */}
-        <div className="flex gap-2">
+        <div id="tuto-secondary" className="flex gap-2">
           <ActionTile emoji="🛒" title="Achats" disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'shop' })} small />
           <ActionTile emoji="🗺️" title="Voyager" disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'travel' })} small />
           <ActionTile emoji="🎒" title={`Sac (${char.inventory.length})`} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'inventory' })} small />
@@ -256,6 +259,7 @@ export default function MainScreen() {
 
       {/* Next Day */}
       <motion.button
+        id="tuto-nextday"
         initial={{ y: 15, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
