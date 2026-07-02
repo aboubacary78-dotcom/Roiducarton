@@ -132,6 +132,24 @@ une pub ailleurs, importe `showInterstitial`, `showRewarded` ou `showBanner`.
 
 ---
 
+## 4 bis. Icône et écran de démarrage (déjà dessinés ✅)
+
+Les sources sont dans le projet, dans la DA du jeu (carton couronné) :
+- `resources/icon.png` (1024×1024) — icône pour les deux stores
+- `resources/splash.png` (2732×2732) — écran de démarrage
+- `client/public/favicon.png` + `apple-touch-icon.png` — versions web
+
+Pour régénérer après modification du design : `node scripts/generate-assets.mjs`.
+
+Une fois les plateformes ajoutées (`pnpm cap:add:android` / `cap:add:ios`),
+génère toutes les déclinaisons natives (icônes rondes Android, tailles iOS,
+splash sombres…) en une commande :
+
+```bash
+pnpm add -D @capacitor/assets
+npx capacitor-assets generate --android --ios
+```
+
 ## 5. Construire et publier
 
 ### Android (Play Store)
