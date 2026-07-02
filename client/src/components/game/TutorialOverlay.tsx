@@ -1,53 +1,76 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { playClick } from '@/lib/sound';
 
 /*
- * Tutoriel de premier lancement : quelques cartes qui expliquent les bases.
- * S'affiche une seule fois (drapeau en localStorage), et peut être revu
- * depuis l'écran Options.
+ * Tutoriel dynamique : une visite guidée qui met en lumière les VRAIS
+ * éléments de l'écran principal (projecteur découpé dans un voile sombre),
+ * étape par étape. S'affiche au premier lancement, rejouable via Options.
  */
 
-export const TUTORIAL_KEY = 'roi-du-carton-tutorial-seen';
+export const TUTORIAL_KEY = 'roi-du-carton-tutorial-seen-v2';
 
-const STEPS = [
+interface Step { targetId: string | null; emoji: string; title: string; text: string; }
+
+const STEPS: Step[] = [
   {
-    emoji: '📦',
-    title: 'Bienvenue dans la rue',
-    text: 'Vous incarnez un sans-abri dans une ville française. Pas de victoire, pas de fin heureuse garantie : survivez le plus longtemps possible, un jour à la fois.',
+    targetId: 'tuto-header', emoji: '👤', title: 'Votre personnage',
+    text: 'Votre nom, votre quartier et le jour de survie. À droite : votre argent 💰 et votre respect ⭐ — le respect fait baisser les prix en boutique.',
   },
   {
-    emoji: '❤️',
-    title: 'Vos six jauges',
-    text: 'Santé, mental, faim, soif, sommeil et dignité. Elles baissent chaque nuit — plus vite s\'il pleut ou s\'il neige. Si la santé ou le mental tombe à zéro, c\'est la fin.',
+    targetId: 'tuto-stats', emoji: '❤️', title: 'Vos six jauges',
+    text: 'Santé, mental, faim, soif, sommeil, dignité. Elles chutent chaque nuit. Si la santé ou le mental tombe à zéro… c\'est la fin.',
   },
   {
-    emoji: '🎯',
-    title: 'Trois actions par jour',
-    text: 'Explorer, mendier, dormir, chercher la bagarre ou voler : chaque action consomme un des trois points de la journée. Ensuite, passez au jour suivant… et encaissez la nuit.',
+    targetId: 'tuto-weather', emoji: '🌦️', title: 'La météo',
+    text: 'Elle change chaque jour et pèse sur vos jauges et vos gains. Orage et neige sont redoutables — anticipez grâce à la prévision de demain.',
   },
   {
-    emoji: '🥷',
-    title: 'Mendier et voler',
-    text: 'Ces actions se jouent à l\'adresse : attrapez les pièces, arrêtez le curseur au bon endroit. Mais gare à la police — amende pour la manche, garde à vue pour le vol.',
+    targetId: 'tuto-actions', emoji: '🎯', title: '3 actions par jour',
+    text: 'Explorer déclenche des rencontres. Mendier et Voler se jouent à l\'adresse — gare à la police ! Dormir récupère, Bagarre… c\'est la bagarre.',
   },
   {
-    emoji: '🥊',
-    title: 'Le combat',
-    text: 'Attaquez avec le bon timing, ou visez le point faible de l\'ennemi — chaque adversaire a le sien, et un indice pour le deviner. Intimider ou fuir reste parfois plus sage.',
+    targetId: 'tuto-secondary', emoji: '🛒', title: 'Gratuit et vital',
+    text: 'Boutiques (nourriture, soins, armes), voyage entre quartiers et votre sac : utilisez et revendez vos objets. Ces menus ne coûtent aucune action.',
   },
   {
-    emoji: '🛒',
-    title: 'Dépensez malin',
-    text: 'Vos euros durement gagnés s\'échangent en boutique : nourriture, soins, armes, manteau. Le respect fait baisser les prix. Bonne chance… Majesté du carton.',
+    targetId: 'tuto-nextday', emoji: '🌙', title: 'Jour suivant',
+    text: 'Vos actions épuisées, passez la nuit. Elle consomme vos jauges — surtout sous la pluie. Préparez-vous avant de dormir.',
+  },
+  {
+    targetId: null, emoji: '👑', title: 'À vous de jouer !',
+    text: 'La rue est dure, mais l\'humour est plus dur. Bonne chance, Majesté du carton.',
   },
 ];
+
+interface Rect { top: number; left: number; width: number; height: number; }
 
 export default function TutorialOverlay() {
   const [visible, setVisible] = useState(() => {
     try { return localStorage.getItem(TUTORIAL_KEY) !== '1'; } catch { return false; }
   });
   const [step, setStep] = useState(0);
+  const [rect, setRect] = useState<Rect | null>(null);
+
+  const s = STEPS[step];
+
+  // Mesure l'élément ciblé (après les animations d'entrée de l'écran).
+  useEffect(() => {
+    if (!visible) return;
+    if (!s.targetId) { setRect(null); return; }
+    let cancelled = false;
+    const measure = () => {
+      const el = document.getElementById(s.targetId!);
+      if (!el || cancelled) { setRect(null); return; }
+      el.scrollIntoView({ block: 'center', behavior: 'instant' as ScrollBehavior });
+      const r = el.getBoundingClientRect();
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    };
+    // Deux mesures : tout de suite, puis après les animations framer (~600 ms).
+    const t1 = setTimeout(measure, 80);
+    const t2 = setTimeout(measure, 650);
+    return () => { cancelled = true; clearTimeout(t1); clearTimeout(t2); };
+  }, [visible, step, s.targetId]);
 
   function close() {
     try { localStorage.setItem(TUTORIAL_KEY, '1'); } catch { /* silent */ }
@@ -56,8 +79,10 @@ export default function TutorialOverlay() {
 
   if (!visible) return null;
 
-  const s = STEPS[step];
   const last = step === STEPS.length - 1;
+  const pad = 6;
+  // Le panneau se place sous l'élément s'il est dans la moitié haute, sinon au-dessus.
+  const placeBelow = rect ? rect.top + rect.height / 2 < window.innerHeight * 0.5 : false;
 
   return (
     <AnimatePresence>
@@ -65,44 +90,63 @@ export default function TutorialOverlay() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-5 overlay-backdrop"
+        className="fixed inset-0 z-50"
       >
+        {/* Projecteur : la découpe suit l'élément ciblé */}
+        {rect ? (
+          <motion.div
+            animate={{
+              top: rect.top - pad, left: rect.left - pad,
+              width: rect.width + pad * 2, height: rect.height + pad * 2,
+            }}
+            transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+            className="absolute rounded-2xl pointer-events-none"
+            style={{ boxShadow: '0 0 0 9999px rgba(42,31,26,0.66)', border: '2px solid #F2C14E' }}
+          />
+        ) : (
+          <div className="absolute inset-0" style={{ background: 'rgba(42,31,26,0.66)' }} />
+        )}
+
+        {/* Panneau d'explication */}
         <motion.div
           key={step}
-          initial={{ scale: 0.92, y: 12, opacity: 0 }}
-          animate={{ scale: 1, y: 0, opacity: 1 }}
-          transition={{ type: 'spring', damping: 22, stiffness: 320 }}
-          className="craft-card-solid p-6 max-w-sm w-full text-center"
+          initial={{ opacity: 0, y: placeBelow ? -8 : 8, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: 'spring', damping: 24, stiffness: 320 }}
+          className="absolute left-1/2 -translate-x-1/2 craft-card-solid p-4 w-[calc(100%-2.5rem)] max-w-sm"
+          style={
+            rect
+              ? placeBelow
+                ? { top: Math.min(rect.top + rect.height + 16, window.innerHeight - 240) }
+                : { bottom: Math.max(window.innerHeight - rect.top + 16, 96) }
+              : { top: '50%', transform: 'translate(-50%, -50%)' }
+          }
         >
-          <div className="text-5xl mb-3">{s.emoji}</div>
-          <h2 className="text-2xl text-[#2A1F1A] mb-2">{s.title}</h2>
-          <p className="text-sm text-[#6B5740] leading-relaxed mb-5">{s.text}</p>
-
-          {/* Points d'étape */}
-          <div className="flex justify-center gap-1.5 mb-5">
-            {STEPS.map((_, i) => (
-              <div
-                key={i}
-                className="w-2 h-2 rounded-full transition-colors"
-                style={{ background: i === step ? '#C4723A' : '#E8D5C0' }}
-              />
-            ))}
+          <div className="flex items-start gap-3 mb-2">
+            <span className="text-3xl">{s.emoji}</span>
+            <div>
+              <h2 className="text-xl text-[#2A1F1A] leading-tight">{s.title}</h2>
+              <p className="text-[10px] text-[#A08B70] font-mono mt-0.5">Étape {step + 1}/{STEPS.length}</p>
+            </div>
           </div>
+          <p className="text-sm text-[#6B5740] leading-relaxed mb-3">{s.text}</p>
 
-          <button
-            onClick={() => { playClick(); last ? close() : setStep(step + 1); }}
-            className="btn-primary w-full py-3 text-sm"
-          >
-            {last ? 'C\'est parti !' : 'Suivant'}
-          </button>
-          {!last && (
+          <div className="flex items-center gap-2">
+            {!last && (
+              <button
+                onClick={close}
+                className="px-3 py-2.5 text-xs text-[#A08B70] font-medium hover:text-[#6B5740] transition-colors"
+              >
+                Passer
+              </button>
+            )}
             <button
-              onClick={close}
-              className="w-full py-2.5 mt-1 text-xs text-[#A08B70] font-medium hover:text-[#6B5740] transition-colors"
+              onClick={() => { playClick(); last ? close() : setStep(step + 1); }}
+              className="btn-primary flex-1 py-2.5 text-sm"
             >
-              Passer le tutoriel
+              {last ? 'C\'est parti !' : 'Suivant →'}
             </button>
-          )}
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

@@ -2435,7 +2435,7 @@ type GameAction =
   | { type: 'START_COMBAT'; enemy: Enemy }
   | { type: 'COMBAT_ATTACK'; quality?: 'perfect' | 'good' | 'poor' }
   | { type: 'COMBAT_AIM'; targetId: string }
-  | { type: 'COMBAT_INTIMIDATE' }
+  | { type: 'COMBAT_INTIMIDATE'; bonus?: number }
   | { type: 'COMBAT_FLEE' }
   | { type: 'BUY_ITEM'; shopItem: ShopItem; actualPrice: number }
   | { type: 'TRIGGER_SHOP_EVENT'; event: ShopEvent };
@@ -2948,7 +2948,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const hasCharisme = state.character.traits.some(t => t.id === 'charismatique');
       const hasHaleine = state.character.traits.some(t => t.id === 'haleine');
       const isAvocat = state.character.job.id === 'avocat';
-      const intimidateChance = 0.2 + (hasCharisme ? 0.15 : 0) + (hasHaleine ? 0.2 : 0) + (isAvocat ? 0.1 : 0);
+      // Le mini-jeu de cri ajoute jusqu'à +35% de chance selon la puissance.
+      const intimidateChance = 0.2 + (hasCharisme ? 0.15 : 0) + (hasHaleine ? 0.2 : 0) + (isAvocat ? 0.1 : 0) + (action.bonus || 0);
       const logs = [...state.combatLog];
       if (Math.random() < intimidateChance) {
         const enemy = ENEMIES.find(e => e.name === state.currentCombat!.enemyName);
