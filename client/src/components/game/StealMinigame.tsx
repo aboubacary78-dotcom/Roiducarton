@@ -12,11 +12,14 @@ export default function StealMinigame() {
   // La cible du vol, tirée une fois à l'ouverture.
   const [target] = useState(() => STEAL_TARGETS[Math.floor(Math.random() * STEAL_TARGETS.length)]);
 
-  // Zones (en %) centrées : jackpot au milieu de la zone de réussite.
-  const greenHalf = 17 + (agile ? 7 : 0);
-  const jackHalf = 5;
-  const greenStart = 50 - greenHalf, greenEnd = 50 + greenHalf;
-  const jackStart = 50 - jackHalf, jackEnd = 50 + jackHalf;
+  // La zone change de place à chaque tentative (impossible de mémoriser le
+  // centre), et le curseur a une vitesse légèrement variable.
+  const [zoneCenter] = useState(() => 25 + Math.random() * 50);
+  const [speed] = useState(() => 2.0 + Math.random() * 0.5);
+  const greenHalf = 10 + (agile ? 5 : 0);
+  const jackHalf = 3.5;
+  const greenStart = zoneCenter - greenHalf, greenEnd = zoneCenter + greenHalf;
+  const jackStart = zoneCenter - jackHalf, jackEnd = zoneCenter + jackHalf;
 
   const [pos, setPos] = useState(2);
   const [tier, setTier] = useState<Tier | null>(null);
@@ -26,7 +29,6 @@ export default function StealMinigame() {
   const stoppedRef = useRef(false);
 
   useEffect(() => {
-    const speed = 1.45;
     const loop = () => {
       if (stoppedRef.current) return;
       let p = posRef.current + dirRef.current * speed;

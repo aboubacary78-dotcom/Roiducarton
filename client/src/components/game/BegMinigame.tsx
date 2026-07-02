@@ -11,7 +11,7 @@ import { playHit, playCrit, playHurt } from '@/lib/sound';
  */
 
 const ROUND_MS = 8000;
-const ITEM_TTL = 1300;
+const ITEM_TTL = 900;
 
 interface Item { id: number; x: number; y: number; kind: 'coin' | 'bill' | 'cop'; }
 
@@ -41,11 +41,12 @@ export default function BegMinigame() {
   }
 
   useEffect(() => {
-    const spawnEvery = charisma ? 520 : 650;
+    const spawnEvery = charisma ? 480 : 600;
     const spawner = setInterval(() => {
       if (endedRef.current) return;
       const roll = Math.random();
-      const kind: Item['kind'] = roll < 0.14 ? 'cop' : roll < 0.30 ? 'bill' : 'coin';
+      // Plus de policiers qu'avant : il faut viser, pas mitrailler.
+      const kind: Item['kind'] = roll < 0.22 ? 'cop' : roll < 0.34 ? 'bill' : 'coin';
       const item: Item = { id: ++idRef.current, x: 8 + Math.random() * 76, y: 8 + Math.random() * 76, kind };
       setItems(prev => [...prev, item]);
       setTimeout(() => setItems(prev => prev.filter(i => i.id !== item.id)), ITEM_TTL);
@@ -104,10 +105,14 @@ export default function BegMinigame() {
           {items.map(item => (
             <motion.button
               key={item.id}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ scale: 0, opacity: 0, y: 0 }}
+              animate={{ scale: 1, opacity: 1, y: 30 }}
               exit={{ scale: 0, opacity: 0 }}
-              transition={{ type: 'spring', damping: 16, stiffness: 400 }}
+              transition={{
+                scale: { type: 'spring', damping: 16, stiffness: 400 },
+                opacity: { duration: 0.15 },
+                y: { duration: ITEM_TTL / 1000, ease: 'linear' },
+              }}
               onClick={() => tap(item)}
               className="absolute text-3xl leading-none select-none"
               style={{ left: `${item.x}%`, top: `${item.y}%`, filter: item.kind === 'bill' ? 'drop-shadow(0 0 6px rgba(184,134,11,0.55))' : undefined }}
