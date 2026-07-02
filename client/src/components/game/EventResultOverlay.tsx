@@ -1,7 +1,8 @@
 import { useGame, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { showRewarded } from '@/lib/ads';
+import { playSuccess, playFail, playWin } from '@/lib/sound';
 
 const STAT_EMOJIS: Record<keyof Stats, string> = {
   health: '❤️', mental: '🧠', hunger: '🍖', thirst: '💧', sleep: '😴', dignity: '👑',
@@ -28,6 +29,17 @@ export default function EventResultOverlay() {
   const { state, dispatch } = useGame();
   const result = state.eventResult;
   const [doubling, setDoubling] = useState(false);
+
+  // Son du résultat : fanfare de victoire, réussite ou échec.
+  useEffect(() => {
+    if (!result) return;
+    const positive = (result.moneyChange || 0) > 0 || (result.respectChange || 0) > 0 ||
+      Object.values(result.statChanges || {}).reduce((s, v) => s + (v || 0), 0) > 0;
+    if (result.text.startsWith('Victoire')) playWin();
+    else if (positive) playSuccess();
+    else playFail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result?.text]);
 
   if (!result) return null;
 

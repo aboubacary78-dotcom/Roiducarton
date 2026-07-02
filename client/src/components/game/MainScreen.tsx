@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import StatBars from './StatBars';
 import CardboardAvatar from './CardboardAvatar';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
+import { playClick } from '@/lib/sound';
 
 interface Enemy {
   name: string;
@@ -234,7 +235,7 @@ export default function MainScreen() {
         <motion.button
           whileHover={actionsLeft <= 0 ? {} : { scale: 1.01 }}
           whileTap={actionsLeft <= 0 ? {} : { scale: 0.98 }}
-          onClick={actionsLeft <= 0 ? undefined : () => dispatch({ type: 'STEAL' })}
+          onClick={actionsLeft <= 0 ? undefined : () => { playClick(); dispatch({ type: 'STEAL' }); }}
           disabled={actionsLeft <= 0}
           className={`action-btn p-2.5 flex items-center justify-center gap-2 border-[#D94F4F]/30 ${
             actionsLeft <= 0 ? 'opacity-35 pointer-events-none' : ''
@@ -260,7 +261,7 @@ export default function MainScreen() {
         transition={{ delay: 0.2 }}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.98 }}
-        onClick={() => dispatch({ type: 'NEXT_DAY' })}
+        onClick={() => { playClick(); dispatch({ type: 'NEXT_DAY' }); }}
         className="btn-primary w-full py-3.5 text-sm"
       >
         Jour Suivant
@@ -276,7 +277,7 @@ function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, sma
     <motion.button
       whileHover={disabled ? {} : { scale: 1.02 }}
       whileTap={disabled ? {} : { scale: 0.97 }}
-      onClick={disabled ? undefined : onClick}
+      onClick={disabled ? undefined : () => { playClick(); onClick(); }}
       disabled={disabled}
       className={`action-btn ${small ? 'p-2.5 flex-1' : 'p-3'} flex flex-col items-center justify-center gap-1 ${
         disabled ? 'opacity-35 pointer-events-none' : ''

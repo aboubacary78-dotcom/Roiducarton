@@ -17,6 +17,7 @@ import ShopScreen from '@/components/game/ShopScreen';
 import SettingsScreen from '@/components/game/SettingsScreen';
 import StealMinigame from '@/components/game/StealMinigame';
 import BegMinigame from '@/components/game/BegMinigame';
+import TutorialOverlay from '@/components/game/TutorialOverlay';
 import WeatherOverlay from '@/components/game/WeatherOverlay';
 
 export default function Home() {
@@ -36,6 +37,7 @@ export default function Home() {
         {state.screen === 'title' && <TitleScreen />}
         {state.screen === 'character-select' && <CharacterSelect />}
         {state.screen === 'main' && <MainScreen />}
+        {state.screen === 'main' && <TutorialOverlay />}
         {state.screen === 'event' && <EventScreen />}
         {state.screen === 'travel' && <TravelScreen />}
         {state.screen === 'inventory' && <InventoryScreen />}
