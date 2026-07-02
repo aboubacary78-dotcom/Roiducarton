@@ -3,11 +3,12 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { isMuted, setMuted } from '@/lib/sound';
 import { isAdsRemoved, purchaseRemoveAds } from '@/lib/ads';
+import { TUTORIAL_KEY } from './TutorialOverlay';
 
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
 const PRIVACY_URL = 'https://example.com/roi-du-carton/confidentialite';
-const APP_VERSION = '1.13.1';
+const APP_VERSION = '1.14.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -133,6 +134,16 @@ export default function SettingsScreen() {
         className="craft-card p-4 flex flex-col gap-3"
       >
         <h2 className="text-base font-semibold text-[#2A1F1A]">Données</h2>
+
+        <button
+          onClick={() => {
+            try { localStorage.removeItem(TUTORIAL_KEY); } catch { /* silent */ }
+            dispatch({ type: 'SET_SCREEN', screen: state.character ? 'main' : 'title' });
+          }}
+          className="action-btn p-3 text-sm text-[#3D3020] flex items-center gap-2"
+        >
+          📖 Revoir le tutoriel
+        </button>
 
         <a
           href={PRIVACY_URL}

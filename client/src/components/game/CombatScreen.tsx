@@ -10,6 +10,13 @@ export default function CombatScreen() {
   const { state, dispatch } = useGame();
   const { currentCombat, combatLog, character } = state;
   const [aiming, setAiming] = useState(false);
+  // Mini-jeu de frappe : curseur à arrêter au bon moment.
+  const [striking, setStriking] = useState(false);
+  const [strikeCenter, setStrikeCenter] = useState(50);
+  const [strikePos, setStrikePos] = useState(2);
+  const strikePosRef = useRef(2);
+  const strikeDirRef = useRef(1);
+  const strikeRafRef = useRef<number | null>(null);
   const [floats, setFloats] = useState<DmgFloat[]>([]);
   const prevEnemyHp = useRef<number | null>(null);
   const prevPlayerHp = useRef<number | null>(null);
@@ -54,6 +61,24 @@ export default function CombatScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCombat?.enemyHealth, character?.stats.health, combatLog.length]);
 
+  // Boucle du curseur de frappe (active tant que `striking` est vrai).
+  useEffect(() => {
+    if (!striking) return;
+    strikePosRef.current = 2;
+    strikeDirRef.current = 1;
+    const speed = 2.3;
+    const loop = () => {
+      let p = strikePosRef.current + strikeDirRef.current * speed;
+      if (p >= 98) { p = 98; strikeDirRef.current = -1; }
+      if (p <= 2) { p = 2; strikeDirRef.current = 1; }
+      strikePosRef.current = p;
+      setStrikePos(p);
+      strikeRafRef.current = requestAnimationFrame(loop);
+    };
+    strikeRafRef.current = requestAnimationFrame(loop);
+    return () => { if (strikeRafRef.current) cancelAnimationFrame(strikeRafRef.current); };
+  }, [striking]);
+
   if (!currentCombat || !character) return null;
 
   const weakDiscovered = character.activeFlags.includes(`wp:${currentCombat.enemyName}`);
@@ -61,6 +86,18 @@ export default function CombatScreen() {
   function aimAt(targetId: string) {
     setAiming(false);
     dispatch({ type: 'COMBAT_AIM', targetId });
+  }
+
+  function openStrike() {
+    setStrikeCenter(25 + Math.random() * 50);
+    setStriking(true);
+  }
+
+  function strike() {
+    const dist = Math.abs(strikePosRef.current - strikeCenter);
+    const quality = dist <= 5.5 ? 'perfect' : dist <= 15 ? 'good' : 'poor';
+    setStriking(false);
+    dispatch({ type: 'COMBAT_ATTACK', quality });
   }
 
   const hpPercent = (currentCombat.enemyHealth / currentCombat.enemyMaxHealth) * 100;
@@ -244,7 +281,44 @@ export default function CombatScreen() {
       {/* Actions */}
       <div className="flex flex-col gap-2 mt-auto">
         <AnimatePresence mode="wait">
-          {aiming ? (
+          {striking ? (
+            <motion.div
+              key="strike-panel"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="flex flex-col gap-2"
+            >
+              <div className="rounded-xl p-2.5 border border-[#5C3A54]" style={{ background: '#2C1A2A' }}>
+                <p className="text-[11px] text-[#F2C14E] text-center">
+                  ⚡ Frappez au bon moment — l'or, c'est la frappe parfaite. Trop loin : coup mou et riposte.
+                </p>
+              </div>
+              <div className="relative h-10 rounded-xl overflow-hidden border border-[#4E2E44]" style={{ background: '#241726' }}>
+                <div className="absolute inset-y-0" style={{ left: `${strikeCenter - 15}%`, width: '30%', background: 'rgba(74,155,95,0.3)' }} />
+                <div className="absolute inset-y-0" style={{ left: `${strikeCenter - 5.5}%`, width: '11%', background: 'rgba(242,193,78,0.5)' }} />
+                <div
+                  className="absolute top-0 bottom-0 w-1 rounded-full"
+                  style={{ left: `calc(${strikePos}% - 2px)`, background: '#F6E3D2', boxShadow: '0 0 8px rgba(255,255,255,0.5)' }}
+                />
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.94 }}
+                onClick={strike}
+                className="w-full py-3.5 rounded-xl text-sm font-semibold text-white"
+                style={{ background: 'linear-gradient(135deg, #B84A3A, #8B2020)', boxShadow: '0 4px 12px rgba(184, 74, 58, 0.3)' }}
+              >
+                ⚡ Frapper !
+              </motion.button>
+              <button
+                onClick={() => setStriking(false)}
+                className="w-full py-2 rounded-xl text-xs font-medium text-[#B98CA0]"
+                style={{ background: '#2C1A2A', border: '1px solid #4E3448' }}
+              >
+                Annuler
+              </button>
+            </motion.div>
+          ) : aiming ? (
             <motion.div
               key="aim-panel"
               initial={{ opacity: 0, y: 10 }}
@@ -302,7 +376,7 @@ export default function CombatScreen() {
                 <motion.button
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.94 }}
-                  onClick={() => dispatch({ type: 'COMBAT_ATTACK' })}
+                  onClick={openStrike}
                   className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #B84A3A, #8B2020)', boxShadow: '0 4px 12px rgba(184, 74, 58, 0.3)' }}
                 >

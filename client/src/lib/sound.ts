@@ -103,6 +103,26 @@ export function playWin(): void {
   notes.forEach((f, i) => setTimeout(() => tone(f, 0.16, 'triangle', 0.12), i * 90));
 }
 
+/** Petit clic d'interface (boutons d'action). */
+export function playClick(): void {
+  if (muted) return;
+  tone(880, 0.045, 'triangle', 0.045);
+}
+
+/** Résultat positif : deux notes ascendantes. */
+export function playSuccess(): void {
+  if (muted) return;
+  tone(523, 0.12, 'triangle', 0.09);
+  setTimeout(() => tone(784, 0.16, 'triangle', 0.09), 110);
+}
+
+/** Résultat négatif : deux notes descendantes. */
+export function playFail(): void {
+  if (muted) return;
+  tone(330, 0.14, 'triangle', 0.08);
+  setTimeout(() => tone(220, 0.2, 'triangle', 0.08), 120);
+}
+
 /** Vibration haptique (Android / app native). Sans effet si non supporté. */
 export function vibrate(pattern: number | number[]): void {
   if (muted) return;

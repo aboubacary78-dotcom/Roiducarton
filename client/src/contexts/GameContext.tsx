@@ -2433,7 +2433,7 @@ type GameAction =
   | { type: 'RESET_SCORES' }
   | { type: 'CONTINUE_SAVE' }
   | { type: 'START_COMBAT'; enemy: Enemy }
-  | { type: 'COMBAT_ATTACK' }
+  | { type: 'COMBAT_ATTACK'; quality?: 'perfect' | 'good' | 'poor' }
   | { type: 'COMBAT_AIM'; targetId: string }
   | { type: 'COMBAT_INTIMIDATE' }
   | { type: 'COMBAT_FLEE' }
@@ -2820,13 +2820,26 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const hasForce = state.character.traits.some(t => t.id === 'costaud');
       const weapon = state.currentCombat.playerWeapon;
       const baseDmg = 6 + (isMilitaire ? 4 : 0) + (hasForce ? 3 : 0) + (weapon ? (weapon.attackBonus ?? 4) : 0);
-      const playerDmg = Math.floor(baseDmg * (0.6 + Math.random() * 0.5));
+      // Qualité du timing (mini-jeu de frappe) : parfaite = plus de dégâts et
+      // riposte affaiblie ; molle = coup faible et l'ennemi en profite.
+      const quality = action.quality || 'good';
+      const dmgMul = quality === 'perfect' ? 1.2 + Math.random() * 0.3
+        : quality === 'poor' ? 0.35 + Math.random() * 0.25
+        : 0.6 + Math.random() * 0.5;
+      const riposteMul = quality === 'perfect' ? 0.45 + Math.random() * 0.45
+        : quality === 'poor' ? 1.0 + Math.random() * 0.6
+        : 0.7 + Math.random() * 0.8;
+      const playerDmg = Math.floor(baseDmg * dmgMul);
       const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
-      const enemyDmg = Math.floor(state.currentCombat.enemyAttack * (0.7 + Math.random() * 0.8) * (hasOsMousse ? 1.5 : 1));
+      const enemyDmg = Math.floor(state.currentCombat.enemyAttack * riposteMul * (hasOsMousse ? 1.5 : 1));
       const newEnemyHp = Math.max(0, state.currentCombat.enemyHealth - playerDmg);
       const newHp = Math.max(0, state.character.stats.health - enemyDmg);
       const logs = [...state.combatLog];
-      logs.push(`⚔️ Vous attaquez${weapon ? ` avec ${weapon.name}` : ''} ! ${playerDmg} dégâts !`);
+      logs.push(quality === 'perfect'
+        ? `⚡ Frappe parfaite${weapon ? ` avec ${weapon.name}` : ''} ! ${playerDmg} dégâts !`
+        : quality === 'poor'
+          ? `😖 Frappe molle${weapon ? ` avec ${weapon.name}` : ''}... ${playerDmg} dégâts.`
+          : `⚔️ Vous attaquez${weapon ? ` avec ${weapon.name}` : ''} ! ${playerDmg} dégâts !`);
       if (newEnemyHp > 0) logs.push(`💥 ${state.currentCombat.enemyName} riposte ! ${enemyDmg} dégâts !`);
       if (newEnemyHp <= 0) {
         const enemy = ENEMIES.find(e => e.name === state.currentCombat!.enemyName);
