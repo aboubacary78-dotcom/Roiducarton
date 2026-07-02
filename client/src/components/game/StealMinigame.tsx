@@ -1,4 +1,4 @@
-import { useGame, STEAL_TARGETS } from '@/contexts/GameContext';
+import { useGame, STEAL_TARGETS, randomFromArray } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
@@ -10,7 +10,7 @@ export default function StealMinigame() {
   const char = state.character;
   const agile = !!char?.traits.some(t => t.id === 'agile');
   // La cible du vol, tirée une fois à l'ouverture.
-  const [target] = useState(() => STEAL_TARGETS[Math.floor(Math.random() * STEAL_TARGETS.length)]);
+  const [target] = useState(() => randomFromArray(STEAL_TARGETS));
 
   // La zone change de place à chaque tentative (impossible de mémoriser le
   // centre), et le curseur a une vitesse légèrement variable.
@@ -21,25 +21,31 @@ export default function StealMinigame() {
   const greenStart = zoneCenter - greenHalf, greenEnd = zoneCenter + greenHalf;
   const jackStart = zoneCenter - jackHalf, jackEnd = zoneCenter + jackHalf;
 
-  const [pos, setPos] = useState(2);
   const [tier, setTier] = useState<Tier | null>(null);
   const posRef = useRef(2);
   const dirRef = useRef(1);
   const rafRef = useRef<number | null>(null);
   const stoppedRef = useRef(false);
+  const cursorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const loop = () => {
+    // Curseur piloté par ref (pas de re-rendu par frame) et normalisé au
+    // temps réel : même vitesse à 60, 90 ou 120 Hz.
+    let last = performance.now();
+    const loop = (now: number) => {
       if (stoppedRef.current) return;
-      let p = posRef.current + dirRef.current * speed;
+      const dt = Math.min(50, now - last);
+      last = now;
+      let p = posRef.current + dirRef.current * speed * (dt / 16.667);
       if (p >= 98) { p = 98; dirRef.current = -1; }
       if (p <= 2) { p = 2; dirRef.current = 1; }
       posRef.current = p;
-      setPos(p);
+      if (cursorRef.current) cursorRef.current.style.left = `calc(${p}% - 2px)`;
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function stop() {
@@ -87,10 +93,11 @@ export default function StealMinigame() {
           <div className="absolute inset-y-0" style={{ left: `${greenStart}%`, width: `${greenEnd - greenStart}%`, background: 'rgba(74,155,95,0.3)' }} />
           {/* zone or */}
           <div className="absolute inset-y-0" style={{ left: `${jackStart}%`, width: `${jackEnd - jackStart}%`, background: 'rgba(184,134,11,0.45)' }} />
-          {/* curseur */}
-          <motion.div
+          {/* curseur (position pilotée par ref dans la boucle rAF) */}
+          <div
+            ref={cursorRef}
             className="absolute top-0 bottom-0 w-1 rounded-full"
-            style={{ left: `calc(${pos}% - 2px)`, background: tier ? tierColor : '#2A1F1A', boxShadow: '0 1px 4px rgba(42,31,26,0.35)' }}
+            style={{ background: tier ? tierColor : '#2A1F1A', boxShadow: '0 1px 4px rgba(42,31,26,0.35)' }}
           />
         </div>
         {agile && <p className="text-[11px] text-[#3d8b4f] text-center mt-2">🏃 Agile : zone de réussite élargie.</p>}

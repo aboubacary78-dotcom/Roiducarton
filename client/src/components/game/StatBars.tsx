@@ -1,13 +1,16 @@
-import type { Stats } from '@/contexts/GameContext';
+import { STAT_META, type Stats } from '@/contexts/GameContext';
 
-const STAT_CONFIG: { key: keyof Stats; emoji: string; label: string; color: string; dangerColor: string }[] = [
-  { key: 'health', emoji: '❤️', label: 'Santé', color: '#D94F4F', dangerColor: '#8B2020' },
-  { key: 'mental', emoji: '🧠', label: 'Mental', color: '#7B68EE', dangerColor: '#4A3A9B' },
-  { key: 'hunger', emoji: '🍖', label: 'Faim', color: '#D4874D', dangerColor: '#8B4513' },
-  { key: 'thirst', emoji: '💧', label: 'Soif', color: '#4A8FBF', dangerColor: '#2A5A8B' },
-  { key: 'sleep', emoji: '😴', label: 'Sommeil', color: '#8B7EC8', dangerColor: '#5A4A8B' },
-  { key: 'dignity', emoji: '👑', label: 'Dignité', color: '#B8860B', dangerColor: '#7A5A08' },
+// Couleurs propres aux barres ; emoji/label viennent de la table commune.
+const STAT_COLORS: { key: keyof Stats; color: string; dangerColor: string }[] = [
+  { key: 'health', color: '#D94F4F', dangerColor: '#8B2020' },
+  { key: 'mental', color: '#7B68EE', dangerColor: '#4A3A9B' },
+  { key: 'hunger', color: '#D4874D', dangerColor: '#8B4513' },
+  { key: 'thirst', color: '#4A8FBF', dangerColor: '#2A5A8B' },
+  { key: 'sleep', color: '#8B7EC8', dangerColor: '#5A4A8B' },
+  { key: 'dignity', color: '#B8860B', dangerColor: '#7A5A08' },
 ];
+
+const STAT_CONFIG = STAT_COLORS.map(c => ({ ...c, ...STAT_META[c.key] }));
 
 export default function StatBars({ stats, compact = false }: { stats: Stats; compact?: boolean }) {
   return (

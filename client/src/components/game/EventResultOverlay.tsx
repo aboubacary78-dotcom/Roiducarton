@@ -1,16 +1,8 @@
-import { useGame, type Stats } from '@/contexts/GameContext';
+import { useGame, STAT_META, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { playSuccess, playFail, playWin } from '@/lib/sound';
-
-const STAT_EMOJIS: Record<keyof Stats, string> = {
-  health: '❤️', mental: '🧠', hunger: '🍖', thirst: '💧', sleep: '😴', dignity: '👑',
-};
-
-const STAT_LABELS: Record<keyof Stats, string> = {
-  health: 'Santé', mental: 'Mental', hunger: 'Faim', thirst: 'Soif', sleep: 'Sommeil', dignity: 'Dignité',
-};
 
 const FLAG_LABELS: Record<string, string> = {
   'ami-jardinier': '🌱 Ami du jardinier',
@@ -116,7 +108,7 @@ export default function EventResultOverlay() {
                         isPos ? 'bg-[#4A9B5F]/10 text-[#3d8b4f]' : 'bg-[#D94F4F]/10 text-[#B84A3A]'
                       }`}
                     >
-                      {STAT_EMOJIS[key as keyof Stats]} {STAT_LABELS[key as keyof Stats]} {isPos ? '+' : ''}{val}
+                      {STAT_META[key as keyof Stats].emoji} {STAT_META[key as keyof Stats].label} {isPos ? '+' : ''}{val}
                     </motion.span>
                   );
                 })}

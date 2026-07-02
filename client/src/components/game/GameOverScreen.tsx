@@ -1,4 +1,4 @@
-import { useGame } from '@/contexts/GameContext';
+import { useGame, computeScore } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showInterstitial, showRewarded } from '@/lib/ads';
@@ -42,7 +42,9 @@ export default function GameOverScreen() {
     ? 'Votre corps a lâché. Trop de blessures, pas assez de soins.'
     : 'Votre esprit s\'est égaré. La rue a brisé votre moral.';
 
-  const score = char.day * 10 + char.respect * 5 + char.money * 2 + char.inventory.length;
+  // Même formule que les meilleurs scores enregistrés (computeScore) :
+  // l'écran de fin et le tableau des scores affichent le même chiffre.
+  const score = computeScore(char.day, char.respect, char.money);
 
   return (
     <motion.div

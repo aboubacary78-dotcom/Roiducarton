@@ -13,16 +13,19 @@ export default function CombatScreen() {
   // Mini-jeu de frappe : curseur à arrêter au bon moment.
   const [striking, setStriking] = useState(false);
   const [strikeCenter, setStrikeCenter] = useState(50);
-  const [strikePos, setStrikePos] = useState(2);
   const strikePosRef = useRef(2);
   const strikeDirRef = useRef(1);
   const strikeRafRef = useRef<number | null>(null);
+  const strikeCursorRef = useRef<HTMLDivElement | null>(null);
   // Mini-jeu de cri (intimidation) : marteler le bouton pour gonfler le cri.
+  // Jauge et minuterie pilotées par refs DOM : pas de re-rendu du combat
+  // pendant le martèlement.
   const SHOUT_MS = 2500;
   const [shouting, setShouting] = useState(false);
-  const [shoutPower, setShoutPower] = useState(0);
-  const [shoutLeft, setShoutLeft] = useState(SHOUT_MS);
   const shoutPowerRef = useRef(0);
+  const shoutGaugeRef = useRef<HTMLDivElement | null>(null);
+  const shoutLabelRef = useRef<HTMLSpanElement | null>(null);
+  const shoutTimeRef = useRef<HTMLDivElement | null>(null);
   const [floats, setFloats] = useState<DmgFloat[]>([]);
   const prevEnemyHp = useRef<number | null>(null);
   const prevPlayerHp = useRef<number | null>(null);
@@ -68,17 +71,22 @@ export default function CombatScreen() {
   }, [currentCombat?.enemyHealth, character?.stats.health, combatLog.length]);
 
   // Boucle du curseur de frappe (active tant que `striking` est vrai).
+  // Piloté par ref (pas de re-rendu par frame) et normalisé au temps réel :
+  // même vitesse quel que soit le taux de rafraîchissement de l'écran.
   useEffect(() => {
     if (!striking) return;
     strikePosRef.current = 2;
     strikeDirRef.current = 1;
     const speed = 2.3;
-    const loop = () => {
-      let p = strikePosRef.current + strikeDirRef.current * speed;
+    let last = performance.now();
+    const loop = (now: number) => {
+      const dt = Math.min(50, now - last);
+      last = now;
+      let p = strikePosRef.current + strikeDirRef.current * speed * (dt / 16.667);
       if (p >= 98) { p = 98; strikeDirRef.current = -1; }
       if (p <= 2) { p = 2; strikeDirRef.current = 1; }
       strikePosRef.current = p;
-      setStrikePos(p);
+      if (strikeCursorRef.current) strikeCursorRef.current.style.left = `calc(${p}% - 2px)`;
       strikeRafRef.current = requestAnimationFrame(loop);
     };
     strikeRafRef.current = requestAnimationFrame(loop);
@@ -89,19 +97,15 @@ export default function CombatScreen() {
   useEffect(() => {
     if (!shouting) return;
     shoutPowerRef.current = 0;
-    setShoutPower(0);
-    setShoutLeft(SHOUT_MS);
+    const end = performance.now() + SHOUT_MS;
     const iv = setInterval(() => {
-      setShoutLeft(prev => {
-        const next = prev - 100;
-        if (next <= 0) {
-          clearInterval(iv);
-          setShouting(false);
-          dispatch({ type: 'COMBAT_INTIMIDATE', bonus: (shoutPowerRef.current / 100) * 0.35 });
-          return 0;
-        }
-        return next;
-      });
+      const left = end - performance.now();
+      if (shoutTimeRef.current) shoutTimeRef.current.style.width = `${Math.max(0, (left / SHOUT_MS) * 100)}%`;
+      if (left <= 0) {
+        clearInterval(iv);
+        setShouting(false);
+        dispatch({ type: 'COMBAT_INTIMIDATE', bonus: (shoutPowerRef.current / 100) * 0.35 });
+      }
     }, 100);
     return () => clearInterval(iv);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,8 +116,15 @@ export default function CombatScreen() {
   const weakDiscovered = character.activeFlags.includes(`wp:${currentCombat.enemyName}`);
 
   function shoutTap() {
-    shoutPowerRef.current = Math.min(100, shoutPowerRef.current + 9);
-    setShoutPower(shoutPowerRef.current);
+    const p = Math.min(100, shoutPowerRef.current + 9);
+    shoutPowerRef.current = p;
+    if (shoutGaugeRef.current) {
+      shoutGaugeRef.current.style.width = `${p}%`;
+      shoutGaugeRef.current.style.background = p >= 70
+        ? 'linear-gradient(90deg, #C99A3A, #F2C14E)'
+        : 'linear-gradient(90deg, #D4874D, #C99A3A)';
+    }
+    if (shoutLabelRef.current) shoutLabelRef.current.textContent = p >= 100 ? 'À PLEINS POUMONS !' : `${p}%`;
     playHit();
   }
 
@@ -332,8 +343,9 @@ export default function CombatScreen() {
                 <div className="absolute inset-y-0" style={{ left: `${strikeCenter - 15}%`, width: '30%', background: 'rgba(74,155,95,0.3)' }} />
                 <div className="absolute inset-y-0" style={{ left: `${strikeCenter - 5.5}%`, width: '11%', background: 'rgba(242,193,78,0.5)' }} />
                 <div
+                  ref={strikeCursorRef}
                   className="absolute top-0 bottom-0 w-1 rounded-full"
-                  style={{ left: `calc(${strikePos}% - 2px)`, background: '#F6E3D2', boxShadow: '0 0 8px rgba(255,255,255,0.5)' }}
+                  style={{ background: '#F6E3D2', boxShadow: '0 0 8px rgba(255,255,255,0.5)' }}
                 />
               </div>
               <motion.button
@@ -365,21 +377,20 @@ export default function CombatScreen() {
                   💢 Martelez le bouton pour gonfler votre cri avant la fin du temps !
                 </p>
               </div>
-              {/* Jauge de cri */}
+              {/* Jauge de cri (remplie via ref, sans re-rendu) */}
               <div className="relative h-10 rounded-xl overflow-hidden border border-[#4E2E44]" style={{ background: '#241726' }}>
-                <motion.div
+                <div
+                  ref={shoutGaugeRef}
                   className="absolute inset-y-0 left-0"
-                  animate={{ width: `${shoutPower}%` }}
-                  transition={{ duration: 0.08 }}
-                  style={{ background: shoutPower >= 70 ? 'linear-gradient(90deg, #C99A3A, #F2C14E)' : 'linear-gradient(90deg, #D4874D, #C99A3A)' }}
+                  style={{ width: '0%', background: 'linear-gradient(90deg, #D4874D, #C99A3A)', transition: 'width 0.08s ease-out' }}
                 />
-                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#F6E3D2]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
-                  {shoutPower >= 100 ? 'À PLEINS POUMONS !' : `${shoutPower}%`}
+                <span ref={shoutLabelRef} className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#F6E3D2]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+                  0%
                 </span>
               </div>
               {/* Temps restant */}
               <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#241726' }}>
-                <div className="h-full rounded-full" style={{ width: `${(shoutLeft / SHOUT_MS) * 100}%`, background: '#B98CA0', transition: 'width 0.1s linear' }} />
+                <div ref={shoutTimeRef} className="h-full rounded-full" style={{ width: '100%', background: '#B98CA0', transition: 'width 0.1s linear' }} />
               </div>
               <motion.button
                 whileTap={{ scale: 0.92 }}
