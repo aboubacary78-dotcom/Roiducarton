@@ -1,4 +1,4 @@
-import { useGame, BEG_SPOTS } from '@/contexts/GameContext';
+import { useGame, BEG_SPOTS, randomFromArray } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
@@ -20,21 +20,30 @@ export default function BegMinigame() {
   const char = state.character;
   const charisma = !!char?.traits.some(t => t.id === 'charismatique');
 
-  const [spot] = useState(() => BEG_SPOTS[Math.floor(Math.random() * BEG_SPOTS.length)]);
+  const [spot] = useState(() => randomFromArray(BEG_SPOTS));
   const [items, setItems] = useState<Item[]>([]);
   const [coins, setCoins] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(ROUND_MS);
   const [ended, setEnded] = useState<null | 'time' | 'cop'>(null);
 
   const idRef = useRef(0);
   const coinsRef = useRef(0);
   const endedRef = useRef(false);
   const timersRef = useRef<ReturnType<typeof setInterval>[]>([]);
+  // Timeouts de disparition des pièces : suivis pour être annulés en fin
+  // de manche (sinon ils continuent de modifier l'état après la fin).
+  const itemTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  const timeBarRef = useRef<HTMLDivElement | null>(null);
+
+  function clearAllTimers() {
+    timersRef.current.forEach(clearInterval);
+    itemTimeoutsRef.current.forEach(clearTimeout);
+    itemTimeoutsRef.current.clear();
+  }
 
   function finish(reason: 'time' | 'cop') {
     if (endedRef.current) return;
     endedRef.current = true;
-    timersRef.current.forEach(clearInterval);
+    clearAllTimers();
     setEnded(reason);
     if (reason === 'cop') playHurt();
     setTimeout(() => dispatch({ type: 'RESOLVE_BEG', coins: coinsRef.current, copTapped: reason === 'cop' }), 1200);
@@ -42,6 +51,7 @@ export default function BegMinigame() {
 
   useEffect(() => {
     const spawnEvery = charisma ? 480 : 600;
+    const end = performance.now() + ROUND_MS;
     const spawner = setInterval(() => {
       if (endedRef.current) return;
       const roll = Math.random();
@@ -49,17 +59,24 @@ export default function BegMinigame() {
       const kind: Item['kind'] = roll < 0.22 ? 'cop' : roll < 0.34 ? 'bill' : 'coin';
       const item: Item = { id: ++idRef.current, x: 8 + Math.random() * 76, y: 8 + Math.random() * 76, kind };
       setItems(prev => [...prev, item]);
-      setTimeout(() => setItems(prev => prev.filter(i => i.id !== item.id)), ITEM_TTL);
+      const to = setTimeout(() => {
+        itemTimeoutsRef.current.delete(to);
+        setItems(prev => prev.filter(i => i.id !== item.id));
+      }, ITEM_TTL);
+      itemTimeoutsRef.current.add(to);
     }, spawnEvery);
+    // Barre de temps pilotée par ref : pas de re-rendu toutes les 100 ms.
     const ticker = setInterval(() => {
-      setTimeLeft(prev => {
-        const next = prev - 100;
-        if (next <= 0) finish('time');
-        return Math.max(0, next);
-      });
+      const left = Math.max(0, end - performance.now());
+      if (timeBarRef.current) {
+        const pct = (left / ROUND_MS) * 100;
+        timeBarRef.current.style.width = `${pct}%`;
+        timeBarRef.current.style.background = pct > 30 ? 'linear-gradient(90deg, #C4723A, #9B5B3A)' : '#D94F4F';
+      }
+      if (left <= 0) finish('time');
     }, 100);
     timersRef.current = [spawner, ticker];
-    return () => timersRef.current.forEach(clearInterval);
+    return () => clearAllTimers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -74,8 +91,6 @@ export default function BegMinigame() {
   }
 
   if (!char) return null;
-
-  const pct = (timeLeft / ROUND_MS) * 100;
 
   return (
     <motion.div
@@ -94,7 +109,7 @@ export default function BegMinigame() {
       {/* Timer + compteur */}
       <div className="flex items-center gap-3">
         <div className="flex-1 stat-bar-track" style={{ height: '10px' }}>
-          <div className="h-full rounded-full transition-[width] duration-100" style={{ width: `${pct}%`, background: pct > 30 ? 'linear-gradient(90deg, #C4723A, #9B5B3A)' : '#D94F4F' }} />
+          <div ref={timeBarRef} className="h-full rounded-full transition-[width] duration-100" style={{ width: '100%', background: 'linear-gradient(90deg, #C4723A, #9B5B3A)' }} />
         </div>
         <span className="text-sm font-bold font-mono text-[#B8860B] w-14 text-right">🪙 {coins}</span>
       </div>

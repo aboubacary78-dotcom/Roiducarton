@@ -29,6 +29,17 @@ export interface Stats {
   dignity: number;
 }
 
+// Table unique emoji/libellé des jauges — utilisée par tous les écrans
+// (inventaire, boutique, résultats, barres de stats) pour rester cohérents.
+export const STAT_META: Record<keyof Stats, { emoji: string; label: string }> = {
+  health: { emoji: '❤️', label: 'Santé' },
+  mental: { emoji: '🧠', label: 'Mental' },
+  hunger: { emoji: '🍖', label: 'Faim' },
+  thirst: { emoji: '💧', label: 'Soif' },
+  sleep: { emoji: '😴', label: 'Sommeil' },
+  dignity: { emoji: '👑', label: 'Dignité' },
+};
+
 export interface Character {
   name: string;
   job: Job;
@@ -2196,7 +2207,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
 };
 
 // ============ EVENT GENERATORS ============
-function randomFromArray<T>(arr: T[]): T {
+export function randomFromArray<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
@@ -2238,15 +2249,22 @@ function generateRestEvents(_location: string, character: Character): GameEvent[
 
 // Habillage textuel des mini-jeux : pioche une issue positive/négative
 // dans un lot d'événements existants (réutilise le contenu narratif).
+// Les pools sont calculés une seule fois par liste (cache module).
+const flavorCache = new Map<GameEvent[], { good: string[]; bad: string[] }>();
 function flavorFrom(events: GameEvent[], positive: boolean): string {
-  const texts: string[] = [];
-  for (const e of events)
-    for (const c of e.choices)
-      for (const o of c.outcomes) {
-        const good = (o.moneyChange || 0) > 0 || Object.values(o.statChanges || {}).reduce((a, b) => a + (b || 0), 0) > 0;
-        if (good === positive) texts.push(o.text);
-      }
-  return texts.length ? randomFromArray(texts) : '';
+  let pools = flavorCache.get(events);
+  if (!pools) {
+    pools = { good: [], bad: [] };
+    for (const e of events)
+      for (const c of e.choices)
+        for (const o of c.outcomes) {
+          const good = (o.moneyChange || 0) > 0 || Object.values(o.statChanges || {}).reduce((a, b) => a + (b || 0), 0) > 0;
+          (good ? pools.good : pools.bad).push(o.text);
+        }
+    flavorCache.set(events, pools);
+  }
+  const pool = positive ? pools.good : pools.bad;
+  return pool.length ? randomFromArray(pool) : '';
 }
 
 // ============ CIBLES DU MINI-JEU DE VOL ============
@@ -2324,6 +2342,37 @@ function generateCharacter(): Character {
     activeFlags: [],
     seed: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`,
     gender: genderFromName(name),
+  };
+}
+
+// Formule de score UNIQUE (écran de fin + meilleurs scores + reducer).
+export function computeScore(day: number, respect: number, money: number): number {
+  return day * 10 + respect * 5 + money * 2;
+}
+
+// Applique un delta de stats puis borne le résultat (motif répété du reducer).
+function applyStatDelta(stats: Stats, delta: Partial<Stats>): Stats {
+  const s = { ...stats };
+  Object.entries(delta).forEach(([k, v]) => { if (v) s[k as keyof Stats] += v; });
+  return clampStats(s);
+}
+
+// Construit l'état de combat pour un ennemi donné (utilisé par START_COMBAT
+// et par les répercussions de vol) — une seule source de vérité.
+function makeCombatState(enemy: Enemy, character: Character): CombatState {
+  const weapon = character.inventory.find(i => i.type === 'weapon');
+  const targeting = getTargeting(enemy.name);
+  return {
+    enemyName: enemy.name,
+    enemyEmoji: enemy.emoji,
+    enemyHealth: enemy.health,
+    enemyMaxHealth: enemy.health,
+    enemyAttack: enemy.attack,
+    description: enemy.description,
+    playerWeapon: weapon,
+    zones: targeting.zones,
+    weakPointId: targeting.weak,
+    weakPointHint: targeting.hint,
   };
 }
 
@@ -2494,11 +2543,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (action.copTapped) {
         const amende = Math.min(c.money, 4 + Math.floor(Math.random() * 4)); // 4-7€ selon les moyens
         const statDelta: Partial<Stats> = { dignity: -10, mental: -6 };
-        let newStats = { ...c.stats };
-        Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
-        newStats = clampStats(newStats);
+        const newStats = applyStatDelta(c.stats, statDelta);
         const isAlive = newStats.health > 0 && newStats.mental > 0;
-        if (!isAlive) { saveHighScore(c.name, c.day, c.day * 10 + c.respect * 5 + (c.money - amende) * 2); clearSave(); }
+        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende)); clearSave(); }
         return {
           ...state,
           character: { ...c, stats: newStats, money: c.money - amende, alive: isAlive },
@@ -2515,16 +2562,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ? { dignity: -3, mental: 6 }
         : { dignity: -4, mental: money > 0 ? 2 : -4 };
       const respectDelta = money >= 8 ? 1 : 0;
-      let newStats = { ...c.stats };
-      Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
-      newStats = clampStats(newStats);
+      const newStats = applyStatDelta(c.stats, statDelta);
       const isAlive = newStats.health > 0 && newStats.mental > 0;
       const prefix = money >= 8 ? '🎩 Manche exceptionnelle ! '
         : money > 0 ? '🪙 Quelques pièces au fond du chapeau. '
         : '💨 Pas un sou aujourd\'hui. ';
       const weatherNote = modifier !== 1 ? (modifier > 1 ? ' Le beau temps a rendu les passants généreux.' : ' Le mauvais temps a fait fuir les passants.') : '';
       if (!isAlive) {
-        saveHighScore(c.name, c.day, c.day * 10 + c.respect * 5 + (c.money + money) * 2);
+        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money));
         clearSave();
       }
       return {
@@ -2551,19 +2596,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const repercussion = Math.random();
         if (target.catcher === 'commercant' && repercussion < 0.5) {
           // Le commerçant veut en découdre : bagarre immédiate !
-          const enemy: Enemy = { name: 'Commerçant Furieux', emoji: '😡', health: 32, attack: 11, description: 'Il vous a pris la main dans le sac. Et il a de la poigne.', loot: { respect: 2 } };
-          const weapon = c.inventory.find(i => i.type === 'weapon');
-          const targeting = getTargeting(enemy.name);
+          const enemy = ENEMIES.find(e => e.name === 'Commerçant Furieux')!;
           return {
             ...state,
             screen: 'combat',
-            currentCombat: {
-              enemyName: enemy.name, enemyEmoji: enemy.emoji,
-              enemyHealth: enemy.health, enemyMaxHealth: enemy.health,
-              enemyAttack: enemy.attack, description: enemy.description,
-              playerWeapon: weapon, zones: targeting.zones,
-              weakPointId: targeting.weak, weakPointHint: targeting.hint,
-            },
+            currentCombat: makeCombatState(enemy, c),
             combatLog: [`😡 Vous êtes surpris la main sur ${target.label} ! Le commerçant retrousse ses manches...`],
           };
         }
@@ -2571,11 +2608,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           // La police vous embarque : garde à vue, journée finie + amende.
           const amende = Math.min(c.money, 5);
           const statDelta: Partial<Stats> = { dignity: -15, mental: -8 };
-          let newStats = { ...c.stats };
-          Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
-          newStats = clampStats(newStats);
+          const newStats = applyStatDelta(c.stats, statDelta);
           const isAlive = newStats.health > 0 && newStats.mental > 0;
-          if (!isAlive) { saveHighScore(c.name, c.day, c.day * 10 + c.respect * 5 + (c.money - amende) * 2); clearSave(); }
+          if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende)); clearSave(); }
           return {
             ...state,
             character: { ...c, stats: newStats, money: c.money - amende, respect: c.respect - 3, alive: isAlive },
@@ -2589,11 +2624,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         }
         // Sinon : simple raclée / fuite honteuse.
         const statDelta: Partial<Stats> = { dignity: -12, health: -6, mental: -6 };
-        let newStats = { ...c.stats };
-        Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
-        newStats = clampStats(newStats);
+        const newStats = applyStatDelta(c.stats, statDelta);
         const isAlive = newStats.health > 0 && newStats.mental > 0;
-        if (!isAlive) { saveHighScore(c.name, c.day, c.day * 10 + c.respect * 5 + c.money * 2); clearSave(); }
+        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money)); clearSave(); }
         return {
           ...state,
           character: { ...c, stats: newStats, respect: c.respect - 2, alive: isAlive },
@@ -2607,9 +2640,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const moneyDelta = jackpot ? 10 + Math.floor(Math.random() * 9) : 3 + Math.floor(Math.random() * 5);
       const respectDelta = jackpot ? 2 : 0;
       const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 6 } : { dignity: -6, mental: 2 };
-      let newStats = { ...c.stats };
-      Object.entries(statDelta).forEach(([k, v]) => { if (v) newStats[k as keyof Stats] += v; });
-      newStats = clampStats(newStats);
+      const newStats = applyStatDelta(c.stats, statDelta);
       const text = jackpot
         ? `💎 Coup de maître ! Vous repartez avec ${target.label} sans que personne ne remarque rien. Revente express au coin de la rue : ${moneyDelta}€.`
         : `🤫 Vol réussi. Vous filez avec ${target.label}, le cœur battant. Ça vaut bien ${moneyDelta}€.`;
@@ -2708,7 +2739,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const isAlive = newStats.health > 0 && newStats.mental > 0;
 
       if (!isAlive) {
-        const score = state.character.day * 10 + newRespect * 5 + newMoney * 2;
+        const score = computeScore(state.character.day, newRespect, newMoney);
         saveHighScore(state.character.name, state.character.day, score);
         clearSave();
       }
@@ -2744,7 +2775,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
 
       if (!isAlive) {
-        const score = state.character.day * 10 + state.character.respect * 5 + state.character.money * 2;
+        const score = computeScore(state.character.day, state.character.respect, state.character.money);
         saveHighScore(state.character.name, state.character.day, score);
         clearSave();
       }
@@ -2797,21 +2828,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'START_COMBAT': {
       if (!state.character) return state;
-      const weapon = state.character.inventory.find(i => i.type === 'weapon');
-      const targeting = getTargeting(action.enemy.name);
-      const combat: CombatState = {
-        enemyName: action.enemy.name,
-        enemyEmoji: action.enemy.emoji,
-        enemyHealth: action.enemy.health,
-        enemyMaxHealth: action.enemy.health,
-        enemyAttack: action.enemy.attack,
-        description: action.enemy.description,
-        playerWeapon: weapon,
-        zones: targeting.zones,
-        weakPointId: targeting.weak,
-        weakPointHint: targeting.hint,
+      return {
+        ...state,
+        screen: 'combat',
+        currentCombat: makeCombatState(action.enemy, state.character),
+        combatLog: [`${action.enemy.emoji} ${action.enemy.name} apparaît ! ${action.enemy.description}`],
       };
-      return { ...state, screen: 'combat', currentCombat: combat, combatLog: [`${action.enemy.emoji} ${action.enemy.name} apparaît ! ${action.enemy.description}`] };
     }
 
     case 'COMBAT_ATTACK': {
@@ -2921,6 +2943,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const lootMoney = enemy?.loot?.money || 0;
         const lootRespect = (enemy?.loot?.respect || 0) + (isCritical ? 1 : 0);
         logs.push(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`);
+        if (lootMoney > 0) logs.push(`💰 +${lootMoney}€ récupérés`);
+        if (lootRespect > 0) logs.push(`⭐ +${lootRespect} respect gagné`);
         const newStats = clampStats({ ...state.character.stats, health: newHp });
         return {
           ...state,

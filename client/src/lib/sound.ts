@@ -55,23 +55,31 @@ function tone(freq: number, dur: number, type: OscillatorType, gain: number, sli
   osc.stop(t0 + dur + 0.02);
 }
 
-// Un bref souffle de bruit (impact).
+// Un bref souffle de bruit (impact). Le buffer est généré UNE fois puis
+// réutilisé : ces sons partent en rafale (martèlement, taps), allouer un
+// buffer neuf à chaque appel provoquait des saccades.
+let noiseBuffer: AudioBuffer | null = null;
 function noise(dur: number, gain: number, hp = 800) {
   const ac = audio();
   if (!ac) return;
-  const frames = Math.floor(ac.sampleRate * dur);
-  const buffer = ac.createBuffer(1, frames, ac.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < frames; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / frames);
+  if (!noiseBuffer || noiseBuffer.sampleRate !== ac.sampleRate) {
+    const frames = Math.floor(ac.sampleRate * 0.25);
+    noiseBuffer = ac.createBuffer(1, frames, ac.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < frames; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / frames);
+  }
+  const t0 = ac.currentTime;
   const src = ac.createBufferSource();
-  src.buffer = buffer;
+  src.buffer = noiseBuffer;
   const filter = ac.createBiquadFilter();
   filter.type = 'highpass';
   filter.frequency.value = hp;
   const g = ac.createGain();
-  g.gain.value = gain;
+  g.gain.setValueAtTime(gain, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   src.connect(filter).connect(g).connect(ac.destination);
-  src.start();
+  src.start(t0);
+  src.stop(t0 + dur + 0.02);
 }
 
 /** Coup normal porté : petit "thud" sourd + impact. */

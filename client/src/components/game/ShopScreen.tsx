@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getShopEvent } from '@/contexts/GameContext';
-import type { Shop, ShopItem, ShopEvent } from '@/contexts/GameContext';
+import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getShopEvent, STAT_META } from '@/contexts/GameContext';
+import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string }> = {
@@ -13,14 +13,6 @@ const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string
   special: { bg: '#B8860B15', color: '#B8860B', label: 'Service' },
 };
 
-const STAT_LABELS: Record<string, { emoji: string; name: string }> = {
-  health: { emoji: '❤️', name: 'Santé' },
-  mental: { emoji: '🧠', name: 'Mental' },
-  hunger: { emoji: '🍖', name: 'Faim' },
-  thirst: { emoji: '💧', name: 'Soif' },
-  sleep: { emoji: '😴', name: 'Sommeil' },
-  dignity: { emoji: '👑', name: 'Dignité' },
-};
 
 export default function ShopScreen() {
   const { state, dispatch } = useGame();
@@ -160,7 +152,7 @@ export default function ShopScreen() {
                     <p className="text-[11px] text-[#6B5740] mt-0.5">{item.description}</p>
                     <div className="flex gap-1.5 flex-wrap mt-1.5">
                       {item.effect && Object.entries(item.effect).map(([key, val]) => {
-                        const stat = STAT_LABELS[key];
+                        const stat = STAT_META[key as keyof Stats];
                         if (!stat || !val) return null;
                         return (
                           <span
