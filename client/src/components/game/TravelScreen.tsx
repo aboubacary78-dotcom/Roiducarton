@@ -1,4 +1,4 @@
-import { useGame, LOCATIONS } from '@/contexts/GameContext';
+import { useGame, LOCATIONS, getShopsForLocation } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { playClick } from '@/lib/sound';
@@ -108,6 +108,7 @@ export default function TravelScreen() {
   const loc = LOCATIONS[selected];
   const isCurrent = selected === char.location;
   const currentZone = ZONES.find(z => z.id === char.location);
+  const shops = getShopsForLocation(selected);
 
   return (
     <div className="min-h-screen bg-texture p-4 flex flex-col gap-3">
@@ -219,6 +220,28 @@ export default function TravelScreen() {
             </div>
             <span className="text-[10px] font-mono text-[#6B5740] w-8 text-right">{loc.resources}%</span>
           </div>
+        </div>
+
+        {/* Boutiques du quartier */}
+        <div className="mb-4">
+          <p className="text-[10px] uppercase tracking-wider text-[#A08B70] font-semibold mb-1.5">
+            Boutiques sur place
+          </p>
+          {shops.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {shops.map(shop => (
+                <span
+                  key={shop.id}
+                  className="text-[11px] px-2 py-1 rounded-full font-medium text-[#6B5740]"
+                  style={{ background: '#F5EDE4', border: '1px solid #E8D5C0' }}
+                >
+                  {shop.emoji} {shop.name}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] text-[#A08B70] italic">Aucune boutique dans ce quartier.</p>
+          )}
         </div>
 
         {isCurrent ? (
