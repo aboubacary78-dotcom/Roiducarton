@@ -8,7 +8,7 @@ import { playClick } from '@/lib/sound';
  * étape par étape. S'affiche au premier lancement, rejouable via Options.
  */
 
-export const TUTORIAL_KEY = 'roi-du-carton-tutorial-seen-v2';
+export const TUTORIAL_KEY = 'roi-du-carton-tutorial-seen-v3';
 
 interface Step { targetId: string | null; emoji: string; title: string; text: string; }
 
@@ -20,6 +20,10 @@ const STEPS: Step[] = [
   {
     targetId: 'tuto-stats', emoji: '❤️', title: 'Vos six jauges',
     text: 'Santé, mental, faim, soif, sommeil, dignité. Elles chutent chaque nuit. Si la santé ou le mental tombe à zéro… c\'est la fin.',
+  },
+  {
+    targetId: 'tuto-stats', emoji: '👑', title: 'La dignité, arme secrète',
+    text: 'Sous 25 de dignité, votre mental s\'effondre chaque nuit — c\'est la spirale qui tue. Bien tenue, elle fait donner les passants à la manche et ouvre des choix réservés aux gens « présentables ». La laverie est votre alliée.',
   },
   {
     targetId: 'tuto-weather', emoji: '🌦️', title: 'La météo',
