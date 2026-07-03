@@ -772,6 +772,10 @@ const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 0.8, text: 'Les mariés vous voient et vous envoient une part de gâteau ! L\'amour rend généreux.', statChanges: { hunger: 15, mental: 8, dignity: 5 } },
         { probability: 0.2, text: 'Personne ne vous remarque. Vous regardez les gens heureux. Nostalgie.', statChanges: { mental: -5 } },
       ]},
+      { text: 'Se mêler aux invités avec assurance', risk: 'normal', emoji: '🥂', requirements: { stat: 'dignity', minValue: 55 }, outcomes: [
+        { probability: 0.8, text: 'Personne ne doute de vous : champagne, petits fours, et vous portez même un toast aux mariés !', statChanges: { hunger: 25, thirst: 20, mental: 12, dignity: 3 } },
+        { probability: 0.2, text: 'La grand-mère de la mariée vous démasque… mais vous trouve charmant. Elle vous remplit une assiette en douce.', statChanges: { hunger: 15, mental: 8 } },
+      ]},
     ],
   },
   {
@@ -1194,6 +1198,10 @@ const BEG_EVENTS: GameEvent[] = [
         { probability: 0.4, text: 'Votre histoire les émeut. 8€ et un numéro d\'association.', statChanges: { mental: 5, dignity: -3 }, moneyChange: 8 },
         { probability: 0.6, text: '"On connaît le truc." Ils accélèrent le pas.', statChanges: { dignity: -8, mental: -5 } },
       ]},
+      { text: 'Engager la conversation d\'égal à égal', risk: 'normal', emoji: '🎩', requirements: { stat: 'dignity', minValue: 50 }, outcomes: [
+        { probability: 0.7, text: 'Votre prestance les surprend. On parle art, vin, vie. L\'homme vous glisse 12€ « pour le plaisir de la conversation ».', moneyChange: 12, statChanges: { mental: 10, dignity: 5 }, respectChange: 2 },
+        { probability: 0.3, text: 'La conversation est agréable mais brève. Elle vous laisse 4€ et un sourire sincère.', moneyChange: 4, statChanges: { mental: 6 } },
+      ]},
     ],
   },
   {
@@ -1223,6 +1231,10 @@ const BEG_EVENTS: GameEvent[] = [
       { text: 'Demander un verre d\'eau', risk: 'safe', emoji: '💧', outcomes: [
         { probability: 0.8, text: 'Le serveur vous apporte un verre d\'eau. Petit geste, grande humanité.', statChanges: { thirst: 15, dignity: 3, mental: 5 } },
         { probability: 0.2, text: '"L\'eau c\'est pour les clients." Froid.', statChanges: { mental: -5, dignity: -3 } },
+      ]},
+      { text: 'S\'installer et discuter comme un habitué', risk: 'normal', emoji: '🗞️', requirements: { stat: 'dignity', minValue: 45 }, outcomes: [
+        { probability: 0.6, text: 'Un retraité vous offre le café et une heure de conversation. En partant, il glisse 3€ « pour le prochain ».', moneyChange: 3, statChanges: { thirst: 12, mental: 12, dignity: 3 } },
+        { probability: 0.4, text: 'Le serveur vous a à l\'œil mais ne dit rien. Vous repartez réchauffé et presque respecté.', statChanges: { mental: 6, thirst: 5 } },
       ]},
     ],
   },
@@ -2557,7 +2569,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
 
-      const money = Math.round(action.coins * modifier);
+      // L'allure compte : les passants donnent plus à qui garde sa dignité
+      // (×0,7 à 0 de dignité → ×1,2 à 100).
+      const dignityMod = 0.7 + (c.stats.dignity / 100) * 0.5;
+      const money = Math.round(action.coins * modifier * dignityMod);
       const statDelta: Partial<Stats> = money >= 6
         ? { dignity: -3, mental: 6 }
         : { dignity: -4, mental: money > 0 ? 2 : -4 };
@@ -2568,6 +2583,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         : money > 0 ? '🪙 Quelques pièces au fond du chapeau. '
         : '💨 Pas un sou aujourd\'hui. ';
       const weatherNote = modifier !== 1 ? (modifier > 1 ? ' Le beau temps a rendu les passants généreux.' : ' Le mauvais temps a fait fuir les passants.') : '';
+      const dignityNote = c.stats.dignity >= 70 ? ' Votre allure soignée a inspiré confiance.'
+        : c.stats.dignity < 25 ? ' Votre allure négligée a fait fuir plus d\'un passant.' : '';
       if (!isAlive) {
         saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money));
         clearSave();
@@ -2575,7 +2592,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive },
-        eventResult: { text: prefix + flavorFrom(BEG_EVENTS, money > 0) + weatherNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta },
+        eventResult: { text: prefix + flavorFrom(BEG_EVENTS, money > 0) + weatherNote + dignityNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta },
         screen: isAlive ? 'main' : 'game-over',
       };
     }

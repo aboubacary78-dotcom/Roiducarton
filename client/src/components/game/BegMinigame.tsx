@@ -104,6 +104,8 @@ export default function BegMinigame() {
         <p className="text-sm text-[#6B5740] mt-1.5">Vous tendez votre chapeau <strong>{spot}</strong>.</p>
         <p className="text-xs text-[#8B6B4A] mt-1">Ramassez les pièces 🪙 et billets 💶. Ne touchez pas le policier 👮, sinon c'est l'amende !</p>
         {charisma && <p className="text-[11px] text-[#B8860B] mt-1">✨ Charismatique : les passants donnent plus souvent.</p>}
+        {char.stats.dignity >= 70 && <p className="text-[11px] text-[#3d8b4f] mt-1">👔 Allure soignée : les passants donnent davantage.</p>}
+        {char.stats.dignity < 25 && <p className="text-[11px] text-[#D94F4F] mt-1">🫥 Allure négligée : les passants se méfient (gains réduits).</p>}
       </div>
 
       {/* Timer + compteur */}

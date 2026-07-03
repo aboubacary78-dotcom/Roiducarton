@@ -1,9 +1,29 @@
-import { useGame } from '@/contexts/GameContext';
+import { useGame, STAT_META, type Character, type EventChoice } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { showRewarded } from '@/lib/ads';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.png';
+
+// Vérifie les conditions d'un choix (stat minimale, objet, compétence de
+// métier) et fournit le libellé à afficher sur le cadenas.
+function checkRequirements(choice: EventChoice, char: Character | null): { ok: boolean; label: string | null } {
+  const req = choice.requirements;
+  if (!req || !char) return { ok: true, label: null };
+  if (req.stat && req.minValue !== undefined) {
+    const meta = STAT_META[req.stat];
+    return { ok: char.stats[req.stat] >= req.minValue, label: `${meta.emoji} ${meta.label} ${req.minValue}+` };
+  }
+  if (req.item) {
+    const item = char.inventory.find(i => i.id === req.item);
+    return { ok: !!item, label: `🎒 Objet requis` };
+  }
+  if (req.skill) {
+    const ok = char.job.bonusSkills.includes(req.skill) || (char.skills[req.skill] ?? 0) > 0;
+    return { ok, label: `💼 ${req.skill}` };
+  }
+  return { ok: true, label: null };
+}
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   combat: { label: 'Combat', color: '#D94F4F' },
@@ -92,22 +112,34 @@ export default function EventScreen() {
 
         {/* Choices */}
         <div className="flex flex-col gap-2">
-          {event.choices.map((choice, i) => (
-            <motion.button
-              key={i}
-              initial={{ x: -15, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2 + i * 0.1 }}
-              whileHover={{ scale: 1.01, x: 2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => dispatch({ type: 'CHOOSE_EVENT', choiceIndex: i, boosted })}
-              className={`action-btn p-3 text-left flex items-start gap-2.5 ${boosted ? 'border-[#B8860B]/60' : ''}`}
-            >
-              <span className="text-lg mt-0.5">{choice.emoji}</span>
-              <span className="text-sm text-[#3D3020] font-medium flex-1">{choice.text}</span>
-              {boosted && <span className="text-[10px] text-[#B8860B] font-semibold mt-1">✨ garanti</span>}
-            </motion.button>
-          ))}
+          {event.choices.map((choice, i) => {
+            const req = checkRequirements(choice, state.character);
+            const locked = !req.ok;
+            return (
+              <motion.button
+                key={i}
+                initial={{ x: -15, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 + i * 0.1 }}
+                whileHover={locked ? {} : { scale: 1.01, x: 2 }}
+                whileTap={locked ? {} : { scale: 0.98 }}
+                onClick={locked ? undefined : () => dispatch({ type: 'CHOOSE_EVENT', choiceIndex: i, boosted })}
+                disabled={locked}
+                className={`action-btn p-3 text-left flex items-start gap-2.5 ${boosted && !locked ? 'border-[#B8860B]/60' : ''} ${
+                  locked ? 'opacity-50 pointer-events-none' : ''
+                }`}
+              >
+                <span className="text-lg mt-0.5">{locked ? '🔒' : choice.emoji}</span>
+                <span className="text-sm text-[#3D3020] font-medium flex-1">{choice.text}</span>
+                {req.label && (
+                  <span className={`text-[10px] font-semibold mt-1 whitespace-nowrap ${locked ? 'text-[#B84A3A]' : 'text-[#3d8b4f]'}`}>
+                    {req.label}
+                  </span>
+                )}
+                {boosted && !locked && !req.label && <span className="text-[10px] text-[#B8860B] font-semibold mt-1">✨ garanti</span>}
+              </motion.button>
+            );
+          })}
         </div>
 
         {/* Coup de pouce par pub */}

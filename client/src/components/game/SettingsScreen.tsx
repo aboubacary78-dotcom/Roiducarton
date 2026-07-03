@@ -8,7 +8,7 @@ import { TUTORIAL_KEY } from './TutorialOverlay';
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
 const PRIVACY_URL = 'https://example.com/roi-du-carton/confidentialite';
-const APP_VERSION = '1.17.1';
+const APP_VERSION = '1.18.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -66,6 +66,7 @@ export default function SettingsScreen() {
           <li>❤️ Surveillez vos 6 jauges : santé, mental, faim, soif, sommeil, dignité.</li>
           <li>🎯 Chaque jour, vous avez un nombre limité d'actions.</li>
           <li>🔍 <strong>Explorer</strong>, 🙏 <strong>Mendier</strong>, 😴 <strong>Dormir</strong>, 🥊 <strong>Bagarre</strong> et 🥷 <strong>Voler</strong> (risqué) font avancer la journée.</li>
+          <li>👑 La dignité compte : sous 25, le mental fond chaque nuit ; bien tenue, elle fait donner les passants et ouvre certains choix.</li>
           <li>🌦️ La météo influence vos jauges : préparez-vous au pire.</li>
           <li>💀 Si la santé ou le mental tombe à zéro, c'est la fin… sauf seconde chance !</li>
         </ul>
