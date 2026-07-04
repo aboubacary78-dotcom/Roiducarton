@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getShopEvent, STAT_META } from '@/contexts/GameContext';
+import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getNextDiscountTier, getShopEvent, STAT_META } from '@/contexts/GameContext';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,6 +23,7 @@ export default function ShopScreen() {
   const [shopEvent, setShopEvent] = useState<ShopEvent | null>(null);
 
   const discountLabel = getDiscountLabel(char.respect);
+  const nextTier = getNextDiscountTier(char.respect);
 
   useEffect(() => {
     if (selectedShop) {
@@ -75,6 +76,15 @@ export default function ShopScreen() {
               )}
             </div>
           </div>
+          {nextTier && (
+            <div className="mt-2 pt-2 border-t border-[#E8D5C0] flex items-center gap-1.5 text-[10px] text-[#8B6B4A]">
+              <span>⭐</span>
+              <span>
+                Encore <strong className="text-[#B8860B]">{nextTier.needed}</strong> respect pour{' '}
+                <strong className="text-[#4A9B5F]">-{Math.round(nextTier.discount * 100)}%</strong>
+              </span>
+            </div>
+          )}
         </motion.div>
 
         {/* Shop Event */}
@@ -233,12 +243,22 @@ export default function ShopScreen() {
         </div>
       </motion.div>
 
-      {discountLabel && (
-        <div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-[#4A9B5F]/6 border border-[#4A9B5F]/15">
-          <span className="text-sm">⭐</span>
-          <p className="text-xs text-[#4A9B5F] font-medium">
-            Votre réputation vous précède ! {discountLabel} sur tous les achats.
-          </p>
+      {(discountLabel || nextTier) && (
+        <div className="flex items-start gap-2 py-2 px-3 rounded-lg bg-[#4A9B5F]/6 border border-[#4A9B5F]/15">
+          <span className="text-sm mt-0.5">⭐</span>
+          <div className="text-xs text-[#4A9B5F] font-medium leading-relaxed">
+            {discountLabel ? (
+              <p>Votre réputation vous précède ! {discountLabel} sur tous les achats.</p>
+            ) : (
+              <p>Gagnez du respect pour débloquer des remises en boutique.</p>
+            )}
+            {nextTier && (
+              <p className="text-[#8B6B4A]">
+                Encore <strong className="text-[#B8860B]">{nextTier.needed}</strong> respect pour{' '}
+                <strong>-{Math.round(nextTier.discount * 100)}%</strong>.
+              </p>
+            )}
+          </div>
         </div>
       )}
 
