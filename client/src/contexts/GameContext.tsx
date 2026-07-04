@@ -91,7 +91,7 @@ export interface EventChoice {
   text: string;
   risk: 'safe' | 'normal' | 'risky';
   emoji: string;
-  requirements?: { skill?: string; item?: string; stat?: keyof Stats; minValue?: number };
+  requirements?: { skill?: string; item?: string; stat?: keyof Stats; minValue?: number; respect?: number };
   outcomes: EventOutcome[];
 }
 
@@ -248,12 +248,19 @@ export function getInitialWeather(): WeatherType {
 }
 
 // ============ RESPECT & MARCHANDAGE ============
+// Paliers de remise : seuil de respect → remise. Du plus haut au plus bas.
+const DISCOUNT_TIERS: { threshold: number; discount: number }[] = [
+  { threshold: 80, discount: 0.30 },
+  { threshold: 50, discount: 0.25 },
+  { threshold: 30, discount: 0.15 },
+  { threshold: 20, discount: 0.10 },
+  { threshold: 10, discount: 0.05 },
+];
+
 export function getDiscount(respect: number): number {
-  if (respect >= 80) return 0.30;
-  if (respect >= 50) return 0.25;
-  if (respect >= 30) return 0.15;
-  if (respect >= 20) return 0.10;
-  if (respect >= 10) return 0.05;
+  for (const tier of DISCOUNT_TIERS) {
+    if (respect >= tier.threshold) return tier.discount;
+  }
   return 0;
 }
 
@@ -267,6 +274,20 @@ export function getDiscountLabel(respect: number): string | null {
   const d = getDiscount(respect);
   if (d === 0) return null;
   return `-${Math.round(d * 100)}%`;
+}
+
+// Prochain palier de remise à atteindre : combien de respect il manque et la
+// remise correspondante. Renvoie null si le respect est déjà au palier maximal.
+export function getNextDiscountTier(respect: number): { needed: number; discount: number } | null {
+  // Les paliers sont ordonnés du plus haut au plus bas ; on cherche le plus bas
+  // seuil encore au-dessus du respect actuel.
+  for (let i = DISCOUNT_TIERS.length - 1; i >= 0; i--) {
+    const tier = DISCOUNT_TIERS[i];
+    if (respect < tier.threshold) {
+      return { needed: tier.threshold - respect, discount: tier.discount };
+    }
+  }
+  return null;
 }
 
 // ============ SHOP EVENTS ============
@@ -1930,6 +1951,10 @@ const TRAVEL_EVENTS: GameEvent[] = [
       { text: 'Contourner par la rue principale', risk: 'safe', emoji: '🛤️', outcomes: [
         { probability: 1.0, text: 'Plus long mais plus sûr. Vous profitez des vitrines.', statChanges: { mental: 2 } },
       ]},
+      { text: 'Traverser tête haute — on vous connaît ici', risk: 'safe', emoji: '👑', requirements: { respect: 30 }, outcomes: [
+        { probability: 0.7, text: 'Le type louche vous reconnaît et baisse les yeux. "Ah, c\'est toi… passe, passe." On ne touche pas à une légende de la rue.', statChanges: { mental: 8, dignity: 5 }, respectChange: 1 },
+        { probability: 0.3, text: 'Un jeune vous salue d\'un signe de tête respectueux et vous glisse 4€. "Pour la route, chef."', statChanges: { mental: 6 }, moneyChange: 4 },
+      ]},
     ],
   },
   {
@@ -2989,13 +3014,17 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const hasCharisme = state.character.traits.some(t => t.id === 'charismatique');
       const hasHaleine = state.character.traits.some(t => t.id === 'haleine');
       const isAvocat = state.character.job.id === 'avocat';
+      // Votre réputation vous précède : plus le respect est élevé, plus les
+      // voyous hésitent à s'en prendre à vous (jusqu'à +25% de chance).
+      const respectBonus = Math.min(0.25, state.character.respect / 300);
+      const isFeared = respectBonus >= 0.15;
       // Le mini-jeu de cri ajoute jusqu'à +35% de chance selon la puissance.
-      const intimidateChance = 0.2 + (hasCharisme ? 0.15 : 0) + (hasHaleine ? 0.2 : 0) + (isAvocat ? 0.1 : 0) + (action.bonus || 0);
+      const intimidateChance = 0.2 + (hasCharisme ? 0.15 : 0) + (hasHaleine ? 0.2 : 0) + (isAvocat ? 0.1 : 0) + respectBonus + (action.bonus || 0);
       const logs = [...state.combatLog];
       if (Math.random() < intimidateChance) {
         const enemy = ENEMIES.find(e => e.name === state.currentCombat!.enemyName);
         const lootRespect = (enemy?.loot?.respect || 0) + 1;
-        logs.push(`😱 ${state.currentCombat.enemyName} prend peur et s'enfuit !${hasHaleine ? ' Votre haleine a fait des ravages !' : ''}`);
+        logs.push(`😱 ${state.currentCombat.enemyName} prend peur et s'enfuit !${isFeared ? ' Votre réputation vous précède…' : hasHaleine ? ' Votre haleine a fait des ravages !' : ''}`);
         return {
           ...state,
           character: { ...state.character, respect: state.character.respect + lootRespect },

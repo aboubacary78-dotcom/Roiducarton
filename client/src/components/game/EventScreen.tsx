@@ -22,6 +22,9 @@ function checkRequirements(choice: EventChoice, char: Character | null): { ok: b
     const ok = char.job.bonusSkills.includes(req.skill) || (char.skills[req.skill] ?? 0) > 0;
     return { ok, label: `💼 ${req.skill}` };
   }
+  if (req.respect !== undefined) {
+    return { ok: char.respect >= req.respect, label: `⭐ Respect ${req.respect}+` };
+  }
   return { ok: true, label: null };
 }
 
