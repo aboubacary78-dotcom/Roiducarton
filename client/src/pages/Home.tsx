@@ -19,6 +19,8 @@ import StealMinigame from '@/components/game/StealMinigame';
 import BegMinigame from '@/components/game/BegMinigame';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import WeatherOverlay from '@/components/game/WeatherOverlay';
+import WardrobeScreen from '@/components/game/WardrobeScreen';
+import AchievementToast from '@/components/game/AchievementToast';
 
 export default function Home() {
   const { state } = useGame();
@@ -46,12 +48,16 @@ export default function Home() {
         {state.screen === 'steal-game' && <StealMinigame />}
         {state.screen === 'beg-game' && <BegMinigame />}
         {state.screen === 'settings' && <SettingsScreen />}
+        {state.screen === 'wardrobe' && <WardrobeScreen />}
         {state.screen === 'game-over' && <GameOverScreen />}
 
         {/* Overlay météo : actif sur tous les écrans de jeu sauf titre et sélection */}
-        {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game'].includes(state.screen) && (
+        {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game', 'wardrobe'].includes(state.screen) && (
           <WeatherOverlay />
         )}
+
+        {/* Notification de succès (accessoire débloqué), au-dessus de tout écran */}
+        <AchievementToast />
 
         {state.eventResult && state.screen !== 'game-over' && <EventResultOverlay />}
       </div>
