@@ -141,15 +141,17 @@ export default function GameOverScreen() {
           style={{ background: 'linear-gradient(135deg, #362232, #26182A)' }}
         >
           <h4 className="text-sm font-semibold text-[#F0D9C4] text-center mb-2">
-            🏆 Meilleurs scores
+            🏆 Plus longues survies
           </h4>
           <div className="flex flex-col gap-1.5">
             {state.highScores.slice(0, 5).map((hs, i) => (
               <div key={i} className="flex justify-between items-center text-xs font-mono">
-                <span className="text-[#A08060]">
-                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`} {hs.name}
+                <span className={i === 0 ? 'text-[#F2C14E] font-semibold' : 'text-[#A08060]'}>
+                  {i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`} {hs.name}
                 </span>
-                <span className="text-[#E8A87C] font-semibold">{hs.score}pts · J{hs.days}</span>
+                <span className={i === 0 ? 'text-[#F2C14E] font-semibold' : 'text-[#E8A87C] font-semibold'}>
+                  {hs.days} {hs.days > 1 ? 'jours' : 'jour'}
+                </span>
               </div>
             ))}
           </div>

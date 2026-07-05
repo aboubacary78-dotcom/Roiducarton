@@ -1,12 +1,13 @@
-import { useGame } from '@/contexts/GameContext';
+import { useGame, getLegend } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
 const SAVE_KEY = 'roi-du-carton-save';
 
 export default function TitleScreen() {
-  const { dispatch } = useGame();
+  const { state, dispatch } = useGame();
   const [hasSave, setHasSave] = useState(false);
+  const legend = getLegend(state.highScores);
 
   useEffect(() => {
     try {
@@ -48,6 +49,11 @@ export default function TitleScreen() {
         <p className="text-xs text-[#A08B70] mt-3 max-w-xs mx-auto">
           Survivez dans la rue. Devenez une légende.
         </p>
+        {legend && (
+          <p className="text-xs text-[#B8860B] font-semibold mt-2">
+            👑 Légende à battre : {legend.name} — {legend.days} {legend.days > 1 ? 'jours' : 'jour'}
+          </p>
+        )}
       </motion.div>
 
       {/* Buttons */}
