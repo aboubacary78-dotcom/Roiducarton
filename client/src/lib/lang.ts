@@ -9,6 +9,7 @@
  *                  quand on change de langue.
  */
 import { useEffect, useReducer } from 'react';
+import { CONTENT_EN } from './content-en';
 
 export type Lang = 'fr' | 'en';
 
@@ -47,6 +48,18 @@ export function subscribeLang(cb: () => void): () => void {
 /** Texte bilingue en ligne : tr('Options', 'Settings'). */
 export function tr(fr: string, en: string): string {
   return current === 'en' ? en : fr;
+}
+
+/**
+ * Traduit un texte de CONTENU (événements, objets, ennemis, métiers…) via le
+ * dictionnaire FR→EN. Repli sur le français si la traduction manque : le jeu
+ * n'est jamais cassé, il reste juste partiellement français le temps qu'on
+ * complète le dictionnaire.
+ */
+export function tc(fr: string | undefined | null): string {
+  if (!fr) return fr ?? '';
+  if (current !== 'en') return fr;
+  return CONTENT_EN[fr] ?? fr;
 }
 
 /** Hook : renvoie la langue courante et redessine le composant au changement. */

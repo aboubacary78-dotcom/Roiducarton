@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showInterstitial, showRewarded } from '@/lib/ads';
 import CardboardAvatar from './CardboardAvatar';
-import { useLang, tr } from '@/lib/lang';
+import { useLang, tr, tc } from '@/lib/lang';
 
 const DEATH_MESSAGES: { fr: string; en: string }[] = [
   { fr: 'La rue a eu raison de vous. Mais votre légende perdure.', en: 'The street got the better of you. But your legend lives on.' },
@@ -128,7 +128,7 @@ export default function GameOverScreen() {
           {char.job.emoji} {char.name}
         </h3>
         <p className="text-[10px] text-[#A08060] text-center mb-3">
-          {char.job.name} · {char.traits.map(t => `${t.emoji} ${t.name}`).join(' · ')}
+          {tc(char.job.name)} · {char.traits.map(t => `${t.emoji} ${tc(t.name)}`).join(' · ')}
         </p>
 
         <div className="grid grid-cols-2 gap-2">

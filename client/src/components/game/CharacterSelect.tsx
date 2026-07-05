@@ -1,6 +1,7 @@
 import { useGame, type Character } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import CardboardAvatar from './CardboardAvatar';
+import { useLang, tr, tc } from '@/lib/lang';
 
 function CharacterCard({ char, index, onSelect }: { char: Character; index: number; onSelect: () => void }) {
   return (
@@ -20,13 +21,13 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
         </div>
         <div>
           <h3 className="text-xl text-[#2A1F1A]">{char.name}</h3>
-          <p className="text-xs text-[#8B6B4A]">{char.job.emoji} {char.job.name}</p>
+          <p className="text-xs text-[#8B6B4A]">{char.job.emoji} {tc(char.job.name)}</p>
         </div>
       </div>
 
       {/* Job description */}
       <p className="text-xs text-[#6B5740] italic mb-3 pb-2 border-b border-[#E8D5C0]">
-        "{char.job.description}"
+        "{tc(char.job.description)}"
       </p>
 
       {/* Traits */}
@@ -35,9 +36,9 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
           <div key={i} className="flex items-center gap-2 text-xs">
             <span>{trait.emoji}</span>
             <span className={`font-medium ${trait.positive ? 'text-[#4A9B5F]' : 'text-[#D94F4F]'}`}>
-              {trait.name}
+              {tc(trait.name)}
             </span>
-            <span className="text-[#A08B70]">— {trait.description}</span>
+            <span className="text-[#A08B70]">— {tc(trait.description)}</span>
           </div>
         ))}
       </div>
@@ -62,6 +63,7 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
 
 export default function CharacterSelect() {
   const { state, dispatch } = useGame();
+  useLang();
 
   return (
     <div className="min-h-screen bg-texture p-4 flex flex-col gap-4">
@@ -71,9 +73,9 @@ export default function CharacterSelect() {
         animate={{ y: 0, opacity: 1 }}
         className="text-center pt-2"
       >
-        <h2 className="text-2xl text-[#2A1F1A]">Choisissez votre Destin</h2>
+        <h2 className="text-2xl text-[#2A1F1A]">{tr('Choisissez votre Destin', 'Choose Your Fate')}</h2>
         <p className="text-xs text-[#8B6B4A] mt-1">
-          3 âmes perdues. 1 seul survivant.
+          {tr('3 âmes perdues. 1 seul survivant.', '3 lost souls. Only 1 survivor.')}
         </p>
       </motion.div>
 
@@ -97,7 +99,7 @@ export default function CharacterSelect() {
         onClick={() => dispatch({ type: 'START_GAME' })}
         className="text-sm text-[#A08B70] font-medium text-center py-2 hover:text-[#6B5740] transition-colors"
       >
-        Relancer les dés
+        {tr('Relancer les dés', 'Reroll')}
       </motion.button>
     </div>
   );

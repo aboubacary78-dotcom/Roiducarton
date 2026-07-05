@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { playSuccess, playFail, playWin } from '@/lib/sound';
-import { useLang, tr } from '@/lib/lang';
+import { useLang, tr, tc } from '@/lib/lang';
 
 const FLAG_LABELS: Record<string, string> = {
   'ami-jardinier': '🌱 Ami du jardinier',
@@ -91,7 +91,7 @@ export default function EventResultOverlay() {
           </motion.div>
 
           {/* Result text */}
-          <p className="text-sm text-[#3D3020] leading-relaxed mb-4 text-center">{result.text}</p>
+          <p className="text-sm text-[#3D3020] leading-relaxed mb-4 text-center">{tc(result.text)}</p>
 
           {/* Stat changes */}
           {hasChanges && (

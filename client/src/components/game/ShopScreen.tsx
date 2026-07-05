@@ -3,7 +3,7 @@ import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, get
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playCoin } from '@/lib/sound';
-import { useLang, tr } from '@/lib/lang';
+import { useLang, tr, tc } from '@/lib/lang';
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string; labelEn: string }> = {
   food: { bg: '#4A9B5F15', color: '#4A9B5F', label: 'Nourriture', labelEn: 'Food' },
@@ -69,8 +69,8 @@ export default function ShopScreen() {
             <div className="flex items-center gap-2.5">
               <span className="text-2xl">{selectedShop.emoji}</span>
               <div>
-                <h2 className="text-lg text-[#2A1F1A]">{selectedShop.name}</h2>
-                <p className="text-xs text-[#8B6B4A]">{selectedShop.description}</p>
+                <h2 className="text-lg text-[#2A1F1A]">{tc(selectedShop.name)}</h2>
+                <p className="text-xs text-[#8B6B4A]">{tc(selectedShop.description)}</p>
               </div>
             </div>
             <div className="text-right font-mono">
@@ -155,7 +155,7 @@ export default function ShopScreen() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-[#2A1F1A]">{item.name}</span>
+                      <span className="text-sm font-semibold text-[#2A1F1A]">{tc(item.name)}</span>
                       <span
                         className="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
                         style={{ backgroundColor: cat.bg, color: cat.color }}
@@ -163,7 +163,7 @@ export default function ShopScreen() {
                         {tr(cat.label, cat.labelEn)}
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#6B5740] mt-0.5">{item.description}</p>
+                    <p className="text-[11px] text-[#6B5740] mt-0.5">{tc(item.description)}</p>
                     <div className="flex gap-1.5 flex-wrap mt-1.5">
                       {item.effect && Object.entries(item.effect).map(([key, val]) => {
                         const stat = STAT_META[key as keyof Stats];
@@ -294,8 +294,8 @@ export default function ShopScreen() {
                   {shop.emoji}
                 </div>
                 <div className="flex-1">
-                  <span className="text-sm font-semibold text-[#2A1F1A] block">{shop.name}</span>
-                  <span className="text-xs text-[#6B5740] block">{shop.description}</span>
+                  <span className="text-sm font-semibold text-[#2A1F1A] block">{tc(shop.name)}</span>
+                  <span className="text-xs text-[#6B5740] block">{tc(shop.description)}</span>
                   <span className="text-[10px] font-mono text-[#A08B70]">
                     {shop.items.length} articles · {cheapest === mostExpensive ? `${cheapest}€` : `${cheapest}€ – ${mostExpensive}€`}
                   </span>
