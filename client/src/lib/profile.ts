@@ -21,7 +21,11 @@ export interface PlayerProfile {
 
 function defaultProfile(): PlayerProfile {
   return {
-    records: { bestDay: 0, bestRespect: 0, bestMoney: 0, bestDignity: 0, totalGames: 0, balancedDay: false },
+    records: {
+      bestDay: 0, bestRespect: 0, bestMoney: 0, bestDignity: 0,
+      totalGames: 0, totalDays: 0,
+      balancedDay: false, lowDignity: false, brokeDay: false, ironMental: false,
+    },
     unlocked: [],
     equipped: {},
   };
@@ -94,17 +98,22 @@ export function syncRecords(partial: Partial<ProfileRecords>): string[] {
   if (partial.bestMoney !== undefined) r.bestMoney = Math.max(r.bestMoney, partial.bestMoney);
   if (partial.bestDignity !== undefined) r.bestDignity = Math.max(r.bestDignity, partial.bestDignity);
   if (partial.totalGames !== undefined) r.totalGames = Math.max(r.totalGames, partial.totalGames);
+  if (partial.totalDays !== undefined) r.totalDays = Math.max(r.totalDays, partial.totalDays);
   if (partial.balancedDay) r.balancedDay = true;
+  if (partial.lowDignity) r.lowDignity = true;
+  if (partial.brokeDay) r.brokeDay = true;
+  if (partial.ironMental) r.ironMental = true;
   const newly = reevaluate(p);
   saveProfile(p);
   return newly;
 }
 
-// Incrémente le compteur de parties (à appeler une fois par fin de partie),
-// puis réévalue les succès.
-export function recordGameEnd(): string[] {
+// À appeler une fois par fin de partie : incrémente le compteur de parties,
+// cumule les jours survécus, puis réévalue les succès.
+export function recordGameEnd(days: number): string[] {
   const p = loadProfile();
   p.records.totalGames += 1;
+  p.records.totalDays += Math.max(0, days);
   const newly = reevaluate(p);
   saveProfile(p);
   return newly;

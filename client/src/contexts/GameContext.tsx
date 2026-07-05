@@ -3331,7 +3331,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const c = state.character;
     const unlocked: string[] = [];
-    if (c) {
+    if (c && c.alive) {
       const balanced =
         c.stats.health >= 60 && c.stats.mental >= 60 && c.stats.hunger >= 60 &&
         c.stats.thirst >= 60 && c.stats.sleep >= 60 && c.stats.dignity >= 60;
@@ -3341,11 +3341,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
         bestMoney: c.money,
         bestDignity: c.stats.dignity,
         balancedDay: balanced,
+        lowDignity: c.stats.dignity <= 10,
+        brokeDay: c.money === 0 && c.day >= 4,
+        ironMental: c.stats.mental <= 12,
       }));
     }
     // Comptabilise la partie une seule fois, à l'entrée sur l'écran de fin.
     if (state.screen === 'game-over' && prevScreen.current !== 'game-over') {
-      unlocked.push(...recordGameEnd());
+      unlocked.push(...recordGameEnd(state.character?.day ?? 0));
     }
     prevScreen.current = state.screen;
     if (unlocked.length) setNewlyUnlocked((prev) => [...prev, ...unlocked.filter((id) => !prev.includes(id))]);
