@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import StatBars from './StatBars';
 import CardboardAvatar from './CardboardAvatar';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
-import { playClick } from '@/lib/sound';
+import { playClick, playNextDay } from '@/lib/sound';
 import { getEquipped } from '@/lib/profile';
 
 interface Enemy {
@@ -271,7 +271,7 @@ export default function MainScreen() {
         transition={{ delay: 0.2 }}
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.98 }}
-        onClick={() => { playClick(); dispatch({ type: 'NEXT_DAY' }); }}
+        onClick={() => { playNextDay(); dispatch({ type: 'NEXT_DAY' }); }}
         className="btn-primary w-full py-3.5 text-sm"
       >
         Jour Suivant

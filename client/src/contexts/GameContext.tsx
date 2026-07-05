@@ -532,6 +532,9 @@ export interface GameState {
   highScores: { name: string; days: number; score: number }[];
   pendingFollowUp: string | null;
   weather: WeatherType;
+  // Cause de mort contextuelle (ex. l'ennemi qui vous a achevé), sinon null
+  // et l'écran de fin la déduit de vos jauges.
+  deathCause: string | null;
 }
 
 // ============ DATA ============
@@ -1692,7 +1695,7 @@ const REST_EVENTS: GameEvent[] = [
   {
     id: 'rest-cabane-carton', title: 'Le Château de Carton', type: 'narrative',
     image: '/assets/rest-cabane-carton-Q65zGixABM5SKqrjKEaS4x.webp',
-    description: 'Vous avez assez de cartons pour construire un véritable palace.',
+    description: 'Vous avez assez de cartons pour vous bâtir un vrai petit palace.',
     choices: [
       { text: 'Construire un abri élaboré', risk: 'normal', emoji: '🏗️', outcomes: [
         { probability: 0.6, text: 'Chef-d\'oeuvre architectural ! Chaud, sec, presque confortable.', statChanges: { sleep: 25, dignity: 5, mental: 5 } },
@@ -2471,6 +2474,24 @@ export function computeScore(day: number, respect: number, money: number): numbe
   return day * 10 + respect * 5 + money * 2;
 }
 
+// Épitaphe contextuelle quand on tombe au combat : une pique selon l'ennemi.
+export function combatDeathMessage(enemy: string): string {
+  const n = enemy.toLowerCase();
+  if (n.includes('chat')) return `Achevé par ${enemy}. Un chat. La rue retiendra ce moment de gloire.`;
+  if (n.includes('écureuil')) return `Vaincu par ${enemy}. Vous n'aviez même pas de noisettes à lui donner.`;
+  if (n.includes('pigeon') || n.includes('mouette') || n.includes('corbeau') || n.includes('cygne') || n.includes('oie') || n.includes('canard') || n.includes('coq')) {
+    return `${enemy} a eu votre peau. Terrassé par un volatile : les oiseaux du quartier s'en souviendront longtemps.`;
+  }
+  if (n.includes('rat') || n.includes('raton')) return `${enemy} a eu le dessus. Même les rongeurs vous regardent de haut désormais.`;
+  if (n.includes('clown')) return `${enemy} a eu le dernier rire. Et personne ne riait déjà.`;
+  if (n.includes('ivrogne')) return `${enemy} titubait. Il frappait quand même plus droit que vous.`;
+  if (n.includes('commerçant') || n.includes('vigile') || n.includes('agent') || n.includes('sécurité')) {
+    return `${enemy} défendait son territoire. Vous, vous ne défendez plus rien.`;
+  }
+  if (n.includes('voyou') || n.includes('chien')) return `${enemy} voulait votre coin de rue. Il l'a eu.`;
+  return `${enemy} a eu raison de vous. La rue continue, indifférente.`;
+}
+
 // Applique un delta de stats puis borne le résultat (motif répété du reducer).
 function applyStatDelta(stats: Stats, delta: Partial<Stats>): Stats {
   const s = { ...stats };
@@ -2625,7 +2646,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'START_GAME':
       clearSave();
-      return { ...state, screen: 'character-select', characterChoices: [generateCharacter(), generateCharacter(), generateCharacter()] };
+      return { ...state, screen: 'character-select', characterChoices: [generateCharacter(), generateCharacter(), generateCharacter()], deathCause: null };
 
     case 'GENERATE_CHARACTERS':
       return { ...state, characterChoices: [generateCharacter(), generateCharacter(), generateCharacter()] };
@@ -3023,7 +3044,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
       if (newHp <= 0) {
-        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'] };
+        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
       }
       const newStats2 = clampStats({ ...state.character.stats, health: newHp });
       return {
@@ -3098,7 +3119,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
       if (newHp <= 0) {
-        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'] };
+        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
       }
       const newStats2 = clampStats({ ...state.character.stats, health: newHp });
       return {
@@ -3139,7 +3160,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const newHp = Math.max(0, state.character.stats.health - enemyDmg);
         logs.push(`😤 ${state.currentCombat.enemyName} n'est pas impressionné et attaque ! ${enemyDmg} dégâts !`);
         if (newHp <= 0) {
-          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'] };
+          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
         }
         const newStats = clampStats({ ...state.character.stats, health: newHp });
         return { ...state, character: { ...state.character, stats: newStats }, combatLog: logs };
@@ -3169,7 +3190,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const newHp = Math.max(0, state.character.stats.health - enemyDmg);
         logs.push(`❌ Fuite ratée ! ${state.currentCombat.enemyName} vous rattrape ! ${enemyDmg} dégâts !`);
         if (newHp <= 0) {
-          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'] };
+          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
         }
         const newStats = clampStats({ ...state.character.stats, health: newHp, dignity: state.character.stats.dignity - 8 });
         return { ...state, character: { ...state.character, stats: newStats }, combatLog: logs };
@@ -3260,6 +3281,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         screen: 'main',
         currentCombat: null,
         combatLog: [],
+        deathCause: null,
         eventResult: { text: '🌅 Une âme charitable vous a porté secours. Vous reprenez vos esprits. La rue ne vous a pas encore eu...' },
         character: {
           ...state.character,
@@ -3297,6 +3319,7 @@ const initialState: GameState = {
   highScores: loadHighScores(),
   pendingFollowUp: null,
   weather: getInitialWeather(),
+  deathCause: null,
 };
 
 // ============ CONTEXT ============
