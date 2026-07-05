@@ -3,19 +3,22 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showInterstitial, showRewarded } from '@/lib/ads';
 import CardboardAvatar from './CardboardAvatar';
+import { useLang, tr } from '@/lib/lang';
 
-const DEATH_MESSAGES = [
-  'La rue a eu raison de vous. Mais votre légende perdure.',
-  'Votre aventure se termine ici. Le carton retourne au carton.',
-  'Vous avez survécu plus longtemps que la plupart. Respect.',
-  'Le Roi du Carton est tombé. Vive le prochain Roi !',
-  'La ville vous a oublié. Comme elle oublie tout le monde.',
+const DEATH_MESSAGES: { fr: string; en: string }[] = [
+  { fr: 'La rue a eu raison de vous. Mais votre légende perdure.', en: 'The street got the better of you. But your legend lives on.' },
+  { fr: 'Votre aventure se termine ici. Le carton retourne au carton.', en: 'Your journey ends here. Cardboard returns to cardboard.' },
+  { fr: 'Vous avez survécu plus longtemps que la plupart. Respect.', en: 'You lasted longer than most. Respect.' },
+  { fr: 'Le Roi du Carton est tombé. Vive le prochain Roi !', en: 'The Cardboard King has fallen. Long live the next King!' },
+  { fr: 'La ville vous a oublié. Comme elle oublie tout le monde.', en: 'The city forgot you. Like it forgets everyone.' },
 ];
 
 export default function GameOverScreen() {
   const { state, dispatch } = useGame();
+  useLang();
   const char = state.character;
-  const [deathMsg] = useState(() => DEATH_MESSAGES[Math.floor(Math.random() * DEATH_MESSAGES.length)]);
+  const [deathMsgIdx] = useState(() => Math.floor(Math.random() * DEATH_MESSAGES.length));
+  const deathMsg = tr(DEATH_MESSAGES[deathMsgIdx].fr, DEATH_MESSAGES[deathMsgIdx].en);
   const [reviving, setReviving] = useState(false);
 
   // Pub interstitielle à l'arrivée sur l'écran de fin (entre deux parties).
@@ -42,15 +45,15 @@ export default function GameOverScreen() {
   // combat), soit déduite de l'état dans lequel vous partez.
   function inferCause(): string {
     if (char!.stats.mental <= 0) {
-      return 'Votre esprit a lâché avant votre corps. La rue a fini par avoir votre moral.';
+      return tr('Votre esprit a lâché avant votre corps. La rue a fini par avoir votre moral.', 'Your mind gave out before your body. The street finally broke your spirit.');
     }
-    if (char!.stats.hunger <= 8) return 'Le ventre vide a eu le dernier mot. On ne survit pas longtemps à jeun.';
-    if (char!.stats.thirst <= 8) return 'La soif a fini le travail. Trouver de l\'eau, ça compte plus qu\'on ne croit.';
-    if (char!.stats.sleep <= 8) return 'L\'épuisement vous a rattrapé. Le corps réclame son dû, toujours.';
+    if (char!.stats.hunger <= 8) return tr('Le ventre vide a eu le dernier mot. On ne survit pas longtemps à jeun.', 'An empty stomach had the last word. You don\'t last long unfed.');
+    if (char!.stats.thirst <= 8) return tr('La soif a fini le travail. Trouver de l\'eau, ça compte plus qu\'on ne croit.', 'Thirst finished the job. Finding water matters more than you\'d think.');
+    if (char!.stats.sleep <= 8) return tr('L\'épuisement vous a rattrapé. Le corps réclame son dû, toujours.', 'Exhaustion caught up with you. The body always claims its due.');
     if ((state.weather === 'snow' || state.weather === 'storm') && char!.stats.health <= 0) {
-      return 'Le froid a eu raison de vous cette nuit. La rue est glaciale avec ses rois.';
+      return tr('Le froid a eu raison de vous cette nuit. La rue est glaciale avec ses rois.', 'The cold got you tonight. The street is icy to its kings.');
     }
-    return 'Votre corps a lâché. Trop de coups, pas assez de soins.';
+    return tr('Votre corps a lâché. Trop de coups, pas assez de soins.', 'Your body gave out. Too many blows, not enough care.');
   }
   const deathCause = state.deathCause || inferCause();
 
@@ -87,7 +90,7 @@ export default function GameOverScreen() {
         transition={{ delay: 0.4 }}
         className="text-3xl text-[#D94F4F] text-center"
       >
-        Fin de l'Aventure
+        {tr('Fin de l\'Aventure', 'End of the Road')}
       </motion.h1>
 
       {/* Death cause */}
@@ -131,19 +134,19 @@ export default function GameOverScreen() {
         <div className="grid grid-cols-2 gap-2">
           <div className="p-2.5 rounded-lg text-center" style={{ background: '#231525' }}>
             <p className="text-xl font-bold text-[#E8A87C]">{char.day}</p>
-            <p className="text-[10px] text-[#A08060]">Jours</p>
+            <p className="text-[10px] text-[#A08060]">{tr('Jours', 'Days')}</p>
           </div>
           <div className="p-2.5 rounded-lg text-center" style={{ background: '#231525' }}>
             <p className="text-xl font-bold text-[#7B68EE]">{char.respect}</p>
-            <p className="text-[10px] text-[#A08060]">Respect</p>
+            <p className="text-[10px] text-[#A08060]">{tr('Respect', 'Respect')}</p>
           </div>
           <div className="p-2.5 rounded-lg text-center" style={{ background: '#231525' }}>
             <p className="text-xl font-bold text-[#B8860B]">{char.money}€</p>
-            <p className="text-[10px] text-[#A08060]">Fortune</p>
+            <p className="text-[10px] text-[#A08060]">{tr('Fortune', 'Money')}</p>
           </div>
           <div className="p-2.5 rounded-lg text-center border border-[#D4874D]/30" style={{ background: '#231525' }}>
             <p className="text-xl font-bold text-[#D4874D]">{score}</p>
-            <p className="text-[10px] text-[#A08060]">Score</p>
+            <p className="text-[10px] text-[#A08060]">{tr('Score', 'Score')}</p>
           </div>
         </div>
       </motion.div>
@@ -158,7 +161,7 @@ export default function GameOverScreen() {
           style={{ background: 'linear-gradient(135deg, #362232, #26182A)' }}
         >
           <h4 className="text-sm font-semibold text-[#F0D9C4] text-center mb-2">
-            🏆 Plus longues survies
+            🏆 {tr('Plus longues survies', 'Longest survivals')}
           </h4>
           <div className="flex flex-col gap-1.5">
             {highScores.slice(0, 5).map((hs, i) => (
@@ -167,7 +170,7 @@ export default function GameOverScreen() {
                   {i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`} {hs.name}
                 </span>
                 <span className={i === 0 ? 'text-[#F2C14E] font-semibold' : 'text-[#E8A87C] font-semibold'}>
-                  {hs.days} {hs.days > 1 ? 'jours' : 'jour'}
+                  {hs.days} {tr(hs.days > 1 ? 'jours' : 'jour', hs.days > 1 ? 'days' : 'day')}
                 </span>
               </div>
             ))}
@@ -191,7 +194,7 @@ export default function GameOverScreen() {
             boxShadow: '0 4px 16px rgba(74, 155, 95, 0.3)',
           }}
         >
-          {reviving ? '⏳ Chargement…' : '🎬 Seconde chance (regarder une pub)'}
+          {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Seconde chance (regarder une pub)', '🎬 Second chance (watch an ad)')}
         </motion.button>
       )}
 
@@ -209,7 +212,7 @@ export default function GameOverScreen() {
           boxShadow: '0 4px 16px rgba(212, 135, 77, 0.3)',
         }}
       >
-        Recommencer
+        {tr('Recommencer', 'Play Again')}
       </motion.button>
     </motion.div>
   );

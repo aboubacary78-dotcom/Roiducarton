@@ -2,6 +2,7 @@ import { useGame, STEAL_TARGETS, randomFromArray } from '@/contexts/GameContext'
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt, playStep, playSpotted } from '@/lib/sound';
+import { useLang, tr } from '@/lib/lang';
 
 /*
  * Mini-jeu de vol « casse en grille » (façon Pac-Man) : on entre dans un lieu,
@@ -89,6 +90,7 @@ function makeLayout(guardCount: number): Layout {
 
 export default function StealHeist() {
   const { state, dispatch } = useGame();
+  useLang();
   const char = state.character;
   const [target] = useState(() => randomFromArray(STEAL_TARGETS));
   const day = char?.day ?? 1;
@@ -208,15 +210,15 @@ export default function StealHeist() {
 
   const guardHere = (x: number, y: number) => guards.some((g) => g.x === x && g.y === y);
 
-  const instruction = hasLoot ? `Filez vers la sortie 🚪 !` : `Récupérez ${target.emoji}`;
+  const instruction = hasLoot ? tr('Filez vers la sortie 🚪 !', 'Get to the exit 🚪 !') : `${tr('Récupérez', 'Grab')} ${target.emoji}`;
 
   return (
     <div className="min-h-screen bg-texture p-4 flex flex-col items-center gap-3">
       {/* En-tête */}
       <div className="text-center">
-        <h1 className="text-2xl text-[#2A1F1A]">Le casse</h1>
+        <h1 className="text-2xl text-[#2A1F1A]">{tr('Le casse', 'The Heist')}</h1>
         <p className="text-sm text-[#6B5740] mt-1 max-w-xs mx-auto">
-          Vous tentez de subtiliser <strong>{target.label}</strong>.
+          {tr('Vous tentez de subtiliser', 'You try to swipe')} <strong>{tr(target.label, target.labelEn)}</strong>.
         </p>
       </div>
 
@@ -227,7 +229,7 @@ export default function StealHeist() {
         }`}
       >
         <span>{instruction}</span>
-        <span className="text-xs">{spotted ? '⚠️ Repéré !' : '🤫 Discret'}</span>
+        <span className="text-xs">{spotted ? tr('⚠️ Repéré !', '⚠️ Spotted!') : tr('🤫 Discret', '🤫 Unseen')}</span>
       </div>
 
       {/* Grille */}
@@ -292,7 +294,7 @@ export default function StealHeist() {
               >
                 <div className="text-4xl mb-1">{status === 'caught' ? '🚨' : spotted ? '🤫' : '💎'}</div>
                 <p className="text-xl font-bold text-white">
-                  {status === 'caught' ? 'Pris sur le fait !' : spotted ? 'Filé de justesse !' : 'Coup de maître !'}
+                  {status === 'caught' ? tr('Pris sur le fait !', 'Caught red-handed!') : spotted ? tr('Filé de justesse !', 'Slipped away!') : tr('Coup de maître !', 'Masterstroke!')}
                 </p>
               </motion.div>
             </motion.div>
@@ -311,7 +313,7 @@ export default function StealHeist() {
       </div>
 
       <p className="text-[11px] text-[#8B6B4A] text-center">
-        Glissez sur la grille ou utilisez les flèches. {guardEmoji} patrouille — ne le touchez pas.
+        {tr('Glissez sur la grille ou utilisez les flèches.', 'Swipe on the grid or use the arrows.')} {guardEmoji} {tr('patrouille — ne le touchez pas.', 'is on patrol — don\'t touch it.')}
       </p>
     </div>
   );
