@@ -9,6 +9,22 @@ import type { AccessorySlot } from '@/lib/cosmetics';
 
 const OUTLINE = '#3A2A1E';
 
+// Points d'une étoile à 5 branches (accessoires étoilés & fonds).
+function star(cx: number, cy: number, outer: number, inner: number): string {
+  let p = '';
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? outer : inner;
+    const a = (Math.PI / 5) * i - Math.PI / 2;
+    p += `${(cx + Math.cos(a) * r).toFixed(1)},${(cy + Math.sin(a) * r).toFixed(1)} `;
+  }
+  return p.trim();
+}
+
+// Tracé d'un cœur centré (accessoires & fonds).
+function heart(cx: number, cy: number, s: number): string {
+  return `M${cx} ${cy + s * 0.9} C${cx - s * 1.2} ${cy - s * 0.2}, ${cx - s} ${cy - s}, ${cx} ${cy - s * 0.3} C${cx + s} ${cy - s}, ${cx + s * 1.2} ${cy - s * 0.2}, ${cx} ${cy + s * 0.9} Z`;
+}
+
 const SKIN = ['#F2DAB8', '#EAD0A8', '#DDB483', '#CB9A63', '#B27F4C', '#946237', '#7C5230', '#5E3E24'];
 const HAIR = ['#2E2018', '#4A3320', '#6B4A2C', '#141414', '#7C7C7C', '#B8862F', '#CBCBCB', '#8A5A2A', '#E8E8E8', '#B5432F'];
 const BG = ['#F1E1C9', '#EBD3B4', '#F0DAC0', '#E7D8C0', '#F2E0CE', '#E9D6BB', '#EFE0CA'];
@@ -58,8 +74,9 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   const accFace = accessories?.face;
   const accNeck = accessories?.neck;
   const accBg = accessories?.bg;
-  // Un chapeau-accessoire masque les cheveux (sauf l'auréole qui flotte au-dessus).
-  const accHidesHair = !!accHat && accHat !== 'halo';
+  // Un chapeau-accessoire masque les cheveux, sauf ceux qui se posent dessus
+  // (auréole flottante, couronne de fleurs en serre-tête).
+  const accHidesHair = !!accHat && accHat !== 'halo' && accHat !== 'flower-crown';
   const showHat = hat === 1 || hat === 2 || accHidesHair;
 
   const eyeL = 40, eyeR = 60, eyeY = 47;
@@ -89,6 +106,76 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           {['#E86A5A', '#EBA23F', '#E8C84B', '#5FB56A', '#4A8FBF', '#7B68C4'].map((c, i) => (
             <rect key={i} x="0" y={i * 16.67} width="100" height="16.68" fill={c} />
           ))}
+        </g>
+      )}
+      {accBg === 'sunset-bg' && (
+        <g>
+          {['#F7D9A0', '#F3B87A', '#EB8E6A', '#C46A6A'].map((c, i) => (
+            <rect key={i} x="0" y={i * 25} width="100" height="25" fill={c} />
+          ))}
+          <circle cx="50" cy="38" r="15" fill="#FBE7C0" opacity="0.9" />
+        </g>
+      )}
+      {accBg === 'stars-bg' && (
+        <g>
+          <rect x="0" y="0" width="100" height="100" rx="20" fill="#2E2A4A" />
+          <circle cx="78" cy="20" r="8" fill="#F2E4A8" opacity="0.9" />
+          <circle cx="74" cy="17" r="7" fill="#2E2A4A" />
+          <g fill="#F2E4A8">
+            <polygon points={star(20, 22, 3, 1.3)} />
+            <polygon points={star(40, 14, 2.4, 1)} />
+            <polygon points={star(58, 30, 2, 0.9)} />
+            <circle cx="30" cy="40" r="1" /><circle cx="14" cy="55" r="1" /><circle cx="86" cy="46" r="1" />
+            <circle cx="50" cy="20" r="0.9" /><circle cx="68" cy="60" r="1" /><circle cx="24" cy="72" r="1" />
+          </g>
+        </g>
+      )}
+      {accBg === 'flames-bg' && (
+        <g>
+          <rect x="0" y="0" width="100" height="100" rx="20" fill="#3A1F14" />
+          <g fill="#E8641E">
+            <path d="M0 100 Q12 60 22 100 Q34 55 46 100 Q58 62 70 100 Q82 55 94 100 L100 100 L100 100 L0 100 Z" />
+          </g>
+          <g fill="#F2A83A">
+            <path d="M8 100 Q18 74 28 100 Q40 70 52 100 Q64 76 76 100 Q86 72 96 100 Z" />
+          </g>
+        </g>
+      )}
+      {accBg === 'hearts-bg' && (
+        <g>
+          <rect x="0" y="0" width="100" height="100" rx="20" fill="#F6D9E4" />
+          <g fill="#E88AA0" opacity="0.75">
+            {[[20, 24, 5], [78, 30, 6], [30, 62, 4], [70, 72, 5], [50, 44, 4], [12, 80, 4], [88, 62, 4]].map(([x, y, s], i) => (
+              <path key={i} d={heart(x, y, s)} />
+            ))}
+          </g>
+        </g>
+      )}
+      {accBg === 'confetti-bg' && (
+        <g>
+          <rect x="0" y="0" width="100" height="100" rx="20" fill="#FBF3E6" />
+          {[['#E86A5A', 18, 20, 20], ['#4A8FBF', 74, 16, -25], ['#5FB56A', 40, 34, 40], ['#EBA23F', 84, 44, 10], ['#7B68C4', 22, 58, -30], ['#E8C84B', 60, 66, 25], ['#E86A5A', 84, 78, -15], ['#4A8FBF', 30, 82, 35], ['#5FB56A', 66, 26, -20], ['#EBA23F', 12, 40, 15]].map(([c, x, y, r], i) => (
+            <rect key={i} x={x as number} y={y as number} width="5" height="8" rx="1.5" fill={c as string} transform={`rotate(${r} ${x as number} ${y as number})`} />
+          ))}
+        </g>
+      )}
+      {accBg === 'royal-bg' && (
+        <g>
+          <rect x="0" y="0" width="100" height="100" rx="20" fill="#4B2E83" />
+          <g fill="#EAC24A" opacity="0.4">
+            {Array.from({ length: 20 }).map((_, i) => {
+              const cx = 15 + (i % 4) * 24;
+              const cy = 15 + Math.floor(i / 4) * 20;
+              return <rect key={i} x={cx - 2.5} y={cy - 2.5} width="5" height="5" transform={`rotate(45 ${cx} ${cy})`} />;
+            })}
+          </g>
+        </g>
+      )}
+      {accBg === 'spotlight-bg' && (
+        <g>
+          <rect x="0" y="0" width="100" height="100" rx="20" fill="#241E1A" />
+          <path d="M50 -6 L16 106 L84 106 Z" fill="#F5E3B0" opacity="0.3" />
+          <ellipse cx="50" cy="52" rx="30" ry="30" fill="#F5E7C0" opacity="0.22" />
         </g>
       )}
 
@@ -281,6 +368,47 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           <text x="50" y="94.4" fontSize="7" textAnchor="middle" fill={OUTLINE} stroke="none" fontWeight="bold">1</text>
         </g>
       )}
+      {accNeck === 'tie' && (
+        <g stroke={OUTLINE} strokeWidth="1" strokeLinejoin="round">
+          <path d="M50 75 L46 79 L50 82 L54 79 Z" fill="#B34A32" />
+          <path d="M50 82 L47 82 L48.5 96 L50 98 L51.5 96 L53 82 Z" fill="#C4553A" />
+        </g>
+      )}
+      {accNeck === 'bandana' && (
+        <g stroke={OUTLINE} strokeWidth="1.4" strokeLinejoin="round">
+          <path d="M36 75 Q50 82 64 75 L62 81 Q50 87 38 81 Z" fill="#C4463A" />
+          <g fill="#F3EEE8" stroke="none" opacity="0.55">
+            <circle cx="44" cy="79" r="1" /><circle cx="50" cy="80.5" r="1" /><circle cx="56" cy="79" r="1" />
+          </g>
+        </g>
+      )}
+      {accNeck === 'cape' && (
+        <g stroke={OUTLINE} strokeWidth="1.4" strokeLinejoin="round">
+          <path d="M39 74 Q34 82 33 96 Q42 90 46 78 Z" fill="#7B2D8E" />
+          <path d="M61 74 Q66 82 67 96 Q58 90 54 78 Z" fill="#7B2D8E" />
+          <path d="M42 73 Q50 78 58 73 Q54 80 50 80 Q46 80 42 73 Z" fill="#8E3AA0" />
+          <circle cx="50" cy="74" r="2.4" fill="#EAC24A" stroke={OUTLINE} strokeWidth="0.8" />
+        </g>
+      )}
+      {accNeck === 'pearls' && (
+        <g fill="#F3EEE8" stroke={OUTLINE} strokeWidth="0.6">
+          {Array.from({ length: 9 }).map((_, i) => {
+            const t = i / 8;
+            const x = (1 - t) * (1 - t) * 36 + 2 * (1 - t) * t * 50 + t * t * 64;
+            const y = (1 - t) * (1 - t) * 76 + 2 * (1 - t) * t * 87 + t * t * 76;
+            return <circle key={i} cx={x} cy={y} r="2" />;
+          })}
+        </g>
+      )}
+      {accNeck === 'whistle' && (
+        <g stroke={OUTLINE} strokeWidth="1">
+          <path d="M45 74 Q49 88 55 82" fill="none" stroke="#8B6B4A" strokeWidth="1.6" />
+          <g transform="rotate(18 55 84)">
+            <rect x="50" y="82" width="9" height="6" rx="2.5" fill="#C4C4C4" />
+            <rect x="58" y="83" width="3.5" height="4" rx="1" fill="#A8A8A8" />
+          </g>
+        </g>
+      )}
 
       {/* Visage */}
       {accFace === 'blush' && (
@@ -299,6 +427,32 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
       )}
       {accFace === 'mustache' && (
         <path d="M50 60 Q42 56 35 60 Q40 65 46 61 Q48 60 50 61.5 Q52 60 54 61 Q60 65 65 60 Q58 56 50 60 Z" fill={hair} stroke={OUTLINE} strokeWidth="0.7" strokeLinejoin="round" />
+      )}
+      {accFace === 'goatee' && (
+        <path d="M44 66 q6 4 12 0 q-1 8 -6 9.5 q-5 -1.5 -6 -9.5 Z" fill={hair} stroke={OUTLINE} strokeWidth="0.6" strokeLinejoin="round" />
+      )}
+      {accFace === 'unibrow' && (
+        <path d="M35 41 Q50 36.5 65 41 Q50 39.5 35 41 Z" fill={hair} />
+      )}
+      {accFace === 'clown-nose' && (
+        <circle cx="50" cy="57" r="5" fill="#E23A3A" stroke={OUTLINE} strokeWidth="1.2" />
+      )}
+      {accFace === 'bandage' && (
+        <g transform="rotate(-20 62 39)">
+          <rect x="55" y="35" width="14" height="6" rx="1.5" fill="#F0C98A" stroke={OUTLINE} strokeWidth="1" />
+          <g stroke="#D9A85E" strokeWidth="0.8">
+            <line x1="59" y1="35" x2="59" y2="41" /><line x1="65" y1="35" x2="65" y2="41" />
+          </g>
+        </g>
+      )}
+      {accFace === 'face-tattoo' && (
+        <path d="M60 52 Q56.5 56 60 59 Q63.5 56 60 52 Z" fill="#3A2A6E" stroke={OUTLINE} strokeWidth="0.4" />
+      )}
+      {accFace === 'star-cheeks' && (
+        <g fill="#F2C14E" stroke={OUTLINE} strokeWidth="0.5">
+          <polygon points={star(35, 57, 3.4, 1.5)} />
+          <polygon points={star(65, 57, 3.4, 1.5)} />
+        </g>
       )}
 
       {/* Yeux */}
@@ -326,6 +480,45 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           <path d="M40 51 C33 44 34 39 40 43 C46 39 47 44 40 51 Z" />
           <path d="M60 51 C53 44 54 39 60 43 C66 39 67 44 60 51 Z" />
           <line x1="46" y1="45" x2="54" y2="45" strokeWidth="1.3" />
+        </g>
+      )}
+      {accEyes === 'star-glasses' && (
+        <g fill="#F2C14E" stroke={OUTLINE} strokeWidth="1.2">
+          <polygon points={star(eyeL, eyeY, 6.5, 2.8)} />
+          <polygon points={star(eyeR, eyeY, 6.5, 2.8)} />
+          <line x1="47" y1="46" x2="53" y2="46" strokeWidth="1.2" />
+        </g>
+      )}
+      {accEyes === 'sunglasses' && (
+        <g stroke={OUTLINE} strokeWidth="1.6">
+          <path d="M31 43 h16 v4 q0 5 -8 5 q-8 0 -8 -6 Z" fill="#20242A" />
+          <path d="M53 43 h16 v3 q0 6 -8 6 q-8 0 -8 -4 Z" fill="#20242A" />
+          <line x1="47" y1="44" x2="53" y2="44" />
+          <line x1="31" y1="43" x2="26" y2="41" />
+          <line x1="69" y1="43" x2="74" y2="41" />
+        </g>
+      )}
+      {accEyes === 'nerd-glasses' && (
+        <g stroke={OUTLINE} strokeWidth="2.2" fill="#ffffff" fillOpacity="0.15">
+          <circle cx={eyeL} cy={eyeY} r="8" />
+          <circle cx={eyeR} cy={eyeY} r="8" />
+          <line x1="48" y1="47" x2="52" y2="47" strokeWidth="2.2" />
+          <rect x="48" y="43" width="4" height="8" fill="#E8E8E8" stroke={OUTLINE} strokeWidth="0.8" />
+        </g>
+      )}
+      {accEyes === 'ski-goggles' && (
+        <g stroke={OUTLINE} strokeWidth="2">
+          <rect x="30" y="41" width="40" height="13" rx="6.5" fill="#4A8FBF" />
+          <rect x="33" y="43.5" width="34" height="8" rx="4" fill="#BFE3F0" opacity="0.7" stroke="none" />
+          <path d="M26 44 L30 46 M74 44 L70 46" strokeWidth="2" />
+        </g>
+      )}
+      {accEyes === 'thug-glasses' && (
+        <g fill="#181818">
+          <rect x="31" y="43" width="16" height="6" />
+          <rect x="53" y="43" width="16" height="6" />
+          <rect x="47" y="44.5" width="6" height="3" />
+          <rect x="26" y="43.5" width="5" height="3" />
         </g>
       )}
 
@@ -364,6 +557,76 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           <path d="M25 34 Q27 16 50 16 Q73 16 75 34 Z" fill="#4A7FB5" />
           <rect x="40" y="31" width="20" height="5" rx="2.5" fill="#3E6E9E" />
           <circle cx="50" cy="18" r="2" fill="#3E6E9E" />
+        </g>
+      )}
+      {accHat === 'party' && (
+        <g stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round">
+          <path d="M50 6 L38 34 L62 34 Z" fill="#E86A8A" />
+          <line x1="44" y1="21" x2="56" y2="21" stroke="#F2C14E" strokeWidth="3" />
+          <line x1="41" y1="28" x2="59" y2="28" stroke="#4A8FBF" strokeWidth="3" />
+          <circle cx="50" cy="6" r="3" fill="#F2C14E" />
+        </g>
+      )}
+      {accHat === 'beanie' && (
+        <g stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round">
+          <path d="M24 34 Q26 14 50 14 Q74 14 76 34 Z" fill="#5E8B6A" />
+          <rect x="22" y="31" width="56" height="8" rx="4" fill="#4E7A5A" />
+          <circle cx="50" cy="12" r="4" fill="#F3EEE8" />
+        </g>
+      )}
+      {accHat === 'cowboy' && (
+        <g stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round">
+          <path d="M16 34 Q50 26 84 34 Q50 41 16 34 Z" fill="#9B6B3A" />
+          <path d="M34 34 Q34 15 50 15 Q66 15 66 34 Z" fill="#A87543" />
+          <path d="M34 30 Q50 33 66 30" stroke="#6E4A28" strokeWidth="2" fill="none" />
+        </g>
+      )}
+      {accHat === 'wizard' && (
+        <g stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round">
+          <path d="M50 4 Q54 20 62 36 L38 36 Q46 20 50 4 Z" fill="#5A4A9E" />
+          <path d="M20 37 Q50 30 80 37 Q50 43 20 37 Z" fill="#5A4A9E" />
+          <polygon points={star(50, 24, 4, 1.7)} fill="#F2C14E" stroke="none" />
+        </g>
+      )}
+      {accHat === 'chef' && (
+        <g stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round">
+          <path d="M32 28 Q28 12 40 14 Q42 6 50 10 Q58 6 60 14 Q72 12 68 28 Z" fill="#F8F5F0" />
+          <rect x="30" y="27" width="40" height="10" rx="2" fill="#F3EEE8" />
+        </g>
+      )}
+      {accHat === 'flower-crown' && (
+        <g>
+          <path d="M24 34 Q50 24 76 34" fill="none" stroke="#6B8E5A" strokeWidth="2.5" />
+          <g stroke={OUTLINE} strokeWidth="0.5">
+            <g><circle cx="30" cy="31" r="3.4" fill="#E86A8A" /><circle cx="30" cy="31" r="1.3" fill="#F2C14E" stroke="none" /></g>
+            <g><circle cx="42" cy="26" r="3.4" fill="#F2C14E" /><circle cx="42" cy="26" r="1.3" fill="#fff" stroke="none" /></g>
+            <g><circle cx="50" cy="23" r="3.8" fill="#EBA23F" /><circle cx="50" cy="23" r="1.4" fill="#fff" stroke="none" /></g>
+            <g><circle cx="58" cy="26" r="3.4" fill="#7B68C4" /><circle cx="58" cy="26" r="1.3" fill="#F2C14E" stroke="none" /></g>
+            <g><circle cx="70" cy="31" r="3.4" fill="#E86A8A" /><circle cx="70" cy="31" r="1.3" fill="#F2C14E" stroke="none" /></g>
+          </g>
+        </g>
+      )}
+      {accHat === 'pirate-hat' && (
+        <g stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round">
+          <path d="M22 30 Q50 12 78 30 Q78 36 68 34 Q50 29 32 34 Q22 36 22 30 Z" fill="#2A2320" />
+          <g fill="#F3EEE8" stroke="none">
+            <circle cx="50" cy="25" r="3.6" />
+            <rect x="46.5" y="27.5" width="7" height="3" rx="1" />
+          </g>
+        </g>
+      )}
+      {accHat === 'graduation' && (
+        <g stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round">
+          <rect x="39" y="24" width="22" height="9" rx="1" fill="#3A322C" />
+          <path d="M50 30 L24 22 L50 14 L76 22 Z" fill="#2A2320" />
+          <line x1="76" y1="22" x2="76" y2="33" stroke="#F2C14E" strokeWidth="1.5" />
+          <circle cx="76" cy="34" r="2" fill="#F2C14E" stroke="none" />
+        </g>
+      )}
+      {accHat === 'beret' && (
+        <g stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round">
+          <path d="M28 30 Q26 14 52 15 Q76 16 72 27 Q58 31 42 31 Q34 31 28 30 Z" fill="#B5432F" />
+          <circle cx="52" cy="14" r="2" fill="#8E3423" />
         </g>
       )}
     </svg>
