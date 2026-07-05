@@ -2326,6 +2326,89 @@ export const STEAL_TARGETS: StealTarget[] = [
   { id: 'sacoche', label: 'une sacoche oubliée sur un banc', emoji: '👜', catcher: 'police' },
 ];
 
+// ============ CLINS D'ŒIL AU RECORDMAN ============
+// Événements « légende » : de temps en temps, la rue évoque celui qui a tenu
+// le plus longtemps. {name} et {days} sont remplis au moment de l'affichage.
+interface LegendTemplate {
+  id: string;
+  title: string;
+  type: GameEvent['type'];
+  description: string;
+  choices: EventChoice[];
+}
+
+const LEGEND_TEMPLATES: LegendTemplate[] = [
+  {
+    id: 'legend-graffiti', title: 'Le mur des légendes', type: 'narrative',
+    description: 'Sur un mur décrépi, un graffiti tracé avec soin : « {name} — {days} jours — Roi du Carton ». La rue n\'oublie pas les siens.',
+    choices: [
+      { text: 'Graver votre nom juste en dessous', risk: 'safe', emoji: '✍️', outcomes: [
+        { probability: 1, text: 'Vous inscrivez votre nom sous celui de {name}. Un jour, peut-être, on parlera de vous aussi.', statChanges: { mental: 8, dignity: 3 }, respectChange: 1 },
+      ]},
+      { text: 'Rendre hommage en silence', risk: 'safe', emoji: '🙏', outcomes: [
+        { probability: 1, text: '{days} jours… Vous serrez les dents. Vous ferez mieux.', statChanges: { mental: 6 } },
+      ]},
+    ],
+  },
+  {
+    id: 'legend-ancien', title: 'Le vieux se souvient', type: 'social',
+    description: 'Un ancien du quartier vous jauge. « {name} ? Ah, ça… {days} jours dans la rue. Personne n\'a fait mieux. Toi, t\'as encore du chemin. »',
+    choices: [
+      { text: 'Jurer de le dépasser', risk: 'safe', emoji: '🔥', outcomes: [
+        { probability: 1, text: 'Le vieux sourit. « J\'aime ça. » Il vous glisse quelques pièces pour la route.', statChanges: { mental: 7 }, moneyChange: 2, respectChange: 1 },
+      ]},
+      { text: 'Hausser les épaules', risk: 'safe', emoji: '😐', outcomes: [
+        { probability: 1, text: '« Comme tu veux. Mais souviens-toi du nom : {name}. »', statChanges: { mental: 2 } },
+      ]},
+    ],
+  },
+  {
+    id: 'legend-carton', title: 'Le carton du roi', type: 'discovery',
+    description: 'Sous un porche, un carton usé jusqu\'à la corde. Une inscription au marqueur : « Ici a dormi {name}, {days} jours durant. » On dirait un lieu de pèlerinage.',
+    choices: [
+      { text: 'Fouiller le vieux carton', risk: 'normal', emoji: '🔍', outcomes: [
+        { probability: 0.5, text: 'Coincée dans un pli : une pièce oubliée et un mot : « Tiens bon. »', moneyChange: 4, statChanges: { mental: 5 } },
+        { probability: 0.5, text: 'Rien, sinon l\'odeur d\'une légende. Vous repartez inspiré.', statChanges: { mental: 6 } },
+      ]},
+      { text: 'Ne pas déranger la relique', risk: 'safe', emoji: '🕯️', outcomes: [
+        { probability: 1, text: 'Vous laissez le carton de {name} intact. Un peu de respect ne coûte rien.', statChanges: { dignity: 4, mental: 4 }, respectChange: 1 },
+      ]},
+    ],
+  },
+  {
+    id: 'legend-pari', title: 'Le pari de la rue', type: 'social',
+    description: 'Deux SDF parient sur votre avenir. « Lui ? Il tiendra jamais {days} jours comme {name}. » « Parie ! »',
+    choices: [
+      { text: 'Leur donner tort', risk: 'safe', emoji: '💪', outcomes: [
+        { probability: 1, text: '« On verra bien. » Vous repartez le menton haut, bien décidé à entrer dans l\'histoire.', statChanges: { mental: 8, dignity: 2 } },
+      ]},
+      { text: 'Parier avec eux', risk: 'normal', emoji: '🎲', outcomes: [
+        { probability: 0.5, text: 'Ils misent une pièce sur vous. « Fais-nous gagner, gamin. »', moneyChange: 3, statChanges: { mental: 4 } },
+        { probability: 0.5, text: 'Ils rigolent et s\'en vont. L\'ombre de {name} plane toujours.', statChanges: { mental: 2 } },
+      ]},
+    ],
+  },
+];
+
+function fillLegend(s: string, legend: { name: string; days: number }): string {
+  return s.replace(/\{name\}/g, legend.name).replace(/\{days\}/g, String(legend.days));
+}
+
+// Construit un événement prêt à afficher pour le recordman donné.
+function makeLegendEvent(legend: { name: string; days: number }): GameEvent {
+  const t = randomFromArray(LEGEND_TEMPLATES);
+  return {
+    id: `${t.id}-${legend.name}`,
+    title: t.title,
+    type: t.type,
+    description: fillLegend(t.description, legend),
+    choices: t.choices.map((c) => ({
+      ...c,
+      outcomes: c.outcomes.map((o) => ({ ...o, text: fillLegend(o.text, legend) })),
+    })),
+  };
+}
+
 // Lieux où tendre le chapeau (mini-jeu de mendicité).
 export const BEG_SPOTS: string[] = [
   'devant la boulangerie',
@@ -2490,9 +2573,20 @@ function saveHighScore(name: string, days: number, score: number) {
   try {
     const scores = loadHighScores();
     scores.push({ name, days, score });
-    scores.sort((a, b) => b.score - a.score);
+    // Classement par jours de survie (le score départage les ex æquo).
+    scores.sort((a, b) => b.days - a.days || b.score - a.score);
     localStorage.setItem(SCORES_KEY, JSON.stringify(scores.slice(0, 10)));
   } catch { /* silent fail */ }
+}
+
+// Le « recordman » : celui qui a survécu le plus longtemps. Sert aux clins
+// d'œil semés dans le jeu (voir makeLegendEvent, TitleScreen). On n'en fait
+// une légende qu'à partir de 4 jours pour éviter les références triviales.
+export function getLegend(scores: { name: string; days: number; score: number }[]): { name: string; days: number } | null {
+  if (!scores || scores.length === 0) return null;
+  const top = [...scores].sort((a, b) => b.days - a.days || b.score - a.score)[0];
+  if (!top || top.days < 4) return null;
+  return { name: top.name, days: top.days };
 }
 
 // ============ REDUCER ============
@@ -2551,6 +2645,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'EXPLORE': {
       if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      // De temps en temps (~8 %), la rue évoque le recordman.
+      const legend = getLegend(state.highScores);
+      if (legend && Math.random() < 0.08) {
+        return { ...state, screen: 'event', currentEvent: makeLegendEvent(legend), dayActions: state.dayActions + 1 };
+      }
       const events = generateEvents(state.character.location, state.character);
       if (events.length === 0) return state;
       const event = randomFromArray(events);
