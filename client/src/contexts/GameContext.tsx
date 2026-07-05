@@ -2561,7 +2561,7 @@ function clearSave() {
   try { localStorage.removeItem(SAVE_KEY); } catch { /* silent fail */ }
 }
 
-function loadHighScores(): { name: string; days: number; score: number }[] {
+export function loadHighScores(): { name: string; days: number; score: number }[] {
   try {
     const saved = localStorage.getItem(SCORES_KEY);
     if (saved) return JSON.parse(saved);
@@ -3314,6 +3314,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
   const prevScreen = useRef(state.screen);
+  // Empêche de comptabiliser deux fois la même partie (ex. mort → seconde
+  // chance par pub → nouvelle mort). Remis à zéro à chaque nouvelle partie.
+  const gameCounted = useRef(false);
 
   const dismissUnlock = useCallback((id: string) => {
     setNewlyUnlocked((prev) => prev.filter((x) => x !== id));
@@ -3346,8 +3349,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
         ironMental: c.stats.mental <= 12,
       }));
     }
-    // Comptabilise la partie une seule fois, à l'entrée sur l'écran de fin.
-    if (state.screen === 'game-over' && prevScreen.current !== 'game-over') {
+    // Une nouvelle partie (passage par l'écran de sélection) réarme le compteur.
+    if (state.screen === 'character-select') gameCounted.current = false;
+    // Comptabilise la partie une seule fois — même si le joueur reprend via
+    // une pub (seconde chance) puis meurt à nouveau.
+    if (state.screen === 'game-over' && prevScreen.current !== 'game-over' && !gameCounted.current) {
+      gameCounted.current = true;
       unlocked.push(...recordGameEnd(state.character?.day ?? 0));
     }
     prevScreen.current = state.screen;

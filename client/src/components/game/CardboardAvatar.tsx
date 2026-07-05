@@ -77,7 +77,11 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   // Un chapeau-accessoire masque les cheveux, sauf ceux qui se posent dessus
   // (auréole flottante, couronne de fleurs en serre-tête).
   const accHidesHair = !!accHat && accHat !== 'halo' && accHat !== 'flower-crown';
-  const showHat = hat === 1 || hat === 2 || accHidesHair;
+  // Les cheveux sont masqués si un chapeau les couvre : chapeau procédural
+  // RÉELLEMENT dessiné (donc pas supprimé par un accessoire) ou chapeau-
+  // accessoire couvrant. Sans le « !accHat », l'auréole/couronne de fleurs
+  // rendrait chauve un personnage dont la graine portait déjà un chapeau.
+  const showHat = (!accHat && (hat === 1 || hat === 2)) || accHidesHair;
 
   const eyeL = 40, eyeR = 60, eyeY = 47;
 

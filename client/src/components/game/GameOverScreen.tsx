@@ -1,4 +1,4 @@
-import { useGame, computeScore } from '@/contexts/GameContext';
+import { useGame, computeScore, loadHighScores } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showInterstitial, showRewarded } from '@/lib/ads';
@@ -45,6 +45,11 @@ export default function GameOverScreen() {
   // Même formule que les meilleurs scores enregistrés (computeScore) :
   // l'écran de fin et le tableau des scores affichent le même chiffre.
   const score = computeScore(char.day, char.respect, char.money);
+
+  // Lecture fraîche du classement (la partie qui vient de se terminer a déjà
+  // été enregistrée dans localStorage par le reducer, mais state.highScores
+  // n'est rafraîchi qu'au redémarrage) : on l'affiche donc à jour, run inclus.
+  const highScores = loadHighScores();
 
   return (
     <motion.div
@@ -132,7 +137,7 @@ export default function GameOverScreen() {
       </motion.div>
 
       {/* High Scores */}
-      {state.highScores && state.highScores.length > 0 && (
+      {highScores.length > 0 && (
         <motion.div
           initial={{ y: 15, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -144,7 +149,7 @@ export default function GameOverScreen() {
             🏆 Plus longues survies
           </h4>
           <div className="flex flex-col gap-1.5">
-            {state.highScores.slice(0, 5).map((hs, i) => (
+            {highScores.slice(0, 5).map((hs, i) => (
               <div key={i} className="flex justify-between items-center text-xs font-mono">
                 <span className={i === 0 ? 'text-[#F2C14E] font-semibold' : 'text-[#A08060]'}>
                   {i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`} {hs.name}
