@@ -1,0 +1,111 @@
+/*
+ * Profil joueur PERMANENT — vit dans une clé localStorage distincte de la
+ * sauvegarde de partie (roi-du-carton-save), qui est effacée à la mort du
+ * personnage. Le profil, lui, survit à toutes les parties : c'est là que sont
+ * conservés les records, les accessoires débloqués et ceux équipés.
+ */
+
+import {
+  ACHIEVEMENTS,
+  type ProfileRecords,
+  type AccessorySlot,
+} from './cosmetics';
+
+const PROFILE_KEY = 'roi-du-carton-profile';
+
+export interface PlayerProfile {
+  records: ProfileRecords;
+  unlocked: string[]; // ids d'accessoires débloqués
+  equipped: Partial<Record<AccessorySlot, string>>; // un accessoire par emplacement
+}
+
+function defaultProfile(): PlayerProfile {
+  return {
+    records: { bestDay: 0, bestRespect: 0, bestMoney: 0, bestDignity: 0, totalGames: 0, balancedDay: false },
+    unlocked: [],
+    equipped: {},
+  };
+}
+
+export function loadProfile(): PlayerProfile {
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw) as Partial<PlayerProfile>;
+      const base = defaultProfile();
+      return {
+        records: { ...base.records, ...(data.records || {}) },
+        unlocked: Array.isArray(data.unlocked) ? data.unlocked : [],
+        equipped: data.equipped && typeof data.equipped === 'object' ? data.equipped : {},
+      };
+    }
+  } catch { /* silent */ }
+  return defaultProfile();
+}
+
+function saveProfile(p: PlayerProfile) {
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
+  } catch { /* silent */ }
+}
+
+export function getEquipped(): Partial<Record<AccessorySlot, string>> {
+  return loadProfile().equipped;
+}
+
+export function isUnlocked(id: string): boolean {
+  return loadProfile().unlocked.includes(id);
+}
+
+// Équipe ou retire un accessoire (bascule si déjà équipé). Ignore si non débloqué.
+export function toggleEquip(slot: AccessorySlot, id: string): PlayerProfile {
+  const p = loadProfile();
+  if (!p.unlocked.includes(id)) return p;
+  if (p.equipped[slot] === id) {
+    delete p.equipped[slot];
+  } else {
+    p.equipped[slot] = id;
+  }
+  saveProfile(p);
+  return p;
+}
+
+// Réévalue tous les succès face aux records courants et débloque les
+// accessoires nouvellement gagnés. Renvoie la liste des ids nouvellement
+// débloqués (pour la notification).
+function reevaluate(p: PlayerProfile): string[] {
+  const newly: string[] = [];
+  for (const a of ACHIEVEMENTS) {
+    if (!p.unlocked.includes(a.reward) && a.progress(p.records) >= a.goal) {
+      p.unlocked.push(a.reward);
+      newly.push(a.reward);
+    }
+  }
+  return newly;
+}
+
+// Met à jour les records (valeurs jamais décroissantes) depuis l'état de la
+// partie en cours, puis débloque les nouveaux accessoires atteints.
+export function syncRecords(partial: Partial<ProfileRecords>): string[] {
+  const p = loadProfile();
+  const r = p.records;
+  if (partial.bestDay !== undefined) r.bestDay = Math.max(r.bestDay, partial.bestDay);
+  if (partial.bestRespect !== undefined) r.bestRespect = Math.max(r.bestRespect, partial.bestRespect);
+  if (partial.bestMoney !== undefined) r.bestMoney = Math.max(r.bestMoney, partial.bestMoney);
+  if (partial.bestDignity !== undefined) r.bestDignity = Math.max(r.bestDignity, partial.bestDignity);
+  if (partial.totalGames !== undefined) r.totalGames = Math.max(r.totalGames, partial.totalGames);
+  if (partial.balancedDay) r.balancedDay = true;
+  const newly = reevaluate(p);
+  saveProfile(p);
+  return newly;
+}
+
+// Incrémente le compteur de parties (à appeler une fois par fin de partie),
+// puis réévalue les succès.
+export function recordGameEnd(): string[] {
+  const p = loadProfile();
+  p.records.totalGames += 1;
+  const newly = reevaluate(p);
+  saveProfile(p);
+  return newly;
+}

@@ -15,7 +15,7 @@ interface Step { targetId: string | null; emoji: string; title: string; text: st
 const STEPS: Step[] = [
   {
     targetId: 'tuto-header', emoji: '👤', title: 'Votre personnage',
-    text: 'Votre nom, votre quartier et le jour de survie. À droite : votre argent 💰 et votre respect ⭐ — le respect fait baisser les prix en boutique, aide à intimider les voyous et débloque certains choix « on vous connaît ici ».',
+    text: 'Votre nom, votre quartier et le jour de survie. À droite : votre argent 💰 et votre respect ⭐ — le respect fait baisser les prix en boutique, aide à intimider les voyous et débloque certains choix « on vous connaît ici ». Touchez votre visage 🎽 pour ouvrir la garde-robe et équiper les accessoires gagnés par vos succès.',
   },
   {
     targetId: 'tuto-stats', emoji: '❤️', title: 'Vos six jauges',

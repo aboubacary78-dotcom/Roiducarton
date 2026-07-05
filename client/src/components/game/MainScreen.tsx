@@ -4,6 +4,7 @@ import StatBars from './StatBars';
 import CardboardAvatar from './CardboardAvatar';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
 import { playClick } from '@/lib/sound';
+import { getEquipped } from '@/lib/profile';
 
 interface Enemy {
   name: string;
@@ -105,9 +106,14 @@ export default function MainScreen() {
       >
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-[#E8D5C0]">
-              <CardboardAvatar seed={char.seed} gender={char.gender} size={40} />
-            </div>
+            <button
+              onClick={() => { playClick(); dispatch({ type: 'SET_SCREEN', screen: 'wardrobe' }); }}
+              className="relative w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-[#E8D5C0] active:scale-95 transition-transform"
+              aria-label="Personnaliser mon personnage"
+            >
+              <CardboardAvatar seed={char.seed} gender={char.gender} size={40} accessories={getEquipped()} />
+              <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#B8860B] text-white text-[9px] flex items-center justify-center shadow">✎</span>
+            </button>
             <div>
               <h2 className="text-base font-semibold text-[#2A1F1A]">{char.name}</h2>
               <p className="text-xs text-[#8B6B4A]">

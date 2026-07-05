@@ -1,4 +1,5 @@
-import { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useReducer, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
+import { syncRecords, recordGameEnd } from '@/lib/profile';
 
 // ============ TYPES ============
 export interface Job {
@@ -127,7 +128,7 @@ export interface CombatState {
   weakPointHint: string;
 }
 
-export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings' | 'steal-game' | 'beg-game';
+export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
 
 // ============ MÉTÉO ============
 export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm' | 'heatwave' | 'fog' | 'snow';
@@ -3203,12 +3204,21 @@ const initialState: GameState = {
 interface GameContextType {
   state: GameState;
   dispatch: React.Dispatch<GameAction>;
+  // Accessoires cosmétiques tout juste débloqués, à notifier (voir AchievementToast).
+  newlyUnlocked: string[];
+  dismissUnlock: (id: string) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  const [newlyUnlocked, setNewlyUnlocked] = useState<string[]>([]);
+  const prevScreen = useRef(state.screen);
+
+  const dismissUnlock = useCallback((id: string) => {
+    setNewlyUnlocked((prev) => prev.filter((x) => x !== id));
+  }, []);
 
   // Auto-save on state changes
   useEffect(() => {
@@ -3217,8 +3227,33 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
+  // Met à jour les records permanents du profil et débloque les accessoires
+  // correspondants (succès). Séparé de la sauvegarde de partie.
+  useEffect(() => {
+    const c = state.character;
+    const unlocked: string[] = [];
+    if (c) {
+      const balanced =
+        c.stats.health >= 60 && c.stats.mental >= 60 && c.stats.hunger >= 60 &&
+        c.stats.thirst >= 60 && c.stats.sleep >= 60 && c.stats.dignity >= 60;
+      unlocked.push(...syncRecords({
+        bestDay: c.day,
+        bestRespect: c.respect,
+        bestMoney: c.money,
+        bestDignity: c.stats.dignity,
+        balancedDay: balanced,
+      }));
+    }
+    // Comptabilise la partie une seule fois, à l'entrée sur l'écran de fin.
+    if (state.screen === 'game-over' && prevScreen.current !== 'game-over') {
+      unlocked.push(...recordGameEnd());
+    }
+    prevScreen.current = state.screen;
+    if (unlocked.length) setNewlyUnlocked((prev) => [...prev, ...unlocked.filter((id) => !prev.includes(id))]);
+  }, [state]);
+
   return (
-    <GameContext.Provider value={{ state, dispatch }}>
+    <GameContext.Provider value={{ state, dispatch, newlyUnlocked, dismissUnlock }}>
       {children}
     </GameContext.Provider>
   );

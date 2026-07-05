@@ -8,7 +8,7 @@ import { TUTORIAL_KEY } from './TutorialOverlay';
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
 const PRIVACY_URL = 'https://example.com/roi-du-carton/confidentialite';
-const APP_VERSION = '1.19.0';
+const APP_VERSION = '1.20.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -68,6 +68,7 @@ export default function SettingsScreen() {
           <li>🔍 <strong>Explorer</strong>, 🙏 <strong>Mendier</strong>, 😴 <strong>Dormir</strong>, 🥊 <strong>Bagarre</strong> et 🥷 <strong>Voler</strong> (risqué) font avancer la journée.</li>
           <li>👑 La dignité compte : sous 25, le mental fond chaque nuit ; bien tenue, elle fait donner les passants et ouvre certains choix.</li>
           <li>⭐ Le respect fait baisser les prix en boutique, aide à intimider les voyous et débloque des choix « on vous connaît ici ».</li>
+          <li>🎽 Touchez votre visage pour ouvrir la garde-robe : réussissez des succès pour gagner des accessoires, gardés d'une partie à l'autre.</li>
           <li>🌦️ La météo influence vos jauges : préparez-vous au pire.</li>
           <li>💀 Si la santé ou le mental tombe à zéro, c'est la fin… sauf seconde chance !</li>
         </ul>
