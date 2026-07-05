@@ -2,7 +2,7 @@ import { useGame, STAT_META, type Character, type EventChoice } from '@/contexts
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { showRewarded } from '@/lib/ads';
-import { useLang, tr } from '@/lib/lang';
+import { useLang, tr, tc } from '@/lib/lang';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.png';
 
@@ -110,10 +110,10 @@ export default function EventScreen() {
         </div>
 
         {/* Title */}
-        <h2 className="text-2xl text-[#2A1F1A] mb-2">{event.title}</h2>
+        <h2 className="text-2xl text-[#2A1F1A] mb-2">{tc(event.title)}</h2>
 
         {/* Description */}
-        <p className="text-sm text-[#5C4A38] leading-relaxed mb-4">{event.description}</p>
+        <p className="text-sm text-[#5C4A38] leading-relaxed mb-4">{tc(event.description)}</p>
 
         {/* Choices */}
         <div className="flex flex-col gap-2">
@@ -135,7 +135,7 @@ export default function EventScreen() {
                 }`}
               >
                 <span className="text-lg mt-0.5">{locked ? '🔒' : choice.emoji}</span>
-                <span className="text-sm text-[#3D3020] font-medium flex-1">{choice.text}</span>
+                <span className="text-sm text-[#3D3020] font-medium flex-1">{tc(choice.text)}</span>
                 {req.label && (
                   <span className={`text-[10px] font-semibold mt-1 whitespace-nowrap ${locked ? 'text-[#B84A3A]' : 'text-[#3d8b4f]'}`}>
                     {req.label}

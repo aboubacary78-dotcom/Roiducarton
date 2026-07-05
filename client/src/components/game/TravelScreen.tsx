@@ -2,7 +2,7 @@ import { useGame, LOCATIONS, getShopsForLocation } from '@/contexts/GameContext'
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { playClick, playWhoosh } from '@/lib/sound';
-import { useLang, tr } from '@/lib/lang';
+import { useLang, tr, tc } from '@/lib/lang';
 
 /*
  * Carte interactive de la ville, dessinée en SVG dans la DA Carton Craft
@@ -238,7 +238,7 @@ export default function TravelScreen() {
                   className="text-[11px] px-2 py-1 rounded-full font-medium text-[#6B5740]"
                   style={{ background: '#F5EDE4', border: '1px solid #E8D5C0' }}
                 >
-                  {shop.emoji} {shop.name}
+                  {shop.emoji} {tc(shop.name)}
                 </span>
               ))}
             </div>

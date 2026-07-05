@@ -1,6 +1,6 @@
 import { useGame, getSellPrice, STAT_META, type Stats } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
-import { useLang, tr } from '@/lib/lang';
+import { useLang, tr, tc } from '@/lib/lang';
 
 const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: string; bg: string }> = {
   food: { label: 'Nourriture', labelEn: 'Food', color: '#4A9B5F', bg: '#4A9B5F15' },
@@ -54,7 +54,7 @@ export default function InventoryScreen() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[#2A1F1A]">{item.name}</span>
+                    <span className="text-sm font-semibold text-[#2A1F1A]">{tc(item.name)}</span>
                     <span
                       className="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
                       style={{ backgroundColor: typeInfo.bg, color: typeInfo.color }}

@@ -2,7 +2,7 @@ import { useGame, getWeaponProfile } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
-import { useLang, tr } from '@/lib/lang';
+import { useLang, tr, tc } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
 
 interface DmgFloat { id: number; target: 'enemy' | 'player'; value: number; crit: boolean; }
@@ -221,8 +221,8 @@ export default function CombatScreen() {
             </motion.div>
           </motion.div>
           <div className="flex-1">
-            <h3 className="text-lg text-[#F8E6D2] font-bold">{currentCombat.enemyName}</h3>
-            <p className="text-xs text-[#D6A896] italic">{currentCombat.description}</p>
+            <h3 className="text-lg text-[#F8E6D2] font-bold">{tc(currentCombat.enemyName)}</h3>
+            <p className="text-xs text-[#D6A896] italic">{tc(currentCombat.description)}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
