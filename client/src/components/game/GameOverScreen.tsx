@@ -38,9 +38,21 @@ export default function GameOverScreen() {
 
   if (!char) return null;
 
-  const deathCause = char.stats.health <= 0
-    ? 'Votre corps a lâché. Trop de blessures, pas assez de soins.'
-    : 'Votre esprit s\'est égaré. La rue a brisé votre moral.';
+  // Cause de mort : soit posée par le jeu (ex. l'ennemi qui vous a achevé au
+  // combat), soit déduite de l'état dans lequel vous partez.
+  function inferCause(): string {
+    if (char!.stats.mental <= 0) {
+      return 'Votre esprit a lâché avant votre corps. La rue a fini par avoir votre moral.';
+    }
+    if (char!.stats.hunger <= 8) return 'Le ventre vide a eu le dernier mot. On ne survit pas longtemps à jeun.';
+    if (char!.stats.thirst <= 8) return 'La soif a fini le travail. Trouver de l\'eau, ça compte plus qu\'on ne croit.';
+    if (char!.stats.sleep <= 8) return 'L\'épuisement vous a rattrapé. Le corps réclame son dû, toujours.';
+    if ((state.weather === 'snow' || state.weather === 'storm') && char!.stats.health <= 0) {
+      return 'Le froid a eu raison de vous cette nuit. La rue est glaciale avec ses rois.';
+    }
+    return 'Votre corps a lâché. Trop de coups, pas assez de soins.';
+  }
+  const deathCause = state.deathCause || inferCause();
 
   // Même formule que les meilleurs scores enregistrés (computeScore) :
   // l'écran de fin et le tableau des scores affichent le même chiffre.

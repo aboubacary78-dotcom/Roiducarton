@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import { getAccessory, achievementForAccessory } from '@/lib/cosmetics';
-import { playWin } from '@/lib/sound';
+import { playUnlock } from '@/lib/sound';
 
 /*
  * Notification de succès : s'affiche quand un accessoire vient d'être débloqué.
@@ -15,7 +15,7 @@ export default function AchievementToast() {
 
   useEffect(() => {
     if (!current) return;
-    playWin();
+    playUnlock();
     const t = setTimeout(() => dismissUnlock(current), 4500);
     return () => clearTimeout(t);
   }, [current, dismissUnlock]);

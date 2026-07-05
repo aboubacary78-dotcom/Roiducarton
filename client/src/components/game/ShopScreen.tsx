@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getNextDiscountTier, getShopEvent, STAT_META } from '@/contexts/GameContext';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { playCoin } from '@/lib/sound';
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string }> = {
   food: { bg: '#4A9B5F15', color: '#4A9B5F', label: 'Nourriture' },
@@ -41,6 +42,7 @@ export default function ShopScreen() {
 
     setBuyAnimation(item.id);
     setTimeout(() => setBuyAnimation(null), 600);
+    playCoin();
     dispatch({ type: 'BUY_ITEM', shopItem: item, actualPrice });
   };
 

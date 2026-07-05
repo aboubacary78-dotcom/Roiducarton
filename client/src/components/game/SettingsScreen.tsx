@@ -8,7 +8,7 @@ import { TUTORIAL_KEY } from './TutorialOverlay';
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
 const PRIVACY_URL = 'https://example.com/roi-du-carton/confidentialite';
-const APP_VERSION = '1.22.1';
+const APP_VERSION = '1.23.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -47,10 +47,10 @@ export default function SettingsScreen() {
       >
         <h2 className="text-base font-semibold text-[#2A1F1A] mb-1">À propos</h2>
         <p className="text-sm text-[#6B5740] leading-relaxed">
-          <strong>Le Roi du Carton</strong> — une épopée urbaine où vous incarnez
-          un sans-abri qui lutte pour survivre dans la rue, entre humour noir et
-          dure réalité. Gérez vos besoins vitaux, explorez, mendiez, et tenez
-          le plus longtemps possible.
+          Dans <strong>Le Roi du Carton</strong>, vous êtes à la rue et il faut
+          tenir. Manger, boire, dormir, éviter les ennuis, et durer le plus de
+          jours possible. C'est rude, souvent injuste, et parfois ça fait rire
+          jaune.
         </p>
       </motion.section>
 

@@ -131,6 +131,49 @@ export function playFail(): void {
   setTimeout(() => tone(220, 0.2, 'triangle', 0.08), 120);
 }
 
+/** Tintement de pièces : achat, gain d'argent. */
+export function playCoin(): void {
+  if (muted) return;
+  tone(1180, 0.06, 'triangle', 0.08);
+  setTimeout(() => tone(1560, 0.09, 'triangle', 0.07), 55);
+}
+
+/** Passage au jour suivant : cloche douce qui descend. */
+export function playNextDay(): void {
+  if (muted) return;
+  tone(660, 0.18, 'sine', 0.09, 440);
+  setTimeout(() => tone(440, 0.32, 'sine', 0.08, 300), 120);
+}
+
+/** Succès débloqué : petite cascade scintillante. */
+export function playUnlock(): void {
+  if (muted) return;
+  const notes = [784, 988, 1319, 1568];
+  notes.forEach((f, i) => setTimeout(() => tone(f, 0.14, 'triangle', 0.09), i * 70));
+  vibrate([0, 30, 40, 30]);
+}
+
+/** Pas feutré sur la grille (mini-jeu de vol). */
+export function playStep(): void {
+  if (muted) return;
+  tone(190, 0.03, 'sine', 0.05);
+}
+
+/** Alerte : repéré par un gardien (mini-jeu de vol). */
+export function playSpotted(): void {
+  if (muted) return;
+  tone(440, 0.1, 'square', 0.08, 680);
+  setTimeout(() => tone(440, 0.12, 'square', 0.08, 680), 130);
+  vibrate(60);
+}
+
+/** Départ en voyage : petit souffle. */
+export function playWhoosh(): void {
+  if (muted) return;
+  noise(0.32, 0.05, 400);
+  tone(300, 0.28, 'sine', 0.05, 700);
+}
+
 /** Vibration haptique (Android / app native). Sans effet si non supporté. */
 export function vibrate(pattern: number | number[]): void {
   if (muted) return;

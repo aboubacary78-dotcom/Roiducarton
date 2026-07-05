@@ -1,7 +1,7 @@
 import { useGame, STEAL_TARGETS, randomFromArray } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { playHit, playCrit, playHurt, playClick } from '@/lib/sound';
+import { playHit, playCrit, playHurt, playStep, playSpotted } from '@/lib/sound';
 
 /*
  * Mini-jeu de vol « casse en grille » (façon Pac-Man) : on entre dans un lieu,
@@ -124,7 +124,7 @@ export default function StealHeist() {
   }, [dispatch, target.id]);
 
   const markSpotted = () => {
-    if (!spottedRef.current) { spottedRef.current = true; setSpotted(true); }
+    if (!spottedRef.current) { spottedRef.current = true; setSpotted(true); playSpotted(); }
   };
 
   const move = useCallback((dx: number, dy: number) => {
@@ -136,7 +136,7 @@ export default function StealHeist() {
     const np = { x: nx, y: ny };
     playerRef.current = np;
     setPlayer(np);
-    playClick();
+    playStep();
 
     let got = hasLootRef.current;
     if (!got && nx === layout.loot.x && ny === layout.loot.y) {

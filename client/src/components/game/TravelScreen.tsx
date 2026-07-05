@@ -1,7 +1,7 @@
 import { useGame, LOCATIONS, getShopsForLocation } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { playClick } from '@/lib/sound';
+import { playClick, playWhoosh } from '@/lib/sound';
 
 /*
  * Carte interactive de la ville, dessinée en SVG dans la DA Carton Craft
@@ -175,9 +175,10 @@ export default function TravelScreen() {
           {currentZone && (
             <g transform={`translate(${currentZone.x + 18} ${currentZone.y + 16})`} pointerEvents="none">
               <motion.circle
-                r="14"
+                r="13"
                 fill="none" stroke="#B8860B" strokeWidth="2"
-                animate={{ r: [11, 16], opacity: [0.8, 0] }}
+                style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+                animate={{ scale: [0.82, 1.2], opacity: [0.8, 0] }}
                 transition={{ repeat: Infinity, duration: 1.6, ease: 'easeOut' }}
               />
               <path d="M-9 4 L-9 -4 L-4.5 0 L0 -7 L4.5 0 L9 -4 L9 4 Z" fill="#E8B84B" stroke="#9B7209" strokeWidth="1.5" strokeLinejoin="round" />
@@ -251,7 +252,7 @@ export default function TravelScreen() {
         ) : (
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={() => { playClick(); dispatch({ type: 'TRAVEL', location: selected }); }}
+            onClick={() => { playWhoosh(); dispatch({ type: 'TRAVEL', location: selected }); }}
             className="btn-primary w-full py-3 text-sm"
           >
             🚶 Voyager vers {loc.name}
