@@ -2,12 +2,14 @@ import { useGame, getWeaponProfile } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
+import { useLang, tr } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
 
 interface DmgFloat { id: number; target: 'enemy' | 'player'; value: number; crit: boolean; }
 
 export default function CombatScreen() {
   const { state, dispatch } = useGame();
+  useLang();
   const { currentCombat, combatLog, character } = state;
   const [aiming, setAiming] = useState(false);
   // Mini-jeu de frappe : curseur à arrêter au bon moment.
@@ -124,7 +126,7 @@ export default function CombatScreen() {
         ? 'linear-gradient(90deg, #C99A3A, #F2C14E)'
         : 'linear-gradient(90deg, #D4874D, #C99A3A)';
     }
-    if (shoutLabelRef.current) shoutLabelRef.current.textContent = p >= 100 ? 'À PLEINS POUMONS !' : `${p}%`;
+    if (shoutLabelRef.current) shoutLabelRef.current.textContent = p >= 100 ? tr('À PLEINS POUMONS !', 'AT THE TOP OF YOUR LUNGS!') : `${p}%`;
     playHit();
   }
 
@@ -169,7 +171,7 @@ export default function CombatScreen() {
         className="absolute left-1/2 -translate-x-1/2 top-1 pointer-events-none font-bold text-center leading-none"
         style={{ color: f.crit ? '#F2C14E' : target === 'enemy' ? '#FF7A5A' : '#FF5A5A', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}
       >
-        {f.crit && <span className="block text-[9px] tracking-wider">CRITIQUE&nbsp;!</span>}
+        {f.crit && <span className="block text-[9px] tracking-wider">{tr('CRITIQUE', 'CRITICAL')}&nbsp;!</span>}
         <span className="text-lg">-{f.value}</span>
       </motion.div>
     ));
@@ -191,7 +193,7 @@ export default function CombatScreen() {
 
       {/* Header */}
       <div className="text-center py-1">
-        <h2 className="text-sm font-semibold text-[#F2C14E] tracking-[0.2em] uppercase">Combat</h2>
+        <h2 className="text-sm font-semibold text-[#F2C14E] tracking-[0.2em] uppercase">{tr('Combat', 'Fight')}</h2>
       </div>
 
       {/* Enemy Card */}
@@ -224,7 +226,7 @@ export default function CombatScreen() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold text-[#F27575] font-mono w-6">PV</span>
+          <span className="text-[10px] font-semibold text-[#F27575] font-mono w-6">{tr('PV', 'HP')}</span>
           <div className="flex-1 h-3 bg-[#2A1622] rounded-full overflow-hidden relative">
             <motion.div
               className="absolute inset-y-0 left-0 rounded-full"
@@ -275,7 +277,7 @@ export default function CombatScreen() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold text-[#5FBE76] font-mono w-6">PV</span>
+            <span className="text-[10px] font-semibold text-[#5FBE76] font-mono w-6">{tr('PV', 'HP')}</span>
             <div className="flex-1 h-3 bg-[#142622] rounded-full overflow-hidden relative">
               <motion.div
                 className="absolute inset-y-0 left-0 rounded-full"
@@ -306,7 +308,7 @@ export default function CombatScreen() {
 
       {/* Combat Log */}
       <div className="rounded-xl p-3 flex-1 min-h-0 overflow-y-auto border border-[#412B41]" style={{ background: 'rgba(38,24,42,0.55)' }}>
-        <p className="text-[9px] uppercase tracking-widest text-[#9A7788] mb-1.5">Journal du combat</p>
+        <p className="text-[9px] uppercase tracking-widest text-[#9A7788] mb-1.5">{tr('Journal du combat', 'Combat log')}</p>
         <AnimatePresence>
           {combatLog.slice(-6).map((log, i) => (
             <motion.p
@@ -354,7 +356,7 @@ export default function CombatScreen() {
                 className="w-full py-3.5 rounded-xl text-sm font-semibold text-white"
                 style={{ background: 'linear-gradient(135deg, #B84A3A, #8B2020)', boxShadow: '0 4px 12px rgba(184, 74, 58, 0.3)' }}
               >
-                ⚡ Frapper !
+                ⚡ {tr('Frapper !', 'Strike!')}
               </motion.button>
               <button
                 onClick={() => setStriking(false)}
@@ -463,7 +465,7 @@ export default function CombatScreen() {
                   className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #B84A3A, #8B2020)', boxShadow: '0 4px 12px rgba(184, 74, 58, 0.3)' }}
                 >
-                  Attaquer
+                  {tr('Attaquer', 'Attack')}
                   {(isMilitaire || hasForce) && <span className="text-xs ml-1 opacity-60">+bonus</span>}
                 </motion.button>
 
@@ -474,7 +476,7 @@ export default function CombatScreen() {
                   className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #C99A3A, #9B7209)', boxShadow: '0 4px 12px rgba(201, 154, 58, 0.25)' }}
                 >
-                  🎯 Viser
+                  🎯 {tr('Viser', 'Aim')}
                 </motion.button>
               </div>
 
@@ -486,7 +488,7 @@ export default function CombatScreen() {
                   className="flex-1 py-3 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)', boxShadow: '0 4px 12px rgba(212, 135, 77, 0.2)' }}
                 >
-                  Intimider
+                  {tr('Intimider', 'Intimidate')}
                   {(hasCharisme || hasHaleine) && <span className="text-[10px] ml-1 opacity-60">+</span>}
                 </motion.button>
 
@@ -497,7 +499,7 @@ export default function CombatScreen() {
                   className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#E8D5C0]"
                   style={{ background: 'linear-gradient(135deg, #3E2A3E, #2A1A2A)', border: '1px solid #5C4A5C' }}
                 >
-                  Fuir
+                  {tr('Fuir', 'Flee')}
                   {(hasAgile || isCascadeur) && <span className="text-[10px] ml-1 opacity-60">+</span>}
                 </motion.button>
               </div>

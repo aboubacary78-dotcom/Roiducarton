@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { playSuccess, playFail, playWin } from '@/lib/sound';
+import { useLang, tr } from '@/lib/lang';
 
 const FLAG_LABELS: Record<string, string> = {
   'ami-jardinier': '🌱 Ami du jardinier',
@@ -19,6 +20,7 @@ const FLAG_LABELS: Record<string, string> = {
 
 export default function EventResultOverlay() {
   const { state, dispatch } = useGame();
+  useLang();
   const result = state.eventResult;
   const [doubling, setDoubling] = useState(false);
 
@@ -171,7 +173,7 @@ export default function EventResultOverlay() {
                 boxShadow: '0 4px 16px rgba(184, 134, 11, 0.3)',
               }}
             >
-              {doubling ? '⏳ Chargement…' : `🎬 Doubler mes gains (+${result.moneyChange}€)`}
+              {doubling ? tr('⏳ Chargement…', '⏳ Loading…') : `🎬 ${tr('Doubler mes gains', 'Double my gains')} (+${result.moneyChange}€)`}
             </motion.button>
           )}
 
@@ -181,7 +183,7 @@ export default function EventResultOverlay() {
               animate={{ opacity: 1 }}
               className="text-center text-xs text-[#8B6B4A] font-semibold mb-2"
             >
-              ✅ Gains doublés !
+              {tr('✅ Gains doublés !', '✅ Gains doubled!')}
             </motion.p>
           )}
 
@@ -195,7 +197,7 @@ export default function EventResultOverlay() {
             onClick={() => dispatch({ type: 'DISMISS_RESULT' })}
             className="btn-primary w-full py-3 text-sm"
           >
-            Continuer
+            {tr('Continuer', 'Continue')}
           </motion.button>
         </motion.div>
       </motion.div>

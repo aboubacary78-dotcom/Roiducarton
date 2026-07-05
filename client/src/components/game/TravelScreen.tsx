@@ -2,6 +2,7 @@ import { useGame, LOCATIONS, getShopsForLocation } from '@/contexts/GameContext'
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { playClick, playWhoosh } from '@/lib/sound';
+import { useLang, tr } from '@/lib/lang';
 
 /*
  * Carte interactive de la ville, dessinée en SVG dans la DA Carton Craft
@@ -102,6 +103,7 @@ function ZoneIcon({ id, x, y }: { id: string; x: number; y: number }) {
 
 export default function TravelScreen() {
   const { state, dispatch } = useGame();
+  const en = useLang() === 'en';
   const char = state.character!;
   const [selected, setSelected] = useState(char.location);
 
@@ -117,8 +119,8 @@ export default function TravelScreen() {
         animate={{ y: 0, opacity: 1 }}
         className="text-center pt-1"
       >
-        <h2 className="text-xl text-[#2A1F1A]">Carte de la ville</h2>
-        <p className="text-xs text-[#8B6B4A]">Touchez un quartier pour le découvrir</p>
+        <h2 className="text-xl text-[#2A1F1A]">{tr('Carte de la ville', 'City map')}</h2>
+        <p className="text-xs text-[#8B6B4A]">{tr('Touchez un quartier pour le découvrir', 'Tap a district to explore it')}</p>
       </motion.div>
 
       {/* Carte */}
@@ -163,7 +165,7 @@ export default function TravelScreen() {
                   fill={OUTLINE}
                   style={{ fontFamily: 'Outfit, sans-serif' }}
                 >
-                  {l.name}
+                  {en ? l.nameEn : l.name}
                 </text>
                 {/* Pastille de danger */}
                 <circle cx={z.x + z.w - 12} cy={z.y + 12} r="6" fill={dangerColor(l.danger)} stroke={OUTLINE} strokeWidth="1.5" />
@@ -198,24 +200,24 @@ export default function TravelScreen() {
       >
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">{loc.emoji}</span>
-          <h3 className="text-lg text-[#2A1F1A]">{loc.name}</h3>
+          <h3 className="text-lg text-[#2A1F1A]">{tr(loc.name, loc.nameEn)}</h3>
           {isCurrent && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#4A9B5F] text-white font-semibold">ICI</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#4A9B5F] text-white font-semibold">{tr('ICI', 'HERE')}</span>
           )}
         </div>
-        <p className="text-xs text-[#6B5740] italic mb-3">{loc.description}</p>
+        <p className="text-xs text-[#6B5740] italic mb-3">{tr(loc.description, loc.descriptionEn)}</p>
 
         {/* Jauges danger / ressources */}
         <div className="flex flex-col gap-2 mb-4">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-medium text-[#B84A3A] w-20">⚠️ Danger</span>
+            <span className="text-[10px] font-mono font-medium text-[#B84A3A] w-20">⚠️ {tr('Danger', 'Danger')}</span>
             <div className="flex-1 stat-bar-track">
               <div className="stat-bar-fill" style={{ width: `${loc.danger}%`, backgroundColor: dangerColor(loc.danger) }} />
             </div>
             <span className="text-[10px] font-mono text-[#6B5740] w-8 text-right">{loc.danger}%</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-medium text-[#3d8b4f] w-20">🎁 Ressources</span>
+            <span className="text-[10px] font-mono font-medium text-[#3d8b4f] w-20">🎁 {tr('Ressources', 'Resources')}</span>
             <div className="flex-1 stat-bar-track">
               <div className="stat-bar-fill" style={{ width: `${loc.resources}%`, backgroundColor: '#4A9B5F' }} />
             </div>
@@ -226,7 +228,7 @@ export default function TravelScreen() {
         {/* Boutiques du quartier */}
         <div className="mb-4">
           <p className="text-[10px] uppercase tracking-wider text-[#A08B70] font-semibold mb-1.5">
-            Boutiques sur place
+            {tr('Boutiques sur place', 'Shops here')}
           </p>
           {shops.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
@@ -241,13 +243,13 @@ export default function TravelScreen() {
               ))}
             </div>
           ) : (
-            <p className="text-[11px] text-[#A08B70] italic">Aucune boutique dans ce quartier.</p>
+            <p className="text-[11px] text-[#A08B70] italic">{tr('Aucune boutique dans ce quartier.', 'No shops in this district.')}</p>
           )}
         </div>
 
         {isCurrent ? (
           <div className="text-center text-xs font-semibold text-[#4A9B5F] py-2.5">
-            📍 Vous êtes déjà dans ce quartier.
+            📍 {tr('Vous êtes déjà dans ce quartier.', 'You\'re already in this district.')}
           </div>
         ) : (
           <motion.button
@@ -255,7 +257,7 @@ export default function TravelScreen() {
             onClick={() => { playWhoosh(); dispatch({ type: 'TRAVEL', location: selected }); }}
             className="btn-primary w-full py-3 text-sm"
           >
-            🚶 Voyager vers {loc.name}
+            🚶 {tr('Voyager vers', 'Travel to')} {tr(loc.name, loc.nameEn)}
           </motion.button>
         )}
       </motion.div>
@@ -264,7 +266,7 @@ export default function TravelScreen() {
         onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
         className="mt-auto py-2 text-sm text-[#A08B70] font-medium text-center hover:text-[#6B5740] transition-colors"
       >
-        ← Retour
+        ← {tr('Retour', 'Back')}
       </button>
     </div>
   );

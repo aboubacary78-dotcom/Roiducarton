@@ -2,41 +2,43 @@ import { useGame, STAT_META, type Character, type EventChoice } from '@/contexts
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { showRewarded } from '@/lib/ads';
+import { useLang, tr } from '@/lib/lang';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.png';
 
 // Vérifie les conditions d'un choix (stat minimale, objet, compétence de
 // métier) et fournit le libellé à afficher sur le cadenas.
-function checkRequirements(choice: EventChoice, char: Character | null): { ok: boolean; label: string | null } {
+function checkRequirements(choice: EventChoice, char: Character | null, en: boolean): { ok: boolean; label: string | null } {
   const req = choice.requirements;
   if (!req || !char) return { ok: true, label: null };
   if (req.stat && req.minValue !== undefined) {
     const meta = STAT_META[req.stat];
-    return { ok: char.stats[req.stat] >= req.minValue, label: `${meta.emoji} ${meta.label} ${req.minValue}+` };
+    return { ok: char.stats[req.stat] >= req.minValue, label: `${meta.emoji} ${en ? meta.labelEn : meta.label} ${req.minValue}+` };
   }
   if (req.item) {
     const item = char.inventory.find(i => i.id === req.item);
-    return { ok: !!item, label: `🎒 Objet requis` };
+    return { ok: !!item, label: en ? '🎒 Item required' : '🎒 Objet requis' };
   }
   if (req.skill) {
     const ok = char.job.bonusSkills.includes(req.skill) || (char.skills[req.skill] ?? 0) > 0;
     return { ok, label: `💼 ${req.skill}` };
   }
   if (req.respect !== undefined) {
-    return { ok: char.respect >= req.respect, label: `⭐ Respect ${req.respect}+` };
+    return { ok: char.respect >= req.respect, label: `⭐ ${en ? 'Respect' : 'Respect'} ${req.respect}+` };
   }
   return { ok: true, label: null };
 }
 
-const TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  combat: { label: 'Combat', color: '#D94F4F' },
-  social: { label: 'Rencontre', color: '#4A8FBF' },
-  discovery: { label: 'Découverte', color: '#4A9B5F' },
-  narrative: { label: 'Événement', color: '#B8860B' },
+const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: string }> = {
+  combat: { label: 'Combat', labelEn: 'Combat', color: '#D94F4F' },
+  social: { label: 'Rencontre', labelEn: 'Encounter', color: '#4A8FBF' },
+  discovery: { label: 'Découverte', labelEn: 'Discovery', color: '#4A9B5F' },
+  narrative: { label: 'Événement', labelEn: 'Event', color: '#B8860B' },
 };
 
 export default function EventScreen() {
   const { state, dispatch } = useGame();
+  const en = useLang() === 'en';
   const event = state.currentEvent;
   const [boosted, setBoosted] = useState(false);
   const [loadingBoost, setLoadingBoost] = useState(false);
@@ -69,7 +71,7 @@ export default function EventScreen() {
           className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-[#7B68EE]/8 border border-[#7B68EE]/20"
         >
           <span className="text-xs font-medium text-[#7B68EE]">
-            Suite d'une rencontre précédente
+            {tr('Suite d\'une rencontre précédente', 'Follow-up to an earlier encounter')}
           </span>
         </motion.div>
       )}
@@ -103,7 +105,7 @@ export default function EventScreen() {
             className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-white"
             style={{ backgroundColor: isFollowUp ? '#7B68EE' : typeInfo.color }}
           >
-            {isFollowUp ? 'Suite narrative' : typeInfo.label}
+            {isFollowUp ? tr('Suite narrative', 'Story follow-up') : tr(typeInfo.label, typeInfo.labelEn)}
           </span>
         </div>
 
@@ -116,7 +118,7 @@ export default function EventScreen() {
         {/* Choices */}
         <div className="flex flex-col gap-2">
           {event.choices.map((choice, i) => {
-            const req = checkRequirements(choice, state.character);
+            const req = checkRequirements(choice, state.character, en);
             const locked = !req.ok;
             return (
               <motion.button
@@ -139,7 +141,7 @@ export default function EventScreen() {
                     {req.label}
                   </span>
                 )}
-                {boosted && !locked && !req.label && <span className="text-[10px] text-[#B8860B] font-semibold mt-1">✨ garanti</span>}
+                {boosted && !locked && !req.label && <span className="text-[10px] text-[#B8860B] font-semibold mt-1">{tr('✨ garanti', '✨ guaranteed')}</span>}
               </motion.button>
             );
           })}
@@ -148,7 +150,7 @@ export default function EventScreen() {
         {/* Coup de pouce par pub */}
         {boosted ? (
           <div className="mt-3 text-center text-xs font-semibold text-[#B8860B]">
-            ✨ Coup de pouce actif : votre prochain choix réussira au mieux.
+            {tr('✨ Coup de pouce actif : votre prochain choix réussira au mieux.', '✨ Boost active: your next choice will get the best outcome.')}
           </div>
         ) : (
           <button
@@ -157,7 +159,7 @@ export default function EventScreen() {
             className="mt-3 w-full py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg, #B8860B, #9B7209)' }}
           >
-            {loadingBoost ? '⏳ Chargement…' : '🎬 Coup de pouce (pub) — garantir le meilleur résultat'}
+            {loadingBoost ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Coup de pouce (pub) — garantir le meilleur résultat', '🎬 Boost (ad) — guarantee the best outcome')}
           </button>
         )}
       </motion.div>
@@ -167,7 +169,7 @@ export default function EventScreen() {
         onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
         className="text-sm text-[#A08B70] font-medium text-center py-2 hover:text-[#6B5740] transition-colors"
       >
-        ← Retour
+        ← {tr('Retour', 'Back')}
       </button>
     </div>
   );
