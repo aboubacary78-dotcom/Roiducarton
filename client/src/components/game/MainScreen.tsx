@@ -5,6 +5,7 @@ import CardboardAvatar from './CardboardAvatar';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
 import { playClick, playNextDay } from '@/lib/sound';
 import { getEquipped } from '@/lib/profile';
+import { useLang, tr } from '@/lib/lang';
 
 interface Enemy {
   name: string;
@@ -88,6 +89,7 @@ function getAmbientText(location: string, day: number): string {
 
 export default function MainScreen() {
   const { state, dispatch } = useGame();
+  useLang();
   const char = state.character!;
   const loc = LOCATIONS[char.location];
   const actionsLeft = state.maxDayActions - state.dayActions;
@@ -117,7 +119,7 @@ export default function MainScreen() {
             <div>
               <h2 className="text-base font-semibold text-[#2A1F1A]">{char.name}</h2>
               <p className="text-xs text-[#8B6B4A]">
-                {loc.emoji} {loc.name} · Jour {char.day}
+                {loc.emoji} {tr(loc.name, loc.nameEn || loc.name)} · {tr('Jour', 'Day')} {char.day}
               </p>
             </div>
           </div>
@@ -172,7 +174,7 @@ export default function MainScreen() {
                 : state.weather === 'heatwave' ? '#ff8040'
                 : '#2A1F1A'
             }}>
-              {weather.label}
+              {tr(weather.label, weather.labelEn)}
             </span>
             {/* Pénalités météo */}
             {Object.entries(weather.dailyPenalty).filter(([, v]) => v !== 0).map(([key, val]) => (
@@ -181,10 +183,10 @@ export default function MainScreen() {
               </span>
             ))}
           </div>
-          <p className="text-[10px] text-[#8B6B4A]">{weather.description}</p>
+          <p className="text-[10px] text-[#8B6B4A]">{tr(weather.description, weather.descriptionEn)}</p>
         </div>
         <div className="text-right">
-          <div className="text-[9px] text-[#A08B70]">demain</div>
+          <div className="text-[9px] text-[#A08B70]">{tr('demain', 'tomorrow')}</div>
           <div className="text-base">{nextWeather.emoji}</div>
         </div>
       </motion.div>
@@ -219,17 +221,17 @@ export default function MainScreen() {
             />
           ))}
           <span className="text-[10px] text-[#A08B70] font-mono ml-1.5">
-            {actionsLeft} action{actionsLeft > 1 ? 's' : ''}
+            {actionsLeft} {tr(`action${actionsLeft > 1 ? 's' : ''}`, `action${actionsLeft > 1 ? 's' : ''}`)}
           </span>
         </div>
 
         {/* Main actions grid */}
         <div id="tuto-actions" className="grid grid-cols-2 gap-2">
-          <ActionTile emoji="🔍" title="Explorer" desc="Tenter une rencontre" accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
-          <ActionTile emoji="🙏" title="Mendier" desc="Récolter des pièces" accent="#B8860B" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })} />
-          <ActionTile emoji="😴" title="Dormir" desc="Récupérer du sommeil" accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
+          <ActionTile emoji="🔍" title={tr('Explorer', 'Explore')} desc={tr('Tenter une rencontre', 'Look for an encounter')} accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
+          <ActionTile emoji="🙏" title={tr('Mendier', 'Beg')} desc={tr('Récolter des pièces', 'Collect coins')} accent="#B8860B" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })} />
+          <ActionTile emoji="😴" title={tr('Dormir', 'Sleep')} desc={tr('Récupérer du sommeil', 'Recover sleep')} accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
           <ActionTile
-            emoji="🥊" title="Bagarre" desc="Provoquer un combat" accent="#D94F4F" disabled={actionsLeft <= 0} danger
+            emoji="🥊" title={tr('Bagarre', 'Fight')} desc={tr('Provoquer un combat', 'Pick a fight')} accent="#D94F4F" disabled={actionsLeft <= 0} danger
             onClick={() => {
               const enemies = getLocationEnemies(char.location);
               if (enemies.length > 0) {
@@ -251,15 +253,15 @@ export default function MainScreen() {
           }`}
         >
           <span className="text-lg">🥷</span>
-          <span className="text-xs font-medium text-[#3D3020]">Voler</span>
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#D94F4F]/10 text-[#D94F4F] font-mono">risqué</span>
+          <span className="text-xs font-medium text-[#3D3020]">{tr('Voler', 'Steal')}</span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#D94F4F]/10 text-[#D94F4F] font-mono">{tr('risqué', 'risky')}</span>
         </motion.button>
 
         {/* Secondary actions */}
         <div id="tuto-secondary" className="flex gap-2">
-          <ActionTile emoji="🛒" title="Achats" disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'shop' })} small />
-          <ActionTile emoji="🗺️" title="Voyager" disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'travel' })} small />
-          <ActionTile emoji="🎒" title={`Sac (${char.inventory.length})`} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'inventory' })} small />
+          <ActionTile emoji="🛒" title={tr('Achats', 'Shop')} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'shop' })} small />
+          <ActionTile emoji="🗺️" title={tr('Voyager', 'Travel')} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'travel' })} small />
+          <ActionTile emoji="🎒" title={`${tr('Sac', 'Bag')} (${char.inventory.length})`} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'inventory' })} small />
         </div>
       </motion.div>
 
@@ -274,7 +276,7 @@ export default function MainScreen() {
         onClick={() => { playNextDay(); dispatch({ type: 'NEXT_DAY' }); }}
         className="btn-primary w-full py-3.5 text-sm"
       >
-        Jour Suivant
+        {tr('Jour Suivant', 'Next Day')}
       </motion.button>
     </div>
   );

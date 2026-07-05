@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { syncRecords, recordGameEnd } from '@/lib/profile';
+import { getLang } from '@/lib/lang';
 
 // ============ TYPES ============
 export interface Job {
@@ -32,13 +33,13 @@ export interface Stats {
 
 // Table unique emoji/libellé des jauges — utilisée par tous les écrans
 // (inventaire, boutique, résultats, barres de stats) pour rester cohérents.
-export const STAT_META: Record<keyof Stats, { emoji: string; label: string }> = {
-  health: { emoji: '❤️', label: 'Santé' },
-  mental: { emoji: '🧠', label: 'Mental' },
-  hunger: { emoji: '🍖', label: 'Faim' },
-  thirst: { emoji: '💧', label: 'Soif' },
-  sleep: { emoji: '😴', label: 'Sommeil' },
-  dignity: { emoji: '👑', label: 'Dignité' },
+export const STAT_META: Record<keyof Stats, { emoji: string; label: string; labelEn: string }> = {
+  health: { emoji: '❤️', label: 'Santé', labelEn: 'Health' },
+  mental: { emoji: '🧠', label: 'Mental', labelEn: 'Mind' },
+  hunger: { emoji: '🍖', label: 'Faim', labelEn: 'Hunger' },
+  thirst: { emoji: '💧', label: 'Soif', labelEn: 'Thirst' },
+  sleep: { emoji: '😴', label: 'Sommeil', labelEn: 'Sleep' },
+  dignity: { emoji: '👑', label: 'Dignité', labelEn: 'Dignity' },
 };
 
 export interface Character {
@@ -136,8 +137,10 @@ export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm' | 'heatwave' | 
 export interface Weather {
   type: WeatherType;
   label: string;
+  labelEn: string;
   emoji: string;
   description: string;
+  descriptionEn: string;
   // Décay supplémentaire par jour
   dailyPenalty: Partial<Stats>;
   // Modificateur sur les actions (ex: mendier rapporte moins sous la pluie)
@@ -151,9 +154,10 @@ export interface Weather {
 export const WEATHER_TYPES: Record<WeatherType, Weather> = {
   sunny: {
     type: 'sunny',
-    label: 'Ensoleillé',
+    label: 'Ensoleillé', labelEn: 'Sunny',
     emoji: '☀️',
     description: 'Une belle journée. Profitez-en, ça ne dure pas.',
+    descriptionEn: 'A fine day. Enjoy it, it won\'t last.',
     dailyPenalty: { thirst: -5 },
     actionModifier: 1.2,
     filter: 'rgba(255, 200, 50, 0)',
@@ -161,9 +165,10 @@ export const WEATHER_TYPES: Record<WeatherType, Weather> = {
   },
   cloudy: {
     type: 'cloudy',
-    label: 'Nuageux',
+    label: 'Nuageux', labelEn: 'Cloudy',
     emoji: '☁️',
     description: 'Gris et morne. Comme votre humeur.',
+    descriptionEn: 'Grey and dull. Like your mood.',
     dailyPenalty: { mental: -3 },
     actionModifier: 1.0,
     filter: 'rgba(150, 150, 170, 0.12)',
@@ -171,9 +176,10 @@ export const WEATHER_TYPES: Record<WeatherType, Weather> = {
   },
   rainy: {
     type: 'rainy',
-    label: 'Pluie',
+    label: 'Pluie', labelEn: 'Rain',
     emoji: '🌧️',
     description: 'La pluie s\'infiltre partout. Vos affaires sont trempées.',
+    descriptionEn: 'Rain seeps in everywhere. Your things are soaked.',
     dailyPenalty: { sleep: -10, health: -5, dignity: -8 },
     actionModifier: 0.7,
     filter: 'rgba(60, 100, 180, 0.18)',
@@ -181,9 +187,10 @@ export const WEATHER_TYPES: Record<WeatherType, Weather> = {
   },
   storm: {
     type: 'storm',
-    label: 'Orage',
+    label: 'Orage', labelEn: 'Storm',
     emoji: '⛈️',
     description: 'Tonnerre et éclairs. Impossible de rester dehors.',
+    descriptionEn: 'Thunder and lightning. No staying outside.',
     dailyPenalty: { sleep: -18, health: -10, mental: -12, dignity: -10 },
     actionModifier: 0.4,
     filter: 'rgba(30, 50, 120, 0.28)',
@@ -191,9 +198,10 @@ export const WEATHER_TYPES: Record<WeatherType, Weather> = {
   },
   heatwave: {
     type: 'heatwave',
-    label: 'Canicule',
+    label: 'Canicule', labelEn: 'Heatwave',
     emoji: '🌡️',
     description: 'La chaleur est écrasante. La soif vous dévore.',
+    descriptionEn: 'The heat is crushing. Thirst devours you.',
     dailyPenalty: { thirst: -20, health: -8, mental: -5 },
     actionModifier: 0.8,
     filter: 'rgba(220, 80, 20, 0.15)',
@@ -201,9 +209,10 @@ export const WEATHER_TYPES: Record<WeatherType, Weather> = {
   },
   fog: {
     type: 'fog',
-    label: 'Brouillard',
+    label: 'Brouillard', labelEn: 'Fog',
     emoji: '🌫️',
     description: 'On ne voit pas à deux mètres. Dangereux.',
+    descriptionEn: 'You can\'t see two metres ahead. Dangerous.',
     dailyPenalty: { mental: -6, sleep: -5 },
     actionModifier: 0.85,
     filter: 'rgba(200, 200, 210, 0.22)',
@@ -211,9 +220,10 @@ export const WEATHER_TYPES: Record<WeatherType, Weather> = {
   },
   snow: {
     type: 'snow',
-    label: 'Neige',
+    label: 'Neige', labelEn: 'Snow',
     emoji: '❄️',
     description: 'Le froid est mortel pour les sans-abri. Survivez.',
+    descriptionEn: 'The cold kills people on the street. Survive.',
     dailyPenalty: { health: -15, sleep: -20, hunger: -10, dignity: -5 },
     actionModifier: 0.5,
     filter: 'rgba(180, 210, 240, 0.25)',
@@ -595,12 +605,12 @@ export const TRAITS: Trait[] = [
   { id: 'ventre-pattes', name: 'Ventre sur Pattes', description: "Mange n'importe quoi, en grande quantité", positive: false, effects: { hunger: -15 }, emoji: '🍔' },
 ];
 
-export const LOCATIONS: Record<string, { name: string; emoji: string; danger: number; resources: number; description: string }> = {
-  'parc': { name: 'Parc Municipal', emoji: '🌳', danger: 20, resources: 40, description: 'Nature, pigeons, bancs. Le paradis des siestes.' },
-  'centre-ville': { name: 'Centre-Ville', emoji: '🏙️', danger: 30, resources: 60, description: 'Passants, commerces, police. Beaucoup de monde.' },
-  'zone-industrielle': { name: 'Zone Industrielle', emoji: '🏭', danger: 60, resources: 80, description: 'Rats, rouille et trésors cachés. Apportez vos gants.' },
-  'gare': { name: 'Gare', emoji: '🚂', danger: 40, resources: 50, description: 'Voyageurs, abri, sécurité. Un toit temporaire.' },
-  'marche': { name: 'Marché', emoji: '🛒', danger: 25, resources: 70, description: 'Nourriture, commerçants. Attention aux vigiles.' },
+export const LOCATIONS: Record<string, { name: string; nameEn: string; emoji: string; danger: number; resources: number; description: string; descriptionEn: string }> = {
+  'parc': { name: 'Parc Municipal', nameEn: 'City Park', emoji: '🌳', danger: 20, resources: 40, description: 'Nature, pigeons, bancs. Le paradis des siestes.', descriptionEn: 'Nature, pigeons, benches. A napper\'s paradise.' },
+  'centre-ville': { name: 'Centre-Ville', nameEn: 'Downtown', emoji: '🏙️', danger: 30, resources: 60, description: 'Passants, commerces, police. Beaucoup de monde.', descriptionEn: 'Passers-by, shops, police. A lot of people.' },
+  'zone-industrielle': { name: 'Zone Industrielle', nameEn: 'Industrial Zone', emoji: '🏭', danger: 60, resources: 80, description: 'Rats, rouille et trésors cachés. Apportez vos gants.', descriptionEn: 'Rats, rust and hidden treasure. Bring gloves.' },
+  'gare': { name: 'Gare', nameEn: 'Train Station', emoji: '🚂', danger: 40, resources: 50, description: 'Voyageurs, abri, sécurité. Un toit temporaire.', descriptionEn: 'Travelers, shelter, security. A temporary roof.' },
+  'marche': { name: 'Marché', nameEn: 'Market', emoji: '🛒', danger: 25, resources: 70, description: 'Nourriture, commerçants. Attention aux vigiles.', descriptionEn: 'Food, vendors. Watch out for guards.' },
 };
 
 const STARTING_ITEMS: Record<string, InventoryItem> = {
@@ -2314,19 +2324,20 @@ function flavorFrom(events: GameEvent[], positive: boolean): string {
 export interface StealTarget {
   id: string;
   label: string;      // "l'étal du primeur" (s'insère dans une phrase)
+  labelEn: string;
   emoji: string;
   catcher: 'commercant' | 'police';
 }
 
 export const STEAL_TARGETS: StealTarget[] = [
-  { id: 'etal', label: "l'étal du primeur", emoji: '🍎', catcher: 'commercant' },
-  { id: 'baguette', label: 'une baguette à la boulangerie', emoji: '🥖', catcher: 'commercant' },
-  { id: 'conserves', label: 'des conserves au supermarché', emoji: '🥫', catcher: 'commercant' },
-  { id: 'kebab', label: 'un kebab sur le comptoir', emoji: '🥙', catcher: 'commercant' },
-  { id: 'portefeuille', label: "le portefeuille d'un passant distrait", emoji: '👛', catcher: 'police' },
-  { id: 'velo', label: 'un vélo mal attaché', emoji: '🚲', catcher: 'police' },
-  { id: 'pourboire', label: 'le pourboire laissé sur une terrasse', emoji: '☕', catcher: 'police' },
-  { id: 'sacoche', label: 'une sacoche oubliée sur un banc', emoji: '👜', catcher: 'police' },
+  { id: 'etal', label: "l'étal du primeur", labelEn: "the greengrocer's stall", emoji: '🍎', catcher: 'commercant' },
+  { id: 'baguette', label: 'une baguette à la boulangerie', labelEn: 'a baguette from the bakery', emoji: '🥖', catcher: 'commercant' },
+  { id: 'conserves', label: 'des conserves au supermarché', labelEn: 'some cans from the supermarket', emoji: '🥫', catcher: 'commercant' },
+  { id: 'kebab', label: 'un kebab sur le comptoir', labelEn: 'a kebab off the counter', emoji: '🥙', catcher: 'commercant' },
+  { id: 'portefeuille', label: "le portefeuille d'un passant distrait", labelEn: "a distracted passer-by's wallet", emoji: '👛', catcher: 'police' },
+  { id: 'velo', label: 'un vélo mal attaché', labelEn: 'a poorly locked bike', emoji: '🚲', catcher: 'police' },
+  { id: 'pourboire', label: 'le pourboire laissé sur une terrasse', labelEn: 'the tip left on a café table', emoji: '☕', catcher: 'police' },
+  { id: 'sacoche', label: 'une sacoche oubliée sur un banc', labelEn: 'a bag left on a bench', emoji: '👜', catcher: 'police' },
 ];
 
 // ============ CLINS D'ŒIL AU RECORDMAN ============
@@ -2477,19 +2488,20 @@ export function computeScore(day: number, respect: number, money: number): numbe
 // Épitaphe contextuelle quand on tombe au combat : une pique selon l'ennemi.
 export function combatDeathMessage(enemy: string): string {
   const n = enemy.toLowerCase();
-  if (n.includes('chat')) return `Achevé par ${enemy}. Un chat. La rue retiendra ce moment de gloire.`;
-  if (n.includes('écureuil')) return `Vaincu par ${enemy}. Vous n'aviez même pas de noisettes à lui donner.`;
+  const en = getLang() === 'en';
+  if (n.includes('chat')) return en ? `Finished off by ${enemy}. A cat. The street will remember this moment of glory.` : `Achevé par ${enemy}. Un chat. La rue retiendra ce moment de gloire.`;
+  if (n.includes('écureuil')) return en ? `Beaten by ${enemy}. You didn't even have any nuts to give it.` : `Vaincu par ${enemy}. Vous n'aviez même pas de noisettes à lui donner.`;
   if (n.includes('pigeon') || n.includes('mouette') || n.includes('corbeau') || n.includes('cygne') || n.includes('oie') || n.includes('canard') || n.includes('coq')) {
-    return `${enemy} a eu votre peau. Terrassé par un volatile : les oiseaux du quartier s'en souviendront longtemps.`;
+    return en ? `${enemy} got the better of you. Taken down by a bird: the local flock will remember this for a long time.` : `${enemy} a eu votre peau. Terrassé par un volatile : les oiseaux du quartier s'en souviendront longtemps.`;
   }
-  if (n.includes('rat') || n.includes('raton')) return `${enemy} a eu le dessus. Même les rongeurs vous regardent de haut désormais.`;
-  if (n.includes('clown')) return `${enemy} a eu le dernier rire. Et personne ne riait déjà.`;
-  if (n.includes('ivrogne')) return `${enemy} titubait. Il frappait quand même plus droit que vous.`;
+  if (n.includes('rat') || n.includes('raton')) return en ? `${enemy} came out on top. Even the rodents look down on you now.` : `${enemy} a eu le dessus. Même les rongeurs vous regardent de haut désormais.`;
+  if (n.includes('clown')) return en ? `${enemy} got the last laugh. And nobody was laughing already.` : `${enemy} a eu le dernier rire. Et personne ne riait déjà.`;
+  if (n.includes('ivrogne')) return en ? `${enemy} was staggering. He still swung straighter than you.` : `${enemy} titubait. Il frappait quand même plus droit que vous.`;
   if (n.includes('commerçant') || n.includes('vigile') || n.includes('agent') || n.includes('sécurité')) {
-    return `${enemy} défendait son territoire. Vous, vous ne défendez plus rien.`;
+    return en ? `${enemy} was defending their turf. You're not defending anything anymore.` : `${enemy} défendait son territoire. Vous, vous ne défendez plus rien.`;
   }
-  if (n.includes('voyou') || n.includes('chien')) return `${enemy} voulait votre coin de rue. Il l'a eu.`;
-  return `${enemy} a eu raison de vous. La rue continue, indifférente.`;
+  if (n.includes('voyou') || n.includes('chien')) return en ? `${enemy} wanted your corner. They got it.` : `${enemy} voulait votre coin de rue. Il l'a eu.`;
+  return en ? `${enemy} got the better of you. The street carries on, indifferent.` : `${enemy} a eu raison de vous. La rue continue, indifférente.`;
 }
 
 // Applique un delta de stats puis borne le résultat (motif répété du reducer).

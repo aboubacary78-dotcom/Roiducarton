@@ -1,11 +1,13 @@
 import { useGame, getLegend } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useLang, tr } from '@/lib/lang';
 
 const SAVE_KEY = 'roi-du-carton-save';
 
 export default function TitleScreen() {
   const { state, dispatch } = useGame();
+  useLang();
   const [hasSave, setHasSave] = useState(false);
   const legend = getLegend(state.highScores);
 
@@ -41,17 +43,17 @@ export default function TitleScreen() {
         className="text-center"
       >
         <h1 className="text-4xl text-[#2A1F1A] leading-tight">
-          Le Roi du Carton
+          {tr('Le Roi du Carton', 'Cardboard King')}
         </h1>
         <p className="text-sm text-[#8B6B4A] mt-1.5">
-          Une Épopée Urbaine
+          {tr('Une Épopée Urbaine', 'An Urban Epic')}
         </p>
         <p className="text-xs text-[#A08B70] mt-3 max-w-xs mx-auto">
-          Survivez dans la rue. Devenez une légende.
+          {tr('Survivez dans la rue. Devenez une légende.', 'Survive the streets. Become a legend.')}
         </p>
         {legend && (
           <p className="text-xs text-[#B8860B] font-semibold mt-2">
-            👑 Légende à battre : {legend.name} — {legend.days} {legend.days > 1 ? 'jours' : 'jour'}
+            👑 {tr('Légende à battre', 'Legend to beat')} : {legend.name} — {legend.days} {tr(legend.days > 1 ? 'jours' : 'jour', legend.days > 1 ? 'days' : 'day')}
           </p>
         )}
       </motion.div>
@@ -72,7 +74,7 @@ export default function TitleScreen() {
               boxShadow: '0 4px 16px rgba(74, 155, 95, 0.3)',
             }}
           >
-            Continuer la partie
+            {tr('Continuer la partie', 'Continue')}
           </motion.button>
         )}
 
@@ -85,7 +87,7 @@ export default function TitleScreen() {
           onClick={() => dispatch({ type: 'START_GAME' })}
           className="btn-primary w-full py-3.5 text-sm"
         >
-          Nouvelle Partie
+          {tr('Nouvelle Partie', 'New Game')}
         </motion.button>
 
         <motion.button
@@ -97,7 +99,7 @@ export default function TitleScreen() {
           onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'settings' })}
           className="action-btn w-full py-3 text-sm text-[#6B5740] font-medium"
         >
-          ⚙️ Options
+          ⚙️ {tr('Options', 'Settings')}
         </motion.button>
       </div>
 
@@ -108,7 +110,7 @@ export default function TitleScreen() {
         transition={{ delay: 1 }}
         className="text-xs text-[#A08B70] text-center italic mt-2"
       >
-        "La rue est dure, mais l'humour est plus dur."
+        {tr('« La rue est dure, mais l\'humour est plus dur. »', '"The street is hard, but humor is harder."')}
       </motion.p>
     </div>
   );
