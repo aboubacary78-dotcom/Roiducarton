@@ -15,7 +15,7 @@ import CombatScreen from '@/components/game/CombatScreen';
 import EventResultOverlay from '@/components/game/EventResultOverlay';
 import ShopScreen from '@/components/game/ShopScreen';
 import SettingsScreen from '@/components/game/SettingsScreen';
-import StealMinigame from '@/components/game/StealMinigame';
+import StealHeist from '@/components/game/StealHeist';
 import BegMinigame from '@/components/game/BegMinigame';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import WeatherOverlay from '@/components/game/WeatherOverlay';
@@ -45,7 +45,7 @@ export default function Home() {
         {state.screen === 'inventory' && <InventoryScreen />}
         {state.screen === 'combat' && <CombatScreen />}
         {state.screen === 'shop' && <ShopScreen />}
-        {state.screen === 'steal-game' && <StealMinigame />}
+        {state.screen === 'steal-game' && <StealHeist />}
         {state.screen === 'beg-game' && <BegMinigame />}
         {state.screen === 'settings' && <SettingsScreen />}
         {state.screen === 'wardrobe' && <WardrobeScreen />}

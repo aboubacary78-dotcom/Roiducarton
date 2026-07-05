@@ -31,7 +31,7 @@ const STEPS: Step[] = [
   },
   {
     targetId: 'tuto-actions', emoji: '🎯', title: '3 actions par jour',
-    text: 'Explorer déclenche des rencontres. Mendier et Voler se jouent à l\'adresse — gare à la police ! Dormir récupère, Bagarre… c\'est la bagarre.',
+    text: 'Explorer déclenche des rencontres. Mendier se joue à l\'adresse. Voler, c\'est un casse en grille : récupérez le butin et filez vers la sortie sans vous faire toucher — sinon bagarre ou garde à vue ! Dormir récupère, Bagarre… c\'est la bagarre.',
   },
   {
     targetId: 'tuto-secondary', emoji: '🛒', title: 'Gratuit et vital',
