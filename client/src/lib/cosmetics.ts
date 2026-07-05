@@ -47,12 +47,12 @@ export interface Achievement {
   progress: (r: ProfileRecords) => number; // valeur courante vers le palier
 }
 
-export const SLOT_LABELS: Record<AccessorySlot, { label: string; emoji: string }> = {
-  hat: { label: 'Chapeaux', emoji: '🎩' },
-  eyes: { label: 'Lunettes', emoji: '👓' },
-  face: { label: 'Visage', emoji: '😊' },
-  neck: { label: 'Cou', emoji: '🧣' },
-  bg: { label: 'Fonds', emoji: '🌈' },
+export const SLOT_LABELS: Record<AccessorySlot, { label: string; labelEn: string; emoji: string }> = {
+  hat: { label: 'Chapeaux', labelEn: 'Hats', emoji: '🎩' },
+  eyes: { label: 'Lunettes', labelEn: 'Eyewear', emoji: '👓' },
+  face: { label: 'Visage', labelEn: 'Face', emoji: '😊' },
+  neck: { label: 'Cou', labelEn: 'Neck', emoji: '🧣' },
+  bg: { label: 'Fonds', labelEn: 'Backgrounds', emoji: '🌈' },
 };
 
 export const SLOT_ORDER: AccessorySlot[] = ['hat', 'eyes', 'face', 'neck', 'bg'];
@@ -191,8 +191,86 @@ export function achievementForAccessory(accessoryId: string): Achievement | unde
   return ACHIEVEMENT_BY_REWARD.get(accessoryId);
 }
 
-export const TIER_META: Record<Tier, { label: string; color: string }> = {
-  facile: { label: 'Facile', color: '#4A9B5F' },
-  moyen: { label: 'Moyen', color: '#B8860B' },
-  difficile: { label: 'Difficile', color: '#D94F4F' },
+export const TIER_META: Record<Tier, { label: string; labelEn: string; color: string }> = {
+  facile: { label: 'Facile', labelEn: 'Easy', color: '#4A9B5F' },
+  moyen: { label: 'Moyen', labelEn: 'Medium', color: '#B8860B' },
+  difficile: { label: 'Difficile', labelEn: 'Hard', color: '#D94F4F' },
 };
+
+// ===== Traductions anglaises (résolues via les helpers ci-dessous) =====
+const ACCESSORY_NAME_EN: Record<string, string> = {
+  crown: 'Golden Crown', halo: 'Halo', tophat: 'Top Hat', santa: 'Santa Hat', 'cap-back': 'Backwards Cap',
+  party: 'Party Hat', beanie: 'Pompom Beanie', cowboy: 'Cowboy Hat', wizard: 'Wizard Hat', chef: 'Chef\'s Toque',
+  'flower-crown': 'Flower Crown', 'pirate-hat': 'Pirate Tricorne', graduation: 'Graduation Cap', beret: 'Beret',
+  monocle: 'Gentleman\'s Monocle', '3d-glasses': '3D Glasses', eyepatch: 'Pirate Eyepatch', 'heart-glasses': 'Heart Glasses',
+  'star-glasses': 'Star Glasses', sunglasses: 'Sunglasses', 'nerd-glasses': 'Nerd Glasses', 'ski-goggles': 'Ski Goggles', 'thug-glasses': 'Pixel Shades',
+  mustache: 'Handlebar Mustache', warpaint: 'War Paint', blush: 'Rosy Cheeks', 'clown-nose': 'Clown Nose', bandage: 'Bandage',
+  'face-tattoo': 'Teardrop Tattoo', goatee: 'Goatee', unibrow: 'Unibrow', 'star-cheeks': 'Star Cheeks',
+  scarf: 'Striped Scarf', 'gold-medal': 'Gold Medal', bowtie: 'Bow Tie', 'gold-chain': 'Gold Chain', tie: 'Necktie',
+  bandana: 'Bandana', cape: 'Hero Cape', pearls: 'Pearl Necklace', whistle: 'Referee Whistle',
+  'gold-bg': 'Golden Aura', 'rainbow-bg': 'Rainbow', 'stars-bg': 'Starry Night', 'flames-bg': 'Flames', 'hearts-bg': 'Hearts',
+  'confetti-bg': 'Confetti', 'royal-bg': 'Royal', 'spotlight-bg': 'Spotlight', 'sunset-bg': 'Sunset',
+};
+
+const ACHIEVEMENT_EN: Record<string, { name: string; description: string }> = {
+  'first-game': { name: 'First steps on the street', description: 'Finish your first run.' },
+  'survivor-2': { name: 'Two days', description: 'Survive to day 2.' },
+  'survivor-3': { name: 'Three days standing', description: 'Survive to day 3.' },
+  'saver-20': { name: 'First coin', description: 'Gather €20 in one run.' },
+  'respected-10': { name: 'People notice you', description: 'Reach 10 respect.' },
+  'respected-15': { name: 'A budding reputation', description: 'Reach 15 respect.' },
+  'dignified-50': { name: 'Level head', description: 'Raise your dignity to 50.' },
+  'saver-30': { name: 'Small nest egg', description: 'Gather €30 in one run.' },
+  'survivor-5': { name: 'Five days', description: 'Survive to day 5.' },
+  'respected-20': { name: 'They talk about you', description: 'Reach 20 respect.' },
+  'dignified-60': { name: 'Presentable', description: 'Raise your dignity to 60.' },
+  'games-3': { name: 'Street regular', description: 'Play 3 runs.' },
+  'saver-50': { name: 'Stash', description: 'Gather €50 in one run.' },
+  'survivor-7': { name: 'One week', description: 'Survive to day 7.' },
+  'tdays-25': { name: 'Some mileage', description: 'Rack up 25 total days survived across all runs.' },
+  'balanced': { name: 'In top shape', description: 'Keep all your gauges at 60 or more on the same day.' },
+  'survivor-8': { name: 'Eight days', description: 'Survive to day 8.' },
+  'respected-25': { name: 'Rising reputation', description: 'Reach 25 respect.' },
+  'dignified-70': { name: 'Dignified', description: 'Raise your dignity to 70.' },
+  'saver-80': { name: 'Thrifty', description: 'Gather €80 in one run.' },
+  'survivor-10': { name: 'Double digits', description: 'Survive to day 10.' },
+  'respected-40': { name: 'Neighborhood figure', description: 'Reach 40 respect.' },
+  'dignified-80': { name: 'Head held high', description: 'Raise your dignity to 80.' },
+  'games-5': { name: 'Repeat offender', description: 'Play 5 runs.' },
+  'saver-120': { name: 'Good manager', description: 'Gather €120 in one run.' },
+  'survivor-13': { name: 'Thirteen days', description: 'Survive to day 13.' },
+  'respected-50': { name: 'Respected', description: 'Reach 50 respect.' },
+  'low-dignity': { name: 'Rock bottom', description: 'Survive a day with dignity at its lowest (10 or less).' },
+  'tdays-60': { name: 'Street veteran', description: 'Rack up 60 total days survived.' },
+  'dignified-90': { name: 'Almost respectable', description: 'Raise your dignity to 90.' },
+  'games-10': { name: 'Unkillable', description: 'Play 10 runs.' },
+  'survivor-16': { name: 'Sixteen days', description: 'Survive to day 16.' },
+  'broke-day': { name: 'Flat broke', description: 'Survive with €0 after day 4.' },
+  'survivor-20': { name: 'The Cardboard King', description: 'Survive to day 20.' },
+  'respected-70': { name: 'Respected by all', description: 'Reach 70 respect.' },
+  'saver-160': { name: 'Loot', description: 'Gather €160 in one run.' },
+  'dignified-95': { name: 'Almost a somebody', description: 'Raise your dignity to 95.' },
+  'survivor-25': { name: 'Street legend', description: 'Survive to day 25.' },
+  'respected-85': { name: 'Rising idol', description: 'Reach 85 respect.' },
+  'saver-220': { name: 'Little treasure', description: 'Gather €220 in one run.' },
+  'games-20': { name: 'Pillar of the street', description: 'Play 20 runs.' },
+  'survivor-30': { name: 'Thirty days', description: 'Survive to day 30.' },
+  'respected-100': { name: 'Street idol', description: 'Reach 100 respect.' },
+  'dignified-100': { name: 'Flawless', description: 'Raise your dignity to 100.' },
+  'tdays-120': { name: 'A whole lifetime', description: 'Rack up 120 total days survived.' },
+  'iron-mental': { name: 'Nerves of steel', description: 'Survive a day with your mind at its lowest (12 or less).' },
+  'saver-300': { name: 'Fortune', description: 'Gather €300 in one run.' },
+  'games-40': { name: 'Eternal of the street', description: 'Play 40 runs.' },
+  'survivor-40': { name: 'Cardboard immortal', description: 'Survive to day 40.' },
+  'tdays-250': { name: 'Living monument', description: 'Rack up 250 total days survived.' },
+};
+
+export function accessoryName(a: Accessory, en: boolean): string {
+  return en ? (ACCESSORY_NAME_EN[a.id] ?? a.name) : a.name;
+}
+export function achievementName(a: Achievement, en: boolean): string {
+  return en ? (ACHIEVEMENT_EN[a.id]?.name ?? a.name) : a.name;
+}
+export function achievementDesc(a: Achievement, en: boolean): string {
+  return en ? (ACHIEVEMENT_EN[a.id]?.description ?? a.description) : a.description;
+}

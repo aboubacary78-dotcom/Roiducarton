@@ -11,12 +11,17 @@ import {
   TIER_META,
   achievementForAccessory,
   getAccessory,
+  accessoryName,
+  achievementName,
+  achievementDesc,
   type AccessorySlot,
 } from '@/lib/cosmetics';
 import { loadProfile, toggleEquip, type PlayerProfile } from '@/lib/profile';
+import { useLang, tr } from '@/lib/lang';
 
 export default function WardrobeScreen() {
   const { state, dispatch } = useGame();
+  const en = useLang() === 'en';
   const char = state.character;
   const [profile, setProfile] = useState<PlayerProfile>(() => loadProfile());
   const [tab, setTab] = useState<'accessoires' | 'succes'>('accessoires');
@@ -42,9 +47,9 @@ export default function WardrobeScreen() {
           ←
         </button>
         <div>
-          <h1 className="text-2xl text-[#2A1F1A] leading-tight">Garde-robe</h1>
+          <h1 className="text-2xl text-[#2A1F1A] leading-tight">{tr('Garde-robe', 'Wardrobe')}</h1>
           <p className="text-xs text-[#8B6B4A]">
-            {unlockedCount}/{ACCESSORIES.length} accessoires débloqués
+            {unlockedCount}/{ACCESSORIES.length} {tr('accessoires débloqués', 'accessories unlocked')}
           </p>
         </div>
       </div>
@@ -59,10 +64,12 @@ export default function WardrobeScreen() {
           <CardboardAvatar seed={seed} gender={gender} size={96} accessories={profile.equipped} />
         </div>
         <div className="flex-1">
-          <p className="text-base font-semibold text-[#2A1F1A]">{char?.name || 'Votre personnage'}</p>
+          <p className="text-base font-semibold text-[#2A1F1A]">{char?.name || tr('Votre personnage', 'Your character')}</p>
           <p className="text-xs text-[#8B6B4A] leading-relaxed mt-1">
-            Équipez les accessoires gagnés par vos succès. Ils vous suivent
-            d'une partie à l'autre. Touchez un accessoire équipé pour le retirer.
+            {tr(
+              'Équipez les accessoires gagnés par vos succès. Ils vous suivent d\'une partie à l\'autre. Touchez un accessoire équipé pour le retirer.',
+              'Equip accessories earned from achievements. They carry over between runs. Tap an equipped accessory to remove it.',
+            )}
           </p>
         </div>
       </motion.div>
@@ -77,7 +84,7 @@ export default function WardrobeScreen() {
               tab === t ? 'btn-primary' : 'action-btn text-[#6B5740]'
             }`}
           >
-            {t === 'accessoires' ? '🎽 Accessoires' : '🏆 Succès'}
+            {t === 'accessoires' ? tr('🎽 Accessoires', '🎽 Accessories') : tr('🏆 Succès', '🏆 Achievements')}
           </button>
         ))}
       </div>
@@ -91,7 +98,7 @@ export default function WardrobeScreen() {
             return (
               <div key={slot}>
                 <h2 className="text-sm font-semibold text-[#5C4A38] mb-2 flex items-center gap-1.5">
-                  <span>{meta.emoji}</span> {meta.label}
+                  <span>{meta.emoji}</span> {tr(meta.label, meta.labelEn)}
                 </h2>
                 <div className="grid grid-cols-3 gap-2">
                   {items.map((acc) => {
@@ -109,15 +116,15 @@ export default function WardrobeScreen() {
                       >
                         <span className="text-2xl leading-none mt-1">{unlocked ? acc.emoji : '🔒'}</span>
                         <span className="text-[10px] font-medium text-[#3D3020] leading-tight line-clamp-2 min-h-[24px] flex items-center">
-                          {acc.name}
+                          {accessoryName(acc, en)}
                         </span>
                         {equipped ? (
-                          <span className="text-[9px] font-semibold text-[#B8860B]">Équipé</span>
+                          <span className="text-[9px] font-semibold text-[#B8860B]">{tr('Équipé', 'Equipped')}</span>
                         ) : unlocked ? (
-                          <span className="text-[9px] text-[#A08B70]">Toucher</span>
+                          <span className="text-[9px] text-[#A08B70]">{tr('Toucher', 'Tap')}</span>
                         ) : (
                           <span className="text-[9px] text-[#B84A3A] leading-tight line-clamp-2">
-                            {ach?.name}
+                            {ach ? achievementName(ach, en) : ''}
                           </span>
                         )}
                       </button>
@@ -145,18 +152,18 @@ export default function WardrobeScreen() {
                   <span className="text-2xl mt-0.5">{unlocked ? ach.icon : '🔒'}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-semibold text-[#2A1F1A]">{ach.name}</span>
+                      <span className="text-sm font-semibold text-[#2A1F1A]">{achievementName(ach, en)}</span>
                       <span
                         className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full text-white"
                         style={{ backgroundColor: tier.color }}
                       >
-                        {tier.label}
+                        {tr(tier.label, tier.labelEn)}
                       </span>
-                      {unlocked && <span className="text-[10px] font-semibold text-[#3d8b4f]">✅ Débloqué</span>}
+                      {unlocked && <span className="text-[10px] font-semibold text-[#3d8b4f]">{tr('✅ Débloqué', '✅ Unlocked')}</span>}
                     </div>
-                    <p className="text-xs text-[#6B5740] mt-0.5">{ach.description}</p>
+                    <p className="text-xs text-[#6B5740] mt-0.5">{achievementDesc(ach, en)}</p>
                     <p className="text-[11px] text-[#8B6B4A] mt-1">
-                      Récompense : <span className="font-medium text-[#B8860B]">{acc?.emoji} {acc?.name}</span>
+                      {tr('Récompense', 'Reward')} : <span className="font-medium text-[#B8860B]">{acc?.emoji} {acc ? accessoryName(acc, en) : ''}</span>
                     </p>
                     {!unlocked && (
                       <div className="mt-1.5">

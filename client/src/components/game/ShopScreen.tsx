@@ -3,20 +3,22 @@ import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, get
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playCoin } from '@/lib/sound';
+import { useLang, tr } from '@/lib/lang';
 
-const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string }> = {
-  food: { bg: '#4A9B5F15', color: '#4A9B5F', label: 'Nourriture' },
-  drink: { bg: '#4A8FBF15', color: '#4A8FBF', label: 'Boisson' },
-  medicine: { bg: '#D94F4F15', color: '#D94F4F', label: 'Soin' },
-  weapon: { bg: '#8B451315', color: '#8B4513', label: 'Arme' },
-  tool: { bg: '#D4874D15', color: '#D4874D', label: 'Outil' },
-  clothing: { bg: '#7B68EE15', color: '#7B68EE', label: 'Vêtement' },
-  special: { bg: '#B8860B15', color: '#B8860B', label: 'Service' },
+const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string; labelEn: string }> = {
+  food: { bg: '#4A9B5F15', color: '#4A9B5F', label: 'Nourriture', labelEn: 'Food' },
+  drink: { bg: '#4A8FBF15', color: '#4A8FBF', label: 'Boisson', labelEn: 'Drink' },
+  medicine: { bg: '#D94F4F15', color: '#D94F4F', label: 'Soin', labelEn: 'Medicine' },
+  weapon: { bg: '#8B451315', color: '#8B4513', label: 'Arme', labelEn: 'Weapon' },
+  tool: { bg: '#D4874D15', color: '#D4874D', label: 'Outil', labelEn: 'Tool' },
+  clothing: { bg: '#7B68EE15', color: '#7B68EE', label: 'Vêtement', labelEn: 'Clothing' },
+  special: { bg: '#B8860B15', color: '#B8860B', label: 'Service', labelEn: 'Service' },
 };
 
 
 export default function ShopScreen() {
   const { state, dispatch } = useGame();
+  const en = useLang() === 'en';
   const char = state.character!;
   const shops = getShopsForLocation(char.location);
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
@@ -82,7 +84,7 @@ export default function ShopScreen() {
             <div className="mt-2 pt-2 border-t border-[#E8D5C0] flex items-center gap-1.5 text-[10px] text-[#8B6B4A]">
               <span>⭐</span>
               <span>
-                Encore <strong className="text-[#B8860B]">{nextTier.needed}</strong> respect pour{' '}
+                {tr('Encore', 'Just')} <strong className="text-[#B8860B]">{nextTier.needed}</strong> {tr('respect pour', 'more respect for')}{' '}
                 <strong className="text-[#4A9B5F]">-{Math.round(nextTier.discount * 100)}%</strong>
               </span>
             </div>
@@ -102,7 +104,7 @@ export default function ShopScreen() {
               <div className="flex items-center gap-2">
                 <span className="text-xl">✨</span>
                 <div className="flex-1">
-                  <p className="text-xs font-semibold text-[#D4874D]">Événement spécial</p>
+                  <p className="text-xs font-semibold text-[#D4874D]">{tr('Événement spécial', 'Special event')}</p>
                   <p className="text-xs text-[#6B5740]">{shopEvent.text}</p>
                 </div>
                 <span className="text-xs text-[#D4874D]">→</span>
@@ -158,7 +160,7 @@ export default function ShopScreen() {
                         className="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
                         style={{ backgroundColor: cat.bg, color: cat.color }}
                       >
-                        {cat.label}
+                        {tr(cat.label, cat.labelEn)}
                       </span>
                     </div>
                     <p className="text-[11px] text-[#6B5740] mt-0.5">{item.description}</p>
@@ -204,7 +206,7 @@ export default function ShopScreen() {
                         <span>{actualPrice}€</span>
                       </span>
                     ) : (
-                      <span>{actualPrice === 0 ? 'Gratuit' : `${actualPrice}€`}</span>
+                      <span>{actualPrice === 0 ? tr('Gratuit', 'Free') : `${actualPrice}€`}</span>
                     )}
                   </button>
                 </div>
@@ -217,7 +219,7 @@ export default function ShopScreen() {
           onClick={() => setSelectedShop(null)}
           className="py-2 text-sm text-[#A08B70] font-medium text-center hover:text-[#6B5740] transition-colors"
         >
-          ← Autres boutiques
+          ← {tr('Autres boutiques', 'Other shops')}
         </button>
       </div>
     );
@@ -233,8 +235,8 @@ export default function ShopScreen() {
       >
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl text-[#2A1F1A]">Boutiques</h2>
-            <p className="text-xs text-[#8B6B4A]">Dépensez votre argent durement gagné</p>
+            <h2 className="text-xl text-[#2A1F1A]">{tr('Boutiques', 'Shops')}</h2>
+            <p className="text-xs text-[#8B6B4A]">{tr('Dépensez votre argent durement gagné', 'Spend your hard-earned money')}</p>
           </div>
           <div className="text-right font-mono">
             <div className="text-sm font-semibold text-[#B8860B]">{char.money}€</div>
@@ -250,13 +252,13 @@ export default function ShopScreen() {
           <span className="text-sm mt-0.5">⭐</span>
           <div className="text-xs text-[#4A9B5F] font-medium leading-relaxed">
             {discountLabel ? (
-              <p>Votre réputation vous précède ! {discountLabel} sur tous les achats.</p>
+              <p>{tr('Votre réputation vous précède !', 'Your reputation precedes you!')} {discountLabel} {tr('sur tous les achats.', 'off everything.')}</p>
             ) : (
-              <p>Gagnez du respect pour débloquer des remises en boutique.</p>
+              <p>{tr('Gagnez du respect pour débloquer des remises en boutique.', 'Earn respect to unlock shop discounts.')}</p>
             )}
             {nextTier && (
               <p className="text-[#8B6B4A]">
-                Encore <strong className="text-[#B8860B]">{nextTier.needed}</strong> respect pour{' '}
+                {tr('Encore', 'Just')} <strong className="text-[#B8860B]">{nextTier.needed}</strong> {tr('respect pour', 'more respect for')}{' '}
                 <strong>-{Math.round(nextTier.discount * 100)}%</strong>.
               </p>
             )}

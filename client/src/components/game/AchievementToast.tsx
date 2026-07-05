@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
-import { getAccessory, achievementForAccessory } from '@/lib/cosmetics';
+import { getAccessory, achievementForAccessory, accessoryName, achievementName } from '@/lib/cosmetics';
 import { playUnlock } from '@/lib/sound';
+import { useLang, tr } from '@/lib/lang';
 
 /*
  * Notification de succès : s'affiche quand un accessoire vient d'être débloqué.
@@ -11,6 +12,7 @@ import { playUnlock } from '@/lib/sound';
  */
 export default function AchievementToast() {
   const { newlyUnlocked, dismissUnlock } = useGame();
+  const en = useLang() === 'en';
   const current = newlyUnlocked[0];
 
   useEffect(() => {
@@ -38,10 +40,10 @@ export default function AchievementToast() {
         >
           <span className="text-3xl shrink-0">{acc.emoji}</span>
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold text-[#B8860B] uppercase tracking-wide">🏆 Succès débloqué</p>
-            <p className="text-sm font-semibold text-[#2A1F1A] leading-tight truncate">{ach?.name}</p>
+            <p className="text-[11px] font-semibold text-[#B8860B] uppercase tracking-wide">{tr('🏆 Succès débloqué', '🏆 Achievement unlocked')}</p>
+            <p className="text-sm font-semibold text-[#2A1F1A] leading-tight truncate">{ach ? achievementName(ach, en) : ''}</p>
             <p className="text-xs text-[#6B5740] leading-tight truncate">
-              Nouvel accessoire : {acc.name}
+              {tr('Nouvel accessoire', 'New accessory')} : {accessoryName(acc, en)}
             </p>
           </div>
         </motion.button>

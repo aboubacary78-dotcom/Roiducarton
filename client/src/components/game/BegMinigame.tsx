@@ -2,6 +2,7 @@ import { useGame, BEG_SPOTS, randomFromArray } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
+import { useLang, tr } from '@/lib/lang';
 
 /*
  * Mini-jeu de mendicité : pendant quelques secondes, des pièces (et parfois
@@ -17,6 +18,7 @@ interface Item { id: number; x: number; y: number; kind: 'coin' | 'bill' | 'cop'
 
 export default function BegMinigame() {
   const { state, dispatch } = useGame();
+  useLang();
   const char = state.character;
   const charisma = !!char?.traits.some(t => t.id === 'charismatique');
 
@@ -100,12 +102,12 @@ export default function BegMinigame() {
     >
       <div className="text-center">
         <div className="text-4xl mb-1">🎩</div>
-        <h1 className="text-2xl text-[#2A1F1A]">La manche</h1>
-        <p className="text-sm text-[#6B5740] mt-1.5">Vous tendez votre chapeau <strong>{spot}</strong>.</p>
-        <p className="text-xs text-[#8B6B4A] mt-1">Ramassez les pièces 🪙 et billets 💶. Ne touchez pas le policier 👮, sinon c'est l'amende !</p>
-        {charisma && <p className="text-[11px] text-[#B8860B] mt-1">✨ Charismatique : les passants donnent plus souvent.</p>}
-        {char.stats.dignity >= 70 && <p className="text-[11px] text-[#3d8b4f] mt-1">👔 Allure soignée : les passants donnent davantage.</p>}
-        {char.stats.dignity < 25 && <p className="text-[11px] text-[#D94F4F] mt-1">🫥 Allure négligée : les passants se méfient (gains réduits).</p>}
+        <h1 className="text-2xl text-[#2A1F1A]">{tr('La manche', 'Begging')}</h1>
+        <p className="text-sm text-[#6B5740] mt-1.5">{tr('Vous tendez votre chapeau', 'You hold out your hat')} <strong>{spot}</strong>.</p>
+        <p className="text-xs text-[#8B6B4A] mt-1">{tr('Ramassez les pièces 🪙 et billets 💶. Ne touchez pas le policier 👮, sinon c\'est l\'amende !', 'Grab coins 🪙 and notes 💶. Don\'t touch the cop 👮, or you\'ll be fined!')}</p>
+        {charisma && <p className="text-[11px] text-[#B8860B] mt-1">{tr('✨ Charismatique : les passants donnent plus souvent.', '✨ Charismatic: passers-by give more often.')}</p>}
+        {char.stats.dignity >= 70 && <p className="text-[11px] text-[#3d8b4f] mt-1">{tr('👔 Allure soignée : les passants donnent davantage.', '👔 Well-groomed: passers-by give more.')}</p>}
+        {char.stats.dignity < 25 && <p className="text-[11px] text-[#D94F4F] mt-1">{tr('🫥 Allure négligée : les passants se méfient (gains réduits).', '🫥 Unkempt: passers-by are wary (reduced gains).')}</p>}
       </div>
 
       {/* Timer + compteur */}
@@ -150,7 +152,7 @@ export default function BegMinigame() {
           >
             <span className="text-4xl">{ended === 'cop' ? '👮' : '🎩'}</span>
             <span className="text-xl font-bold" style={{ color: ended === 'cop' ? '#D94F4F' : '#B8860B' }}>
-              {ended === 'cop' ? 'Circulez !' : `${coins} pièce${coins > 1 ? 's' : ''} !`}
+              {ended === 'cop' ? tr('Circulez !', 'Move along!') : `${coins} ${tr(coins > 1 ? 'pièces' : 'pièce', coins > 1 ? 'coins' : 'coin')} !`}
             </span>
           </motion.div>
         )}

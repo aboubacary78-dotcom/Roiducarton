@@ -1,18 +1,20 @@
 import { useGame, getSellPrice, STAT_META, type Stats } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
+import { useLang, tr } from '@/lib/lang';
 
-const TYPE_LABELS: Record<string, { label: string; color: string; bg: string }> = {
-  food: { label: 'Nourriture', color: '#4A9B5F', bg: '#4A9B5F15' },
-  weapon: { label: 'Arme', color: '#D94F4F', bg: '#D94F4F15' },
-  armor: { label: 'Armure', color: '#4A8FBF', bg: '#4A8FBF15' },
-  tool: { label: 'Outil', color: '#D4874D', bg: '#D4874D15' },
-  junk: { label: 'Bazar', color: '#B8860B', bg: '#B8860B15' },
-  special: { label: 'Spécial', color: '#7B68EE', bg: '#7B68EE15' },
+const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: string; bg: string }> = {
+  food: { label: 'Nourriture', labelEn: 'Food', color: '#4A9B5F', bg: '#4A9B5F15' },
+  weapon: { label: 'Arme', labelEn: 'Weapon', color: '#D94F4F', bg: '#D94F4F15' },
+  armor: { label: 'Armure', labelEn: 'Armor', color: '#4A8FBF', bg: '#4A8FBF15' },
+  tool: { label: 'Outil', labelEn: 'Tool', color: '#D4874D', bg: '#D4874D15' },
+  junk: { label: 'Bazar', labelEn: 'Junk', color: '#B8860B', bg: '#B8860B15' },
+  special: { label: 'Spécial', labelEn: 'Special', color: '#7B68EE', bg: '#7B68EE15' },
 };
 
 
 export default function InventoryScreen() {
   const { state, dispatch } = useGame();
+  const en = useLang() === 'en';
   const char = state.character!;
 
   return (
@@ -22,14 +24,14 @@ export default function InventoryScreen() {
         animate={{ y: 0, opacity: 1 }}
         className="craft-card p-3.5 flex justify-between items-center"
       >
-        <h2 className="text-xl text-[#2A1F1A]">Inventaire</h2>
+        <h2 className="text-xl text-[#2A1F1A]">{tr('Inventaire', 'Inventory')}</h2>
         <span className="text-xs text-[#A08B70] font-mono font-medium">{char.inventory.length}/20</span>
       </motion.div>
 
       {char.inventory.length === 0 ? (
         <div className="craft-card p-8 text-center">
           <p className="text-3xl mb-2">🕳️</p>
-          <p className="text-sm text-[#8B6B4A]">Votre sac est vide. Comme votre estomac.</p>
+          <p className="text-sm text-[#8B6B4A]">{tr('Votre sac est vide. Comme votre estomac.', 'Your bag is empty. Like your stomach.')}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -57,7 +59,7 @@ export default function InventoryScreen() {
                       className="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
                       style={{ backgroundColor: typeInfo.bg, color: typeInfo.color }}
                     >
-                      {typeInfo.label}
+                      {tr(typeInfo.label, typeInfo.labelEn)}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-[#6B5740] mt-0.5 font-mono">
@@ -80,7 +82,7 @@ export default function InventoryScreen() {
                       className="px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg"
                       style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)', boxShadow: '0 2px 6px rgba(74, 155, 95, 0.25)' }}
                     >
-                      Utiliser
+                      {tr('Utiliser', 'Use')}
                     </button>
                   )}
                   <button
@@ -88,7 +90,7 @@ export default function InventoryScreen() {
                     className="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-[#8B6B4A]"
                     style={{ background: '#F5EDE4', border: '1px solid #E8D5C0' }}
                   >
-                    Vendre {getSellPrice(item)}€
+                    {tr('Vendre', 'Sell')} {getSellPrice(item)}€
                   </button>
                 </div>
               </motion.div>
@@ -101,7 +103,7 @@ export default function InventoryScreen() {
         onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
         className="mt-auto py-2 text-sm text-[#A08B70] font-medium text-center hover:text-[#6B5740] transition-colors"
       >
-        ← Retour
+        ← {tr('Retour', 'Back')}
       </button>
     </div>
   );
