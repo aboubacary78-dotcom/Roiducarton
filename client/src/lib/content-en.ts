@@ -1036,4 +1036,13 @@ export const CONTENT_EN: Record<string, string> = {
   "Ils misent une pièce sur vous. « Fais-nous gagner, gamin. »": "They put a coin on you. \"Win it for us, kid.\"",
   "Vous avez fui le combat. Votre dignité en prend un coup...": "You fled the fight. Your dignity takes a hit...",
   "🌅 Une âme charitable vous a porté secours. Vous reprenez vos esprits. La rue ne vous a pas encore eu...": "🌅 A kind soul came to your aid. You come to your senses. The street hasn't gotten you yet...",
+  "Sur un mur décrépi, un graffiti tracé avec soin : « {name} — {days} jours — Roi du Carton ». La rue n'oublie pas les siens.": "On a crumbling wall, a graffiti drawn with care: \"{name} — {days} days — Cardboard King.\" The street never forgets its own.",
+  "Vous inscrivez votre nom sous celui de {name}. Un jour, peut-être, on parlera de vous aussi.": "You write your name below {name}'s. One day, maybe, they'll talk about you too.",
+  "{days} jours… Vous serrez les dents. Vous ferez mieux.": "{days} days… You grit your teeth. You'll do better.",
+  "Un ancien du quartier vous jauge. « {name} ? Ah, ça… {days} jours dans la rue. Personne n'a fait mieux. Toi, t'as encore du chemin. »": "An old-timer sizes you up. \"{name}? Ah, that one… {days} days on the street. Nobody's done better. You? You've still got a way to go.\"",
+  "« Comme tu veux. Mais souviens-toi du nom : {name}. »": "\"Suit yourself. But remember the name: {name}.\"",
+  "Sous un porche, un carton usé jusqu'à la corde. Une inscription au marqueur : « Ici a dormi {name}, {days} jours durant. » On dirait un lieu de pèlerinage.": "Under a porch, a cardboard box worn to threads. A marker inscription: \"Here slept {name}, for {days} days.\" It looks like a place of pilgrimage.",
+  "Vous laissez le carton de {name} intact. Un peu de respect ne coûte rien.": "You leave {name}'s cardboard untouched. A little respect costs nothing.",
+  "Deux SDF parient sur votre avenir. « Lui ? Il tiendra jamais {days} jours comme {name}. » « Parie ! »": "Two homeless folks bet on your future. \"Him? He'll never last {days} days like {name}.\" \"Wanna bet!\"",
+  "Ils rigolent et s'en vont. L'ombre de {name} plane toujours.": "They laugh and walk off. The shadow of {name} still looms.",
 };

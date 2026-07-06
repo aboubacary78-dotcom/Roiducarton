@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
 import { useLang, tr } from '@/lib/lang';
+import MinigameIntro, { introSeen } from './MinigameIntro';
 
 /*
  * Mini-jeu de mendicité : pendant quelques secondes, des pièces (et parfois
@@ -17,6 +18,27 @@ const ITEM_TTL = 900;
 interface Item { id: number; x: number; y: number; kind: 'coin' | 'bill' | 'cop'; }
 
 export default function BegMinigame() {
+  const [ready, setReady] = useState(() => introSeen('beg'));
+  if (!ready) {
+    return (
+      <MinigameIntro
+        id="beg"
+        emoji="🎩"
+        title="La manche"
+        titleEn="Begging"
+        lines={[
+          { emoji: '🪙', fr: 'Des pièces et des billets 💶 apparaissent : tapez dessus vite avant qu\'ils ne disparaissent.', en: 'Coins and notes 💶 pop up: tap them fast before they vanish.' },
+          { emoji: '👮', fr: 'Ne touchez JAMAIS le policier, sinon il vous déloge et la manche s\'arrête net.', en: 'NEVER tap the cop, or he moves you along and begging ends at once.' },
+          { emoji: '👔', fr: 'Une allure soignée (dignité haute) fait donner les passants plus généreusement.', en: 'A tidy look (high dignity) makes passers-by give more generously.' },
+        ]}
+        onStart={() => setReady(true)}
+      />
+    );
+  }
+  return <BegMinigameInner />;
+}
+
+function BegMinigameInner() {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character;

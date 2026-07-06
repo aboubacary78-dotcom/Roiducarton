@@ -3,8 +3,17 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { useLang, tr, tc } from '@/lib/lang';
+import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.png';
+
+// Vignette de repli selon le type d'événement quand aucun mot-clé ne ressort.
+const TYPE_SCENE: Record<string, SceneTheme> = {
+  combat: 'fight',
+  social: 'friend',
+  discovery: 'discovery',
+  narrative: 'street',
+};
 
 // Vérifie les conditions d'un choix (stat minimale, objet, compétence de
 // métier) et fournit le libellé à afficher sur le cadenas.
@@ -77,7 +86,7 @@ export default function EventScreen() {
       )}
 
       {/* Event illustration */}
-      {eventImage && (
+      {eventImage ? (
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -89,6 +98,18 @@ export default function EventScreen() {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-full h-40 rounded-xl overflow-hidden shadow-[0_4px_16px_rgba(58,42,30,0.12)] relative"
+        >
+          <SceneIllustration
+            theme={sceneFor(`${event.title} ${event.description}`, TYPE_SCENE[event.type] || 'street')}
+            className="w-full h-full"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
         </motion.div>
       )}
 

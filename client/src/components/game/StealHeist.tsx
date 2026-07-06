@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt, playStep, playSpotted } from '@/lib/sound';
 import { useLang, tr } from '@/lib/lang';
+import CardboardAvatar from './CardboardAvatar';
+import { getEquipped } from '@/lib/profile';
+import MinigameIntro, { introSeen } from './MinigameIntro';
 
 /*
  * Mini-jeu de vol « casse en grille » (façon Pac-Man) : on entre dans un lieu,
@@ -89,6 +92,29 @@ function makeLayout(guardCount: number): Layout {
 }
 
 export default function StealHeist() {
+  const [ready, setReady] = useState(() => introSeen('steal'));
+  if (!ready) {
+    return (
+      <MinigameIntro
+        id="steal"
+        emoji="🗝️"
+        title="Le casse"
+        titleEn="The Heist"
+        lines={[
+          { emoji: '🎯', fr: 'Récupérez l\'objet convoité dans le lieu…', en: 'Grab the coveted item inside the place…' },
+          { emoji: '🚪', fr: '…puis filez jusqu\'à la sortie pour l\'emporter.', en: '…then slip to the exit to make off with it.' },
+          { emoji: '👮', fr: 'Les gardiens patrouillent : s\'ils vous touchent, c\'est la bagarre ou la garde à vue.', en: 'Guards patrol: if they touch you, it\'s a fight or a night in a cell.' },
+          { emoji: '💎', fr: 'Sortir sans jamais être repéré = coup de maître (gros gain).', en: 'Escape without ever being spotted = a masterstroke (big payout).' },
+          { emoji: '🕹️', fr: 'Glissez sur la grille ou utilisez les flèches pour bouger.', en: 'Swipe on the grid or use the arrows to move.' },
+        ]}
+        onStart={() => setReady(true)}
+      />
+    );
+  }
+  return <StealHeistInner />;
+}
+
+function StealHeistInner() {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character;
@@ -96,10 +122,14 @@ export default function StealHeist() {
   const day = char?.day ?? 1;
   const guardEmoji = target.catcher === 'police' ? '👮' : '🧑‍🍳';
 
-  // Difficulté croissante avec les jours.
-  const guardCount = Math.min(1 + Math.floor(day / 4), 3);
-  const tickMs = Math.max(620 - day * 18, 380);
-  const chaseProb = Math.min(0.45 + day * 0.02, 0.75);
+  // Difficulté croissante : le nombre de casses déjà tentés durant la partie
+  // durcit la surveillance (plus on vole, plus on est attendu), les jours
+  // écoulés y ajoutent une pression de fond.
+  const steals = char?.stealCount ?? 1;
+  const heat = (steals - 1) + Math.floor(day / 5);
+  const guardCount = Math.min(1 + Math.floor(heat / 2), 4);
+  const tickMs = Math.max(640 - heat * 45, 300);
+  const chaseProb = Math.min(0.42 + heat * 0.045, 0.85);
 
   const [layout] = useState(() => makeLayout(guardCount));
   const [player, setPlayer] = useState<Cell>(layout.player);
@@ -260,9 +290,9 @@ export default function StealHeist() {
                     key="player"
                     animate={{ scale: [1, 1.12, 1] }}
                     transition={{ repeat: Infinity, duration: 1.1 }}
-                    className="drop-shadow"
+                    className="drop-shadow flex items-center justify-center"
                   >
-                    🥷
+                    <CardboardAvatar seed={char.seed} gender={char.gender} size={30} accessories={getEquipped()} />
                   </motion.span>
                 ) : isGuard ? (
                   <span>{guardEmoji}</span>

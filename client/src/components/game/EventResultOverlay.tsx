@@ -4,18 +4,19 @@ import { useState, useEffect } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { playSuccess, playFail, playWin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
+import SceneIllustration, { sceneFor } from './SceneIllustration';
 
-const FLAG_LABELS: Record<string, string> = {
-  'ami-jardinier': '🌱 Ami du jardinier',
-  'hero-enfant': '🦸 Héros d\'un enfant',
-  'ami-pecheur': '🎣 Ami du pêcheur',
-  'ami-brocanteur': '🔧 Ami du brocanteur',
-  'ami-musicien': '🎵 Ami du musicien',
-  'roi-dechetterie': '♻️ Roi de la récup',
-  'chat-compagnon': '🐱 Chat compagnon',
-  'aide-mairie': '🏛️ Aide de la mairie',
-  'jardinier-mentor': '🌻 Mentor jardinier',
-  'emploi-jardin': '💼 Emploi au jardin',
+const FLAG_LABELS: Record<string, { fr: string; en: string }> = {
+  'ami-jardinier': { fr: '🌱 Ami du jardinier', en: '🌱 Gardener\'s friend' },
+  'hero-enfant': { fr: '🦸 Héros d\'un enfant', en: '🦸 A child\'s hero' },
+  'ami-pecheur': { fr: '🎣 Ami du pêcheur', en: '🎣 Fisherman\'s friend' },
+  'ami-brocanteur': { fr: '🔧 Ami du brocanteur', en: '🔧 Junk dealer\'s friend' },
+  'ami-musicien': { fr: '🎵 Ami du musicien', en: '🎵 Musician\'s friend' },
+  'roi-dechetterie': { fr: '♻️ Roi de la récup', en: '♻️ King of salvage' },
+  'chat-compagnon': { fr: '🐱 Chat compagnon', en: '🐱 Cat companion' },
+  'aide-mairie': { fr: '🏛️ Aide de la mairie', en: '🏛️ Town hall aid' },
+  'jardinier-mentor': { fr: '🌻 Mentor jardinier', en: '🌻 Gardening mentor' },
+  'emploi-jardin': { fr: '💼 Emploi au jardin', en: '💼 Garden job' },
 };
 
 export default function EventResultOverlay() {
@@ -51,7 +52,8 @@ export default function EventResultOverlay() {
 
   const hasChanges = result.statChanges || result.moneyChange || result.respectChange;
   const lastFlag = state.character?.activeFlags?.slice(-1)[0];
-  const flagLabel = lastFlag ? FLAG_LABELS[lastFlag] : null;
+  const flagEntry = lastFlag ? FLAG_LABELS[lastFlag] : null;
+  const flagLabel = flagEntry ? tr(flagEntry.fr, flagEntry.en) : null;
 
   const isPositive = (() => {
     if (result.moneyChange && result.moneyChange > 0) return true;
@@ -80,14 +82,16 @@ export default function EventResultOverlay() {
           className="craft-card-solid p-5 max-w-sm w-full"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Result icon */}
+          {/* Illustration de résultat (générée, DA carton) */}
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', delay: 0.1 }}
-            className="text-center mb-3"
+            initial={{ scale: 0.94, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', delay: 0.05 }}
+            className="relative w-full h-32 rounded-xl overflow-hidden mb-3 shadow-[0_3px_12px_rgba(58,42,30,0.12)]"
           >
-            <span className="text-3xl">{isPositive ? '✨' : '😓'}</span>
+            <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} className="w-full h-full" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+            <span className="absolute top-2 right-2 text-2xl drop-shadow">{isPositive ? '✨' : '😓'}</span>
           </motion.div>
 
           {/* Result text */}
@@ -110,7 +114,7 @@ export default function EventResultOverlay() {
                         isPos ? 'bg-[#4A9B5F]/10 text-[#3d8b4f]' : 'bg-[#D94F4F]/10 text-[#B84A3A]'
                       }`}
                     >
-                      {STAT_META[key as keyof Stats].emoji} {STAT_META[key as keyof Stats].label} {isPos ? '+' : ''}{val}
+                      {STAT_META[key as keyof Stats].emoji} {tr(STAT_META[key as keyof Stats].label, STAT_META[key as keyof Stats].labelEn)} {isPos ? '+' : ''}{val}
                     </motion.span>
                   );
                 })}
@@ -152,7 +156,7 @@ export default function EventResultOverlay() {
             >
               <p className="text-xs text-[#7B68EE] text-center font-semibold">{flagLabel}</p>
               <p className="text-[10px] text-[#7B68EE]/60 text-center mt-0.5">
-                Cette rencontre pourrait avoir une suite...
+                {tr('Cette rencontre pourrait avoir une suite...', 'This encounter might have a sequel...')}
               </p>
             </motion.div>
           )}
