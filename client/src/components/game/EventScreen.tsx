@@ -1,6 +1,6 @@
 import { useGame, STAT_META, type Character, type EventChoice } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { useLang, tr, tc } from '@/lib/lang';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
@@ -49,7 +49,13 @@ const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: strin
 export default function EventScreen() {
   const { state, dispatch } = useGame();
   const en = useLang() === 'en';
-  const event = state.currentEvent;
+  // On mémorise le dernier événement affiché : au moment où un choix est fait,
+  // `currentEvent` repasse à null alors que cet écran joue encore sa transition
+  // de sortie (AnimatePresence). On garde donc l'ancien contenu pendant la
+  // sortie, sans jamais déclencher de navigation pendant le rendu.
+  const lastEventRef = useRef(state.currentEvent);
+  if (state.currentEvent) lastEventRef.current = state.currentEvent;
+  const event = state.currentEvent ?? lastEventRef.current;
   const [boosted, setBoosted] = useState(false);
   const [loadingBoost, setLoadingBoost] = useState(false);
 
@@ -61,10 +67,7 @@ export default function EventScreen() {
     setLoadingBoost(false);
   }
 
-  if (!event) {
-    dispatch({ type: 'SET_SCREEN', screen: 'main' });
-    return null;
-  }
+  if (!event) return null;
 
   const isCombat = event.type === 'combat';
   const isFollowUp = event.isFollowUp;
