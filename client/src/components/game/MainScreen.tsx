@@ -6,6 +6,7 @@ import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
 import { playClick, playNextDay } from '@/lib/sound';
 import { getEquipped } from '@/lib/profile';
 import { useLang, tr } from '@/lib/lang';
+import SceneIllustration, { sceneForLocation } from './SceneIllustration';
 
 interface Enemy {
   name: string;
@@ -191,15 +192,20 @@ export default function MainScreen() {
         </div>
       </motion.div>
 
-      {/* Ambient */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+      {/* Décor du quartier + ambiance (illustration générée, DA carton) */}
+      <motion.div
+        key={char.location}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="text-xs text-[#A08B70] italic text-center px-4"
+        className="relative w-full h-28 rounded-xl overflow-hidden craft-card p-0"
       >
-        "{getAmbientText(char.location, char.day)}"
-      </motion.p>
+        <SceneIllustration theme={sceneForLocation(char.location)} className="w-full h-full" rounded={false} align="bottom" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+        <p className="absolute bottom-0 left-0 right-0 px-3 pb-2 text-[11px] text-white/95 italic leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+          "{getAmbientText(char.location, char.day)}"
+        </p>
+      </motion.div>
 
       {/* Actions */}
       <motion.div

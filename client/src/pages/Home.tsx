@@ -1,9 +1,10 @@
 /*
  * LE ROI DU CARTON - Home Page
- * Design: Carton Craft - warm cardboard textures, marker-drawn UI, tape strips
- * Fonts: Caveat (titles), Patrick Hand (body), Courier Prime (stats)
+ * Design: Carton Craft — textures carton chaudes, UI feutre, direction ludique.
+ * Polices : Fredoka (titres/boutons), Outfit (corps), JetBrains Mono (stats).
  */
 import { useGame } from '@/contexts/GameContext';
+import { AnimatePresence, motion } from 'framer-motion';
 import TitleScreen from '@/components/game/TitleScreen';
 import CharacterSelect from '@/components/game/CharacterSelect';
 import MainScreen from '@/components/game/MainScreen';
@@ -22,6 +23,27 @@ import WeatherOverlay from '@/components/game/WeatherOverlay';
 import WardrobeScreen from '@/components/game/WardrobeScreen';
 import AchievementToast from '@/components/game/AchievementToast';
 
+// Rendu de l'écran courant. Les superpositions (résultat, météo, tutoriel,
+// succès) sont gérées à part pour ne pas être rejouées à chaque transition.
+function renderScreen(screen: string) {
+  switch (screen) {
+    case 'title': return <TitleScreen />;
+    case 'character-select': return <CharacterSelect />;
+    case 'main': return <MainScreen />;
+    case 'event': return <EventScreen />;
+    case 'travel': return <TravelScreen />;
+    case 'inventory': return <InventoryScreen />;
+    case 'combat': return <CombatScreen />;
+    case 'shop': return <ShopScreen />;
+    case 'steal-game': return <StealHeist />;
+    case 'beg-game': return <BegMinigame />;
+    case 'settings': return <SettingsScreen />;
+    case 'wardrobe': return <WardrobeScreen />;
+    case 'game-over': return <GameOverScreen />;
+    default: return <MainScreen />;
+  }
+}
+
 export default function Home() {
   const { state } = useGame();
 
@@ -36,20 +58,23 @@ export default function Home() {
       }}
     >
       <div className="w-full max-w-md mx-auto min-h-screen relative safe-area">
-        {state.screen === 'title' && <TitleScreen />}
-        {state.screen === 'character-select' && <CharacterSelect />}
-        {state.screen === 'main' && <MainScreen />}
+        {/* Transition douce entre écrans : chaque changement d'écran fond en
+            fondu + léger glissé, pour que la navigation « réponde » au clic. */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={state.screen}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full"
+          >
+            {renderScreen(state.screen)}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Tutoriel guidé (écran principal uniquement) */}
         {state.screen === 'main' && <TutorialOverlay />}
-        {state.screen === 'event' && <EventScreen />}
-        {state.screen === 'travel' && <TravelScreen />}
-        {state.screen === 'inventory' && <InventoryScreen />}
-        {state.screen === 'combat' && <CombatScreen />}
-        {state.screen === 'shop' && <ShopScreen />}
-        {state.screen === 'steal-game' && <StealHeist />}
-        {state.screen === 'beg-game' && <BegMinigame />}
-        {state.screen === 'settings' && <SettingsScreen />}
-        {state.screen === 'wardrobe' && <WardrobeScreen />}
-        {state.screen === 'game-over' && <GameOverScreen />}
 
         {/* Overlay météo : actif sur tous les écrans de jeu sauf titre et sélection */}
         {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game', 'wardrobe'].includes(state.screen) && (
