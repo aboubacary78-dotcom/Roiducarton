@@ -113,11 +113,10 @@ export interface EventOutcome {
   followUpEventId?: string;
 }
 
-export interface CombatZone {
-  id: string;
-  label: string;
-  emoji: string;
-}
+// Combat « Dodge & Draw » : chaque round = une phase d'esquive (arène de
+// projectiles, jouée en temps réel dans le composant) puis une phase de
+// riposte (on pioche des cartes selon la performance et on en joue une).
+export type CombatPhase = 'dodge' | 'draw';
 
 export interface CombatState {
   enemyName: string;
@@ -127,9 +126,22 @@ export interface CombatState {
   enemyAttack: number;
   description: string;
   playerWeapon?: InventoryItem;
-  zones: CombatZone[];
-  weakPointId: string;
-  weakPointHint: string;
+  // Butin de l'ennemi, copié à l'entrée en combat (certains ennemis n'existent
+  // que dans la liste par lieu de MainScreen, d'où la copie plutôt qu'un lookup).
+  loot?: { money?: number; respect?: number; item?: InventoryItem };
+  round: number;
+  phase: CombatPhase;
+  // Motif de projectiles de l'ennemi (voir PROJECTILE_PATTERNS / getPattern).
+  pattern: string;
+  // Cartes piochées à jouer ce round (ids, voir CARD_DEFS).
+  hand: string[];
+  // Bonus d'attaque temporaire (Cri de Guerre) appliqué au prochain coup.
+  atkBuff: number;
+  // Malus infligé à l'ennemi (intimidation/haleine) : réduit ses projectiles
+  // au prochain round.
+  enemyStunned: boolean;
+  // Réduction d'attaque ennemie cumulée (Insulte Ciblée).
+  enemyAtkDebuff: number;
 }
 
 export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
@@ -586,14 +598,14 @@ export const JOBS: Job[] = [
 ];
 
 export const TRAITS: Trait[] = [
-  { id: 'estomac-acier', name: "Estomac d'Acier", description: 'Immunisé à la nourriture périmée', positive: true, effects: { hunger: 5 }, emoji: '🦾' },
+  { id: 'estomac-acier', name: "Estomac d'Acier", description: 'Digère tout : la faim vient plus lentement', positive: true, effects: { hunger: 5 }, emoji: '🦾' },
   { id: 'optimiste', name: 'Optimiste Né', description: 'La santé mentale remonte plus vite', positive: true, effects: { mental: 10 }, emoji: '😊' },
   { id: 'poissard', name: 'Poissard', description: "Plus d'événements négatifs, score x2", positive: false, effects: { mental: -5 }, emoji: '🍀' },
   { id: 'ami-pigeons', name: 'Ami des Pigeons', description: 'Les oiseaux apportent des objets', positive: true, effects: {}, emoji: '🐦' },
   { id: 'sommeil-plomb', name: 'Sommeil de Plomb', description: 'Récupère plus vite en dormant', positive: true, effects: { sleep: 10 }, emoji: '😴' },
-  { id: 'nez-sensible', name: 'Nez Sensible', description: 'Détecte les dangers, malus dignité si sale', positive: true, effects: { dignity: -5 }, emoji: '👃' },
+  { id: 'nez-sensible', name: 'Nez Sensible', description: 'Flaire les coups : projectiles annoncés au combat', positive: true, effects: { dignity: -5 }, emoji: '👃' },
   { id: 'insomniaque', name: 'Insomniaque', description: 'Moins de sommeil requis, mental fragile', positive: false, effects: { sleep: 10, mental: -10 }, emoji: '🌙' },
-  { id: 'paranoiaque', name: 'Paranoïaque', description: 'Pas de vol en dormant, stress élevé', positive: false, effects: { mental: -10 }, emoji: '👀' },
+  { id: 'paranoiaque', name: 'Paranoïaque', description: 'Toujours sur ses gardes : anticipe les coups, mais stressé', positive: false, effects: { mental: -10 }, emoji: '👀' },
   { id: 'main-verte', name: 'Main Verte', description: 'Fait pousser des choses dans des pots', positive: true, effects: { hunger: 5 }, emoji: '🌿' },
   { id: 'charismatique', name: 'Charismatique', description: 'Les passants donnent plus facilement', positive: true, effects: { dignity: 5 }, emoji: '✨' },
   { id: 'os-mousse', name: 'Os en Mousse', description: 'Subit plus de dégâts physiques', positive: false, effects: { health: -10 }, emoji: '🦴' },
@@ -603,8 +615,8 @@ export const TRAITS: Trait[] = [
   { id: 'haleine', name: 'Haleine Redoutable', description: 'Bonus combat, malus social', positive: false, effects: { dignity: -10 }, emoji: '💨' },
   { id: 'agile', name: 'Agile', description: 'Excellente capacité de fuite', positive: true, effects: {}, emoji: '🏃' },
   { id: 'resistant-froid', name: 'Résistant au Froid', description: 'Dort dehors sans couverture', positive: true, effects: { health: 5 }, emoji: '❄️' },
-  { id: 'bricoleur', name: 'Bricoleur du Dimanche', description: 'Artisanat moins coûteux', positive: true, effects: {}, emoji: '🔨' },
-  { id: 'orientation', name: "Sens de l'Orientation", description: 'Ne se perd jamais', positive: true, effects: {}, emoji: '🧭' },
+  { id: 'bricoleur', name: 'Bricoleur du Dimanche', description: 'Bricole une arme de fortune au combat', positive: true, effects: {}, emoji: '🔨' },
+  { id: 'orientation', name: "Sens de l'Orientation", description: 'Connaît les raccourcis : voyager remonte le moral', positive: true, effects: {}, emoji: '🧭' },
   { id: 'ventre-pattes', name: 'Ventre sur Pattes', description: "Mange n'importe quoi, en grande quantité", positive: false, effects: { hunger: -15 }, emoji: '🍔' },
 ];
 
@@ -670,78 +682,50 @@ const ENEMIES: Enemy[] = [
   { name: 'Chat Sauvage', emoji: '🐈', health: 18, attack: 9, description: 'Pas de collier, pas de maître, pas de pitié.', image: '/assets/combat-chat-sauvage-fFoiY6tVx6eNamsMbyGbNq.webp', loot: { money: 2, respect: 2 } },
 ];
 
-// ============ POINTS FAIBLES (ciblage en combat) ============
-// Pour chaque ennemi : 3 zones à viser, l'id de la zone "point faible",
-// et un indice pour aider le joueur à le deviner.
-interface Targeting { zones: CombatZone[]; weak: string; hint: string; }
+// ============ MOTIFS DE PROJECTILES (phase d'esquive) ============
+// Chaque ennemi tire selon un « motif » : type de projectile, cadence,
+// trajectoire, vitesse. Le composant DodgeArena lit ce descripteur pour
+// générer les vagues. On classe les ennemis par archétype d'après leur
+// silhouette (emoji) et leur agressivité.
+export type ProjectileKind = 'peck' | 'feather' | 'fist' | 'claw' | 'bottle' | 'dash';
+export type ProjectileMotion = 'straight' | 'homing' | 'lob' | 'spread';
 
-const Z = {
-  tete: { id: 'tete', label: 'Tête', emoji: '🤕' },
-  torse: { id: 'torse', label: 'Torse', emoji: '🎽' },
-  jambes: { id: 'jambes', label: 'Jambes', emoji: '🦵' },
-  ailes: { id: 'ailes', label: 'Ailes', emoji: '🪽' },
-  pattes: { id: 'pattes', label: 'Pattes', emoji: '🐾' },
-  queue: { id: 'queue', label: 'Queue', emoji: '🌀' },
-  bec: { id: 'bec', label: 'Bec', emoji: '🔻' },
-  museau: { id: 'museau', label: 'Museau', emoji: '👃' },
-  ventre: { id: 'ventre', label: 'Ventre', emoji: '🎈' },
-  mains: { id: 'mains', label: 'Mains', emoji: '✋' },
-} as const;
-
-const WEAK_POINTS: Record<string, Targeting> = {
-  'Pigeon Alpha':        { zones: [Z.bec, Z.ailes, Z.pattes], weak: 'ailes', hint: 'Coupez-lui les ailes, il ne pourra plus voltiger.' },
-  'Mouette Furibonde':   { zones: [Z.bec, Z.ailes, Z.ventre], weak: 'ailes', hint: 'Tout est dans le vol : visez les ailes.' },
-  'Mouette Géante':      { zones: [Z.bec, Z.ailes, Z.ventre], weak: 'ailes', hint: 'Une si grande envergure... visez les ailes.' },
-  'Chat de Gouttière':   { zones: [Z.tete, Z.pattes, Z.queue], weak: 'queue', hint: 'Attrapez la queue, il déteste ça.' },
-  'Chat Sauvage':        { zones: [Z.tete, Z.pattes, Z.queue], weak: 'queue', hint: 'Sa queue est son point sensible.' },
-  'Commerçant Furieux':  { zones: [Z.tete, Z.torse, Z.jambes], weak: 'torse', hint: 'Un bon ventre sous le tablier : coupez-lui le souffle.' },
-  'Voyou du Coin':       { zones: [Z.tete, Z.torse, Z.jambes], weak: 'tete', hint: 'Un bon crochet au menton et il tombe.' },
-  'Squatteur Territorial':{ zones: [Z.tete, Z.torse, Z.jambes], weak: 'tete', hint: 'Visez la tête, il ne s\'y attend pas.' },
-  'Concurrent Agressif': { zones: [Z.tete, Z.torse, Z.jambes], weak: 'torse', hint: 'Coupez-lui le souffle : droit au plexus.' },
-  'Agent de Sécurité':   { zones: [Z.tete, Z.ventre, Z.jambes], weak: 'ventre', hint: 'Sous le gilet, le ventre est à nu.' },
-  'Ivrogne Agressif':    { zones: [Z.tete, Z.torse, Z.jambes], weak: 'jambes', hint: 'Il tient à peine debout : fauchez ses jambes.' },
-  'Pickpocket':          { zones: [Z.tete, Z.mains, Z.jambes], weak: 'jambes', hint: 'Il mise tout sur sa vitesse : brisez son élan.' },
-  'Rat Géant':           { zones: [Z.tete, Z.pattes, Z.queue], weak: 'queue', hint: 'Marchez sur sa queue pour le clouer sur place.' },
-  'Chien Errant':        { zones: [Z.museau, Z.pattes, Z.torse], weak: 'museau', hint: 'Le museau est ultra-sensible : frappez là.' },
-  'Raton Laveur':        { zones: [Z.tete, Z.pattes, Z.queue], weak: 'tete', hint: 'Visez entre les yeux, sous le masque.' },
-};
-
-const DEFAULT_TARGETING: Targeting = { zones: [Z.tete, Z.torse, Z.jambes], weak: 'tete', hint: 'Cherchez l\'ouverture... la tête semble vulnérable.' };
-
-function getTargeting(enemyName: string): Targeting {
-  return WEAK_POINTS[enemyName] || DEFAULT_TARGETING;
+export interface ProjectilePattern {
+  id: string;
+  label: string;
+  labelEn: string;
+  kind: ProjectileKind;   // forme/emoji du projectile
+  motion: ProjectileMotion;
+  spawnMs: number;        // intervalle entre deux tirs (plus petit = plus dense)
+  speed: number;          // vitesse en px/s dans l'arène 300×300
+  size: number;           // rayon du projectile (px)
 }
 
-// Profil de combat selon le style de l'arme — c'est ce qui fait que
-// "viser" se joue différemment avec un couteau ou une batte.
-export interface WeaponProfile {
-  style: 'precise' | 'heavy' | 'balanced';
-  label: string;
-  note: string;
-  critMin: number; critRange: number;   // multiplicateur critique = critMin + alea*critRange
-  stunChance: number;                    // chance d'étourdir sur un critique
-  missMin: number; missRange: number;    // multiplicateur de dégâts sur mauvaise zone
-  riposteMin: number; riposteRange: number; // riposte ennemie sur mauvaise zone
+export const PROJECTILE_PATTERNS: Record<string, ProjectilePattern> = {
+  bird:  { id: 'bird',  label: 'Volée furieuse', labelEn: 'Furious flock', kind: 'feather', motion: 'spread', spawnMs: 520, speed: 150, size: 12 },
+  brute: { id: 'brute', label: 'Cognée lourde', labelEn: 'Heavy swings', kind: 'fist', motion: 'straight', spawnMs: 700, speed: 130, size: 20 },
+  small: { id: 'small', label: 'Assaut vif', labelEn: 'Quick assault', kind: 'claw', motion: 'homing', spawnMs: 460, speed: 175, size: 11 },
+  drunk: { id: 'drunk', label: 'Bouteilles en cloche', labelEn: 'Lobbed bottles', kind: 'bottle', motion: 'lob', spawnMs: 640, speed: 120, size: 16 },
+  beast: { id: 'beast', label: 'Charge bestiale', labelEn: 'Bestial charge', kind: 'dash', motion: 'homing', spawnMs: 560, speed: 165, size: 15 },
+};
+
+// Choisit le motif d'après l'ennemi (silhouette + stats).
+export function getPattern(enemy: { name: string; emoji: string; attack: number; health: number }): string {
+  const birds = ['🐦', '🦅', '🦢', '🪿', '🦆', '🐓', '🐦‍⬛'];
+  const cats = ['🐱', '😾', '🐈'];
+  const small = ['🐀', '🐿️', '🐦'];
+  if (birds.includes(enemy.emoji)) return 'bird';
+  if (enemy.emoji === '🍺' || /ivrogne/i.test(enemy.name)) return 'drunk';
+  if (cats.includes(enemy.emoji) || small.includes(enemy.emoji) || enemy.health <= 16) return 'small';
+  if (['🦝', '🐕', '🐀'].includes(enemy.emoji)) return 'beast';
+  if (enemy.attack >= 11 || ['🧔', '👮', '🔦', '🤡'].includes(enemy.emoji)) return 'brute';
+  return 'beast';
 }
 
 // Prix de revente d'un objet : 60% de sa valeur (empêche tout aller-retour
 // achat→revente rentable, tout en donnant une utilité à chaque objet).
 export function getSellPrice(item: InventoryItem): number {
   return Math.max(1, Math.round((item.value || 1) * 0.6));
-}
-
-export function getWeaponProfile(weapon?: InventoryItem): WeaponProfile {
-  switch (weapon?.combatStyle) {
-    case 'precise':
-      return { style: 'precise', label: '🔪 Arme précise', note: 'Critiques marqués — mais un raté ne fait presque rien et vous expose.',
-        critMin: 1.6, critRange: 0.5, stunChance: 0.45, missMin: 0.15, missRange: 0.2, riposteMin: 1.0, riposteRange: 0.6 };
-    case 'heavy':
-      return { style: 'heavy', label: '🏏 Arme lourde', note: 'Même un coup mal ajusté fait mal et tient l\'ennemi à distance. Critiques plus modestes.',
-        critMin: 1.3, critRange: 0.3, stunChance: 0.25, missMin: 0.6, missRange: 0.4, riposteMin: 0.4, riposteRange: 0.4 };
-    default:
-      return { style: 'balanced', label: '✊ Coup équilibré', note: 'Sans arme spécialisée : visée standard.',
-        critMin: 1.4, critRange: 0.4, stunChance: 0.35, missMin: 0.3, missRange: 0.3, riposteMin: 1.0, riposteRange: 0.6 };
-  }
 }
 
 // ============ EXPLORE EVENTS (30) ============
@@ -2520,11 +2504,128 @@ function applyStatDelta(stats: Stats, delta: Partial<Stats>): Stats {
   return clampStats(s);
 }
 
+// ============ CARTES DE RIPOSTE (phase « Draw ») ============
+// Chaque carte a une disponibilité (selon inventaire / stats / traits / métier)
+// et une estimation de dégâts affichée. L'effet réel est appliqué par le
+// reducer (PLAY_CARD), unique source de vérité.
+export type CardKind = 'attack' | 'debuff' | 'buff' | 'flee' | 'heal';
+
+export interface CombatCard {
+  id: string;
+  name: string; nameEn: string;
+  emoji: string;
+  kind: CardKind;
+  desc: string; descEn: string;
+  // Étiquette de dégâts/effet affichée sur la carte.
+  estimate: (c: Character, combat: CombatState) => string;
+  available: (c: Character, combat: CombatState) => boolean;
+}
+
+// Dégâts de base à mains nues (métier + buff temporaire).
+function unarmedDamage(c: Character, combat: CombatState): number {
+  return 7 + (c.job.id === 'militaire' ? 3 : 0) + combat.atkBuff;
+}
+// Meilleur bonus d'arme dans l'inventaire.
+function bestWeaponBonus(c: Character): number {
+  return c.inventory.reduce((m, i) => Math.max(m, i.type === 'weapon' ? (i.attackBonus ?? 4) : 0), 0);
+}
+function hasHealingItem(c: Character): boolean {
+  return c.inventory.some(i => (i.effect?.health ?? 0) > 0);
+}
+function firstJunk(c: Character): InventoryItem | undefined {
+  return c.inventory.find(i => i.type === 'junk');
+}
+
+const dmgLabel = (n: number, extra = '') => `≈ ${n} ${getLang() === 'en' ? 'dmg' : 'dég.'}${extra}`;
+
+export const CARD_DEFS: CombatCard[] = [
+  {
+    id: 'punch', name: 'Coup de Poing', nameEn: 'Punch', emoji: '👊', kind: 'attack',
+    desc: 'Un direct honnête. Toujours disponible.', descEn: 'An honest jab. Always available.',
+    estimate: (c, k) => dmgLabel(Math.round(unarmedDamage(c, k))),
+    available: () => true,
+  },
+  {
+    id: 'bottle', name: 'Coup d\'Arme', nameEn: 'Weapon Blow', emoji: '🍾', kind: 'attack',
+    desc: 'Frappe avec votre arme la plus solide. Gros dégâts.', descEn: 'Hit with your sturdiest weapon. Big damage.',
+    estimate: (c, k) => dmgLabel(Math.round((unarmedDamage(c, k) + bestWeaponBonus(c)) * 1.35)),
+    available: (c) => bestWeaponBonus(c) > 0,
+  },
+  {
+    id: 'insult', name: 'Insulte Ciblée', nameEn: 'Targeted Insult', emoji: '🗯️', kind: 'debuff',
+    desc: 'Sape le moral de l\'ennemi : il frappe moins fort ensuite.', descEn: 'Saps the foe\'s morale: it hits softer afterwards.',
+    estimate: () => getLang() === 'en' ? '−enemy atk' : '−atk ennemi',
+    available: (c) => c.stats.dignity > 30 || c.traits.some(t => t.id === 'charismatique'),
+  },
+  {
+    id: 'combo', name: 'Feinte + Coup Bas', nameEn: 'Feint + Low Blow', emoji: '🎭', kind: 'attack',
+    desc: 'Combo dévastateur qui vous ouvre aussi une esquive facile.', descEn: 'Devastating combo that also buys you an easy dodge.',
+    estimate: (c, k) => dmgLabel(Math.round(unarmedDamage(c, k) * 1.6), getLang() === 'en' ? ' + dodge' : ' + esquive'),
+    available: () => true,
+  },
+  {
+    id: 'warcry', name: 'Cri de Guerre', nameEn: 'War Cry', emoji: '📣', kind: 'buff',
+    desc: 'Vous vous galvanisez : votre prochaine attaque frappe plus fort.', descEn: 'You psych yourself up: your next attack hits harder.',
+    estimate: () => getLang() === 'en' ? '+attack' : '+attaque',
+    available: (c) => c.stats.mental > 15,
+  },
+  {
+    id: 'haleine', name: 'Haleine Redoutable', nameEn: 'Dreadful Breath', emoji: '💨', kind: 'debuff',
+    desc: 'Votre haleine sonne l\'ennemi : sa prochaine attaque sera molle.', descEn: 'Your breath stuns the foe: its next attack will be feeble.',
+    estimate: (c, k) => dmgLabel(Math.round(unarmedDamage(c, k) * 0.8), getLang() === 'en' ? ' + stun' : ' + étourdi'),
+    available: (c) => c.traits.some(t => t.id === 'haleine'),
+  },
+  {
+    id: 'fortune', name: 'Arme de Fortune', nameEn: 'Makeshift Weapon', emoji: '🔧', kind: 'attack',
+    desc: 'Bricole une arme d\'un objet du sac. Gros dégâts, consomme l\'objet.', descEn: 'Rig a weapon from a bag item. Big damage, consumes the item.',
+    estimate: (c, k) => dmgLabel(Math.round(unarmedDamage(c, k) * 1.7)),
+    available: (c) => c.traits.some(t => t.id === 'bricoleur') && !!firstJunk(c),
+  },
+  {
+    id: 'military', name: 'Coup Réglementaire', nameEn: 'Regulation Strike', emoji: '🎖️', kind: 'attack',
+    desc: 'Technique militaire propre et efficace.', descEn: 'Clean, efficient military technique.',
+    estimate: (c, k) => dmgLabel(Math.round(unarmedDamage(c, k) * 1.5)),
+    available: (c) => c.job.id === 'militaire',
+  },
+  {
+    id: 'bandage', name: 'Répit', nameEn: 'Breather', emoji: '🩹', kind: 'heal',
+    desc: 'Utilise un soin du sac au lieu de frapper. Rend de la santé.', descEn: 'Use a healing item instead of striking. Restores health.',
+    estimate: () => getLang() === 'en' ? '+health' : '+santé',
+    available: (c) => hasHealingItem(c),
+  },
+  {
+    id: 'flee', name: 'Fuite', nameEn: 'Flee', emoji: '🏃', kind: 'flee',
+    desc: 'Tenter de fuir. Plus l\'ennemi est brutal, plus c\'est risqué.', descEn: 'Try to run. The more brutal the foe, the riskier.',
+    estimate: (c) => c.traits.some(t => t.id === 'agile') ? (getLang() === 'en' ? 'flee (agile)' : 'fuite (agile)') : (getLang() === 'en' ? 'flee' : 'fuite'),
+    available: () => true,
+  },
+];
+
+export function getCard(id: string): CombatCard | undefined {
+  return CARD_DEFS.find(c => c.id === id);
+}
+
+// Pioche une main de `count` cartes : le Coup de Poing est toujours présent,
+// les autres sont tirées parmi les cartes disponibles. La Feinte (combo) ne
+// peut sortir que si l'on pioche au moins 2 cartes (bonne performance).
+export function generateHand(character: Character, combat: CombatState, count: number): string[] {
+  const pool = CARD_DEFS
+    .filter(c => c.id !== 'punch' && c.available(character, combat))
+    .filter(c => c.id !== 'combo' || count >= 2)
+    .map(c => c.id);
+  // Mélange simple.
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const hand = ['punch', ...pool.slice(0, Math.max(0, count - 1))];
+  return hand;
+}
+
 // Construit l'état de combat pour un ennemi donné (utilisé par START_COMBAT
 // et par les répercussions de vol) — une seule source de vérité.
 function makeCombatState(enemy: Enemy, character: Character): CombatState {
   const weapon = character.inventory.find(i => i.type === 'weapon');
-  const targeting = getTargeting(enemy.name);
   return {
     enemyName: enemy.name,
     enemyEmoji: enemy.emoji,
@@ -2533,9 +2634,14 @@ function makeCombatState(enemy: Enemy, character: Character): CombatState {
     enemyAttack: enemy.attack,
     description: enemy.description,
     playerWeapon: weapon,
-    zones: targeting.zones,
-    weakPointId: targeting.weak,
-    weakPointHint: targeting.hint,
+    loot: enemy.loot,
+    round: 1,
+    phase: 'dodge',
+    pattern: getPattern(enemy),
+    hand: [],
+    atkBuff: 0,
+    enemyStunned: false,
+    enemyAtkDebuff: 0,
   };
 }
 
@@ -2656,10 +2762,8 @@ type GameAction =
   | { type: 'RESET_SCORES' }
   | { type: 'CONTINUE_SAVE' }
   | { type: 'START_COMBAT'; enemy: Enemy }
-  | { type: 'COMBAT_ATTACK'; quality?: 'perfect' | 'good' | 'poor' }
-  | { type: 'COMBAT_AIM'; targetId: string }
-  | { type: 'COMBAT_INTIMIDATE'; bonus?: number }
-  | { type: 'COMBAT_FLEE' }
+  | { type: 'DODGE_RESULT'; hits: number }
+  | { type: 'PLAY_CARD'; cardId: string; junkItemId?: string }
   | { type: 'BUY_ITEM'; shopItem: ShopItem; actualPrice: number }
   | { type: 'TRIGGER_SHOP_EVENT'; event: ShopEvent };
 
@@ -2866,7 +2970,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'TRAVEL': {
       if (!state.character) return state;
       const travelEvent = generateTravelEvent(state.character.location, action.location, state.character);
-      const newChar = { ...state.character, location: action.location };
+      // Sens de l'Orientation : connaître les raccourcis rend le trajet moins
+      // pénible — petit regain de moral à chaque voyage.
+      const hasOrientation = state.character.traits.some(t => t.id === 'orientation');
+      const movedStats = hasOrientation
+        ? clampStats({ ...state.character.stats, mental: state.character.stats.mental + 2 })
+        : state.character.stats;
+      const newChar = { ...state.character, location: action.location, stats: movedStats };
       if (travelEvent) {
         return { ...state, character: newChar, screen: 'event', currentEvent: travelEvent };
       }
@@ -2949,33 +3059,76 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'NEXT_DAY': {
       if (!state.character) return state;
+      const ch = state.character;
       const nextWeather = getNextWeather(state.weather);
       const weatherData = WEATHER_TYPES[state.weather];
-      // Appliquer la pénalité météo en plus du decay normal
-      const baseDecayed = applyDailyDecay(state.character.stats);
       const weatherPenalty = weatherData.dailyPenalty;
-      const decayedStats = clampStats({
+      const traits = new Set(ch.traits.map(t => t.id));
+      const cold = state.weather === 'snow' || state.weather === 'storm' || state.weather === 'cloudy';
+
+      // Decay de base, puis météo.
+      const baseDecayed = applyDailyDecay(ch.stats);
+      const s = {
         health: baseDecayed.health + (weatherPenalty.health || 0),
         mental: baseDecayed.mental + (weatherPenalty.mental || 0),
         hunger: baseDecayed.hunger + (weatherPenalty.hunger || 0),
         thirst: baseDecayed.thirst + (weatherPenalty.thirst || 0),
         sleep: baseDecayed.sleep + (weatherPenalty.sleep || 0),
         dignity: baseDecayed.dignity + (weatherPenalty.dignity || 0),
-      });
+      };
+
+      // ---- Effets passifs de traits, appliqués chaque nuit ----
+      const notes: string[] = [];
+      const notesEn: string[] = [];
+      let inventory = ch.inventory;
+      let bonusMoney = 0;
+
+      if (traits.has('metabolisme')) s.health += 6;                    // Guérit vite
+      if (traits.has('estomac-acier')) s.hunger += 5;                  // Digère lentement : moins faim
+      if (traits.has('optimiste')) s.mental += 5;                      // Le mental remonte plus vite
+      if (traits.has('insomniaque')) s.sleep += 8;                     // Moins de sommeil requis
+      if (traits.has('sommeil-plomb')) s.sleep += 6;                   // Récupère mieux la nuit
+      if (traits.has('resistant-froid') && cold) {                     // Dort dehors sans souffrir du froid
+        s.health += Math.abs(weatherPenalty.health || 0);
+        notes.push('❄️ Le froid ne vous atteint pas.'); notesEn.push('❄️ The cold doesn\'t touch you.');
+      }
+      if (traits.has('collectionneur') && ch.inventory.length >= 18) { // Bonus moral si sac plein
+        s.mental += 6; notes.push('📦 Votre collection vous réconforte.'); notesEn.push('📦 Your hoard comforts you.');
+      }
+      if (traits.has('phobie-rats') && ch.location === 'zone-industrielle') { // Panique en zone industrielle
+        s.mental -= 8; notes.push('🐀 Les rats du coin vous rongent le moral.'); notesEn.push('🐀 The local rats gnaw at your nerves.');
+      }
+      if (traits.has('main-verte') && Math.random() < 0.5) {           // Fait pousser des choses
+        s.hunger += 12; notes.push('🌿 Vos plants ont donné : un petit repas gratuit.'); notesEn.push('🌿 Your plants bore fruit: a small free meal.');
+      }
+      if (traits.has('ami-pigeons')) {                                 // Les oiseaux apportent des choses
+        const roll = Math.random();
+        if (roll < 0.35 && inventory.length < 20) {
+          const gift = STARTING_ITEMS[randomFromArray(['cable-usb', 'crayon', 'graines', 'harmonica-casse'])];
+          if (gift) { inventory = [...inventory, { ...gift }]; notes.push(`🐦 Un pigeon vous dépose : ${gift.name}.`); notesEn.push(`🐦 A pigeon drops off: ${tc(gift.name)}.`); }
+        } else if (roll < 0.6) {
+          bonusMoney += 2; notes.push('🐦 Vos pigeons vous rapportent 2€ de bricoles brillantes.'); notesEn.push('🐦 Your pigeons bring you €2 of shiny trinkets.');
+        }
+      }
+
+      const decayedStats = clampStats(s);
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
 
       if (!isAlive) {
-        const score = computeScore(state.character.day, state.character.respect, state.character.money);
-        saveHighScore(state.character.name, state.character.day, score);
+        const score = computeScore(ch.day, ch.respect, ch.money);
+        saveHighScore(ch.name, ch.day, score);
         clearSave();
       }
 
       return {
         ...state,
-        character: { ...state.character, stats: decayedStats, day: state.character.day + 1, alive: isAlive },
+        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney },
         dayActions: 0,
         screen: isAlive ? 'main' : 'game-over',
         weather: nextWeather,
+        eventResult: isAlive && notes.length > 0
+          ? { text: L(notes.join(' '), notesEn.join(' ')), moneyChange: bonusMoney || undefined }
+          : state.eventResult,
       };
     }
 
@@ -3026,208 +3179,165 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    case 'COMBAT_ATTACK': {
+    // Fin de la phase d'esquive : on encaisse les touches, puis on pioche des
+    // cartes selon la performance (0 touche = 3 cartes, 1-2 = 2, 3+ = 1).
+    case 'DODGE_RESULT': {
       if (!state.character || !state.currentCombat) return state;
-      const isMilitaire = state.character.job.id === 'militaire';
-      const hasForce = state.character.traits.some(t => t.id === 'costaud');
-      const weapon = state.currentCombat.playerWeapon;
-      const baseDmg = 6 + (isMilitaire ? 4 : 0) + (hasForce ? 3 : 0) + (weapon ? (weapon.attackBonus ?? 4) : 0);
-      // Qualité du timing (mini-jeu de frappe) : parfaite = plus de dégâts et
-      // riposte affaiblie ; molle = coup faible et l'ennemi en profite.
-      const quality = action.quality || 'good';
-      const dmgMul = quality === 'perfect' ? 1.2 + Math.random() * 0.3
-        : quality === 'poor' ? 0.35 + Math.random() * 0.25
-        : 0.6 + Math.random() * 0.5;
-      const riposteMul = quality === 'perfect' ? 0.45 + Math.random() * 0.45
-        : quality === 'poor' ? 1.0 + Math.random() * 0.6
-        : 0.7 + Math.random() * 0.8;
-      const playerDmg = Math.floor(baseDmg * dmgMul);
-      const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
-      const enemyDmg = Math.floor(state.currentCombat.enemyAttack * riposteMul * (hasOsMousse ? 1.5 : 1));
-      const newEnemyHp = Math.max(0, state.currentCombat.enemyHealth - playerDmg);
-      const newHp = Math.max(0, state.character.stats.health - enemyDmg);
-      const logs = [...state.combatLog];
-      const wpn = weapon ? tc(weapon.name) : '';
-      logs.push(quality === 'perfect'
-        ? L(`⚡ Frappe parfaite${weapon ? ` avec ${weapon.name}` : ''} ! ${playerDmg} dégâts !`, `⚡ Perfect strike${weapon ? ` with ${wpn}` : ''}! ${playerDmg} damage!`)
-        : quality === 'poor'
-          ? L(`😖 Frappe molle${weapon ? ` avec ${weapon.name}` : ''}... ${playerDmg} dégâts.`, `😖 Weak strike${weapon ? ` with ${wpn}` : ''}... ${playerDmg} damage.`)
-          : L(`⚔️ Vous attaquez${weapon ? ` avec ${weapon.name}` : ''} ! ${playerDmg} dégâts !`, `⚔️ You attack${weapon ? ` with ${wpn}` : ''}! ${playerDmg} damage!`));
-      if (newEnemyHp > 0) logs.push(L(`💥 ${state.currentCombat.enemyName} riposte ! ${enemyDmg} dégâts !`, `💥 ${tc(state.currentCombat.enemyName)} strikes back! ${enemyDmg} damage!`));
-      if (newEnemyHp <= 0) {
-        const enemy = ENEMIES.find(e => e.name === state.currentCombat!.enemyName);
-        const lootMoney = enemy?.loot?.money || 0;
-        const lootRespect = enemy?.loot?.respect || 0;
-        const en = tc(state.currentCombat.enemyName);
-        logs.push(L(`🎉 Victoire ! Vous avez vaincu ${state.currentCombat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
-        if (lootMoney > 0) logs.push(L(`💰 +${lootMoney}€ récupérés`, `💰 +€${lootMoney} looted`));
-        if (lootRespect > 0) logs.push(L(`⭐ +${lootRespect} respect gagné`, `⭐ +${lootRespect} respect gained`));
-        const newStats = clampStats({ ...state.character.stats, health: newHp });
+      const c = state.character;
+      const combat = state.currentCombat;
+      const hasOsMousse = c.traits.some(t => t.id === 'os-mousse');
+      const hasFroid = c.traits.some(t => t.id === 'resistant-froid');
+      // Dégâts par touche : basés sur l'attaque de l'ennemi, réduits par un
+      // éventuel malus (Insulte) et par la résistance, aggravés par Os en Mousse.
+      const effAtk = Math.max(3, combat.enemyAttack - combat.enemyAtkDebuff);
+      const perHit = Math.max(2, Math.round(effAtk * 0.5 * (hasOsMousse ? 1.5 : 1) * (hasFroid ? 0.8 : 1)));
+      const totalDmg = action.hits * perHit;
+      const newHp = Math.max(0, c.stats.health - totalDmg);
+      if (newHp <= 0) {
         return {
-          ...state,
-          character: { ...state.character, stats: newStats, money: state.character.money + lootMoney, respect: state.character.respect + lootRespect },
-          currentCombat: null,
-          combatLog: logs,
-          eventResult: { text: L(`Victoire contre ${state.currentCombat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`, `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`), moneyChange: lootMoney, respectChange: lootRespect },
-          screen: 'main',
+          ...state, screen: 'game-over', currentCombat: null,
+          combatLog: [...state.combatLog, L(`💥 ${action.hits} coup(s) encaissé(s)... ${totalDmg} dégâts.`, `💥 Took ${action.hits} hit(s)... ${totalDmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')],
+          deathCause: combatDeathMessage(combat.enemyName),
         };
       }
-      if (newHp <= 0) {
-        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
-      }
-      const newStats2 = clampStats({ ...state.character.stats, health: newHp });
+      // Cartes piochées selon la performance, avec bonus de traits.
+      let draw = action.hits === 0 ? 3 : action.hits <= 2 ? 2 : 1;
+      if (c.traits.some(t => t.id === 'collectionneur') && c.inventory.length >= 18) draw += 1;
+      if (c.traits.some(t => t.id === 'optimiste') && c.stats.mental < 30) draw += 1;
+      draw = Math.min(3, draw);
+      const newStats = clampStats({ ...c.stats, health: newHp });
+      const hand = generateHand({ ...c, stats: newStats }, combat, draw);
+      const logs = [...state.combatLog];
+      if (action.hits === 0) logs.push(L('✨ Esquive parfaite ! Vous piochez 3 cartes.', '✨ Flawless dodge! You draw 3 cards.'));
+      else logs.push(L(`🛡️ ${action.hits} touche(s), ${totalDmg} dégâts. ${draw} carte(s) en main.`, `🛡️ ${action.hits} hit(s), ${totalDmg} damage. ${draw} card(s) in hand.`));
       return {
         ...state,
-        character: { ...state.character, stats: newStats2 },
-        currentCombat: { ...state.currentCombat, enemyHealth: newEnemyHp },
+        character: { ...c, stats: newStats },
+        currentCombat: { ...combat, phase: 'draw', hand, enemyAtkDebuff: 0, enemyStunned: false },
         combatLog: logs,
       };
     }
 
-    case 'COMBAT_AIM': {
+    // Le joueur joue une carte de riposte : on applique son effet, puis on
+    // enchaîne (victoire, fuite, ou round suivant → nouvelle esquive).
+    case 'PLAY_CARD': {
       if (!state.character || !state.currentCombat) return state;
+      const c = state.character;
       const combat = state.currentCombat;
-      const zone = combat.zones.find(z => z.id === action.targetId);
-      if (!zone) return state;
-      const isCritical = action.targetId === combat.weakPointId;
-
-      const isMilitaire = state.character.job.id === 'militaire';
-      const hasForce = state.character.traits.some(t => t.id === 'costaud');
-      const weapon = combat.playerWeapon;
-      const baseDmg = 6 + (isMilitaire ? 4 : 0) + (hasForce ? 3 : 0) + (weapon ? (weapon.attackBonus ?? 4) : 0);
-      const profile = getWeaponProfile(weapon);
-
-      const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
-      let playerDmg: number;
-      let enemyDmg: number;
+      const card = getCard(action.cardId);
+      if (!card || !combat.hand.includes(action.cardId)) return state;
       const logs = [...state.combatLog];
+      const rnd = (min: number, range: number) => min + Math.random() * range;
+      const base = unarmedDamage(c, combat);
 
-      if (isCritical) {
-        // Coup critique : gros dégâts + chance d'étourdir (pas de riposte).
-        // L'arme précise frappe plus fort et sonne plus souvent.
-        playerDmg = Math.floor(baseDmg * (profile.critMin + Math.random() * profile.critRange));
-        const stunned = Math.random() < profile.stunChance;
-        enemyDmg = stunned ? 0 : Math.floor(combat.enemyAttack * (0.6 + Math.random() * 0.5) * (hasOsMousse ? 1.5 : 1));
-        const zl = tc(zone.label).toLowerCase();
-        logs.push(L(`🎯 COUP CRITIQUE sur ${zone.label.toLowerCase()} ! ${playerDmg} dégâts !`, `🎯 CRITICAL HIT on the ${zl}! ${playerDmg} damage!`));
-        if (stunned) logs.push(L(`💫 ${combat.enemyName} est sonné et ne riposte pas !`, `💫 ${tc(combat.enemyName)} is stunned and can't strike back!`));
-      } else {
-        // Mauvaise zone : avec une arme lourde le coup porte quand même,
-        // avec une lame il glisse dans le vide et l'ennemi en profite.
-        playerDmg = Math.floor(baseDmg * (profile.missMin + Math.random() * profile.missRange));
-        enemyDmg = Math.floor(combat.enemyAttack * (profile.riposteMin + Math.random() * profile.riposteRange) * (hasOsMousse ? 1.5 : 1));
-        const zl = tc(zone.label).toLowerCase();
-        const missMsg = profile.style === 'heavy'
-          ? L(`🪓 Pas le point faible (${zone.label.toLowerCase()}), mais ça cogne quand même : ${playerDmg} dégâts.`, `🪓 Not the weak point (${zl}), but it still lands: ${playerDmg} damage.`)
-          : L(`😬 Mauvaise cible (${zone.label.toLowerCase()}) ! Le coup glisse : ${playerDmg} dégâts.`, `😬 Wrong target (${zl})! The blow slips: ${playerDmg} damage.`);
-        logs.push(missMsg);
+      // Fuite : probabilité selon la brutalité de l'ennemi (+ trait agile).
+      if (card.id === 'flee') {
+        const hasAgile = c.traits.some(t => t.id === 'agile');
+        const isCascadeur = c.job.id === 'cascadeur';
+        const fleeChance = Math.min(0.85, 0.5 - combat.enemyAttack * 0.012 + (hasAgile ? 0.25 : 0) + (isCascadeur ? 0.12 : 0));
+        if (Math.random() < fleeChance) {
+          const newStats = clampStats({ ...c.stats, dignity: c.stats.dignity - 5 });
+          return {
+            ...state, character: { ...c, stats: newStats }, currentCombat: null,
+            combatLog: [...logs, L('🏃 Vous prenez vos jambes à votre cou ! Fuite réussie !', '🏃 You take to your heels! Escape successful!')],
+            eventResult: { text: L('Vous avez fui le combat. Votre dignité en prend un coup...', 'You fled the fight. Your dignity takes a hit...'), statChanges: { dignity: -5 } },
+            screen: 'main',
+          };
+        }
+        // Fuite ratée : l'ennemi place un coup, on repart en esquive.
+        const dmg = Math.max(2, Math.round(combat.enemyAttack * rnd(0.5, 0.4)));
+        const hp = Math.max(0, c.stats.health - dmg);
+        if (hp <= 0) return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(combat.enemyName) };
+        logs.push(L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`));
+        return {
+          ...state,
+          character: { ...c, stats: clampStats({ ...c.stats, health: hp, dignity: c.stats.dignity - 3 }) },
+          currentCombat: { ...combat, phase: 'dodge', round: combat.round + 1, hand: [], atkBuff: 0 },
+          combatLog: logs,
+        };
       }
 
-      const newEnemyHp = Math.max(0, combat.enemyHealth - playerDmg);
-      const newHp = Math.max(0, state.character.stats.health - enemyDmg);
-      if (enemyDmg > 0 && newEnemyHp > 0) logs.push(L(`💥 ${combat.enemyName} riposte ! ${enemyDmg} dégâts !`, `💥 ${tc(combat.enemyName)} strikes back! ${enemyDmg} damage!`));
+      // Soin : on consomme un objet de soin, pas de dégâts.
+      if (card.id === 'bandage') {
+        const heal = c.inventory.find(i => (i.effect?.health ?? 0) > 0);
+        if (!heal) return state;
+        const gain = heal.effect!.health!;
+        const newInv = c.inventory.filter(i => i !== heal);
+        logs.push(L(`🩹 Vous utilisez ${heal.name} : +${gain} santé.`, `🩹 You use ${tc(heal.name)}: +${gain} health.`));
+        return {
+          ...state,
+          character: { ...c, inventory: newInv, stats: clampStats({ ...c.stats, health: c.stats.health + gain }) },
+          currentCombat: { ...combat, phase: 'dodge', round: combat.round + 1, hand: [], atkBuff: 0 },
+          combatLog: logs,
+        };
+      }
 
-      // Mémorise le point faible découvert (pour l'afficher les fois suivantes).
-      let newFlags = [...state.character.activeFlags];
-      const wpFlag = `wp:${combat.enemyName}`;
-      if (isCritical && !newFlags.includes(wpFlag)) newFlags.push(wpFlag);
+      // Cri de Guerre : buff d'attaque, on repart en esquive (pas de dégâts).
+      if (card.id === 'warcry') {
+        logs.push(L('📣 CRI DE GUERRE ! Vous vous galvanisez pour le prochain coup.', '📣 WAR CRY! You psych yourself up for the next blow.'));
+        return {
+          ...state,
+          currentCombat: { ...combat, phase: 'dodge', round: combat.round + 1, hand: [], atkBuff: combat.atkBuff + 6 },
+          combatLog: logs,
+        };
+      }
 
+      // Cartes d'attaque / debuff : on calcule les dégâts et effets.
+      let dmg = 0;
+      let stun = false;
+      let atkDebuff = 0;
+      let consumeJunk: InventoryItem | undefined;
+      switch (card.id) {
+        case 'punch': dmg = Math.round(base * rnd(0.85, 0.35)); logs.push(L(`👊 Coup de poing ! ${dmg} dégâts.`, `👊 Punch! ${dmg} damage.`)); break;
+        case 'bottle': dmg = Math.round((base + bestWeaponBonus(c)) * rnd(1.15, 0.4)); logs.push(L(`🍾 Coup d'arme ! ${dmg} dégâts.`, `🍾 Weapon blow! ${dmg} damage.`)); break;
+        case 'military': dmg = Math.round(base * rnd(1.4, 0.3)); logs.push(L(`🎖️ Coup réglementaire ! ${dmg} dégâts.`, `🎖️ Regulation strike! ${dmg} damage.`)); break;
+        case 'combo': dmg = Math.round(base * rnd(1.5, 0.4)); stun = true; logs.push(L(`🎭 Feinte + coup bas ! ${dmg} dégâts, et vous voilà en position.`, `🎭 Feint + low blow! ${dmg} damage, and you're in position.`)); break;
+        case 'haleine': dmg = Math.round(base * rnd(0.7, 0.3)); stun = true; logs.push(L(`💨 Haleine redoutable ! ${dmg} dégâts, l'ennemi suffoque.`, `💨 Dreadful breath! ${dmg} damage, the foe gags.`)); break;
+        case 'insult': dmg = Math.round(base * rnd(0.4, 0.3)); atkDebuff = 4; logs.push(L(`🗯️ Insulte ciblée ! ${dmg} dégâts, ${combat.enemyName} perd ses moyens.`, `🗯️ Targeted insult! ${dmg} damage, ${tc(combat.enemyName)} loses its cool.`)); break;
+        case 'fortune': {
+          consumeJunk = firstJunk(c);
+          dmg = Math.round(base * rnd(1.55, 0.4));
+          logs.push(L(`🔧 Arme de fortune${consumeJunk ? ` (${consumeJunk.name})` : ''} ! ${dmg} dégâts.`, `🔧 Makeshift weapon${consumeJunk ? ` (${tc(consumeJunk.name)})` : ''}! ${dmg} damage.`));
+          break;
+        }
+        default: dmg = Math.round(base); break;
+      }
+
+      const newEnemyHp = Math.max(0, combat.enemyHealth - dmg);
+      const inventory = consumeJunk ? c.inventory.filter(i => i !== consumeJunk) : c.inventory;
+
+      // Victoire ?
       if (newEnemyHp <= 0) {
-        const enemy = ENEMIES.find(e => e.name === combat.enemyName);
-        const lootMoney = enemy?.loot?.money || 0;
-        const lootRespect = (enemy?.loot?.respect || 0) + (isCritical ? 1 : 0);
+        const lootMoney = combat.loot?.money || 0;
+        const lootRespect = combat.loot?.respect || 0;
         const en = tc(combat.enemyName);
         logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
-        if (lootMoney > 0) logs.push(L(`💰 +${lootMoney}€ récupérés`, `💰 +€${lootMoney} looted`));
-        if (lootRespect > 0) logs.push(L(`⭐ +${lootRespect} respect gagné`, `⭐ +${lootRespect} respect gained`));
-        const newStats = clampStats({ ...state.character.stats, health: newHp });
         return {
           ...state,
-          character: { ...state.character, stats: newStats, money: state.character.money + lootMoney, respect: state.character.respect + lootRespect, activeFlags: newFlags },
+          character: { ...c, inventory, money: c.money + lootMoney, respect: c.respect + lootRespect },
           currentCombat: null,
           combatLog: logs,
-          eventResult: { text: L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`, `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`), moneyChange: lootMoney, respectChange: lootRespect },
+          eventResult: { text: L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim()), moneyChange: lootMoney, respectChange: lootRespect },
           screen: 'main',
         };
       }
-      if (newHp <= 0) {
-        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
-      }
-      const newStats2 = clampStats({ ...state.character.stats, health: newHp });
+
+      // Sinon : round suivant, retour en phase d'esquive.
       return {
         ...state,
-        character: { ...state.character, stats: newStats2, activeFlags: newFlags },
-        currentCombat: { ...combat, enemyHealth: newEnemyHp },
+        character: { ...c, inventory },
+        currentCombat: {
+          ...combat,
+          enemyHealth: newEnemyHp,
+          phase: 'dodge',
+          round: combat.round + 1,
+          hand: [],
+          atkBuff: 0,
+          enemyStunned: stun,
+          enemyAtkDebuff: combat.enemyAtkDebuff + atkDebuff,
+        },
         combatLog: logs,
       };
-    }
-
-    case 'COMBAT_INTIMIDATE': {
-      if (!state.character || !state.currentCombat) return state;
-      const hasCharisme = state.character.traits.some(t => t.id === 'charismatique');
-      const hasHaleine = state.character.traits.some(t => t.id === 'haleine');
-      const isAvocat = state.character.job.id === 'avocat';
-      // Votre réputation vous précède : plus le respect est élevé, plus les
-      // voyous hésitent à s'en prendre à vous (jusqu'à +25% de chance).
-      const respectBonus = Math.min(0.25, state.character.respect / 300);
-      const isFeared = respectBonus >= 0.15;
-      // Le mini-jeu de cri ajoute jusqu'à +35% de chance selon la puissance.
-      const intimidateChance = 0.2 + (hasCharisme ? 0.15 : 0) + (hasHaleine ? 0.2 : 0) + (isAvocat ? 0.1 : 0) + respectBonus + (action.bonus || 0);
-      const logs = [...state.combatLog];
-      if (Math.random() < intimidateChance) {
-        const enemy = ENEMIES.find(e => e.name === state.currentCombat!.enemyName);
-        const lootRespect = (enemy?.loot?.respect || 0) + 1;
-        const en = tc(state.currentCombat.enemyName);
-        logs.push(L(`😱 ${state.currentCombat.enemyName} prend peur et s'enfuit !${isFeared ? ' Votre réputation vous précède…' : hasHaleine ? ' Votre haleine a fait des ravages !' : ''}`, `😱 ${en} panics and flees!${isFeared ? ' Your reputation precedes you…' : hasHaleine ? ' Your breath did the trick!' : ''}`));
-        return {
-          ...state,
-          character: { ...state.character, respect: state.character.respect + lootRespect },
-          currentCombat: null,
-          combatLog: logs,
-          eventResult: { text: L(`${state.currentCombat.enemyName} s'enfuit, terrorisé ! +${lootRespect} respect`, `${en} flees in terror! +${lootRespect} respect`), respectChange: lootRespect },
-          screen: 'main',
-        };
-      } else {
-        const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
-        const enemyDmg = Math.floor(state.currentCombat.enemyAttack * (0.6 + Math.random() * 0.6) * (hasOsMousse ? 1.5 : 1));
-        const newHp = Math.max(0, state.character.stats.health - enemyDmg);
-        logs.push(L(`😤 ${state.currentCombat.enemyName} n'est pas impressionné et attaque ! ${enemyDmg} dégâts !`, `😤 ${tc(state.currentCombat.enemyName)} is unimpressed and attacks! ${enemyDmg} damage!`));
-        if (newHp <= 0) {
-          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
-        }
-        const newStats = clampStats({ ...state.character.stats, health: newHp });
-        return { ...state, character: { ...state.character, stats: newStats }, combatLog: logs };
-      }
-    }
-
-    case 'COMBAT_FLEE': {
-      if (!state.character || !state.currentCombat) return state;
-      const hasAgile = state.character.traits.some(t => t.id === 'agile');
-      const isCascadeur = state.character.job.id === 'cascadeur';
-      const fleeChance = 0.35 + (hasAgile ? 0.2 : 0) + (isCascadeur ? 0.15 : 0);
-      const logs = [...state.combatLog];
-      if (Math.random() < fleeChance) {
-        logs.push(L('🏃 Vous prenez vos jambes à votre cou ! Fuite réussie !', '🏃 You take to your heels! Escape successful!'));
-        const newStats = clampStats({ ...state.character.stats, dignity: state.character.stats.dignity - 5 });
-        return {
-          ...state,
-          character: { ...state.character, stats: newStats },
-          currentCombat: null,
-          combatLog: logs,
-          eventResult: { text: 'Vous avez fui le combat. Votre dignité en prend un coup...', statChanges: { dignity: -5 } },
-          screen: 'main',
-        };
-      } else {
-        const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
-        const enemyDmg = Math.floor(state.currentCombat.enemyAttack * (0.8 + Math.random() * 0.4) * (hasOsMousse ? 1.5 : 1));
-        const newHp = Math.max(0, state.character.stats.health - enemyDmg);
-        logs.push(L(`❌ Fuite ratée ! ${state.currentCombat.enemyName} vous rattrape ! ${enemyDmg} dégâts !`, `❌ Escape failed! ${tc(state.currentCombat.enemyName)} catches you! ${enemyDmg} damage!`));
-        if (newHp <= 0) {
-          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
-        }
-        const newStats = clampStats({ ...state.character.stats, health: newHp, dignity: state.character.stats.dignity - 8 });
-        return { ...state, character: { ...state.character, stats: newStats }, combatLog: logs };
-      }
     }
 
     case 'BUY_ITEM': {

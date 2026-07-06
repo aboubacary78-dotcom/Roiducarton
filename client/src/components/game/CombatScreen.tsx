@@ -1,12 +1,38 @@
-import { useGame, getWeaponProfile } from '@/contexts/GameContext';
-import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
-import { playHit, playCrit, playHurt } from '@/lib/sound';
+import { useGame, PROJECTILE_PATTERNS, getCard } from '@/contexts/GameContext';
+import type { Character, CombatState, CombatCard } from '@/contexts/GameContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { playHurt, playWhoosh } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
+import { getEquipped } from '@/lib/profile';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import { stampTap, liftHover } from '@/lib/anim';
 
-interface DmgFloat { id: number; target: 'enemy' | 'player'; value: number; crit: boolean; }
+/*
+ * Combat « Dodge & Draw ».
+ * Round = 2 phases : (1) esquive en temps réel dans une arène de projectiles
+ * (façon Undertale, avatar carton contrôlable), puis (2) riposte en piochant
+ * des cartes selon la performance. Voir le reducer (DODGE_RESULT / PLAY_CARD)
+ * pour la logique de résolution — ici on ne fait que jouer et remonter le
+ * nombre de touches / la carte choisie.
+ */
+
+const ARENA = 300;          // côté de l'arène en px
+const DURATION = 4200;      // durée d'une phase d'esquive (ms)
+const IFRAME = 700;         // invulnérabilité après une touche (ms)
+
+type Dir = 'up' | 'down' | 'left' | 'right';
+interface Proj { id: number; x: number; y: number; vx: number; vy: number; size: number; kind: string; armUntil: number; }
+
+const KIND_STYLE: Record<string, { color: string; shape: 'circle' | 'rect' }> = {
+  feather: { color: '#7B68A8', shape: 'circle' },
+  fist: { color: '#C4723A', shape: 'rect' },
+  claw: { color: '#D94F4F', shape: 'circle' },
+  bottle: { color: '#6B8E5A', shape: 'circle' },
+  dash: { color: '#B8860B', shape: 'rect' },
+  peck: { color: '#4A8FBF', shape: 'circle' },
+};
 
 export default function CombatScreen() {
   const [ready, setReady] = useState(() => introSeen('combat'));
@@ -18,11 +44,10 @@ export default function CombatScreen() {
         title="La bagarre"
         titleEn="The Fight"
         lines={[
-          { emoji: '👊', fr: 'Frapper : arrêtez le curseur dans la zone verte — plus c\'est précis, plus ça fait mal.', en: 'Strike: stop the cursor in the green zone — the tighter, the harder it hits.' },
-          { emoji: '🎯', fr: 'Viser un point faible : risqué, mais un coup critique dévastateur à la clé.', en: 'Aim for a weak spot: risky, but a devastating critical hit if it lands.' },
-          { emoji: '😱', fr: 'Intimider : martelez le bouton pour crier ; avec assez de respect, l\'adversaire peut fuir.', en: 'Intimidate: hammer the button to shout; with enough respect, the foe may flee.' },
-          { emoji: '🏃', fr: 'Fuir : vous partez, mais votre dignité en prend un coup.', en: 'Flee: you get away, but your dignity takes a hit.' },
-          { emoji: '💀', fr: 'Videz la santé de l\'adversaire avant que la vôtre ne tombe à zéro.', en: 'Empty the enemy\'s health before yours drops to zero.' },
+          { emoji: '🏃', fr: 'Phase 1 — Esquive : déplacez votre personnage (ZQSD, flèches ou la croix tactile) pour éviter les projectiles pendant quelques secondes.', en: 'Phase 1 — Dodge: move your character (WASD, arrows or the on-screen pad) to avoid projectiles for a few seconds.' },
+          { emoji: '🃏', fr: 'Phase 2 — Riposte : mieux vous esquivez, plus vous piochez de cartes (jusqu\'à 3). Choisissez-en une pour contre-attaquer.', en: 'Phase 2 — Riposte: the better you dodge, the more cards you draw (up to 3). Pick one to counter-attack.' },
+          { emoji: '🎽', fr: 'Vos objets, vos stats et vos traits débloquent des cartes spéciales (arme, insulte, haleine, fuite…).', en: 'Your items, stats and traits unlock special cards (weapon, insult, breath, flee…).' },
+          { emoji: '💀', fr: 'Les touches entament votre vraie santé. Videz les PV de l\'ennemi avant que les vôtres tombent à zéro.', en: 'Hits chip your real health. Empty the enemy\'s HP before yours drops to zero.' },
         ]}
         onStart={() => setReady(true)}
       />
@@ -34,502 +59,335 @@ export default function CombatScreen() {
 function CombatScreenInner() {
   const { state, dispatch } = useGame();
   useLang();
-  const { currentCombat, combatLog, character } = state;
-  const [aiming, setAiming] = useState(false);
-  // Mini-jeu de frappe : curseur à arrêter au bon moment.
-  const [striking, setStriking] = useState(false);
-  const [strikeCenter, setStrikeCenter] = useState(50);
-  const strikePosRef = useRef(2);
-  const strikeDirRef = useRef(1);
-  const strikeRafRef = useRef<number | null>(null);
-  const strikeCursorRef = useRef<HTMLDivElement | null>(null);
-  // Mini-jeu de cri (intimidation) : marteler le bouton pour gonfler le cri.
-  // Jauge et minuterie pilotées par refs DOM : pas de re-rendu du combat
-  // pendant le martèlement.
-  const SHOUT_MS = 2500;
-  const [shouting, setShouting] = useState(false);
-  const shoutPowerRef = useRef(0);
-  const shoutGaugeRef = useRef<HTMLDivElement | null>(null);
-  const shoutLabelRef = useRef<HTMLSpanElement | null>(null);
-  const shoutTimeRef = useRef<HTMLDivElement | null>(null);
-  const [floats, setFloats] = useState<DmgFloat[]>([]);
-  const prevEnemyHp = useRef<number | null>(null);
-  const prevPlayerHp = useRef<number | null>(null);
-  const floatId = useRef(0);
-  const enemyCtrl = useAnimationControls();
-  const enemyLungeCtrl = useAnimationControls();
-  const playerCtrl = useAnimationControls();
-  const critCtrl = useAnimationControls();
-
-  function pushFloat(target: 'enemy' | 'player', value: number, crit: boolean) {
-    const id = ++floatId.current;
-    setFloats((f) => [...f, { id, target, value, crit }]);
-    setTimeout(() => setFloats((f) => f.filter((x) => x.id !== id)), 950);
-  }
-
-  // Détecte les variations de PV pour déclencher impacts + chiffres de dégâts.
-  useEffect(() => {
-    if (!currentCombat || !character) return;
-    const eHp = currentCombat.enemyHealth;
-    const pHp = character.stats.health;
-    const crit = /CRITIQUE|CRITICAL/i.test(combatLog.slice(-2).join(' '));
-
-    if (prevEnemyHp.current !== null && eHp < prevEnemyHp.current) {
-      pushFloat('enemy', prevEnemyHp.current - eHp, crit);
-      enemyCtrl.start({ x: [0, -9, 9, -6, 6, 0], transition: { duration: 0.38 } });
-      if (crit) {
-        critCtrl.start({ opacity: [0, 0.55, 0], transition: { duration: 0.5 } });
-        playCrit();
-      } else {
-        playHit();
-      }
-    }
-    if (prevPlayerHp.current !== null && pHp < prevPlayerHp.current) {
-      pushFloat('player', prevPlayerHp.current - pHp, false);
-      playerCtrl.start({ x: [0, -7, 7, -4, 4, 0], transition: { duration: 0.35 } });
-      // L'ennemi charge vers le joueur quand il riposte.
-      enemyLungeCtrl.start({ y: [0, 16, 0], scale: [1, 1.12, 1], transition: { duration: 0.32 } });
-      playHurt();
-    }
-    prevEnemyHp.current = eHp;
-    prevPlayerHp.current = pHp;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentCombat?.enemyHealth, character?.stats.health, combatLog.length]);
-
-  // Boucle du curseur de frappe (active tant que `striking` est vrai).
-  // Piloté par ref (pas de re-rendu par frame) et normalisé au temps réel :
-  // même vitesse quel que soit le taux de rafraîchissement de l'écran.
-  useEffect(() => {
-    if (!striking) return;
-    strikePosRef.current = 2;
-    strikeDirRef.current = 1;
-    const speed = 2.3;
-    let last = performance.now();
-    const loop = (now: number) => {
-      const dt = Math.min(50, now - last);
-      last = now;
-      let p = strikePosRef.current + strikeDirRef.current * speed * (dt / 16.667);
-      if (p >= 98) { p = 98; strikeDirRef.current = -1; }
-      if (p <= 2) { p = 2; strikeDirRef.current = 1; }
-      strikePosRef.current = p;
-      if (strikeCursorRef.current) strikeCursorRef.current.style.left = `calc(${p}% - 2px)`;
-      strikeRafRef.current = requestAnimationFrame(loop);
-    };
-    strikeRafRef.current = requestAnimationFrame(loop);
-    return () => { if (strikeRafRef.current) cancelAnimationFrame(strikeRafRef.current); };
-  }, [striking]);
-
-  // Minuterie du cri : à la fin, on résout l'intimidation avec le bonus accumulé.
-  useEffect(() => {
-    if (!shouting) return;
-    shoutPowerRef.current = 0;
-    const end = performance.now() + SHOUT_MS;
-    const iv = setInterval(() => {
-      const left = end - performance.now();
-      if (shoutTimeRef.current) shoutTimeRef.current.style.width = `${Math.max(0, (left / SHOUT_MS) * 100)}%`;
-      if (left <= 0) {
-        clearInterval(iv);
-        setShouting(false);
-        dispatch({ type: 'COMBAT_INTIMIDATE', bonus: (shoutPowerRef.current / 100) * 0.35 });
-      }
-    }, 100);
-    return () => clearInterval(iv);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouting]);
-
+  const { currentCombat, character } = state;
   if (!currentCombat || !character) return null;
-
-  const weakDiscovered = character.activeFlags.includes(`wp:${currentCombat.enemyName}`);
-
-  function shoutTap() {
-    const p = Math.min(100, shoutPowerRef.current + 9);
-    shoutPowerRef.current = p;
-    if (shoutGaugeRef.current) {
-      shoutGaugeRef.current.style.width = `${p}%`;
-      shoutGaugeRef.current.style.background = p >= 70
-        ? 'linear-gradient(90deg, #C99A3A, #F2C14E)'
-        : 'linear-gradient(90deg, #D4874D, #C99A3A)';
-    }
-    if (shoutLabelRef.current) shoutLabelRef.current.textContent = p >= 100 ? tr('À PLEINS POUMONS !', 'AT THE TOP OF YOUR LUNGS!') : `${p}%`;
-    playHit();
-  }
-
-  function aimAt(targetId: string) {
-    setAiming(false);
-    dispatch({ type: 'COMBAT_AIM', targetId });
-  }
-
-  function openStrike() {
-    setStrikeCenter(25 + Math.random() * 50);
-    setStriking(true);
-  }
-
-  function strike() {
-    const dist = Math.abs(strikePosRef.current - strikeCenter);
-    const quality = dist <= 5.5 ? 'perfect' : dist <= 15 ? 'good' : 'poor';
-    setStriking(false);
-    dispatch({ type: 'COMBAT_ATTACK', quality });
-  }
 
   const hpPercent = (currentCombat.enemyHealth / currentCombat.enemyMaxHealth) * 100;
   const playerHpPercent = character.stats.health;
-  const weapon = character.inventory.find(i => i.type === 'weapon');
-  const weaponProfile = getWeaponProfile(weapon);
 
-  const isMilitaire = character.job.id === 'militaire';
-  const hasForce = character.traits.some(t => t.id === 'costaud');
-  const hasCharisme = character.traits.some(t => t.id === 'charismatique');
-  const hasHaleine = character.traits.some(t => t.id === 'haleine');
-  const hasAgile = character.traits.some(t => t.id === 'agile');
-  const isCascadeur = character.job.id === 'cascadeur';
-
-  const playerInDanger = playerHpPercent <= 30;
-
-  const renderFloats = (target: 'enemy' | 'player') =>
-    floats.filter((f) => f.target === target).map((f) => (
+  return (
+    <div className="min-h-screen bg-texture p-4 flex flex-col items-center gap-3 select-none">
+      {/* En-tête ennemi */}
       <motion.div
-        key={f.id}
-        initial={{ y: 4, opacity: 0, scale: 0.5 }}
-        animate={{ y: -44, opacity: [0, 1, 1, 0], scale: f.crit ? 1.5 : 1 }}
-        transition={{ duration: 0.9, ease: 'easeOut' }}
-        className="absolute left-1/2 -translate-x-1/2 top-1 pointer-events-none font-bold text-center leading-none"
-        style={{ color: f.crit ? '#F2C14E' : target === 'enemy' ? '#FF7A5A' : '#FF5A5A', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}
+        initial={{ y: -16, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="w-full max-w-sm craft-card p-3 flex items-center gap-3"
       >
-        {f.crit && <span className="block text-[9px] tracking-wider">{tr('CRITIQUE', 'CRITICAL')}&nbsp;!</span>}
-        <span className="text-lg">-{f.value}</span>
+        <motion.span className="text-4xl" animate={{ rotate: [0, -4, 4, 0] }} transition={{ repeat: Infinity, duration: 2.6 }}>
+          {currentCombat.enemyEmoji}
+        </motion.span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-base font-bold text-[#2A1F1A] truncate">{tc(currentCombat.enemyName)}</h2>
+            <span className="text-[10px] font-mono text-[#B84A3A] shrink-0">{currentCombat.enemyHealth}/{currentCombat.enemyMaxHealth}</span>
+          </div>
+          <div className="mt-1 h-2.5 bg-[#F0E0D2] rounded-full overflow-hidden">
+            <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg,#D94F4F,#E86B5A)' }} animate={{ width: `${hpPercent}%` }} transition={{ duration: 0.35 }} />
+          </div>
+          <p className="text-[10px] text-[#8B6B4A] italic mt-1 truncate">{tr('Round', 'Round')} {currentCombat.round} · {tc(currentCombat.description)}</p>
+        </div>
       </motion.div>
-    ));
+
+      {/* Barre de vie du joueur */}
+      <div className="w-full max-w-sm flex items-center gap-2">
+        <span className="text-[10px] font-mono text-[#3d8b4f] w-8">{tr('PV', 'HP')}</span>
+        <div className="flex-1 h-2.5 bg-[#E9E0D4] rounded-full overflow-hidden">
+          <motion.div className="h-full rounded-full" style={{ background: playerHpPercent > 40 ? 'linear-gradient(90deg,#4A9B5F,#5CB870)' : 'linear-gradient(90deg,#8B2020,#D94F4F)' }} animate={{ width: `${playerHpPercent}%` }} transition={{ duration: 0.35 }} />
+        </div>
+        <span className="text-[10px] font-mono text-[#3d8b4f] w-8 text-right">{Math.round(character.stats.health)}</span>
+      </div>
+
+      {/* Phase courante */}
+      <AnimatePresence mode="wait">
+        {currentCombat.phase === 'dodge' ? (
+          <DodgeArena
+            key={`dodge-${currentCombat.round}`}
+            combat={currentCombat}
+            character={character}
+            onDone={(hits) => dispatch({ type: 'DODGE_RESULT', hits })}
+          />
+        ) : (
+          <CardHand
+            key={`draw-${currentCombat.round}`}
+            combat={currentCombat}
+            character={character}
+            onPlay={(cardId) => dispatch({ type: 'PLAY_CARD', cardId })}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Phase 1 — Esquive                                                   */
+/* ------------------------------------------------------------------ */
+function DodgeArena({ combat, character, onDone }: { combat: CombatState; character: Character; onDone: (hits: number) => void }) {
+  const lang = useLang();
+  const pattern = PROJECTILE_PATTERNS[combat.pattern] || PROJECTILE_PATTERNS.brute;
+  const hasAgile = character.traits.some((t) => t.id === 'agile');
+  const telegraph = character.traits.some((t) => t.id === 'nez-sensible' || t.id === 'paranoiaque');
+
+  const R = hasAgile ? 11 : 15;
+  const SPEED = hasAgile ? 205 : 168;
+  const densityMul = (1 + (combat.round - 1) * 0.12) * (combat.enemyStunned ? 0.5 : 1);
+  const speedMul = (1 + (combat.round - 1) * 0.06) * (combat.enemyStunned ? 0.8 : 1);
+
+  const posRef = useRef({ x: ARENA / 2, y: ARENA - 40 });
+  const projRef = useRef<Proj[]>([]);
+  const keysRef = useRef<Set<Dir>>(new Set());
+  const hitsRef = useRef(0);
+  const iframeRef = useRef(0);
+  const projId = useRef(0);
+  const [, force] = useState(0);
+  const [flash, setFlash] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(1);
+  const doneRef = useRef(false);
+
+  const spawn = useCallback((now: number) => {
+    const p = posRef.current;
+    const add = (px: number, py: number, vx: number, vy: number) => {
+      projRef.current.push({ id: ++projId.current, x: px, y: py, vx, vy, size: pattern.size, kind: pattern.kind, armUntil: telegraph ? now + 420 : 0 });
+    };
+    const speed = pattern.speed * speedMul;
+    if (pattern.motion === 'spread') {
+      // Éventail depuis le haut vers le bas.
+      const cx = 40 + Math.random() * (ARENA - 80);
+      for (let i = -1; i <= 1; i++) add(cx, -10, i * 55, speed);
+    } else if (pattern.motion === 'lob') {
+      // Cloche : part du haut, retombe (accélération verticale via vy croissant).
+      add(30 + Math.random() * (ARENA - 60), -10, (Math.random() - 0.5) * 60, speed * 0.5);
+    } else if (pattern.motion === 'homing') {
+      // Depuis un bord aléatoire, vise le joueur.
+      const edge = Math.floor(Math.random() * 4);
+      const sx = edge === 0 ? -10 : edge === 1 ? ARENA + 10 : Math.random() * ARENA;
+      const sy = edge === 2 ? -10 : edge === 3 ? ARENA + 10 : Math.random() * ARENA;
+      const dx = p.x - sx, dy = p.y - sy; const d = Math.hypot(dx, dy) || 1;
+      add(sx, sy, (dx / d) * speed, (dy / d) * speed);
+    } else {
+      // straight : d'un bord vers le point opposé.
+      const fromTop = Math.random() < 0.5;
+      if (fromTop) add(Math.random() * ARENA, -10, (Math.random() - 0.5) * 40, speed);
+      else { const left = Math.random() < 0.5; add(left ? -10 : ARENA + 10, Math.random() * ARENA * 0.7, (left ? 1 : -1) * speed, 20); }
+    }
+  }, [pattern, speedMul, telegraph]);
+
+  useEffect(() => {
+    let raf = 0;
+    let last = performance.now();
+    const start = last;
+    let nextSpawn = last + 300;
+    const loop = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const elapsed = now - start;
+      setTimeLeft(Math.max(0, 1 - elapsed / DURATION));
+
+      // Déplacement du joueur.
+      let dx = 0, dy = 0;
+      const k = keysRef.current;
+      if (k.has('left')) dx -= 1; if (k.has('right')) dx += 1;
+      if (k.has('up')) dy -= 1; if (k.has('down')) dy += 1;
+      if (dx || dy) { const d = Math.hypot(dx, dy); const p = posRef.current; p.x += (dx / d) * SPEED * dt; p.y += (dy / d) * SPEED * dt; p.x = Math.max(R, Math.min(ARENA - R, p.x)); p.y = Math.max(R, Math.min(ARENA - R, p.y)); }
+
+      // Apparition des projectiles.
+      const interval = pattern.spawnMs / densityMul;
+      while (now >= nextSpawn && elapsed < DURATION) { spawn(now); nextSpawn += interval; }
+
+      // Déplacement + collisions.
+      const p = posRef.current;
+      const alive: Proj[] = [];
+      for (const pr of projRef.current) {
+        pr.x += pr.vx * dt; pr.y += pr.vy * dt;
+        if (pattern.motion === 'lob') pr.vy += 260 * dt; // gravité
+        if (pattern.motion === 'homing' && elapsed < DURATION) {
+          const ax = p.x - pr.x, ay = p.y - pr.y; const d = Math.hypot(ax, ay) || 1;
+          pr.vx += (ax / d) * 60 * dt; pr.vy += (ay / d) * 60 * dt;
+        }
+        if (pr.x < -40 || pr.x > ARENA + 40 || pr.y < -40 || pr.y > ARENA + 40) continue;
+        const armed = pr.armUntil === 0 || now >= pr.armUntil;
+        if (armed && now >= iframeRef.current) {
+          const dist = Math.hypot(pr.x - p.x, pr.y - p.y);
+          if (dist < R + pr.size / 2) {
+            hitsRef.current += 1; iframeRef.current = now + IFRAME;
+            setFlash(true); setTimeout(() => setFlash(false), 160); playHurt();
+            continue; // le projectile disparaît après impact
+          }
+        }
+        alive.push(pr);
+      }
+      projRef.current = alive;
+      force((n) => n + 1);
+
+      if (elapsed >= DURATION) {
+        if (!doneRef.current) { doneRef.current = true; setTimeout(() => onDone(hitsRef.current), 250); }
+        return;
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Clavier (ZQSD / WASD / flèches).
+  useEffect(() => {
+    const map: Record<string, Dir> = {
+      arrowup: 'up', z: 'up', w: 'up', arrowdown: 'down', s: 'down',
+      arrowleft: 'left', q: 'left', a: 'left', arrowright: 'right', d: 'right',
+    };
+    const down = (e: KeyboardEvent) => { const dir = map[e.key.toLowerCase()]; if (dir) { e.preventDefault(); keysRef.current.add(dir); } };
+    const up = (e: KeyboardEvent) => { const dir = map[e.key.toLowerCase()]; if (dir) keysRef.current.delete(dir); };
+    window.addEventListener('keydown', down); window.addEventListener('keyup', up);
+    return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); };
+  }, []);
+
+  // Tactile : glissé direct sur l'arène (le doigt tire le personnage).
+  const dragRef = useRef(false);
+  const arenaRef = useRef<HTMLDivElement | null>(null);
+  const moveTo = (clientX: number, clientY: number) => {
+    const el = arenaRef.current; if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const scale = ARENA / rect.width;
+    const x = (clientX - rect.left) * scale; const y = (clientY - rect.top) * scale;
+    posRef.current.x = Math.max(R, Math.min(ARENA - R, x));
+    posRef.current.y = Math.max(R, Math.min(ARENA - R, y));
+  };
+
+  const hold = (dir: Dir, on: boolean) => { if (on) keysRef.current.add(dir); else keysRef.current.delete(dir); };
+
+  const p = posRef.current;
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen p-4 flex flex-col gap-3 relative overflow-hidden"
-      style={{ background: 'radial-gradient(95% 55% at 50% 4%, rgba(242,193,78,0.14), transparent 58%), linear-gradient(180deg, #5C3A34 0%, #3A2438 55%, #1E1426 100%)' }}
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex flex-col items-center gap-2 w-full"
     >
-      {/* Flash de coup critique */}
-      <motion.div
-        animate={critCtrl}
-        initial={{ opacity: 0 }}
-        className="absolute inset-0 z-20 pointer-events-none"
-        style={{ background: 'radial-gradient(circle at 50% 35%, rgba(242,193,78,0.6), transparent 65%)' }}
-      />
+      <div className="text-xs font-semibold text-[#B84A3A]">{tr('Esquivez !', 'Dodge!')} <span className="text-[#8B6B4A] font-normal">· {lang === 'en' ? pattern.labelEn : pattern.label}{telegraph ? tr(' · 👃 danger flairé', ' · 👃 danger sensed') : ''}</span></div>
 
-      {/* Header */}
-      <div className="text-center py-1">
-        <h2 className="text-sm font-semibold text-[#F2C14E] tracking-[0.2em] uppercase">{tr('Combat', 'Fight')}</h2>
-      </div>
-
-      {/* Enemy Card */}
-      <motion.div
-        initial={{ y: -30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="rounded-xl p-4 border border-[#8A424C] relative"
-        style={{ background: 'linear-gradient(135deg, #4C2A32, #331E2A)', boxShadow: '0 0 24px rgba(200,70,70,0.12)' }}
+      {/* Arène */}
+      <div
+        ref={arenaRef}
+        className="relative rounded-xl overflow-hidden"
+        style={{ width: 'min(300px, 82vw)', aspectRatio: '1 / 1', background: 'radial-gradient(circle at 50% 40%, #2E2438, #1C1622)', border: '3px solid #3A2A1E', touchAction: 'none' }}
+        onPointerDown={(e) => { dragRef.current = true; moveTo(e.clientX, e.clientY); }}
+        onPointerMove={(e) => { if (dragRef.current) moveTo(e.clientX, e.clientY); }}
+        onPointerUp={() => { dragRef.current = false; }}
+        onPointerLeave={() => { dragRef.current = false; }}
       >
-        {renderFloats('enemy')}
-        <div className="flex items-center gap-3 mb-3">
-          <motion.div animate={enemyLungeCtrl} className="shrink-0">
-            <motion.div
-              animate={enemyCtrl}
-              className="w-16 h-16 rounded-2xl flex items-center justify-center border border-[#8A424C]"
-              style={{ background: 'radial-gradient(circle at 50% 40%, rgba(230,90,90,0.28), rgba(40,16,24,0.5) 72%)' }}
-            >
-              <motion.span
-                className="text-4xl"
-                animate={{ rotate: [0, -3, 3, 0] }}
-                transition={{ repeat: Infinity, duration: 2.5 }}
-              >
-                {currentCombat.enemyEmoji}
-              </motion.span>
-            </motion.div>
-          </motion.div>
-          <div className="flex-1">
-            <h3 className="text-lg text-[#F8E6D2] font-bold">{tc(currentCombat.enemyName)}</h3>
-            <p className="text-xs text-[#D6A896] italic">{tc(currentCombat.description)}</p>
-          </div>
+        {/* jauge de temps */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-black/30">
+          <div className="h-full bg-[#F2C14E]" style={{ width: `${timeLeft * 100}%` }} />
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold text-[#F27575] font-mono w-6">{tr('PV', 'HP')}</span>
-          <div className="flex-1 h-3 bg-[#2A1622] rounded-full overflow-hidden relative">
-            <motion.div
-              className="absolute inset-y-0 left-0 rounded-full"
-              style={{ background: 'rgba(255,240,220,0.5)' }}
-              animate={{ width: `${hpPercent}%` }}
-              transition={{ duration: 0.75, delay: 0.18 }}
-            />
-            <motion.div
-              className="absolute inset-y-0 left-0 rounded-full"
+
+        {/* projectiles */}
+        {projRef.current.map((pr) => {
+          const st = KIND_STYLE[pr.kind] || KIND_STYLE.fist;
+          const armed = pr.armUntil === 0 || performance.now() >= pr.armUntil;
+          return (
+            <div
+              key={pr.id}
               style={{
-                background: hpPercent > 50 ? 'linear-gradient(90deg, #D94F4F, #E86B5A)'
-                  : hpPercent > 25 ? 'linear-gradient(90deg, #D4874D, #E8A060)'
-                  : 'linear-gradient(90deg, #8B2020, #D94F4F)',
+                position: 'absolute',
+                left: `${(pr.x / ARENA) * 100}%`, top: `${(pr.y / ARENA) * 100}%`,
+                width: pr.size, height: st.shape === 'rect' ? pr.size * 0.7 : pr.size,
+                transform: 'translate(-50%,-50%)',
+                background: st.color, opacity: armed ? 0.95 : 0.35,
+                borderRadius: st.shape === 'rect' ? 3 : '50%',
+                border: '2px solid #3A2A1E',
               }}
-              animate={{ width: `${hpPercent}%` }}
-              transition={{ duration: 0.3 }}
             />
-          </div>
-          <span className="text-[10px] font-semibold text-[#F27575] font-mono w-14 text-right">
-            {currentCombat.enemyHealth}/{currentCombat.enemyMaxHealth}
-          </span>
-        </div>
-      </motion.div>
+          );
+        })}
 
-      {/* VS */}
-      <div className="text-center">
-        <span className="text-sm font-bold text-[#B98CA0] tracking-widest">VS</span>
-      </div>
-
-      {/* Player Card */}
-      <motion.div animate={playerCtrl}>
+        {/* joueur */}
         <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className={`rounded-xl p-4 border relative ${playerInDanger ? 'border-[#C24A4A]' : 'border-[#43764F]'}`}
-          style={{ background: 'linear-gradient(135deg, #23392E, #172A26)', boxShadow: '0 0 24px rgba(74,155,95,0.10)' }}
+          style={{ position: 'absolute', left: `${(p.x / ARENA) * 100}%`, top: `${(p.y / ARENA) * 100}%`, transform: 'translate(-50%,-50%)', width: R * 2.4, height: R * 2.4 }}
+          animate={{ opacity: flash ? [1, 0.2, 1] : 1 }}
+          transition={{ duration: 0.16 }}
         >
-          {renderFloats('player')}
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-[#43764F]">
-              <CardboardAvatar seed={character.seed} gender={character.gender} size={48} />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg text-[#C4E0B8] font-bold">{character.name}</h3>
-              <p className="text-xs text-[#93B89E]">
-                {character.job.name}{weapon && ` · ${weapon.emoji} ${weapon.name}`}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold text-[#5FBE76] font-mono w-6">{tr('PV', 'HP')}</span>
-            <div className="flex-1 h-3 bg-[#142622] rounded-full overflow-hidden relative">
-              <motion.div
-                className="absolute inset-y-0 left-0 rounded-full"
-                style={{ background: 'rgba(255,180,160,0.5)' }}
-                animate={{ width: `${playerHpPercent}%` }}
-                transition={{ duration: 0.75, delay: 0.18 }}
-              />
-              <motion.div
-                className="absolute inset-y-0 left-0 rounded-full"
-                style={{
-                  background: playerHpPercent > 50 ? 'linear-gradient(90deg, #4A9B5F, #5CB870)'
-                    : playerHpPercent > 25 ? 'linear-gradient(90deg, #D4874D, #E8A060)'
-                    : 'linear-gradient(90deg, #8B2020, #D94F4F)',
-                }}
-                animate={{
-                  width: `${playerHpPercent}%`,
-                  opacity: playerInDanger ? [0.6, 1, 0.6] : 1,
-                }}
-                transition={playerInDanger ? { opacity: { repeat: Infinity, duration: 0.8 } } : { duration: 0.3 }}
-              />
-            </div>
-            <span className="text-[10px] font-semibold text-[#5FBE76] font-mono w-14 text-right">
-              {character.stats.health}/100
-            </span>
+          <div className="w-full h-full rounded-full overflow-hidden" style={{ boxShadow: flash ? '0 0 0 3px #D94F4F' : '0 0 0 2px rgba(242,193,78,0.7)' }}>
+            <CardboardAvatar seed={character.seed} gender={character.gender} size={Math.round(R * 2.4)} accessories={getEquipped()} />
           </div>
         </motion.div>
-      </motion.div>
-
-      {/* Combat Log */}
-      <div className="rounded-xl p-3 flex-1 min-h-0 overflow-y-auto border border-[#412B41]" style={{ background: 'rgba(38,24,42,0.55)' }}>
-        <p className="text-[9px] uppercase tracking-widest text-[#9A7788] mb-1.5">{tr('Journal du combat', 'Combat log')}</p>
-        <AnimatePresence>
-          {combatLog.slice(-6).map((log, i) => (
-            <motion.p
-              key={`${combatLog.length - 6 + i}`}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              className={`text-xs mb-1 ${
-                i === Math.min(combatLog.length, 6) - 1 ? 'text-[#F6E3D2] font-medium' : 'text-[#A98A98]'
-              }`}
-            >
-              {log}
-            </motion.p>
-          ))}
-        </AnimatePresence>
       </div>
 
-      {/* Actions */}
-      <div className="flex flex-col gap-2 mt-auto">
-        <AnimatePresence mode="wait">
-          {striking ? (
-            <motion.div
-              key="strike-panel"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="flex flex-col gap-2"
-            >
-              <div className="rounded-xl p-2.5 border border-[#5C3A54]" style={{ background: '#2C1A2A' }}>
-                <p className="text-[11px] text-[#F2C14E] text-center">
-                  ⚡ Frappez au bon moment — l'or, c'est la frappe parfaite. Trop loin : coup mou et riposte.
-                </p>
-              </div>
-              <div className="relative h-10 rounded-xl overflow-hidden border border-[#4E2E44]" style={{ background: '#241726' }}>
-                <div className="absolute inset-y-0" style={{ left: `${strikeCenter - 15}%`, width: '30%', background: 'rgba(74,155,95,0.3)' }} />
-                <div className="absolute inset-y-0" style={{ left: `${strikeCenter - 5.5}%`, width: '11%', background: 'rgba(242,193,78,0.5)' }} />
-                <div
-                  ref={strikeCursorRef}
-                  className="absolute top-0 bottom-0 w-1 rounded-full"
-                  style={{ background: '#F6E3D2', boxShadow: '0 0 8px rgba(255,255,255,0.5)' }}
-                />
-              </div>
-              <motion.button
-                whileTap={{ scale: 0.94 }}
-                onClick={strike}
-                className="w-full py-3.5 rounded-xl text-sm font-semibold text-white"
-                style={{ background: 'linear-gradient(135deg, #B84A3A, #8B2020)', boxShadow: '0 4px 12px rgba(184, 74, 58, 0.3)' }}
-              >
-                ⚡ {tr('Frapper !', 'Strike!')}
-              </motion.button>
-              <button
-                onClick={() => setStriking(false)}
-                className="w-full py-2 rounded-xl text-xs font-medium text-[#B98CA0]"
-                style={{ background: '#2C1A2A', border: '1px solid #4E3448' }}
-              >
-                Annuler
-              </button>
-            </motion.div>
-          ) : shouting ? (
-            <motion.div
-              key="shout-panel"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="flex flex-col gap-2"
-            >
-              <div className="rounded-xl p-2.5 border border-[#5C3A54]" style={{ background: '#2C1A2A' }}>
-                <p className="text-[11px] text-[#F2C14E] text-center">
-                  💢 Martelez le bouton pour gonfler votre cri avant la fin du temps !
-                </p>
-              </div>
-              {/* Jauge de cri (remplie via ref, sans re-rendu) */}
-              <div className="relative h-10 rounded-xl overflow-hidden border border-[#4E2E44]" style={{ background: '#241726' }}>
-                <div
-                  ref={shoutGaugeRef}
-                  className="absolute inset-y-0 left-0"
-                  style={{ width: '0%', background: 'linear-gradient(90deg, #D4874D, #C99A3A)', transition: 'width 0.08s ease-out' }}
-                />
-                <span ref={shoutLabelRef} className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#F6E3D2]" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
-                  0%
-                </span>
-              </div>
-              {/* Temps restant */}
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#241726' }}>
-                <div ref={shoutTimeRef} className="h-full rounded-full" style={{ width: '100%', background: '#B98CA0', transition: 'width 0.1s linear' }} />
-              </div>
-              <motion.button
-                whileTap={{ scale: 0.92 }}
-                onClick={shoutTap}
-                className="w-full py-4 rounded-xl text-base font-bold text-white select-none"
-                style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)', boxShadow: '0 4px 12px rgba(212, 135, 77, 0.3)' }}
-              >
-                CRIEZ ! 💢
-              </motion.button>
-            </motion.div>
-          ) : aiming ? (
-            <motion.div
-              key="aim-panel"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="flex flex-col gap-2"
-            >
-              <div className="rounded-xl p-2.5 border border-[#5C3A54] flex flex-col gap-1.5" style={{ background: '#2C1A2A' }}>
-                <p className="text-[11px] text-[#F2C14E] text-center">
-                  🔎 {weakDiscovered
-                    ? 'Point faible connu — la cible 🎯 marque la zone.'
-                    : currentCombat.weakPointHint}
-                </p>
-                <p className="text-[10px] text-[#D6A896] text-center border-t border-[#4E3448] pt-1.5">
-                  {weaponProfile.label} — {weaponProfile.note}
-                </p>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {currentCombat.zones.map((zone) => {
-                  const showMark = weakDiscovered && zone.id === currentCombat.weakPointId;
-                  return (
-                    <motion.button
-                      key={zone.id}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => aimAt(zone.id)}
-                      className={`py-3 rounded-xl text-xs font-semibold text-[#F6E3D2] flex flex-col items-center gap-1 border ${
-                        showMark ? 'border-[#F2C14E]' : 'border-[#4E2E44]'
-                      }`}
-                      style={{ background: showMark ? 'linear-gradient(135deg, #46283C, #34202E)' : 'linear-gradient(135deg, #34202E, #281A26)' }}
-                    >
-                      <span className="text-xl">{showMark ? '🎯' : zone.emoji}</span>
-                      <span>{zone.label}</span>
-                    </motion.button>
-                  );
-                })}
-              </div>
-              <button
-                onClick={() => setAiming(false)}
-                className="w-full py-2 rounded-xl text-xs font-medium text-[#B98CA0]"
-                style={{ background: '#2C1A2A', border: '1px solid #4E3448' }}
-              >
-                Annuler
-              </button>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="main-actions"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col gap-2"
-            >
-              <div className="flex gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.94 }}
-                  onClick={openStrike}
-                  className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white"
-                  style={{ background: 'linear-gradient(135deg, #B84A3A, #8B2020)', boxShadow: '0 4px 12px rgba(184, 74, 58, 0.3)' }}
-                >
-                  {tr('Attaquer', 'Attack')}
-                  {(isMilitaire || hasForce) && <span className="text-xs ml-1 opacity-60">+bonus</span>}
-                </motion.button>
+      {/* Croix directionnelle tactile */}
+      <div className="grid grid-cols-3 gap-1 w-36 mt-1" aria-label={tr('Déplacements', 'Movement')}>
+        <span />
+        <PadBtn label="▲" onHold={(on) => hold('up', on)} />
+        <span />
+        <PadBtn label="◀" onHold={(on) => hold('left', on)} />
+        <PadBtn label="▼" onHold={(on) => hold('down', on)} />
+        <PadBtn label="▶" onHold={(on) => hold('right', on)} />
+      </div>
+      <p className="text-[10px] text-[#8B6B4A]">{tr('Glissez dans l\'arène, ZQSD/flèches, ou la croix.', 'Drag in the arena, WASD/arrows, or the pad.')}</p>
+    </motion.div>
+  );
+}
 
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.94 }}
-                  onClick={() => setAiming(true)}
-                  className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white"
-                  style={{ background: 'linear-gradient(135deg, #C99A3A, #9B7209)', boxShadow: '0 4px 12px rgba(201, 154, 58, 0.25)' }}
-                >
-                  🎯 {tr('Viser', 'Aim')}
-                </motion.button>
-              </div>
+function PadBtn({ label, onHold }: { label: string; onHold: (on: boolean) => void }) {
+  return (
+    <button
+      className="action-btn aspect-square flex items-center justify-center text-base"
+      style={{ touchAction: 'none' }}
+      onPointerDown={(e) => { e.preventDefault(); onHold(true); }}
+      onPointerUp={() => onHold(false)}
+      onPointerLeave={() => onHold(false)}
+      onPointerCancel={() => onHold(false)}
+    >
+      {label}
+    </button>
+  );
+}
 
-              <div className="flex gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.94 }}
-                  onClick={() => setShouting(true)}
-                  className="flex-1 py-3 rounded-xl text-sm font-semibold text-white"
-                  style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)', boxShadow: '0 4px 12px rgba(212, 135, 77, 0.2)' }}
-                >
-                  {tr('Intimider', 'Intimidate')}
-                  {(hasCharisme || hasHaleine) && <span className="text-[10px] ml-1 opacity-60">+</span>}
-                </motion.button>
+/* ------------------------------------------------------------------ */
+/* Phase 2 — Riposte (cartes)                                          */
+/* ------------------------------------------------------------------ */
+function CardHand({ combat, character, onPlay }: { combat: CombatState; character: Character; onPlay: (cardId: string) => void }) {
+  const lang = useLang();
+  const [played, setPlayed] = useState(false);
+  const cards = combat.hand.map((id) => getCard(id)).filter(Boolean) as CombatCard[];
 
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.94 }}
-                  onClick={() => dispatch({ type: 'COMBAT_FLEE' })}
-                  className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#E8D5C0]"
-                  style={{ background: 'linear-gradient(135deg, #3E2A3E, #2A1A2A)', border: '1px solid #5C4A5C' }}
-                >
-                  {tr('Fuir', 'Flee')}
-                  {(hasAgile || isCascadeur) && <span className="text-[10px] ml-1 opacity-60">+</span>}
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+  const play = (id: string) => { if (played) return; setPlayed(true); playWhoosh(); setTimeout(() => onPlay(id), 220); };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="w-full max-w-sm flex flex-col items-center gap-3 mt-1"
+    >
+      <div className="text-sm font-semibold text-[#2A1F1A]">{tr('Ripostez !', 'Counter-attack!')} <span className="text-xs text-[#8B6B4A] font-normal">({cards.length} {tr('carte', 'card')}{cards.length > 1 ? 's' : ''})</span></div>
+      <div className={`grid gap-2.5 w-full ${cards.length >= 3 ? 'grid-cols-3' : cards.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        {cards.map((card, i) => (
+          <motion.button
+            key={card.id}
+            initial={{ opacity: 0, y: 16, rotate: -3 }}
+            animate={{ opacity: 1, y: 0, rotate: 0 }}
+            transition={{ delay: 0.06 * i, type: 'spring', stiffness: 320, damping: 22 }}
+            whileHover={liftHover}
+            whileTap={stampTap}
+            disabled={played}
+            onClick={() => play(card.id)}
+            className="craft-card-solid p-3 flex flex-col items-center text-center gap-1.5 disabled:opacity-60"
+            style={{ border: '2px solid #E0C9AC' }}
+          >
+            <span className="text-3xl">{card.emoji}</span>
+            <span className="text-sm font-bold text-[#2A1F1A] leading-tight">{lang === 'en' ? card.nameEn : card.name}</span>
+            <span className="text-[10px] text-[#6B5740] leading-snug">{lang === 'en' ? card.descEn : card.desc}</span>
+            <span className={`text-[10px] font-mono font-semibold mt-0.5 px-2 py-0.5 rounded-full ${
+              card.kind === 'attack' ? 'bg-[#D94F4F]/10 text-[#B84A3A]'
+                : card.kind === 'heal' ? 'bg-[#4A9B5F]/10 text-[#3d8b4f]'
+                : card.kind === 'flee' ? 'bg-[#8B6B4A]/10 text-[#8B6B4A]'
+                : 'bg-[#7B68EE]/10 text-[#7B68EE]'
+            }`}>
+              {card.estimate(character, combat)}
+            </span>
+          </motion.button>
+        ))}
       </div>
     </motion.div>
   );
