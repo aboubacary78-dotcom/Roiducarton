@@ -4,10 +4,34 @@ import { useState, useEffect, useRef } from 'react';
 import { playHit, playCrit, playHurt } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
+import MinigameIntro, { introSeen } from './MinigameIntro';
 
 interface DmgFloat { id: number; target: 'enemy' | 'player'; value: number; crit: boolean; }
 
 export default function CombatScreen() {
+  const [ready, setReady] = useState(() => introSeen('combat'));
+  if (!ready) {
+    return (
+      <MinigameIntro
+        id="combat"
+        emoji="🥊"
+        title="La bagarre"
+        titleEn="The Fight"
+        lines={[
+          { emoji: '👊', fr: 'Frapper : arrêtez le curseur dans la zone verte — plus c\'est précis, plus ça fait mal.', en: 'Strike: stop the cursor in the green zone — the tighter, the harder it hits.' },
+          { emoji: '🎯', fr: 'Viser un point faible : risqué, mais un coup critique dévastateur à la clé.', en: 'Aim for a weak spot: risky, but a devastating critical hit if it lands.' },
+          { emoji: '😱', fr: 'Intimider : martelez le bouton pour crier ; avec assez de respect, l\'adversaire peut fuir.', en: 'Intimidate: hammer the button to shout; with enough respect, the foe may flee.' },
+          { emoji: '🏃', fr: 'Fuir : vous partez, mais votre dignité en prend un coup.', en: 'Flee: you get away, but your dignity takes a hit.' },
+          { emoji: '💀', fr: 'Videz la santé de l\'adversaire avant que la vôtre ne tombe à zéro.', en: 'Empty the enemy\'s health before yours drops to zero.' },
+        ]}
+        onStart={() => setReady(true)}
+      />
+    );
+  }
+  return <CombatScreenInner />;
+}
+
+function CombatScreenInner() {
   const { state, dispatch } = useGame();
   useLang();
   const { currentCombat, combatLog, character } = state;
@@ -48,7 +72,7 @@ export default function CombatScreen() {
     if (!currentCombat || !character) return;
     const eHp = currentCombat.enemyHealth;
     const pHp = character.stats.health;
-    const crit = /CRITIQUE/i.test(combatLog.slice(-2).join(' '));
+    const crit = /CRITIQUE|CRITICAL/i.test(combatLog.slice(-2).join(' '));
 
     if (prevEnemyHp.current !== null && eHp < prevEnemyHp.current) {
       pushFloat('enemy', prevEnemyHp.current - eHp, crit);

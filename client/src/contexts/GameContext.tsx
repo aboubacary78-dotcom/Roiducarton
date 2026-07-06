@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { syncRecords, recordGameEnd } from '@/lib/profile';
-import { getLang } from '@/lib/lang';
+import { getLang, tc } from '@/lib/lang';
 
 // ============ TYPES ============
 export interface Job {
@@ -55,6 +55,9 @@ export interface Character {
   location: string;
   alive: boolean;
   activeFlags: string[];
+  // Nombre de casses tentés durant cette partie : chaque vol rend le
+  // prochain mini-jeu plus difficile (voir StealHeist).
+  stealCount: number;
   // Graine unique servant à générer le visage du personnage (voir CardboardAvatar).
   seed: string;
   // Genre déduit du prénom, pour que le visage corresponde (pas de barbe sur une femme, etc.).
@@ -2413,12 +2416,13 @@ function makeLegendEvent(legend: { name: string; days: number }): GameEvent {
   const t = randomFromArray(LEGEND_TEMPLATES);
   return {
     id: `${t.id}-${legend.name}`,
-    title: t.title,
+    title: tc(t.title),
     type: t.type,
-    description: fillLegend(t.description, legend),
+    description: fillLegend(tc(t.description), legend),
     choices: t.choices.map((c) => ({
       ...c,
-      outcomes: c.outcomes.map((o) => ({ ...o, text: fillLegend(o.text, legend) })),
+      text: tc(c.text),
+      outcomes: c.outcomes.map((o) => ({ ...o, text: fillLegend(tc(o.text), legend) })),
     })),
   };
 }
@@ -2475,6 +2479,7 @@ function generateCharacter(): Character {
     location: 'parc',
     alive: true,
     activeFlags: [],
+    stealCount: 0,
     seed: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`,
     gender: genderFromName(name),
   };
@@ -2484,6 +2489,10 @@ function generateCharacter(): Character {
 export function computeScore(day: number, respect: number, money: number): number {
   return day * 10 + respect * 5 + money * 2;
 }
+
+// Choix de langue pour les chaînes GÉNÉRÉES par le reducer (journaux de
+// combat, résultats interpolés) qu'on ne peut pas passer par le dictionnaire.
+const L = (fr: string, en: string): string => (getLang() === 'en' ? en : fr);
 
 // Épitaphe contextuelle quand on tombe au combat : une pique selon l'ennemi.
 export function combatDeathMessage(enemy: string): string {
@@ -2720,7 +2729,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           ...state,
           character: { ...c, stats: newStats, money: c.money - amende, alive: isAlive },
           eventResult: {
-            text: `👮 « Mendicité sur la voie publique, circulez ! » Le policier confisque votre récolte${amende > 0 ? ` et vous colle ${amende}€ d'amende` : ' — insolvable, vous repartez avec un avertissement'}.`,
+            text: L(`👮 « Mendicité sur la voie publique, circulez ! » Le policier confisque votre récolte${amende > 0 ? ` et vous colle ${amende}€ d'amende` : ' — insolvable, vous repartez avec un avertissement'}.`, `👮 "Begging in public, move along!" The cop confiscates your takings${amende > 0 ? ` and slaps you with a €${amende} fine` : ' — broke, so you leave with a warning'}.`),
             statChanges: statDelta, moneyChange: -amende,
           },
           screen: isAlive ? 'main' : 'game-over',
@@ -2737,12 +2746,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const respectDelta = money >= 8 ? 1 : 0;
       const newStats = applyStatDelta(c.stats, statDelta);
       const isAlive = newStats.health > 0 && newStats.mental > 0;
-      const prefix = money >= 8 ? '🎩 Manche exceptionnelle ! '
-        : money > 0 ? '🪙 Quelques pièces au fond du chapeau. '
-        : '💨 Pas un sou aujourd\'hui. ';
-      const weatherNote = modifier !== 1 ? (modifier > 1 ? ' Le beau temps a rendu les passants généreux.' : ' Le mauvais temps a fait fuir les passants.') : '';
-      const dignityNote = c.stats.dignity >= 70 ? ' Votre allure soignée a inspiré confiance.'
-        : c.stats.dignity < 25 ? ' Votre allure négligée a fait fuir plus d\'un passant.' : '';
+      const prefix = money >= 8 ? L('🎩 Manche exceptionnelle ! ', '🎩 An exceptional haul! ')
+        : money > 0 ? L('🪙 Quelques pièces au fond du chapeau. ', '🪙 A few coins in the bottom of the hat. ')
+        : L('💨 Pas un sou aujourd\'hui. ', '💨 Not a penny today. ');
+      const weatherNote = modifier !== 1 ? (modifier > 1 ? L(' Le beau temps a rendu les passants généreux.', ' The good weather made passers-by generous.') : L(' Le mauvais temps a fait fuir les passants.', ' The bad weather scared off passers-by.')) : '';
+      const dignityNote = c.stats.dignity >= 70 ? L(' Votre allure soignée a inspiré confiance.', ' Your neat appearance inspired trust.')
+        : c.stats.dignity < 25 ? L(' Votre allure négligée a fait fuir plus d\'un passant.', ' Your unkempt look scared off more than one passer-by.') : '';
       if (!isAlive) {
         saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money));
         clearSave();
@@ -2750,15 +2759,21 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive },
-        eventResult: { text: prefix + flavorFrom(BEG_EVENTS, money > 0) + weatherNote + dignityNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta },
+        eventResult: { text: prefix + tc(flavorFrom(BEG_EVENTS, money > 0)) + weatherNote + dignityNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta },
         screen: isAlive ? 'main' : 'game-over',
       };
     }
 
     case 'STEAL': {
       if (!state.character || state.dayActions >= state.maxDayActions) return state;
-      // Ouvre le mini-jeu d'adresse (voir StealMinigame).
-      return { ...state, screen: 'steal-game', dayActions: state.dayActions + 1 };
+      // Ouvre le mini-jeu du casse (voir StealHeist). Chaque tentative
+      // incrémente le compteur : plus on vole, plus la surveillance se durcit.
+      return {
+        ...state,
+        character: { ...state.character, stealCount: (state.character.stealCount ?? 0) + 1 },
+        screen: 'steal-game',
+        dayActions: state.dayActions + 1,
+      };
     }
 
     case 'RESOLVE_STEAL': {
@@ -2776,7 +2791,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             ...state,
             screen: 'combat',
             currentCombat: makeCombatState(enemy, c),
-            combatLog: [`😡 Vous êtes surpris la main sur ${target.label} ! Le commerçant retrousse ses manches...`],
+            combatLog: [L(`😡 Vous êtes surpris la main sur ${target.label} ! Le commerçant retrousse ses manches...`, `😡 You're caught with your hand on ${target.labelEn}! The shopkeeper rolls up his sleeves...`)],
           };
         }
         if (target.catcher === 'police' && repercussion < 0.5) {
@@ -2791,7 +2806,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             character: { ...c, stats: newStats, money: c.money - amende, respect: c.respect - 3, alive: isAlive },
             dayActions: state.maxDayActions,
             eventResult: {
-              text: `🚔 Un policier vous cueille la main sur ${target.label}. Garde à vue ! Vous perdez le reste de la journée${amende > 0 ? ` et ${amende}€ d'amende` : ' — insolvable, il vous laisse filer avec un avertissement'}.`,
+              text: L(`🚔 Un policier vous cueille la main sur ${target.label}. Garde à vue ! Vous perdez le reste de la journée${amende > 0 ? ` et ${amende}€ d'amende` : ' — insolvable, il vous laisse filer avec un avertissement'}.`, `🚔 A cop nabs you with your hand on ${target.labelEn}. Held in custody! You lose the rest of the day${amende > 0 ? ` and a €${amende} fine` : ' — broke, so he lets you off with a warning'}.`),
               statChanges: statDelta, moneyChange: -amende, respectChange: -3,
             },
             screen: isAlive ? 'main' : 'game-over',
@@ -2805,7 +2820,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state,
           character: { ...c, stats: newStats, respect: c.respect - 2, alive: isAlive },
-          eventResult: { text: `🚨 Raté ! Repéré en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoché.`, statChanges: statDelta, respectChange: -2 },
+          eventResult: { text: L(`🚨 Raté ! Repéré en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoché.`, `🚨 Failed! Spotted trying to steal ${target.labelEn}, you flee amid insults, a little battered.`), statChanges: statDelta, respectChange: -2 },
           screen: isAlive ? 'main' : 'game-over',
         };
       }
@@ -2817,8 +2832,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 6 } : { dignity: -6, mental: 2 };
       const newStats = applyStatDelta(c.stats, statDelta);
       const text = jackpot
-        ? `💎 Coup de maître ! Vous repartez avec ${target.label} sans que personne ne remarque rien. Revente express au coin de la rue : ${moneyDelta}€.`
-        : `🤫 Vol réussi. Vous filez avec ${target.label}, le cœur battant. Ça vaut bien ${moneyDelta}€.`;
+        ? L(`💎 Coup de maître ! Vous repartez avec ${target.label} sans que personne ne remarque rien. Revente express au coin de la rue : ${moneyDelta}€.`, `💎 Masterstroke! You walk off with ${target.labelEn} without anyone noticing a thing. Quick resale on the corner: €${moneyDelta}.`)
+        : L(`🤫 Vol réussi. Vous filez avec ${target.label}, le cœur battant. Ça vaut bien ${moneyDelta}€.`, `🤫 Theft successful. You slip away with ${target.labelEn}, heart pounding. Worth a good €${moneyDelta}.`);
       return {
         ...state,
         character: { ...c, stats: newStats, money: c.money + moneyDelta, respect: c.respect + respectDelta },
@@ -2983,7 +2998,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...state.character, stats: newStats, inventory: newInv },
-        eventResult: { text: `Vous utilisez ${item.name}. Ça fait du bien !`, statChanges: item.effect },
+        eventResult: { text: L(`Vous utilisez ${item.name}. Ça fait du bien !`, `You use the ${tc(item.name)}. That feels good!`), statChanges: item.effect },
       };
     }
 
@@ -2997,7 +3012,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...state.character, money: state.character.money + price, inventory: newInv },
-        eventResult: { text: `Vous revendez ${item.name} pour ${price}€. Chaque euro compte.`, moneyChange: price },
+        eventResult: { text: L(`Vous revendez ${item.name} pour ${price}€. Chaque euro compte.`, `You sell the ${tc(item.name)} for €${price}. Every euro counts.`), moneyChange: price },
       };
     }
 
@@ -3007,7 +3022,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         screen: 'combat',
         currentCombat: makeCombatState(action.enemy, state.character),
-        combatLog: [`${action.enemy.emoji} ${action.enemy.name} apparaît ! ${action.enemy.description}`],
+        combatLog: [L(`${action.enemy.emoji} ${action.enemy.name} apparaît ! ${action.enemy.description}`, `${action.enemy.emoji} ${tc(action.enemy.name)} appears! ${tc(action.enemy.description)}`)],
       };
     }
 
@@ -3032,31 +3047,33 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const newEnemyHp = Math.max(0, state.currentCombat.enemyHealth - playerDmg);
       const newHp = Math.max(0, state.character.stats.health - enemyDmg);
       const logs = [...state.combatLog];
+      const wpn = weapon ? tc(weapon.name) : '';
       logs.push(quality === 'perfect'
-        ? `⚡ Frappe parfaite${weapon ? ` avec ${weapon.name}` : ''} ! ${playerDmg} dégâts !`
+        ? L(`⚡ Frappe parfaite${weapon ? ` avec ${weapon.name}` : ''} ! ${playerDmg} dégâts !`, `⚡ Perfect strike${weapon ? ` with ${wpn}` : ''}! ${playerDmg} damage!`)
         : quality === 'poor'
-          ? `😖 Frappe molle${weapon ? ` avec ${weapon.name}` : ''}... ${playerDmg} dégâts.`
-          : `⚔️ Vous attaquez${weapon ? ` avec ${weapon.name}` : ''} ! ${playerDmg} dégâts !`);
-      if (newEnemyHp > 0) logs.push(`💥 ${state.currentCombat.enemyName} riposte ! ${enemyDmg} dégâts !`);
+          ? L(`😖 Frappe molle${weapon ? ` avec ${weapon.name}` : ''}... ${playerDmg} dégâts.`, `😖 Weak strike${weapon ? ` with ${wpn}` : ''}... ${playerDmg} damage.`)
+          : L(`⚔️ Vous attaquez${weapon ? ` avec ${weapon.name}` : ''} ! ${playerDmg} dégâts !`, `⚔️ You attack${weapon ? ` with ${wpn}` : ''}! ${playerDmg} damage!`));
+      if (newEnemyHp > 0) logs.push(L(`💥 ${state.currentCombat.enemyName} riposte ! ${enemyDmg} dégâts !`, `💥 ${tc(state.currentCombat.enemyName)} strikes back! ${enemyDmg} damage!`));
       if (newEnemyHp <= 0) {
         const enemy = ENEMIES.find(e => e.name === state.currentCombat!.enemyName);
         const lootMoney = enemy?.loot?.money || 0;
         const lootRespect = enemy?.loot?.respect || 0;
-        logs.push(`🎉 Victoire ! Vous avez vaincu ${state.currentCombat.enemyName} !`);
-        if (lootMoney > 0) logs.push(`💰 +${lootMoney}€ récupérés`);
-        if (lootRespect > 0) logs.push(`⭐ +${lootRespect} respect gagné`);
+        const en = tc(state.currentCombat.enemyName);
+        logs.push(L(`🎉 Victoire ! Vous avez vaincu ${state.currentCombat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
+        if (lootMoney > 0) logs.push(L(`💰 +${lootMoney}€ récupérés`, `💰 +€${lootMoney} looted`));
+        if (lootRespect > 0) logs.push(L(`⭐ +${lootRespect} respect gagné`, `⭐ +${lootRespect} respect gained`));
         const newStats = clampStats({ ...state.character.stats, health: newHp });
         return {
           ...state,
           character: { ...state.character, stats: newStats, money: state.character.money + lootMoney, respect: state.character.respect + lootRespect },
           currentCombat: null,
           combatLog: logs,
-          eventResult: { text: `Victoire contre ${state.currentCombat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`, moneyChange: lootMoney, respectChange: lootRespect },
+          eventResult: { text: L(`Victoire contre ${state.currentCombat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`, `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`), moneyChange: lootMoney, respectChange: lootRespect },
           screen: 'main',
         };
       }
       if (newHp <= 0) {
-        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
+        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
       }
       const newStats2 = clampStats({ ...state.character.stats, health: newHp });
       return {
@@ -3091,22 +3108,24 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         playerDmg = Math.floor(baseDmg * (profile.critMin + Math.random() * profile.critRange));
         const stunned = Math.random() < profile.stunChance;
         enemyDmg = stunned ? 0 : Math.floor(combat.enemyAttack * (0.6 + Math.random() * 0.5) * (hasOsMousse ? 1.5 : 1));
-        logs.push(`🎯 COUP CRITIQUE sur ${zone.label.toLowerCase()} ! ${playerDmg} dégâts !`);
-        if (stunned) logs.push(`💫 ${combat.enemyName} est sonné et ne riposte pas !`);
+        const zl = tc(zone.label).toLowerCase();
+        logs.push(L(`🎯 COUP CRITIQUE sur ${zone.label.toLowerCase()} ! ${playerDmg} dégâts !`, `🎯 CRITICAL HIT on the ${zl}! ${playerDmg} damage!`));
+        if (stunned) logs.push(L(`💫 ${combat.enemyName} est sonné et ne riposte pas !`, `💫 ${tc(combat.enemyName)} is stunned and can't strike back!`));
       } else {
         // Mauvaise zone : avec une arme lourde le coup porte quand même,
         // avec une lame il glisse dans le vide et l'ennemi en profite.
         playerDmg = Math.floor(baseDmg * (profile.missMin + Math.random() * profile.missRange));
         enemyDmg = Math.floor(combat.enemyAttack * (profile.riposteMin + Math.random() * profile.riposteRange) * (hasOsMousse ? 1.5 : 1));
+        const zl = tc(zone.label).toLowerCase();
         const missMsg = profile.style === 'heavy'
-          ? `🪓 Pas le point faible (${zone.label.toLowerCase()}), mais ça cogne quand même : ${playerDmg} dégâts.`
-          : `😬 Mauvaise cible (${zone.label.toLowerCase()}) ! Le coup glisse : ${playerDmg} dégâts.`;
+          ? L(`🪓 Pas le point faible (${zone.label.toLowerCase()}), mais ça cogne quand même : ${playerDmg} dégâts.`, `🪓 Not the weak point (${zl}), but it still lands: ${playerDmg} damage.`)
+          : L(`😬 Mauvaise cible (${zone.label.toLowerCase()}) ! Le coup glisse : ${playerDmg} dégâts.`, `😬 Wrong target (${zl})! The blow slips: ${playerDmg} damage.`);
         logs.push(missMsg);
       }
 
       const newEnemyHp = Math.max(0, combat.enemyHealth - playerDmg);
       const newHp = Math.max(0, state.character.stats.health - enemyDmg);
-      if (enemyDmg > 0 && newEnemyHp > 0) logs.push(`💥 ${combat.enemyName} riposte ! ${enemyDmg} dégâts !`);
+      if (enemyDmg > 0 && newEnemyHp > 0) logs.push(L(`💥 ${combat.enemyName} riposte ! ${enemyDmg} dégâts !`, `💥 ${tc(combat.enemyName)} strikes back! ${enemyDmg} damage!`));
 
       // Mémorise le point faible découvert (pour l'afficher les fois suivantes).
       let newFlags = [...state.character.activeFlags];
@@ -3117,21 +3136,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const enemy = ENEMIES.find(e => e.name === combat.enemyName);
         const lootMoney = enemy?.loot?.money || 0;
         const lootRespect = (enemy?.loot?.respect || 0) + (isCritical ? 1 : 0);
-        logs.push(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`);
-        if (lootMoney > 0) logs.push(`💰 +${lootMoney}€ récupérés`);
-        if (lootRespect > 0) logs.push(`⭐ +${lootRespect} respect gagné`);
+        const en = tc(combat.enemyName);
+        logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
+        if (lootMoney > 0) logs.push(L(`💰 +${lootMoney}€ récupérés`, `💰 +€${lootMoney} looted`));
+        if (lootRespect > 0) logs.push(L(`⭐ +${lootRespect} respect gagné`, `⭐ +${lootRespect} respect gained`));
         const newStats = clampStats({ ...state.character.stats, health: newHp });
         return {
           ...state,
           character: { ...state.character, stats: newStats, money: state.character.money + lootMoney, respect: state.character.respect + lootRespect, activeFlags: newFlags },
           currentCombat: null,
           combatLog: logs,
-          eventResult: { text: `Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`, moneyChange: lootMoney, respectChange: lootRespect },
+          eventResult: { text: L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`, `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`), moneyChange: lootMoney, respectChange: lootRespect },
           screen: 'main',
         };
       }
       if (newHp <= 0) {
-        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
+        return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
       }
       const newStats2 = clampStats({ ...state.character.stats, health: newHp });
       return {
@@ -3157,22 +3177,23 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (Math.random() < intimidateChance) {
         const enemy = ENEMIES.find(e => e.name === state.currentCombat!.enemyName);
         const lootRespect = (enemy?.loot?.respect || 0) + 1;
-        logs.push(`😱 ${state.currentCombat.enemyName} prend peur et s'enfuit !${isFeared ? ' Votre réputation vous précède…' : hasHaleine ? ' Votre haleine a fait des ravages !' : ''}`);
+        const en = tc(state.currentCombat.enemyName);
+        logs.push(L(`😱 ${state.currentCombat.enemyName} prend peur et s'enfuit !${isFeared ? ' Votre réputation vous précède…' : hasHaleine ? ' Votre haleine a fait des ravages !' : ''}`, `😱 ${en} panics and flees!${isFeared ? ' Your reputation precedes you…' : hasHaleine ? ' Your breath did the trick!' : ''}`));
         return {
           ...state,
           character: { ...state.character, respect: state.character.respect + lootRespect },
           currentCombat: null,
           combatLog: logs,
-          eventResult: { text: `${state.currentCombat.enemyName} s'enfuit, terrorisé ! +${lootRespect} respect`, respectChange: lootRespect },
+          eventResult: { text: L(`${state.currentCombat.enemyName} s'enfuit, terrorisé ! +${lootRespect} respect`, `${en} flees in terror! +${lootRespect} respect`), respectChange: lootRespect },
           screen: 'main',
         };
       } else {
         const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
         const enemyDmg = Math.floor(state.currentCombat.enemyAttack * (0.6 + Math.random() * 0.6) * (hasOsMousse ? 1.5 : 1));
         const newHp = Math.max(0, state.character.stats.health - enemyDmg);
-        logs.push(`😤 ${state.currentCombat.enemyName} n'est pas impressionné et attaque ! ${enemyDmg} dégâts !`);
+        logs.push(L(`😤 ${state.currentCombat.enemyName} n'est pas impressionné et attaque ! ${enemyDmg} dégâts !`, `😤 ${tc(state.currentCombat.enemyName)} is unimpressed and attacks! ${enemyDmg} damage!`));
         if (newHp <= 0) {
-          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
+          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
         }
         const newStats = clampStats({ ...state.character.stats, health: newHp });
         return { ...state, character: { ...state.character, stats: newStats }, combatLog: logs };
@@ -3186,7 +3207,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const fleeChance = 0.35 + (hasAgile ? 0.2 : 0) + (isCascadeur ? 0.15 : 0);
       const logs = [...state.combatLog];
       if (Math.random() < fleeChance) {
-        logs.push('🏃 Vous prenez vos jambes à votre cou ! Fuite réussie !');
+        logs.push(L('🏃 Vous prenez vos jambes à votre cou ! Fuite réussie !', '🏃 You take to your heels! Escape successful!'));
         const newStats = clampStats({ ...state.character.stats, dignity: state.character.stats.dignity - 5 });
         return {
           ...state,
@@ -3200,9 +3221,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const hasOsMousse = state.character.traits.some(t => t.id === 'os-mousse');
         const enemyDmg = Math.floor(state.currentCombat.enemyAttack * (0.8 + Math.random() * 0.4) * (hasOsMousse ? 1.5 : 1));
         const newHp = Math.max(0, state.character.stats.health - enemyDmg);
-        logs.push(`❌ Fuite ratée ! ${state.currentCombat.enemyName} vous rattrape ! ${enemyDmg} dégâts !`);
+        logs.push(L(`❌ Fuite ratée ! ${state.currentCombat.enemyName} vous rattrape ! ${enemyDmg} dégâts !`, `❌ Escape failed! ${tc(state.currentCombat.enemyName)} catches you! ${enemyDmg} damage!`));
         if (newHp <= 0) {
-          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, '💀 Vous succombez à vos blessures...'], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
+          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(state.currentCombat.enemyName) };
         }
         const newStats = clampStats({ ...state.character.stats, health: newHp, dignity: state.character.stats.dignity - 8 });
         return { ...state, character: { ...state.character, stats: newStats }, combatLog: logs };

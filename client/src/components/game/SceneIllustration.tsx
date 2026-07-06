@@ -1,0 +1,296 @@
+/*
+ * Illustrations d'événements générées en SVG, dans la direction artistique
+ * « carton » (crème, brun, or, contour marqueur). Aucune image externe : chaque
+ * scène est dessinée par le code, à plat, avec un gros contour façon feutre.
+ *
+ * On choisit la scène à partir des mots-clés du texte de l'événement/résultat
+ * (sceneFor). Ainsi, chaque rencontre reçoit une vignette cohérente sans avoir
+ * à stocker une image par événement.
+ */
+
+const OUTLINE = '#3A2A1E';
+const CREAM = '#FBF6F0';
+const BROWN = '#C4723A';
+const GOLD = '#B8860B';
+const GREEN = '#6B8E5A';
+const BLUE = '#4A8FBF';
+const RED = '#D94F4F';
+const CARD = '#D8B98C'; // teinte carton
+
+export type SceneTheme =
+  | 'coins' | 'food' | 'fight' | 'police' | 'night' | 'rain'
+  | 'cat' | 'trash' | 'shop' | 'friend' | 'discovery' | 'sun'
+  | 'street';
+
+// Chaque scène est une liste de mots-clés (français, minuscules, sans accents
+// gérés séparément) ; le premier thème dont un mot apparaît l'emporte.
+const KEYWORDS: [SceneTheme, string[]][] = [
+  ['police', ['polic', 'flic', 'agent', 'gendarme', 'garde a vue', 'amende', 'menotte', 'arrete']],
+  ['fight', ['bagarre', 'coup', 'frappe', 'baston', 'voyou', 'raclee', 'combat', 'poing', 'blesse', 'amoche', 'castagne']],
+  ['coins', ['€', 'euro', 'piece', 'billet', 'argent', 'monnaie', 'pactole', 'jackpot', 'porte-monnaie', 'gagne', 'revente', 'revend']],
+  ['food', ['mange', 'nourriture', 'pain', 'sandwich', 'repas', 'soupe', 'faim', 'boulanger', 'conserve', 'cantine', 'restaurant', 'boit', 'boire']],
+  ['cat', ['chat', 'chaton', 'felin', 'matou', 'chien', 'animal']],
+  ['trash', ['poubelle', 'benne', 'dechet', 'recup', 'ordure', 'container', 'trie', 'recycl']],
+  ['shop', ['boutique', 'magasin', 'commerc', 'echoppe', 'epicerie', 'vitrine', 'marche']],
+  ['rain', ['pluie', 'orage', 'averse', 'trempe', 'mouille', 'tempete', 'deluge']],
+  ['night', ['nuit', 'dort', 'dormir', 'sommeil', 'carton', 'endort', 'reveil', 'lune', 'etoile']],
+  ['sun', ['soleil', 'chaleur', 'beau temps', 'ensoleill', 'canicule', 'rayon']],
+  ['friend', ['ami', 'rencontre', 'inconnu', 'passant', 'vieux', 'vieille', 'aide', 'donne', 'sourit', 'discute', 'parle', 'partage', 'musicien', 'pecheur', 'jardinier']],
+  ['discovery', ['trouve', 'decouvre', 'fouille', 'objet', 'cache', 'tresor', 'ramasse', 'deniche']],
+];
+
+// Retire les accents pour une recherche de mots-clés robuste.
+function deburr(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
+export function sceneFor(text: string, fallback: SceneTheme = 'street'): SceneTheme {
+  const t = deburr(text);
+  for (const [theme, words] of KEYWORDS) {
+    for (const w of words) {
+      if (t.includes(w)) return theme;
+    }
+  }
+  return fallback;
+}
+
+// Toit crénelé d'immeuble simple, réutilisé en fond.
+function skyline() {
+  return (
+    <g>
+      <rect x="8" y="70" width="60" height="60" rx="3" fill={CARD} stroke={OUTLINE} strokeWidth="2.5" />
+      <rect x="74" y="52" width="52" height="78" rx="3" fill="#E8CBA0" stroke={OUTLINE} strokeWidth="2.5" />
+      <rect x="132" y="64" width="60" height="66" rx="3" fill={CARD} stroke={OUTLINE} strokeWidth="2.5" />
+      {[18, 34, 50].map((x) => <rect key={`a${x}`} x={x} y="82" width="10" height="12" fill={CREAM} stroke={OUTLINE} strokeWidth="1.6" />)}
+      {[84, 100, 116].map((x) => <rect key={`b${x}`} x={x} y="66" width="10" height="12" fill={CREAM} stroke={OUTLINE} strokeWidth="1.6" />)}
+      {[144, 160, 176].map((x) => <rect key={`c${x}`} x={x} y="78" width="10" height="12" fill={CREAM} stroke={OUTLINE} strokeWidth="1.6" />)}
+    </g>
+  );
+}
+
+function coin(cx: number, cy: number, r: number) {
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={r} fill={GOLD} stroke={OUTLINE} strokeWidth="2.5" />
+      <circle cx={cx} cy={cy} r={r - 4} fill="none" stroke="#8B6B0A" strokeWidth="1.4" />
+      <text x={cx} y={cy + r * 0.32} textAnchor="middle" fontSize={r * 0.9} fontWeight="bold" fill="#8B6B0A">€</text>
+    </g>
+  );
+}
+
+function SceneBody({ theme }: { theme: SceneTheme }) {
+  switch (theme) {
+    case 'coins':
+      return (
+        <g>
+          {skyline()}
+          <ellipse cx="100" cy="118" rx="66" ry="12" fill="#000" opacity="0.06" />
+          {coin(66, 96, 20)}
+          {coin(104, 104, 24)}
+          {coin(140, 92, 18)}
+          <path d="M52 118 q48 -22 96 0" fill="none" stroke={GOLD} strokeWidth="3" strokeLinecap="round" opacity="0.5" />
+        </g>
+      );
+    case 'food':
+      return (
+        <g>
+          {skyline()}
+          {/* Baguette */}
+          <g transform="rotate(-18 100 96)">
+            <rect x="46" y="86" width="108" height="22" rx="11" fill="#E0A24B" stroke={OUTLINE} strokeWidth="2.5" />
+            {[64, 84, 104, 124].map((x) => <line key={x} x1={x} y1="90" x2={x + 6} y2="104" stroke={OUTLINE} strokeWidth="1.6" />)}
+          </g>
+          {/* Boîte de conserve */}
+          <rect x="120" y="96" width="30" height="30" rx="3" fill={RED} stroke={OUTLINE} strokeWidth="2.5" />
+          <rect x="120" y="102" width="30" height="12" fill={CREAM} opacity="0.85" />
+        </g>
+      );
+    case 'fight':
+      return (
+        <g>
+          {skyline()}
+          {/* Étoile d'impact */}
+          <path d="M100 60 l10 22 24 3 -18 16 6 24 -22 -12 -22 12 6 -24 -18 -16 24 -3 z" fill={RED} stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
+          <text x="100" y="104" textAnchor="middle" fontSize="20" fontWeight="bold" fill={CREAM}>POW</text>
+          {/* Pansement */}
+          <g transform="rotate(28 150 108)">
+            <rect x="132" y="100" width="36" height="16" rx="8" fill="#F0D9B8" stroke={OUTLINE} strokeWidth="2.2" />
+            <rect x="146" y="100" width="8" height="16" fill="#E0C39A" stroke={OUTLINE} strokeWidth="1.4" />
+          </g>
+        </g>
+      );
+    case 'police':
+      return (
+        <g>
+          {skyline()}
+          {/* Casquette */}
+          <path d="M60 108 q40 -40 80 0 z" fill={BLUE} stroke={OUTLINE} strokeWidth="2.5" />
+          <rect x="52" y="106" width="96" height="12" rx="5" fill="#3A6E97" stroke={OUTLINE} strokeWidth="2.5" />
+          <circle cx="100" cy="82" r="8" fill={GOLD} stroke={OUTLINE} strokeWidth="2" />
+          {/* Gyrophare */}
+          <rect x="150" y="70" width="20" height="14" rx="3" fill={RED} stroke={OUTLINE} strokeWidth="2.2" />
+          <path d="M150 70 l10 -12 10 12" fill={RED} stroke={OUTLINE} strokeWidth="2.2" strokeLinejoin="round" />
+        </g>
+      );
+    case 'night':
+      return (
+        <g>
+          <rect x="0" y="0" width="200" height="130" fill="#2E3A4E" />
+          <circle cx="150" cy="42" r="20" fill="#F2E3B0" stroke={OUTLINE} strokeWidth="2" />
+          <circle cx="142" cy="38" r="18" fill="#2E3A4E" />
+          {[[40, 30], [70, 20], [110, 34], [176, 78], [30, 64]].map(([x, y], i) => (
+            <path key={i} d={`M${x} ${y - 4} l1.5 3 3 1 -3 1 -1.5 3 -1.5 -3 -3 -1 3 -1 z`} fill="#F2E3B0" />
+          ))}
+          {/* Carton-lit */}
+          <rect x="46" y="96" width="108" height="30" rx="4" fill={CARD} stroke={OUTLINE} strokeWidth="2.5" />
+          <line x1="100" y1="96" x2="100" y2="126" stroke={OUTLINE} strokeWidth="1.6" />
+          <path d="M60 96 q40 -14 80 0" fill="none" stroke={OUTLINE} strokeWidth="1.6" opacity="0.5" />
+        </g>
+      );
+    case 'rain':
+      return (
+        <g>
+          {skyline()}
+          <ellipse cx="96" cy="52" rx="46" ry="24" fill="#B8C2CC" stroke={OUTLINE} strokeWidth="2.5" />
+          <ellipse cx="132" cy="56" rx="30" ry="18" fill="#C8D0D8" stroke={OUTLINE} strokeWidth="2.5" />
+          {[64, 84, 104, 124, 144].map((x, i) => (
+            <line key={x} x1={x} y1={72 + (i % 2) * 6} x2={x - 6} y2={92 + (i % 2) * 6} stroke={BLUE} strokeWidth="3" strokeLinecap="round" />
+          ))}
+        </g>
+      );
+    case 'cat':
+      return (
+        <g>
+          {skyline()}
+          <ellipse cx="100" cy="120" rx="48" ry="10" fill="#000" opacity="0.06" />
+          {/* Corps chat */}
+          <path d="M74 118 q-4 -40 26 -40 q30 0 26 40 z" fill="#6B5748" stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
+          <path d="M80 82 l-6 -16 14 8 z" fill="#6B5748" stroke={OUTLINE} strokeWidth="2.2" strokeLinejoin="round" />
+          <path d="M120 82 l6 -16 -14 8 z" fill="#6B5748" stroke={OUTLINE} strokeWidth="2.2" strokeLinejoin="round" />
+          <circle cx="90" cy="98" r="3.5" fill={GREEN} />
+          <circle cx="110" cy="98" r="3.5" fill={GREEN} />
+          <path d="M96 106 q4 4 8 0" fill="none" stroke={OUTLINE} strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M148 116 q18 -6 10 -26" fill="none" stroke="#6B5748" strokeWidth="7" strokeLinecap="round" />
+          <path d="M148 116 q18 -6 10 -26" fill="none" stroke={OUTLINE} strokeWidth="2" strokeLinecap="round" opacity="0.4" />
+        </g>
+      );
+    case 'trash':
+      return (
+        <g>
+          {skyline()}
+          <path d="M64 78 h72 l-8 50 h-56 z" fill={GREEN} stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
+          <rect x="58" y="70" width="84" height="12" rx="4" fill="#5A7A4B" stroke={OUTLINE} strokeWidth="2.5" />
+          <rect x="92" y="60" width="16" height="12" rx="3" fill="#5A7A4B" stroke={OUTLINE} strokeWidth="2.5" />
+          {/* Symbole recyclage */}
+          <g transform="translate(100 104)" stroke={CREAM} strokeWidth="2.4" fill="none" strokeLinecap="round">
+            <path d="M-9 3 l4 -8 4 3" />
+            <path d="M9 3 l-1 -9 -5 2" />
+            <path d="M-4 10 l6 6 3 -5" />
+          </g>
+        </g>
+      );
+    case 'shop':
+      return (
+        <g>
+          <rect x="0" y="0" width="200" height="130" fill={CREAM} />
+          <rect x="34" y="54" width="132" height="72" fill="#EBD3B4" stroke={OUTLINE} strokeWidth="2.5" />
+          {/* Store */}
+          <path d="M28 54 h144 l-6 20 h-132 z" fill={BROWN} stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
+          {[36, 58, 80, 102, 124, 146].map((x) => <rect key={x} x={x} y="54" width="22" height="20" fill={x % 44 === 36 || x === 80 || x === 124 ? CREAM : BROWN} opacity="0.9" />)}
+          {/* Vitrine + porte */}
+          <rect x="44" y="84" width="40" height="42" fill="#CFE3EC" stroke={OUTLINE} strokeWidth="2.2" />
+          <rect x="116" y="84" width="34" height="42" rx="2" fill={CARD} stroke={OUTLINE} strokeWidth="2.2" />
+          <circle cx="122" cy="106" r="2.4" fill={OUTLINE} />
+        </g>
+      );
+    case 'friend':
+      return (
+        <g>
+          {skyline()}
+          <ellipse cx="100" cy="122" rx="60" ry="10" fill="#000" opacity="0.06" />
+          {/* Deux silhouettes */}
+          <g>
+            <circle cx="78" cy="72" r="13" fill="#EAD0A8" stroke={OUTLINE} strokeWidth="2.5" />
+            <path d="M62 124 q0 -34 16 -34 q16 0 16 34 z" fill={BROWN} stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
+          </g>
+          <g>
+            <circle cx="124" cy="72" r="13" fill="#DDB483" stroke={OUTLINE} strokeWidth="2.5" />
+            <path d="M108 124 q0 -34 16 -34 q16 0 16 34 z" fill={GREEN} stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
+          </g>
+          {/* Poignée de main */}
+          <path d="M92 104 h18" stroke={OUTLINE} strokeWidth="5" strokeLinecap="round" />
+        </g>
+      );
+    case 'discovery':
+      return (
+        <g>
+          {skyline()}
+          {/* Loupe */}
+          <circle cx="94" cy="86" r="26" fill="#CFE3EC" stroke={OUTLINE} strokeWidth="3" />
+          <circle cx="94" cy="86" r="26" fill="none" stroke={CREAM} strokeWidth="1.5" opacity="0.6" />
+          <rect x="112" y="104" width="26" height="9" rx="4" transform="rotate(45 112 104)" fill={BROWN} stroke={OUTLINE} strokeWidth="2.5" />
+          {/* Étincelles */}
+          {[[92, 84], [98, 90], [88, 92]].map(([x, y], i) => (
+            <path key={i} d={`M${x} ${y - 5} l1.6 3.4 3.4 1.6 -3.4 1.6 -1.6 3.4 -1.6 -3.4 -3.4 -1.6 3.4 -1.6 z`} fill={GOLD} />
+          ))}
+        </g>
+      );
+    case 'sun':
+      return (
+        <g>
+          {skyline()}
+          <circle cx="150" cy="46" r="20" fill={GOLD} stroke={OUTLINE} strokeWidth="2.5" />
+          {Array.from({ length: 8 }).map((_, i) => {
+            const a = (Math.PI / 4) * i;
+            const x1 = 150 + Math.cos(a) * 26, y1 = 46 + Math.sin(a) * 26;
+            const x2 = 150 + Math.cos(a) * 36, y2 = 46 + Math.sin(a) * 36;
+            return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={GOLD} strokeWidth="3" strokeLinecap="round" />;
+          })}
+        </g>
+      );
+    case 'street':
+    default:
+      return (
+        <g>
+          {skyline()}
+          {/* Lampadaire */}
+          <line x1="168" y1="130" x2="168" y2="58" stroke={OUTLINE} strokeWidth="3" />
+          <path d="M168 58 q0 -8 12 -8" fill="none" stroke={OUTLINE} strokeWidth="3" />
+          <circle cx="182" cy="54" r="6" fill={GOLD} stroke={OUTLINE} strokeWidth="2" />
+          {/* Trottoir */}
+          <rect x="0" y="122" width="200" height="8" fill="#CBB79A" />
+        </g>
+      );
+  }
+}
+
+export default function SceneIllustration({
+  theme,
+  className = '',
+  rounded = true,
+}: {
+  theme: SceneTheme;
+  className?: string;
+  rounded?: boolean;
+}) {
+  return (
+    <svg
+      viewBox="0 0 200 130"
+      className={className}
+      role="img"
+      aria-hidden="true"
+      style={{ display: 'block', width: '100%', height: '100%' }}
+      preserveAspectRatio="xMidYMid slice"
+    >
+      <defs>
+        <clipPath id={`scene-clip-${theme}`}>
+          <rect x="0" y="0" width="200" height="130" rx={rounded ? 10 : 0} />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#scene-clip-${theme})`}>
+        <rect x="0" y="0" width="200" height="130" fill={CREAM} />
+        <SceneBody theme={theme} />
+      </g>
+    </svg>
+  );
+}
