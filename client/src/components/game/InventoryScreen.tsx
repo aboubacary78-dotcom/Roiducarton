@@ -1,6 +1,7 @@
 import { useGame, getSellPrice, STAT_META, type Stats } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
+import SceneIllustration, { sceneForLocation } from './SceneIllustration';
 
 const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: string; bg: string }> = {
   food: { label: 'Nourriture', labelEn: 'Food', color: '#4A9B5F', bg: '#4A9B5F15' },
@@ -22,10 +23,16 @@ export default function InventoryScreen() {
       <motion.div
         initial={{ y: -15, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="craft-card p-3.5 flex justify-between items-center"
+        className="craft-card p-0 overflow-hidden"
       >
-        <h2 className="text-xl text-[#2A1F1A]">{tr('Inventaire', 'Inventory')}</h2>
-        <span className="text-xs text-[#A08B70] font-mono font-medium">{char.inventory.length}/20</span>
+        <div className="relative h-20 w-full">
+          <SceneIllustration theme={sceneForLocation(char.location)} className="w-full h-full" rounded={false} align="bottom" sway />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/75 to-white/15" />
+          <div className="absolute inset-0 flex justify-between items-center px-3.5">
+            <h2 className="text-xl text-[#2A1F1A]">{tr('Inventaire', 'Inventory')}</h2>
+            <span className="text-xs text-[#A08B70] font-mono font-medium">{char.inventory.length}/20</span>
+          </div>
+        </div>
       </motion.div>
 
       {char.inventory.length === 0 ? (

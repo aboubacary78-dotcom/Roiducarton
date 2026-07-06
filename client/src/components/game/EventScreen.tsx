@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { useLang, tr, tc } from '@/lib/lang';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
+import { stampTap, liftHover } from '@/lib/anim';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.png';
 
@@ -108,6 +109,7 @@ export default function EventScreen() {
           <SceneIllustration
             theme={sceneFor(`${event.title} ${event.description}`, TYPE_SCENE[event.type] || 'street')}
             className="w-full h-full"
+            sway
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
         </motion.div>
@@ -147,8 +149,8 @@ export default function EventScreen() {
                 initial={{ x: -15, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 + i * 0.1 }}
-                whileHover={locked ? {} : { scale: 1.01, x: 2 }}
-                whileTap={locked ? {} : { scale: 0.98 }}
+                whileHover={locked ? {} : liftHover}
+                whileTap={locked ? {} : stampTap}
                 onClick={locked ? undefined : () => dispatch({ type: 'CHOOSE_EVENT', choiceIndex: i, boosted })}
                 disabled={locked}
                 className={`action-btn p-3 text-left flex items-start gap-2.5 ${boosted && !locked ? 'border-[#B8860B]/60' : ''} ${

@@ -7,6 +7,7 @@ import { playClick, playNextDay } from '@/lib/sound';
 import { getEquipped } from '@/lib/profile';
 import { useLang, tr } from '@/lib/lang';
 import SceneIllustration, { sceneForLocation } from './SceneIllustration';
+import { stampTap, liftHover } from '@/lib/anim';
 
 interface Enemy {
   name: string;
@@ -200,7 +201,7 @@ export default function MainScreen() {
         transition={{ delay: 0.1 }}
         className="relative w-full h-28 rounded-xl overflow-hidden craft-card p-0"
       >
-        <SceneIllustration theme={sceneForLocation(char.location)} className="w-full h-full" rounded={false} align="bottom" />
+        <SceneIllustration theme={sceneForLocation(char.location)} className="w-full h-full" rounded={false} align="bottom" sway />
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
         <p className="absolute bottom-0 left-0 right-0 px-3 pb-2 text-[11px] text-white/95 italic leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
           "{getAmbientText(char.location, char.day)}"
@@ -250,8 +251,8 @@ export default function MainScreen() {
 
         {/* Action risquée : Voler */}
         <motion.button
-          whileHover={actionsLeft <= 0 ? {} : { scale: 1.01 }}
-          whileTap={actionsLeft <= 0 ? {} : { scale: 0.98 }}
+          whileHover={actionsLeft <= 0 ? {} : liftHover}
+          whileTap={actionsLeft <= 0 ? {} : stampTap}
           onClick={actionsLeft <= 0 ? undefined : () => { playClick(); dispatch({ type: 'STEAL' }); }}
           disabled={actionsLeft <= 0}
           className={`action-btn p-2.5 flex items-center justify-center gap-2 border-[#D94F4F]/30 ${
@@ -277,8 +278,8 @@ export default function MainScreen() {
         initial={{ y: 15, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={liftHover}
+        whileTap={stampTap}
         onClick={() => { playNextDay(); dispatch({ type: 'NEXT_DAY' }); }}
         className="btn-primary w-full py-3.5 text-sm"
       >
@@ -293,8 +294,8 @@ function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, sma
 }) {
   return (
     <motion.button
-      whileHover={disabled ? {} : { scale: 1.02 }}
-      whileTap={disabled ? {} : { scale: 0.97 }}
+      whileHover={disabled ? {} : liftHover}
+      whileTap={disabled ? {} : stampTap}
       onClick={disabled ? undefined : () => { playClick(); onClick(); }}
       disabled={disabled}
       className={`action-btn ${small ? 'p-2.5 flex-1' : 'p-3'} flex flex-col items-center justify-center gap-1 ${
