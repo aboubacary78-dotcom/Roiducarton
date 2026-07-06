@@ -8,6 +8,9 @@
  * à stocker une image par événement.
  */
 
+import { motion } from 'framer-motion';
+import { paperSway } from '@/lib/anim';
+
 const OUTLINE = '#3A2A1E';
 const CREAM = '#FBF6F0';
 const BROWN = '#C4723A';
@@ -378,6 +381,7 @@ export default function SceneIllustration({
   className = '',
   rounded = true,
   align = 'center',
+  sway = false,
 }: {
   theme: SceneTheme;
   className?: string;
@@ -385,15 +389,19 @@ export default function SceneIllustration({
   // 'bottom' garde le niveau du sol visible (utile pour les décors de quartier
   // dans une bannière large et courte) ; 'center' recadre au milieu.
   align?: 'center' | 'bottom';
+  // Respiration stop-motion (à n'utiliser que dans un conteneur overflow-hidden).
+  sway?: boolean;
 }) {
+  const Svg = sway ? motion.svg : 'svg';
   return (
-    <svg
+    <Svg
       viewBox="0 0 200 130"
       className={className}
       role="img"
       aria-hidden="true"
       style={{ display: 'block', width: '100%', height: '100%' }}
       preserveAspectRatio={align === 'bottom' ? 'xMidYMax slice' : 'xMidYMid slice'}
+      {...(sway ? { animate: paperSway } : {})}
     >
       <defs>
         <clipPath id={`scene-clip-${theme}`}>
@@ -404,6 +412,6 @@ export default function SceneIllustration({
         <rect x="0" y="0" width="200" height="130" fill={CREAM} />
         <SceneBody theme={theme} />
       </g>
-    </svg>
+    </Svg>
   );
 }

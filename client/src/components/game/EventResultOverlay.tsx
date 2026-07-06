@@ -89,7 +89,7 @@ export default function EventResultOverlay() {
             transition={{ type: 'spring', delay: 0.05 }}
             className="relative w-full h-32 rounded-xl overflow-hidden mb-3 shadow-[0_3px_12px_rgba(58,42,30,0.12)]"
           >
-            <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} className="w-full h-full" />
+            <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} className="w-full h-full" sway />
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
             <span className="absolute top-2 right-2 text-2xl drop-shadow">{isPositive ? '✨' : '😓'}</span>
           </motion.div>

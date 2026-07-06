@@ -4,6 +4,7 @@ import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playCoin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
+import SceneIllustration, { sceneForLocation } from './SceneIllustration';
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string; labelEn: string }> = {
   food: { bg: '#4A9B5F15', color: '#4A9B5F', label: 'Nourriture', labelEn: 'Food' },
@@ -231,18 +232,22 @@ export default function ShopScreen() {
       <motion.div
         initial={{ y: -15, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="craft-card p-3.5"
+        className="craft-card p-0 overflow-hidden"
       >
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl text-[#2A1F1A]">{tr('Boutiques', 'Shops')}</h2>
-            <p className="text-xs text-[#8B6B4A]">{tr('Dépensez votre argent durement gagné', 'Spend your hard-earned money')}</p>
-          </div>
-          <div className="text-right font-mono">
-            <div className="text-sm font-semibold text-[#B8860B]">{char.money}€</div>
-            {discountLabel && (
-              <div className="text-[10px] text-[#4A9B5F] font-medium">{discountLabel}</div>
-            )}
+        <div className="relative h-20 w-full">
+          <SceneIllustration theme={sceneForLocation(char.location)} className="w-full h-full" rounded={false} align="bottom" sway />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/75 to-white/15" />
+          <div className="absolute inset-0 flex justify-between items-center px-3.5">
+            <div>
+              <h2 className="text-xl text-[#2A1F1A]">{tr('Boutiques', 'Shops')}</h2>
+              <p className="text-xs text-[#8B6B4A]">{tr('Dépensez votre argent durement gagné', 'Spend your hard-earned money')}</p>
+            </div>
+            <div className="text-right font-mono">
+              <div className="text-sm font-semibold text-[#B8860B]">{char.money}€</div>
+              {discountLabel && (
+                <div className="text-[10px] text-[#4A9B5F] font-medium">{discountLabel}</div>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
