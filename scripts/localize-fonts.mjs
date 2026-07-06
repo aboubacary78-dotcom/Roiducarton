@@ -1,5 +1,5 @@
 /*
- * Auto-héberge les polices du jeu (DM Serif Display, Outfit, JetBrains Mono).
+ * Auto-héberge les polices du jeu (Fredoka, DM Serif Display, Outfit, JetBrains Mono).
  *
  * Télécharge les fichiers .woff2 depuis Google Fonts dans client/public/fonts/
  * et génère client/public/fonts/fonts.css avec les @font-face correspondants.
@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = resolve(root, 'client/public/fonts');
-const CSS_URL = 'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap';
+const CSS_URL = 'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap';
 // Sous-ensembles utiles pour le français (latin-ext couvre œ, Œ, etc.)
 const SUBSETS = new Set(['latin', 'latin-ext']);
 

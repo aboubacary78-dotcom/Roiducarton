@@ -20,7 +20,22 @@ const CARD = '#D8B98C'; // teinte carton
 export type SceneTheme =
   | 'coins' | 'food' | 'fight' | 'police' | 'night' | 'rain'
   | 'cat' | 'trash' | 'shop' | 'friend' | 'discovery' | 'sun'
-  | 'street';
+  | 'street'
+  // Décors de quartier (bannière de l'écran principal)
+  | 'park' | 'downtown' | 'industrial' | 'station' | 'market';
+
+// Décor par quartier (voir LOCATIONS).
+const LOCATION_SCENE: Record<string, SceneTheme> = {
+  'parc': 'park',
+  'centre-ville': 'downtown',
+  'zone-industrielle': 'industrial',
+  'gare': 'station',
+  'marche': 'market',
+};
+
+export function sceneForLocation(locationId: string): SceneTheme {
+  return LOCATION_SCENE[locationId] ?? 'street';
+}
 
 // Chaque scène est une liste de mots-clés (français, minuscules, sans accents
 // gérés séparément) ; le premier thème dont un mot apparaît l'emporte.
@@ -248,6 +263,100 @@ function SceneBody({ theme }: { theme: SceneTheme }) {
           })}
         </g>
       );
+    case 'park':
+      return (
+        <g>
+          <rect x="0" y="0" width="200" height="130" fill="#DCEAD3" />
+          <circle cx="164" cy="34" r="15" fill={GOLD} stroke={OUTLINE} strokeWidth="2.2" />
+          {/* Arbres */}
+          {[[40, 96], [150, 100]].map(([x, y], i) => (
+            <g key={i}>
+              <rect x={x - 4} y={y} width="8" height="24" fill="#8A5A2A" stroke={OUTLINE} strokeWidth="2" />
+              <circle cx={x} cy={y - 6} r="22" fill={GREEN} stroke={OUTLINE} strokeWidth="2.5" />
+              <circle cx={x - 12} cy={y + 2} r="14" fill="#7BA05B" stroke={OUTLINE} strokeWidth="2.2" />
+              <circle cx={x + 12} cy={y + 2} r="14" fill="#7BA05B" stroke={OUTLINE} strokeWidth="2.2" />
+            </g>
+          ))}
+          {/* Banc */}
+          <g>
+            <rect x="80" y="104" width="44" height="7" rx="2" fill={BROWN} stroke={OUTLINE} strokeWidth="2.2" />
+            <rect x="80" y="94" width="44" height="6" rx="2" fill={BROWN} stroke={OUTLINE} strokeWidth="2.2" />
+            <rect x="84" y="111" width="5" height="12" fill={OUTLINE} />
+            <rect x="115" y="111" width="5" height="12" fill={OUTLINE} />
+          </g>
+          <rect x="0" y="122" width="200" height="8" fill="#8FAe78" />
+        </g>
+      );
+    case 'downtown':
+      return (
+        <g>
+          <rect x="0" y="0" width="200" height="130" fill="#EAD9C2" />
+          <rect x="6" y="40" width="40" height="90" rx="2" fill="#D8B98C" stroke={OUTLINE} strokeWidth="2.5" />
+          <rect x="52" y="20" width="44" height="110" rx="2" fill="#E8CBA0" stroke={OUTLINE} strokeWidth="2.5" />
+          <rect x="102" y="52" width="40" height="78" rx="2" fill="#D8B98C" stroke={OUTLINE} strokeWidth="2.5" />
+          <rect x="148" y="30" width="46" height="100" rx="2" fill="#E8CBA0" stroke={OUTLINE} strokeWidth="2.5" />
+          {[[10, 48], [58, 28], [108, 60], [154, 38]].flatMap(([bx, by], b) =>
+            Array.from({ length: 8 }, (_, i) => {
+              const r = Math.floor(i / 2), c = i % 2;
+              return <rect key={`${b}-${i}`} x={bx + 6 + c * 16} y={by + 6 + r * 18} width="9" height="11" fill={CREAM} stroke={OUTLINE} strokeWidth="1.3" />;
+            }),
+          )}
+          <rect x="0" y="124" width="200" height="6" fill="#CBB79A" />
+        </g>
+      );
+    case 'industrial':
+      return (
+        <g>
+          <rect x="0" y="0" width="200" height="130" fill="#E4D3BC" />
+          {/* Usine */}
+          <rect x="20" y="70" width="120" height="60" fill="#B99A78" stroke={OUTLINE} strokeWidth="2.5" />
+          <path d="M20 70 l16 -16 16 16 16 -16 16 16 16 -16 16 16 16 -16 16 16" fill="#B99A78" stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
+          {/* Cheminée + fumée */}
+          <rect x="150" y="46" width="20" height="84" fill="#9B7A58" stroke={OUTLINE} strokeWidth="2.5" />
+          <rect x="148" y="42" width="24" height="8" fill="#7C5E3E" stroke={OUTLINE} strokeWidth="2.2" />
+          {[[160, 30, 10], [172, 18, 8], [156, 12, 7]].map(([x, y, r], i) => (
+            <circle key={i} cx={x} cy={y} r={r} fill="#C9BBA9" stroke={OUTLINE} strokeWidth="1.8" opacity="0.85" />
+          ))}
+          {[30, 54, 78, 102].map((x) => <rect key={x} x={x} y="86" width="14" height="16" fill="#7FA0B0" stroke={OUTLINE} strokeWidth="1.6" />)}
+          <rect x="0" y="124" width="200" height="6" fill="#B0987C" />
+        </g>
+      );
+    case 'station':
+      return (
+        <g>
+          <rect x="0" y="0" width="200" height="130" fill="#E7D6BF" />
+          {/* Halle */}
+          <rect x="10" y="34" width="180" height="14" rx="4" fill={BROWN} stroke={OUTLINE} strokeWidth="2.5" />
+          <line x1="26" y1="48" x2="26" y2="120" stroke={OUTLINE} strokeWidth="3" />
+          <line x1="174" y1="48" x2="174" y2="120" stroke={OUTLINE} strokeWidth="3" />
+          {/* Train */}
+          <rect x="42" y="70" width="116" height="42" rx="7" fill="#9B5B3A" stroke={OUTLINE} strokeWidth="2.5" />
+          <rect x="50" y="78" width="24" height="18" rx="3" fill="#CFE3EC" stroke={OUTLINE} strokeWidth="2" />
+          <rect x="86" y="78" width="24" height="18" rx="3" fill="#CFE3EC" stroke={OUTLINE} strokeWidth="2" />
+          <circle cx="130" cy="88" r="10" fill={GOLD} stroke={OUTLINE} strokeWidth="2" />
+          <circle cx="62" cy="116" r="7" fill="#3A2A1E" stroke={OUTLINE} strokeWidth="2" />
+          <circle cx="140" cy="116" r="7" fill="#3A2A1E" stroke={OUTLINE} strokeWidth="2" />
+          <rect x="0" y="122" width="200" height="8" fill="#CBB79A" />
+        </g>
+      );
+    case 'market':
+      return (
+        <g>
+          {skyline()}
+          {/* Étals avec auvents rayés */}
+          {[[26, BROWN], [96, RED], [150, GREEN]].map(([x, col], i) => (
+            <g key={i}>
+              <rect x={Number(x)} y="78" width="44" height="48" fill="#E8CBA0" stroke={OUTLINE} strokeWidth="2.2" />
+              <path d={`M${Number(x) - 4} 78 h52 l-6 -14 h-40 z`} fill={col as string} stroke={OUTLINE} strokeWidth="2.2" strokeLinejoin="round" />
+              {[0, 1, 2].map((s) => <rect key={s} x={Number(x) + 2 + s * 14} y="64" width="7" height="14" fill={CREAM} opacity="0.5" />)}
+              <circle cx={Number(x) + 12} cy="94" r="4" fill={RED} stroke={OUTLINE} strokeWidth="1.4" />
+              <circle cx={Number(x) + 24} cy="94" r="4" fill={GOLD} stroke={OUTLINE} strokeWidth="1.4" />
+              <circle cx={Number(x) + 18} cy="104" r="4" fill={GREEN} stroke={OUTLINE} strokeWidth="1.4" />
+            </g>
+          ))}
+          <rect x="0" y="124" width="200" height="6" fill="#CBB79A" />
+        </g>
+      );
     case 'street':
     default:
       return (
@@ -268,10 +377,14 @@ export default function SceneIllustration({
   theme,
   className = '',
   rounded = true,
+  align = 'center',
 }: {
   theme: SceneTheme;
   className?: string;
   rounded?: boolean;
+  // 'bottom' garde le niveau du sol visible (utile pour les décors de quartier
+  // dans une bannière large et courte) ; 'center' recadre au milieu.
+  align?: 'center' | 'bottom';
 }) {
   return (
     <svg
@@ -280,7 +393,7 @@ export default function SceneIllustration({
       role="img"
       aria-hidden="true"
       style={{ display: 'block', width: '100%', height: '100%' }}
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio={align === 'bottom' ? 'xMidYMax slice' : 'xMidYMid slice'}
     >
       <defs>
         <clipPath id={`scene-clip-${theme}`}>
