@@ -11,14 +11,22 @@
 import { motion } from 'framer-motion';
 import { paperSway } from '@/lib/anim';
 
-const OUTLINE = '#3A2A1E';
-const CREAM = '#FBF6F0';
-const BROWN = '#C4723A';
-const GOLD = '#B8860B';
-const GREEN = '#6B8E5A';
-const BLUE = '#4A8FBF';
-const RED = '#D94F4F';
-const CARD = '#D8B98C'; // teinte carton
+// Palette « diorama carton kraft » (cf. images d'événements) : tout est en
+// tons de carton, contour feutre, lumière chaude. On garde les noms d'origine
+// pour ne pas tout renommer, mais les valeurs sont désormais kraft/monochromes.
+const OUTLINE = '#2E2015';   // marqueur brun foncé
+const CREAM = '#EFDCB2';     // papier kraft clair (reflets, texte sur foncé)
+const BROWN = '#A9743F';     // carton brun (accents)
+const GOLD = '#E6A939';      // lumière chaude / laiton (guirlande, pièces)
+const GREEN = '#8A7E3E';     // « peint » olive kraft (feuilles, yeux)
+const BLUE = '#8B979A';      // carton peint gris-bleu éteint (eau, verre)
+const RED = '#B4593A';       // terre cuite / brique (impacts)
+const CARD = '#D3AE6E';      // face de carton (clair)
+
+// Teintes de carton pour le décor de fond (pièce du diorama).
+const KRAFT_DARK = '#5A4128';
+const KRAFT_MID = '#7A5A38';
+const KRAFT_FLOOR = '#8A6A45';
 
 export type SceneTheme =
   | 'coins' | 'food' | 'fight' | 'police' | 'night' | 'rain'
@@ -107,16 +115,46 @@ export function moodFor(text: string, hintPositive?: boolean): SceneMood {
   return 'neutral';
 }
 
-// Toit crénelé d'immeuble simple, réutilisé en fond.
+// Une caisse en carton (flaps + ligne de cannelure + bout de scotch).
+function box(x: number, y: number, w: number, h: number, face = CARD) {
+  const dark = '#9A7645';
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={h} rx="2" fill={face} stroke={OUTLINE} strokeWidth="2.5" />
+      {/* rabat supérieur */}
+      <path d={`M${x} ${y} l${w / 2} 6 l${w / 2} -6`} fill="none" stroke={OUTLINE} strokeWidth="1.8" />
+      {/* cannelure (bord) */}
+      <path d={`M${x + 2} ${y + h - 3} q3 -3 6 0 t6 0 t6 0`} fill="none" stroke={dark} strokeWidth="1.2" opacity="0.6" />
+      {/* scotch */}
+      <rect x={x + w / 2 - 5} y={y - 2} width="10" height={h + 4} fill="#E7D3A6" opacity="0.35" />
+    </g>
+  );
+}
+
+// Fond de « pile de cartons » (remplace l'ancienne skyline d'immeubles).
 function skyline() {
   return (
     <g>
-      <rect x="8" y="70" width="60" height="60" rx="3" fill={CARD} stroke={OUTLINE} strokeWidth="2.5" />
-      <rect x="74" y="52" width="52" height="78" rx="3" fill="#E8CBA0" stroke={OUTLINE} strokeWidth="2.5" />
-      <rect x="132" y="64" width="60" height="66" rx="3" fill={CARD} stroke={OUTLINE} strokeWidth="2.5" />
-      {[18, 34, 50].map((x) => <rect key={`a${x}`} x={x} y="82" width="10" height="12" fill={CREAM} stroke={OUTLINE} strokeWidth="1.6" />)}
-      {[84, 100, 116].map((x) => <rect key={`b${x}`} x={x} y="66" width="10" height="12" fill={CREAM} stroke={OUTLINE} strokeWidth="1.6" />)}
-      {[144, 160, 176].map((x) => <rect key={`c${x}`} x={x} y="78" width="10" height="12" fill={CREAM} stroke={OUTLINE} strokeWidth="1.6" />)}
+      {box(6, 74, 58, 56)}
+      {box(70, 54, 56, 76, '#C39A56')}
+      {box(132, 66, 60, 64)}
+      {box(150, 96, 44, 34, '#C39A56')}
+    </g>
+  );
+}
+
+// Guirlande lumineuse (élément signature du diorama).
+function fairyLights() {
+  const bulbs = [[20, 20], [56, 12], [96, 22], [136, 10], [176, 18]];
+  return (
+    <g>
+      <path d="M0 16 Q28 30 56 14 T112 16 T168 14 T200 20" fill="none" stroke="#6E5230" strokeWidth="1.4" opacity="0.7" />
+      {bulbs.map(([x, y], i) => (
+        <g key={i}>
+          <circle cx={x} cy={y + 6} r="6.5" fill={GOLD} opacity="0.35" />
+          <circle cx={x} cy={y + 6} r="3" fill="#FFE29A" stroke="#B98A2A" strokeWidth="1" />
+        </g>
+      ))}
     </g>
   );
 }
@@ -275,18 +313,18 @@ function SceneBody({ theme, mood }: { theme: SceneTheme; mood: SceneMood }) {
         </g>
       );
     case 'night':
+      // Nuit dans la « pièce » du diorama : on garde le fond chaud, une lune en
+      // carton découpé et le carton-lit.
       return (
         <g>
-          <rect x="0" y="0" width="200" height="130" fill="#2E3A4E" />
-          <circle cx="150" cy="42" r="20" fill="#F2E3B0" stroke={OUTLINE} strokeWidth="2" />
-          <circle cx="142" cy="38" r="18" fill="#2E3A4E" />
-          {[[40, 30], [70, 20], [110, 34], [176, 78], [30, 64]].map(([x, y], i) => (
-            <path key={i} d={`M${x} ${y - 4} l1.5 3 3 1 -3 1 -1.5 3 -1.5 -3 -3 -1 3 -1 z`} fill="#F2E3B0" />
+          <circle cx="150" cy="40" r="18" fill="#E7D3A6" stroke={OUTLINE} strokeWidth="2" />
+          <circle cx="143" cy="36" r="15" fill={KRAFT_MID} />
+          {[[40, 30], [70, 20], [110, 30], [30, 60]].map(([x, y], i) => (
+            <path key={i} d={`M${x} ${y - 4} l1.5 3 3 1 -3 1 -1.5 3 -1.5 -3 -3 -1 3 -1 z`} fill={GOLD} />
           ))}
           {/* Carton-lit */}
-          <rect x="46" y="96" width="108" height="30" rx="4" fill={CARD} stroke={OUTLINE} strokeWidth="2.5" />
-          <line x1="100" y1="96" x2="100" y2="126" stroke={OUTLINE} strokeWidth="1.6" />
-          <path d="M60 96 q40 -14 80 0" fill="none" stroke={OUTLINE} strokeWidth="1.6" opacity="0.5" />
+          {box(46, 96, 108, 30)}
+          <path d="M60 100 q40 -12 80 0" fill="none" stroke={OUTLINE} strokeWidth="1.6" opacity="0.4" />
         </g>
       );
     case 'rain':
@@ -404,25 +442,22 @@ function SceneBody({ theme, mood }: { theme: SceneTheme; mood: SceneMood }) {
         </g>
       );
     case 'garden':
+      // Pots de fortune sur le sol de la pièce (fond kraft conservé).
       return (
         <g>
-          <rect x="0" y="0" width="200" height="130" fill="#DCEAD3" />
-          <circle cx="166" cy="34" r="14" fill={GOLD} stroke={OUTLINE} strokeWidth="2.2" />
-          {/* Pots + pousses */}
           {[46, 100, 154].map((x, i) => (
             <g key={i}>
               <path d={`M${x - 16} 104 h32 l-4 22 h-24 z`} fill={BROWN} stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
               {bad
-                ? <path d={`M${x} 104 q-2 -6 0 -12`} fill="none" stroke="#9B8" strokeWidth="3" strokeLinecap="round" />
+                ? <path d={`M${x} 104 q-2 -6 0 -12`} fill="none" stroke="#8A7E3E" strokeWidth="3" strokeLinecap="round" />
                 : <>
                     <path d={`M${x} 104 q0 -20 0 -28`} fill="none" stroke={GREEN} strokeWidth="3.5" strokeLinecap="round" />
                     <ellipse cx={x - 7} cy={78} rx="7" ry="4" fill={GREEN} stroke={OUTLINE} strokeWidth="1.6" transform={`rotate(-30 ${x - 7} 78)`} />
-                    <ellipse cx={x + 7} cy={80} rx="7" ry="4" fill="#7BA05B" stroke={OUTLINE} strokeWidth="1.6" transform={`rotate(30 ${x + 7} 80)`} />
+                    <ellipse cx={x + 7} cy={80} rx="7" ry="4" fill="#9A8A46" stroke={OUTLINE} strokeWidth="1.6" transform={`rotate(30 ${x + 7} 80)`} />
                     <circle cx={x} cy={70} r="5" fill={RED} stroke={OUTLINE} strokeWidth="1.6" />
                   </>}
             </g>
           ))}
-          <rect x="0" y="124" width="200" height="6" fill="#8FAe78" />
         </g>
       );
     case 'fishing':
@@ -736,9 +771,17 @@ export default function SceneIllustration({
         <clipPath id={clip}>
           <rect x="0" y="0" width="200" height="130" rx={rounded ? 10 : 0} />
         </clipPath>
+        <radialGradient id={`room-${clip}`} cx="50%" cy="34%" r="75%">
+          <stop offset="0%" stopColor={KRAFT_MID} />
+          <stop offset="100%" stopColor={KRAFT_DARK} />
+        </radialGradient>
       </defs>
       <g clipPath={`url(#${clip})`}>
-        <rect x="0" y="0" width="200" height="130" fill={CREAM} />
+        {/* Décor de « pièce » en carton : mur chaud, sol, guirlande. */}
+        <rect x="0" y="0" width="200" height="130" fill={`url(#room-${clip})`} />
+        <rect x="0" y="104" width="200" height="26" fill={KRAFT_FLOOR} />
+        <line x1="0" y1="104" x2="200" y2="104" stroke={OUTLINE} strokeWidth="1.5" opacity="0.35" />
+        {fairyLights()}
         <SceneBody theme={theme} mood={mood} />
         {/* Liseré + teinte selon l'issue (léger, ne cache pas la scène). */}
         {mood === 'good' && (
