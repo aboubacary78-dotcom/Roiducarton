@@ -129,6 +129,8 @@ export interface CombatState {
   // Butin de l'ennemi, copié à l'entrée en combat (certains ennemis n'existent
   // que dans la liste par lieu de MainScreen, d'où la copie plutôt qu'un lookup).
   loot?: { money?: number; respect?: number; item?: InventoryItem };
+  // Image (diorama) de l'ennemi, réutilisée sur l'écran de victoire.
+  image?: string;
   round: number;
   phase: CombatPhase;
   // Motif de projectiles de l'ennemi (voir PROJECTILE_PATTERNS / getPattern).
@@ -2339,6 +2341,7 @@ interface LegendTemplate {
   type: GameEvent['type'];
   description: string;
   choices: EventChoice[];
+  image?: string;
 }
 
 const LEGEND_TEMPLATES: LegendTemplate[] = [
@@ -2405,6 +2408,7 @@ function makeLegendEvent(legend: { name: string; days: number }): GameEvent {
     id: `${t.id}-${legend.name}`,
     title: tc(t.title),
     type: t.type,
+    image: `/assets/${t.id}.webp`,
     description: fillLegend(tc(t.description), legend),
     choices: t.choices.map((c) => ({
       ...c,
@@ -2629,6 +2633,8 @@ export function generateHand(character: Character, combat: CombatState, count: n
 // et par les répercussions de vol) — une seule source de vérité.
 function makeCombatState(enemy: Enemy, character: Character): CombatState {
   const weapon = character.inventory.find(i => i.type === 'weapon');
+  // Image de l'ennemi : la sienne, sinon celle de la fiche canonique du même nom.
+  const image = enemy.image || ENEMIES.find(e => e.name === enemy.name)?.image;
   return {
     enemyName: enemy.name,
     enemyEmoji: enemy.emoji,
@@ -2638,6 +2644,7 @@ function makeCombatState(enemy: Enemy, character: Character): CombatState {
     description: enemy.description,
     playerWeapon: weapon,
     loot: enemy.loot,
+    image,
     round: 1,
     phase: 'dodge',
     pattern: getPattern(enemy),
@@ -2838,7 +2845,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           character: { ...c, stats: newStats, money: c.money - amende, alive: isAlive },
           eventResult: {
             text: L(`👮 « Mendicité sur la voie publique, circulez ! » Le policier confisque votre récolte${amende > 0 ? ` et vous colle ${amende}€ d'amende` : ' — insolvable, vous repartez avec un avertissement'}.`, `👮 "Begging in public, move along!" The cop confiscates your takings${amende > 0 ? ` and slaps you with a €${amende} fine` : ' — broke, so you leave with a warning'}.`),
-            statChanges: statDelta, moneyChange: -amende,
+            statChanges: statDelta, moneyChange: -amende, image: '/assets/result-beg-police.webp',
           },
           screen: isAlive ? 'main' : 'game-over',
         };
@@ -2867,7 +2874,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive },
-        eventResult: { text: prefix + tc(flavorFrom(BEG_EVENTS, money > 0)) + weatherNote + dignityNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta },
+        eventResult: { text: prefix + tc(flavorFrom(BEG_EVENTS, money > 0)) + weatherNote + dignityNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta, image: randomFromArray(BEG_EVENTS).image },
         screen: isAlive ? 'main' : 'game-over',
       };
     }
@@ -2915,7 +2922,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             dayActions: state.maxDayActions,
             eventResult: {
               text: L(`🚔 Un policier vous cueille la main sur ${target.label}. Garde à vue ! Vous perdez le reste de la journée${amende > 0 ? ` et ${amende}€ d'amende` : ' — insolvable, il vous laisse filer avec un avertissement'}.`, `🚔 A cop nabs you with your hand on ${target.labelEn}. Held in custody! You lose the rest of the day${amende > 0 ? ` and a €${amende} fine` : ' — broke, so he lets you off with a warning'}.`),
-              statChanges: statDelta, moneyChange: -amende, respectChange: -3,
+              statChanges: statDelta, moneyChange: -amende, respectChange: -3, image: '/assets/result-steal-police.webp',
             },
             screen: isAlive ? 'main' : 'game-over',
           };
@@ -2928,7 +2935,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state,
           character: { ...c, stats: newStats, respect: c.respect - 2, alive: isAlive },
-          eventResult: { text: L(`🚨 Raté ! Repéré en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoché.`, `🚨 Failed! Spotted trying to steal ${target.labelEn}, you flee amid insults, a little battered.`), statChanges: statDelta, respectChange: -2 },
+          eventResult: { text: L(`🚨 Raté ! Repéré en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoché.`, `🚨 Failed! Spotted trying to steal ${target.labelEn}, you flee amid insults, a little battered.`), statChanges: statDelta, respectChange: -2, image: '/assets/result-steal-fail.webp' },
           screen: isAlive ? 'main' : 'game-over',
         };
       }
@@ -2945,7 +2952,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...c, stats: newStats, money: c.money + moneyDelta, respect: c.respect + respectDelta },
-        eventResult: { text, statChanges: statDelta, moneyChange: moneyDelta, respectChange: respectDelta },
+        eventResult: { text, statChanges: statDelta, moneyChange: moneyDelta, respectChange: respectDelta, image: '/assets/result-steal-success.webp' },
         screen: 'main',
       };
     }
@@ -3333,7 +3340,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           character: { ...c, inventory, money: c.money + lootMoney, respect: c.respect + lootRespect },
           currentCombat: null,
           combatLog: logs,
-          eventResult: { text: L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim()), moneyChange: lootMoney, respectChange: lootRespect },
+          eventResult: { text: L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim()), moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
           screen: 'main',
         };
       }
