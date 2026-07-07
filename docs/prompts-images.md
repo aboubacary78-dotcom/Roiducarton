@@ -1,52 +1,85 @@
-# Prompts d'images — dioramas carton (Le Roi du Carton)
+# Prompts d'images — Le Roi du Carton (pour Manus)
 
-Ces images manquent encore pour certains **résultats** (vol, mendicité-police,
-événements-légende). Le code les référence déjà : dès que tu déposes le fichier
-au bon nom dans `client/public/assets/`, il s'affiche automatiquement. Tant
-qu'un fichier est absent, le jeu retombe proprement sur une scène dessinée.
+Manus connaît déjà la **DA** (diorama miniature en carton kraft, personnages en
+carton découpé à visage feutre, guirlande lumineuse, lumière chaude, humour noir
+de la rue). Donc ci-dessous : surtout les **scènes**, avec le **nom de fichier
+exact** attendu par le code.
 
-## Comment procéder
-1. Génère chaque image avec ton outil (Midjourney, DALL·E, SDXL…), en
-   **collant le préambule de style + la description de la scène**.
-2. Format conseillé : **paysage 3:2**, exporté en **`.webp`** (ou `.png`/`.jpg`,
-   je convertirai).
-3. Nomme le fichier **exactement** comme indiqué (colonne « Fichier »).
-4. Renvoie-moi les fichiers : je les place dans `client/public/assets/` et je
-   vérifie le rendu en jeu.
+## Règles
+- Format **paysage 3:2**, export **`.webp`** de préférence (sinon png/jpg, je
+  convertis).
+- Garde le **même personnage SDF** (barbe, manteau rapiécé) que sur les images
+  existantes, et le même éclairage/guirlande.
+- Nomme les fichiers **exactement** comme la colonne « Fichier ».
+- Dépose tout dans `client/public/assets/`. Le code affiche automatiquement dès
+  que le fichier est là (repli sur dessin tant qu'il manque).
 
-## Préambule de style (à mettre au début de CHAQUE prompt)
-> Handmade miniature diorama, everything built entirely from brown corrugated
-> cardboard and kraft paper. Characters are cardboard cut-out puppets with
-> hand-drawn black marker faces, frayed edges, visible cardboard corrugation,
-> bits of twine, masking tape and staples. Warm tungsten lighting with a string
-> of tiny glowing fairy lights, cozy but gritty homeless-street mood, gentle
-> dark humor. Macro product photography, shallow depth of field, soft warm
-> shadows, slightly desaturated warm brown palette, photorealistic. 3:2 landscape.
-
-*(Astuce cohérence : garde les mêmes réglages/seed d'une image à l'autre, et le
-même « personnage SDF » en carton — barbe, manteau rapiécé — que sur les images
-déjà présentes `exp-*` / `combat-*`.)*
+Rappel de style à préfixer si besoin :
+> Handmade miniature cardboard diorama, brown kraft & corrugated cardboard,
+> cut-out puppet characters with hand-drawn marker faces, warm tungsten light,
+> tiny fairy-light string, shallow depth of field, photorealistic, gentle dark
+> humor, 3:2 landscape.
 
 ---
 
-## Images à générer (8)
+## A. Résultats d'action (8)
 
-| # | Fichier | Scène (à ajouter après le préambule) |
-|---|---------|--------------------------------------|
-| 1 | `result-steal-success.webp` | A cardboard homeless man sneaking away with a stolen item (an apple / a baguette) hidden under his patched coat, a sly satisfied grin on his marker face, glancing over his shoulder in a cardboard alley. Triumphant but sneaky. |
-| 2 | `result-steal-fail.webp` | The cardboard homeless man caught stealing, fleeing in panic while an angry cardboard shopkeeper and passers-by shout and point; a dropped cardboard apple mid-air. Chaos, shame, motion. |
-| 3 | `result-steal-police.webp` | A stern cardboard police officer gripping the cardboard homeless man by the arm, handcuffs of twisted wire, a tiny cardboard police car with a glowing red light in the background. Custody, resignation. |
-| 4 | `result-beg-police.webp` | A cardboard police officer waving the cardboard beggar away from a cardboard sidewalk, an overturned cardboard hat with a few coins spilling out, "MOVE ALONG" mood. Disappointment. |
-| 5 | `legend-graffiti.webp` | A crumbling cardboard wall with graffiti drawn in marker: "ROI DU CARTON", a small cardboard crown doodle, the cardboard homeless man standing before it in quiet respect. Reverent, nostalgic. |
-| 6 | `legend-ancien.webp` | An old wise cardboard homeless man with a long frayed beard sitting on a cardboard crate, telling a story, gesturing; the player's cardboard character listening. Warm, mentor mood. |
-| 7 | `legend-carton.webp` | A worn-out cardboard box shrine under a cardboard porch, a marker inscription on it, a tiny cardboard candle and coin beside it, like a street relic / pilgrimage spot. Solemn, tender. |
-| 8 | `legend-pari.webp` | Two cardboard homeless men shaking hands over a bet, one coin between them, grinning marker faces, a cardboard alley with fairy lights. Playful, streetwise. |
+| Fichier | Scène |
+|---------|-------|
+| `result-steal-success.webp` | Le SDF en carton s'éloigne, l'objet volé (pomme/baguette) planqué sous son manteau rapiécé, petit sourire malin, regard en coin, ruelle en carton. Fier mais discret. |
+| `result-steal-fail.webp` | Le SDF pris en flagrant délit s'enfuit, un commerçant en carton furieux et des passants qui crient et pointent du doigt ; une pomme en carton qui tombe. Chaos, honte. |
+| `result-steal-police.webp` | Un policier en carton sévère tient le SDF par le bras, menottes en fil de fer, une petite voiture de police en carton avec un gyrophare rouge lumineux au fond. Garde à vue. |
+| `result-beg-police.webp` | Un policier en carton fait « circulez » au mendiant assis, un chapeau renversé avec quelques pièces qui s'échappent. Déception. |
+| `legend-graffiti.webp` | Un mur de carton décrépi avec un graffiti au feutre « ROI DU CARTON » + une petite couronne dessinée ; le SDF le contemple, respectueux. Nostalgique. |
+| `legend-ancien.webp` | Un vieux SDF en carton à la longue barbe effilochée, assis sur une caisse, raconte une histoire en gesticulant ; le personnage l'écoute. Ambiance de mentor. |
+| `legend-carton.webp` | Une vieille boîte en carton usée en guise d'autel sous un porche en carton, une inscription au feutre, une bougie et une pièce à côté. Relique de rue, solennel. |
+| `legend-pari.webp` | Deux SDF en carton se serrent la main sur un pari, une pièce entre eux, sourires au feutre, ruelle avec guirlande. Complice, malin. |
+
+## B. Ennemis de la Bagarre (12)
+
+Chaque ennemi = version **en carton découpé**, en posture de menace/combat face
+au joueur, dans une ruelle/coin de rue en carton.
+
+| Fichier | Ennemi |
+|---------|--------|
+| `combat-commercant.webp` | Commerçant furieux en carton, tablier, manches retroussées, poing levé. |
+| `combat-rat-geant.webp` | Rat géant en carton (taille d'un petit chien), dents visibles, agressif. |
+| `combat-mouette-furibonde.webp` | Mouette furibonde en carton, ailes déployées, bec ouvert, veut le sandwich. |
+| `combat-chien-errant.webp` | Chien errant molosse en carton sans collier, crocs, babines retroussées. |
+| `combat-pigeon-alpha.webp` | Pigeon « chef de gang » en carton, air menaçant, roucoule (petit mais fier). |
+| `combat-voyou.webp` | Voyou de rue en carton, capuche, air louche, veut le spot. |
+| `combat-agent-securite.webp` | Agent de sécurité en carton zélé, badge, gilet, lampe torche. |
+| `combat-chat-gouttiere.webp` | Chat de gouttière en carton, petit mais vicieux, griffes sorties. |
+| `combat-raton.webp` | Raton laveur en carton, masque naturel, fouille une poubelle, effronté. |
+| `combat-concurrent.webp` | Autre SDF concurrent agressif en carton qui veut ton coin de rue. |
+| `combat-pickpocket.webp` | Pickpocket en carton, agile, main tendue vers une poche. |
+| `combat-squatteur.webp` | Squatteur territorial en carton dans un hangar, l'air possessif et menaçant. |
+
+## C. Morts personnalisées (7) — « la mort »
+
+Écran de fin. Le **personnage SDF en carton** mort/effondré, selon la cause,
+ambiance **mélancolique**, lumière froide/tamisée, poignante mais sobre.
+
+| Fichier | Cause | Scène |
+|---------|-------|-------|
+| `death-combat.webp` | Bagarre | Le SDF à terre après une bagarre, bleus au feutre, K.O., un adversaire en carton qui s'éloigne dans l'ombre. |
+| `death-hunger.webp` | Faim | Le SDF effondré, joues creuses, une boîte de conserve vide roulée à côté, ventre vide. |
+| `death-thirst.webp` | Soif | Le SDF affaissé près d'une fontaine en carton à sec, une bouteille vide, soleil dur. |
+| `death-exhaustion.webp` | Épuisement | Le SDF endormi pour toujours sur son carton-lit, corps épuisé, paisible. |
+| `death-cold.webp` | Froid | Le SDF figé sous la neige/le gel, guirlande givrée, souffle glacé, carton blanchi. |
+| `death-despair.webp` | Moral (mental) | Le SDF prostré, tête dans les mains, ombre lourde, ambiance très sombre, esprit brisé. |
+| `death-injury.webp` | Générique | Le SDF qui s'effondre doucement contre un mur de carton, le corps qui lâche. |
 
 ---
 
-## Optionnel (plus tard) — variantes réussite/échec par événement
-Si tu veux VRAIMENT une image différente selon l'issue de chaque rencontre
-(ex. « les chats se calment » vs « les chats t'attaquent »), c'est faisable mais
-c'est un gros lot (≈ 2 images × chaque événement). On peut le faire par vagues :
-dis-moi les événements prioritaires et je te sortirai les prompts correspondants
-sur le même modèle.
+## Total : 27 images
+- A. Résultats : 8
+- B. Ennemis : 12
+- C. Morts : 7
+
+Renvoie-les moi (même par lots), je les place et je vérifie le rendu en jeu.
+
+## Optionnel (plus tard)
+Variantes réussite/échec **par événement** (≈ 2 images × rencontre) : gros lot,
+à faire par vagues si tu veux que chaque issue ait sa propre image. Dis-moi les
+événements prioritaires.
