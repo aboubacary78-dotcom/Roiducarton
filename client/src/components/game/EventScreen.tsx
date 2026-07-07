@@ -1,6 +1,6 @@
 import { useGame, STAT_META, type Character, type EventChoice } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { useLang, tr, tc } from '@/lib/lang';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
@@ -58,6 +58,9 @@ export default function EventScreen() {
   const event = state.currentEvent ?? lastEventRef.current;
   const [boosted, setBoosted] = useState(false);
   const [loadingBoost, setLoadingBoost] = useState(false);
+  // Repli propre si l'image de l'événement n'existe pas encore (fichier absent).
+  const [imgError, setImgError] = useState(false);
+  useEffect(() => { setImgError(false); }, [event?.id]);
 
   async function activateBoost() {
     if (loadingBoost || boosted) return;
@@ -90,7 +93,7 @@ export default function EventScreen() {
       )}
 
       {/* Event illustration */}
-      {eventImage ? (
+      {eventImage && !imgError ? (
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -99,6 +102,7 @@ export default function EventScreen() {
           <img
             src={eventImage}
             alt={event.title}
+            onError={() => setImgError(true)}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
