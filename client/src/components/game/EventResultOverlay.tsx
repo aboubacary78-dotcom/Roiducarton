@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { playSuccess, playFail, playWin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
-import SceneIllustration, { sceneFor } from './SceneIllustration';
+import SceneIllustration, { sceneFor, moodFor } from './SceneIllustration';
 
 const FLAG_LABELS: Record<string, { fr: string; en: string }> = {
   'ami-jardinier': { fr: '🌱 Ami du jardinier', en: '🌱 Gardener\'s friend' },
@@ -25,12 +25,13 @@ export default function EventResultOverlay() {
   const result = state.eventResult;
   const [doubling, setDoubling] = useState(false);
 
-  // Son du résultat : fanfare de victoire, réussite ou échec.
+  // Son du résultat + petit encouragement : fanfare de victoire, réussite ou échec.
   useEffect(() => {
     if (!result) return;
     const positive = (result.moneyChange || 0) > 0 || (result.respectChange || 0) > 0 ||
       Object.values(result.statChanges || {}).reduce((s, v) => s + (v || 0), 0) > 0;
-    if (result.text.startsWith('Victoire')) playWin();
+    const isVictory = /^Victoire|^Victory/.test(result.text);
+    if (isVictory) playWin();
     else if (positive) playSuccess();
     else playFail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +90,7 @@ export default function EventResultOverlay() {
             transition={{ type: 'spring', delay: 0.05 }}
             className="relative w-full h-32 rounded-xl overflow-hidden mb-3 shadow-[0_3px_12px_rgba(58,42,30,0.12)]"
           >
-            <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} className="w-full h-full" sway />
+            <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} mood={moodFor(result.text, isPositive)} className="w-full h-full" sway />
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
             <span className="absolute top-2 right-2 text-2xl drop-shadow">{isPositive ? '✨' : '😓'}</span>
           </motion.div>
