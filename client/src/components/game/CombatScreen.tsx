@@ -8,6 +8,7 @@ import CardboardAvatar from './CardboardAvatar';
 import { getEquipped } from '@/lib/profile';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import { stampTap, liftHover } from '@/lib/anim';
+import { pushToast } from '@/lib/toast';
 
 /*
  * Combat « Dodge & Draw ».
@@ -104,7 +105,11 @@ function CombatScreenInner() {
             key={`dodge-${currentCombat.round}`}
             combat={currentCombat}
             character={character}
-            onDone={(hits) => dispatch({ type: 'DODGE_RESULT', hits })}
+            onDone={(hits) => {
+              if (hits === 0) pushToast(tr('Esquive parfaite !', 'Flawless dodge!'), { emoji: '✨', tone: 'good' });
+              else if (hits === 1) pushToast(tr('Bien esquivé !', 'Nicely dodged!'), { emoji: '🛡️', tone: 'good' });
+              dispatch({ type: 'DODGE_RESULT', hits });
+            }}
           />
         ) : (
           <CardHand

@@ -18,6 +18,7 @@ import {
 } from '@/lib/cosmetics';
 import { loadProfile, toggleEquip, type PlayerProfile } from '@/lib/profile';
 import { useLang, tr } from '@/lib/lang';
+import { pushToast } from '@/lib/toast';
 
 export default function WardrobeScreen() {
   const { state, dispatch } = useGame();
@@ -32,7 +33,12 @@ export default function WardrobeScreen() {
 
   const equip = (slot: AccessorySlot, id: string) => {
     playClick();
+    const wasEquipped = profile.equipped[slot] === id;
     setProfile({ ...toggleEquip(slot, id) });
+    pushToast(
+      wasEquipped ? tr('Accessoire retiré', 'Accessory removed') : tr('Accessoire équipé !', 'Accessory equipped!'),
+      { emoji: wasEquipped ? '👕' : '✨', tone: wasEquipped ? 'info' : 'good' },
+    );
   };
 
   return (

@@ -23,6 +23,7 @@ import TutorialOverlay from '@/components/game/TutorialOverlay';
 import WeatherOverlay from '@/components/game/WeatherOverlay';
 import WardrobeScreen from '@/components/game/WardrobeScreen';
 import AchievementToast from '@/components/game/AchievementToast';
+import Toaster from '@/components/game/Toaster';
 
 // Rendu de l'écran courant. Les superpositions (résultat, météo, tutoriel,
 // succès) sont gérées à part pour ne pas être rejouées à chaque transition.
@@ -84,6 +85,9 @@ export default function Home() {
 
         {/* Notification de succès (accessoire débloqué), au-dessus de tout écran */}
         <AchievementToast />
+
+        {/* Retours flash (toasts) des actions */}
+        <Toaster />
 
         {state.eventResult && state.screen !== 'game-over' && <EventResultOverlay />}
       </div>

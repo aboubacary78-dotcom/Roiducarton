@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playCoin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import SceneIllustration, { sceneForLocation } from './SceneIllustration';
+import { pushToast } from '@/lib/toast';
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string; labelEn: string }> = {
   food: { bg: '#4A9B5F15', color: '#4A9B5F', label: 'Nourriture', labelEn: 'Food' },
@@ -47,6 +48,10 @@ export default function ShopScreen() {
     setTimeout(() => setBuyAnimation(null), 600);
     playCoin();
     dispatch({ type: 'BUY_ITEM', shopItem: item, actualPrice });
+    pushToast(
+      `${tr('Acheté', 'Bought')} : ${tc(item.name)}${actualPrice > 0 ? ` (−${actualPrice}€)` : ''}`,
+      { emoji: '🛍️', tone: 'good' },
+    );
   };
 
   const handleShopEvent = () => {
