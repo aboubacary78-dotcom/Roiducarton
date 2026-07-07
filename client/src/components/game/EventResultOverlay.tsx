@@ -83,14 +83,19 @@ export default function EventResultOverlay() {
           className="craft-card-solid p-5 max-w-sm w-full"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Illustration de résultat (générée, DA carton) */}
+          {/* Illustration de résultat : la vraie image (diorama) de l'événement
+              si elle existe, sinon une scène générée en repli. */}
           <motion.div
             initial={{ scale: 0.94, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', delay: 0.05 }}
             className="relative w-full h-32 rounded-xl overflow-hidden mb-3 shadow-[0_3px_12px_rgba(58,42,30,0.12)]"
           >
-            <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} mood={moodFor(result.text, isPositive)} className="w-full h-full" sway />
+            {result.image ? (
+              <img src={result.image} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} mood={moodFor(result.text, isPositive)} className="w-full h-full" sway />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
             <span className="absolute top-2 right-2 text-2xl drop-shadow">{isPositive ? '✨' : '😓'}</span>
           </motion.div>

@@ -550,7 +550,10 @@ export interface GameState {
   characterChoices: Character[];
   currentEvent: GameEvent | null;
   currentCombat: CombatState | null;
-  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean } | null;
+  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; image?: string } | null;
+  // Bilan de la nuit affiché après « Jour suivant » : nouveau jour, météo,
+  // pertes/gains de jauges de la nuit, et éventuels effets de traits.
+  daySummary: { day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number; notes: string[]; notesEn: string[] } | null;
   combatLog: string[];
   dayActions: number;
   maxDayActions: number;
@@ -2752,6 +2755,7 @@ type GameAction =
   | { type: 'TRAVEL'; location: string }
   | { type: 'CHOOSE_EVENT'; choiceIndex: number; boosted?: boolean }
   | { type: 'DISMISS_RESULT' }
+  | { type: 'DISMISS_DAY_SUMMARY' }
   | { type: 'NEXT_DAY' }
   | { type: 'SET_SCREEN'; screen: GameScreen }
   | { type: 'USE_ITEM'; itemId: string }
@@ -3049,13 +3053,18 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         screen: isAlive ? 'event' : 'game-over',
         character: { ...state.character, stats: newStats, money: newMoney, respect: newRespect, inventory: newInventory, alive: isAlive, activeFlags: newFlags },
         currentEvent: null,
-        eventResult: { text: outcome.text, statChanges: outcome.statChanges, moneyChange: outcome.moneyChange, respectChange: outcome.respectChange },
+        // On réutilise l'image (diorama) de l'événement sur l'écran de résultat
+        // quand elle existe — même DA que la rencontre.
+        eventResult: { text: outcome.text, statChanges: outcome.statChanges, moneyChange: outcome.moneyChange, respectChange: outcome.respectChange, image: state.currentEvent.image },
         pendingFollowUp,
       };
     }
 
     case 'DISMISS_RESULT':
       return { ...state, eventResult: null, screen: state.character?.alive ? 'main' : 'game-over' };
+
+    case 'DISMISS_DAY_SUMMARY':
+      return { ...state, daySummary: null };
 
     case 'NEXT_DAY': {
       if (!state.character) return state;
@@ -3120,15 +3129,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         clearSave();
       }
 
+      // Bilan de la nuit : variations de jauges (par rapport à avant la nuit).
+      const deltas: Partial<Stats> = {};
+      (Object.keys(decayedStats) as (keyof Stats)[]).forEach((k) => {
+        const d = decayedStats[k] - ch.stats[k];
+        if (d !== 0) deltas[k] = d;
+      });
+
       return {
         ...state,
         character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney },
         dayActions: 0,
         screen: isAlive ? 'main' : 'game-over',
         weather: nextWeather,
-        eventResult: isAlive && notes.length > 0
-          ? { text: L(notes.join(' '), notesEn.join(' ')), moneyChange: bonusMoney || undefined }
-          : state.eventResult,
+        daySummary: isAlive
+          ? { day: ch.day + 1, weather: nextWeather, deltas, moneyChange: bonusMoney, notes, notesEn }
+          : null,
       };
     }
 
@@ -3456,6 +3472,7 @@ const initialState: GameState = {
   currentEvent: null,
   currentCombat: null,
   eventResult: null,
+  daySummary: null,
   combatLog: [],
   dayActions: 0,
   maxDayActions: 3,
