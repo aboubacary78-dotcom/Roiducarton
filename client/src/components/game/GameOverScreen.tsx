@@ -20,6 +20,19 @@ export default function GameOverScreen() {
   const [deathMsgIdx] = useState(() => Math.floor(Math.random() * DEATH_MESSAGES.length));
   const deathMsg = tr(DEATH_MESSAGES[deathMsgIdx].fr, DEATH_MESSAGES[deathMsgIdx].en);
   const [reviving, setReviving] = useState(false);
+  const [deathImgOk, setDeathImgOk] = useState(true);
+
+  // Catégorie de mort → image (diorama) personnalisée. Repli sur le 💀 si le
+  // fichier n'existe pas encore.
+  const deathCat = state.deathCause ? 'combat'
+    : !char ? 'injury'
+    : char.stats.mental <= 0 ? 'despair'
+    : char.stats.hunger <= 8 ? 'hunger'
+    : char.stats.thirst <= 8 ? 'thirst'
+    : char.stats.sleep <= 8 ? 'exhaustion'
+    : (state.weather === 'snow' || state.weather === 'storm') ? 'cold'
+    : 'injury';
+  const deathImg = `/assets/death-${deathCat}.webp`;
 
   // Pub interstitielle à l'arrivée sur l'écran de fin (entre deux parties).
   useEffect(() => {
@@ -73,15 +86,28 @@ export default function GameOverScreen() {
       className="min-h-screen p-5 flex flex-col items-center justify-center gap-4"
       style={{ background: 'radial-gradient(95% 45% at 50% 0%, rgba(217,79,79,0.16), transparent 60%), linear-gradient(180deg, #3A2436 0%, #1C1322 100%)' }}
     >
-      {/* Death Icon */}
-      <motion.div
-        initial={{ scale: 0, rotate: -180 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: 'spring', damping: 12, delay: 0.2 }}
-        className="text-5xl"
-      >
-        💀
-      </motion.div>
+      {/* Image de mort personnalisée (diorama) si disponible, sinon 💀 */}
+      {deathImgOk ? (
+        <motion.div
+          initial={{ scale: 0.92, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', damping: 18, delay: 0.15 }}
+          className="w-full max-w-sm h-40 rounded-xl overflow-hidden relative shadow-[0_6px_20px_rgba(0,0,0,0.35)]"
+        >
+          <img src={deathImg} alt="" onError={() => setDeathImgOk(false)} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+          <span className="absolute bottom-2 right-3 text-2xl drop-shadow">💀</span>
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', damping: 12, delay: 0.2 }}
+          className="text-5xl"
+        >
+          💀
+        </motion.div>
+      )}
 
       {/* Title */}
       <motion.h1

@@ -687,6 +687,24 @@ const ENEMIES: Enemy[] = [
   { name: 'Chat Sauvage', emoji: '🐈', health: 18, attack: 9, description: 'Pas de collier, pas de maître, pas de pitié.', image: '/assets/combat-chat-sauvage-fFoiY6tVx6eNamsMbyGbNq.webp', loot: { money: 2, respect: 2 } },
 ];
 
+// Images (dioramas) des ennemis effectivement affrontés via « Bagarre » mais
+// qui n'en avaient pas encore. Nom d'ennemi → fichier à venir dans /assets.
+// Repli automatique sur la scène dessinée tant que le fichier est absent.
+const COMBAT_IMAGES: Record<string, string> = {
+  'Commerçant Furieux': '/assets/combat-commercant.webp',
+  'Rat Géant': '/assets/combat-rat-geant.webp',
+  'Mouette Furibonde': '/assets/combat-mouette-furibonde.webp',
+  'Chien Errant': '/assets/combat-chien-errant.webp',
+  'Pigeon Alpha': '/assets/combat-pigeon-alpha.webp',
+  'Voyou du Coin': '/assets/combat-voyou.webp',
+  'Agent de Sécurité': '/assets/combat-agent-securite.webp',
+  'Chat de Gouttière': '/assets/combat-chat-gouttiere.webp',
+  'Raton Laveur': '/assets/combat-raton.webp',
+  'Concurrent Agressif': '/assets/combat-concurrent.webp',
+  'Pickpocket': '/assets/combat-pickpocket.webp',
+  'Squatteur Territorial': '/assets/combat-squatteur.webp',
+};
+
 // ============ MOTIFS DE PROJECTILES (phase d'esquive) ============
 // Chaque ennemi tire selon un « motif » : type de projectile, cadence,
 // trajectoire, vitesse. Le composant DodgeArena lit ce descripteur pour
@@ -2633,8 +2651,9 @@ export function generateHand(character: Character, combat: CombatState, count: n
 // et par les répercussions de vol) — une seule source de vérité.
 function makeCombatState(enemy: Enemy, character: Character): CombatState {
   const weapon = character.inventory.find(i => i.type === 'weapon');
-  // Image de l'ennemi : la sienne, sinon celle de la fiche canonique du même nom.
-  const image = enemy.image || ENEMIES.find(e => e.name === enemy.name)?.image;
+  // Image de l'ennemi : la sienne, sinon la fiche canonique, sinon la table
+  // COMBAT_IMAGES (ennemis de la « Bagarre » dont l'image est à générer).
+  const image = enemy.image || ENEMIES.find(e => e.name === enemy.name)?.image || COMBAT_IMAGES[enemy.name];
   return {
     enemyName: enemy.name,
     enemyEmoji: enemy.emoji,
