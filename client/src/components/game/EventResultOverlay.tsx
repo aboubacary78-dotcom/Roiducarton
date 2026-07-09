@@ -24,10 +24,12 @@ export default function EventResultOverlay() {
   useLang();
   const result = state.eventResult;
   const [doubling, setDoubling] = useState(false);
-  // Si l'image de résultat n'existe pas encore (fichier absent), on retombe
-  // proprement sur la scène générée.
-  const [imgError, setImgError] = useState(false);
-  useEffect(() => { setImgError(false); }, [result?.image]);
+  // Chaîne de replis pour l'image : variante réussite/échec → image de la
+  // rencontre → scène dessinée. errorCount compte les échecs de chargement.
+  const [errorCount, setErrorCount] = useState(0);
+  useEffect(() => { setErrorCount(0); }, [result?.image]);
+  const candidates = [result?.image, result?.fallbackImage].filter(Boolean) as string[];
+  const shownImage = errorCount < candidates.length ? candidates[errorCount] : null;
 
   // Son du résultat + petit encouragement : fanfare de victoire, réussite ou échec.
   useEffect(() => {
@@ -95,8 +97,8 @@ export default function EventResultOverlay() {
             transition={{ type: 'spring', delay: 0.05 }}
             className="relative w-full h-32 rounded-xl overflow-hidden mb-3 shadow-[0_3px_12px_rgba(58,42,30,0.12)]"
           >
-            {result.image && !imgError ? (
-              <img src={result.image} alt="" className="w-full h-full object-cover" onError={() => setImgError(true)} />
+            {shownImage ? (
+              <img key={shownImage} src={shownImage} alt="" className="w-full h-full object-cover" onError={() => setErrorCount((n) => n + 1)} />
             ) : (
               <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} mood={moodFor(result.text, isPositive)} className="w-full h-full" sway />
             )}

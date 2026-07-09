@@ -552,7 +552,7 @@ export interface GameState {
   characterChoices: Character[];
   currentEvent: GameEvent | null;
   currentCombat: CombatState | null;
-  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; image?: string } | null;
+  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; image?: string; fallbackImage?: string } | null;
   // Bilan de la nuit affiché après « Jour suivant » : nouveau jour, météo,
   // pertes/gains de jauges de la nuit, et éventuels effets de traits.
   daySummary: { day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number; notes: string[]; notesEn: string[] } | null;
@@ -3074,14 +3074,20 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         clearSave();
       }
 
+      // Image du résultat : d'abord la VARIANTE réussite/échec de l'événement
+      // (result-<id>-good/bad.webp, générée par vagues), sinon l'image de la
+      // rencontre, sinon la scène dessinée (chaîne de replis côté overlay).
+      const outcomeScore = (outcome.moneyChange || 0) +
+        Object.values(outcome.statChanges || {}).reduce((a, b) => a + (b || 0), 0) +
+        (outcome.respectChange || 0);
+      const variant = `/assets/result-${state.currentEvent.id}-${outcomeScore > 0 ? 'good' : 'bad'}.webp`;
+
       return {
         ...state,
         screen: isAlive ? 'event' : 'game-over',
         character: { ...state.character, stats: newStats, money: newMoney, respect: newRespect, inventory: newInventory, alive: isAlive, activeFlags: newFlags },
         currentEvent: null,
-        // On réutilise l'image (diorama) de l'événement sur l'écran de résultat
-        // quand elle existe — même DA que la rencontre.
-        eventResult: { text: outcome.text, statChanges: outcome.statChanges, moneyChange: outcome.moneyChange, respectChange: outcome.respectChange, image: state.currentEvent.image },
+        eventResult: { text: outcome.text, statChanges: outcome.statChanges, moneyChange: outcome.moneyChange, respectChange: outcome.respectChange, image: variant, fallbackImage: state.currentEvent.image },
         pendingFollowUp,
       };
     }
