@@ -61,6 +61,9 @@ function CombatScreenInner() {
   const { state, dispatch } = useGame();
   useLang();
   const { currentCombat, character } = state;
+  // Portrait (diorama) de l'ennemi ; repli sur l'emoji si le fichier manque.
+  const [imgError, setImgError] = useState(false);
+  useEffect(() => { setImgError(false); }, [currentCombat?.enemyName]);
   if (!currentCombat || !character) return null;
 
   const hpPercent = (currentCombat.enemyHealth / currentCombat.enemyMaxHealth) * 100;
@@ -74,9 +77,19 @@ function CombatScreenInner() {
         animate={{ y: 0, opacity: 1 }}
         className="w-full max-w-sm craft-card p-3 flex items-center gap-3"
       >
-        <motion.span className="text-4xl" animate={{ rotate: [0, -4, 4, 0] }} transition={{ repeat: Infinity, duration: 2.6 }}>
-          {currentCombat.enemyEmoji}
-        </motion.span>
+        {currentCombat.image && !imgError ? (
+          <motion.div
+            animate={{ rotate: [0, -2, 2, 0] }}
+            transition={{ repeat: Infinity, duration: 2.6 }}
+            className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border-2 border-[#3A2A1E]/20 shadow"
+          >
+            <img src={currentCombat.image} alt="" onError={() => setImgError(true)} className="w-full h-full object-cover" />
+          </motion.div>
+        ) : (
+          <motion.span className="text-4xl" animate={{ rotate: [0, -4, 4, 0] }} transition={{ repeat: Infinity, duration: 2.6 }}>
+            {currentCombat.enemyEmoji}
+          </motion.span>
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-base font-bold text-[#2A1F1A] truncate">{tc(currentCombat.enemyName)}</h2>
