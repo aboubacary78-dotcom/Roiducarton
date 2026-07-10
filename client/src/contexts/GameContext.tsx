@@ -2905,11 +2905,23 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'STEAL': {
       if (!state.character || state.dayActions >= state.maxDayActions) return state;
-      // Ouvre le mini-jeu du casse (voir StealHeist). Chaque tentative
-      // incrémente le compteur : plus on vole, plus la surveillance se durcit.
+      // Chaque tentative incrémente le compteur (durcit le mini-jeu).
+      const stealChar = { ...state.character, stealCount: (state.character.stealCount ?? 0) + 1 };
+      // 1 fois sur 3 : un vol « à texte » (choix + risque) au lieu du mini-jeu,
+      // pour varier les occasions de voler.
+      if (Math.random() < 0.34) {
+        return {
+          ...state,
+          character: stealChar,
+          screen: 'event',
+          currentEvent: randomFromArray(STEAL_EVENTS),
+          dayActions: state.dayActions + 1,
+        };
+      }
+      // Sinon : le mini-jeu du casse (voir StealHeist).
       return {
         ...state,
-        character: { ...state.character, stealCount: (state.character.stealCount ?? 0) + 1 },
+        character: stealChar,
         screen: 'steal-game',
         dayActions: state.dayActions + 1,
       };
