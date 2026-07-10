@@ -2892,10 +2892,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money));
         clearSave();
       }
+      // Variante réussite/échec par scène de manche (result-beg-<id>-good/bad),
+      // avec repli sur l'image de base de la scène.
+      const begEvt = randomFromArray(BEG_EVENTS);
       return {
         ...state,
         character: { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive },
-        eventResult: { text: prefix + tc(flavorFrom(BEG_EVENTS, money > 0)) + weatherNote + dignityNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta, image: randomFromArray(BEG_EVENTS).image },
+        eventResult: { text: prefix + tc(flavorFrom(BEG_EVENTS, money > 0)) + weatherNote + dignityNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta, image: `/assets/result-${begEvt.id}-${money > 0 ? 'good' : 'bad'}.webp`, fallbackImage: begEvt.image },
         screen: isAlive ? 'main' : 'game-over',
       };
     }
