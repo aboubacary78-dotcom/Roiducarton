@@ -2423,7 +2423,9 @@ function fillLegend(s: string, legend: { name: string; days: number }): string {
 function makeLegendEvent(legend: { name: string; days: number }): GameEvent {
   const t = randomFromArray(LEGEND_TEMPLATES);
   return {
-    id: `${t.id}-${legend.name}`,
+    // id stable (sans le nom du recordman) pour que le chemin des variantes
+    // d'images (result-<id>-good/bad.webp) corresponde à un fichier fixe.
+    id: t.id,
     title: tc(t.title),
     type: t.type,
     image: `/assets/${t.id}.webp`,
