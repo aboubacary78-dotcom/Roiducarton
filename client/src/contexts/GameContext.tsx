@@ -113,10 +113,79 @@ export interface EventOutcome {
   followUpEventId?: string;
 }
 
-// Combat « Dodge & Draw » : chaque round = une phase d'esquive (arène de
-// projectiles, jouée en temps réel dans le composant) puis une phase de
-// riposte (on pioche des cartes selon la performance et on en joue une).
-export type CombatPhase = 'dodge' | 'draw';
+// Combat « Signe, Esquive & Riposte » : chaque manche s'ouvre sur un duel de
+// signes (pierre-feuille-ciseaux thématisé, informé par les tendances de
+// l'ennemi et un indice faillible). Manche gagnée → riposte aux cartes.
+// Manche perdue → esquive de rattrapage en temps réel (arène de projectiles) ;
+// parfaite, elle vole une riposte réduite. Les traits débloquent en plus un
+// coup spécial à charges (voir SPECIAL_DEFS).
+export type CombatPhase = 'sign' | 'dodge' | 'draw';
+
+// ---- Duel de signes ----
+// Triangle façon baston : Châtaigne bat Feinte, Feinte bat Garde,
+// Garde bat Châtaigne. Les « tells » sont les indices affichés avant la manche.
+export type SignId = 'strike' | 'feint' | 'guard';
+
+export interface SignDef {
+  id: SignId;
+  name: string; nameEn: string;
+  emoji: string;
+  beats: SignId;
+  tells: string[]; tellsEn: string[];
+}
+
+export const SIGNS: Record<SignId, SignDef> = {
+  strike: {
+    id: 'strike', name: 'Châtaigne', nameEn: 'Haymaker', emoji: '👊', beats: 'feint',
+    tells: ['Il serre le poing…', 'Ses épaules se bandent…'],
+    tellsEn: ['It clenches a fist…', 'Its shoulders coil…'],
+  },
+  feint: {
+    id: 'feint', name: 'Feinte', nameEn: 'Feint', emoji: '🎭', beats: 'guard',
+    tells: ['Son regard glisse de côté…', 'Il esquisse un pas chaloupé…'],
+    tellsEn: ['Its gaze slides sideways…', 'It sways, shifting its weight…'],
+  },
+  guard: {
+    id: 'guard', name: 'Garde', nameEn: 'Block', emoji: '📦', beats: 'strike',
+    tells: ['Il se ramasse derrière sa garde…', 'Il recule d\'un pas, bien couvert…'],
+    tellsEn: ['It hunkers behind its guard…', 'It steps back, covered up…'],
+  },
+};
+
+// Coups spéciaux : un seul par personnage (premier trait correspondant),
+// chargé en gagnant une manche au signe, 2 usages max par combat.
+export type SpecialId = 'haleine' | 'piege' | 'pas-de-cote' | 'desescalade';
+
+export interface SpecialDef {
+  id: SpecialId;
+  traitId: string;
+  name: string; nameEn: string;
+  emoji: string;
+  desc: string; descEn: string;
+}
+
+export const SPECIAL_DEFS: SpecialDef[] = [
+  {
+    id: 'haleine', traitId: 'haleine', name: 'Haleine Redoutable', nameEn: 'Dreadful Breath', emoji: '💨',
+    desc: 'Bat Châtaigne et Feinte (il suffoque), mais perd contre Garde. S\'il encaisse : sonné, son prochain signe est télégraphié.',
+    descEn: 'Beats Haymaker and Feint (the foe gags), but loses to Block. If it lands: stunned, the foe\'s next sign is telegraphed.',
+  },
+  {
+    id: 'piege', traitId: 'bricoleur', name: 'Piège à Carton', nameEn: 'Cardboard Trap', emoji: '🪤',
+    desc: 'Pose un piège pour 2 manches : à sa prochaine Châtaigne, l\'ennemi se blesse tout seul.',
+    descEn: 'Sets a trap for 2 rounds: on its next Haymaker, the foe hurts itself.',
+  },
+  {
+    id: 'pas-de-cote', traitId: 'agile', name: 'Pas de Côté', nameEn: 'Side Step', emoji: '🌀',
+    desc: 'Annule la manche et révèle à coup sûr le signe de l\'ennemi.',
+    descEn: 'Cancels the round and reveals the foe\'s sign for certain.',
+  },
+  {
+    id: 'desescalade', traitId: 'charismatique', name: 'Désescalade', nameEn: 'De-escalation', emoji: '🕊️',
+    desc: 'Conclure en parlant : selon votre dignité et votre respect, le combat peut s\'arrêter là — avec le respect en prime.',
+    descEn: 'Talk it out: with enough dignity and respect the fight may end right here — with extra respect on top.',
+  },
+];
 
 export interface CombatState {
   enemyName: string;
@@ -139,11 +208,25 @@ export interface CombatState {
   hand: string[];
   // Bonus d'attaque temporaire (Cri de Guerre) appliqué au prochain coup.
   atkBuff: number;
-  // Malus infligé à l'ennemi (intimidation/haleine) : réduit ses projectiles
-  // au prochain round.
+  // Ennemi sonné : son prochain signe est télégraphié à coup sûr (et ses
+  // projectiles raréfiés si une esquive survient avant).
   enemyStunned: boolean;
   // Réduction d'attaque ennemie cumulée (Insulte Ciblée).
   enemyAtkDebuff: number;
+  // Duel de signes : signe (déjà) choisi par l'ennemi pour la manche en cours,
+  // indice affiché (peut mentir sauf tellSure) et nonce pour re-clefer l'UI.
+  enemySign: SignId;
+  tellSign: SignId | null;
+  tellSure: boolean;
+  signNonce: number;
+  // Coup spécial du personnage (déterminé par ses traits, null sinon).
+  specialId: SpecialId | null;
+  specialCharged: boolean;
+  specialUses: number;
+  // Piège à Carton : manches restantes où l'ennemi peut marcher dedans.
+  trapRounds: number;
+  // Multiplicateur de densité de la prochaine esquive (spécial contré = 1.2).
+  dodgePenalty: number;
 }
 
 export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
@@ -743,6 +826,45 @@ export function getPattern(enemy: { name: string; emoji: string; attack: number;
   if (['🦝', '🐕', '🐀'].includes(enemy.emoji)) return 'beast';
   if (enemy.attack >= 11 || ['🧔', '👮', '🔦', '🤡'].includes(enemy.emoji)) return 'brute';
   return 'beast';
+}
+
+// ---- Duel de signes : tendances & indices ----
+// Chaque ennemi a ses habitudes au duel, déduites de sa silhouette : les
+// vigiles se couvrent, les brutes cognent, les oiseaux feintent… C'est ce qui
+// transforme le hasard en lecture : on apprend les ennemis, puis on anticipe.
+function signTendency(enemy: { name: string; emoji: string; attack: number; health: number }): Record<SignId, number> {
+  if (/vigile|agent|s[ée]curit|commer[çc]ant|polic|concierge/i.test(enemy.name)) {
+    return { strike: 0.3, feint: 0.15, guard: 0.55 };
+  }
+  switch (getPattern(enemy)) {
+    case 'bird': return { strike: 0.2, feint: 0.55, guard: 0.25 };
+    case 'small': return { strike: 0.3, feint: 0.5, guard: 0.2 };
+    case 'drunk': return { strike: 0.5, feint: 0.3, guard: 0.2 };
+    case 'beast': return { strike: 0.45, feint: 0.35, guard: 0.2 };
+    default: return { strike: 0.55, feint: 0.25, guard: 0.2 }; // brute
+  }
+}
+
+// Tire le signe de l'ennemi pour la manche et l'indice affiché. L'indice sort
+// une fois sur deux (75 % avec un bon flair), dit vrai à 70 %, et devient
+// certain quand l'ennemi est sonné (ou après un Pas de Côté).
+export function rollSignRound(
+  enemy: { name: string; emoji: string; attack: number; health: number },
+  character: Character,
+  guaranteed: boolean,
+): { enemySign: SignId; tellSign: SignId | null; tellSure: boolean } {
+  const tendency = signTendency(enemy);
+  const all: SignId[] = ['strike', 'feint', 'guard'];
+  let r = Math.random();
+  let enemySign: SignId = 'strike';
+  for (const id of all) { r -= tendency[id]; if (r <= 0) { enemySign = id; break; } }
+  const sharp = character.traits.some(t => t.id === 'paranoiaque' || t.id === 'nez-sensible');
+  const tellChance = guaranteed ? 1 : 0.5 + (sharp ? 0.25 : 0);
+  if (Math.random() >= tellChance) return { enemySign, tellSign: null, tellSure: false };
+  const truthful = guaranteed || Math.random() < 0.7;
+  const others = all.filter(s => s !== enemySign);
+  const tellSign = truthful ? enemySign : others[Math.floor(Math.random() * others.length)];
+  return { enemySign, tellSign, tellSure: guaranteed };
 }
 
 // Prix de revente d'un objet : 60% de sa valeur (empêche tout aller-retour
@@ -2586,8 +2708,8 @@ export const CARD_DEFS: CombatCard[] = [
   },
   {
     id: 'combo', name: 'Feinte + Coup Bas', nameEn: 'Feint + Low Blow', emoji: '🎭', kind: 'attack',
-    desc: 'Combo dévastateur qui vous ouvre aussi une esquive facile.', descEn: 'Devastating combo that also buys you an easy dodge.',
-    estimate: (c, k) => dmgLabel(Math.round(unarmedDamage(c, k) * 1.6), getLang() === 'en' ? ' + dodge' : ' + esquive'),
+    desc: 'Combo dévastateur : l\'ennemi sonné télégraphie son prochain signe.', descEn: 'Devastating combo: the stunned foe telegraphs its next sign.',
+    estimate: (c, k) => dmgLabel(Math.round(unarmedDamage(c, k) * 1.6), getLang() === 'en' ? ' + stun' : ' + sonné'),
     available: () => true,
   },
   {
@@ -2595,12 +2717,6 @@ export const CARD_DEFS: CombatCard[] = [
     desc: 'Vous vous galvanisez : votre prochaine attaque frappe plus fort.', descEn: 'You psych yourself up: your next attack hits harder.',
     estimate: () => getLang() === 'en' ? '+attack' : '+attaque',
     available: (c) => c.stats.mental > 15,
-  },
-  {
-    id: 'haleine', name: 'Haleine Redoutable', nameEn: 'Dreadful Breath', emoji: '💨', kind: 'debuff',
-    desc: 'Votre haleine sonne l\'ennemi : sa prochaine attaque sera molle.', descEn: 'Your breath stuns the foe: its next attack will be feeble.',
-    estimate: (c, k) => dmgLabel(Math.round(unarmedDamage(c, k) * 0.8), getLang() === 'en' ? ' + stun' : ' + étourdi'),
-    available: (c) => c.traits.some(t => t.id === 'haleine'),
   },
   {
     id: 'fortune', name: 'Arme de Fortune', nameEn: 'Makeshift Weapon', emoji: '🔧', kind: 'attack',
@@ -2656,6 +2772,8 @@ function makeCombatState(enemy: Enemy, character: Character): CombatState {
   // Image de l'ennemi : la sienne, sinon la fiche canonique, sinon la table
   // COMBAT_IMAGES (ennemis de la « Bagarre » dont l'image est à générer).
   const image = enemy.image || ENEMIES.find(e => e.name === enemy.name)?.image || COMBAT_IMAGES[enemy.name];
+  // Coup spécial du personnage : premier trait correspondant (voir SPECIAL_DEFS).
+  const special = SPECIAL_DEFS.find(s => character.traits.some(t => t.id === s.traitId));
   return {
     enemyName: enemy.name,
     enemyEmoji: enemy.emoji,
@@ -2667,12 +2785,19 @@ function makeCombatState(enemy: Enemy, character: Character): CombatState {
     loot: enemy.loot,
     image,
     round: 1,
-    phase: 'dodge',
+    phase: 'sign',
     pattern: getPattern(enemy),
     hand: [],
     atkBuff: 0,
     enemyStunned: false,
     enemyAtkDebuff: 0,
+    ...rollSignRound(enemy, character, false),
+    signNonce: 0,
+    specialId: special?.id ?? null,
+    specialCharged: false,
+    specialUses: 0,
+    trapRounds: 0,
+    dodgePenalty: 1,
   };
 }
 
@@ -2776,7 +2901,7 @@ type GameAction =
   | { type: 'EXPLORE' }
   | { type: 'BEG' }
   | { type: 'STEAL' }
-  | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot'; targetId: string }
+  | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot' | 'hot'; targetId: string }
   | { type: 'RESOLVE_BEG'; coins: number; copTapped: boolean }
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
@@ -2794,6 +2919,8 @@ type GameAction =
   | { type: 'RESET_SCORES' }
   | { type: 'CONTINUE_SAVE' }
   | { type: 'START_COMBAT'; enemy: Enemy }
+  | { type: 'PLAY_SIGN'; sign: SignId | 'special' }
+  | { type: 'FLEE_ATTEMPT' }
   | { type: 'DODGE_RESULT'; hits: number }
   | { type: 'PLAY_CARD'; cardId: string; junkItemId?: string }
   | { type: 'BUY_ITEM'; shopItem: ShopItem; actualPrice: number }
@@ -2976,15 +3103,18 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
 
-      // Réussite (ok / jackpot).
+      // Réussite (ok / jackpot / sortie à chaud en plein bouclage).
       const jackpot = action.tier === 'jackpot';
+      const hot = action.tier === 'hot';
       const moneyDelta = jackpot ? 10 + Math.floor(Math.random() * 9) : 3 + Math.floor(Math.random() * 5);
-      const respectDelta = jackpot ? 2 : 0;
-      const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 6 } : { dignity: -6, mental: 2 };
+      const respectDelta = jackpot ? 2 : hot ? 2 : 0;
+      const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 6 } : hot ? { dignity: -5, mental: 5 } : { dignity: -6, mental: 2 };
       const newStats = applyStatDelta(c.stats, statDelta);
       const text = jackpot
         ? L(`💎 Coup de maître ! Vous repartez avec ${target.label} sans que personne ne remarque rien. Revente express au coin de la rue : ${moneyDelta}€.`, `💎 Masterstroke! You walk off with ${target.labelEn} without anyone noticing a thing. Quick resale on the corner: €${moneyDelta}.`)
-        : L(`🤫 Vol réussi. Vous filez avec ${target.label}, le cœur battant. Ça vaut bien ${moneyDelta}€.`, `🤫 Theft successful. You slip away with ${target.labelEn}, heart pounding. Worth a good €${moneyDelta}.`);
+        : hot
+          ? L(`🚨 Sortie en plein bouclage ! Vous filez avec ${target.label} sous le nez des renforts. Le quartier ne parle que de votre culot : ${moneyDelta}€ et +2 respect.`, `🚨 Out mid-lockdown! You slip away with ${target.labelEn} right under the reinforcements' noses. The block talks of nothing but your nerve: €${moneyDelta} and +2 respect.`)
+          : L(`🤫 Vol réussi. Vous filez avec ${target.label}, le cœur battant. Ça vaut bien ${moneyDelta}€.`, `🤫 Theft successful. You slip away with ${target.labelEn}, heart pounding. Worth a good €${moneyDelta}.`);
       return {
         ...state,
         character: { ...c, stats: newStats, money: c.money + moneyDelta, respect: c.respect + respectDelta },
@@ -3244,8 +3374,188 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    // Fin de la phase d'esquive : on encaisse les touches, puis on pioche des
-    // cartes selon la performance (0 touche = 3 cartes, 1-2 = 2, 3+ = 1).
+    // Duel de signes : résout la manche (triangle, coup spécial, piège) et
+    // oriente la suite — riposte (gagnée), esquive (perdue), manche suivante
+    // (égalité ou effet neutre).
+    case 'PLAY_SIGN': {
+      if (!state.character || !state.currentCombat || state.currentCombat.phase !== 'sign') return state;
+      const c = state.character;
+      const combat = state.currentCombat;
+      const logs = [...state.combatLog];
+      const eSign = combat.enemySign;
+      const eDef = SIGNS[eSign];
+      const enemyLike = { name: combat.enemyName, emoji: combat.enemyEmoji, attack: combat.enemyAttack, health: combat.enemyMaxHealth };
+      // Le piège se dégrade à chaque manche résolue (posé = 2 manches de vie).
+      const trapAfter = Math.max(0, combat.trapRounds - 1);
+
+      // Cartes d'une riposte, bonus de traits compris.
+      const drawCount = (base: number, cap: number) => {
+        let d = base;
+        if (c.traits.some(t => t.id === 'collectionneur') && c.inventory.length >= 18) d += 1;
+        if (c.traits.some(t => t.id === 'optimiste') && c.stats.mental < 30) d += 1;
+        return Math.min(cap, d);
+      };
+      // Une manche gagnée recharge le coup spécial (2 usages max par combat).
+      const rechargedSpecial = () => combat.specialCharged || (combat.specialId != null && combat.specialUses < 2);
+
+      // Entrée dans la manche suivante : l'ennemi rechoisit un signe.
+      const nextSignCombat = (over: Partial<CombatState>, guaranteedTell = false): CombatState => ({
+        ...combat,
+        hand: [],
+        phase: 'sign',
+        round: combat.round + 1,
+        signNonce: combat.signNonce + 1,
+        enemyStunned: false,
+        trapRounds: trapAfter,
+        ...rollSignRound(enemyLike, c, guaranteedTell),
+        ...over,
+      });
+
+      const victoryState = (cUpd: Character): GameState => {
+        const lootMoney = combat.loot?.money || 0;
+        const lootRespect = combat.loot?.respect || 0;
+        const en = tc(combat.enemyName);
+        logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
+        return {
+          ...state,
+          character: { ...cUpd, money: cUpd.money + lootMoney, respect: cUpd.respect + lootRespect },
+          currentCombat: null,
+          combatLog: logs,
+          eventResult: { text: L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim()), moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
+          screen: 'main',
+        };
+      };
+
+      // Le piège à carton se déclenche avant tout : l'ennemi charge dedans.
+      if (combat.trapRounds > 0 && eSign === 'strike') {
+        const trapDmg = 9;
+        const hp = Math.max(0, combat.enemyHealth - trapDmg);
+        logs.push(L(`🪤 CLAC ! ${combat.enemyName} charge et marche en plein dans le piège à carton : ${trapDmg} dégâts, sonné !`, `🪤 SNAP! ${tc(combat.enemyName)} charges straight into the cardboard trap: ${trapDmg} damage, stunned!`));
+        if (hp <= 0) return victoryState(c);
+        return {
+          ...state,
+          currentCombat: { ...combat, enemyHealth: hp, trapRounds: 0, phase: 'draw', hand: generateHand(c, combat, drawCount(2, 3)), enemyStunned: true, specialCharged: rechargedSpecial() },
+          combatLog: logs,
+        };
+      }
+
+      // Coup spécial (4e signe, hors triangle) : chargé par les manches gagnées.
+      if (action.sign === 'special') {
+        const sp = combat.specialId ? SPECIAL_DEFS.find(s => s.id === combat.specialId) : undefined;
+        if (!sp || !combat.specialCharged || combat.specialUses >= 2) return state;
+        const spent = { specialCharged: false, specialUses: combat.specialUses + 1 };
+        switch (sp.id) {
+          case 'haleine': {
+            if (eSign === 'guard') {
+              logs.push(L('💨 Il se pince le nez derrière sa garde : l\'haleine se dissipe et il contre-attaque, furieux !', '💨 It pinches its nose behind its guard: the breath disperses and it counter-attacks, furious!'));
+              return { ...state, currentCombat: { ...combat, ...spent, trapRounds: trapAfter, phase: 'dodge', hand: [], dodgePenalty: 1.2 }, combatLog: logs };
+            }
+            logs.push(L('💨 HALEINE REDOUTABLE ! L\'ennemi suffoque, sonné — son prochain coup sera télégraphié.', '💨 DREADFUL BREATH! The foe gags, stunned — its next move will be telegraphed.'));
+            return { ...state, currentCombat: { ...combat, ...spent, trapRounds: trapAfter, phase: 'draw', hand: generateHand(c, combat, 3), enemyStunned: true }, combatLog: logs };
+          }
+          case 'piege': {
+            if (eSign === 'strike') {
+              const trapDmg = 9;
+              const hp = Math.max(0, combat.enemyHealth - trapDmg);
+              logs.push(L(`🪤 À peine posé — CLAC ! ${combat.enemyName} charge dedans : ${trapDmg} dégâts, sonné !`, `🪤 Barely set — SNAP! ${tc(combat.enemyName)} charges right in: ${trapDmg} damage, stunned!`));
+              if (hp <= 0) return victoryState(c);
+              return { ...state, currentCombat: { ...combat, ...spent, enemyHealth: hp, trapRounds: 0, phase: 'draw', hand: generateHand(c, combat, drawCount(2, 3)), enemyStunned: true }, combatLog: logs };
+            }
+            logs.push(L('🪤 Vous restez hors de portée et tendez un piège à carton. Deux manches pour qu\'il fonce dedans…', '🪤 You stay out of reach and set a cardboard trap. Two rounds for the foe to blunder in…'));
+            return { ...state, currentCombat: nextSignCombat({ ...spent, trapRounds: 2 }), combatLog: logs };
+          }
+          case 'pas-de-cote': {
+            logs.push(L('🌀 Pas de côté ! Vous tournez autour de lui : son jeu est lu à livre ouvert.', '🌀 Side step! You circle the foe: its game is an open book.'));
+            return { ...state, currentCombat: { ...combat, ...spent, tellSign: eSign, tellSure: true, signNonce: combat.signNonce + 1, hand: [] }, combatLog: logs };
+          }
+          case 'desescalade': {
+            const chance = Math.min(0.85, 0.35 + c.stats.dignity * 0.004 + c.respect * 0.01);
+            if (Math.random() < chance) {
+              logs.push(L('🕊️ Vous trouvez les mots justes. L\'affaire se règle sans un coup de plus.', '🕊️ You find the right words. The matter settles without another blow.'));
+              return {
+                ...state,
+                character: { ...c, respect: c.respect + 2 },
+                currentCombat: null,
+                combatLog: logs,
+                eventResult: { text: L(`Vous désamorcez l'affrontement avec ${combat.enemyName}, à la parole. La rue apprécie le style.`, `You talk ${tc(combat.enemyName)} down, word by word. The street appreciates the style.`), respectChange: 2, image: combat.image },
+                screen: 'main',
+              };
+            }
+            logs.push(L('🕊️ « On peut en discuter, non ? » Apparemment, non. Il charge !', '🕊️ "Can\'t we talk this over?" Apparently not. It charges!'));
+            return { ...state, currentCombat: { ...combat, ...spent, trapRounds: trapAfter, phase: 'dodge', hand: [] }, combatLog: logs };
+          }
+        }
+        return state;
+      }
+
+      // Triangle : Châtaigne > Feinte > Garde > Châtaigne.
+      const pDef = SIGNS[action.sign];
+      if (pDef.beats === eSign) {
+        logs.push(L(`${pDef.emoji} ${pDef.name} bat ${eDef.name} : vous prenez l'initiative !`, `${pDef.emoji} ${pDef.nameEn} beats ${eDef.nameEn}: you seize the initiative!`));
+        return {
+          ...state,
+          currentCombat: { ...combat, trapRounds: trapAfter, phase: 'draw', hand: generateHand(c, combat, drawCount(2, 3)), specialCharged: rechargedSpecial() },
+          combatLog: logs,
+        };
+      }
+      if (action.sign === eSign) {
+        // Égalité : accrochage — petits dégâts des deux côtés, on rejoue.
+        const pDmg = 2, eDmg = 3;
+        const hp = Math.max(0, c.stats.health - pDmg);
+        const eHp = Math.max(0, combat.enemyHealth - eDmg);
+        logs.push(L(`⚡ ${pDef.name} contre ${eDef.name} : accrochage ! (−${pDmg} pour vous, −${eDmg} pour lui)`, `⚡ ${pDef.nameEn} meets ${eDef.nameEn}: clash! (−${pDmg} you, −${eDmg} foe)`));
+        const cUpd = { ...c, stats: clampStats({ ...c.stats, health: hp }) };
+        if (eHp <= 0) return victoryState(cUpd);
+        if (hp <= 0) {
+          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous vous écroulez dans l\'accrochage...', '💀 You collapse in the scuffle...')], deathCause: combatDeathMessage(combat.enemyName) };
+        }
+        return {
+          ...state,
+          character: cUpd,
+          currentCombat: { ...combat, enemyHealth: eHp, trapRounds: trapAfter, signNonce: combat.signNonce + 1, hand: [], ...rollSignRound(enemyLike, c, false) },
+          combatLog: logs,
+        };
+      }
+      // Manche perdue : l'ennemi presse — place à l'esquive de rattrapage.
+      logs.push(L(`${eDef.emoji} Sa ${eDef.name.toLowerCase()} prend votre ${pDef.name.toLowerCase()} de vitesse : esquivez !`, `${eDef.emoji} Its ${eDef.nameEn.toLowerCase()} beats your ${pDef.nameEn.toLowerCase()}: dodge!`));
+      return { ...state, currentCombat: { ...combat, trapRounds: trapAfter, phase: 'dodge', hand: [] }, combatLog: logs };
+    }
+
+    // Fuite tentée depuis le duel de signes (soupape quand tout va mal :
+    // pas besoin de gagner une manche pour avoir le droit de renoncer).
+    case 'FLEE_ATTEMPT': {
+      if (!state.character || !state.currentCombat || state.currentCombat.phase !== 'sign') return state;
+      const c = state.character;
+      const combat = state.currentCombat;
+      const logs = [...state.combatLog];
+      const hasAgile = c.traits.some(t => t.id === 'agile');
+      const isCascadeur = c.job.id === 'cascadeur';
+      const fleeChance = Math.min(0.85, 0.5 - combat.enemyAttack * 0.012 + (hasAgile ? 0.25 : 0) + (isCascadeur ? 0.12 : 0));
+      if (Math.random() < fleeChance) {
+        const newStats = clampStats({ ...c.stats, dignity: c.stats.dignity - 5 });
+        return {
+          ...state, character: { ...c, stats: newStats }, currentCombat: null,
+          combatLog: [...logs, L('🏃 Vous filez avant l\'échange ! Fuite réussie !', '🏃 You bolt before the exchange! Escape successful!')],
+          eventResult: { text: L('Vous avez fui le combat. Votre dignité en prend un coup...', 'You fled the fight. Your dignity takes a hit...'), statChanges: { dignity: -5 } },
+          screen: 'main',
+        };
+      }
+      const dmg = Math.max(2, Math.round(combat.enemyAttack * (0.5 + Math.random() * 0.4)));
+      const hp = Math.max(0, c.stats.health - dmg);
+      if (hp <= 0) return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(combat.enemyName) };
+      logs.push(L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`));
+      const enemyLike = { name: combat.enemyName, emoji: combat.enemyEmoji, attack: combat.enemyAttack, health: combat.enemyMaxHealth };
+      return {
+        ...state,
+        character: { ...c, stats: clampStats({ ...c.stats, health: hp, dignity: c.stats.dignity - 3 }) },
+        currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], ...rollSignRound(enemyLike, c, false) },
+        combatLog: logs,
+      };
+    }
+
+    // Fin de l'esquive de rattrapage (manche perdue au signe) : on encaisse.
+    // Parfaite (0 touche) = contre-tempo, une riposte réduite. Sinon, retour
+    // au duel de signes.
     case 'DODGE_RESULT': {
       if (!state.character || !state.currentCombat) return state;
       const c = state.character;
@@ -3265,26 +3575,36 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           deathCause: combatDeathMessage(combat.enemyName),
         };
       }
-      // Cartes piochées selon la performance, avec bonus de traits.
-      let draw = action.hits === 0 ? 3 : action.hits <= 2 ? 2 : 1;
-      if (c.traits.some(t => t.id === 'collectionneur') && c.inventory.length >= 18) draw += 1;
-      if (c.traits.some(t => t.id === 'optimiste') && c.stats.mental < 30) draw += 1;
-      draw = Math.min(3, draw);
       const newStats = clampStats({ ...c.stats, health: newHp });
-      const hand = generateHand({ ...c, stats: newStats }, combat, draw);
+      const cUpd = { ...c, stats: newStats };
       const logs = [...state.combatLog];
-      if (action.hits === 0) logs.push(L('✨ Esquive parfaite ! Vous piochez 3 cartes.', '✨ Flawless dodge! You draw 3 cards.'));
-      else logs.push(L(`🛡️ ${action.hits} touche(s), ${totalDmg} dégâts. ${draw} carte(s) en main.`, `🛡️ ${action.hits} hit(s), ${totalDmg} damage. ${draw} card(s) in hand.`));
+      if (action.hits === 0) {
+        // Contre-tempo : le rattrapage récompense le skill sans annuler la
+        // défaite au signe (1 carte de base contre 2 pour une manche gagnée).
+        let draw = 1;
+        if (c.traits.some(t => t.id === 'collectionneur') && c.inventory.length >= 18) draw += 1;
+        if (c.traits.some(t => t.id === 'optimiste') && c.stats.mental < 30) draw += 1;
+        draw = Math.min(2, draw);
+        logs.push(L(`✨ Esquive parfaite ! Contre-tempo : vous volez une riposte (${draw} carte${draw > 1 ? 's' : ''}).`, `✨ Flawless dodge! Counter-tempo: you steal a riposte (${draw} card${draw > 1 ? 's' : ''}).`));
+        return {
+          ...state,
+          character: cUpd,
+          currentCombat: { ...combat, phase: 'draw', hand: generateHand(cUpd, combat, draw), enemyAtkDebuff: 0, dodgePenalty: 1, enemyStunned: false },
+          combatLog: logs,
+        };
+      }
+      logs.push(L(`💥 ${action.hits} touche(s) encaissée(s), ${totalDmg} dégâts. Retour au face-à-face.`, `💥 Took ${action.hits} hit(s), ${totalDmg} damage. Back to the standoff.`));
+      const enemyLike = { name: combat.enemyName, emoji: combat.enemyEmoji, attack: combat.enemyAttack, health: combat.enemyMaxHealth };
       return {
         ...state,
-        character: { ...c, stats: newStats },
-        currentCombat: { ...combat, phase: 'draw', hand, enemyAtkDebuff: 0, enemyStunned: false },
+        character: cUpd,
+        currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], enemyAtkDebuff: 0, dodgePenalty: 1, enemyStunned: false, ...rollSignRound(enemyLike, cUpd, false) },
         combatLog: logs,
       };
     }
 
     // Le joueur joue une carte de riposte : on applique son effet, puis on
-    // enchaîne (victoire, fuite, ou round suivant → nouvelle esquive).
+    // enchaîne (victoire, fuite, ou manche suivante → nouveau duel de signes).
     case 'PLAY_CARD': {
       if (!state.character || !state.currentCombat) return state;
       const c = state.character;
@@ -3294,6 +3614,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const logs = [...state.combatLog];
       const rnd = (min: number, range: number) => min + Math.random() * range;
       const base = unarmedDamage(c, combat);
+      const enemyLike = { name: combat.enemyName, emoji: combat.enemyEmoji, attack: combat.enemyAttack, health: combat.enemyMaxHealth };
 
       // Fuite : probabilité selon la brutalité de l'ennemi (+ trait agile).
       if (card.id === 'flee') {
@@ -3332,17 +3653,17 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state,
           character: { ...c, inventory: newInv, stats: clampStats({ ...c.stats, health: c.stats.health + gain }) },
-          currentCombat: { ...combat, phase: 'dodge', round: combat.round + 1, hand: [], atkBuff: 0 },
+          currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], atkBuff: 0, enemyStunned: false, ...rollSignRound(enemyLike, c, combat.enemyStunned) },
           combatLog: logs,
         };
       }
 
-      // Cri de Guerre : buff d'attaque, on repart en esquive (pas de dégâts).
+      // Cri de Guerre : buff d'attaque, retour au duel (pas de dégâts).
       if (card.id === 'warcry') {
         logs.push(L('📣 CRI DE GUERRE ! Vous vous galvanisez pour le prochain coup.', '📣 WAR CRY! You psych yourself up for the next blow.'));
         return {
           ...state,
-          currentCombat: { ...combat, phase: 'dodge', round: combat.round + 1, hand: [], atkBuff: combat.atkBuff + 6 },
+          currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], atkBuff: combat.atkBuff + 6, enemyStunned: false, ...rollSignRound(enemyLike, c, combat.enemyStunned) },
           combatLog: logs,
         };
       }
@@ -3357,7 +3678,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         case 'bottle': dmg = Math.round((base + bestWeaponBonus(c)) * rnd(1.15, 0.4)); logs.push(L(`🍾 Coup d'arme ! ${dmg} dégâts.`, `🍾 Weapon blow! ${dmg} damage.`)); break;
         case 'military': dmg = Math.round(base * rnd(1.4, 0.3)); logs.push(L(`🎖️ Coup réglementaire ! ${dmg} dégâts.`, `🎖️ Regulation strike! ${dmg} damage.`)); break;
         case 'combo': dmg = Math.round(base * rnd(1.5, 0.4)); stun = true; logs.push(L(`🎭 Feinte + coup bas ! ${dmg} dégâts, et vous voilà en position.`, `🎭 Feint + low blow! ${dmg} damage, and you're in position.`)); break;
-        case 'haleine': dmg = Math.round(base * rnd(0.7, 0.3)); stun = true; logs.push(L(`💨 Haleine redoutable ! ${dmg} dégâts, l'ennemi suffoque.`, `💨 Dreadful breath! ${dmg} damage, the foe gags.`)); break;
         case 'insult': dmg = Math.round(base * rnd(0.4, 0.3)); atkDebuff = 4; logs.push(L(`🗯️ Insulte ciblée ! ${dmg} dégâts, ${combat.enemyName} perd ses moyens.`, `🗯️ Targeted insult! ${dmg} damage, ${tc(combat.enemyName)} loses its cool.`)); break;
         case 'fortune': {
           consumeJunk = firstJunk(c);
@@ -3387,19 +3707,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
 
-      // Sinon : round suivant, retour en phase d'esquive.
+      // Sinon : manche suivante, retour au duel de signes. Un ennemi sonné
+      // (combo, haleine, piège) télégraphie son prochain signe à coup sûr.
       return {
         ...state,
         character: { ...c, inventory },
         currentCombat: {
           ...combat,
           enemyHealth: newEnemyHp,
-          phase: 'dodge',
+          phase: 'sign',
           round: combat.round + 1,
+          signNonce: combat.signNonce + 1,
           hand: [],
           atkBuff: 0,
-          enemyStunned: stun,
+          enemyStunned: false,
           enemyAtkDebuff: combat.enemyAtkDebuff + atkDebuff,
+          ...rollSignRound(enemyLike, c, stun || combat.enemyStunned),
         },
         combatLog: logs,
       };

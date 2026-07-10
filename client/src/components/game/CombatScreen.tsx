@@ -1,7 +1,7 @@
-import { useGame, PROJECTILE_PATTERNS, getCard } from '@/contexts/GameContext';
-import type { Character, CombatState, CombatCard } from '@/contexts/GameContext';
+import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS } from '@/contexts/GameContext';
+import type { Character, CombatState, CombatCard, SignId } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { playHurt, playWhoosh } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
@@ -11,16 +11,17 @@ import { stampTap, liftHover } from '@/lib/anim';
 import { pushToast } from '@/lib/toast';
 
 /*
- * Combat « Dodge & Draw ».
- * Round = 2 phases : (1) esquive en temps réel dans une arène de projectiles
- * (façon Undertale, avatar carton contrôlable), puis (2) riposte en piochant
- * des cartes selon la performance. Voir le reducer (DODGE_RESULT / PLAY_CARD)
- * pour la logique de résolution — ici on ne fait que jouer et remonter le
- * nombre de touches / la carte choisie.
+ * Combat « Signe, Esquive & Riposte ».
+ * Chaque manche : (0) duel de signes — triangle Châtaigne/Feinte/Garde, informé
+ * par les tendances de l'ennemi et un indice faillible ; manche gagnée →
+ * (2) riposte aux cartes ; manche perdue → (1) esquive de rattrapage en temps
+ * réel (une esquive parfaite vole une riposte réduite). Voir le reducer
+ * (PLAY_SIGN / DODGE_RESULT / PLAY_CARD) pour la résolution — ici on ne fait
+ * que jouer et remonter le choix.
  */
 
 const ARENA = 300;          // côté de l'arène en px
-const DURATION = 4200;      // durée d'une phase d'esquive (ms)
+const DURATION = 3200;      // durée d'une esquive de rattrapage (ms)
 const IFRAME = 700;         // invulnérabilité après une touche (ms)
 
 type Dir = 'up' | 'down' | 'left' | 'right';
@@ -36,18 +37,19 @@ const KIND_STYLE: Record<string, { color: string; shape: 'circle' | 'rect' }> = 
 };
 
 export default function CombatScreen() {
-  const [ready, setReady] = useState(() => introSeen('combat'));
+  const [ready, setReady] = useState(() => introSeen('combat2'));
   if (!ready) {
     return (
       <MinigameIntro
-        id="combat"
+        id="combat2"
         emoji="🥊"
         title="La bagarre"
         titleEn="The Fight"
         lines={[
-          { emoji: '🏃', fr: 'Phase 1 — Esquive : déplacez votre personnage (ZQSD, flèches ou la croix tactile) pour éviter les projectiles pendant quelques secondes.', en: 'Phase 1 — Dodge: move your character (WASD, arrows or the on-screen pad) to avoid projectiles for a few seconds.' },
-          { emoji: '🃏', fr: 'Phase 2 — Riposte : mieux vous esquivez, plus vous piochez de cartes (jusqu\'à 3). Choisissez-en une pour contre-attaquer.', en: 'Phase 2 — Riposte: the better you dodge, the more cards you draw (up to 3). Pick one to counter-attack.' },
-          { emoji: '🎽', fr: 'Vos objets, vos stats et vos traits débloquent des cartes spéciales (arme, insulte, haleine, fuite…).', en: 'Your items, stats and traits unlock special cards (weapon, insult, breath, flee…).' },
+          { emoji: '✊', fr: 'Chaque manche s\'ouvre sur un duel de signes : 👊 Châtaigne bat 🎭 Feinte, qui bat 📦 Garde, qui bat 👊 Châtaigne.', en: 'Each round opens with a sign duel: 👊 Haymaker beats 🎭 Feint, which beats 📦 Block, which beats 👊 Haymaker.' },
+          { emoji: '👀', fr: 'Guettez les indices (« Il serre le poing… ») : chaque ennemi a ses habitudes, mais un indice peut mentir.', en: 'Watch the tells ("It clenches a fist…"): every foe has habits, but a tell can lie.' },
+          { emoji: '🃏', fr: 'Manche gagnée : piochez des cartes et ripostez. Manche perdue : esquivez la riposte ennemie — parfaite, elle vous rend un contre.', en: 'Win the round: draw cards and strike back. Lose it: dodge the foe\'s onslaught — a flawless dodge steals a counter back.' },
+          { emoji: '⚡', fr: 'Vos traits débloquent un coup spécial (haleine, piège…) : gagnez des manches pour le charger, 2 usages par combat.', en: 'Your traits unlock a special move (breath, trap…): win rounds to charge it, 2 uses per fight.' },
           { emoji: '💀', fr: 'Les touches entament votre vraie santé. Videz les PV de l\'ennemi avant que les vôtres tombent à zéro.', en: 'Hits chip your real health. Empty the enemy\'s HP before yours drops to zero.' },
         ]}
         onStart={() => setReady(true)}
@@ -64,6 +66,16 @@ function CombatScreenInner() {
   // Portrait (diorama) de l'ennemi ; repli sur l'emoji si le fichier manque.
   const [imgError, setImgError] = useState(false);
   useEffect(() => { setImgError(false); }, [currentCombat?.enemyName]);
+  // Toast quand le coup spécial vient d'être chargé (manche gagnée).
+  const prevCharged = useRef(false);
+  useEffect(() => {
+    const charged = !!currentCombat?.specialCharged;
+    if (charged && !prevCharged.current) {
+      const sp = SPECIAL_DEFS.find(s => s.id === currentCombat?.specialId);
+      if (sp) pushToast(tr(`${sp.name} chargé !`, `${sp.nameEn} charged!`), { emoji: sp.emoji, tone: 'good' });
+    }
+    prevCharged.current = charged;
+  }, [currentCombat?.specialCharged, currentCombat?.specialId]);
   if (!currentCombat || !character) return null;
 
   const hpPercent = (currentCombat.enemyHealth / currentCombat.enemyMaxHealth) * 100;
@@ -113,7 +125,14 @@ function CombatScreenInner() {
 
       {/* Phase courante */}
       <AnimatePresence mode="wait">
-        {currentCombat.phase === 'dodge' ? (
+        {currentCombat.phase === 'sign' ? (
+          <SignPhase
+            key={`sign-${currentCombat.round}-${currentCombat.signNonce}`}
+            combat={currentCombat}
+            onPick={(sign) => dispatch({ type: 'PLAY_SIGN', sign })}
+            onFlee={() => dispatch({ type: 'FLEE_ATTEMPT' })}
+          />
+        ) : currentCombat.phase === 'dodge' ? (
           <DodgeArena
             key={`dodge-${currentCombat.round}`}
             combat={currentCombat}
@@ -138,6 +157,182 @@ function CombatScreenInner() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Phase 0 — Duel de signes                                            */
+/* ------------------------------------------------------------------ */
+const SIGN_ORDER: SignId[] = ['strike', 'feint', 'guard'];
+
+function SignPhase({ combat, onPick, onFlee }: {
+  combat: CombatState;
+  onPick: (sign: SignId | 'special') => void;
+  onFlee: () => void;
+}) {
+  const lang = useLang();
+  const [choice, setChoice] = useState<SignId | 'special' | null>(null);
+  const special = combat.specialId ? SPECIAL_DEFS.find(s => s.id === combat.specialId) : undefined;
+  const usesLeft = 2 - combat.specialUses;
+
+  // Indice de la manche : phrase piochée une fois pour toutes.
+  const tellText = useMemo(() => {
+    if (!combat.tellSign) return null;
+    const def = SIGNS[combat.tellSign];
+    const list = lang === 'en' ? def.tellsEn : def.tells;
+    return list[Math.floor(Math.random() * list.length)];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [combat.signNonce, lang]);
+
+  const pick = (s: SignId | 'special') => {
+    if (choice) return;
+    setChoice(s);
+    playWhoosh();
+    setTimeout(() => onPick(s), 1350);
+  };
+
+  // Verdict affiché pendant la révélation (reflète la résolution du reducer).
+  const verdict = ((): { txt: string; tone: 'good' | 'bad' | 'neutral' } | null => {
+    if (!choice) return null;
+    if (choice === 'special') {
+      if (!special) return null;
+      if (special.id === 'haleine') return combat.enemySign === 'guard' ? { txt: tr('Contré !', 'Countered!'), tone: 'bad' } : { txt: tr('Ça porte !', 'It lands!'), tone: 'good' };
+      if (special.id === 'piege') return combat.enemySign === 'strike' ? { txt: tr('CLAC ! En plein dedans !', 'SNAP! Right in it!'), tone: 'good' } : { txt: tr('Piège posé…', 'Trap set…'), tone: 'neutral' };
+      if (special.id === 'pas-de-cote') return { txt: tr('Son jeu est lu !', 'Its game is read!'), tone: 'good' };
+      return { txt: tr('Vous parlementez…', 'You parley…'), tone: 'neutral' };
+    }
+    const p = SIGNS[choice];
+    if (p.beats === combat.enemySign) return { txt: tr('Vous prenez l\'avantage !', 'You take the upper hand!'), tone: 'good' };
+    if (choice === combat.enemySign) return { txt: tr('Égalité ! Accrochage !', 'Tie! Clash!'), tone: 'neutral' };
+    return { txt: tr('Il vous a lu… Esquivez !', 'It read you… Dodge!'), tone: 'bad' };
+  })();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="w-full max-w-sm flex flex-col items-center gap-3 mt-1"
+    >
+      {/* Indice (tell) */}
+      <div className={`w-full rounded-xl px-3 py-2 text-center text-sm ${combat.tellSign ? 'bg-[#F2C14E]/15 text-[#8B6B4A]' : 'bg-[#E9E0D4] text-[#A08B70]'}`}>
+        {combat.tellSign ? (
+          <>👁️ <em>{tellText}</em>{combat.tellSure && <span className="ml-1 text-[10px] font-bold text-[#3d8b4f]">{tr('(indice sûr)', '(sure tell)')}</span>}</>
+        ) : (
+          <>🃏 {tr('Il ne laisse rien paraître…', 'It gives nothing away…')}</>
+        )}
+      </div>
+
+      {/* Les trois signes */}
+      <div className="grid grid-cols-3 gap-2.5 w-full">
+        {SIGN_ORDER.map((id, i) => {
+          const s = SIGNS[id];
+          const beats = SIGNS[s.beats];
+          return (
+            <motion.button
+              key={id}
+              initial={{ opacity: 0, y: 16, rotate: -2 }}
+              animate={{ opacity: 1, y: 0, rotate: 0 }}
+              transition={{ delay: 0.05 * i, type: 'spring', stiffness: 320, damping: 22 }}
+              whileHover={liftHover}
+              whileTap={stampTap}
+              disabled={!!choice}
+              onClick={() => pick(id)}
+              className="craft-card-solid p-3 flex flex-col items-center text-center gap-1 disabled:opacity-60"
+              style={{ border: '2px solid #E0C9AC' }}
+            >
+              <span className="text-3xl">{s.emoji}</span>
+              <span className="text-sm font-bold text-[#2A1F1A] leading-tight">{lang === 'en' ? s.nameEn : s.name}</span>
+              <span className="text-[10px] text-[#8B6B4A]">{tr('bat', 'beats')} {beats.emoji} {lang === 'en' ? beats.nameEn : beats.name}</span>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* Coup spécial (traits) */}
+      {special && (
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileTap={stampTap}
+          disabled={!combat.specialCharged || usesLeft <= 0 || !!choice}
+          onClick={() => pick('special')}
+          className="w-full craft-card-solid p-3 flex items-center gap-3 text-left disabled:opacity-55"
+          style={{ border: combat.specialCharged && usesLeft > 0 ? '2px solid #F2C14E' : '2px dashed #D8C4A8' }}
+        >
+          <motion.span
+            className="text-3xl"
+            animate={combat.specialCharged && usesLeft > 0 ? { scale: [1, 1.18, 1] } : {}}
+            transition={{ repeat: Infinity, duration: 1.4 }}
+          >
+            {special.emoji}
+          </motion.span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-bold text-[#2A1F1A]">{lang === 'en' ? special.nameEn : special.name}
+              <span className="ml-1.5 text-[10px] font-normal text-[#A08B70]">{'●'.repeat(Math.max(0, usesLeft))}{'○'.repeat(Math.max(0, 2 - usesLeft))}</span>
+            </span>
+            <span className="block text-[10px] text-[#6B5740] leading-snug">{lang === 'en' ? special.descEn : special.desc}</span>
+            <span className={`block text-[10px] font-semibold mt-0.5 ${combat.specialCharged && usesLeft > 0 ? 'text-[#B8860B]' : 'text-[#A08B70]'}`}>
+              {usesLeft <= 0 ? tr('Épuisé pour ce combat', 'Spent for this fight') : combat.specialCharged ? tr('⚡ Chargé !', '⚡ Charged!') : tr('Gagnez une manche pour charger', 'Win a round to charge')}
+            </span>
+          </span>
+        </motion.button>
+      )}
+
+      {/* Fuite (toujours possible avant l'échange) */}
+      <button
+        onClick={() => { if (!choice) onFlee(); }}
+        className="text-xs text-[#8B6B4A] underline underline-offset-2 decoration-[#D8C4A8]"
+      >
+        🏃 {tr('Tenter de fuir', 'Try to flee')}
+      </button>
+
+      {/* Révélation des signes */}
+      <AnimatePresence>
+        {choice && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-40 flex items-center justify-center px-6"
+            style={{ background: 'rgba(42,31,26,0.6)' }}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+              className="craft-card-solid p-5 flex flex-col items-center gap-3 w-full max-w-xs"
+            >
+              <div className="flex items-center justify-center gap-5">
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl">{choice === 'special' ? special?.emoji : SIGNS[choice as SignId].emoji}</span>
+                  <span className="text-[10px] text-[#8B6B4A] mt-1">{tr('Vous', 'You')}</span>
+                </div>
+                <span className="text-lg font-black text-[#B84A3A]">VS</span>
+                <motion.div
+                  initial={{ opacity: 0, rotateY: 90 }}
+                  animate={{ opacity: 1, rotateY: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex flex-col items-center"
+                >
+                  <span className="text-4xl">{SIGNS[combat.enemySign].emoji}</span>
+                  <span className="text-[10px] text-[#8B6B4A] mt-1 max-w-20 truncate">{tc(combat.enemyName)}</span>
+                </motion.div>
+              </div>
+              {verdict && (
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.65 }}
+                  className={`text-base font-bold ${verdict.tone === 'good' ? 'text-[#3d8b4f]' : verdict.tone === 'bad' ? 'text-[#B84A3A]' : 'text-[#8B6B4A]'}`}
+                >
+                  {verdict.txt}
+                </motion.p>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Phase 1 — Esquive                                                   */
 /* ------------------------------------------------------------------ */
 function DodgeArena({ combat, character, onDone }: { combat: CombatState; character: Character; onDone: (hits: number) => void }) {
@@ -148,7 +343,7 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
 
   const R = hasAgile ? 11 : 15;
   const SPEED = hasAgile ? 205 : 168;
-  const densityMul = (1 + (combat.round - 1) * 0.12) * (combat.enemyStunned ? 0.5 : 1);
+  const densityMul = (1 + (combat.round - 1) * 0.12) * (combat.enemyStunned ? 0.5 : 1) * (combat.dodgePenalty || 1);
   const speedMul = (1 + (combat.round - 1) * 0.06) * (combat.enemyStunned ? 0.8 : 1);
 
   const posRef = useRef({ x: ARENA / 2, y: ARENA - 40 });
