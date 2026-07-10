@@ -1,4 +1,4 @@
-import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS } from '@/contexts/GameContext';
+import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon } from '@/contexts/GameContext';
 import type { Character, CombatState, CombatCard, SignId } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
@@ -129,6 +129,7 @@ function CombatScreenInner() {
           <SignPhase
             key={`sign-${currentCombat.round}-${currentCombat.signNonce}`}
             combat={currentCombat}
+            character={character}
             onPick={(sign) => dispatch({ type: 'PLAY_SIGN', sign })}
             onFlee={() => dispatch({ type: 'FLEE_ATTEMPT' })}
           />
@@ -161,8 +162,9 @@ function CombatScreenInner() {
 /* ------------------------------------------------------------------ */
 const SIGN_ORDER: SignId[] = ['strike', 'feint', 'guard'];
 
-function SignPhase({ combat, onPick, onFlee }: {
+function SignPhase({ combat, character, onPick, onFlee }: {
   combat: CombatState;
+  character: Character;
   onPick: (sign: SignId | 'special') => void;
   onFlee: () => void;
 }) {
@@ -170,6 +172,10 @@ function SignPhase({ combat, onPick, onFlee }: {
   const [choice, setChoice] = useState<SignId | 'special' | null>(null);
   const special = combat.specialId ? SPECIAL_DEFS.find(s => s.id === combat.specialId) : undefined;
   const usesLeft = 2 - combat.specialUses;
+  // Arme lourde : les accrochages (égalités) tournent pour vous — affiché
+  // pour que l'achat d'une batte se sente dès le duel de signes.
+  const weapon = bestWeapon(character);
+  const heavyWeapon = weapon?.combatStyle === 'heavy' ? weapon : undefined;
 
   // Indice de la manche : phrase piochée une fois pour toutes.
   const tellText = useMemo(() => {
@@ -244,6 +250,13 @@ function SignPhase({ combat, onPick, onFlee }: {
           );
         })}
       </div>
+
+      {/* Arme lourde : rappel de son effet sur les accrochages */}
+      {heavyWeapon && (
+        <div className="text-[10px] text-[#8B6B4A] bg-[#E9E0D4] rounded-full px-3 py-1">
+          🏏 {tc(heavyWeapon.name)} — {tr('les accrochages tournent pour vous.', 'clashes turn in your favor.')}
+        </div>
+      )}
 
       {/* Coup spécial (traits) */}
       {special && (

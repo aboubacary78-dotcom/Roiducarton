@@ -194,7 +194,6 @@ export interface CombatState {
   enemyMaxHealth: number;
   enemyAttack: number;
   description: string;
-  playerWeapon?: InventoryItem;
   // Butin de l'ennemi, copié à l'entrée en combat (certains ennemis n'existent
   // que dans la liste par lieu de MainScreen, d'où la copie plutôt qu'un lookup).
   loot?: { money?: number; respect?: number; item?: InventoryItem };
@@ -2674,9 +2673,20 @@ export interface CombatCard {
 function unarmedDamage(c: Character, combat: CombatState): number {
   return 7 + (c.job.id === 'militaire' ? 3 : 0) + combat.atkBuff;
 }
-// Meilleur bonus d'arme dans l'inventaire.
+// Meilleure arme portée (bonus le plus élevé). Son style compte au combat :
+// « heavy » fait tourner les accrochages (égalités) en votre faveur,
+// « precise » donne 20 % de coup critique ×2 au Coup d'Arme.
+export function bestWeapon(c: Character): InventoryItem | undefined {
+  let best: InventoryItem | undefined;
+  for (const i of c.inventory) {
+    if (i.type !== 'weapon') continue;
+    if (!best || (i.attackBonus ?? 4) > (best.attackBonus ?? 4)) best = i;
+  }
+  return best;
+}
 function bestWeaponBonus(c: Character): number {
-  return c.inventory.reduce((m, i) => Math.max(m, i.type === 'weapon' ? (i.attackBonus ?? 4) : 0), 0);
+  const w = bestWeapon(c);
+  return w ? (w.attackBonus ?? 4) : 0;
 }
 function hasHealingItem(c: Character): boolean {
   return c.inventory.some(i => (i.effect?.health ?? 0) > 0);
@@ -2697,7 +2707,10 @@ export const CARD_DEFS: CombatCard[] = [
   {
     id: 'bottle', name: 'Coup d\'Arme', nameEn: 'Weapon Blow', emoji: '🍾', kind: 'attack',
     desc: 'Frappe avec votre arme la plus solide. Gros dégâts.', descEn: 'Hit with your sturdiest weapon. Big damage.',
-    estimate: (c, k) => dmgLabel(Math.round((unarmedDamage(c, k) + bestWeaponBonus(c)) * 1.35)),
+    estimate: (c, k) => dmgLabel(
+      Math.round((unarmedDamage(c, k) + bestWeaponBonus(c)) * 1.35),
+      bestWeapon(c)?.combatStyle === 'precise' ? (getLang() === 'en' ? ' ⚡20% crit' : ' ⚡20% crit.') : '',
+    ),
     available: (c) => bestWeaponBonus(c) > 0,
   },
   {
@@ -2749,11 +2762,17 @@ export function getCard(id: string): CombatCard | undefined {
 }
 
 // Pioche une main de `count` cartes : le Coup de Poing est toujours présent,
-// les autres sont tirées parmi les cartes disponibles. La Feinte (combo) ne
-// peut sortir que si l'on pioche au moins 2 cartes (bonne performance).
+// et une arme portée garantit son Coup d'Arme (une arme achetée doit servir
+// à chaque riposte, pas au hasard). Les places restantes sont tirées parmi
+// les cartes disponibles. La Feinte (combo) ne peut sortir que si l'on
+// pioche au moins 2 cartes (bonne performance).
 export function generateHand(character: Character, combat: CombatState, count: number): string[] {
+  const armed = bestWeaponBonus(character) > 0;
+  // Riposte à 1 carte (contre-tempo) : l'arme prend le dessus si l'on en a une.
+  if (count <= 1) return [armed ? 'bottle' : 'punch'];
+  const guaranteed = armed ? ['punch', 'bottle'] : ['punch'];
   const pool = CARD_DEFS
-    .filter(c => c.id !== 'punch' && c.available(character, combat))
+    .filter(c => !guaranteed.includes(c.id) && c.available(character, combat))
     .filter(c => c.id !== 'combo' || count >= 2)
     .map(c => c.id);
   // Mélange simple.
@@ -2761,14 +2780,12 @@ export function generateHand(character: Character, combat: CombatState, count: n
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  const hand = ['punch', ...pool.slice(0, Math.max(0, count - 1))];
-  return hand;
+  return [...guaranteed, ...pool.slice(0, Math.max(0, count - guaranteed.length))];
 }
 
 // Construit l'état de combat pour un ennemi donné (utilisé par START_COMBAT
 // et par les répercussions de vol) — une seule source de vérité.
 function makeCombatState(enemy: Enemy, character: Character): CombatState {
-  const weapon = character.inventory.find(i => i.type === 'weapon');
   // Image de l'ennemi : la sienne, sinon la fiche canonique, sinon la table
   // COMBAT_IMAGES (ennemis de la « Bagarre » dont l'image est à générer).
   const image = enemy.image || ENEMIES.find(e => e.name === enemy.name)?.image || COMBAT_IMAGES[enemy.name];
@@ -2781,7 +2798,6 @@ function makeCombatState(enemy: Enemy, character: Character): CombatState {
     enemyMaxHealth: enemy.health,
     enemyAttack: enemy.attack,
     description: enemy.description,
-    playerWeapon: weapon,
     loot: enemy.loot,
     image,
     round: 1,
@@ -3500,10 +3516,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
       if (action.sign === eSign) {
         // Égalité : accrochage — petits dégâts des deux côtés, on rejoue.
-        const pDmg = 2, eDmg = 3;
+        // Une arme lourde fait tourner l'échange : c'est lui qui encaisse.
+        const weapon = bestWeapon(c);
+        const heavy = weapon?.combatStyle === 'heavy';
+        const pDmg = heavy ? 0 : 2, eDmg = heavy ? 5 : 3;
         const hp = Math.max(0, c.stats.health - pDmg);
         const eHp = Math.max(0, combat.enemyHealth - eDmg);
-        logs.push(L(`⚡ ${pDef.name} contre ${eDef.name} : accrochage ! (−${pDmg} pour vous, −${eDmg} pour lui)`, `⚡ ${pDef.nameEn} meets ${eDef.nameEn}: clash! (−${pDmg} you, −${eDmg} foe)`));
+        if (heavy) logs.push(L(`🏏 Accrochage — ${weapon!.name} fait la différence : c'est lui qui encaisse ! (−${eDmg} pour lui)`, `🏏 Clash — ${tc(weapon!.name)} makes the difference: the foe takes the hit! (−${eDmg} foe)`));
+        else logs.push(L(`⚡ ${pDef.name} contre ${eDef.name} : accrochage ! (−${pDmg} pour vous, −${eDmg} pour lui)`, `⚡ ${pDef.nameEn} meets ${eDef.nameEn}: clash! (−${pDmg} you, −${eDmg} foe)`));
         const cUpd = { ...c, stats: clampStats({ ...c.stats, health: hp }) };
         if (eHp <= 0) return victoryState(cUpd);
         if (hp <= 0) {
@@ -3675,7 +3695,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       let consumeJunk: InventoryItem | undefined;
       switch (card.id) {
         case 'punch': dmg = Math.round(base * rnd(0.85, 0.35)); logs.push(L(`👊 Coup de poing ! ${dmg} dégâts.`, `👊 Punch! ${dmg} damage.`)); break;
-        case 'bottle': dmg = Math.round((base + bestWeaponBonus(c)) * rnd(1.15, 0.4)); logs.push(L(`🍾 Coup d'arme ! ${dmg} dégâts.`, `🍾 Weapon blow! ${dmg} damage.`)); break;
+        case 'bottle': {
+          // Arme précise : 20 % de coup critique ×2 (« critiques dévastateurs »).
+          const weapon = bestWeapon(c);
+          const crit = weapon?.combatStyle === 'precise' && Math.random() < 0.2;
+          dmg = Math.round((base + bestWeaponBonus(c)) * rnd(1.15, 0.4) * (crit ? 2 : 1));
+          if (crit) logs.push(L(`🔪 COUP CRITIQUE ! ${weapon!.name} trouve la faille : ${dmg} dégâts !`, `🔪 CRITICAL HIT! ${tc(weapon!.name)} finds the gap: ${dmg} damage!`));
+          else logs.push(L(`🍾 Coup d'arme ! ${dmg} dégâts.`, `🍾 Weapon blow! ${dmg} damage.`));
+          break;
+        }
         case 'military': dmg = Math.round(base * rnd(1.4, 0.3)); logs.push(L(`🎖️ Coup réglementaire ! ${dmg} dégâts.`, `🎖️ Regulation strike! ${dmg} damage.`)); break;
         case 'combo': dmg = Math.round(base * rnd(1.5, 0.4)); stun = true; logs.push(L(`🎭 Feinte + coup bas ! ${dmg} dégâts, et vous voilà en position.`, `🎭 Feint + low blow! ${dmg} damage, and you're in position.`)); break;
         case 'insult': dmg = Math.round(base * rnd(0.4, 0.3)); atkDebuff = 4; logs.push(L(`🗯️ Insulte ciblée ! ${dmg} dégâts, ${combat.enemyName} perd ses moyens.`, `🗯️ Targeted insult! ${dmg} damage, ${tc(combat.enemyName)} loses its cool.`)); break;
