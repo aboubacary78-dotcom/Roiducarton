@@ -110,5 +110,23 @@ Même DA/convention. **Paysage 3:2, vrai WebP.** Le code cherche déjà `result-
 | `result-legend-pari-good.webp` | ✅ Le SDF repart le menton haut, deux vieux SDF qui pariaient sur lui en fond, détermination. |
 
 
-## Total restant : 84 images
+## E. Vol « à texte » (remis en rotation — 12 images)
+
+| Fichier | Scène (issue) |
+|---|---|
+| `result-steal-etal-marche-good.webp` | ✅ Mission accomplie ! Deux belles pommes dans la poche. Discret comme un chat. |
+| `result-steal-etal-marche-bad.webp` | ❌ "HÉ ! Le voleur !" Le primeur vous attrape par le col et vous secoue. |
+| `result-steal-poche-costard-good.webp` | ✅ Vos doigts de fée font merveille. 15€ et il ronfle toujours. |
+| `result-steal-poche-costard-bad.webp` | ❌ Il se réveille en sursaut ! "Au voleur !" Vous courez, le cœur battant. |
+| `result-steal-supermarche-good.webp` | ✅ Vous passez les portiques l'air de rien. Conserves et chocolat : repas assuré. |
+| `result-steal-supermarche-bad.webp` | ❌ Le portique sonne. Le vigile se réveille enfin. Fouille humiliante devant tout le monde. |
+| `result-steal-velo-good.webp` | ✅ Clic ! L'antivol cède. Revendu à un receleur : 20€. Belle prise. |
+| `result-steal-velo-bad.webp` | ❌ Le propriétaire surgit du café d'à côté. La poursuite tourne mal pour vous. |
+| `result-steal-tronc-eglise-good.webp` | ✅ Le curé vous offre un repas chaud et 5€ du tronc, de bon cœur. "Reviens quand tu veux." |
+| `result-steal-tronc-eglise-bad.webp` | ❌ Vous récupérez 12€ en pièces. Personne, sauf peut-être le Tout-Puissant. |
+| `result-steal-etendage-good.webp` | ✅ Un bon manteau de laine, encore tiède du soleil. Vos nuits seront moins rudes. |
+| `result-steal-etendage-bad.webp` | ❌ Une grand-mère hurle à la fenêtre : "Au secours, on me vole !" Tout le quartier se réveille. |
+
+
+## Total restant : 96 images
 Livrable par lots. Chaque image s'active dès qu'elle arrive ; en attendant, l'image de base de la scène s'affiche.
