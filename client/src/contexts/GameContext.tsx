@@ -639,6 +639,9 @@ export interface GameState {
   // Bilan de la nuit affiché après « Jour suivant » : nouveau jour, météo,
   // pertes/gains de jauges de la nuit, et éventuels effets de traits.
   daySummary: { day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number; notes: string[]; notesEn: string[] } | null;
+  // Contrat du matin : micro-objectif du jour (jugé à la nuit). `done` sert
+  // aux contrats accomplis en cours de journée (ex. gagner un combat).
+  contract: { id: string; done: boolean } | null;
   combatLog: string[];
   dayActions: number;
   maxDayActions: number;
@@ -2542,6 +2545,93 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
 };
 
+// ============ TITRES DE RUE ============
+// La rue reconnaît ceux qui durent : franchir un palier de jours donne un
+// titre (affiché sur l'écran principal) et un peu de respect au passage.
+export interface StreetTitle { day: number; fr: string; en: string; respect: number; emoji: string }
+export const STREET_TITLES: StreetTitle[] = [
+  { day: 3, fr: 'Le Débrouillard', en: 'The Resourceful', respect: 1, emoji: '🧦' },
+  { day: 5, fr: 'L\'Habitué', en: 'The Regular', respect: 2, emoji: '🪑' },
+  { day: 8, fr: 'Le Doyen', en: 'The Elder', respect: 3, emoji: '🧓' },
+  { day: 12, fr: 'Le Roi du Carton', en: 'The Cardboard King', respect: 5, emoji: '👑' },
+];
+export function streetTitleFor(day: number): StreetTitle | null {
+  let t: StreetTitle | null = null;
+  for (const st of STREET_TITLES) if (day >= st.day) t = st;
+  return t;
+}
+
+// ============ CONTRATS DU MATIN ============
+// Un micro-objectif par jour, annoncé au réveil et jugé à la nuit tombée :
+// le petit « encore une journée » qui donne une direction à la survie.
+export interface Contract {
+  id: string;
+  emoji: string;
+  label: string; labelEn: string;
+  rewardLabel: string; rewardLabelEn: string;
+  // Évalué à la fin de la journée (NEXT_DAY)…
+  check?: (c: Character) => boolean;
+  // …ou accompli en cours de journée (ex. gagner un combat → done).
+  needsFlag?: boolean;
+  reward: { stats?: Partial<Stats>; money?: number; respect?: number };
+}
+export const CONTRACTS: Contract[] = [
+  {
+    id: 'contrat-pecule', emoji: '💶',
+    label: 'Finir la journée avec au moins 12€', labelEn: 'End the day with at least €12',
+    rewardLabel: '+2 respect', rewardLabelEn: '+2 respect',
+    check: c => c.money >= 12, reward: { respect: 2 },
+  },
+  {
+    id: 'contrat-forme', emoji: '💪',
+    label: 'Finir la journée avec toutes les jauges au-dessus de 30', labelEn: 'End the day with every gauge above 30',
+    rewardLabel: '+6 mental', rewardLabelEn: '+6 mind',
+    check: c => (Object.values(c.stats) as number[]).every(v => v > 30), reward: { stats: { mental: 6 } },
+  },
+  {
+    id: 'contrat-digne', emoji: '👑',
+    label: 'Finir la journée avec 50 de dignité ou plus', labelEn: 'End the day with 50+ dignity',
+    rewardLabel: '+2 respect', rewardLabelEn: '+2 respect',
+    check: c => c.stats.dignity >= 50, reward: { respect: 2 },
+  },
+  {
+    id: 'contrat-combatif', emoji: '🥊',
+    label: 'Gagner un combat aujourd\'hui', labelEn: 'Win a fight today',
+    rewardLabel: '+4 mental, +1 respect', rewardLabelEn: '+4 mind, +1 respect',
+    needsFlag: true, reward: { stats: { mental: 4 }, respect: 1 },
+  },
+  {
+    id: 'contrat-fourmi', emoji: '🎒',
+    label: 'Finir la journée avec 5 objets ou plus dans le sac', labelEn: 'End the day with 5+ items in your bag',
+    rewardLabel: '+3€', rewardLabelEn: '+€3',
+    check: c => c.inventory.length >= 5, reward: { money: 3 },
+  },
+];
+export function getContract(id: string): Contract | undefined {
+  return CONTRACTS.find(c => c.id === id);
+}
+
+// ============ LE SURSAUT ============
+// Une seule fois par run : quand la santé ou le mental frôle le zéro, un
+// souvenir remonte. La quasi-mort devient un moment de récit, pas une spirale.
+const SURSAUT_EVENT: GameEvent = {
+  id: 'sursaut', title: 'Le Sursaut', type: 'narrative',
+  description: 'Au bord du gouffre, quelque chose remonte : un souvenir, un visage, une promesse. Vous vous rappelez pourquoi vous tenez encore debout.',
+  choices: [
+    { text: 'S\'accrocher au souvenir', risk: 'safe', emoji: '💫', outcomes: [
+      { probability: 1, text: 'Le souvenir brûle comme un petit feu intérieur. Pas aujourd\'hui. Pas comme ça.', statChanges: { mental: 18, health: 8, dignity: 5 }, addFlag: 'sursaut-vu' },
+    ]},
+    { text: 'Pleurer un bon coup', risk: 'safe', emoji: '😭', outcomes: [
+      { probability: 1, text: 'Ça vide, et ça lave. Vous vous relevez plus léger, étrangement.', statChanges: { mental: 14, sleep: 6 }, addFlag: 'sursaut-vu' },
+    ]},
+  ],
+};
+
+// Le Sursaut doit-il interrompre l'action ? (une seule fois par run)
+function dueSursaut(c: Character): boolean {
+  return (c.stats.health < 12 || c.stats.mental < 12) && c.stats.health > 0 && c.stats.mental > 0 && !c.activeFlags.includes('sursaut-vu');
+}
+
 // ============ EVENT GENERATORS ============
 export function randomFromArray<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -3164,6 +3254,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const legacy = peekLegacy();
       clearLegacy();
       const kits = takePendingKits();
+      const firstContract = { id: randomFromArray(CONTRACTS).id, done: false };
       let inventory = [...char.inventory];
       let money = char.money;
       const gifts: string[] = [];
@@ -3180,7 +3271,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
       if (gifts.length > 0) {
         return {
-          ...state, screen: 'main', dayActions: 0,
+          ...state, screen: 'main', dayActions: 0, contract: firstContract,
           character: { ...char, inventory, money },
           eventResult: {
             text: L(
@@ -3190,19 +3281,23 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           },
         };
       }
-      return { ...state, screen: 'main', character: char, dayActions: 0 };
+      return { ...state, screen: 'main', character: char, dayActions: 0, contract: firstContract };
     }
 
     case 'CONTINUE_SAVE': {
       const saved = loadGame();
       if (saved && saved.character) {
-        return { ...state, ...saved, weather: (saved as Partial<GameState>).weather || getInitialWeather() };
+        return { ...state, ...saved, weather: (saved as Partial<GameState>).weather || getInitialWeather(), contract: { id: randomFromArray(CONTRACTS).id, done: false } };
       }
       return state;
     }
 
     case 'EXPLORE': {
       if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      // Au bord du gouffre, le Sursaut passe avant tout (une fois par run).
+      if (dueSursaut(state.character)) {
+        return { ...state, screen: 'event', currentEvent: SURSAUT_EVENT, dayActions: state.dayActions + 1 };
+      }
       // De temps en temps (~8 %), la rue évoque le recordman.
       const legend = getLegend(state.highScores);
       if (legend && Math.random() < 0.08) {
@@ -3378,6 +3473,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'REST': {
       if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      if (dueSursaut(state.character)) {
+        return { ...state, screen: 'event', currentEvent: SURSAUT_EVENT, dayActions: state.dayActions + 1 };
+      }
       const restEvents = generateRestEvents(state.character.location, state.character);
       if (restEvents.length === 0) return state;
       const restEvent = randomFromArray(restEvents);
@@ -3556,6 +3654,36 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
+      // ---- Contrat du matin : verdict de la journée écoulée ----
+      let respectBonus = 0;
+      const cDef = state.contract ? getContract(state.contract.id) : undefined;
+      if (cDef) {
+        const success = cDef.needsFlag ? state.contract!.done : !!cDef.check?.(ch);
+        if (success) {
+          if (cDef.reward.stats) Object.entries(cDef.reward.stats).forEach(([k, v]) => { if (v) (s as unknown as Record<string, number>)[k] += v; });
+          bonusMoney += cDef.reward.money || 0;
+          respectBonus += cDef.reward.respect || 0;
+          notes.push(`${cDef.emoji} Contrat rempli (${cDef.rewardLabel}) : ${cDef.label}.`);
+          notesEn.push(`${cDef.emoji} Contract fulfilled (${cDef.rewardLabelEn}): ${cDef.labelEn}.`);
+        } else {
+          notes.push(`${cDef.emoji} Contrat manqué : ${cDef.label}. Demain, peut-être.`);
+          notesEn.push(`${cDef.emoji} Contract missed: ${cDef.labelEn}. Tomorrow, maybe.`);
+        }
+      }
+      // Le contrat du nouveau jour, annoncé dans le bilan de la nuit.
+      const nextContract = { id: randomFromArray(CONTRACTS).id, done: false };
+      const nextDef = getContract(nextContract.id)!;
+      notes.push(`📋 Contrat du jour : ${nextDef.label} (${nextDef.rewardLabel}).`);
+      notesEn.push(`📋 Today's contract: ${nextDef.labelEn} (${nextDef.rewardLabelEn}).`);
+
+      // ---- Titre de rue : franchit-on un palier de jours ? ----
+      const crossed = STREET_TITLES.find(t => t.day === ch.day + 1);
+      if (crossed) {
+        respectBonus += crossed.respect;
+        notes.push(`🏅 La rue vous appelle désormais « ${crossed.fr} » (+${crossed.respect} respect).`);
+        notesEn.push(`🏅 The street now calls you "${crossed.en}" (+${crossed.respect} respect).`);
+      }
+
       const decayedStats = clampStats(s);
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
 
@@ -3574,10 +3702,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       return {
         ...state,
-        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney },
+        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus },
         dayActions: 0,
         screen: isAlive ? 'main' : 'game-over',
         weather: nextWeather,
+        contract: isAlive ? nextContract : null,
         daySummary: isAlive
           ? { day: ch.day + 1, weather: nextWeather, deltas, moneyChange: bonusMoney, notes, notesEn }
           : null,
@@ -3692,6 +3821,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
         return {
           ...state,
+          contract: state.contract?.id === 'contrat-combatif' ? { id: state.contract.id, done: true } : state.contract,
           character: { ...cUpd, money: cUpd.money + lootMoney, respect: cUpd.respect + lootRespect, inventory: drop ? [...cUpd.inventory, drop] : cUpd.inventory },
           currentCombat: null,
           combatLog: logs,
@@ -3988,6 +4118,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
         return {
           ...state,
+          contract: state.contract?.id === 'contrat-combatif' ? { id: state.contract.id, done: true } : state.contract,
           character: { ...c, inventory: drop ? [...inventory, drop] : inventory, money: c.money + lootMoney, respect: c.respect + lootRespect },
           currentCombat: null,
           combatLog: logs,
@@ -4136,6 +4267,7 @@ const initialState: GameState = {
   currentCombat: null,
   eventResult: null,
   daySummary: null,
+  contract: null,
   combatLog: [],
   dayActions: 0,
   maxDayActions: 3,
