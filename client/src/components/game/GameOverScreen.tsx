@@ -51,7 +51,14 @@ export default function GameOverScreen() {
     return knownEnemyNames().find(n => state.deathCause!.includes(n) || state.deathCause!.includes(tc(n))) || null;
   }, [state.deathCause]);
 
-  // ---- Registre des Morts + Karma : enregistrés UNE fois par mort ----
+  // Gros titre de la une (sert aussi d'épitaphe sur la tombe du Cimetière).
+  const headline = killerEnemy
+    ? tr(`${tc(killerEnemy).toUpperCase()} TERRASSE UN HOMME EN PLEINE RUE`, `${tc(killerEnemy).toUpperCase()} FELLS A MAN IN BROAD DAYLIGHT`)
+    : deathCat === 'combat'
+      ? tr('RIXE FATALE DANS LE QUARTIER', 'FATAL BRAWL IN THE NEIGHBORHOOD')
+      : tr(HEADLINES[deathCat].fr, HEADLINES[deathCat].en);
+
+  // ---- Registre des Morts + Karma + tombe : enregistrés UNE fois par mort ----
   const harvest = useMemo(() => {
     if (!char) return null;
     const ids: string[] = [];
@@ -61,7 +68,10 @@ export default function GameOverScreen() {
     if (char.money >= 30) ids.push('mort-riche');
     if (state.weather === 'heatwave') ids.push('mort-canicule');
     if (char.day >= 10) ids.push('mort-doyen');
-    return recordDeath({ ids, name: char.name, day: char.day, respect: char.respect, seed: char.seed });
+    return recordDeath({
+      ids, name: char.name, day: char.day, respect: char.respect, seed: char.seed,
+      grave: { name: char.name, seed: char.seed, gender: char.gender, day: char.day, jobEmoji: char.job.emoji, jobName: char.job.name, cause: headline },
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [char?.seed]);
 
@@ -103,13 +113,6 @@ export default function GameOverScreen() {
     return tr('Votre corps a lâché. Trop de coups, pas assez de soins.', 'Your body gave out. Too many blows, not enough care.');
   }
   const deathCause = state.deathCause || inferCause();
-
-  // Gros titre de la une.
-  const headline = killerEnemy
-    ? tr(`${tc(killerEnemy).toUpperCase()} TERRASSE UN HOMME EN PLEINE RUE`, `${tc(killerEnemy).toUpperCase()} FELLS A MAN IN BROAD DAYLIGHT`)
-    : deathCat === 'combat'
-      ? tr('RIXE FATALE DANS LE QUARTIER', 'FATAL BRAWL IN THE NEIGHBORHOOD')
-      : tr(HEADLINES[deathCat].fr, HEADLINES[deathCat].en);
 
   const score = computeScore(char.day, char.respect, char.money, hasTrait(char, 'poissard'));
   const highScores = loadHighScores();

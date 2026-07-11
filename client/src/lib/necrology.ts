@@ -18,6 +18,8 @@ const BOOK_KEY = 'roi-du-carton-deathbook';
 const KARMA_KEY = 'roi-du-carton-karma';
 const LEGACY_KEY = 'roi-du-carton-legacy';
 const SEEN_KEY = 'roi-du-carton-death-seen';
+const GRAVES_KEY = 'roi-du-carton-cimetiere';
+const HERITAGE_KEY = 'roi-du-carton-heritage';
 
 // ---- Les fins « nommées » (hors ennemis, qui sont générés depuis leur liste) ----
 export interface DeathDef {
@@ -62,6 +64,7 @@ export function recordDeath(params: {
   day: number;
   respect: number;
   seed: string;
+  grave?: Omit<Grave, 'at' | 'golden'>; // la tombe à dresser au Cimetière
 }): { newIds: string[]; karmaGained: number; karmaTotal: number } {
   const dedupe = `${params.seed}:${params.day}:${params.ids.join(',')}`;
   try {
@@ -83,7 +86,90 @@ export function recordDeath(params: {
     localStorage.setItem(KARMA_KEY, String(karmaTotal));
     localStorage.setItem(SEEN_KEY, JSON.stringify({ dedupe, newIds, karmaGained }));
   } catch { /* silent */ }
+
+  // La tombe rejoint le Cimetière des Cartons (dorée si la vanité l'attendait).
+  if (params.grave) {
+    const h = loadHeritage();
+    pushGrave({ ...params.grave, golden: h.goldenEpitaph, at: now });
+    if (h.goldenEpitaph) setGoldenEpitaph(false);
+  }
   return { newIds, karmaGained, karmaTotal };
+}
+
+// ---- Le Cimetière des Cartons : une tombe par personnage tombé ----
+export interface Grave {
+  name: string;
+  seed: string;
+  gender: string;
+  day: number;
+  jobEmoji: string;
+  jobName: string;
+  cause: string;        // cause courte (FR, langue de la partie au moment de la mort)
+  golden?: boolean;     // épitaphe dorée (vanité achetée dans L'Héritage)
+  at: number;
+}
+
+export function loadGraves(): Grave[] {
+  try { return JSON.parse(localStorage.getItem(GRAVES_KEY) || '[]'); } catch { return []; }
+}
+
+function pushGrave(g: Grave): void {
+  try {
+    const graves = loadGraves();
+    graves.unshift(g);
+    localStorage.setItem(GRAVES_KEY, JSON.stringify(graves.slice(0, 40))); // les 40 dernières
+  } catch { /* silent */ }
+}
+
+// ---- L'Héritage : ce que le Karma de Rue achète entre les runs ----
+// Débloquages latéraux uniquement (jamais de puissance brute) : métiers en
+// plus dans le tirage, kits de départ consommables, vanités.
+export interface HeritageState {
+  jobs: string[];       // ids de métiers débloqués
+  kits: string[];       // kits en attente, consommés au prochain personnage
+  goldenEpitaph?: boolean; // la PROCHAINE tombe sera dorée
+}
+
+export function loadHeritage(): HeritageState {
+  try {
+    const h = JSON.parse(localStorage.getItem(HERITAGE_KEY) || '{}');
+    return { jobs: h.jobs || [], kits: h.kits || [], goldenEpitaph: !!h.goldenEpitaph };
+  } catch { return { jobs: [], kits: [] }; }
+}
+
+function saveHeritage(h: HeritageState): void {
+  try { localStorage.setItem(HERITAGE_KEY, JSON.stringify(h)); } catch { /* silent */ }
+}
+
+export function spendKarma(cost: number): boolean {
+  const k = loadKarma();
+  if (k < cost) return false;
+  try { localStorage.setItem(KARMA_KEY, String(k - cost)); } catch { return false; }
+  return true;
+}
+
+export function unlockJob(id: string): void {
+  const h = loadHeritage();
+  if (!h.jobs.includes(id)) { h.jobs.push(id); saveHeritage(h); }
+}
+
+export function addKit(id: string): void {
+  const h = loadHeritage();
+  h.kits.push(id);
+  saveHeritage(h);
+}
+
+export function takePendingKits(): string[] {
+  const h = loadHeritage();
+  const kits = h.kits;
+  if (kits.length) { h.kits = []; saveHeritage(h); }
+  return kits;
+}
+
+export function setGoldenEpitaph(v: boolean): void {
+  const h = loadHeritage();
+  h.goldenEpitaph = v;
+  saveHeritage(h);
 }
 
 // ---- Dernières volontés : l'objet légué au prochain personnage ----

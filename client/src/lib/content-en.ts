@@ -1130,4 +1130,16 @@ export const CONTENT_EN: Record<string, string> = {
   'Lampe torche du vigile': 'Watchman\'s flashlight',
   'Bague brillante (volée ?)': 'Shiny ring (stolen?)',
   'Montre cassée (butin du raton)': 'Broken watch (raccoon loot)',
+
+  // ============ MÉTIERS DÉBLOCABLES (L'Héritage) ============
+  'Ancien Boxeur': 'Ex-Boxer',
+  'Les poings se souviennent. Le reste a un peu oublié.': 'The fists remember. The rest has mostly forgotten.',
+  'Ancien Poète': 'Ex-Poet',
+  'Des vers plein la tête, des trous plein les poches.': 'A head full of verses, pockets full of holes.',
+  'Gants de boxe fatigués': 'Tired boxing gloves',
+  'Carnet de poèmes': 'Poem notebook',
+  'Sandwich emballé': 'Wrapped sandwich',
+  'Gourde pleine': 'Full flask',
+  'Clé à molette rouillée': 'Rusty wrench',
+  'Pelote de ficelle': 'Ball of string',
 };
