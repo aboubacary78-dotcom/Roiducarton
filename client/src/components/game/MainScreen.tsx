@@ -9,6 +9,26 @@ import { useLang, tr } from '@/lib/lang';
 import SceneIllustration, { sceneForLocation } from './SceneIllustration';
 import { stampTap, liftHover } from '@/lib/anim';
 
+// Couleur du voile de lumière selon l'avancement de la journée : or du matin,
+// plein jour transparent, orange du soir, bleu de nuit. Interpolation linéaire
+// entre ces étapes (r, g, b, alpha).
+const DAY_VEILS: Array<[number, number, number, number, number]> = [
+  [0.0, 255, 214, 140, 0.14],  // matin doré
+  [0.35, 255, 255, 255, 0],    // plein jour
+  [0.7, 224, 122, 60, 0.16],   // fin d'après-midi
+  [0.9, 96, 62, 96, 0.24],     // crépuscule
+  [1.0, 22, 30, 68, 0.42],     // nuit — plus d'action restante
+];
+function dayVeil(p: number): string {
+  let i = 0;
+  while (i < DAY_VEILS.length - 2 && DAY_VEILS[i + 1][0] < p) i++;
+  const a = DAY_VEILS[i], b = DAY_VEILS[i + 1];
+  const k = Math.min(1, Math.max(0, (p - a[0]) / (b[0] - a[0] || 1)));
+  const mix = (x: number, y: number) => Math.round(x + (y - x) * k);
+  const alpha = a[4] + (b[4] - a[4]) * k;
+  return `rgba(${mix(a[1], b[1])}, ${mix(a[2], b[2])}, ${mix(a[3], b[3])}, ${alpha.toFixed(3)})`;
+}
+
 interface Enemy {
   name: string;
   emoji: string;
@@ -95,6 +115,9 @@ export default function MainScreen() {
   const char = state.character!;
   const loc = LOCATIONS[char.location];
   const actionsLeft = state.maxDayActions - state.dayActions;
+  // Avancement de la journée (0 = matin frais, 1 = nuit tombée) : ce sont les
+  // actions consommées qui font tourner la lumière sur la scène du quartier.
+  const dayProgress = state.maxDayActions > 0 ? state.dayActions / state.maxDayActions : 0;
   const weather = WEATHER_TYPES[state.weather];
   const nextWeatherType = getNextWeather(state.weather);
   const nextWeather = WEATHER_TYPES[nextWeatherType];
@@ -193,7 +216,10 @@ export default function MainScreen() {
         </div>
       </motion.div>
 
-      {/* Décor du quartier + ambiance (illustration générée, DA carton) */}
+      {/* Décor du quartier + ambiance (illustration générée, DA carton).
+          La journée PASSE sur la scène : chaque action consommée fait glisser
+          le décor, tourner la lumière (matin → midi → soir → nuit) et avancer
+          le soleil — remplacé par la lune quand il ne reste plus d'action. */}
       <motion.div
         key={char.location}
         initial={{ opacity: 0, y: 6 }}
@@ -201,7 +227,38 @@ export default function MainScreen() {
         transition={{ delay: 0.1 }}
         className="relative w-full h-28 rounded-xl overflow-hidden craft-card p-0"
       >
-        <SceneIllustration theme={sceneForLocation(char.location)} className="w-full h-full" rounded={false} align="bottom" sway />
+        <motion.div
+          className="w-full h-full"
+          style={{ scale: 1.15, willChange: 'transform' }}
+          animate={{ x: -6 - dayProgress * 30 }}
+          transition={{ type: 'spring', stiffness: 55, damping: 20 }}
+        >
+          <SceneIllustration theme={sceneForLocation(char.location)} className="w-full h-full" rounded={false} align="bottom" sway />
+        </motion.div>
+        {/* Voile de lumière du moment de la journée */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{ backgroundColor: dayVeil(dayProgress) }}
+          transition={{ duration: 0.8 }}
+        />
+        {/* Étoiles quand la nuit tombe (plus d'action restante) */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{ opacity: actionsLeft === 0 ? 1 : 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          {[[12, 18], [32, 10], [55, 16], [74, 9], [88, 20]].map(([l, t], i) => (
+            <span key={i} className="absolute w-1 h-1 rounded-full bg-[#F5EEDC]" style={{ left: `${l}%`, top: `${t}%`, opacity: i % 2 ? 0.7 : 1 }} />
+          ))}
+        </motion.div>
+        {/* Course du soleil, puis lever de lune */}
+        <motion.span
+          className="absolute text-lg drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)] pointer-events-none"
+          animate={{ left: `${6 + dayProgress * 80}%`, top: `${30 - Math.sin(dayProgress * Math.PI) * 22}%` }}
+          transition={{ type: 'spring', stiffness: 55, damping: 18 }}
+        >
+          {actionsLeft === 0 ? '🌙' : '☀️'}
+        </motion.span>
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
         <p className="absolute bottom-0 left-0 right-0 px-3 pb-2 text-[11px] text-white/95 italic leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
           "{getAmbientText(char.location, char.day)}"
