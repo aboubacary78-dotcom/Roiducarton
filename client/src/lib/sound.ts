@@ -28,13 +28,26 @@ function audio(): AudioContext | null {
   }
 }
 
+// Contexte partagé avec le module d'ambiances (lib/ambience.ts).
+export function getAudio(): AudioContext | null {
+  return audio();
+}
+
 export function isMuted(): boolean {
   return muted;
+}
+
+// Les ambiances continues doivent démarrer/s'arrêter quand on (dé)coupe le
+// son : elles s'abonnent ici plutôt que d'interroger isMuted() en boucle.
+const muteListeners: Array<(m: boolean) => void> = [];
+export function onMuteChange(fn: (m: boolean) => void): void {
+  muteListeners.push(fn);
 }
 
 export function setMuted(v: boolean): void {
   muted = v;
   try { localStorage.setItem(MUTE_KEY, v ? '1' : '0'); } catch { /* silent */ }
+  muteListeners.forEach(f => { try { f(v); } catch { /* silent */ } });
 }
 
 // Une note synthétisée avec enveloppe simple.
@@ -172,6 +185,38 @@ export function playWhoosh(): void {
   if (muted) return;
   noise(0.32, 0.05, 400);
   tone(300, 0.28, 'sine', 0.05, 700);
+}
+
+/**
+ * Cri de l'ennemi à son entrée en combat, selon sa silhouette (le « pattern »
+ * de projectiles sert aussi de famille sonore) : criaillement d'oiseau,
+ * feulement de chat, grognement de bête, clink d'ivrogne, grognement humain.
+ */
+export function playEnemyCry(pattern: string): void {
+  if (muted) return;
+  switch (pattern) {
+    case 'bird': // criaillement : trois chirps stridents descendants
+      [1900, 2300, 1500].forEach((f, i) => setTimeout(() => tone(f, 0.09, 'square', 0.045, f * 0.55), i * 95));
+      break;
+    case 'small': // feulement de chat : sirène râpeuse qui monte puis retombe
+      tone(480, 0.4, 'sawtooth', 0.04, 950);
+      setTimeout(() => tone(900, 0.3, 'sawtooth', 0.035, 380), 300);
+      break;
+    case 'beast': // grognement grave qui gronde, puis claquement sec
+      tone(85, 0.5, 'sawtooth', 0.08, 65);
+      setTimeout(() => tone(230, 0.1, 'square', 0.07, 130), 430);
+      break;
+    case 'drunk': // clink de bouteilles + rot grave, évidemment
+      tone(1650, 0.06, 'triangle', 0.055);
+      setTimeout(() => tone(1240, 0.08, 'triangle', 0.05), 85);
+      setTimeout(() => tone(150, 0.3, 'sawtooth', 0.05, 80), 250);
+      break;
+    default: // brute : souffle + grognement humain sourd
+      noise(0.2, 0.05, 300);
+      tone(135, 0.32, 'sawtooth', 0.065, 85);
+      break;
+  }
+  vibrate(35);
 }
 
 /** Vibration haptique (Android / app native). Sans effet si non supporté. */

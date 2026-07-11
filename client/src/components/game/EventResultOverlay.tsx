@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { playSuccess, playFail, playWin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
+import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, moodFor } from './SceneIllustration';
 
 const FLAG_LABELS: Record<string, { fr: string; en: string }> = {
@@ -98,7 +99,7 @@ export default function EventResultOverlay() {
             className="relative w-full h-32 rounded-xl overflow-hidden mb-3 shadow-[0_3px_12px_rgba(58,42,30,0.12)]"
           >
             {shownImage ? (
-              <img key={shownImage} src={shownImage} alt="" className="w-full h-full object-cover" onError={() => setErrorCount((n) => n + 1)} />
+              <KenBurnsImage src={shownImage} onError={() => setErrorCount((n) => n + 1)} />
             ) : (
               <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} mood={moodFor(result.text, isPositive)} className="w-full h-full" sway />
             )}

@@ -5,7 +5,9 @@
  */
 import { useGame } from '@/contexts/GameContext';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { screenIn } from '@/lib/anim';
+import { setAmbience, type AmbienceId } from '@/lib/ambience';
 import TitleScreen from '@/components/game/TitleScreen';
 import CharacterSelect from '@/components/game/CharacterSelect';
 import MainScreen from '@/components/game/MainScreen';
@@ -49,6 +51,19 @@ function renderScreen(screen: string) {
 
 export default function Home() {
   const { state } = useGame();
+
+  // Ambiance sonore continue selon l'écran : thème musical sur le titre,
+  // lit sonore du lieu en jeu, silence pendant combat/mini-jeux (leurs effets
+  // portent la tension) et sur l'écran de fin.
+  const location = state.character?.location;
+  useEffect(() => {
+    const s = state.screen;
+    if (s === 'title' || s === 'character-select') setAmbience('title');
+    else if (s === 'combat' || s === 'steal-game' || s === 'beg-game' || s === 'game-over') setAmbience(null);
+    else if (location) setAmbience(location as AmbienceId);
+    else setAmbience(null);
+  }, [state.screen, location]);
+  useEffect(() => () => setAmbience(null), []);
 
   return (
     <div className="min-h-screen flex flex-col items-center"

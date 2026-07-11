@@ -154,20 +154,99 @@ function CardboardBuilding({ x, w, top, fill }: { x: number; w: number; top: num
   );
 }
 
+// ---- Cycle jour/nuit de l'écran-titre ----
+// La ville vit en boucle (~40 s) : jour → coucher de soleil → nuit étoilée →
+// aube. Tout est interpolé entre ces étapes : couleurs du ciel, course du
+// soleil, lever de lune, étoiles, voile nocturne sur les immeubles.
+interface SkyKey { t: number; top: string; mid: string; bot: string; overlay: number; sun: number; moon: number; stars: number; sunY: number; moonY: number }
+const SKY_KEYS: SkyKey[] = [
+  { t: 0.00, top: '#AED4E6', mid: '#DCE6CB', bot: '#F0DFC0', overlay: 0.00, sun: 0.9, moon: 0, stars: 0, sunY: 36, moonY: 150 },
+  { t: 0.28, top: '#F7E3C6', mid: '#EBB387', bot: '#D88B57', overlay: 0.04, sun: 0.85, moon: 0, stars: 0, sunY: 64, moonY: 140 },
+  { t: 0.42, top: '#8A5D74', mid: '#B76A56', bot: '#7E4A44', overlay: 0.16, sun: 0.35, moon: 0.25, stars: 0.2, sunY: 96, moonY: 84 },
+  { t: 0.52, top: '#232B4A', mid: '#2E3A5C', bot: '#3A4668', overlay: 0.34, sun: 0, moon: 0.9, stars: 0.95, sunY: 130, moonY: 46 },
+  { t: 0.78, top: '#202846', mid: '#2B3758', bot: '#374363', overlay: 0.34, sun: 0, moon: 0.85, stars: 0.9, sunY: 130, moonY: 58 },
+  { t: 0.90, top: '#D9C4D6', mid: '#EFC7A2', bot: '#E2A171', overlay: 0.10, sun: 0.35, moon: 0.25, stars: 0.2, sunY: 98, moonY: 104 },
+  { t: 1.00, top: '#AED4E6', mid: '#DCE6CB', bot: '#F0DFC0', overlay: 0.00, sun: 0.9, moon: 0, stars: 0, sunY: 36, moonY: 150 },
+];
+const STARS = [
+  [30, 24], [74, 40], [118, 18], [158, 34], [196, 22], [238, 44], [268, 16], [302, 36], [348, 26], [372, 48], [52, 58], [214, 60],
+] as const;
+
+const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
+function mixHex(a: string, b: string, k: number): string {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const r = Math.round(lerp(pa >> 16, pb >> 16, k));
+  const g = Math.round(lerp((pa >> 8) & 255, (pb >> 8) & 255, k));
+  const bl = Math.round(lerp(pa & 255, pb & 255, k));
+  return `#${((r << 16) | (g << 8) | bl).toString(16).padStart(6, '0')}`;
+}
+function sampleSky(t: number): SkyKey {
+  let i = 0;
+  while (i < SKY_KEYS.length - 2 && SKY_KEYS[i + 1].t < t) i++;
+  const a = SKY_KEYS[i], b = SKY_KEYS[i + 1];
+  const k = (t - a.t) / (b.t - a.t || 1);
+  return {
+    t,
+    top: mixHex(a.top, b.top, k), mid: mixHex(a.mid, b.mid, k), bot: mixHex(a.bot, b.bot, k),
+    overlay: lerp(a.overlay, b.overlay, k),
+    sun: lerp(a.sun, b.sun, k), moon: lerp(a.moon, b.moon, k), stars: lerp(a.stars, b.stars, k),
+    sunY: lerp(a.sunY, b.sunY, k), moonY: lerp(a.moonY, b.moonY, k),
+  };
+}
+
 function CardboardCityHero() {
+  // On démarre au coucher de soleil (l'identité visuelle du jeu), puis ça vit.
+  const [t, setT] = useState(0.28);
+  useEffect(() => {
+    const id = setInterval(() => setT(v => (v + 0.125 / 40) % 1), 125);
+    return () => clearInterval(id);
+  }, []);
+  const k = sampleSky(t);
+
   return (
-    <svg viewBox="0 0 390 192" className="w-full h-48" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Une ville faite de cartons au coucher du soleil">
+    <svg viewBox="0 0 390 192" className="w-full h-48" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Une ville faite de cartons, du jour à la nuit">
       <defs>
         <linearGradient id="rdc-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#F7E3C6" />
-          <stop offset="55%" stopColor="#EBB387" />
-          <stop offset="100%" stopColor="#D88B57" />
+          <stop offset="0%" stopColor={k.top} />
+          <stop offset="55%" stopColor={k.mid} />
+          <stop offset="100%" stopColor={k.bot} />
         </linearGradient>
       </defs>
       <rect width="390" height="192" fill="url(#rdc-sky)" />
-      {/* soleil bas */}
-      <circle cx="316" cy="58" r="34" fill="#FBE7C0" opacity="0.85" />
-      <circle cx="316" cy="58" r="22" fill="#FCEFD4" opacity="0.9" />
+      {/* étoiles (nuit) */}
+      <g opacity={k.stars}>
+        {STARS.map(([x, y], i) => (
+          <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.5 : 1} fill="#F5EEDC" />
+        ))}
+      </g>
+      {/* soleil : descend et s'éteint le soir */}
+      <g opacity={k.sun}>
+        <circle cx="316" cy={k.sunY} r="34" fill="#FBE7C0" opacity="0.85" />
+        <circle cx="316" cy={k.sunY} r="22" fill="#FCEFD4" opacity="0.9" />
+      </g>
+      {/* lune (croissant) : se lève la nuit */}
+      <g opacity={k.moon}>
+        <circle cx="76" cy={k.moonY} r="16" fill="#F1E9D2" />
+        <circle cx="83" cy={k.moonY - 4} r="14" fill={k.top} />
+      </g>
+      {/* nuages en carton qui dérivent, discrets la nuit */}
+      <motion.g
+        opacity={0.5 - k.stars * 0.35}
+        initial={{ x: -120 }}
+        animate={{ x: 420 }}
+        transition={{ duration: 70, repeat: Infinity, ease: 'linear' }}
+      >
+        <ellipse cx="0" cy="40" rx="34" ry="10" fill="#FFFFFF" opacity="0.8" />
+        <ellipse cx="24" cy="35" rx="22" ry="8" fill="#FFFFFF" opacity="0.7" />
+      </motion.g>
+      <motion.g
+        opacity={0.4 - k.stars * 0.3}
+        initial={{ x: 180 }}
+        animate={{ x: 540 }}
+        transition={{ duration: 95, repeat: Infinity, ease: 'linear' }}
+      >
+        <ellipse cx="-260" cy="70" rx="28" ry="8" fill="#FFFFFF" opacity="0.75" />
+      </motion.g>
       {/* immeubles lointains, brumeux */}
       <g opacity="0.45">
         <rect x="0" y="110" width="60" height="82" fill="#C98A56" />
@@ -182,6 +261,8 @@ function CardboardCityHero() {
       <CardboardBuilding x={222} w={52} top={88} fill="#B97C49" />
       <CardboardBuilding x={278} w={42} top={126} fill="#9B5B3A" />
       <CardboardBuilding x={324} w={60} top={100} fill="#B97C49" />
+      {/* voile nocturne : la ville s'assombrit, les fenêtres ressortent */}
+      <rect width="390" height="192" fill="#141B38" opacity={k.overlay} />
       {/* couronne sur l'immeuble le plus haut (le Roi du Carton) */}
       <g transform="translate(0,-2)">
         <path d="M122 70 L122 56 L130 63 L137 51 L144 63 L152 56 L152 70 Z" fill="#E8B84B" stroke="#9B7209" strokeWidth="1.4" strokeLinejoin="round" />

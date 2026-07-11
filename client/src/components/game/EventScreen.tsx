@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { showRewarded } from '@/lib/ads';
 import { useLang, tr, tc } from '@/lib/lang';
+import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
 import { stampTap, liftHover } from '@/lib/anim';
 
@@ -95,12 +96,7 @@ export default function EventScreen() {
           animate={{ scale: 1, opacity: 1 }}
           className="w-full h-44 rounded-xl overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.1)] relative"
         >
-          <img
-            src={eventImage}
-            alt={event.title}
-            onError={() => setImgError(true)}
-            className="w-full h-full object-cover"
-          />
+          <KenBurnsImage src={eventImage} alt={event.title} onError={() => setImgError(true)} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         </motion.div>
       ) : (
