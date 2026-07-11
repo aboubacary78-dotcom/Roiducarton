@@ -128,5 +128,37 @@ Même DA/convention. **Paysage 3:2, vrai WebP.** Le code cherche déjà `result-
 | `result-steal-etendage-bad.webp` | ❌ Une grand-mère hurle à la fenêtre : "Au secours, on me vole !" Tout le quartier se réveille. |
 
 
-## Total restant : 96 images
-Livrable par lots. Chaque image s'active dès qu'elle arrive ; en attendant, l'image de base de la scène s'affiche.
+## F. Nouvelles suites narratives (18 images : 7 rencontres + 11 variantes)
+
+Sept événements « suite » viennent d'être ajoutés au jeu (les graines plantées
+par certains événements paient enfin). Ils n'ont AUCUNE image : d'abord la
+rencontre (`followup-<nom>.webp`), puis les variantes `result-<id>-good/bad`.
+
+### Rencontres (7 images)
+| Fichier | Scène |
+|---|---|
+| `followup-velo.webp` | Un étudiant en carton lorgne le vélo rafistolé au fil de fer du SDF, billet à la main, l'air très intéressé. |
+| `followup-eglise.webp` | Le prêtre accueille le SDF sur le parvis, porte ouverte, vapeur de soupe au fond, lumière chaude. |
+| `followup-gardien.webp` | Le gardien de la déchetterie hèle le SDF depuis sa guérite, thermos levé, montagnes de récup en fond. |
+| `followup-toit.webp` | Le SDF sur son campement discret de toit, ville en carton illuminée en contrebas, nuit étoilée. |
+| `followup-emploi-jardin.webp` | Le vieux jardinier bougon tend une bêche au SDF dans le potager caché, complicité rugueuse. |
+| `followup-tomates.webp` | Le petit carré de terre du SDF avec trois tomates rouges éclatantes, lumière de matin, fierté. |
+| `followup-magasin.webp` | Le SDF devant la porte arrière entrouverte du magasin abandonné, nuit, hésitation, lampadaire lointain. |
+
+### Variantes réussite/échec (11 images)
+| Fichier | Scène (issue) |
+|---|---|
+| `result-exp-velo-suite-good.webp` | ✅ L'étudiant repart en zigzaguant sur le vélo, le SDF compte ses billets, mi-figue mi-raisin. |
+| `result-exp-eglise-suite-good.webp` | ✅ Le SDF attablé devant une soupe fumante, le curé sert, banc au chaud dans l'église. |
+| `result-exp-gardien-suite-good.webp` | ✅ Café partagé dans la guérite, le gardien tend une vieille radio, biscuits mous, complicité. |
+| `result-exp-toit-suite-good.webp` | ✅ Le SDF endormi comme un roi sous les étoiles sur son toit, ville qui scintille. |
+| `result-exp-toit-suite-bad.webp` | ❌ Le SDF dévale l'escalier de service, faisceau de lampe du concierge derrière lui, panique. |
+| `result-exp-emploi-jardin-suite-good.webp` | ✅ Le SDF bêche fièrement, repas chaud posé sur une caisse, jardinier approbateur. |
+| `result-exp-emploi-jardin-suite-bad.webp` | ❌ Le jardinier renvoie le SDF d'un geste sec, bêche plantée là, mine penaude. |
+| `result-exp-mentor-suite-good.webp` | ✅ Le SDF croque une tomate tiède de soleil devant son carré de terre, triomphe simple. |
+| `result-exp-mentor-suite-bad.webp` | ❌ Des pigeons repus autour d'une demi-tomate massacrée, le SDF les fusille du regard. |
+| `result-exp-magasin-suite-good.webp` | ✅ Le SDF ressort du magasin abandonné chargé d'un carton d'invendus, sourire de contrebandier. |
+| `result-exp-magasin-suite-bad.webp` | ❌ Le SDF fuit ventre à terre, gyrophare d'alarme rouge sur la façade, mannequins en silhouette. |
+
+## Total restant : 114 images (96 + 18 nouvelles)
+Livrable par lots. Chaque image s'active dès qu'elle arrive ; en attendant, l'image de base de la scène (ou la scène dessinée) s'affiche.
