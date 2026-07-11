@@ -1,4 +1,4 @@
-import { useGame, LOCATIONS } from '@/contexts/GameContext';
+import { useGame, streetTitleFor, getContract, LOCATIONS } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import StatBars from './StatBars';
 import CardboardAvatar from './CardboardAvatar';
@@ -118,6 +118,10 @@ export default function MainScreen() {
   // Avancement de la journée (0 = matin frais, 1 = nuit tombée) : ce sont les
   // actions consommées qui font tourner la lumière sur la scène du quartier.
   const dayProgress = state.maxDayActions > 0 ? state.dayActions / state.maxDayActions : 0;
+  // Titre de rue (palier de jours) et contrat du matin.
+  const streetTitle = streetTitleFor(char.day);
+  const contractDef = state.contract ? getContract(state.contract.id) : undefined;
+  const contractDone = !!state.contract?.done || (contractDef?.check ? contractDef.check(char) : false);
   const weather = WEATHER_TYPES[state.weather];
   const nextWeatherType = getNextWeather(state.weather);
   const nextWeather = WEATHER_TYPES[nextWeatherType];
@@ -144,7 +148,7 @@ export default function MainScreen() {
             <div>
               <h2 className="text-base font-semibold text-[#2A1F1A]">{char.name}</h2>
               <p className="text-xs text-[#8B6B4A]">
-                {loc.emoji} {tr(loc.name, loc.nameEn || loc.name)} · {tr('Jour', 'Day')} {char.day}
+                {loc.emoji} {tr(loc.name, loc.nameEn || loc.name)} · {tr('Jour', 'Day')} {char.day}{streetTitle ? ` · ${streetTitle.emoji} ${tr(streetTitle.fr, streetTitle.en)}` : ''}
               </p>
             </div>
           </div>
@@ -288,6 +292,15 @@ export default function MainScreen() {
             {actionsLeft} {tr(`action${actionsLeft > 1 ? 's' : ''}`, `action${actionsLeft > 1 ? 's' : ''}`)}
           </span>
         </div>
+
+        {/* Contrat du matin : le micro-objectif du jour */}
+        {contractDef && (
+          <div className={`flex items-center justify-center gap-1.5 text-[10px] mt-1 ${contractDone ? 'text-[#3d8b4f]' : 'text-[#8B6B4A]'}`}>
+            <span>{contractDone ? '✅' : '📋'}</span>
+            <span className="font-medium">{tr(contractDef.label, contractDef.labelEn)}</span>
+            <span className="font-mono text-[#B8860B]">({tr(contractDef.rewardLabel, contractDef.rewardLabelEn)})</span>
+          </div>
+        )}
 
         {/* Main actions grid */}
         <div id="tuto-actions" className="grid grid-cols-2 gap-2">
