@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { syncRecords, recordGameEnd } from '@/lib/profile';
 import { getLang, tc } from '@/lib/lang';
+import { peekLegacy, clearLegacy } from '@/lib/necrology';
 
 // ============ TYPES ============
 export interface Job {
@@ -225,7 +226,7 @@ export interface CombatState {
   dodgePenalty: number;
 }
 
-export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'game-over' | 'shop' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
+export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'game-over' | 'shop' | 'registre' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
 
 // ============ MÉTÉO ============
 export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm' | 'heatwave' | 'fog' | 'snow';
@@ -809,6 +810,14 @@ export const PROJECTILE_PATTERNS: Record<string, ProjectilePattern> = {
   drunk: { id: 'drunk', label: 'Bouteilles en cloche', labelEn: 'Lobbed bottles', kind: 'bottle', motion: 'lob', spawnMs: 640, speed: 120, size: 16 },
   beast: { id: 'beast', label: 'Charge bestiale', labelEn: 'Bestial charge', kind: 'dash', motion: 'homing', spawnMs: 560, speed: 165, size: 15 },
 };
+
+// Tous les ennemis « connus » du jeu (fiches canoniques + adversaires de la
+// Bagarre) : c'est la liste des fins « Tombé au combat » du Registre des Morts.
+export function knownEnemyNames(): string[] {
+  const names = new Set<string>(ENEMIES.map(e => e.name));
+  Object.keys(COMBAT_IMAGES).forEach(n => names.add(n));
+  return Array.from(names);
+}
 
 // Choisit le motif d'après l'ennemi (silhouette + stats).
 export function getPattern(enemy: { name: string; emoji: string; attack: number; health: number }): string {
@@ -3061,6 +3070,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'SELECT_CHARACTER': {
       const char = state.characterChoices[action.index];
+      // Dernières volontés : l'objet légué par le personnage précédent attend
+      // sur le carton (voir GameOverScreen / lib/necrology).
+      const legacy = peekLegacy();
+      clearLegacy();
+      if (legacy && char.inventory.length < 20) {
+        return {
+          ...state, screen: 'main', dayActions: 0,
+          character: { ...char, inventory: [...char.inventory, legacy.item] },
+          eventResult: {
+            text: L(
+              `🎁 Sur votre carton, quelqu'un a déposé ${legacy.item.name} — l'héritage de ${legacy.from}. La rue se souvient.`,
+              `🎁 Someone left the ${tc(legacy.item.name)} on your cardboard — ${legacy.from}'s legacy. The street remembers.`,
+            ),
+          },
+        };
+      }
       return { ...state, screen: 'main', character: char, dayActions: 0 };
     }
 
@@ -3957,8 +3982,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'REVIVE': {
       // Seconde chance (via pub récompensée) : on remet le personnage
       // dans un état survivable et on relance la journée. Utilisable
-      // une seule fois par partie (flag 'revived').
+      // une seule fois par partie (flag 'revived'). Le legs éventuellement
+      // choisi sur l'écran de fin est annulé : le défunt n'est plus défunt.
       if (!state.character) return state;
+      clearLegacy();
       const revivedStats: Stats = {
         ...state.character.stats,
         health: Math.max(state.character.stats.health, 50),
