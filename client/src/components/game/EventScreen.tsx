@@ -7,7 +7,7 @@ import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
 import { stampTap, liftHover } from '@/lib/anim';
 
-const COMBAT_IMG_FALLBACK = '/assets/combat-scene.png';
+const COMBAT_IMG_FALLBACK = '/assets/combat-scene.webp';
 
 // Vignette de repli selon le type d'événement quand aucun mot-clé ne ressort.
 const TYPE_SCENE: Record<string, SceneTheme> = {
