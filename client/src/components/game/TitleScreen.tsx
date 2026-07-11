@@ -2,6 +2,8 @@ import { useGame, getLegend } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useLang, tr } from '@/lib/lang';
+import { DEATH_DEFS, loadDeathBook, loadKarma } from '@/lib/necrology';
+import { knownEnemyNames } from '@/contexts/GameContext';
 
 const SAVE_KEY = 'roi-du-carton-save';
 
@@ -10,6 +12,10 @@ export default function TitleScreen() {
   useLang();
   const [hasSave, setHasSave] = useState(false);
   const legend = getLegend(state.highScores);
+  // Avancement du Registre des Morts + Karma de Rue (méta persistante).
+  const deathsFound = Object.keys(loadDeathBook()).length;
+  const deathsTotal = DEATH_DEFS.length + knownEnemyNames().length;
+  const karma = loadKarma();
 
   useEffect(() => {
     try {
@@ -96,12 +102,36 @@ export default function TitleScreen() {
           transition={{ delay: hasSave ? 0.7 : 0.6 }}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'registre' })}
+          className="action-btn w-full py-3 text-sm text-[#6B5740] font-medium flex items-center justify-center gap-2"
+        >
+          <span>📕 {tr('Registre des Morts', 'Book of the Dead')}</span>
+          <span className="text-[10px] font-mono text-[#A08B70]">{deathsFound}/{deathsTotal}</span>
+        </motion.button>
+
+        <motion.button
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: hasSave ? 0.8 : 0.7 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'settings' })}
           className="action-btn w-full py-3 text-sm text-[#6B5740] font-medium"
         >
           ⚙️ {tr('Options', 'Settings')}
         </motion.button>
       </div>
+
+      {karma > 0 && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.9 }}
+          className="text-[11px] text-[#B8860B] font-semibold"
+        >
+          👑 {tr('Karma de Rue', 'Street Karma')} : {karma}
+        </motion.p>
+      )}
 
       {/* Footer */}
       <motion.p
