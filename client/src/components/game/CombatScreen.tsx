@@ -2,7 +2,7 @@ import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon 
 import type { Character, CombatState, CombatCard, SignId } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { playHurt, playWhoosh } from '@/lib/sound';
+import { playHurt, playWhoosh, playEnemyCry } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
 import { getEquipped } from '@/lib/profile';
@@ -66,6 +66,9 @@ function CombatScreenInner() {
   // Portrait (diorama) de l'ennemi ; repli sur l'emoji si le fichier manque.
   const [imgError, setImgError] = useState(false);
   useEffect(() => { setImgError(false); }, [currentCombat?.enemyName]);
+  // Cri de l'ennemi à son entrée en scène (famille sonore = son pattern).
+  const pattern = currentCombat?.pattern;
+  useEffect(() => { if (pattern) playEnemyCry(pattern); }, [pattern, currentCombat?.enemyName]);
   // Toast quand le coup spécial vient d'être chargé (manche gagnée).
   const prevCharged = useRef(false);
   useEffect(() => {
