@@ -29,10 +29,6 @@ function checkRequirements(choice: EventChoice, char: Character | null, en: bool
     const item = char.inventory.find(i => i.id === req.item);
     return { ok: !!item, label: en ? '🎒 Item required' : '🎒 Objet requis' };
   }
-  if (req.skill) {
-    const ok = char.job.bonusSkills.includes(req.skill) || (char.skills[req.skill] ?? 0) > 0;
-    return { ok, label: `💼 ${req.skill}` };
-  }
   if (req.respect !== undefined) {
     return { ok: char.respect >= req.respect, label: `⭐ ${en ? 'Respect' : 'Respect'} ${req.respect}+` };
   }

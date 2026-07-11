@@ -8,7 +8,6 @@ export interface Job {
   name: string;
   description: string;
   bonusStats: Partial<Stats>;
-  bonusSkills: string[];
   startingItems: string[];
   emoji: string;
 }
@@ -50,7 +49,6 @@ export interface Character {
   money: number;
   respect: number;
   inventory: InventoryItem[];
-  skills: Record<string, number>;
   day: number;
   location: string;
   alive: boolean;
@@ -96,7 +94,7 @@ export interface EventChoice {
   text: string;
   risk: 'safe' | 'normal' | 'risky';
   emoji: string;
-  requirements?: { skill?: string; item?: string; stat?: keyof Stats; minValue?: number; respect?: number };
+  requirements?: { item?: string; stat?: keyof Stats; minValue?: number; respect?: number };
   outcomes: EventOutcome[];
 }
 
@@ -110,7 +108,6 @@ export interface EventOutcome {
   itemLoss?: string;
   addFlag?: string;
   removeFlag?: string;
-  followUpEventId?: string;
 }
 
 // Combat « Signe, Esquive & Riposte » : chaque manche s'ouvre sur un duel de
@@ -228,7 +225,7 @@ export interface CombatState {
   dodgePenalty: number;
 }
 
-export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'craft' | 'game-over' | 'day-summary' | 'shop' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
+export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'game-over' | 'shop' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
 
 // ============ MÉTÉO ============
 export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm' | 'heatwave' | 'fog' | 'snow';
@@ -642,7 +639,6 @@ export interface GameState {
   dayActions: number;
   maxDayActions: number;
   highScores: { name: string; days: number; score: number }[];
-  pendingFollowUp: string | null;
   weather: WeatherType;
   // Cause de mort contextuelle (ex. l'ennemi qui vous a achevé), sinon null
   // et l'écran de fin la déduit de vos jauges.
@@ -667,21 +663,21 @@ export function genderFromName(name: string): 'm' | 'f' {
 }
 
 export const JOBS: Job[] = [
-  { id: 'comptable', name: 'Ancien Comptable', description: 'Les chiffres, ça le connaît. Les poubelles, un peu moins.', bonusStats: { dignity: 10 }, bonusSkills: ['negociation'], startingItems: ['calculatrice'], emoji: '🧮' },
-  { id: 'ouvrier', name: 'Ancien Ouvrier', description: 'Des mains en or et un dos en compote.', bonusStats: { health: 10 }, bonusSkills: ['artisanat'], startingItems: ['cle-molette'], emoji: '🔧' },
-  { id: 'professeur', name: 'Ancien Professeur', description: 'Il corrige encore les fautes sur les panneaux.', bonusStats: { mental: 15 }, bonusSkills: ['persuasion'], startingItems: ['livre'], emoji: '📚' },
-  { id: 'sommelier', name: 'Ancien Sommelier', description: "Peut distinguer un Bordeaux d'un jus de poubelle. Parfois.", bonusStats: { hunger: 10 }, bonusSkills: ['detection'], startingItems: ['tire-bouchon'], emoji: '🍷' },
-  { id: 'cascadeur', name: 'Ancien Cascadeur', description: 'Tombe de haut. Littéralement et figurativement.', bonusStats: { health: 5 }, bonusSkills: ['agilite'], startingItems: ['genouillere'], emoji: '🤸' },
-  { id: 'informaticien', name: 'Ancien Informaticien', description: 'Cherche encore le WiFi gratuit.', bonusStats: { mental: 10 }, bonusSkills: ['piratage'], startingItems: ['cable-usb'], emoji: '💻' },
-  { id: 'cuisinier', name: 'Ancien Cuisinier', description: 'Transforme un rat en ratatouille.', bonusStats: { hunger: 15 }, bonusSkills: ['cuisine'], startingItems: ['couteau-suisse'], emoji: '👨‍🍳' },
-  { id: 'infirmier', name: 'Ancien Infirmier', description: 'Se soigne avec des feuilles de journal.', bonusStats: { health: 15 }, bonusSkills: ['soin'], startingItems: ['bandage'], emoji: '🏥' },
-  { id: 'artiste', name: 'Ancien Artiste', description: "Son art n'a jamais été compris. Même par lui.", bonusStats: { dignity: 15 }, bonusSkills: ['performance'], startingItems: ['crayon'], emoji: '🎨' },
-  { id: 'militaire', name: 'Ancien Militaire', description: "Dort debout et mange n'importe quoi.", bonusStats: { health: 10 }, bonusSkills: ['combat'], startingItems: ['couverture-survie'], emoji: '🎖️' },
-  { id: 'bibliothecaire', name: 'Ancien Bibliothécaire', description: 'Connaît tous les recoins de la ville.', bonusStats: { mental: 10 }, bonusSkills: ['exploration'], startingItems: ['carte-ville'], emoji: '📖' },
-  { id: 'vendeur', name: 'Ancien Vendeur de Voitures', description: 'Peut vendre un carton mouillé comme un loft.', bonusStats: { dignity: 5 }, bonusSkills: ['negociation', 'arnaque'], startingItems: ['cravate'], emoji: '🚗' },
-  { id: 'jardinier', name: 'Ancien Jardinier', description: 'Fait pousser des tomates dans une chaussure.', bonusStats: { hunger: 10 }, bonusSkills: ['botanique'], startingItems: ['graines'], emoji: '🌱' },
-  { id: 'avocat', name: 'Ancien Avocat', description: 'Connaît ses droits. Et ceux des pigeons.', bonusStats: { dignity: 10, mental: 5 }, bonusSkills: ['intimidation'], startingItems: ['code-civil'], emoji: '⚖️' },
-  { id: 'musicien', name: 'Ancien Musicien', description: 'Son harmonica a connu des jours meilleurs.', bonusStats: { mental: 10, dignity: 5 }, bonusSkills: ['performance'], startingItems: ['harmonica-casse'], emoji: '🎵' },
+  { id: 'comptable', name: 'Ancien Comptable', description: 'Les chiffres, ça le connaît. Les poubelles, un peu moins.', bonusStats: { dignity: 10 }, startingItems: ['calculatrice'], emoji: '🧮' },
+  { id: 'ouvrier', name: 'Ancien Ouvrier', description: 'Des mains en or et un dos en compote.', bonusStats: { health: 10 }, startingItems: ['cle-molette'], emoji: '🔧' },
+  { id: 'professeur', name: 'Ancien Professeur', description: 'Il corrige encore les fautes sur les panneaux.', bonusStats: { mental: 15 }, startingItems: ['livre'], emoji: '📚' },
+  { id: 'sommelier', name: 'Ancien Sommelier', description: "Peut distinguer un Bordeaux d'un jus de poubelle. Parfois.", bonusStats: { hunger: 10 }, startingItems: ['tire-bouchon'], emoji: '🍷' },
+  { id: 'cascadeur', name: 'Ancien Cascadeur', description: 'Tombe de haut. Littéralement et figurativement.', bonusStats: { health: 5 }, startingItems: ['genouillere'], emoji: '🤸' },
+  { id: 'informaticien', name: 'Ancien Informaticien', description: 'Cherche encore le WiFi gratuit.', bonusStats: { mental: 10 }, startingItems: ['cable-usb'], emoji: '💻' },
+  { id: 'cuisinier', name: 'Ancien Cuisinier', description: 'Transforme un rat en ratatouille.', bonusStats: { hunger: 15 }, startingItems: ['couteau-suisse'], emoji: '👨‍🍳' },
+  { id: 'infirmier', name: 'Ancien Infirmier', description: 'Se soigne avec des feuilles de journal.', bonusStats: { health: 15 }, startingItems: ['bandage'], emoji: '🏥' },
+  { id: 'artiste', name: 'Ancien Artiste', description: "Son art n'a jamais été compris. Même par lui.", bonusStats: { dignity: 15 }, startingItems: ['crayon'], emoji: '🎨' },
+  { id: 'militaire', name: 'Ancien Militaire', description: "Dort debout et mange n'importe quoi.", bonusStats: { health: 10 }, startingItems: ['couverture-survie'], emoji: '🎖️' },
+  { id: 'bibliothecaire', name: 'Ancien Bibliothécaire', description: 'Connaît tous les recoins de la ville.', bonusStats: { mental: 10 }, startingItems: ['carte-ville'], emoji: '📖' },
+  { id: 'vendeur', name: 'Ancien Vendeur de Voitures', description: 'Peut vendre un carton mouillé comme un loft.', bonusStats: { dignity: 5 }, startingItems: ['cravate'], emoji: '🚗' },
+  { id: 'jardinier', name: 'Ancien Jardinier', description: 'Fait pousser des tomates dans une chaussure.', bonusStats: { hunger: 10 }, startingItems: ['graines'], emoji: '🌱' },
+  { id: 'avocat', name: 'Ancien Avocat', description: 'Connaît ses droits. Et ceux des pigeons.', bonusStats: { dignity: 10, mental: 5 }, startingItems: ['code-civil'], emoji: '⚖️' },
+  { id: 'musicien', name: 'Ancien Musicien', description: 'Son harmonica a connu des jours meilleurs.', bonusStats: { mental: 10, dignity: 5 }, startingItems: ['harmonica-casse'], emoji: '🎵' },
 ];
 
 export const TRAITS: Trait[] = [
@@ -745,18 +741,18 @@ interface Enemy {
 }
 
 const ENEMIES: Enemy[] = [
-  { name: 'Commerçant Furieux', emoji: '😡', health: 32, attack: 11, description: 'Il vous a pris la main dans le sac. Et il a de la poigne.', loot: { respect: 2 } },
+  { name: 'Commerçant Furieux', emoji: '😡', health: 32, attack: 11, description: 'Il vous a pris la main dans le sac. Et il a de la poigne.', loot: { respect: 2, item: { id: 'sandwich-confisque', name: 'Sandwich de l\'étal', emoji: '🥪', type: 'food', value: 5, effect: { hunger: 15 } } } },
   { name: 'Rat Géant', emoji: '🐀', health: 20, attack: 8, description: "Un rat de la taille d'un chihuahua. Il n'a pas peur.", loot: { money: 2, respect: 1 } },
   { name: 'Mouette Furibonde', emoji: '🦅', health: 15, attack: 6, description: 'Elle veut votre sandwich. Elle aura votre sandwich.', loot: { respect: 2 } },
   { name: 'Chien Errant', emoji: '🐕', health: 30, attack: 12, description: 'Un molosse sans collier. Ses crocs brillent au clair de lune.', loot: { money: 3, respect: 3 } },
   { name: 'Pigeon Alpha', emoji: '🐦', health: 10, attack: 4, description: 'Le chef du gang de pigeons. Il roucoule avec menace.', loot: { money: 1, respect: 1 } },
-  { name: 'Voyou du Coin', emoji: '🧔', health: 40, attack: 15, description: 'Un type louche qui veut votre spot. Négociation impossible.', loot: { money: 8, respect: 5 } },
+  { name: 'Voyou du Coin', emoji: '🧔', health: 40, attack: 15, description: 'Un type louche qui veut votre spot. Négociation impossible.', loot: { money: 8, respect: 5, item: { id: 'couteau-cran', name: 'Couteau à cran usé', emoji: '🔪', type: 'weapon', value: 9, attackBonus: 4, combatStyle: 'precise' } } },
   { name: 'Agent de Sécurité', emoji: '👮', health: 35, attack: 10, description: 'Il fait du zèle. Beaucoup de zèle.', loot: { respect: 4 } },
   { name: 'Chat de Gouttière', emoji: '🐱', health: 12, attack: 7, description: 'Petit mais vicieux. Ses griffes sont des rasoirs.', loot: { money: 1 } },
   { name: 'Raton Laveur', emoji: '🦝', health: 25, attack: 9, description: "Il fouille VOTRE poubelle. L'affront.", loot: { money: 3, respect: 2 } },
-  { name: 'Corbeau Géant', emoji: '🐦‍⬛', health: 18, attack: 7, description: 'Noir comme la nuit, méchant comme le jour.', image: '/assets/combat-corbeau-fjv5mmnWmHHKd72RfGopfD.webp', loot: { money: 2, respect: 2 } },
-  { name: 'Ivrogne Agressif', emoji: '🍺', health: 35, attack: 11, description: 'Il titube mais frappe fort. Très fort.', image: '/assets/combat-ivrogne-fnqUTa9w2g29Z7Y8UCPEJQ.webp', loot: { money: 5, respect: 3 } },
-  { name: 'Vigile Zélé', emoji: '🔦', health: 38, attack: 12, description: 'Badge, lampe torche, ego surdimensionné.', image: '/assets/combat-vigile-8AYmxD2oRKZLSGj3y3tgdy.webp', loot: { money: 4, respect: 4 } },
+  { name: 'Corbeau Géant', emoji: '🐦‍⬛', health: 18, attack: 7, description: 'Noir comme la nuit, méchant comme le jour.', image: '/assets/combat-corbeau-fjv5mmnWmHHKd72RfGopfD.webp', loot: { money: 2, respect: 2, item: { id: 'bague-brillante', name: 'Bague brillante (volée ?)', emoji: '💍', type: 'junk', value: 9 } } },
+  { name: 'Ivrogne Agressif', emoji: '🍺', health: 35, attack: 11, description: 'Il titube mais frappe fort. Très fort.', image: '/assets/combat-ivrogne-fnqUTa9w2g29Z7Y8UCPEJQ.webp', loot: { money: 5, respect: 3, item: { id: 'bouteille-ivrogne', name: 'Bouteille (presque) vide', emoji: '🍾', type: 'weapon', value: 4, attackBonus: 3, combatStyle: 'heavy' } } },
+  { name: 'Vigile Zélé', emoji: '🔦', health: 38, attack: 12, description: 'Badge, lampe torche, ego surdimensionné.', image: '/assets/combat-vigile-8AYmxD2oRKZLSGj3y3tgdy.webp', loot: { money: 4, respect: 4, item: { id: 'lampe-torche', name: 'Lampe torche du vigile', emoji: '🔦', type: 'tool', value: 7 } } },
   { name: 'Cygne Furieux', emoji: '🦢', health: 22, attack: 9, description: 'Élégant mais mortel. Ne jamais sous-estimer un cygne.', image: '/assets/combat-cygne-Do53kfaKnGAeMKwxEmgUi4.webp', loot: { respect: 3 } },
   { name: 'Clown Sinistre', emoji: '🤡', health: 28, attack: 10, description: 'Son rire résonne dans la nuit. Personne ne rit avec lui.', image: '/assets/combat-clown-Lauu92h5boZ4Z4nRnyDEaT.webp', loot: { money: 6, respect: 4 } },
   { name: 'Écureuil Enragé', emoji: '🐿️', health: 8, attack: 5, description: 'Petit, rapide, et il veut vos noisettes. Vous avez pas de noisettes.', image: '/assets/combat-ecureuil-AN8vTTKVptLec9zLjTGRNw.webp', loot: { money: 1 } },
@@ -765,7 +761,7 @@ const ENEMIES: Enemy[] = [
   { name: 'Coq de Combat', emoji: '🐓', health: 20, attack: 10, description: 'Réveillé à 4h du matin. Et il est furieux.', image: '/assets/combat-coq-URw8wuYwXEgZPMq4wFjJu2.webp', loot: { money: 3, respect: 2 } },
   { name: 'Chat Territorial', emoji: '😾', health: 15, attack: 8, description: 'Ce coin est à LUI. Et il va vous le prouver.', image: '/assets/combat-chat-territorial-2N2qDLSJ5PEDpR4bibLqqR.webp', loot: { money: 2, respect: 1 } },
   { name: 'Mouette Géante', emoji: '🦅', health: 24, attack: 11, description: 'La mère de toutes les mouettes. Envergure impressionnante.', image: '/assets/combat-mouette-geante-msASE7NG2HZ8VNUAwFqgA3.webp', loot: { money: 4, respect: 3 } },
-  { name: 'Raton Laveur Alpha', emoji: '🦝', health: 30, attack: 10, description: 'Le boss des ratons. Il porte un masque naturel de bandit.', image: '/assets/combat-raton-laveur-DV28WgnY4Dw7WEQpakPMzH.webp', loot: { money: 5, respect: 3 } },
+  { name: 'Raton Laveur Alpha', emoji: '🦝', health: 30, attack: 10, description: 'Le boss des ratons. Il porte un masque naturel de bandit.', image: '/assets/combat-raton-laveur-DV28WgnY4Dw7WEQpakPMzH.webp', loot: { money: 5, respect: 3, item: { id: 'montre-cassee', name: 'Montre cassée (butin du raton)', emoji: '⌚', type: 'junk', value: 6 } } },
   { name: 'Chat Sauvage', emoji: '🐈', health: 18, attack: 9, description: 'Pas de collier, pas de maître, pas de pitié.', image: '/assets/combat-chat-sauvage-fFoiY6tVx6eNamsMbyGbNq.webp', loot: { money: 2, respect: 2 } },
 ];
 
@@ -880,7 +876,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Un vieil homme cultive des légumes en cachette dans un coin du parc. Il vous repère.',
     choices: [
       { text: 'Proposer votre aide', risk: 'safe', emoji: '🌱', outcomes: [
-        { probability: 0.7, text: 'Il accepte ! Vous passez une heure à jardiner. Il vous donne une tomate. "Reviens demain, petit."', statChanges: { hunger: 10, mental: 8, dignity: 5 }, addFlag: 'ami-jardinier', followUpEventId: 'exp-jardin-communautaire-suite' },
+        { probability: 0.7, text: 'Il accepte ! Vous passez une heure à jardiner. Il vous donne une tomate. "Reviens demain, petit."', statChanges: { hunger: 10, mental: 8, dignity: 5 }, addFlag: 'ami-jardinier' },
         { probability: 0.3, text: 'Il vous regarde avec méfiance. "Dégage, c\'est mon coin." Ambiance.', statChanges: { mental: -3 } },
       ]},
       { text: 'Voler quelques légumes discrètement', risk: 'risky', emoji: '🥕', outcomes: [
@@ -898,7 +894,7 @@ const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Un gamin de 6 ans pleure sur un banc. Il a perdu sa maman dans le parc.',
     choices: [
       { text: 'L\'aider à retrouver sa mère', risk: 'safe', emoji: '👩‍👦', outcomes: [
-        { probability: 0.7, text: 'Vous retrouvez la mère en 10 minutes. Elle vous remercie avec 5€ et un sandwich. "Merci infiniment !"', moneyChange: 5, statChanges: { hunger: 15, dignity: 10, mental: 10 }, respectChange: 3, addFlag: 'hero-enfant', followUpEventId: 'exp-vieille-dame-suite' },
+        { probability: 0.7, text: 'Vous retrouvez la mère en 10 minutes. Elle vous remercie avec 5€ et un sandwich. "Merci infiniment !"', moneyChange: 5, statChanges: { hunger: 15, dignity: 10, mental: 10 }, respectChange: 3, addFlag: 'hero-enfant' },
         { probability: 0.3, text: 'La mère arrive en courant. Elle vous regarde avec suspicion et emmène l\'enfant sans un mot.', statChanges: { dignity: -5, mental: -5 } },
       ]},
       { text: 'Appeler la police', risk: 'safe', emoji: '📞', outcomes: [
@@ -2386,6 +2382,106 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
       ]},
     ],
   },
+  // ---- Suites des « graines narratives » longtemps orphelines : chaque flag
+  // posé par un événement trouve enfin son « plus tard ». Les one-shot
+  // consomment leur flag (removeFlag), les rituels le gardent. ----
+  'exp-velo-suite': {
+    id: 'exp-velo-suite', title: 'L\'Offre pour le Vélo', type: 'social',
+    isFollowUp: true, requiresFlag: 'a-velo',
+    description: 'Un étudiant lorgne votre vélo rafistolé au fil de fer. "Il roule ? Je vous en donne quelque chose !"',
+    choices: [
+      { text: 'Vendre le vélo', risk: 'safe', emoji: '💶', outcomes: [
+        { probability: 0.7, text: 'Marché conclu : 8€. Il repart en zigzaguant — les freins, c\'était en option.', moneyChange: 8, statChanges: { mental: -3 }, removeFlag: 'a-velo' },
+        { probability: 0.3, text: 'Il négocie dur : 5€. Vous cédez. Le fil de fer, ça n\'a pas de prix. Enfin si : 5€.', moneyChange: 5, statChanges: { mental: -3 }, removeFlag: 'a-velo' },
+      ]},
+      { text: 'Refuser — ce vélo, c\'est la liberté', risk: 'safe', emoji: '🚲', outcomes: [
+        { probability: 1, text: 'Il hausse les épaules et s\'en va. Vous caressez le guidon. Vous, au moins, vous vous comprenez.', statChanges: { mental: 6, dignity: 3 } },
+      ]},
+    ],
+  },
+  'exp-eglise-suite': {
+    id: 'exp-eglise-suite', title: 'La Soupe du Curé', type: 'social',
+    isFollowUp: true, requiresFlag: 'aide-eglise',
+    description: 'Le prêtre vous reconnaît sur le parvis. "Notre ami ! La soupe est chaude, entrez donc."',
+    choices: [
+      { text: 'Accepter la soupe', risk: 'safe', emoji: '🍲', outcomes: [
+        { probability: 0.7, text: 'Soupe épaisse, pain frais, banc au chaud. Le curé ne demande rien en échange. Ça repose.', statChanges: { hunger: 18, thirst: 8, mental: 8 } },
+        { probability: 0.3, text: 'La soupe est claire comme l\'eau bénite, mais la compagnie réchauffe.', statChanges: { hunger: 8, mental: 6 } },
+      ]},
+      { text: 'Aider à servir d\'abord', risk: 'safe', emoji: '🙏', outcomes: [
+        { probability: 1, text: 'Vous servez les autres avant de vous servir. Le curé vous glisse une part double et un clin d\'œil.', statChanges: { hunger: 22, mental: 10, dignity: 8 }, respectChange: 2 },
+      ]},
+    ],
+  },
+  'exp-gardien-suite': {
+    id: 'exp-gardien-suite', title: 'Le Café du Gardien', type: 'social',
+    isFollowUp: true, requiresFlag: 'ami-gardien-dechetterie',
+    description: 'Le gardien de la déchetterie vous hèle depuis sa guérite. "Pause café ? J\'ai un truc à te montrer, aussi."',
+    choices: [
+      { text: 'Partager le café', risk: 'safe', emoji: '☕', outcomes: [
+        { probability: 0.6, text: 'Café brûlant, biscuits mous, et une radio en état de marche « tombée du camion ». Belle matinée.', statChanges: { thirst: 12, mental: 10 }, itemGain: { id: 'radio-guerite', name: 'Radio de guérite', emoji: '📻', type: 'junk', value: 8 }, removeFlag: 'ami-gardien-dechetterie' },
+        { probability: 0.4, text: 'Le café est infect mais l\'amitié sincère. Il vous garde une place au chaud pour les jours de pluie.', statChanges: { thirst: 8, mental: 12 }, removeFlag: 'ami-gardien-dechetterie' },
+      ]},
+    ],
+  },
+  'exp-toit-suite': {
+    id: 'exp-toit-suite', title: 'Votre Toit', type: 'discovery',
+    isFollowUp: true, requiresFlag: 'camp-toit',
+    description: 'Votre planque sur le toit vous attend. La ville scintille en carton, et personne ne sait que vous êtes là.',
+    choices: [
+      { text: 'Y passer la nuit', risk: 'normal', emoji: '🌃', outcomes: [
+        { probability: 0.75, text: 'Nuit étoilée au-dessus du vacarme. Vous dormez comme un roi — du carton, mais un roi.', statChanges: { sleep: 20, mental: 12 } },
+        { probability: 0.25, text: 'Le concierge fait sa ronde ! Vous dévalez l\'escalier de service, le cœur à 200. Planque grillée.', statChanges: { mental: -5, sleep: -3 }, removeFlag: 'camp-toit' },
+      ]},
+      { text: 'Juste souffler dix minutes', risk: 'safe', emoji: '🌇', outcomes: [
+        { probability: 1, text: 'Dix minutes de silence au-dessus de la ville. Ça ne répare rien, mais ça recolle les morceaux.', statChanges: { mental: 8 } },
+      ]},
+    ],
+  },
+  'exp-emploi-jardin-suite': {
+    id: 'exp-emploi-jardin-suite', title: 'Journée au Jardin', type: 'social',
+    isFollowUp: true, requiresFlag: 'emploi-jardin',
+    description: '"T\'es en retard," grogne le vieux jardinier en vous tendant une bêche. Votre « emploi » vous attend.',
+    choices: [
+      { text: 'Travailler dur', risk: 'safe', emoji: '💪', outcomes: [
+        { probability: 0.7, text: 'Une matinée à biner, un repas chaud, et quelques pièces « pour le dérangement ».', statChanges: { hunger: 15, mental: 8, dignity: 6 }, moneyChange: 4 },
+        { probability: 0.3, text: 'Le dos proteste, mais le potager est superbe. Le jardinier vous paie en légumes.', statChanges: { hunger: 18, health: -3, dignity: 5 } },
+      ]},
+      { text: 'Travailler mollement', risk: 'normal', emoji: '🦥', outcomes: [
+        { probability: 0.6, text: 'Il fait semblant de ne pas voir. Repas quand même, mais pas de pièces.', statChanges: { hunger: 10, mental: 4 } },
+        { probability: 0.4, text: '"Si c\'est comme ça, reviens quand tu seras motivé." Vexant. Juste, mais vexant.', statChanges: { mental: -4, dignity: -3 } },
+      ]},
+    ],
+  },
+  'exp-mentor-suite': {
+    id: 'exp-mentor-suite', title: 'Vos Tomates', type: 'discovery',
+    isFollowUp: true, requiresFlag: 'jardinier-mentor',
+    description: 'Le coin de terre que le vieux vous a appris à cultiver a bien travaillé : des tomates. Des vraies. Les vôtres.',
+    choices: [
+      { text: 'Récolter fièrement', risk: 'safe', emoji: '🍅', outcomes: [
+        { probability: 0.8, text: 'Trois tomates parfaites. Vous en mangez une sur place, tiède de soleil. Vous avez FAIT quelque chose.', statChanges: { hunger: 14, mental: 14, dignity: 6 } },
+        { probability: 0.2, text: 'Les pigeons sont passés avant vous. Il reste une demi-tomate. La rage.', statChanges: { hunger: 4, mental: -4 } },
+      ]},
+      { text: 'En offrir au jardinier', risk: 'safe', emoji: '🎁', outcomes: [
+        { probability: 1, text: '"Pas mal, gamin." Venant de lui, c\'est une médaille. Vous partagez le déjeuner.', statChanges: { hunger: 12, mental: 10 }, respectChange: 3 },
+      ]},
+    ],
+  },
+  'exp-magasin-suite': {
+    id: 'exp-magasin-suite', title: 'La Porte de Derrière', type: 'narrative',
+    isFollowUp: true, requiresFlag: 'magasin-repere',
+    description: 'Le magasin abandonné, la porte arrière entrouverte. Vous l\'aviez notée « pour plus tard ». Plus tard, c\'est maintenant.',
+    choices: [
+      { text: 'Entrer discrètement', risk: 'risky', emoji: '🚪', outcomes: [
+        { probability: 0.5, text: 'À l\'intérieur : des invendus oubliés ! Vous repartez chargé comme un mulet.', moneyChange: 10, statChanges: { dignity: -4 }, itemGain: { id: 'carton-invendus', name: 'Carton d\'invendus', emoji: '📦', type: 'food', value: 8, effect: { hunger: 20 } }, removeFlag: 'magasin-repere' },
+        { probability: 0.3, text: 'Rien que de la poussière et des mannequins qui vous jugent. Vous repartez bredouille et vaguement humilié.', statChanges: { mental: -4 }, removeFlag: 'magasin-repere' },
+        { probability: 0.2, text: 'Une alarme oubliée hurle ! Vous fuyez ventre à terre, poursuivi par le fantôme du commerce de proximité.', statChanges: { mental: -8, dignity: -6, health: -4 }, respectChange: -2, removeFlag: 'magasin-repere' },
+      ]},
+      { text: 'Renoncer — trop risqué', risk: 'safe', emoji: '🚶', outcomes: [
+        { probability: 1, text: 'Vous passez votre chemin. La porte restera un « et si » de plus dans votre collection.', statChanges: { mental: -2 }, removeFlag: 'magasin-repere' },
+      ]},
+    ],
+  },
 };
 
 // ============ EVENT GENERATORS ============
@@ -2606,7 +2702,6 @@ function generateCharacter(): Character {
     money: startingMoney,
     respect: 0,
     inventory: startingItems,
-    skills: {},
     day: 1,
     location: 'parc',
     alive: true,
@@ -2617,9 +2712,15 @@ function generateCharacter(): Character {
   };
 }
 
+// Un personnage possède-t-il un trait donné ? (raccourci très fréquent)
+export function hasTrait(c: Character, id: string): boolean {
+  return c.traits.some(t => t.id === id);
+}
+
 // Formule de score UNIQUE (écran de fin + meilleurs scores + reducer).
-export function computeScore(day: number, respect: number, money: number): number {
-  return day * 10 + respect * 5 + money * 2;
+// Le Poissard vit plus mal mais marque double : son trait promet « score ×2 ».
+export function computeScore(day: number, respect: number, money: number, poissard = false): number {
+  return (day * 10 + respect * 5 + money * 2) * (poissard ? 2 : 1);
 }
 
 // Choix de langue pour les chaînes GÉNÉRÉES par le reducer (journaux de
@@ -3003,7 +3104,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const statDelta: Partial<Stats> = { dignity: -10, mental: -6 };
         const newStats = applyStatDelta(c.stats, statDelta);
         const isAlive = newStats.health > 0 && newStats.mental > 0;
-        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende)); clearSave(); }
+        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, hasTrait(c, 'poissard'))); clearSave(); }
         return {
           ...state,
           character: { ...c, stats: newStats, money: c.money - amende, alive: isAlive },
@@ -3032,7 +3133,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const dignityNote = c.stats.dignity >= 70 ? L(' Votre allure soignée a inspiré confiance.', ' Your neat appearance inspired trust.')
         : c.stats.dignity < 25 ? L(' Votre allure négligée a fait fuir plus d\'un passant.', ' Your unkempt look scared off more than one passer-by.') : '';
       if (!isAlive) {
-        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money));
+        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, hasTrait(c, 'poissard')));
         clearSave();
       }
       // Variante réussite/échec par scène de manche (result-beg-<id>-good/bad),
@@ -3094,7 +3195,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           const statDelta: Partial<Stats> = { dignity: -15, mental: -8 };
           const newStats = applyStatDelta(c.stats, statDelta);
           const isAlive = newStats.health > 0 && newStats.mental > 0;
-          if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende)); clearSave(); }
+          if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, hasTrait(c, 'poissard'))); clearSave(); }
           return {
             ...state,
             character: { ...c, stats: newStats, money: c.money - amende, respect: c.respect - 3, alive: isAlive },
@@ -3110,7 +3211,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const statDelta: Partial<Stats> = { dignity: -12, health: -6, mental: -6 };
         const newStats = applyStatDelta(c.stats, statDelta);
         const isAlive = newStats.health > 0 && newStats.mental > 0;
-        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money)); clearSave(); }
+        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, 'poissard'))); clearSave(); }
         return {
           ...state,
           character: { ...c, stats: newStats, respect: c.respect - 2, alive: isAlive },
@@ -3181,19 +3282,25 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const choice = state.currentEvent.choices[action.choiceIndex];
 
       let outcome = choice.outcomes[0];
+      // Valeur « heureuse » d'une issue (sert au coup de pouce et au Poissard).
+      const outcomeScore = (o: EventOutcome) =>
+        (o.moneyChange || 0) + (o.respectChange || 0) * 2 +
+        Object.values(o.statChanges || {}).reduce((a, b) => a + (b || 0), 0) +
+        (o.itemGain ? 5 : 0) - (o.itemLoss ? 3 : 0);
       if (action.boosted) {
         // Coup de pouce (pub) : on force la meilleure issue du choix.
-        const score = (o: EventOutcome) =>
-          (o.moneyChange || 0) + (o.respectChange || 0) * 2 +
-          Object.values(o.statChanges || {}).reduce((a, b) => a + (b || 0), 0) +
-          (o.itemGain ? 5 : 0) - (o.itemLoss ? 3 : 0);
-        outcome = [...choice.outcomes].sort((a, b) => score(b) - score(a))[0];
+        outcome = [...choice.outcomes].sort((a, b) => outcomeScore(b) - outcomeScore(a))[0];
       } else {
         const roll = Math.random();
         let cumProb = 0;
         for (const o of choice.outcomes) {
           cumProb += o.probability;
           if (roll <= cumProb) { outcome = o; break; }
+        }
+        // Poissard : une fois sur quatre, le destin rechoisit… la pire issue.
+        // (Contrepartie du score ×2 — voir computeScore.)
+        if (choice.outcomes.length > 1 && state.character.traits.some(t => t.id === 'poissard') && Math.random() < 0.25) {
+          outcome = [...choice.outcomes].sort((a, b) => outcomeScore(a) - outcomeScore(b))[0];
         }
       }
 
@@ -3227,12 +3334,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       // Handle follow-up events
-      const pendingFollowUp = outcome.followUpEventId || null;
 
       const isAlive = newStats.health > 0 && newStats.mental > 0;
 
       if (!isAlive) {
-        const score = computeScore(state.character.day, newRespect, newMoney);
+        const score = computeScore(state.character.day, newRespect, newMoney, hasTrait(state.character, 'poissard'));
         saveHighScore(state.character.name, state.character.day, score);
         clearSave();
       }
@@ -3240,10 +3346,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Image du résultat : d'abord la VARIANTE réussite/échec de l'événement
       // (result-<id>-good/bad.webp, générée par vagues), sinon l'image de la
       // rencontre, sinon la scène dessinée (chaîne de replis côté overlay).
-      const outcomeScore = (outcome.moneyChange || 0) +
+      const resultValue = (outcome.moneyChange || 0) +
         Object.values(outcome.statChanges || {}).reduce((a, b) => a + (b || 0), 0) +
         (outcome.respectChange || 0);
-      const variant = `/assets/result-${state.currentEvent.id}-${outcomeScore > 0 ? 'good' : 'bad'}.webp`;
+      const variant = `/assets/result-${state.currentEvent.id}-${resultValue > 0 ? 'good' : 'bad'}.webp`;
 
       return {
         ...state,
@@ -3251,7 +3357,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         character: { ...state.character, stats: newStats, money: newMoney, respect: newRespect, inventory: newInventory, alive: isAlive, activeFlags: newFlags },
         currentEvent: null,
         eventResult: { text: outcome.text, statChanges: outcome.statChanges, moneyChange: outcome.moneyChange, respectChange: outcome.respectChange, image: variant, fallbackImage: state.currentEvent.image },
-        pendingFollowUp,
       };
     }
 
@@ -3319,7 +3424,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
 
       if (!isAlive) {
-        const score = computeScore(ch.day, ch.respect, ch.money);
+        const score = computeScore(ch.day, ch.respect, ch.money, hasTrait(ch, 'poissard'));
         saveHighScore(ch.name, ch.day, score);
         clearSave();
       }
@@ -3351,9 +3456,23 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const idx = state.character.inventory.findIndex(i => i.id === action.itemId);
       if (idx === -1) return state;
       const item = state.character.inventory[idx];
+      const gourmand = hasTrait(state.character, 'ventre-pattes');
+      // Ventre sur Pattes : « mange n'importe quoi » — le bric-à-brac se croque.
+      if (!item.effect && gourmand && item.type === 'junk') {
+        const newInv = [...state.character.inventory.slice(0, idx), ...state.character.inventory.slice(idx + 1)];
+        const junkDelta: Partial<Stats> = { hunger: 10, dignity: -2 };
+        return {
+          ...state,
+          character: { ...state.character, stats: applyStatDelta(state.character.stats, junkDelta), inventory: newInv },
+          eventResult: { text: L(`Vous mangez… ${item.name}. Oui, ça se mange. Enfin, VOUS, vous le mangez.`, `You eat… the ${tc(item.name)}. Yes, it's edible. Well, YOU eat it.`), statChanges: junkDelta },
+        };
+      }
       if (!item.effect) return state;
+      // Ventre sur Pattes : « en grande quantité » — la nourriture cale +25 %.
+      const effect: Partial<Stats> = { ...item.effect };
+      if (gourmand && (effect.hunger ?? 0) > 0) effect.hunger = Math.round(effect.hunger! * 1.25);
       let newStats = { ...state.character.stats };
-      Object.entries(item.effect).forEach(([key, val]) => {
+      Object.entries(effect).forEach(([key, val]) => {
         if (val) newStats[key as keyof Stats] += val;
       });
       newStats = clampStats(newStats);
@@ -3362,7 +3481,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...state.character, stats: newStats, inventory: newInv },
-        eventResult: { text: L(`Vous utilisez ${item.name}. Ça fait du bien !`, `You use the ${tc(item.name)}. That feels good!`), statChanges: item.effect },
+        eventResult: { text: L(`Vous utilisez ${item.name}. Ça fait du bien !`, `You use the ${tc(item.name)}. That feels good!`), statChanges: effect },
       };
     }
 
@@ -3430,14 +3549,17 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const victoryState = (cUpd: Character): GameState => {
         const lootMoney = combat.loot?.money || 0;
         const lootRespect = combat.loot?.respect || 0;
+        // L'ennemi lâche parfois un objet à son image (sandwich, couteau…).
+        const drop = combat.loot?.item && cUpd.inventory.length < 20 ? combat.loot.item : undefined;
         const en = tc(combat.enemyName);
         logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
+        if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
         return {
           ...state,
-          character: { ...cUpd, money: cUpd.money + lootMoney, respect: cUpd.respect + lootRespect },
+          character: { ...cUpd, money: cUpd.money + lootMoney, respect: cUpd.respect + lootRespect, inventory: drop ? [...cUpd.inventory, drop] : cUpd.inventory },
           currentCombat: null,
           combatLog: logs,
-          eventResult: { text: L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim()), moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
+          eventResult: { text: `${L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim())}${drop ? L(` Il lâche ${drop.name} ${drop.emoji} !`, ` It drops the ${tc(drop.name)} ${drop.emoji}!`) : ''}`, moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
           screen: 'main',
         };
       };
@@ -3723,14 +3845,17 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (newEnemyHp <= 0) {
         const lootMoney = combat.loot?.money || 0;
         const lootRespect = combat.loot?.respect || 0;
+        // L'ennemi lâche parfois un objet à son image (sandwich, couteau…).
+        const drop = combat.loot?.item && inventory.length < 20 ? combat.loot.item : undefined;
         const en = tc(combat.enemyName);
         logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
+        if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
         return {
           ...state,
-          character: { ...c, inventory, money: c.money + lootMoney, respect: c.respect + lootRespect },
+          character: { ...c, inventory: drop ? [...inventory, drop] : inventory, money: c.money + lootMoney, respect: c.respect + lootRespect },
           currentCombat: null,
           combatLog: logs,
-          eventResult: { text: L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim()), moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
+          eventResult: { text: `${L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim())}${drop ? L(` Il lâche ${drop.name} ${drop.emoji} !`, ` It drops the ${tc(drop.name)} ${drop.emoji}!`) : ''}`, moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
           screen: 'main',
         };
       }
@@ -3877,7 +4002,6 @@ const initialState: GameState = {
   dayActions: 0,
   maxDayActions: 3,
   highScores: loadHighScores(),
-  pendingFollowUp: null,
   weather: getInitialWeather(),
   deathCause: null,
 };

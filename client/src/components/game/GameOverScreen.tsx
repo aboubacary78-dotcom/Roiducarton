@@ -1,4 +1,4 @@
-import { useGame, computeScore, loadHighScores } from '@/contexts/GameContext';
+import { useGame, computeScore, hasTrait, loadHighScores } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showInterstitial, showRewarded } from '@/lib/ads';
@@ -72,7 +72,7 @@ export default function GameOverScreen() {
 
   // Même formule que les meilleurs scores enregistrés (computeScore) :
   // l'écran de fin et le tableau des scores affichent le même chiffre.
-  const score = computeScore(char.day, char.respect, char.money);
+  const score = computeScore(char.day, char.respect, char.money, hasTrait(char, 'poissard'));
 
   // Lecture fraîche du classement (la partie qui vient de se terminer a déjà
   // été enregistrée dans localStorage par le reducer, mais state.highScores
