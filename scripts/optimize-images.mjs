@@ -16,9 +16,11 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ASSET_DIR = resolve(root, 'client/public/assets');
-const LARGEUR_MAX = 1600;
-const QUALITE = 0.78;
-const SEUIL_KO = 600; // on ne ré-encode que ce qui dépasse ~600 Ko
+// Surchargeables : MAX_W=1200 QUALITY=0.72 THRESHOLD_KB=170 node scripts/optimize-images.mjs
+// (le jeu affiche les scènes à ~780 px max sur mobile : 1200 px suffit largement)
+const LARGEUR_MAX = Number(process.env.MAX_W || 1600);
+const QUALITE = Number(process.env.QUALITY || 0.78);
+const SEUIL_KO = Number(process.env.THRESHOLD_KB || 600); // on ne ré-encode que ce qui dépasse
 
 function findChrome() {
   const base = resolve(root, 'chrome');
