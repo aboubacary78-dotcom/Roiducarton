@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { syncRecords, recordGameEnd } from '@/lib/profile';
 import { getLang, tc } from '@/lib/lang';
-import { peekLegacy, clearLegacy } from '@/lib/necrology';
+import { peekLegacy, clearLegacy, loadHeritage, takePendingKits, loadGraves, type Grave } from '@/lib/necrology';
 
 // ============ TYPES ============
 export interface Job {
@@ -11,6 +11,9 @@ export interface Job {
   bonusStats: Partial<Stats>;
   startingItems: string[];
   emoji: string;
+  // Métier verrouillé : n'entre dans le tirage qu'une fois acheté dans
+  // L'Héritage (Karma de Rue). Débloquage latéral, pas de puissance brute.
+  locked?: boolean;
 }
 
 export interface Trait {
@@ -226,7 +229,7 @@ export interface CombatState {
   dodgePenalty: number;
 }
 
-export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'game-over' | 'shop' | 'registre' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
+export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'game-over' | 'shop' | 'registre' | 'cimetiere' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
 
 // ============ MÉTÉO ============
 export type WeatherType = 'sunny' | 'cloudy' | 'rainy' | 'storm' | 'heatwave' | 'fog' | 'snow';
@@ -679,6 +682,8 @@ export const JOBS: Job[] = [
   { id: 'jardinier', name: 'Ancien Jardinier', description: 'Fait pousser des tomates dans une chaussure.', bonusStats: { hunger: 10 }, startingItems: ['graines'], emoji: '🌱' },
   { id: 'avocat', name: 'Ancien Avocat', description: 'Connaît ses droits. Et ceux des pigeons.', bonusStats: { dignity: 10, mental: 5 }, startingItems: ['code-civil'], emoji: '⚖️' },
   { id: 'musicien', name: 'Ancien Musicien', description: 'Son harmonica a connu des jours meilleurs.', bonusStats: { mental: 10, dignity: 5 }, startingItems: ['harmonica-casse'], emoji: '🎵' },
+  { id: 'boxeur', name: 'Ancien Boxeur', description: 'Les poings se souviennent. Le reste a un peu oublié.', bonusStats: { health: 10 }, startingItems: ['gants-boxe'], emoji: '🥊', locked: true },
+  { id: 'poete', name: 'Ancien Poète', description: 'Des vers plein la tête, des trous plein les poches.', bonusStats: { mental: 15 }, startingItems: ['carnet-poemes'], emoji: '🖋️', locked: true },
 ];
 
 export const TRAITS: Trait[] = [
@@ -712,8 +717,45 @@ export const LOCATIONS: Record<string, { name: string; nameEn: string; emoji: st
   'marche': { name: 'Marché', nameEn: 'Market', emoji: '🛒', danger: 25, resources: 70, description: 'Nourriture, commerçants. Attention aux vigiles.', descriptionEn: 'Food, vendors. Watch out for guards.' },
 };
 
+// Kits de départ de L'Héritage : achetés au Cimetière avec le Karma de Rue,
+// consommés au prochain personnage. Petits coups de pouce, jamais décisifs.
+export interface HeritageKit {
+  id: string;
+  name: string; nameEn: string;
+  emoji: string;
+  desc: string; descEn: string;
+  cost: number;
+  money: number;
+  items: InventoryItem[];
+}
+export const HERITAGE_KITS: HeritageKit[] = [
+  {
+    id: 'kit-casse-croute', name: 'le Casse-croûte du Souvenir', nameEn: 'the Memorial Snack', emoji: '🥖', cost: 10, money: 0,
+    desc: 'Un sandwich et une gourde pleine pour bien commencer.', descEn: 'A sandwich and a full flask for a decent start.',
+    items: [
+      { id: 'kit-sandwich', name: 'Sandwich emballé', emoji: '🥪', type: 'food', value: 4, effect: { hunger: 15 } },
+      { id: 'kit-gourde', name: 'Gourde pleine', emoji: '🥤', type: 'food', value: 3, effect: { thirst: 14 } },
+    ],
+  },
+  {
+    id: 'kit-pecule', name: 'le Pécule du Défunt', nameEn: 'the Departed\'s Nest Egg', emoji: '💶', cost: 12, money: 8,
+    desc: '8€ de départ, économisés pièce par pièce par vos prédécesseurs.', descEn: '€8 to start, saved coin by coin by your predecessors.',
+    items: [],
+  },
+  {
+    id: 'kit-bricoleur', name: 'la Trousse du Bricoleur', nameEn: 'the Tinkerer\'s Pouch', emoji: '🧰', cost: 15, money: 0,
+    desc: 'Une clé à molette et de quoi bricoler une arme de fortune.', descEn: 'A wrench and something to rig a makeshift weapon from.',
+    items: [
+      { id: 'kit-cle', name: 'Clé à molette rouillée', emoji: '🔧', type: 'weapon', value: 8, attackBonus: 3, combatStyle: 'heavy' },
+      { id: 'kit-ficelle', name: 'Pelote de ficelle', emoji: '🧵', type: 'junk', value: 2 },
+    ],
+  },
+];
+
 const STARTING_ITEMS: Record<string, InventoryItem> = {
   'calculatrice': { id: 'calculatrice', name: 'Calculatrice solaire', emoji: '🧮', type: 'tool', value: 5, effect: { mental: 8 } },
+  'gants-boxe': { id: 'gants-boxe', name: 'Gants de boxe fatigués', emoji: '🥊', type: 'weapon', value: 8, attackBonus: 3, combatStyle: 'heavy' },
+  'carnet-poemes': { id: 'carnet-poemes', name: 'Carnet de poèmes', emoji: '📓', type: 'tool', value: 4, effect: { mental: 10 } },
   'cle-molette': { id: 'cle-molette', name: 'Clé à molette rouillée', emoji: '🔧', type: 'weapon', value: 8, attackBonus: 3, combatStyle: 'heavy' },
   'livre': { id: 'livre', name: 'Livre de philo', emoji: '📚', type: 'tool', value: 3, effect: { mental: 5 } },
   'tire-bouchon': { id: 'tire-bouchon', name: 'Tire-bouchon de sommelier', emoji: '🍷', type: 'tool', value: 6, effect: { thirst: 10, mental: 5 } },
@@ -2505,6 +2547,47 @@ export function randomFromArray<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// Les fantômes du Cimetière : un ancien personnage (mort) laisse une trace
+// dans la run en cours. Défaites passées → petits coups de main présents.
+function makeGhostEvent(grave: Grave): GameEvent {
+  const n = grave.name;
+  const templates: GameEvent[] = [
+    {
+      id: 'ghost-banc', title: L(`Le Banc de ${n}`, `${n}'s Bench`), type: 'discovery', isFollowUp: true,
+      description: L(`Vous reconnaissez ce banc : c'est là que dormait ${n}, avant. Quelqu'un y a gravé ses initiales.`, `You know this bench: it's where ${n} used to sleep. Someone carved their initials into it.`),
+      choices: [
+        { text: L('S\'y reposer un moment', 'Rest there a while'), risk: 'safe', emoji: '🪑', outcomes: [
+          { probability: 0.7, text: L(`Le coin est bon, ${n} savait choisir. Vous repartez apaisé — et vous trouvez une pièce sous une latte.`, `A good spot — ${n} knew how to pick them. You leave calmer, and find a coin under a slat.`), statChanges: { mental: 8, sleep: 6 }, moneyChange: 1 },
+          { probability: 0.3, text: L('Un moment de paix. Les absents veillent, à leur façon.', 'A moment of peace. The departed keep watch, in their way.'), statChanges: { mental: 10 } },
+        ]},
+        { text: L('Se recueillir et passer son chemin', 'Pay respects and move on'), risk: 'safe', emoji: '🕯️', outcomes: [
+          { probability: 1, text: L('Vous saluez la mémoire du prédécesseur. La rue respecte ceux qui se souviennent.', 'You honor your predecessor\'s memory. The street respects those who remember.'), statChanges: { mental: 5, dignity: 4 }, respectChange: 1 },
+        ]},
+      ],
+    },
+    {
+      id: 'ghost-souvenir', title: L('Quelqu\'un se souvient', 'Someone Remembers'), type: 'social', isFollowUp: true,
+      description: L(`Une passante vous dévisage : « Vous connaissiez ${n}, non ? Un brave. Tenez, pour la route. »`, `A passer-by studies you: "You knew ${n}, right? Good soul. Here, for the road."`),
+      choices: [
+        { text: L('Accepter avec dignité', 'Accept with dignity'), risk: 'safe', emoji: '🤝', outcomes: [
+          { probability: 0.6, text: L(`Elle vous glisse 3€ et un sourire triste. La mémoire de ${n} nourrit encore.`, `She slips you €3 and a sad smile. ${n}'s memory still provides.`), moneyChange: 3, statChanges: { mental: 6 } },
+          { probability: 0.4, text: L('Elle vous tend un sandwich sous cellophane. « Il aimait ceux au thon. »', 'She hands you a wrapped sandwich. "He liked the tuna ones."'), statChanges: { hunger: 14, mental: 5 } },
+        ]},
+      ],
+    },
+    {
+      id: 'ghost-echo', title: L('L\'Écho de la Rue', 'Echo of the Street'), type: 'discovery', isFollowUp: true,
+      description: L(`Sur un mur, au feutre : « ${n} était là. » La rue n'oublie pas ses rois.`, `On a wall, in marker: "${n} was here." The street doesn't forget its kings.`),
+      choices: [
+        { text: L('Ajouter votre nom dessous', 'Add your name below'), risk: 'safe', emoji: '🖊️', outcomes: [
+          { probability: 1, text: L('Deux noms sur un mur. Une dynastie de carton. Étrangement, ça donne du courage.', 'Two names on a wall. A cardboard dynasty. Strangely, it gives you heart.'), statChanges: { mental: 9, dignity: 3 }, respectChange: 1 },
+        ]},
+      ],
+    },
+  ];
+  return randomFromArray(templates);
+}
+
 function generateEvents(_location: string, character: Character): GameEvent[] {
   // Check for pending follow-up events first
   const availableFollowUps = Object.values(FOLLOW_UP_EVENTS).filter(e => 
@@ -2513,6 +2596,11 @@ function generateEvents(_location: string, character: Character): GameEvent[] {
   // 30% chance to trigger a follow-up if available
   if (availableFollowUps.length > 0 && Math.random() < 0.3) {
     return [randomFromArray(availableFollowUps)];
+  }
+  // Sinon, parfois, un fantôme du Cimetière (8 %) — les morts rendent service.
+  const graves = loadGraves().filter(g => g.name !== character.name);
+  if (graves.length > 0 && Math.random() < 0.08) {
+    return [makeGhostEvent(randomFromArray(graves))];
   }
   // Otherwise return random explore events
   const shuffled = [...EXPLORE_EVENTS].sort(() => Math.random() - 0.5);
@@ -2688,7 +2776,8 @@ function generateTravelEvent(_from: string, _to: string, _character: Character):
 
 // ============ HELPERS ============
 function generateCharacter(): Character {
-  const job = randomFromArray(JOBS);
+  const unlockedJobs = loadHeritage().jobs;
+  const job = randomFromArray(JOBS.filter(j => !j.locked || unlockedJobs.includes(j.id)));
   const availableTraits = [...TRAITS];
   const trait1Index = Math.floor(Math.random() * availableTraits.length);
   const trait1 = availableTraits.splice(trait1Index, 1)[0];
@@ -2788,7 +2877,7 @@ export interface CombatCard {
 
 // Dégâts de base à mains nues (métier + buff temporaire).
 function unarmedDamage(c: Character, combat: CombatState): number {
-  return 7 + (c.job.id === 'militaire' ? 3 : 0) + combat.atkBuff;
+  return 7 + (c.job.id === 'militaire' ? 3 : 0) + (c.job.id === 'boxeur' ? 2 : 0) + combat.atkBuff;
 }
 // Meilleure arme portée (bonus le plus élevé). Son style compte au combat :
 // « heavy » fait tourner les accrochages (égalités) en votre faveur,
@@ -3070,18 +3159,33 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'SELECT_CHARACTER': {
       const char = state.characterChoices[action.index];
-      // Dernières volontés : l'objet légué par le personnage précédent attend
-      // sur le carton (voir GameOverScreen / lib/necrology).
+      // Dernières volontés + kits de L'Héritage : tout ce qui attendait le
+      // prochain personnage est déposé sur son carton au départ.
       const legacy = peekLegacy();
       clearLegacy();
-      if (legacy && char.inventory.length < 20) {
+      const kits = takePendingKits();
+      let inventory = [...char.inventory];
+      let money = char.money;
+      const gifts: string[] = [];
+      if (legacy && inventory.length < 20) {
+        inventory.push(legacy.item);
+        gifts.push(L(`${legacy.item.name} — l'héritage de ${legacy.from}`, `the ${tc(legacy.item.name)} — ${legacy.from}'s legacy`));
+      }
+      for (const kit of kits) {
+        const def = HERITAGE_KITS.find(k => k.id === kit);
+        if (!def) continue;
+        def.items.forEach(it => { if (inventory.length < 20) inventory.push({ ...it }); });
+        money += def.money;
+        gifts.push(L(def.name, def.nameEn));
+      }
+      if (gifts.length > 0) {
         return {
           ...state, screen: 'main', dayActions: 0,
-          character: { ...char, inventory: [...char.inventory, legacy.item] },
+          character: { ...char, inventory, money },
           eventResult: {
             text: L(
-              `🎁 Sur votre carton, quelqu'un a déposé ${legacy.item.name} — l'héritage de ${legacy.from}. La rue se souvient.`,
-              `🎁 Someone left the ${tc(legacy.item.name)} on your cardboard — ${legacy.from}'s legacy. The street remembers.`,
+              `🎁 Sur votre carton, quelqu'un a déposé : ${gifts.join(', ')}. La rue se souvient.`,
+              `🎁 Left on your cardboard: ${gifts.join(', ')}. The street remembers.`,
             ),
           },
         };

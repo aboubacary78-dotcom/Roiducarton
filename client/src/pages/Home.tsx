@@ -28,6 +28,7 @@ import AchievementToast from '@/components/game/AchievementToast';
 import Toaster from '@/components/game/Toaster';
 import DaySummaryOverlay from '@/components/game/DaySummaryOverlay';
 import DeathRegistryScreen from '@/components/game/DeathRegistryScreen';
+import CimetiereScreen from '@/components/game/CimetiereScreen';
 
 // Rendu de l'écran courant. Les superpositions (résultat, météo, tutoriel,
 // succès) sont gérées à part pour ne pas être rejouées à chaque transition.
@@ -47,6 +48,7 @@ function renderScreen(screen: string) {
     case 'wardrobe': return <WardrobeScreen />;
     case 'game-over': return <GameOverScreen />;
     case 'registre': return <DeathRegistryScreen />;
+    case 'cimetiere': return <CimetiereScreen />;
     default: return <MainScreen />;
   }
 }

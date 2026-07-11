@@ -96,18 +96,31 @@ export default function TitleScreen() {
           {tr('Nouvelle Partie', 'New Game')}
         </motion.button>
 
-        <motion.button
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: hasSave ? 0.7 : 0.6 }}
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'registre' })}
-          className="action-btn w-full py-3 text-sm text-[#6B5740] font-medium flex items-center justify-center gap-2"
+          className="flex gap-3"
         >
-          <span>📕 {tr('Registre des Morts', 'Book of the Dead')}</span>
-          <span className="text-[10px] font-mono text-[#A08B70]">{deathsFound}/{deathsTotal}</span>
-        </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'registre' })}
+            className="action-btn flex-1 py-3 text-sm text-[#6B5740] font-medium flex flex-col items-center leading-tight"
+          >
+            <span>📕 {tr('Registre', 'Registry')}</span>
+            <span className="text-[10px] font-mono text-[#A08B70]">{deathsFound}/{deathsTotal}</span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'cimetiere' })}
+            className="action-btn flex-1 py-3 text-sm text-[#6B5740] font-medium flex flex-col items-center leading-tight"
+          >
+            <span>⚰️ {tr('Cimetière', 'Cemetery')}</span>
+            <span className="text-[10px] font-mono text-[#A08B70]">👑 {karma}</span>
+          </motion.button>
+        </motion.div>
 
         <motion.button
           initial={{ y: 20, opacity: 0 }}
@@ -121,17 +134,6 @@ export default function TitleScreen() {
           ⚙️ {tr('Options', 'Settings')}
         </motion.button>
       </div>
-
-      {karma > 0 && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.9 }}
-          className="text-[11px] text-[#B8860B] font-semibold"
-        >
-          👑 {tr('Karma de Rue', 'Street Karma')} : {karma}
-        </motion.p>
-      )}
 
       {/* Footer */}
       <motion.p
