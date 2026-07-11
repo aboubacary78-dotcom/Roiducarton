@@ -1,4 +1,4 @@
-import { useGame, getSellPrice, STAT_META, type Stats } from '@/contexts/GameContext';
+import { useGame, getSellPrice, hasTrait, STAT_META, type Stats } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
 import SceneIllustration, { sceneForLocation } from './SceneIllustration';
@@ -44,7 +44,9 @@ export default function InventoryScreen() {
         <div className="flex flex-col gap-2">
           {char.inventory.map((item, i) => {
             const typeInfo = TYPE_LABELS[item.type] || TYPE_LABELS.junk;
-            const hasEffect = item.effect && Object.keys(item.effect).length > 0;
+            // Ventre sur Pattes : le bric-à-brac devient « mangeable ».
+            const edibleJunk = item.type === 'junk' && !item.effect && hasTrait(char, 'ventre-pattes');
+            const hasEffect = (item.effect && Object.keys(item.effect).length > 0) || edibleJunk;
             return (
               <motion.div
                 key={`${item.id}-${i}`}
@@ -89,7 +91,7 @@ export default function InventoryScreen() {
                       className="px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg"
                       style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)', boxShadow: '0 2px 6px rgba(74, 155, 95, 0.25)' }}
                     >
-                      {tr('Utiliser', 'Use')}
+                      {edibleJunk ? tr('Manger ?!', 'Eat?!') : tr('Utiliser', 'Use')}
                     </button>
                   )}
                   <button

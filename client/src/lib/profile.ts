@@ -57,10 +57,6 @@ export function getEquipped(): Partial<Record<AccessorySlot, string>> {
   return loadProfile().equipped;
 }
 
-export function isUnlocked(id: string): boolean {
-  return loadProfile().unlocked.includes(id);
-}
-
 // Équipe ou retire un accessoire (bascule si déjà équipé). Ignore si non débloqué.
 export function toggleEquip(slot: AccessorySlot, id: string): PlayerProfile {
   const p = loadProfile();
