@@ -2387,6 +2387,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   // consomment leur flag (removeFlag), les rituels le gardent. ----
   'exp-velo-suite': {
     id: 'exp-velo-suite', title: 'L\'Offre pour le Vélo', type: 'social',
+    image: '/assets/followup-velo.webp',
     isFollowUp: true, requiresFlag: 'a-velo',
     description: 'Un étudiant lorgne votre vélo rafistolé au fil de fer. "Il roule ? Je vous en donne quelque chose !"',
     choices: [
@@ -2401,6 +2402,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-eglise-suite': {
     id: 'exp-eglise-suite', title: 'La Soupe du Curé', type: 'social',
+    image: '/assets/followup-eglise.webp',
     isFollowUp: true, requiresFlag: 'aide-eglise',
     description: 'Le prêtre vous reconnaît sur le parvis. "Notre ami ! La soupe est chaude, entrez donc."',
     choices: [
@@ -2415,6 +2417,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-gardien-suite': {
     id: 'exp-gardien-suite', title: 'Le Café du Gardien', type: 'social',
+    image: '/assets/followup-gardien.webp',
     isFollowUp: true, requiresFlag: 'ami-gardien-dechetterie',
     description: 'Le gardien de la déchetterie vous hèle depuis sa guérite. "Pause café ? J\'ai un truc à te montrer, aussi."',
     choices: [
@@ -2426,6 +2429,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-toit-suite': {
     id: 'exp-toit-suite', title: 'Votre Toit', type: 'discovery',
+    image: '/assets/followup-toit.webp',
     isFollowUp: true, requiresFlag: 'camp-toit',
     description: 'Votre planque sur le toit vous attend. La ville scintille en carton, et personne ne sait que vous êtes là.',
     choices: [
@@ -2440,6 +2444,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-emploi-jardin-suite': {
     id: 'exp-emploi-jardin-suite', title: 'Journée au Jardin', type: 'social',
+    image: '/assets/followup-emploi-jardin.webp',
     isFollowUp: true, requiresFlag: 'emploi-jardin',
     description: '"T\'es en retard," grogne le vieux jardinier en vous tendant une bêche. Votre « emploi » vous attend.',
     choices: [
@@ -2455,6 +2460,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-mentor-suite': {
     id: 'exp-mentor-suite', title: 'Vos Tomates', type: 'discovery',
+    image: '/assets/followup-tomates.webp',
     isFollowUp: true, requiresFlag: 'jardinier-mentor',
     description: 'Le coin de terre que le vieux vous a appris à cultiver a bien travaillé : des tomates. Des vraies. Les vôtres.',
     choices: [
@@ -2469,6 +2475,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
   },
   'exp-magasin-suite': {
     id: 'exp-magasin-suite', title: 'La Porte de Derrière', type: 'narrative',
+    image: '/assets/followup-magasin.webp',
     isFollowUp: true, requiresFlag: 'magasin-repere',
     description: 'Le magasin abandonné, la porte arrière entrouverte. Vous l\'aviez notée « pour plus tard ». Plus tard, c\'est maintenant.',
     choices: [
