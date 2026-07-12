@@ -1,8 +1,38 @@
-# Prompts — Variantes réussite/échec, VAGUE 3 (voyage + mendicité + suites)
+# 🎨 Manus — Images VAGUE 3 à générer (Le Roi du Carton)
 
-Même DA/convention. **Paysage 3:2, vrai WebP.** Le code cherche déjà `result-<id>-good/bad.webp` (repli auto). Ne génère QUE les fichiers listés (ceux qui manquent).
+## ⚠️ À LIRE EN PREMIER — ce qui n'a pas marché
 
-## Manquant isolé
+Les derniers envois contenaient les variantes **exploration (`result-exp-*`)** et
+**repos (`result-rest-*`)** : elles sont **déjà dans le jeu depuis début juillet**.
+Les régénérer ne sert à rien.
+
+**Aucune** des images ci-dessous n'existe encore. Ce sont celles-là, et
+**seulement celles-là**, qu'il faut générer : **voyage, mendicité, suites,
+légendes, vol, + 7 rencontres de suite.**
+
+Avant de livrer, vérifie dans ton projet :
+```
+ls client/public/assets | grep -E "result-travel-|followup-"
+```
+- Si c'est **vide** → tu n'as pas encore généré la vague 3 (c'est normal, fais-la).
+- Le zip que tu m'envoies **doit** contenir des fichiers commençant par
+  `result-travel-`, `followup-`, `result-legend-`. S'il n'en a aucun, c'est le
+  mauvais dossier.
+
+## Convention (identique aux images déjà livrées)
+
+- **DA habituelle** : diorama carton kraft, personnage SDF découpé (barbe,
+  manteau rapiécé), visage feutre, guirlande lumineuse, lumière chaude, humour noir.
+- **Format paysage 3:2**, export **vrai `.webp`** (pas un PNG renommé — sinon je
+  le ré-encode, mais autant éviter).
+- **Noms de fichiers EXACTS** (le code cherche `result-<id>-good.webp` /
+  `result-<id>-bad.webp`). Une faute de nom = image ignorée.
+- Livrable **par lots** : chaque image s'active dès qu'elle arrive ; en
+  attendant, le jeu affiche la scène de base. Rien ne casse.
+
+---
+
+## Manquant isolé (1)
 | Fichier | Scène |
 |---|---|
 | `result-rest-parking-souterrain-good.webp` | ✅ Nuit tranquille dans un parking souterrain en carton, béton sec, le SDF dort adossé à un pilier. |
@@ -109,8 +139,7 @@ Même DA/convention. **Paysage 3:2, vrai WebP.** Le code cherche déjà `result-
 | `result-legend-carton-good.webp` | ✅ Le SDF découvre une pièce et un mot « Tiens bon » dans un pli du vieux carton-relique, émotion. |
 | `result-legend-pari-good.webp` | ✅ Le SDF repart le menton haut, deux vieux SDF qui pariaient sur lui en fond, détermination. |
 
-
-## E. Vol « à texte » (remis en rotation — 12 images)
+## E. Vol « à texte » (12 images)
 
 | Fichier | Scène (issue) |
 |---|---|
@@ -127,12 +156,10 @@ Même DA/convention. **Paysage 3:2, vrai WebP.** Le code cherche déjà `result-
 | `result-steal-etendage-good.webp` | ✅ Un bon manteau de laine, encore tiède du soleil. Vos nuits seront moins rudes. |
 | `result-steal-etendage-bad.webp` | ❌ Une grand-mère hurle à la fenêtre : "Au secours, on me vole !" Tout le quartier se réveille. |
 
-
 ## F. Nouvelles suites narratives (18 images : 7 rencontres + 11 variantes)
 
-Sept événements « suite » viennent d'être ajoutés au jeu (les graines plantées
-par certains événements paient enfin). Ils n'ont AUCUNE image : d'abord la
-rencontre (`followup-<nom>.webp`), puis les variantes `result-<id>-good/bad`.
+Sept événements « suite » ont été ajoutés au jeu. Ils n'ont **aucune** image :
+d'abord la rencontre (`followup-<nom>.webp`), puis les variantes.
 
 ### Rencontres (7 images)
 | Fichier | Scène |
@@ -160,5 +187,13 @@ rencontre (`followup-<nom>.webp`), puis les variantes `result-<id>-good/bad`.
 | `result-exp-magasin-suite-good.webp` | ✅ Le SDF ressort du magasin abandonné chargé d'un carton d'invendus, sourire de contrebandier. |
 | `result-exp-magasin-suite-bad.webp` | ❌ Le SDF fuit ventre à terre, gyrophare d'alarme rouge sur la façade, mannequins en silhouette. |
 
-## Total restant : 114 images (96 + 18 nouvelles)
-Livrable par lots. Chaque image s'active dès qu'elle arrive ; en attendant, l'image de base de la scène (ou la scène dessinée) s'affiche.
+---
+
+## ✅ Checklist avant de livrer
+
+1. Chaque fichier commence par `result-` ou `followup-` **et** finit par `.webp`.
+2. Le zip contient bien des `result-travel-…`, `result-beg-…`, `followup-…`
+   (s'il n'a que des `result-exp-…` ou `result-rest-…`, **c'est le mauvais lot**).
+3. Vraies images WebP paysage 3:2, même DA carton kraft que les précédentes.
+
+**Total : 114 images.** Livrable par petits lots — chacune s'active dès son arrivée.
