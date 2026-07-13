@@ -150,9 +150,17 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+// Les plugins Manus/Builder servent UNIQUEMENT en développement (aperçu dans
+// l'éditeur Manus, collecte de logs). Ils injectent un runtime de ~360 Ko dans
+// index.html : inutile et coûteux dans le jeu publié. On ne les charge donc
+// qu'en mode `serve` (dev), jamais dans le build de production.
+export default defineConfig(({ command }) => {
+  const isBuild = command === 'build';
+  const plugins = isBuild
+    ? [react(), tailwindcss()]
+    : [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
-export default defineConfig({
+  return {
   plugins,
   resolve: {
     alias: {
@@ -185,4 +193,5 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
+  };
 });
