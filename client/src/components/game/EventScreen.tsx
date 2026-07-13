@@ -189,7 +189,7 @@ export default function EventScreen() {
       {/* Back */}
       <button
         onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
-        className="text-sm text-[#A08B70] font-medium text-center py-2 hover:text-[#6B5740] transition-colors"
+        className="action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
       >
         ← {tr('Retour', 'Back')}
       </button>

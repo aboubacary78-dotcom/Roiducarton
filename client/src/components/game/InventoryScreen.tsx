@@ -110,7 +110,7 @@ export default function InventoryScreen() {
 
       <button
         onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
-        className="mt-auto py-2 text-sm text-[#A08B70] font-medium text-center hover:text-[#6B5740] transition-colors"
+        className="mt-auto action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
       >
         ← {tr('Retour', 'Back')}
       </button>
