@@ -12,7 +12,7 @@
  *
  * Tout vit dans le localStorage, comme les scores et le profil.
  */
-import type { InventoryItem } from '@/contexts/GameContext';
+import type { InventoryItem } from '@/contexts/types';
 
 const BOOK_KEY = 'roi-du-carton-deathbook';
 const KARMA_KEY = 'roi-du-carton-karma';
