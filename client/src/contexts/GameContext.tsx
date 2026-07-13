@@ -60,6 +60,8 @@ export interface Character {
   // Nombre de casses tentés durant cette partie : chaque vol rend le
   // prochain mini-jeu plus difficile (voir StealHeist).
   stealCount: number;
+  // Mémoire courte : les derniers événements vus, pour éviter les répétitions.
+  recentEvents?: string[];
   // Graine unique servant à générer le visage du personnage (voir CardboardAvatar).
   seed: string;
   // Genre déduit du prénom, pour que le visage corresponde (pas de barbe sur une femme, etc.).
@@ -2637,6 +2639,21 @@ export function randomFromArray<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// ---- Mémoire anti-répétition ----
+// On retient les N derniers événements vus (toutes actions confondues) et on
+// les écarte du tirage, pour que jour après jour ça ne tourne pas en rond.
+const RECENT_MEMORY = 8;
+function freshPool(pool: GameEvent[], recent: string[] | undefined): GameEvent[] {
+  if (!recent || recent.length === 0) return pool;
+  const fresh = pool.filter(e => !recent.includes(e.id));
+  // Garde-fou petits pools : on n'exclut jamais au point de ne (presque) plus
+  // rien laisser (ex. vol = 6 événements).
+  return fresh.length >= Math.min(3, pool.length) ? fresh : pool;
+}
+function rememberEvent(recent: string[] | undefined, id: string): string[] {
+  return [...(recent || []), id].slice(-RECENT_MEMORY);
+}
+
 // Les fantômes du Cimetière : un ancien personnage (mort) laisse une trace
 // dans la run en cours. Défaites passées → petits coups de main présents.
 function makeGhostEvent(grave: Grave): GameEvent {
@@ -2684,8 +2701,9 @@ function generateEvents(_location: string, character: Character): GameEvent[] {
     e.requiresFlag && character.activeFlags.includes(e.requiresFlag)
   );
   // 30% chance to trigger a follow-up if available
-  if (availableFollowUps.length > 0 && Math.random() < 0.3) {
-    return [randomFromArray(availableFollowUps)];
+  const freshFollowUps = availableFollowUps.filter(e => !character.recentEvents?.includes(e.id));
+  if (freshFollowUps.length > 0 && Math.random() < 0.3) {
+    return [randomFromArray(freshFollowUps)];
   }
   // Sinon, parfois, un fantôme du Cimetière (8 %) — les morts rendent service.
   const graves = loadGraves().filter(g => g.name !== character.name);
@@ -2693,7 +2711,7 @@ function generateEvents(_location: string, character: Character): GameEvent[] {
     return [makeGhostEvent(randomFromArray(graves))];
   }
   // Otherwise return random explore events
-  const shuffled = [...EXPLORE_EVENTS].sort(() => Math.random() - 0.5);
+  const shuffled = [...freshPool(EXPLORE_EVENTS, character.recentEvents)].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, 5);
 }
 
@@ -2701,10 +2719,11 @@ function generateBegEvents(_location: string, character: Character): GameEvent[]
   const availableFollowUps = Object.values(FOLLOW_UP_EVENTS).filter(e => 
     e.requiresFlag && character.activeFlags.includes(e.requiresFlag)
   );
-  if (availableFollowUps.length > 0 && Math.random() < 0.25) {
-    return [randomFromArray(availableFollowUps)];
+  const freshFollowUps = availableFollowUps.filter(e => !character.recentEvents?.includes(e.id));
+  if (freshFollowUps.length > 0 && Math.random() < 0.25) {
+    return [randomFromArray(freshFollowUps)];
   }
-  const shuffled = [...BEG_EVENTS].sort(() => Math.random() - 0.5);
+  const shuffled = [...freshPool(BEG_EVENTS, character.recentEvents)].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, 5);
 }
 
@@ -2712,10 +2731,11 @@ function generateRestEvents(_location: string, character: Character): GameEvent[
   const availableFollowUps = Object.values(FOLLOW_UP_EVENTS).filter(e => 
     e.requiresFlag && character.activeFlags.includes(e.requiresFlag)
   );
-  if (availableFollowUps.length > 0 && Math.random() < 0.2) {
-    return [randomFromArray(availableFollowUps)];
+  const freshFollowUps = availableFollowUps.filter(e => !character.recentEvents?.includes(e.id));
+  if (freshFollowUps.length > 0 && Math.random() < 0.2) {
+    return [randomFromArray(freshFollowUps)];
   }
-  const shuffled = [...REST_EVENTS].sort(() => Math.random() - 0.5);
+  const shuffled = [...freshPool(REST_EVENTS, character.recentEvents)].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, 5);
 }
 
@@ -2859,9 +2879,9 @@ export const BEG_SPOTS: string[] = [
   'sous les arcades du centre-ville',
 ];
 
-function generateTravelEvent(_from: string, _to: string, _character: Character): GameEvent | null {
+function generateTravelEvent(_from: string, _to: string, character: Character): GameEvent | null {
   if (Math.random() > 0.5) return null;
-  return randomFromArray(TRAVEL_EVENTS);
+  return randomFromArray(freshPool(TRAVEL_EVENTS, character.recentEvents));
 }
 
 // ============ HELPERS ============
@@ -3306,7 +3326,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const events = generateEvents(state.character.location, state.character);
       if (events.length === 0) return state;
       const event = randomFromArray(events);
-      return { ...state, screen: 'event', currentEvent: event, dayActions: state.dayActions + 1 };
+      return { ...state, screen: 'event', currentEvent: event, dayActions: state.dayActions + 1,
+        character: { ...state.character, recentEvents: rememberEvent(state.character.recentEvents, event.id) } };
     }
 
     case 'BEG': {
@@ -3316,7 +3337,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (Math.random() < 0.34) {
         const begEvents = generateBegEvents(state.character.location, state.character);
         if (begEvents.length > 0) {
-          return { ...state, screen: 'event', currentEvent: randomFromArray(begEvents), dayActions: state.dayActions + 1 };
+          const begEvt = randomFromArray(begEvents);
+          return { ...state, screen: 'event', currentEvent: begEvt, dayActions: state.dayActions + 1,
+            character: { ...state.character, recentEvents: rememberEvent(state.character.recentEvents, begEvt.id) } };
         }
       }
       return { ...state, screen: 'beg-game', dayActions: state.dayActions + 1 };
@@ -3385,11 +3408,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // 1 fois sur 3 : un vol « à texte » (choix + risque) au lieu du mini-jeu,
       // pour varier les occasions de voler.
       if (Math.random() < 0.34) {
+        const stealEvt = randomFromArray(freshPool(STEAL_EVENTS, stealChar.recentEvents));
         return {
           ...state,
-          character: stealChar,
+          character: { ...stealChar, recentEvents: rememberEvent(stealChar.recentEvents, stealEvt.id) },
           screen: 'event',
-          currentEvent: randomFromArray(STEAL_EVENTS),
+          currentEvent: stealEvt,
           dayActions: state.dayActions + 1,
         };
       }
@@ -3479,7 +3503,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const restEvents = generateRestEvents(state.character.location, state.character);
       if (restEvents.length === 0) return state;
       const restEvent = randomFromArray(restEvents);
-      return { ...state, screen: 'event', currentEvent: restEvent, dayActions: state.dayActions + 1 };
+      return { ...state, screen: 'event', currentEvent: restEvent, dayActions: state.dayActions + 1,
+        character: { ...state.character, recentEvents: rememberEvent(state.character.recentEvents, restEvent.id) } };
     }
 
     case 'DOUBLE_REWARD': {
@@ -3506,7 +3531,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         : state.character.stats;
       const newChar = { ...state.character, location: action.location, stats: movedStats };
       if (travelEvent) {
-        return { ...state, character: newChar, screen: 'event', currentEvent: travelEvent };
+        return { ...state, character: { ...newChar, recentEvents: rememberEvent(newChar.recentEvents, travelEvent.id) }, screen: 'event', currentEvent: travelEvent };
       }
       return { ...state, character: newChar, screen: 'main' };
     }
