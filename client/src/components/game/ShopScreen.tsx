@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getNextDiscountTier, getShopEvent, STAT_META } from '@/contexts/GameContext';
+import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, STAT_META } from '@/contexts/GameContext';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playCoin } from '@/lib/sound';
@@ -288,6 +288,9 @@ export default function ShopScreen() {
             const cheapest = Math.min(...prices);
             const mostExpensive = Math.max(...prices);
             const canAffordSomething = prices.some(p => char.money >= p);
+            // Boutique en panne/fermée : on affiche la raison loufoque, non cliquable.
+            const closed = shopClosure(char, shop.id);
+            const daysLeft = closed ? closed.untilDay - char.day : 0;
 
             return (
               <motion.button
@@ -295,22 +298,34 @@ export default function ShopScreen() {
                 initial={{ y: 8, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: i * 0.06 }}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedShop(shop)}
-                className={`craft-card p-3.5 text-left flex items-center gap-3 ${!canAffordSomething ? 'opacity-50' : ''}`}
+                whileHover={closed ? {} : { scale: 1.01 }}
+                whileTap={closed ? {} : { scale: 0.98 }}
+                onClick={closed ? undefined : () => setSelectedShop(shop)}
+                disabled={!!closed}
+                className={`craft-card p-3.5 text-left flex items-center gap-3 ${closed ? 'opacity-70 grayscale' : !canAffordSomething ? 'opacity-50' : ''}`}
               >
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E8D5C0] to-[#D4B896] flex items-center justify-center text-2xl shadow-sm shrink-0">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E8D5C0] to-[#D4B896] flex items-center justify-center text-2xl shadow-sm shrink-0 relative">
                   {shop.emoji}
+                  {closed && <span className="absolute -bottom-1 -right-1 text-sm">🚫</span>}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <span className="text-sm font-semibold text-[#2A1F1A] block">{tc(shop.name)}</span>
-                  <span className="text-xs text-[#6B5740] block">{tc(shop.description)}</span>
-                  <span className="text-[10px] font-mono text-[#A08B70]">
-                    {shop.items.length} articles · {cheapest === mostExpensive ? `${cheapest}€` : `${cheapest}€ – ${mostExpensive}€`}
-                  </span>
+                  {closed ? (
+                    <>
+                      <span className="text-xs text-[#B84A3A] font-semibold block">
+                        {tr(`Fermé (${daysLeft} j)`, `Closed (${daysLeft}d)`)} — {tr(closed.reason, closed.reasonEn)}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xs text-[#6B5740] block">{tc(shop.description)}</span>
+                      <span className="text-[10px] font-mono text-[#A08B70]">
+                        {shop.items.length} articles · {cheapest === mostExpensive ? `${cheapest}€` : `${cheapest}€ – ${mostExpensive}€`}
+                      </span>
+                    </>
+                  )}
                 </div>
-                <span className="text-[#A08B70]">→</span>
+                <span className="text-[#A08B70]">{closed ? '🔒' : '→'}</span>
               </motion.button>
             );
           })}

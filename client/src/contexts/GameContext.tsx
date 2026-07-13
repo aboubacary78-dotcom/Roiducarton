@@ -62,6 +62,8 @@ export interface Character {
   stealCount: number;
   // Mémoire courte : les derniers événements vus, pour éviter les répétitions.
   recentEvents?: string[];
+  // Boutiques en panne/fermées pendant la partie (voir ShopClosure).
+  shopClosures?: ShopClosure[];
   // Graine unique servant à générer le visage du personnage (voir CardboardAvatar).
   seed: string;
   // Genre déduit du prénom, pour que le visage corresponde (pas de barbe sur une femme, etc.).
@@ -519,6 +521,78 @@ export interface Shop {
   description: string;
   locations: string[];
   items: ShopItem[];
+}
+
+// ============ PANNES & FERMETURES DE BOUTIQUES ============
+// La rue est imprévisible : au fil des jours, des commerces ferment un jour ou
+// deux, avec une explication loufoque. Ça punit le pilotage automatique (« je
+// vais toujours à la laverie ») et force à s'adapter. Stocké sur le personnage
+// (donc persistant dans la partie, remis à zéro au personnage suivant).
+export interface ShopClosure {
+  shopId: string;
+  untilDay: number;   // la boutique rouvre à partir de ce jour
+  reason: string; reasonEn: string;
+}
+
+// Raisons propres à certaines boutiques (plus savoureuses).
+const CLOSURE_REASONS_BY_SHOP: Record<string, Array<[string, string]>> = {
+  laverie: [
+    ['une machine a avalé un pigeon entier, les pompiers sont sur place.', 'a machine swallowed a whole pigeon, firefighters are on site.'],
+    ['le sèche-linge tourne à l\'envers depuis mardi. Personne ne sait pourquoi.', 'the dryer has been spinning backwards since Tuesday. Nobody knows why.'],
+  ],
+  fontaine: [
+    ['un canard a élu domicile dans la tuyauterie. Elle est à sec.', 'a duck moved into the plumbing. It ran dry.'],
+  ],
+  distributeur: [
+    ['il ne rend plus que des pièces de Monopoly. Hors service.', 'it only dispenses Monopoly coins now. Out of order.'],
+  ],
+  boulangerie: [
+    ['le four a rendu l\'âme en pleine fournée. Deuil national du croissant.', 'the oven died mid-batch. National croissant mourning.'],
+  ],
+  kebab: [
+    ['rupture de broche. Le patron est parti « chercher de la viande ». On l\'attend.', 'out of skewer. The owner went to "get more meat". Still waiting.'],
+  ],
+  pharmacie: [
+    ['inventaire surprise : la pharmacienne compte les cotons-tiges un par un.', 'surprise inventory: the pharmacist is counting cotton swabs one by one.'],
+  ],
+  epicerie: [
+    ['le gérant s\'est enfermé dehors. Encore.', 'the owner locked himself out. Again.'],
+  ],
+  brocanteur: [
+    ['le brocanteur a « des ennuis ». Rideau baissé, pas de questions.', 'the dealer has "trouble". Shutters down, no questions.'],
+  ],
+  'marche-aux-puces': [
+    ['grand vent : les étals se sont envolés vers le quartier d\'à côté.', 'windy day: the stalls blew off to the next neighborhood.'],
+  ],
+  herboriste: [
+    ['l\'herboriste médite. Ne pas déranger avant l\'illumination.', 'the herbalist is meditating. Do not disturb before enlightenment.'],
+  ],
+};
+// Raisons génériques (n'importe quelle boutique).
+const CLOSURE_REASONS_GENERIC: Array<[string, string]> = [
+  ['fermé pour « raisons personnelles ». Personne ne sait lesquelles.', 'closed for "personal reasons". Nobody knows which.'],
+  ['grève surprise. Même le patron fait grève.', 'surprise strike. Even the owner is on strike.'],
+  ['un contrôle sanitaire a mal tourné. Fermeture immédiate.', 'a health inspection went sideways. Immediate closure.'],
+  ['panne de courant dans tout le pâté de maisons.', 'power outage across the whole block.'],
+  ['le gérant a gagné au Loto (petit lot) et fête ça bruyamment.', 'the owner won the lottery (small prize) and is loudly celebrating.'],
+];
+
+// Une boutique est-elle fermée au jour donné ?
+export function shopClosure(char: Character | null, shopId: string): ShopClosure | undefined {
+  return char?.shopClosures?.find(c => c.shopId === shopId && c.untilDay > char.day);
+}
+
+// Tire une nouvelle fermeture parmi les boutiques encore ouvertes (ou null).
+function rollShopClosure(active: ShopClosure[], day: number): ShopClosure | null {
+  const open = SHOPS.filter(s => !active.some(c => c.shopId === s.id));
+  if (open.length === 0) return null;
+  const shop = randomFromArray(open);
+  const specific = CLOSURE_REASONS_BY_SHOP[shop.id];
+  const [reason, reasonEn] = specific && Math.random() < 0.7
+    ? randomFromArray(specific)
+    : randomFromArray(CLOSURE_REASONS_GENERIC);
+  const duration = 1 + Math.floor(Math.random() * 2); // 1 à 2 jours
+  return { shopId: shop.id, untilDay: day + duration, reason, reasonEn };
 }
 
 export const SHOPS: Shop[] = [
@@ -3709,6 +3783,31 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         notesEn.push(`🏅 The street now calls you "${crossed.en}" (+${crossed.respect} respect).`);
       }
 
+      // ---- Pannes & fermetures de boutiques (imprévu qui monte avec les jours) ----
+      const newDay = ch.day + 1;
+      const prevClosures = ch.shopClosures || [];
+      // Réouvertures : on annonce ce qui rouvre aujourd'hui.
+      prevClosures.filter(c => c.untilDay === newDay).forEach(c => {
+        const sh = SHOPS.find(s => s.id === c.shopId);
+        if (sh) {
+          notes.push(`🔓 ${sh.emoji} ${sh.name} a rouvert. La vie reprend.`);
+          notesEn.push(`🔓 ${sh.emoji} ${tc(sh.name)} has reopened. Life goes on.`);
+        }
+      });
+      let shopClosures = prevClosures.filter(c => c.untilDay > newDay);
+      // Nouvelle panne ? Probabilité croissante, 2 fermetures simultanées max.
+      const closureChance = Math.min(0.55, 0.12 + newDay * 0.03);
+      if (shopClosures.length < 2 && Math.random() < closureChance) {
+        const nc = rollShopClosure(shopClosures, newDay);
+        if (nc) {
+          shopClosures = [...shopClosures, nc];
+          const sh = SHOPS.find(s => s.id === nc.shopId)!;
+          const days = nc.untilDay - newDay;
+          notes.push(`🚫 ${sh.emoji} ${sh.name} est fermé (${days} j) : ${nc.reason}`);
+          notesEn.push(`🚫 ${sh.emoji} ${tc(sh.name)} is closed (${days}d): ${nc.reasonEn}`);
+        }
+      }
+
       const decayedStats = clampStats(s);
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
 
@@ -3727,7 +3826,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       return {
         ...state,
-        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus },
+        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus, shopClosures },
         dayActions: 0,
         screen: isAlive ? 'main' : 'game-over',
         weather: nextWeather,
