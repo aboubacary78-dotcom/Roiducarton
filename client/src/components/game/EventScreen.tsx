@@ -181,7 +181,7 @@ export default function EventScreen() {
             className="mt-3 w-full py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg, #B8860B, #9B7209)' }}
           >
-            {loadingBoost ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Coup de pouce (pub) — garantir le meilleur résultat', '🎬 Boost (ad) — guarantee the best outcome')}
+            {loadingBoost ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Coup de pouce (pub), garantir le meilleur résultat', '🎬 Boost (ad), guarantee the best outcome')}
           </button>
         )}
       </motion.div>

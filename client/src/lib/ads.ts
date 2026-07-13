@@ -1,5 +1,5 @@
 /*
- * LE ROI DU CARTON — Service de publicités (AdMob)
+ * LE ROI DU CARTON, Service de publicités (AdMob)
  *
  * Cette couche centralise toute la logique des pubs Google AdMob.
  * - Sur mobile (Android/iOS via Capacitor) : vraies publicités.
@@ -7,7 +7,7 @@
  *   immédiatement, pour ne jamais bloquer ni casser le jeu pendant
  *   le développement.
  *
- * IMPORTANT — avant publication sur les stores :
+ * IMPORTANT, avant publication sur les stores :
  * 1. Crée un compte AdMob (https://admob.google.com).
  * 2. Crée une app AdMob pour Android et une pour iOS.
  * 3. Remplace les ID de TEST ci-dessous par tes vrais ID de blocs d'annonces.
@@ -47,7 +47,7 @@ export function setAdsRemoved(v: boolean): void {
  * @capacitor-community/in-app-purchases) avec un produit non consommable
  * « remove_ads », puis appeler setAdsRemoved(true) seulement après confirmation.
  * En l'état, la fonction active directement le mode sans pub (placeholder de
- * démonstration) — À REMPLACER avant publication (voir STORE_PUBLISHING.md).
+ * démonstration), À REMPLACER avant publication (voir STORE_PUBLISHING.md).
  */
 export async function purchaseRemoveAds(): Promise<boolean> {
   setAdsRemoved(true);

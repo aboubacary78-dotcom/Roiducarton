@@ -17,7 +17,7 @@ const DAY_VEILS: Array<[number, number, number, number, number]> = [
   [0.35, 255, 255, 255, 0],    // plein jour
   [0.7, 224, 122, 60, 0.16],   // fin d'après-midi
   [0.9, 96, 62, 96, 0.24],     // crépuscule
-  [1.0, 22, 30, 68, 0.42],     // nuit — plus d'action restante
+  [1.0, 22, 30, 68, 0.42],     // nuit, plus d'action restante
 ];
 function dayVeil(p: number): string {
   let i = 0;
@@ -223,7 +223,7 @@ export default function MainScreen() {
       {/* Décor du quartier + ambiance (illustration générée, DA carton).
           La journée PASSE sur la scène : chaque action consommée fait glisser
           le décor, tourner la lumière (matin → midi → soir → nuit) et avancer
-          le soleil — remplacé par la lune quand il ne reste plus d'action. */}
+          le soleil, remplacé par la lune quand il ne reste plus d'action. */}
       <motion.div
         key={char.location}
         initial={{ opacity: 0, y: 6 }}

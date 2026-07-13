@@ -34,7 +34,7 @@ export interface Stats {
   dignity: number;
 }
 
-// Table unique emoji/libellé des jauges — utilisée par tous les écrans
+// Table unique emoji/libellé des jauges, utilisée par tous les écrans
 // (inventaire, boutique, résultats, barres de stats) pour rester cohérents.
 export const STAT_META: Record<keyof Stats, { emoji: string; label: string; labelEn: string }> = {
   health: { emoji: '❤️', label: 'Santé', labelEn: 'Health' },
@@ -187,8 +187,8 @@ export const SPECIAL_DEFS: SpecialDef[] = [
   },
   {
     id: 'desescalade', traitId: 'charismatique', name: 'Désescalade', nameEn: 'De-escalation', emoji: '🕊️',
-    desc: 'Conclure en parlant : selon votre dignité et votre respect, le combat peut s\'arrêter là — avec le respect en prime.',
-    descEn: 'Talk it out: with enough dignity and respect the fight may end right here — with extra respect on top.',
+    desc: 'Conclure en parlant : selon votre dignité et votre respect, le combat peut s\'arrêter là, avec le respect en prime.',
+    descEn: 'Talk it out: with enough dignity and respect the fight may end right here, with extra respect on top.',
   },
 ];
 
@@ -1851,7 +1851,7 @@ const BEG_EVENTS: GameEvent[] = [
   },
 ];
 
-// ============ STEAL EVENTS — action "Voler" (haut risque / haute récompense) ============
+// ============ STEAL EVENTS, action "Voler" (haut risque / haute récompense) ============
 const STEAL_EVENTS: GameEvent[] = [
   {
     id: 'steal-etal-marche', title: 'L\'Étal du Marché', type: 'discovery',
@@ -2249,7 +2249,7 @@ const TRAVEL_EVENTS: GameEvent[] = [
       { text: 'Contourner par la rue principale', risk: 'safe', emoji: '🛤️', outcomes: [
         { probability: 1.0, text: 'Plus long mais plus sûr. Vous profitez des vitrines.', statChanges: { mental: 2 } },
       ]},
-      { text: 'Traverser tête haute — on vous connaît ici', risk: 'safe', emoji: '👑', requirements: { respect: 30 }, outcomes: [
+      { text: 'Traverser tête haute, on vous connaît ici', risk: 'safe', emoji: '👑', requirements: { respect: 30 }, outcomes: [
         { probability: 0.7, text: 'Le type louche vous reconnaît et baisse les yeux. "Ah, c\'est toi… passe, passe." On ne touche pas à une légende de la rue.', statChanges: { mental: 8, dignity: 5 }, respectChange: 1 },
         { probability: 0.3, text: 'Un jeune vous salue d\'un signe de tête respectueux et vous glisse 4€. "Pour la route, chef."', statChanges: { mental: 6 }, moneyChange: 4 },
       ]},
@@ -2549,10 +2549,10 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
     description: 'Un étudiant lorgne votre vélo rafistolé au fil de fer. "Il roule ? Je vous en donne quelque chose !"',
     choices: [
       { text: 'Vendre le vélo', risk: 'safe', emoji: '💶', outcomes: [
-        { probability: 0.7, text: 'Marché conclu : 8€. Il repart en zigzaguant — les freins, c\'était en option.', moneyChange: 8, statChanges: { mental: -3 }, removeFlag: 'a-velo' },
+        { probability: 0.7, text: 'Marché conclu : 8€. Il repart en zigzaguant, les freins, c\'était en option.', moneyChange: 8, statChanges: { mental: -3 }, removeFlag: 'a-velo' },
         { probability: 0.3, text: 'Il négocie dur : 5€. Vous cédez. Le fil de fer, ça n\'a pas de prix. Enfin si : 5€.', moneyChange: 5, statChanges: { mental: -3 }, removeFlag: 'a-velo' },
       ]},
-      { text: 'Refuser — ce vélo, c\'est la liberté', risk: 'safe', emoji: '🚲', outcomes: [
+      { text: 'Refuser, ce vélo, c\'est la liberté', risk: 'safe', emoji: '🚲', outcomes: [
         { probability: 1, text: 'Il hausse les épaules et s\'en va. Vous caressez le guidon. Vous, au moins, vous vous comprenez.', statChanges: { mental: 6, dignity: 3 } },
       ]},
     ],
@@ -2591,7 +2591,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
     description: 'Votre planque sur le toit vous attend. La ville scintille en carton, et personne ne sait que vous êtes là.',
     choices: [
       { text: 'Y passer la nuit', risk: 'normal', emoji: '🌃', outcomes: [
-        { probability: 0.75, text: 'Nuit étoilée au-dessus du vacarme. Vous dormez comme un roi — du carton, mais un roi.', statChanges: { sleep: 20, mental: 12 } },
+        { probability: 0.75, text: 'Nuit étoilée au-dessus du vacarme. Vous dormez comme un roi, du carton, mais un roi.', statChanges: { sleep: 20, mental: 12 } },
         { probability: 0.25, text: 'Le concierge fait sa ronde ! Vous dévalez l\'escalier de service, le cœur à 200. Planque grillée.', statChanges: { mental: -5, sleep: -3 }, removeFlag: 'camp-toit' },
       ]},
       { text: 'Juste souffler dix minutes', risk: 'safe', emoji: '🌇', outcomes: [
@@ -2641,7 +2641,7 @@ const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
         { probability: 0.3, text: 'Rien que de la poussière et des mannequins qui vous jugent. Vous repartez bredouille et vaguement humilié.', statChanges: { mental: -4 }, removeFlag: 'magasin-repere' },
         { probability: 0.2, text: 'Une alarme oubliée hurle ! Vous fuyez ventre à terre, poursuivi par le fantôme du commerce de proximité.', statChanges: { mental: -8, dignity: -6, health: -4 }, respectChange: -2, removeFlag: 'magasin-repere' },
       ]},
-      { text: 'Renoncer — trop risqué', risk: 'safe', emoji: '🚶', outcomes: [
+      { text: 'Renoncer, trop risqué', risk: 'safe', emoji: '🚶', outcomes: [
         { probability: 1, text: 'Vous passez votre chemin. La porte restera un « et si » de plus dans votre collection.', statChanges: { mental: -2 }, removeFlag: 'magasin-repere' },
       ]},
     ],
@@ -2765,7 +2765,7 @@ function makeGhostEvent(grave: Grave): GameEvent {
       description: L(`Vous reconnaissez ce banc : c'est là que dormait ${n}, avant. Quelqu'un y a gravé ses initiales.`, `You know this bench: it's where ${n} used to sleep. Someone carved their initials into it.`),
       choices: [
         { text: L('S\'y reposer un moment', 'Rest there a while'), risk: 'safe', emoji: '🪑', outcomes: [
-          { probability: 0.7, text: L(`Le coin est bon, ${n} savait choisir. Vous repartez apaisé — et vous trouvez une pièce sous une latte.`, `A good spot — ${n} knew how to pick them. You leave calmer, and find a coin under a slat.`), statChanges: { mental: 8, sleep: 6 }, moneyChange: 1 },
+          { probability: 0.7, text: L(`Le coin est bon, ${n} savait choisir. Vous repartez apaisé, et vous trouvez une pièce sous une latte.`, `A good spot, ${n} knew how to pick them. You leave calmer, and find a coin under a slat.`), statChanges: { mental: 8, sleep: 6 }, moneyChange: 1 },
           { probability: 0.3, text: L('Un moment de paix. Les absents veillent, à leur façon.', 'A moment of peace. The departed keep watch, in their way.'), statChanges: { mental: 10 } },
         ]},
         { text: L('Se recueillir et passer son chemin', 'Pay respects and move on'), risk: 'safe', emoji: '🕯️', outcomes: [
@@ -2806,7 +2806,7 @@ function generateEvents(_location: string, character: Character): GameEvent[] {
   if (freshFollowUps.length > 0 && Math.random() < 0.3) {
     return [randomFromArray(freshFollowUps)];
   }
-  // Sinon, parfois, un fantôme du Cimetière (8 %) — les morts rendent service.
+  // Sinon, parfois, un fantôme du Cimetière (8 %), les morts rendent service.
   const graves = loadGraves().filter(g => g.name !== character.name);
   if (graves.length > 0 && Math.random() < 0.08) {
     return [makeGhostEvent(randomFromArray(graves))];
@@ -2897,7 +2897,7 @@ interface LegendTemplate {
 const LEGEND_TEMPLATES: LegendTemplate[] = [
   {
     id: 'legend-graffiti', title: 'Le mur des légendes', type: 'narrative',
-    description: 'Sur un mur décrépi, un graffiti tracé avec soin : « {name} — {days} jours — Roi du Carton ». La rue n\'oublie pas les siens.',
+    description: 'Sur un mur décrépi, un graffiti tracé avec soin : « {name}, {days} jours, Roi du Carton ». La rue n\'oublie pas les siens.',
     choices: [
       { text: 'Graver votre nom juste en dessous', risk: 'safe', emoji: '✍️', outcomes: [
         { probability: 1, text: 'Vous inscrivez votre nom sous celui de {name}. Un jour, peut-être, on parlera de vous aussi.', statChanges: { mental: 8, dignity: 3 }, respectChange: 1 },
@@ -3201,7 +3201,7 @@ export function generateHand(character: Character, combat: CombatState, count: n
 }
 
 // Construit l'état de combat pour un ennemi donné (utilisé par START_COMBAT
-// et par les répercussions de vol) — une seule source de vérité.
+// et par les répercussions de vol), une seule source de vérité.
 function makeCombatState(enemy: Enemy, character: Character): CombatState {
   // Image de l'ennemi : la sienne, sinon la fiche canonique, sinon la table
   // COMBAT_IMAGES (ennemis de la « Bagarre » dont l'image est à générer).
@@ -3382,7 +3382,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const gifts: string[] = [];
       if (legacy && inventory.length < 20) {
         inventory.push(legacy.item);
-        gifts.push(L(`${legacy.item.name} — l'héritage de ${legacy.from}`, `the ${tc(legacy.item.name)} — ${legacy.from}'s legacy`));
+        gifts.push(L(`${legacy.item.name}, l'héritage de ${legacy.from}`, `the ${tc(legacy.item.name)}, ${legacy.from}'s legacy`));
       }
       for (const kit of kits) {
         const def = HERITAGE_KITS.find(k => k.id === kit);
@@ -3465,7 +3465,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           ...state,
           character: { ...c, stats: newStats, money: c.money - amende, alive: isAlive },
           eventResult: {
-            text: L(`👮 « Mendicité sur la voie publique, circulez ! » Le policier confisque votre récolte${amende > 0 ? ` et vous colle ${amende}€ d'amende` : ' — insolvable, vous repartez avec un avertissement'}.`, `👮 "Begging in public, move along!" The cop confiscates your takings${amende > 0 ? ` and slaps you with a €${amende} fine` : ' — broke, so you leave with a warning'}.`),
+            text: L(`👮 « Mendicité sur la voie publique, circulez ! » Le policier confisque votre récolte${amende > 0 ? ` et vous colle ${amende}€ d'amende` : ', insolvable, vous repartez avec un avertissement'}.`, `👮 "Begging in public, move along!" The cop confiscates your takings${amende > 0 ? ` and slaps you with a €${amende} fine` : ', broke, so you leave with a warning'}.`),
             statChanges: statDelta, moneyChange: -amende, image: '/assets/result-beg-police.webp',
           },
           screen: isAlive ? 'main' : 'game-over',
@@ -3558,7 +3558,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             character: { ...c, stats: newStats, money: c.money - amende, respect: c.respect - 3, alive: isAlive },
             dayActions: state.maxDayActions,
             eventResult: {
-              text: L(`🚔 Un policier vous cueille la main sur ${target.label}. Garde à vue ! Vous perdez le reste de la journée${amende > 0 ? ` et ${amende}€ d'amende` : ' — insolvable, il vous laisse filer avec un avertissement'}.`, `🚔 A cop nabs you with your hand on ${target.labelEn}. Held in custody! You lose the rest of the day${amende > 0 ? ` and a €${amende} fine` : ' — broke, so he lets you off with a warning'}.`),
+              text: L(`🚔 Un policier vous cueille la main sur ${target.label}. Garde à vue ! Vous perdez le reste de la journée${amende > 0 ? ` et ${amende}€ d'amende` : ', insolvable, il vous laisse filer avec un avertissement'}.`, `🚔 A cop nabs you with your hand on ${target.labelEn}. Held in custody! You lose the rest of the day${amende > 0 ? ` and a €${amende} fine` : ', broke, so he lets you off with a warning'}.`),
               statChanges: statDelta, moneyChange: -amende, respectChange: -3, image: '/assets/result-steal-police.webp',
             },
             screen: isAlive ? 'main' : 'game-over',
@@ -3626,7 +3626,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (!state.character) return state;
       const travelEvent = generateTravelEvent(state.character.location, action.location, state.character);
       // Sens de l'Orientation : connaître les raccourcis rend le trajet moins
-      // pénible — petit regain de moral à chaque voyage.
+      // pénible, petit regain de moral à chaque voyage.
       const hasOrientation = state.character.traits.some(t => t.id === 'orientation');
       const movedStats = hasOrientation
         ? clampStats({ ...state.character.stats, mental: state.character.stats.mental + 2 })
@@ -3659,7 +3659,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           if (roll <= cumProb) { outcome = o; break; }
         }
         // Poissard : une fois sur quatre, le destin rechoisit… la pire issue.
-        // (Contrepartie du score ×2 — voir computeScore.)
+        // (Contrepartie du score ×2, voir computeScore.)
         if (choice.outcomes.length > 1 && state.character.traits.some(t => t.id === 'poissard') && Math.random() < 0.25) {
           outcome = [...choice.outcomes].sort((a, b) => outcomeScore(a) - outcomeScore(b))[0];
         }
@@ -3874,7 +3874,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (idx === -1) return state;
       const item = state.character.inventory[idx];
       const gourmand = hasTrait(state.character, 'ventre-pattes');
-      // Ventre sur Pattes : « mange n'importe quoi » — le bric-à-brac se croque.
+      // Ventre sur Pattes : « mange n'importe quoi », le bric-à-brac se croque.
       if (!item.effect && gourmand && item.type === 'junk') {
         const newInv = [...state.character.inventory.slice(0, idx), ...state.character.inventory.slice(idx + 1)];
         const junkDelta: Partial<Stats> = { hunger: 10, dignity: -2 };
@@ -3885,7 +3885,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
       if (!item.effect) return state;
-      // Ventre sur Pattes : « en grande quantité » — la nourriture cale +25 %.
+      // Ventre sur Pattes : « en grande quantité », la nourriture cale +25 %.
       const effect: Partial<Stats> = { ...item.effect };
       if (gourmand && (effect.hunger ?? 0) > 0) effect.hunger = Math.round(effect.hunger! * 1.25);
       let newStats = { ...state.character.stats };
@@ -3927,7 +3927,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     // Duel de signes : résout la manche (triangle, coup spécial, piège) et
-    // oriente la suite — riposte (gagnée), esquive (perdue), manche suivante
+    // oriente la suite, riposte (gagnée), esquive (perdue), manche suivante
     // (égalité ou effet neutre).
     case 'PLAY_SIGN': {
       if (!state.character || !state.currentCombat || state.currentCombat.phase !== 'sign') return state;
@@ -4006,14 +4006,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
               logs.push(L('💨 Il se pince le nez derrière sa garde : l\'haleine se dissipe et il contre-attaque, furieux !', '💨 It pinches its nose behind its guard: the breath disperses and it counter-attacks, furious!'));
               return { ...state, currentCombat: { ...combat, ...spent, trapRounds: trapAfter, phase: 'dodge', hand: [], dodgePenalty: 1.2 }, combatLog: logs };
             }
-            logs.push(L('💨 HALEINE REDOUTABLE ! L\'ennemi suffoque, sonné — son prochain coup sera télégraphié.', '💨 DREADFUL BREATH! The foe gags, stunned — its next move will be telegraphed.'));
+            logs.push(L('💨 HALEINE REDOUTABLE ! L\'ennemi suffoque, sonné, son prochain coup sera télégraphié.', '💨 DREADFUL BREATH! The foe gags, stunned, its next move will be telegraphed.'));
             return { ...state, currentCombat: { ...combat, ...spent, trapRounds: trapAfter, phase: 'draw', hand: generateHand(c, combat, 3), enemyStunned: true }, combatLog: logs };
           }
           case 'piege': {
             if (eSign === 'strike') {
               const trapDmg = 9;
               const hp = Math.max(0, combat.enemyHealth - trapDmg);
-              logs.push(L(`🪤 À peine posé — CLAC ! ${combat.enemyName} charge dedans : ${trapDmg} dégâts, sonné !`, `🪤 Barely set — SNAP! ${tc(combat.enemyName)} charges right in: ${trapDmg} damage, stunned!`));
+              logs.push(L(`🪤 À peine posé, CLAC ! ${combat.enemyName} charge dedans : ${trapDmg} dégâts, sonné !`, `🪤 Barely set, SNAP! ${tc(combat.enemyName)} charges right in: ${trapDmg} damage, stunned!`));
               if (hp <= 0) return victoryState(c);
               return { ...state, currentCombat: { ...combat, ...spent, enemyHealth: hp, trapRounds: 0, phase: 'draw', hand: generateHand(c, combat, drawCount(2, 3)), enemyStunned: true }, combatLog: logs };
             }
@@ -4055,14 +4055,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         };
       }
       if (action.sign === eSign) {
-        // Égalité : accrochage — petits dégâts des deux côtés, on rejoue.
+        // Égalité : accrochage, petits dégâts des deux côtés, on rejoue.
         // Une arme lourde fait tourner l'échange : c'est lui qui encaisse.
         const weapon = bestWeapon(c);
         const heavy = weapon?.combatStyle === 'heavy';
         const pDmg = heavy ? 0 : 2, eDmg = heavy ? 5 : 3;
         const hp = Math.max(0, c.stats.health - pDmg);
         const eHp = Math.max(0, combat.enemyHealth - eDmg);
-        if (heavy) logs.push(L(`🏏 Accrochage — ${weapon!.name} fait la différence : c'est lui qui encaisse ! (−${eDmg} pour lui)`, `🏏 Clash — ${tc(weapon!.name)} makes the difference: the foe takes the hit! (−${eDmg} foe)`));
+        if (heavy) logs.push(L(`🏏 Accrochage, ${weapon!.name} fait la différence : c'est lui qui encaisse ! (−${eDmg} pour lui)`, `🏏 Clash, ${tc(weapon!.name)} makes the difference: the foe takes the hit! (−${eDmg} foe)`));
         else logs.push(L(`⚡ ${pDef.name} contre ${eDef.name} : accrochage ! (−${pDmg} pour vous, −${eDmg} pour lui)`, `⚡ ${pDef.nameEn} meets ${eDef.nameEn}: clash! (−${pDmg} you, −${eDmg} foe)`));
         const cUpd = { ...c, stats: clampStats({ ...c.stats, health: hp }) };
         if (eHp <= 0) return victoryState(cUpd);
@@ -4076,7 +4076,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           combatLog: logs,
         };
       }
-      // Manche perdue : l'ennemi presse — place à l'esquive de rattrapage.
+      // Manche perdue : l'ennemi presse, place à l'esquive de rattrapage.
       logs.push(L(`${eDef.emoji} Sa ${eDef.name.toLowerCase()} prend votre ${pDef.name.toLowerCase()} de vitesse : esquivez !`, `${eDef.emoji} Its ${eDef.nameEn.toLowerCase()} beats your ${pDef.nameEn.toLowerCase()}: dodge!`));
       return { ...state, currentCombat: { ...combat, trapRounds: trapAfter, phase: 'dodge', hand: [] }, combatLog: logs };
     }
@@ -4492,7 +4492,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
     // Une nouvelle partie (passage par l'écran de sélection) réarme le compteur.
     if (state.screen === 'character-select') gameCounted.current = false;
-    // Comptabilise la partie une seule fois — même si le joueur reprend via
+    // Comptabilise la partie une seule fois, même si le joueur reprend via
     // une pub (seconde chance) puis meurt à nouveau.
     if (state.screen === 'game-over' && prevScreen.current !== 'game-over' && !gameCounted.current) {
       gameCounted.current = true;

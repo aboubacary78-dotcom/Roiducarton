@@ -1,5 +1,5 @@
 /*
- * La méta de la mort — « chaque mort produit trois choses : une trace, un
+ * La méta de la mort, « chaque mort produit trois choses : une trace, un
  * gain, une histoire ».
  *
  *  - Le REGISTRE DES MORTS : catalogue persistant des fins découvertes

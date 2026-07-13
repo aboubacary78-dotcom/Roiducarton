@@ -1,6 +1,6 @@
 /*
  * LE ROI DU CARTON - Home Page
- * Design: Carton Craft — textures carton chaudes, UI feutre, direction ludique.
+ * Design: Carton Craft, textures carton chaudes, UI feutre, direction ludique.
  * Polices : Fredoka (titres/boutons), Outfit (corps), JetBrains Mono (stats).
  */
 import { useGame } from '@/contexts/GameContext';

@@ -12,11 +12,11 @@ import { pushToast } from '@/lib/toast';
 
 /*
  * Combat « Signe, Esquive & Riposte ».
- * Chaque manche : (0) duel de signes — triangle Châtaigne/Feinte/Garde, informé
+ * Chaque manche : (0) duel de signes, triangle Châtaigne/Feinte/Garde, informé
  * par les tendances de l'ennemi et un indice faillible ; manche gagnée →
  * (2) riposte aux cartes ; manche perdue → (1) esquive de rattrapage en temps
  * réel (une esquive parfaite vole une riposte réduite). Voir le reducer
- * (PLAY_SIGN / DODGE_RESULT / PLAY_CARD) pour la résolution — ici on ne fait
+ * (PLAY_SIGN / DODGE_RESULT / PLAY_CARD) pour la résolution, ici on ne fait
  * que jouer et remonter le choix.
  */
 
@@ -48,7 +48,7 @@ export default function CombatScreen() {
         lines={[
           { emoji: '✊', fr: 'Chaque manche s\'ouvre sur un duel de signes : 👊 Châtaigne bat 🎭 Feinte, qui bat 📦 Garde, qui bat 👊 Châtaigne.', en: 'Each round opens with a sign duel: 👊 Haymaker beats 🎭 Feint, which beats 📦 Block, which beats 👊 Haymaker.' },
           { emoji: '👀', fr: 'Guettez les indices (« Il serre le poing… ») : chaque ennemi a ses habitudes, mais un indice peut mentir.', en: 'Watch the tells ("It clenches a fist…"): every foe has habits, but a tell can lie.' },
-          { emoji: '🃏', fr: 'Manche gagnée : piochez des cartes et ripostez. Manche perdue : esquivez la riposte ennemie — parfaite, elle vous rend un contre.', en: 'Win the round: draw cards and strike back. Lose it: dodge the foe\'s onslaught — a flawless dodge steals a counter back.' },
+          { emoji: '🃏', fr: 'Manche gagnée : piochez des cartes et ripostez. Manche perdue : esquivez la riposte ennemie, parfaite, elle vous rend un contre.', en: 'Win the round: draw cards and strike back. Lose it: dodge the foe\'s onslaught, a flawless dodge steals a counter back.' },
           { emoji: '⚡', fr: 'Vos traits débloquent un coup spécial (haleine, piège…) : gagnez des manches pour le charger, 2 usages par combat.', en: 'Your traits unlock a special move (breath, trap…): win rounds to charge it, 2 uses per fight.' },
           { emoji: '💀', fr: 'Les touches entament votre vraie santé. Videz les PV de l\'ennemi avant que les vôtres tombent à zéro.', en: 'Hits chip your real health. Empty the enemy\'s HP before yours drops to zero.' },
         ]}
@@ -161,7 +161,7 @@ function CombatScreenInner() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Phase 0 — Duel de signes                                            */
+/* Phase 0, Duel de signes                                            */
 /* ------------------------------------------------------------------ */
 const SIGN_ORDER: SignId[] = ['strike', 'feint', 'guard'];
 
@@ -175,7 +175,7 @@ function SignPhase({ combat, character, onPick, onFlee }: {
   const [choice, setChoice] = useState<SignId | 'special' | null>(null);
   const special = combat.specialId ? SPECIAL_DEFS.find(s => s.id === combat.specialId) : undefined;
   const usesLeft = 2 - combat.specialUses;
-  // Arme lourde : les accrochages (égalités) tournent pour vous — affiché
+  // Arme lourde : les accrochages (égalités) tournent pour vous, affiché
   // pour que l'achat d'une batte se sente dès le duel de signes.
   const weapon = bestWeapon(character);
   const heavyWeapon = weapon?.combatStyle === 'heavy' ? weapon : undefined;
@@ -257,7 +257,7 @@ function SignPhase({ combat, character, onPick, onFlee }: {
       {/* Arme lourde : rappel de son effet sur les accrochages */}
       {heavyWeapon && (
         <div className="text-[10px] text-[#8B6B4A] bg-[#E9E0D4] rounded-full px-3 py-1">
-          🏏 {tc(heavyWeapon.name)} — {tr('les accrochages tournent pour vous.', 'clashes turn in your favor.')}
+          🏏 {tc(heavyWeapon.name)}, {tr('les accrochages tournent pour vous.', 'clashes turn in your favor.')}
         </div>
       )}
 
@@ -349,7 +349,7 @@ function SignPhase({ combat, character, onPick, onFlee }: {
 }
 
 /* ------------------------------------------------------------------ */
-/* Phase 1 — Esquive                                                   */
+/* Phase 1, Esquive                                                   */
 /* ------------------------------------------------------------------ */
 function DodgeArena({ combat, character, onDone }: { combat: CombatState; character: Character; onDone: (hits: number) => void }) {
   const lang = useLang();
@@ -573,7 +573,7 @@ function PadBtn({ label, onHold }: { label: string; onHold: (on: boolean) => voi
 }
 
 /* ------------------------------------------------------------------ */
-/* Phase 2 — Riposte (cartes)                                          */
+/* Phase 2, Riposte (cartes)                                          */
 /* ------------------------------------------------------------------ */
 function CardHand({ combat, character, onPlay }: { combat: CombatState; character: Character; onPlay: (cardId: string) => void }) {
   const lang = useLang();

@@ -12,7 +12,7 @@ import {
 
 /*
  * Le Cimetière des Cartons : toutes les runs passées dressées en tombes de
- * carton — et, au milieu des tombes, L'HÉRITAGE : la petite échoppe où le
+ * carton, et, au milieu des tombes, L'HÉRITAGE : la petite échoppe où le
  * Karma de Rue s'échange contre des débloquages LATÉRAUX (métiers en plus
  * dans le tirage, kits de départ, vanités). Jamais de puissance brute :
  * la rue reste dure, on élargit le jeu, on ne l'adoucit pas.
@@ -68,7 +68,7 @@ export default function CimetiereScreen() {
       <div className="rounded-xl p-3 border border-[#3A4838]" style={{ background: 'linear-gradient(135deg, #2A3826, #1C2818)' }}>
         <p className="text-[10px] tracking-widest uppercase text-[#B8C89B] font-semibold mb-0.5">👑 {tr('L\'Héritage', 'The Heritage')}</p>
         <p className="text-[10px] text-[#8FA080] mb-2.5">
-          {tr('Le Karma de vos morts s\'échange ici. Rien qui adoucisse la rue — juste de quoi l\'aborder autrement.', 'Your deaths\' Karma is traded here. Nothing that softens the street — just new ways to face it.')}
+          {tr('Le Karma de vos morts s\'échange ici. Rien qui adoucisse la rue, juste de quoi l\'aborder autrement.', 'Your deaths\' Karma is traded here. Nothing that softens the street, just new ways to face it.')}
         </p>
 
         {/* Kits consommables */}
@@ -155,7 +155,7 @@ export default function CimetiereScreen() {
         <div className="rounded-xl p-6 text-center border border-[#3A4838] bg-black/20">
           <p className="text-3xl mb-2">🌱</p>
           <p className="text-[12px] text-[#8FA080]">
-            {tr('Personne n\'est encore tombé. Ça viendra — la rue est patiente.', 'Nobody has fallen yet. It\'ll come — the street is patient.')}
+            {tr('Personne n\'est encore tombé. Ça viendra, la rue est patiente.', 'Nobody has fallen yet. It\'ll come, the street is patient.')}
           </p>
         </div>
       ) : (

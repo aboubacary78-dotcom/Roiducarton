@@ -10,7 +10,7 @@ import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy } from '@/lib/necrology
 
 /*
  * L'écran de fin est une « une de journal » : la mort du personnage devient
- * un fait divers avec gros titre, photo, nécrologie — et surtout la récolte
+ * un fait divers avec gros titre, photo, nécrologie, et surtout la récolte
  * méta : fins découvertes (Registre des Morts), Karma de Rue gagné, et les
  * Dernières Volontés (l'objet légué au prochain personnage).
  */
@@ -286,7 +286,7 @@ export default function GameOverScreen() {
         </motion.div>
       )}
 
-      {/* Seconde chance (pub récompensée) — une fois par partie */}
+      {/* Seconde chance (pub récompensée), une fois par partie */}
       {canRevive && (
         <motion.button
           initial={{ y: 15, opacity: 0 }}

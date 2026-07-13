@@ -38,7 +38,7 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
             <span className={`font-medium ${trait.positive ? 'text-[#4A9B5F]' : 'text-[#D94F4F]'}`}>
               {tc(trait.name)}
             </span>
-            <span className="text-[#A08B70]">— {tc(trait.description)}</span>
+            <span className="text-[#A08B70]">· {tc(trait.description)}</span>
           </div>
         ))}
       </div>

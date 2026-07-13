@@ -1,5 +1,5 @@
 /*
- * Profil joueur PERMANENT — vit dans une clé localStorage distincte de la
+ * Profil joueur PERMANENT, vit dans une clé localStorage distincte de la
  * sauvegarde de partie (roi-du-carton-save), qui est effacée à la mort du
  * personnage. Le profil, lui, survit à toutes les parties : c'est là que sont
  * conservés les records, les accessoires débloqués et ceux équipés.

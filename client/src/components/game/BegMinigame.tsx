@@ -7,7 +7,7 @@ import MinigameIntro, { introSeen } from './MinigameIntro';
 
 /*
  * Mini-jeu de mendicité : pendant quelques secondes, des pièces (et parfois
- * des billets) apparaissent — tape dessus pour les ramasser. Si tu touches
+ * des billets) apparaissent, tape dessus pour les ramasser. Si tu touches
  * le policier, il te déloge et la manche s'arrête net.
  * Le trait Charismatique fait apparaître plus de dons.
  */

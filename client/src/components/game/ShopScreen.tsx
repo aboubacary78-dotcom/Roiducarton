@@ -325,7 +325,7 @@ export default function ShopScreen() {
                     <div className="flex-1 min-w-0">
                       <span className="text-sm font-semibold text-[#2A1F1A] block">{tc(shop.name)}</span>
                       <span className="text-xs text-[#B84A3A] font-semibold block leading-snug">
-                        {tr(`Fermé (${daysLeft} j)`, `Closed (${daysLeft}d)`)} — {tr(closed.reason, closed.reasonEn)}
+                        {tr(`Fermé (${daysLeft} j)`, `Closed (${daysLeft}d)`)} : {tr(closed.reason, closed.reasonEn)}
                       </span>
                     </div>
                   </div>

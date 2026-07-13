@@ -16,12 +16,12 @@ import MinigameIntro, { introSeen } from './MinigameIntro';
  * Jauge d'alerte à paliers-cliquets (0-100, ne redescend jamais sous le
  * palier atteint) : être adjacent à un gardien ou dans sa ligne de vue fait
  * monter la jauge (ramasser le butin aussi), se planquer la fait décroître.
- *   P0 Discret  — comportement de base.
- *   P1 Méfiance — les gardiens EXISTANTS accélèrent et collent davantage.
- *   P2 Alerte   — un renfort-chasseur entre par un bord (télégraphié 🚨).
- *   P3 Bouclage — un vigile vient camper autour de la sortie.
+ *   P0 Discret , comportement de base.
+ *   P1 Méfiance, les gardiens EXISTANTS accélèrent et collent davantage.
+ *   P2 Alerte  , un renfort-chasseur entre par un bord (télégraphié 🚨).
+ *   P3 Bouclage, un vigile vient camper autour de la sortie.
  * Règles d'équité : un renfort n'apparaît jamais à côté du joueur, il est
- * annoncé un tick à l'avance, et l'escalade ne vient QUE du bruit du joueur —
+ * annoncé un tick à l'avance, et l'escalade ne vient QUE du bruit du joueur,
  * rester furtif = difficulté de base pour toujours.
  * Sortir en P0 = coup de maître (jackpot) ; en P3 = « sortie à chaud »
  * (gains normaux + bonus de respect : le culot, ça se respecte).
@@ -139,9 +139,9 @@ export default function StealHeist() {
         titleEn="The Heist"
         lines={[
           { emoji: '🎯', fr: 'Récupérez l\'objet convoité, puis filez jusqu\'à la sortie 🚪 pour l\'emporter.', en: 'Grab the coveted item, then slip to the exit 🚪 to make off with it.' },
-          { emoji: '👁️', fr: 'Frôler un gardien ou traverser sa ligne de vue fait monter l\'alerte. Planqué, elle retombe — mais jamais sous le palier atteint.', en: 'Brushing past a guard or crossing its line of sight raises the alert. Hidden, it drops — but never below the tier you reached.' },
+          { emoji: '👁️', fr: 'Frôler un gardien ou traverser sa ligne de vue fait monter l\'alerte. Planqué, elle retombe, mais jamais sous le palier atteint.', en: 'Brushing past a guard or crossing its line of sight raises the alert. Hidden, it drops, but never below the tier you reached.' },
           { emoji: '🚨', fr: 'Paliers : gardiens plus vifs, puis un renfort télégraphié 🚨, puis un vigile qui boucle la sortie.', en: 'Tiers: quicker guards, then a telegraphed reinforcement 🚨, then a watchman locking down the exit.' },
-          { emoji: '💎', fr: 'Sortir sans alerte = coup de maître (gros gain). Sortir en plein bouclage = bonus de respect — le culot, ça se respecte.', en: 'Escape with zero alert = masterstroke (big payout). Escape mid-lockdown = respect bonus — nerve earns respect.' },
+          { emoji: '💎', fr: 'Sortir sans alerte = coup de maître (gros gain). Sortir en plein bouclage = bonus de respect, le culot, ça se respecte.', en: 'Escape with zero alert = masterstroke (big payout). Escape mid-lockdown = respect bonus, nerve earns respect.' },
           { emoji: '🕹️', fr: 'Glissez sur la grille ou utilisez les flèches pour bouger. Toucher un gardien = pris.', en: 'Swipe on the grid or use the arrows to move. Touch a guard = caught.' },
         ]}
         onStart={() => setReady(true)}
@@ -523,7 +523,7 @@ function StealHeistInner() {
       </div>
 
       <p className="text-[11px] text-[#8B6B4A] text-center">
-        {tr('Glissez sur la grille ou utilisez les flèches.', 'Swipe on the grid or use the arrows.')} {guardEmoji} {tr('patrouille — restez hors de vue, la jauge monte vite.', 'is on patrol — stay out of sight, the gauge climbs fast.')}
+        {tr('Glissez sur la grille ou utilisez les flèches.', 'Swipe on the grid or use the arrows.')} {guardEmoji} {tr('patrouille, restez hors de vue, la jauge monte vite.', 'is on patrol, stay out of sight, the gauge climbs fast.')}
       </p>
     </div>
   );

@@ -1,5 +1,5 @@
 /*
- * Effets sonores du jeu — entièrement générés par code (Web Audio API).
+ * Effets sonores du jeu, entièrement générés par code (Web Audio API).
  * Aucun fichier audio à télécharger : les sons sont synthétisés à la volée,
  * donc ça fonctionne hors-ligne et sans dépendance externe.
  *

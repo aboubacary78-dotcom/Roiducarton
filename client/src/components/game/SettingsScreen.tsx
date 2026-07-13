@@ -9,7 +9,7 @@ import { useLang, setLang, tr } from '@/lib/lang';
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
 const PRIVACY_URL = 'https://example.com/roi-du-carton/confidentialite';
-const APP_VERSION = '1.52.0';
+const APP_VERSION = '1.53.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -130,7 +130,7 @@ export default function SettingsScreen() {
           <div className="flex items-center justify-between">
             <span className="text-base font-semibold text-[#2A1F1A]">🚫 {tr('Sans pub', 'Ad-free')}</span>
             <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#4A9B5F]/15 text-[#3d8b4f]">
-              {tr('✅ Actif — merci !', '✅ Active — thanks!')}
+              {tr('✅ Actif, merci !', '✅ Active, thanks!')}
             </span>
           </div>
         ) : (

@@ -1,5 +1,5 @@
 /*
- * Ambiances sonores continues — 100 % Web Audio, comme sound.ts (aucun
+ * Ambiances sonores continues, 100 % Web Audio, comme sound.ts (aucun
  * fichier à télécharger). Chaque ambiance est un petit orchestre procédural :
  * une nappe de fond (bruit filtré, bourdon) + des événements aléatoires
  * (pépiements, klaxons, clangs, annonces…) reprogrammés par minuterie.
@@ -45,7 +45,7 @@ function sync(): void {
 }
 
 // Autoplay : tant que l'utilisateur n'a pas touché l'écran, le contexte est
-// suspendu — on démarre l'ambiance au premier geste.
+// suspendu, on démarre l'ambiance au premier geste.
 function armGesture(): void {
   if (gestureArmed || typeof window === 'undefined') return;
   gestureArmed = true;

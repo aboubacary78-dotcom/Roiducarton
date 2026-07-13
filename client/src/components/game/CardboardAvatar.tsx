@@ -2,7 +2,7 @@
  * Visage de personnage généré en SVG, dans la direction artistique "carton".
  * Chaque personnage a une graine (seed) : le même personnage a toujours le
  * même visage, et deux personnages différents ont des visages différents.
- * Aucune image externe — tout est dessiné par le code.
+ * Aucune image externe, tout est dessiné par le code.
  */
 
 import type { AccessorySlot } from '@/lib/cosmetics';

@@ -59,7 +59,7 @@ export default function TitleScreen() {
         </p>
         {legend && (
           <p className="text-xs text-[#B8860B] font-semibold mt-2">
-            👑 {tr('Légende à battre', 'Legend to beat')} : {legend.name} — {legend.days} {tr(legend.days > 1 ? 'jours' : 'jour', legend.days > 1 ? 'days' : 'day')}
+            👑 {tr('Légende à battre', 'Legend to beat')} : {legend.name}, {legend.days} {tr(legend.days > 1 ? 'jours' : 'jour', legend.days > 1 ? 'days' : 'day')}
           </p>
         )}
       </motion.div>

@@ -16,8 +16,8 @@ interface Step { targetId: string | null; emoji: string; title: string; titleEn:
 const STEPS: Step[] = [
   {
     targetId: 'tuto-header', emoji: '👤', title: 'Votre personnage', titleEn: 'Your character',
-    text: 'Votre nom, votre quartier et le jour de survie. À droite : votre argent 💰 et votre respect ⭐ — le respect fait baisser les prix en boutique, aide à intimider les voyous et débloque certains choix « on vous connaît ici ». Touchez votre visage 🎽 pour ouvrir la garde-robe et équiper les accessoires gagnés par vos succès.',
-    textEn: 'Your name, your district and the day you\'ve survived to. On the right: your money 💰 and your respect ⭐ — respect lowers shop prices, helps you intimidate thugs, and unlocks some "they know you here" choices. Tap your face 🎽 to open the wardrobe and equip accessories earned from achievements.',
+    text: 'Votre nom, votre quartier et le jour de survie. À droite : votre argent 💰 et votre respect ⭐, le respect fait baisser les prix en boutique, aide à intimider les voyous et débloque certains choix « on vous connaît ici ». Touchez votre visage 🎽 pour ouvrir la garde-robe et équiper les accessoires gagnés par vos succès.',
+    textEn: 'Your name, your district and the day you\'ve survived to. On the right: your money 💰 and your respect ⭐, respect lowers shop prices, helps you intimidate thugs, and unlocks some "they know you here" choices. Tap your face 🎽 to open the wardrobe and equip accessories earned from achievements.',
   },
   {
     targetId: 'tuto-stats', emoji: '❤️', title: 'Vos six jauges', titleEn: 'Your six gauges',
@@ -26,18 +26,18 @@ const STEPS: Step[] = [
   },
   {
     targetId: 'tuto-stats', emoji: '👑', title: 'La dignité, arme secrète', titleEn: 'Dignity, your secret weapon',
-    text: 'Sous 25 de dignité, votre mental s\'effondre chaque nuit — c\'est la spirale qui tue. Bien tenue, elle fait donner les passants à la manche et ouvre des choix réservés aux gens « présentables ». La laverie est votre alliée.',
-    textEn: 'Below 25 dignity, your mind collapses every night — that\'s the spiral that kills. Kept high, passers-by give more when you beg, and "presentable" choices open up. The laundromat is your ally.',
+    text: 'Sous 25 de dignité, votre mental s\'effondre chaque nuit, c\'est la spirale qui tue. Bien tenue, elle fait donner les passants à la manche et ouvre des choix réservés aux gens « présentables ». La laverie est votre alliée.',
+    textEn: 'Below 25 dignity, your mind collapses every night, that\'s the spiral that kills. Kept high, passers-by give more when you beg, and "presentable" choices open up. The laundromat is your ally.',
   },
   {
     targetId: 'tuto-weather', emoji: '🌦️', title: 'La météo', titleEn: 'The weather',
-    text: 'Elle change chaque jour et pèse sur vos jauges et vos gains. Orage et neige sont redoutables — anticipez grâce à la prévision de demain.',
-    textEn: 'It changes daily and weighs on your gauges and your gains. Storms and snow are brutal — plan ahead using tomorrow\'s forecast.',
+    text: 'Elle change chaque jour et pèse sur vos jauges et vos gains. Orage et neige sont redoutables, anticipez grâce à la prévision de demain.',
+    textEn: 'It changes daily and weighs on your gauges and your gains. Storms and snow are brutal, plan ahead using tomorrow\'s forecast.',
   },
   {
     targetId: 'tuto-actions', emoji: '🎯', title: '3 actions par jour', titleEn: '3 actions a day',
-    text: 'Explorer déclenche des rencontres. Mendier se joue à l\'adresse. Voler, c\'est un casse en grille : récupérez le butin et filez vers la sortie sans vous faire toucher — sinon bagarre ou garde à vue ! Dormir récupère, Bagarre… c\'est la bagarre.',
-    textEn: 'Explore triggers encounters. Begging is a game of skill. Stealing is a grid heist: grab the loot and slip out without getting caught — or it\'s a fight or a night in a cell! Sleep restores, Fight… is a fight.',
+    text: 'Explorer déclenche des rencontres. Mendier se joue à l\'adresse. Voler, c\'est un casse en grille : récupérez le butin et filez vers la sortie sans vous faire toucher, sinon bagarre ou garde à vue ! Dormir récupère, Bagarre… c\'est la bagarre.',
+    textEn: 'Explore triggers encounters. Begging is a game of skill. Stealing is a grid heist: grab the loot and slip out without getting caught, or it\'s a fight or a night in a cell! Sleep restores, Fight… is a fight.',
   },
   {
     targetId: 'tuto-secondary', emoji: '🛒', title: 'Gratuit et vital', titleEn: 'Free and vital',
@@ -46,8 +46,8 @@ const STEPS: Step[] = [
   },
   {
     targetId: 'tuto-nextday', emoji: '🌙', title: 'Jour suivant', titleEn: 'Next day',
-    text: 'Vos actions épuisées, passez la nuit. Elle consomme vos jauges — surtout sous la pluie. Préparez-vous avant de dormir.',
-    textEn: 'Once your actions are used up, get through the night. It drains your gauges — especially in the rain. Prepare before you sleep.',
+    text: 'Vos actions épuisées, passez la nuit. Elle consomme vos jauges, surtout sous la pluie. Préparez-vous avant de dormir.',
+    textEn: 'Once your actions are used up, get through the night. It drains your gauges, especially in the rain. Prepare before you sleep.',
   },
   {
     targetId: null, emoji: '👑', title: 'À vous de jouer !', titleEn: 'Over to you!',
