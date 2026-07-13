@@ -577,6 +577,33 @@ const CLOSURE_REASONS_GENERIC: Array<[string, string]> = [
   ['le gérant a gagné au Loto (petit lot) et fête ça bruyamment.', 'the owner won the lottery (small prize) and is loudly celebrating.'],
 ];
 
+// Résolutions absurdes quand le joueur « donne un coup de main » (via pub) pour
+// rouvrir une boutique en panne. Aussi loufoques que les fermetures.
+const REOPEN_REASONS_BY_SHOP: Record<string, Array<[string, string]>> = {
+  laverie: [['Vous récupérez le pigeon (vivant, vexé) et relancez la machine. Ça tourne !', 'You retrieve the pigeon (alive, offended) and restart the machine. It spins!']],
+  fontaine: [['Vous délogez le canard avec une baguette rassie. L\'eau coule à nouveau !', 'You dislodge the duck with a stale baguette. Water flows again!']],
+  distributeur: [['Un grand coup d\'épaule et il recrache de vraies pièces. Miracle mécanique !', 'One shoulder-check and it spits out real coins again. Mechanical miracle!']],
+  boulangerie: [['Vous prêtez votre briquet pour rallumer le four. Le boulanger vous bénit.', 'You lend your lighter to relight the oven. The baker blesses you.']],
+  kebab: [['Vous croisez le patron qui « cherchait de la viande ». Vous portez les cartons.', 'You run into the owner who was "getting meat". You carry the boxes.']],
+  pharmacie: [['Vous aidez à compter les cotons-tiges (il y en avait 4 212). Inventaire bouclé.', 'You help count the swabs (there were 4,212). Inventory done.']],
+  epicerie: [['Vous crochetez la porte avec une carte de fidélité. Le gérant, gêné, rouvre.', 'You pick the lock with a loyalty card. The owner, embarrassed, reopens.']],
+  brocanteur: [['Vous réglez « les ennuis » d\'un simple regard entendu. Rideau relevé.', 'You settle "the trouble" with a knowing look. Shutters up.']],
+  'marche-aux-puces': [['Vous rapportez les étals du quartier d\'à côté, un par un. Marché sauvé !', 'You lug the stalls back from the next block, one by one. Market saved!']],
+  herboriste: [['Vous atteignez l\'illumination à sa place. Impressionné, il rouvre.', 'You reach enlightenment on his behalf. Impressed, he reopens.']],
+};
+const REOPEN_REASONS_GENERIC: Array<[string, string]> = [
+  ['Un coup de main, deux mots gentils, et le rideau se relève.', 'A helping hand, a few kind words, and the shutters roll up.'],
+  ['Vous « arrangez » la situation. Ne posez pas de questions. Rouvert !', 'You "sort out" the situation. Ask no questions. Reopened!'],
+  ['Vous soudoyez le destin avec votre plus beau sourire. Ça marche.', 'You bribe fate with your best smile. It works.'],
+];
+
+// Résolution absurde tirée pour une boutique donnée (utilisée par la pub).
+export function absurdReopen(shopId: string): { fr: string; en: string } {
+  const pool = REOPEN_REASONS_BY_SHOP[shopId] || REOPEN_REASONS_GENERIC;
+  const [fr, en] = randomFromArray(pool);
+  return { fr, en };
+}
+
 // Une boutique est-elle fermée au jour donné ?
 export function shopClosure(char: Character | null, shopId: string): ShopClosure | undefined {
   return char?.shopClosures?.find(c => c.shopId === shopId && c.untilDay > char.day);
@@ -3330,6 +3357,7 @@ type GameAction =
   | { type: 'DODGE_RESULT'; hits: number }
   | { type: 'PLAY_CARD'; cardId: string; junkItemId?: string }
   | { type: 'BUY_ITEM'; shopItem: ShopItem; actualPrice: number }
+  | { type: 'REOPEN_SHOP'; shopId: string }
   | { type: 'TRIGGER_SHOP_EVENT'; event: ShopEvent };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -4269,6 +4297,18 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           ...rollSignRound(enemyLike, c, stun || combat.enemyStunned),
         },
         combatLog: logs,
+      };
+    }
+
+    case 'REOPEN_SHOP': {
+      // « Coup de main » (via pub) : la boutique en panne rouvre séance tenante.
+      if (!state.character) return state;
+      return {
+        ...state,
+        character: {
+          ...state.character,
+          shopClosures: (state.character.shopClosures || []).filter(c => c.shopId !== action.shopId),
+        },
       };
     }
 

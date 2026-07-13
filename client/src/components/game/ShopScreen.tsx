@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, STAT_META } from '@/contexts/GameContext';
+import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META } from '@/contexts/GameContext';
+import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playCoin } from '@/lib/sound';
@@ -26,6 +27,21 @@ export default function ShopScreen() {
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [buyAnimation, setBuyAnimation] = useState<string | null>(null);
   const [shopEvent, setShopEvent] = useState<ShopEvent | null>(null);
+  const [reopeningId, setReopeningId] = useState<string | null>(null);
+
+  // « Coup de main » via pub récompensée : la boutique rouvre, avec une
+  // résolution aussi absurde que la panne.
+  async function reopenWithAd(shop: Shop) {
+    if (reopeningId) return;
+    setReopeningId(shop.id);
+    const rewarded = await showRewarded();
+    if (rewarded) {
+      const reason = absurdReopen(shop.id);
+      dispatch({ type: 'REOPEN_SHOP', shopId: shop.id });
+      pushToast(`${tc(shop.name)} : ${tr(reason.fr, reason.en)}`, { emoji: '🔓', tone: 'good' });
+    }
+    setReopeningId(null);
+  }
 
   const discountLabel = getDiscountLabel(char.respect);
   const nextTier = getNextDiscountTier(char.respect);
@@ -288,9 +304,44 @@ export default function ShopScreen() {
             const cheapest = Math.min(...prices);
             const mostExpensive = Math.max(...prices);
             const canAffordSomething = prices.some(p => char.money >= p);
-            // Boutique en panne/fermée : on affiche la raison loufoque, non cliquable.
+            // Boutique en panne/fermée : raison loufoque + « coup de main » via pub.
             const closed = shopClosure(char, shop.id);
             const daysLeft = closed ? closed.untilDay - char.day : 0;
+
+            if (closed) {
+              return (
+                <motion.div
+                  key={shop.id}
+                  initial={{ y: 8, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: i * 0.06 }}
+                  className="craft-card p-3.5 flex flex-col gap-2.5 opacity-90"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E8D5C0] to-[#D4B896] grayscale flex items-center justify-center text-2xl shadow-sm shrink-0 relative">
+                      {shop.emoji}
+                      <span className="absolute -bottom-1 -right-1 text-sm">🚫</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-semibold text-[#2A1F1A] block">{tc(shop.name)}</span>
+                      <span className="text-xs text-[#B84A3A] font-semibold block leading-snug">
+                        {tr(`Fermé (${daysLeft} j)`, `Closed (${daysLeft}d)`)} — {tr(closed.reason, closed.reasonEn)}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => reopenWithAd(shop)}
+                    disabled={reopeningId === shop.id}
+                    className="w-full py-2 text-xs font-semibold text-white rounded-lg disabled:opacity-60"
+                    style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)' }}
+                  >
+                    {reopeningId === shop.id
+                      ? tr('⏳ Chargement…', '⏳ Loading…')
+                      : tr('🎬 Filer un coup de main (pub)', '🎬 Lend a hand (watch an ad)')}
+                  </button>
+                </motion.div>
+              );
+            }
 
             return (
               <motion.button
@@ -298,34 +349,22 @@ export default function ShopScreen() {
                 initial={{ y: 8, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: i * 0.06 }}
-                whileHover={closed ? {} : { scale: 1.01 }}
-                whileTap={closed ? {} : { scale: 0.98 }}
-                onClick={closed ? undefined : () => setSelectedShop(shop)}
-                disabled={!!closed}
-                className={`craft-card p-3.5 text-left flex items-center gap-3 ${closed ? 'opacity-70 grayscale' : !canAffordSomething ? 'opacity-50' : ''}`}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedShop(shop)}
+                className={`craft-card p-3.5 text-left flex items-center gap-3 ${!canAffordSomething ? 'opacity-50' : ''}`}
               >
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E8D5C0] to-[#D4B896] flex items-center justify-center text-2xl shadow-sm shrink-0 relative">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E8D5C0] to-[#D4B896] flex items-center justify-center text-2xl shadow-sm shrink-0">
                   {shop.emoji}
-                  {closed && <span className="absolute -bottom-1 -right-1 text-sm">🚫</span>}
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-semibold text-[#2A1F1A] block">{tc(shop.name)}</span>
-                  {closed ? (
-                    <>
-                      <span className="text-xs text-[#B84A3A] font-semibold block">
-                        {tr(`Fermé (${daysLeft} j)`, `Closed (${daysLeft}d)`)} — {tr(closed.reason, closed.reasonEn)}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-xs text-[#6B5740] block">{tc(shop.description)}</span>
-                      <span className="text-[10px] font-mono text-[#A08B70]">
-                        {shop.items.length} articles · {cheapest === mostExpensive ? `${cheapest}€` : `${cheapest}€ – ${mostExpensive}€`}
-                      </span>
-                    </>
-                  )}
+                  <span className="text-xs text-[#6B5740] block">{tc(shop.description)}</span>
+                  <span className="text-[10px] font-mono text-[#A08B70]">
+                    {shop.items.length} articles · {cheapest === mostExpensive ? `${cheapest}€` : `${cheapest}€ – ${mostExpensive}€`}
+                  </span>
                 </div>
-                <span className="text-[#A08B70]">{closed ? '🔒' : '→'}</span>
+                <span className="text-[#A08B70]">→</span>
               </motion.button>
             );
           })}
