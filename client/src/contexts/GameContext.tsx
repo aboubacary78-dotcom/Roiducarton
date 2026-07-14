@@ -252,9 +252,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'BEG': {
       if (!state.character || state.dayActions >= state.maxDayActions) return state;
-      // 1 fois sur 3 : un événement narratif de mendicité (garde le contenu
-      // écrit vivant) ; sinon le mini-jeu "attraper les pièces".
-      if (Math.random() < 0.34) {
+      // Le mini-jeu "attraper les pièces" reste la voie principale (~3 fois
+      // sur 4) ; l'événement narratif de mendicité est l'exception qui garde
+      // le contenu écrit vivant.
+      if (Math.random() < 0.28) {
         const begEvents = generateBegEvents(state.character.location, state.character);
         if (begEvents.length > 0) {
           const begEvt = randomFromArray(begEvents);
@@ -491,7 +492,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
       newStats = clampStats(newStats);
 
-      let newMoney = state.character.money + (outcome.moneyChange || 0);
+      let newMoney = Math.max(0, state.character.money + (outcome.moneyChange || 0));
       if (newMoney < 0) newMoney = 0;
       const newRespect = state.character.respect + (outcome.respectChange || 0);
 

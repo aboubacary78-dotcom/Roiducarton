@@ -9,6 +9,9 @@ import type { GameEvent, Character, StealTarget, LegendTemplate } from '../types
 import { randomFromArray, L } from './util';
 import { tc } from '@/lib/lang';
 import { loadGraves, type Grave } from '@/lib/necrology';
+import { EXPLORE_EVENTS_2 } from './events2-explore';
+import { REST_EVENTS_2 } from './events2-rest';
+import { BEG_EVENTS_2 } from './events2-beg';
 
 
 // ============ EXPLORE EVENTS (30) ============
@@ -1657,10 +1660,18 @@ export function dueSursaut(c: Character): boolean {
 
 // ============ GÉNÉRATEURS D'ÉVÉNEMENTS ============
 
+// ---- Fusion de la vague 2 ----
+// Les gros lots supplémentaires vivent dans events2-*.ts (fichiers dédiés,
+// pour ne pas recréer un monolithe ici) et rejoignent les pools au chargement.
+EXPLORE_EVENTS.push(...EXPLORE_EVENTS_2);
+REST_EVENTS.push(...REST_EVENTS_2);
+BEG_EVENTS.push(...BEG_EVENTS_2);
+
 // ---- Mémoire anti-répétition ----
 // On retient les N derniers événements vus (toutes actions confondues) et on
 // les écarte du tirage, pour que jour après jour ça ne tourne pas en rond.
-const RECENT_MEMORY = 8;
+// Élargie avec la vague 2 : des pools de 70-80 supportent une mémoire longue.
+const RECENT_MEMORY = 12;
 export function freshPool(pool: GameEvent[], recent: string[] | undefined): GameEvent[] {
   if (!recent || recent.length === 0) return pool;
   const fresh = pool.filter(e => !recent.includes(e.id));
