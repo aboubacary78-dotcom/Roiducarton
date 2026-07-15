@@ -297,7 +297,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     description: 'Un égoutier en pause remonte de sa bouche d\'égout, s\'assoit sur le rebord et vous tend un gobelet de thermos, comme si c\'était prévu.',
     choices: [
       { text: 'Partager le café et la causerie', risk: 'safe', emoji: '☕', outcomes: [
-        { probability: 0.7, text: 'Il connaît la ville par en dessous. Il vous indique une grille d\'aération tiède « où même les rats sont polis ». Une adresse en or.', statChanges: { thirst: 8, mental: 8, sleep: 5 } },
+        { probability: 0.7, text: 'Il connaît la ville par en dessous. Il vous indique une grille d\'aération tiède « où même les rats sont polis ». Une adresse en or.', statChanges: { thirst: 8, mental: 8, sleep: 5 }, addFlag: 'grille-egoutier' },
         { probability: 0.3, text: 'Son café a un léger goût de tuyau. Sa philosophie aussi. Les deux réchauffent quand même.', statChanges: { thirst: 5, health: -2, mental: 4 } },
       ]},
       { text: 'Demander ce qu\'on trouve en bas', risk: 'normal', emoji: '🐊', outcomes: [
@@ -343,7 +343,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     description: 'Une caravane mauve s\'est garée sur le terrain vague. « Madame Esperanza, avenir, passé, objets perdus. » Elle vous fait signe d\'entrer, gratuitement.',
     choices: [
       { text: 'Se faire lire l\'avenir', risk: 'normal', emoji: '🔮', outcomes: [
-        { probability: 0.6, text: '« Je vois... un toit. Pas tout de suite, mais je le vois. » Elle vous offre le thé. Un toit. Vous y pensez toute la journée.', statChanges: { mental: 10, thirst: 6 } },
+        { probability: 0.6, text: '« Je vois... un toit. Pas tout de suite, mais je le vois. » Elle vous offre le thé. Un toit. Vous y pensez toute la journée.', statChanges: { mental: 10, thirst: 6 }, addFlag: 'prophetie-toit' },
         { probability: 0.4, text: 'Elle pâlit en regardant les cartes, les range, et vous donne un billet : « revenez jamais. » Inquiétant, mais rentable.', moneyChange: 5, statChanges: { mental: -5, sleep: -3 } },
       ]},
       { text: 'Lui proposer de rabattre des clients', risk: 'normal', emoji: '📣', outcomes: [
@@ -407,7 +407,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
       ]},
       { text: 'Se servir, vite', risk: 'risky', emoji: '🏃', outcomes: [
         { probability: 0.5, text: 'Deux hot-dogs engloutis en marchant vite. La moutarde vous coule sur les doigts comme un remords tiède.', statChanges: { hunger: 22, mental: -3, dignity: -4 } },
-        { probability: 0.5, text: 'Le vendeur revient PILE à la saucisse. La poursuite est brève, la honte durable. Il garde votre bonnet en otage.', statChanges: { health: -4, dignity: -6, mental: -4 } },
+        { probability: 0.5, text: 'Le vendeur revient PILE à la saucisse. La poursuite est brève, la honte durable. Il garde votre bonnet en otage.', statChanges: { health: -4, dignity: -6, mental: -4 }, addFlag: 'bonnet-otage' },
       ]},
     ],
   },
@@ -494,7 +494,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
         { probability: 0.3, text: 'L\'animalerie est complète, mais la vieille dame du troisième prend tout le monde. Vous, elle vous prend en affection. Ça compte double.', statChanges: { mental: 8 }, respectChange: 2 },
       ]},
       { text: 'En garder un, donner les autres', risk: 'normal', emoji: '🐈', outcomes: [
-        { probability: 0.6, text: 'Le plus teigneux reste avec vous une journée entière, perché sur votre épaule comme un pirate. Puis il choisit une boulangère. Traître, mais bon goût.', statChanges: { mental: 12 } },
+        { probability: 0.6, text: 'Le plus teigneux reste avec vous une journée entière, perché sur votre épaule comme un pirate. Puis il choisit une boulangère. Traître, mais bon goût.', statChanges: { mental: 12 }, addFlag: 'chaton-boulangere' },
         { probability: 0.4, text: 'Le chaton pleure toute la nuit. Vous ne dormez pas, mais vous êtes deux à ne pas dormir. C\'est déjà de la compagnie.', statChanges: { mental: 6, sleep: -8 } },
       ]},
     ],
@@ -566,7 +566,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     choices: [
       { text: 'Revendre des tickets aux automobilistes', risk: 'risky', emoji: '🎫', outcomes: [
         { probability: 0.5, text: 'Les tickets sont VALIDES. Vous les vendez à moitié prix aux conducteurs ravis. L\'horodateur imprime, vous encaissez. Une fintech est née.', moneyChange: 8, statChanges: { mental: 6 } },
-        { probability: 0.5, text: 'Une contractuelle vous observe depuis dix minutes. Les tickets sont valides, votre commerce beaucoup moins. Elle confisque le fonds de caisse.', moneyChange: 1, statChanges: { mental: -4, dignity: -3 } },
+        { probability: 0.5, text: 'Une contractuelle vous observe depuis dix minutes. Les tickets sont valides, votre commerce beaucoup moins. Elle confisque le fonds de caisse.', moneyChange: 1, statChanges: { mental: -4, dignity: -3 }, addFlag: 'reperee-contractuelle' },
       ]},
       { text: 'Prévenir la mairie, en bon citoyen', risk: 'safe', emoji: '📞', outcomes: [
         { probability: 0.6, text: 'L\'agent municipal arrive, constate, rigole, et vous laisse « les tickets du sinistre » : le rouleau entier. Ça fera de l\'allume-feu de luxe.', statChanges: { mental: 4 }, itemGain: { id: 'rouleau-tickets', name: 'Rouleau de tickets', emoji: '🧾', type: 'junk', value: 2 } },
@@ -611,7 +611,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     choices: [
       { text: 'S\'asseoir et jouer', risk: 'safe', emoji: '♟️', outcomes: [
         { probability: 0.6, text: 'Il vous bat en douze coups, trois parties de suite, avec une joie féroce. Puis il partage son thermos et ses madeleines. Rituel adopté.', statChanges: { mental: 12, thirst: 6, hunger: 6 } },
-        { probability: 0.4, text: 'Vous gagnez une partie. Le silence dure une minute entière. Puis : « revenez demain. » C\'est la plus belle victoire de votre année.', statChanges: { mental: 15, dignity: 5 }, respectChange: 2 },
+        { probability: 0.4, text: 'Vous gagnez une partie. Le silence dure une minute entière. Puis : « revenez demain. » C\'est la plus belle victoire de votre année.', statChanges: { mental: 15, dignity: 5 }, respectChange: 2, addFlag: 'rival-echecs' },
       ]},
       { text: 'Parier une pièce sur la partie', risk: 'risky', emoji: '🪙', outcomes: [
         { probability: 0.4, text: 'Défaite héroïque mais honorable. Il refuse votre pièce : « on ne prend pas l\'argent d\'un joueur courageux. » Et double la mise en madeleines.', statChanges: { hunger: 10, mental: 8 } },

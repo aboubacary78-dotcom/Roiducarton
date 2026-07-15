@@ -12,6 +12,8 @@ import { loadGraves, type Grave } from '@/lib/necrology';
 import { EXPLORE_EVENTS_2 } from './events2-explore';
 import { REST_EVENTS_2 } from './events2-rest';
 import { BEG_EVENTS_2 } from './events2-beg';
+import { STEAL_EVENTS_2 } from './events2-steal';
+import { FOLLOW_UP_EVENTS_2 } from './events2-suites';
 
 
 // ============ EXPLORE EVENTS (30) ============
@@ -1666,6 +1668,8 @@ export function dueSursaut(c: Character): boolean {
 EXPLORE_EVENTS.push(...EXPLORE_EVENTS_2);
 REST_EVENTS.push(...REST_EVENTS_2);
 BEG_EVENTS.push(...BEG_EVENTS_2);
+STEAL_EVENTS.push(...STEAL_EVENTS_2);
+Object.assign(FOLLOW_UP_EVENTS, FOLLOW_UP_EVENTS_2);
 
 // ---- Mémoire anti-répétition ----
 // On retient les N derniers événements vus (toutes actions confondues) et on

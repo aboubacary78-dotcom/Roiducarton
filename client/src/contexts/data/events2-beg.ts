@@ -46,7 +46,7 @@ export const BEG_EVENTS_2: GameEvent[] = [
     choices: [
       { text: 'Se poster près de la crèche', risk: 'normal', emoji: '🎄', outcomes: [
         { probability: 0.6, text: 'Entre le petit Jésus et le stand de churros, l\'esprit de Noël sort les portefeuilles. Une dame vous offre même des chaussettes à renne. La magie opère.', moneyChange: 8, statChanges: { mental: 5 } },
-        { probability: 0.4, text: 'Le Père Noël officiel du marché vous fait déguerpir : « c\'est MON spot. » Un Père Noël syndiqué. Vous cédez le terrain avec les pièces déjà tombées.', moneyChange: 2, statChanges: { mental: -4 }, respectChange: -1 },
+        { probability: 0.4, text: 'Le Père Noël officiel du marché vous fait déguerpir : « c\'est MON spot. » Un Père Noël syndiqué. Vous cédez le terrain avec les pièces déjà tombées.', moneyChange: 2, statChanges: { mental: -4 }, respectChange: -1, addFlag: 'ennemi-pere-noel' },
       ]},
       { text: 'Chanter des chants de Noël', risk: 'normal', emoji: '🎵', outcomes: [
         { probability: 0.5, text: 'Votre « Petit Papa Noël » éraillé émeut aux larmes une génération entière. Le chapeau déborde. Un enfant vous demande si vous êtes le vrai. Vous ne démentez pas.', moneyChange: 9, statChanges: { dignity: 5, mental: 6 } },
@@ -122,7 +122,7 @@ export const BEG_EVENTS_2: GameEvent[] = [
     description: 'Le videur de la boîte chic s\'ennuie ferme entre deux refus. Deux mètres, cent trente kilos, et un regard qui vous a déjà classé « inoffensif, causant ».',
     choices: [
       { text: 'Tenir compagnie au colosse', risk: 'safe', emoji: '🚪', outcomes: [
-        { probability: 0.7, text: 'Trois heures de philosophie de comptoir debout. Il partage son sandwich, les pièces du vestiaire, et sa théorie sur les gens « qui puent des chaussures mais pas du cœur ». Vous êtes cité en exemple.', statChanges: { hunger: 12, mental: 6 }, moneyChange: 4, respectChange: 2 },
+        { probability: 0.7, text: 'Trois heures de philosophie de comptoir debout. Il partage son sandwich, les pièces du vestiaire, et sa théorie sur les gens « qui puent des chaussures mais pas du cœur ». Vous êtes cité en exemple.', statChanges: { hunger: 12, mental: 6 }, moneyChange: 4, respectChange: 2, addFlag: 'pote-videur' },
         { probability: 0.3, text: 'Il vous apprend deux prises de self-défense « pour la rue » sur un lampadaire consentant. Le lampadaire a perdu, vous avez appris.', statChanges: { mental: 6, health: 3 }, respectChange: 2 },
       ]},
       { text: 'Trier les recalés avec lui', risk: 'normal', emoji: '😎', outcomes: [

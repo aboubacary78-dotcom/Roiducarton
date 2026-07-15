@@ -235,7 +235,7 @@ export const REST_EVENTS_2: GameEvent[] = [
     choices: [
       { text: 'Nuit au rayon jeunesse', risk: 'normal', emoji: '📚', outcomes: [
         { probability: 0.7, text: 'Endormi sur les coussins du conte, un album ouvert sur le ventre. Vous rêvez en illustrations. Le réveil sent le papier et l\'enfance des autres.', statChanges: { sleep: 18, mental: 9 } },
-        { probability: 0.3, text: 'La bibliothécaire vous trouve au matin. Au lieu d\'appeler qui que ce soit, elle vous inscrit : « ça vous fera une adresse. » Une carte de bibliothèque. Votre premier document officiel depuis longtemps.', statChanges: { sleep: 12, mental: 8, dignity: 4 }, respectChange: 2 },
+        { probability: 0.3, text: 'La bibliothécaire vous trouve au matin. Au lieu d\'appeler qui que ce soit, elle vous inscrit : « ça vous fera une adresse. » Une carte de bibliothèque. Votre premier document officiel depuis longtemps.', statChanges: { sleep: 12, mental: 8, dignity: 4 }, respectChange: 2, addFlag: 'carte-biblio' },
       ]},
       { text: 'Lire jusqu\'à l\'aube', risk: 'safe', emoji: '📖', outcomes: [
         { probability: 1, text: 'Vous dévorez un roman d\'aventure entier, genoux repliés sous la veilleuse. Dormir peut attendre : vous étiez en mer de Chine.', statChanges: { sleep: 6, mental: 12 } },
