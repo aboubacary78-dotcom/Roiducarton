@@ -10,6 +10,7 @@
  */
 import { useEffect, useReducer } from 'react';
 import { CONTENT_EN } from './content-en';
+import { CONTENT_EN_2 } from './content-en-2';
 
 export type Lang = 'fr' | 'en';
 
@@ -59,7 +60,7 @@ export function tr(fr: string, en: string): string {
 export function tc(fr: string | undefined | null): string {
   if (!fr) return fr ?? '';
   if (current !== 'en') return fr;
-  return CONTENT_EN[fr] ?? fr;
+  return CONTENT_EN[fr] ?? CONTENT_EN_2[fr] ?? fr;
 }
 
 /** Hook : renvoie la langue courante et redessine le composant au changement. */
