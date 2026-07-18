@@ -19,7 +19,7 @@ Gemini Pro...) : chaque pack contient tout le contexte, la DA et le protocole.
 
 | Pack | Contenu | Images | Priorité |
 |---|---|---|---|
-| `pack-1-priorite-haute-30.md` | Les 30 dernières variantes d'issue de la vague 1 | 30 | 🔥 D'abord |
+| ~~pack-1~~ | ✅ TERMINÉ (livré et intégré) | 30 | Fait |
 | `pack-2-explorer-50.md` | Nouveaux événements Explorer | 50 | Ensuite |
 | `pack-3-dormir-50.md` | Nouveaux événements Dormir | 50 | Ensuite |
 | `pack-4-mendier-voler-46.md` | Mendier (15) + Voler (31) | 46 | Ensuite |

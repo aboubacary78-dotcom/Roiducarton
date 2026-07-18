@@ -1,37 +1,5 @@
-# Images manquantes (généré le 2026-07-18 après import de la livraison Manus « vague 3 complète »)
+# Images manquantes (MAJ : pack 1 TERMINÉ, restent les packs 2-6)
 # Voir docs/prompts-gemini/ pour les prompts prêts à l'emploi.
-
-## Variantes d'issue vague 1 (30) — pack 1
-result-beg-eglise-dimanche-bad.webp
-result-beg-fleuriste-good.webp
-result-beg-parc-chien-bad.webp
-result-exp-brocante-suite-bad.webp
-result-exp-brocante-suite-good.webp
-result-exp-chat-revient-bad.webp
-result-exp-chat-revient-good.webp
-result-exp-dechetterie-suite-bad.webp
-result-exp-dechetterie-suite-good.webp
-result-exp-eglise-suite-bad.webp
-result-exp-foyer-accueil-bad.webp
-result-exp-foyer-accueil-good.webp
-result-exp-gardien-suite-bad.webp
-result-exp-jardin-communautaire-suite-bad.webp
-result-exp-jardin-communautaire-suite-good.webp
-result-exp-musicien-suite-bad.webp
-result-exp-musicien-suite-good.webp
-result-exp-pecheur-suite-bad.webp
-result-exp-pecheur-suite-good.webp
-result-exp-velo-suite-bad.webp
-result-exp-vieille-dame-suite-bad.webp
-result-exp-vieille-dame-suite-good.webp
-result-legend-ancien-bad.webp
-result-legend-carton-bad.webp
-result-legend-graffiti-bad.webp
-result-legend-pari-bad.webp
-result-rest-parking-souterrain-good.webp
-result-steal-poche-costard-good.webp
-result-steal-supermarche-good.webp
-result-steal-velo-bad.webp
 
 ## Illustrations vague 2 (176) + suites (10) — packs 2 à 6
 beg-averse.webp
