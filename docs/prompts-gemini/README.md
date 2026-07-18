@@ -1,6 +1,6 @@
 # Prompts Gemini — Le Roi du Carton
 
-214 images à générer, découpées en 5 packs. **Chaque pack = une conversation
+244 images à générer, découpées en 6 packs. **Chaque pack = une conversation
 Gemini** : colle le message d'amorçage (en tête de chaque pack) une seule fois,
 joins 2-3 .webp existants du jeu comme référence de style, puis envoie les
 scènes une par une.
@@ -14,6 +14,7 @@ scènes une par une.
 | `pack-3-dormir-50.md` | Illustrations des nouveaux événements Dormir | 50 | Ensuite |
 | `pack-4-mendier-voler-46.md` | Mendier (15) + Voler (31) | 46 | Ensuite |
 | `pack-5-suites-10.md` | Les 10 nouvelles suites narratives | 10 | Ensuite |
+| `pack-6-voyager-30.md` | Illustrations des nouveaux événements Voyager | 30 | Ensuite |
 
 ## Règles d'or
 
