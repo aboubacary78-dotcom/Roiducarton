@@ -1,24 +1,44 @@
 # Pack 3 — Dormir, vague 2 (50 images)
 
-## 🎬 Message d'amorçage — à coller EN PREMIER dans Gemini (une seule fois par conversation)
+## 📦 Contexte projet (à lire en entier — tu pars de zéro)
 
-> Tu vas générer une série d'illustrations pour mon jeu mobile « Le Roi du Carton ».
-> **Style à respecter pour TOUTES les images de cette conversation** :
-> diorama miniature en carton kraft fait main, style maquette artisanale ; le héros
-> est un SDF en carton découpé (barbe grise, manteau rapiécé, visage dessiné au
-> feutre) ; textures carton ondulé et papier kraft bien visibles ; lumière chaude
-> d'atelier, petite guirlande lumineuse en fond ; humour noir tendre, jamais glauque.
-> **Format paysage 3:2. Aucun texte ni lettre dans l'image.**
-> Je vais t'envoyer les scènes une par une : réponds uniquement avec l'image.
+Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie (un SDF
+survit jour après jour dans une ville française). Direction artistique
+**« Carton Craft »** : chaque illustration est un **diorama miniature en carton
+kraft fait main**, comme une maquette artisanale photographiée.
 
-💡 **Astuce cohérence** : joins 2-3 images existantes du jeu (n'importe quel .webp
-de `client/public/assets/`) à ce premier message comme référence de style.
+**Style OBLIGATOIRE pour chaque image :**
+- diorama en carton kraft, textures carton ondulé et papier découpé visibles ;
+- le héros : SDF en carton découpé, barbe grise, manteau rapiécé, visage
+  dessiné au feutre ;
+- lumière chaude d'atelier, petite guirlande lumineuse en fond ;
+- humour noir tendre, jamais glauque ni misérabiliste ;
+- **format paysage 3:2, AUCUN texte ni lettre dans l'image.**
+
+Le dépôt GitHub contient déjà 300+ images de référence dans
+`client/public/assets/` : **regarde-en quelques-unes avant de commencer** et
+imite-les.
+
+## 🚚 Protocole de livraison (points déjà ratés par le passé, à respecter)
+
+1. **Noms de fichiers EXACTS**, copiés depuis la liste ci-dessous. Une faute
+   de nom = image ignorée par le jeu, silencieusement.
+2. **VRAIS fichiers .webp** : un PNG renommé en .webp ne compte pas (la
+   dernière livraison contenait 98 PNG déguisés de 5 Mo pièce, il a fallu tout
+   ré-encoder). Vérifie avant de livrer :
+   ```
+   file client/public/assets/*.webp | grep -v RIFF   # doit être VIDE
+   ```
+   Si tu ne sais pas encoder en webp, livre des **.png honnêtes** (extension
+   .png), max 1600 px de large : la conversion sera faite à l'intégration.
+3. **Poids raisonnable** : ≤ 1200 px de large, objectif < 200 Ko par image.
+4. **Ne régénère JAMAIS un fichier déjà présent** dans
+   `client/public/assets/` (des vagues entières ont déjà été perdues à
+   régénérer de l'existant). Seuls les fichiers listés ci-dessous manquent.
+5. Livraison : pousse sur la branche **`manus-assets`**, fichiers dans
+   `client/public/assets/`. Lots partiels bienvenus.
 
 ---
-
-Ensuite, envoie chaque ligne ci-dessous comme un message (la scène, pas le nom de
-fichier). **Renomme le fichier téléchargé EXACTEMENT comme indiqué** — une faute
-de nom = image ignorée par le jeu. PNG/JPG acceptés : je convertis en .webp.
 
 - `rest-salle-attente.webp`
   La Salle d'Attente : Les urgences sont ouvertes toute la nuit, et personne ne demande rien à celui qui attend. Vous êtes très doué pour attendre.
