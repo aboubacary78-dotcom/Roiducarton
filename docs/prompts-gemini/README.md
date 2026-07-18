@@ -1,29 +1,37 @@
 # Prompts d'images — Le Roi du Carton
 
 **216 images** à générer, découpées en 6 packs. Conçus pour être donnés tels
-quels à un générateur d'images (Gemini Pro, ou un compte Manus vierge) : chaque
-pack contient tout le contexte nécessaire, DA et protocole de livraison inclus.
+quels à un générateur d'images **sans accès au dépôt** (compte Manus vierge,
+Gemini Pro...) : chaque pack contient tout le contexte, la DA et le protocole.
+
+## Mode d'emploi
+
+1. Ouvre une conversation par pack.
+2. Colle le contenu du pack en premier message et **joins les images du zip
+   `references-style.zip`** comme référence visuelle (indispensable : le
+   générateur n'a pas accès aux 300 images existantes du jeu).
+3. Récupère les images, **noms exacts**, et livre un **ZIP** (dossier
+   `assets/` à l'intérieur). Lots partiels bienvenus.
+4. Transmets le zip pour intégration (vérification, conversion webp si besoin,
+   optimisation, mise en jeu).
 
 ## Ordre conseillé
 
 | Pack | Contenu | Images | Priorité |
 |---|---|---|---|
 | `pack-1-priorite-haute-30.md` | Les 30 dernières variantes d'issue de la vague 1 | 30 | 🔥 D'abord |
-| `pack-2-explorer-50.md` | Illustrations des nouveaux événements Explorer | 50 | Ensuite |
-| `pack-3-dormir-50.md` | Illustrations des nouveaux événements Dormir | 50 | Ensuite |
+| `pack-2-explorer-50.md` | Nouveaux événements Explorer | 50 | Ensuite |
+| `pack-3-dormir-50.md` | Nouveaux événements Dormir | 50 | Ensuite |
 | `pack-4-mendier-voler-46.md` | Mendier (15) + Voler (31) | 46 | Ensuite |
 | `pack-5-suites-10.md` | Les 10 nouvelles suites narratives | 10 | Ensuite |
-| `pack-6-voyager-30.md` | Illustrations des nouveaux événements Voyager | 30 | Ensuite |
+| `pack-6-voyager-30.md` | Nouveaux événements Voyager | 30 | Ensuite |
 
-## Bilan de la livraison Manus du 15/07 (pour mémoire)
+## Leçons des livraisons précédentes (intégrées au protocole)
 
-✅ Respecté : noms de fichiers exacts, uniquement les manquants, livraison par
-la branche `manus-assets`. Les 7 `followup-*` historiques et 38 variantes sont
-intégrés.
-❌ Pas respecté : « vrais .webp » — 98 PNG renommés en .webp (5 Mo pièce,
-485 Mo au total), ré-encodés à l'intégration (33 Mo). 1 fichier corrompu
-(`result-beg-fleuriste-good.webp`), remis dans le pack 1.
-➡️ D'où le protocole de livraison durci en tête de chaque pack.
+✅ Respecté : noms exacts, uniquement les manquants.
+❌ Raté : « vrais .webp » (98 PNG renommés, 5 Mo pièce, ré-encodés à
+l'intégration) ; 1 fichier corrompu. D'où : webp réel OU png honnête ≤ 1600 px,
+< 200 Ko visé, et livraison zip uniquement.
 
 ## Phase 2 (plus tard, optionnel)
 

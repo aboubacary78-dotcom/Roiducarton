@@ -1,9 +1,9 @@
 # Pack 2 — Explorer, vague 2 (50 images)
 
-## 📦 Contexte projet (à lire en entier — tu pars de zéro)
+## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
 
-Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie (un SDF
-survit jour après jour dans une ville française). Direction artistique
+Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie : un SDF
+survit jour après jour dans une ville française. Direction artistique
 **« Carton Craft »** : chaque illustration est un **diorama miniature en carton
 kraft fait main**, comme une maquette artisanale photographiée.
 
@@ -15,28 +15,24 @@ kraft fait main**, comme une maquette artisanale photographiée.
 - humour noir tendre, jamais glauque ni misérabiliste ;
 - **format paysage 3:2, AUCUN texte ni lettre dans l'image.**
 
-Le dépôt GitHub contient déjà 300+ images de référence dans
-`client/public/assets/` : **regarde-en quelques-unes avant de commencer** et
-imite-les.
+**Des images de référence te sont fournies en pièces jointes** avec ce brief :
+observe-les attentivement et imite exactement ce style (matière, lumière,
+personnage). Toute image qui s'en écarte sera refusée.
 
-## 🚚 Protocole de livraison (points déjà ratés par le passé, à respecter)
+## 🚚 Protocole de livraison (lis bien, les points 2 et 4 ont déjà été ratés)
 
 1. **Noms de fichiers EXACTS**, copiés depuis la liste ci-dessous. Une faute
-   de nom = image ignorée par le jeu, silencieusement.
-2. **VRAIS fichiers .webp** : un PNG renommé en .webp ne compte pas (la
-   dernière livraison contenait 98 PNG déguisés de 5 Mo pièce, il a fallu tout
-   ré-encoder). Vérifie avant de livrer :
-   ```
-   file client/public/assets/*.webp | grep -v RIFF   # doit être VIDE
-   ```
-   Si tu ne sais pas encoder en webp, livre des **.png honnêtes** (extension
-   .png), max 1600 px de large : la conversion sera faite à l'intégration.
+   de nom = image inutilisable.
+2. **VRAIS fichiers .webp** : un PNG renommé en .webp ne compte pas (une
+   précédente livraison contenait 98 PNG déguisés de 5 Mo pièce). Si tu ne
+   sais pas encoder en webp, livre des **.png honnêtes** (extension .png),
+   max 1600 px de large : la conversion sera faite à l'intégration.
 3. **Poids raisonnable** : ≤ 1200 px de large, objectif < 200 Ko par image.
-4. **Ne régénère JAMAIS un fichier déjà présent** dans
-   `client/public/assets/` (des vagues entières ont déjà été perdues à
-   régénérer de l'existant). Seuls les fichiers listés ci-dessous manquent.
-5. Livraison : pousse sur la branche **`manus-assets`**, fichiers dans
-   `client/public/assets/`. Lots partiels bienvenus.
+4. **Génère UNIQUEMENT les fichiers de la liste ci-dessous.** Rien d'autre.
+   Ne réinvente pas de noms, n'ajoute pas de variantes non demandées.
+5. **Livraison : un fichier ZIP** contenant un dossier `assets/` avec toutes
+   les images. Les lots partiels sont bienvenus (zip de 10, 20, 30 images...) :
+   chaque image livrée s'active dès son intégration.
 
 ---
 
