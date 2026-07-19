@@ -1,4 +1,4 @@
-# Pack 4 — Mendier (15) + Voler (31), vague 2
+# Pack 4 — Mendier (15) + Voler (31) + le Vigile de Choc (1)
 
 ## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
 
@@ -36,6 +36,8 @@ personnage). Toute image qui s'en écarte sera refusée.
 
 ---
 
+## A. Mendier (15 images)
+
 - `beg-sortie-boite.webp`
   La Sortie de Boîte : Cinq heures du matin. Les fêtards sortent de boîte en titubant, la générosité multipliée par le taux d'alcoolémie. Fenêtre de tir : quarante minutes.
 - `beg-marathon.webp`
@@ -66,6 +68,9 @@ personnage). Toute image qui s'en écarte sera refusée.
   L'Averse Soudaine : Un orage éclate sans prévenir sur la place. Vous êtes le seul être humain du quartier à posséder... un parapluie cassé. La demande explose, l'offre c'est vous.
 - `beg-bingo.webp`
   La Sortie du Loto des Anciens : La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des cabas à roulettes, et une gagnante du jambon qui rayonne comme un phare.
+
+## B. Voler (31 images)
+
 - `steal-distributeur-secoue.webp`
   Le Distributeur Récalcitrant : Le distributeur de la gare a gardé le Twix ET la pièce d'un voyageur furieux, parti en jurant. La machine vous nargue, repue.
 - `steal-chantier-cuivre.webp`
@@ -128,5 +133,8 @@ personnage). Toute image qui s'en écarte sera refusée.
   Les Palettes Consignées : Derrière l'entrepôt, une pile de palettes Europe : les bleues, les consignées, celles qui valent une vraie pièce chacune. Le mur est bas. Le chien, en revanche, est théorique : le panneau « chien méchant » est rouillé.
 - `steal-buvette-stade.webp`
   La Buvette du Stade : Mi-temps au stade municipal : la buvette est prise d'assaut, le bénévole est seul, et la caisse est une boîte à chaussures. Le chaos organisé, sauf que personne n'organise.
+
+## C. Le nouvel ennemi (1 image)
+
 - `combat-vigile-choc.webp`
-  Le Vigile de Choc : un vigile immense en gilet de sécurité, ancien videur, bras croisés devant une sortie qu'il bouche entièrement. Il ne court pas : il n'en a pas besoin. Diorama de face, menaçant et imperturbable.
+  Le Vigile de Choc : un vigile immense en gilet de sécurité jaune, ancien videur, bras croisés devant une sortie qu'il bouche entièrement de sa carrure. Il ne court pas : il n'en a pas besoin. Diorama de face, menaçant et imperturbable, lampe torche à la ceinture.
