@@ -6,7 +6,7 @@ import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
 import { playClick, playNextDay } from '@/lib/sound';
 import { getEquipped } from '@/lib/profile';
 import { useLang, tr } from '@/lib/lang';
-import SceneIllustration, { sceneForLocation } from './SceneIllustration';
+import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
 
 // Couleur du voile de lumière selon l'avancement de la journée : or du matin,
@@ -237,7 +237,7 @@ export default function MainScreen() {
           animate={{ x: -6 - dayProgress * 30 }}
           transition={{ type: 'spring', stiffness: 55, damping: 20 }}
         >
-          <SceneIllustration theme={sceneForLocation(char.location)} className="w-full h-full" rounded={false} align="bottom" sway />
+          <LocationBackdrop location={char.location} />
         </motion.div>
         {/* Voile de lumière du moment de la journée */}
         <motion.div

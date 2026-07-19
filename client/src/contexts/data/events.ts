@@ -1645,6 +1645,7 @@ export const FOLLOW_UP_EVENTS: Record<string, GameEvent> = {
 // souvenir remonte. La quasi-mort devient un moment de récit, pas une spirale.
 export const SURSAUT_EVENT: GameEvent = {
   id: 'sursaut', title: 'Le Sursaut', type: 'narrative',
+  image: '/assets/sursaut.webp',
   description: 'Au bord du gouffre, quelque chose remonte : un souvenir, un visage, une promesse. Vous vous rappelez pourquoi vous tenez encore debout.',
   choices: [
     { text: 'S\'accrocher au souvenir', risk: 'safe', emoji: '💫', outcomes: [
@@ -1695,7 +1696,7 @@ function makeGhostEvent(grave: Grave): GameEvent {
   const n = grave.name;
   const templates: GameEvent[] = [
     {
-      id: 'ghost-banc', title: L(`Le Banc de ${n}`, `${n}'s Bench`), type: 'discovery', isFollowUp: true,
+      id: 'ghost-banc', title: L(`Le Banc de ${n}`, `${n}'s Bench`), type: 'discovery', isFollowUp: true, image: '/assets/ghost-banc.webp',
       description: L(`Vous reconnaissez ce banc : c'est là que dormait ${n}, avant. Quelqu'un y a gravé ses initiales.`, `You know this bench: it's where ${n} used to sleep. Someone carved their initials into it.`),
       choices: [
         { text: L('S\'y reposer un moment', 'Rest there a while'), risk: 'safe', emoji: '🪑', outcomes: [
@@ -1708,7 +1709,7 @@ function makeGhostEvent(grave: Grave): GameEvent {
       ],
     },
     {
-      id: 'ghost-souvenir', title: L('Quelqu\'un se souvient', 'Someone Remembers'), type: 'social', isFollowUp: true,
+      id: 'ghost-souvenir', title: L('Quelqu\'un se souvient', 'Someone Remembers'), type: 'social', isFollowUp: true, image: '/assets/ghost-souvenir.webp',
       description: L(`Une passante vous dévisage : « Vous connaissiez ${n}, non ? Un brave. Tenez, pour la route. »`, `A passer-by studies you: "You knew ${n}, right? Good soul. Here, for the road."`),
       choices: [
         { text: L('Accepter avec dignité', 'Accept with dignity'), risk: 'safe', emoji: '🤝', outcomes: [
@@ -1718,7 +1719,7 @@ function makeGhostEvent(grave: Grave): GameEvent {
       ],
     },
     {
-      id: 'ghost-echo', title: L('L\'Écho de la Rue', 'Echo of the Street'), type: 'discovery', isFollowUp: true,
+      id: 'ghost-echo', title: L('L\'Écho de la Rue', 'Echo of the Street'), type: 'discovery', isFollowUp: true, image: '/assets/ghost-echo.webp',
       description: L(`Sur un mur, au feutre : « ${n} était là. » La rue n'oublie pas ses rois.`, `On a wall, in marker: "${n} was here." The street doesn't forget its kings.`),
       choices: [
         { text: L('Ajouter votre nom dessous', 'Add your name below'), risk: 'safe', emoji: '🖊️', outcomes: [

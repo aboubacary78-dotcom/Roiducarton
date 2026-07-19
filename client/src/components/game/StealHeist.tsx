@@ -6,6 +6,7 @@ import { useLang, tr } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
 import { getEquipped } from '@/lib/profile';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import SafeImg from './SafeImg';
 
 /*
  * Mini-jeu de vol « casse en grille » (façon Pac-Man) : on entre dans un lieu,
@@ -191,6 +192,7 @@ function HeistCasing({ onPick }: { onPick: (t: HeistTarget) => void }) {
               onClick={() => onPick(t)}
               className="craft-card p-3 text-left flex flex-col gap-1.5"
             >
+              <SafeImg src={`/assets/${t.id}.webp`} className="w-full h-20 object-cover rounded-lg -mb-0.5" />
               <div className="flex items-center justify-between">
                 <span className="text-base font-semibold text-[#2A1F1A]">{t.emoji} {tr(t.label, t.labelEn)}</span>
                 <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-black/5 text-[#6B5740]">

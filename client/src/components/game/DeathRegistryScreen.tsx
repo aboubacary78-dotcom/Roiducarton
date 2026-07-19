@@ -1,3 +1,4 @@
+import SafeImg from './SafeImg';
 import { useGame, knownEnemyNames } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -29,6 +30,7 @@ export default function DeathRegistryScreen() {
       style={{ background: 'linear-gradient(180deg, #2A1D30 0%, #1C1322 100%)' }}
     >
       {/* En-tête */}
+      <SafeImg src="/assets/registre-hub.webp" className="w-full h-24 object-cover rounded-xl" />
       <div className="flex items-center gap-3">
         <button onClick={back} className="w-10 h-10 flex items-center justify-center text-lg rounded-xl border border-[#4A3048] text-[#E8A87C]" aria-label={tr('Retour', 'Back')}>
           ←

@@ -5,8 +5,9 @@ import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playCoin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
-import SceneIllustration, { sceneForLocation } from './SceneIllustration';
+import LocationBackdrop from './LocationBackdrop';
 import { pushToast } from '@/lib/toast';
+import SafeImg from './SafeImg';
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string; labelEn: string }> = {
   food: { bg: '#4A9B5F15', color: '#4A9B5F', label: 'Nourriture', labelEn: 'Food' },
@@ -87,6 +88,7 @@ export default function ShopScreen() {
           animate={{ y: 0, opacity: 1 }}
           className="craft-card p-3.5"
         >
+          <SafeImg src={`/assets/shop-${selectedShop.id}.webp`} className="w-full h-24 object-cover rounded-lg mb-2.5" />
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2.5">
               <span className="text-2xl">{selectedShop.emoji}</span>
@@ -256,7 +258,7 @@ export default function ShopScreen() {
         className="craft-card p-0 overflow-hidden"
       >
         <div className="relative h-20 w-full">
-          <SceneIllustration theme={sceneForLocation(char.location)} className="w-full h-full" rounded={false} align="bottom" sway />
+          <LocationBackdrop location={char.location} />
           <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/75 to-white/15" />
           <div className="absolute inset-0 flex justify-between items-center px-3.5">
             <div>
