@@ -38,3 +38,19 @@ l'intégration) ; 1 fichier corrompu. D'où : webp réel OU png honnête ≤ 160
 Les variantes d'issue `result-<id>-good/bad.webp` des 186 nouveaux événements
 (~370 images) ne sont pas dans ces packs : en leur absence, le jeu retombe
 proprement sur l'illustration de l'événement.
+
+## Phase 2 — EN COURS : les variantes d'issue (372 images, 7 packs)
+
+Dossier `phase2/` : pour chaque nouvel événement, l'issue heureuse
+(`result-<id>-good.webp`) et l'issue ratée (`result-<id>-bad.webp`), même
+décor, ambiance opposée. Même protocole que les packs précédents.
+
+| Pack | Images |
+|---|---|
+| `phase2-pack-1-explorer-A.md` | 50 |
+| `phase2-pack-2-explorer-B.md` | 50 |
+| `phase2-pack-3-dormir-A.md` | 50 |
+| `phase2-pack-4-dormir-B.md` | 50 |
+| `phase2-pack-5-mendier-suites.md` | 50 |
+| `phase2-pack-6-voler.md` | 62 |
+| `phase2-pack-7-voyager.md` | 60 |
