@@ -24,7 +24,7 @@ Gemini Pro...) : chaque pack contient tout le contexte, la DA et le protocole.
 | ~~pack-3~~ | ✅ TERMINÉ (livré et intégré) | 50 | Fait |
 | ~~pack-4~~ | ✅ TERMINÉ (livré et intégré) | 47 | Fait |
 | `pack-5-suites-10.md` | Les 10 nouvelles suites narratives | 10 | Ensuite |
-| `pack-6-voyager-30.md` | Nouveaux événements Voyager | 30 | Ensuite |
+| ~~pack-6~~ | ✅ TERMINÉ (livré et intégré) | 30 | Fait |
 
 ## Leçons des livraisons précédentes (intégrées au protocole)
 
