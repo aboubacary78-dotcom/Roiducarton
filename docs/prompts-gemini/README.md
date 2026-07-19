@@ -55,9 +55,9 @@ décor, ambiance opposée. Même protocole que les packs précédents.
 | `phase2-pack-6-voler.md` | 62 |
 | `phase2-pack-7-voyager.md` | 60 |
 
-## Pack Écrans (36 images) — les décors du jeu
+## Pack Écrans (38 images) — les décors du jeu
 
-`pack-ecrans-36.md` : panoramas de quartier, boutiques, cartes du Repérage,
+`pack-ecrans-38.md` : panoramas de quartier, boutiques, cartes du Repérage,
 Sursaut/fantômes, bannières Cimetière/Registre. Presque tous SANS le héros
 (voir l'avertissement en tête du pack). Les emplacements sont déjà câblés dans
 le code : chaque image s'affiche dès qu'elle arrive.
