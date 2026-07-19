@@ -229,10 +229,6 @@ function sampleSky(t: number): SkyKey {
 function CardboardCityHero() {
   // On démarre au coucher de soleil (l'identité visuelle du jeu), puis ça vit.
   const [t, setT] = useState(0.28);
-  // Dioramas jour/nuit (title-day/night.webp) : fondus selon le cycle du ciel,
-  // la ville SVG animée reste le repli tant que les fichiers n'existent pas.
-  const [dayOk, setDayOk] = useState(true);
-  const [nightOk, setNightOk] = useState(true);
   useEffect(() => {
     const id = setInterval(() => setT(v => (v + 0.125 / 40) % 1), 125);
     return () => clearInterval(id);
@@ -308,23 +304,6 @@ function CardboardCityHero() {
       {/* rue */}
       <rect x="0" y="180" width="390" height="12" fill="#5A4636" />
     </svg>
-    {dayOk && (
-      <img
-        src="/assets/title-day.webp"
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-        onError={() => setDayOk(false)}
-      />
-    )}
-    {dayOk && nightOk && (
-      <img
-        src="/assets/title-night.webp"
-        alt=""
-        style={{ opacity: Math.min(1, k.overlay / 0.34) }}
-        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-        onError={() => setNightOk(false)}
-      />
-    )}
     </div>
   );
 }

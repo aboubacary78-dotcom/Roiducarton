@@ -1,4 +1,4 @@
-# Pack Écrans — Les décors du jeu (38 images)
+# Pack Écrans — Les décors du jeu (36 images)
 
 ## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
 
@@ -45,6 +45,15 @@ ce sont des lieux, l'interface pose le personnage par-dessus.
 ---
 
 ## A. Les 5 panoramas de quartier (toile de fond de l'écran principal, SANS héros)
+
+⚠️ Ces panoramas seront ANIMÉS par le jeu (lent travelling au fil de la
+journée + zoom respirant + voile de lumière aube→nuit ajouté par-dessus).
+Conséquences pour la génération :
+- cadrage LARGE avec de la matière sur toute la largeur (le jeu se déplace
+  dedans), rien d'important collé aux bords ;
+- lumière NEUTRE de milieu de journée (le jeu recolore lui-même l'aube, le
+  soir et la nuit) ;
+- pas de soleil ni de lune dans le ciel (le jeu les anime par-dessus).
 
 - `scene-parc.webp`
   🌳 Parc Municipal, panorama large du quartier en diorama : Nature, pigeons, bancs. Le paradis des siestes. Vue d'ensemble, ciel visible, aucun personnage principal (des silhouettes de passants en carton sont bienvenues).
@@ -130,14 +139,3 @@ ce sont des lieux, l'interface pose le personnage par-dessus.
   Le Cimetière des Cartons : rangées de petites tombes faites de cartons dressés, bougies, guirlande éteinte, ambiance nocturne recueillie et douce. Bannière large.
 - `registre-hub.webp`
   Le Registre des Morts : un grand livre ancien ouvert à la lueur d'une bougie, pages couvertes de croquis et de noms, ambiance cabinet de curiosités. Bannière large.
-
-## F. L'écran-titre (2 images, SANS héros)
-
-L'écran d'accueil du jeu fond ces deux images l'une dans l'autre selon un
-cycle jour/nuit de 40 secondes : MÊME cadrage exact pour les deux, seule la
-lumière change.
-
-- `title-day.webp`
-  La ville du Roi du Carton en plein jour : une skyline entière d'immeubles en carton kraft, ruelles, linge aux fenêtres, ciel bleu doux, ambiance chaleureuse. Panorama iconique, c'est la première image que voit le joueur.
-- `title-night.webp`
-  EXACTEMENT le même panorama, la nuit : ciel étoilé, lune de papier, fenêtres allumées en jaune chaud, guirlande lumineuse. Même cadrage au millimètre que title-day pour un fondu parfait.
