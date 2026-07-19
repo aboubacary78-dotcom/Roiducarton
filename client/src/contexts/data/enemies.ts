@@ -24,6 +24,10 @@ export const ENEMIES: Enemy[] = [
   { name: 'Mouette Géante', emoji: '🦅', health: 24, attack: 11, description: 'La mère de toutes les mouettes. Envergure impressionnante.', image: '/assets/combat-mouette-geante-msASE7NG2HZ8VNUAwFqgA3.webp', loot: { money: 4, respect: 3 } },
   { name: 'Raton Laveur Alpha', emoji: '🦝', health: 30, attack: 10, description: 'Le boss des ratons. Il porte un masque naturel de bandit.', image: '/assets/combat-raton-laveur-DV28WgnY4Dw7WEQpakPMzH.webp', loot: { money: 5, respect: 3, item: { id: 'montre-cassee', name: 'Montre cassée (butin du raton)', emoji: '⌚', type: 'junk', value: 6 } } },
   { name: 'Chat Sauvage', emoji: '🐈', health: 18, attack: 9, description: 'Pas de collier, pas de maître, pas de pitié.', image: '/assets/combat-chat-sauvage-fFoiY6tVx6eNamsMbyGbNq.webp', loot: { money: 2, respect: 2 } },
+  // Le boss des échecs de « grand coup » (voir data/heist.ts) : il ne rôde
+  // nulle part ailleurs, on ne le croise qu'en ratant un casse gardé. Très
+  // dur à battre, mais le vaincre paie en respect et en trophée.
+  { name: 'Vigile de Choc', emoji: '🦺', health: 60, attack: 17, description: 'Ancien videur, actuel mur. Il ne court pas : il n\'en a pas besoin.', image: '/assets/combat-vigile-choc.webp', loot: { money: 8, respect: 6, item: { id: 'badge-vigile', name: 'Badge de vigile (trophée)', emoji: '🪪', type: 'junk', value: 12 } } },
 ];
 
 // Images (dioramas) des ennemis effectivement affrontés via « Bagarre » mais

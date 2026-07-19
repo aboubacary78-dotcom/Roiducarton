@@ -1,4 +1,4 @@
-import { useGame, STEAL_TARGETS, randomFromArray } from '@/contexts/GameContext';
+import { useGame, LOCATIONS, heistTargetsFor, HEIST_TUNING, type HeistTarget } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt, playStep, playSpotted } from '@/lib/sound';
@@ -129,36 +129,103 @@ function makeLayout(guardCount: number): Layout {
 }
 
 export default function StealHeist() {
-  const [ready, setReady] = useState(() => introSeen('steal2'));
+  const [ready, setReady] = useState(() => introSeen('steal3'));
+  const [target, setTarget] = useState<HeistTarget | null>(null);
   if (!ready) {
     return (
       <MinigameIntro
-        id="steal2"
+        id="steal3"
         emoji="🗝️"
         title="Le casse"
         titleEn="The Heist"
         lines={[
+          { emoji: '🗺️', fr: 'D\'abord, le repérage : choisissez votre cible parmi celles du quartier. Petit coup tranquille ou grand coup gardé, à vous de voir.', en: 'First, the casing: pick your target among the neighborhood\'s. Quiet small job or heavily guarded big score, your call.' },
           { emoji: '🎯', fr: 'Récupérez l\'objet convoité, puis filez jusqu\'à la sortie 🚪 pour l\'emporter.', en: 'Grab the coveted item, then slip to the exit 🚪 to make off with it.' },
           { emoji: '👁️', fr: 'Frôler un gardien ou traverser sa ligne de vue fait monter l\'alerte. Planqué, elle retombe, mais jamais sous le palier atteint.', en: 'Brushing past a guard or crossing its line of sight raises the alert. Hidden, it drops, but never below the tier you reached.' },
-          { emoji: '🚨', fr: 'Paliers : gardiens plus vifs, puis un renfort télégraphié 🚨, puis un vigile qui boucle la sortie.', en: 'Tiers: quicker guards, then a telegraphed reinforcement 🚨, then a watchman locking down the exit.' },
-          { emoji: '💎', fr: 'Sortir sans alerte = coup de maître (gros gain). Sortir en plein bouclage = bonus de respect, le culot, ça se respecte.', en: 'Escape with zero alert = masterstroke (big payout). Escape mid-lockdown = respect bonus, nerve earns respect.' },
+          { emoji: '🚨', fr: 'Repéré = des renforts débarquent, et plus la cible est grosse, plus il en vient. Au bouclage, un vigile campe la sortie.', en: 'Spotted = reinforcements arrive, and the bigger the target, the more of them come. At lockdown, a watchman camps the exit.' },
+          { emoji: '💎', fr: 'Sortir sans alerte = coup de maître (butin max). Sortir en plein bouclage = bonus de respect, le culot, ça se respecte.', en: 'Escape with zero alert = masterstroke (max loot). Escape mid-lockdown = respect bonus, nerve earns respect.' },
           { emoji: '🕹️', fr: 'Glissez sur la grille ou utilisez les flèches pour bouger. Toucher un gardien = pris.', en: 'Swipe on the grid or use the arrows to move. Touch a guard = caught.' },
         ]}
         onStart={() => setReady(true)}
       />
     );
   }
-  return <StealHeistInner />;
+  if (!target) return <HeistCasing onPick={setTarget} />;
+  return <StealHeistInner target={target} />;
 }
 
-function StealHeistInner() {
+// ---- Le Repérage : choisir sa cible dans le quartier ----
+const CATCHER_UI: Record<HeistTarget['catcher'], { fr: string; en: string }> = {
+  commercant: { fr: '😡 Si pris : le proprio vous tombe dessus', en: '😡 If caught: the owner comes at you' },
+  police: { fr: '🚔 Si pris : garde à vue et amende', en: '🚔 If caught: custody and a fine' },
+  vigile: { fr: '🦺 Si pris : le Vigile de Choc (très, très costaud)', en: '🦺 If caught: the Shock Guard (very, very tough)' },
+};
+
+function HeistCasing({ onPick }: { onPick: (t: HeistTarget) => void }) {
+  const { state } = useGame();
+  useLang();
+  const char = state.character;
+  const location = char?.location ?? 'parc';
+  const loc = LOCATIONS[location];
+  const targets = heistTargetsFor(location);
+  const steals = char?.stealCount ?? 1;
+
+  return (
+    <div className="min-h-screen bg-texture p-4 flex flex-col items-center gap-3">
+      <div className="text-center">
+        <h1 className="text-2xl text-[#2A1F1A]">{tr('Le Repérage', 'The Casing')}</h1>
+        <p className="text-sm text-[#6B5740] mt-1">
+          {loc.emoji} {tr(loc.name, loc.nameEn)} · {tr('Trois cibles repérées. Laquelle ?', 'Three targets cased. Which one?')}
+        </p>
+      </div>
+
+      <div className="w-full max-w-sm flex flex-col gap-2.5">
+        {targets.map((t, i) => {
+          const tune = HEIST_TUNING[t.difficulty];
+          return (
+            <motion.button
+              key={t.id}
+              initial={{ y: 14, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: i * 0.08 }}
+              onClick={() => onPick(t)}
+              className="craft-card p-3 text-left flex flex-col gap-1.5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-base font-semibold text-[#2A1F1A]">{t.emoji} {tr(t.label, t.labelEn)}</span>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-black/5 text-[#6B5740]">
+                  {tune.stars} {tr(tune.fr, tune.en)}
+                </span>
+              </div>
+              <p className="text-xs text-[#6B5740] leading-snug">{tr(t.desc, t.descEn)}</p>
+              <div className="flex items-center justify-between text-[11px] font-medium">
+                <span className="text-[#3d8b4f]">
+                  💶 ≈ {t.moneyMin}-{t.moneyMax}€{t.item ? ` + ${t.item.emoji}` : ''}
+                </span>
+                <span className="text-[#B84A3A]">{tr(CATCHER_UI[t.catcher].fr, CATCHER_UI[t.catcher].en)}</span>
+              </div>
+            </motion.button>
+          );
+        })}
+      </div>
+
+      <p className="text-[11px] text-[#8B6B4A] text-center max-w-xs">
+        {steals > 1
+          ? tr(`Casier de la partie : ${steals - 1} casse${steals > 2 ? 's' : ''} déjà tenté${steals > 2 ? 's' : ''}. La surveillance s'en souvient.`, `This run's record: ${steals - 1} heist${steals > 2 ? 's' : ''} already attempted. Security remembers.`)
+          : tr('Premier casse de la partie : la surveillance ne vous connaît pas encore.', 'First heist of the run: security doesn\'t know you yet.')}
+      </p>
+    </div>
+  );
+}
+
+function StealHeistInner({ target }: { target: HeistTarget }) {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character;
-  const [target] = useState(() => randomFromArray(STEAL_TARGETS));
+  const tuning = HEIST_TUNING[target.difficulty];
   const day = char?.day ?? 1;
-  const guardEmoji = target.catcher === 'police' ? '👮' : '🧑‍🍳';
-  const chaserEmoji = target.catcher === 'police' ? '🚓' : '🧹';
+  const guardEmoji = target.catcher === 'police' ? '👮' : target.catcher === 'vigile' ? '🦺' : '🧑‍🍳';
+  const chaserEmoji = target.catcher === 'police' ? '🚓' : target.catcher === 'vigile' ? '🕶️' : '🧹';
 
   // Traits qui résonnent ici comme au combat : l'agile fait retomber la
   // pression plus vite, le flair révèle les lignes de vue, l'haleine se sent.
@@ -166,14 +233,15 @@ function StealHeistInner() {
   const hasFlair = char?.traits.some((t) => t.id === 'nez-sensible' || t.id === 'paranoiaque') ?? false;
   const hasHaleine = char?.traits.some((t) => t.id === 'haleine') ?? false;
 
-  // Difficulté d'ENTRÉE (réglage de base) : le nombre de casses déjà tentés
-  // durcit la surveillance, les jours écoulés ajoutent une pression de fond.
+  // Difficulté d'ENTRÉE : la CIBLE choisie fixe le niveau de base (gardiens,
+  // sensibilité de l'alerte, rythme), puis le « casier » (casses déjà tentés)
+  // et les jours écoulés durcissent la surveillance par-dessus.
   // L'escalade EN COURS de partie, elle, ne dépend que de la jauge d'alerte.
   const steals = char?.stealCount ?? 1;
   const heat = (steals - 1) + Math.floor(day / 5);
-  const guardCount = Math.min(1 + Math.floor(heat / 2), 4);
-  const tickMs = Math.max(640 - heat * 45, 300);
-  const chaseProb = Math.min(0.42 + heat * 0.045, 0.85);
+  const guardCount = Math.min(tuning.guards + Math.floor(heat / 3), tuning.guards + 2);
+  const tickMs = Math.max(640 - heat * 45 - tuning.tickBonus, 280);
+  const chaseProb = Math.min(0.42 + heat * 0.045 + (target.difficulty === 'grand' ? 0.06 : 0), 0.9);
 
   const [layout] = useState(() => makeLayout(guardCount));
   const [player, setPlayer] = useState<Cell>(layout.player);
@@ -229,10 +297,13 @@ function StealHeistInner() {
     setPending(pendingRef.current);
   }, [layout]);
 
-  // Monte la jauge, franchit les paliers (cliquets) et déclenche les renforts.
+  // Monte la jauge (sensibilité selon la cible), franchit les paliers
+  // (cliquets) et déclenche les renforts : plus la cible est grosse, plus il
+  // débarque de monde quand on se fait repérer.
   const raiseAlert = useCallback((pts: number) => {
     if (statusRef.current !== 'playing' || pts <= 0) return;
-    const after = Math.min(100, alertRef.current + pts);
+    const scaled = Math.max(1, Math.round(pts * tuning.alertMult));
+    const after = Math.min(100, alertRef.current + scaled);
     if (after === alertRef.current) return;
     alertRef.current = after;
     setAlert(after);
@@ -241,10 +312,17 @@ function StealHeistInner() {
       tierRef.current = t;
       setTier(t);
       playSpotted();
-      if (t >= 2 && !spawnedRef.current.chaser) { spawnedRef.current.chaser = true; queueSpawn('chaser'); }
-      if (t >= 3 && !spawnedRef.current.camper) { spawnedRef.current.camper = true; queueSpawn('camper'); }
+      if (t >= 2 && !spawnedRef.current.chaser) {
+        spawnedRef.current.chaser = true;
+        for (let i = 0; i < tuning.spawnP2; i++) queueSpawn('chaser');
+      }
+      if (t >= 3 && !spawnedRef.current.camper) {
+        spawnedRef.current.camper = true;
+        queueSpawn('camper');
+        for (let i = 0; i < tuning.spawnP3; i++) queueSpawn('chaser');
+      }
     }
-  }, [queueSpawn]);
+  }, [queueSpawn, tuning]);
 
   const move = useCallback((dx: number, dy: number) => {
     if (statusRef.current !== 'playing') return;

@@ -25,12 +25,13 @@ import { SHOPS, shopClosure, rollShopClosure, getSellPrice } from './data/shops'
 import {
   generateEvents, generateBegEvents, generateRestEvents, generateTravelEvent,
   freshPool, rememberEvent, flavorFrom, makeLegendEvent, dueSursaut,
-  SURSAUT_EVENT, BEG_EVENTS, STEAL_EVENTS, STEAL_TARGETS,
+  SURSAUT_EVENT, BEG_EVENTS, STEAL_EVENTS,
 } from './data/events';
 import {
   makeCombatState, generateHand, getCard, unarmedDamage, bestWeapon, bestWeaponBonus, firstJunk,
   combatDeathMessage, SIGNS, SPECIAL_DEFS,
 } from './data/combat';
+import { getHeistTarget, HEIST_TARGETS } from './data/heist';
 
 // Façade stable : ré-exporte types & données pour les composants existants.
 export * from './types';
@@ -42,6 +43,7 @@ export * from './data/enemies';
 export * from './data/shops';
 export * from './data/events';
 export * from './data/combat';
+export * from './data/heist';
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
@@ -350,11 +352,24 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'RESOLVE_STEAL': {
       if (!state.character) return state;
       const c = state.character;
-      const target = STEAL_TARGETS.find(t => t.id === action.targetId) || STEAL_TARGETS[0];
+      const target = getHeistTarget(action.targetId) || HEIST_TARGETS[0];
 
       // Échec : répercussions selon qui vous attrape.
       if (action.tier === 'fail') {
         const repercussion = Math.random();
+        if (target.catcher === 'vigile' && repercussion < 0.7) {
+          // La société de gardiennage envoie son mur : combat très difficile.
+          const enemy = ENEMIES.find(e => e.name === 'Vigile de Choc')!;
+          return {
+            ...state,
+            screen: 'combat',
+            currentCombat: makeCombatState(enemy, c),
+            combatLog: [
+              L(`🦺 Pris la main sur ${target.label} ! Une ombre massive bouche la sortie : le Vigile de Choc. Il craque ses cervicales.`, `🦺 Caught with your hand on ${target.labelEn}! A massive shadow blocks the exit: the Shock Guard. He cracks his neck.`),
+              L('⚠️ Celui-là ne plaisante pas. La fuite est peut-être la meilleure carte.', '⚠️ This one isn\'t joking. Fleeing might be your best card.'),
+            ],
+          };
+        }
         if (target.catcher === 'commercant' && repercussion < 0.5) {
           // Le commerçant veut en découdre : bagarre immédiate !
           const enemy = ENEMIES.find(e => e.name === 'Commerçant Furieux')!;
@@ -366,8 +381,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           };
         }
         if (target.catcher === 'police' && repercussion < 0.5) {
-          // La police vous embarque : garde à vue, journée finie + amende.
-          const amende = Math.min(c.money, 5);
+          // La police vous embarque : garde à vue, journée finie + amende
+          // (proportionnelle à l'ambition du coup).
+          const amende = Math.min(c.money, target.difficulty === 'grand' ? 12 : target.difficulty === 'risque' ? 5 : 3);
           const statDelta: Partial<Stats> = { dignity: -15, mental: -8 };
           const newStats = applyStatDelta(c.stats, statDelta);
           const isAlive = newStats.health > 0 && newStats.mental > 0;
@@ -383,34 +399,49 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             screen: isAlive ? 'main' : 'game-over',
           };
         }
-        // Sinon : simple raclée / fuite honteuse.
-        const statDelta: Partial<Stats> = { dignity: -12, health: -6, mental: -6 };
+        // Sinon : raclée / fuite honteuse (plus brutale si c'était des vigiles).
+        const rossee = target.catcher === 'vigile';
+        const statDelta: Partial<Stats> = rossee
+          ? { dignity: -14, health: -12, mental: -8 }
+          : { dignity: -12, health: -6, mental: -6 };
         const newStats = applyStatDelta(c.stats, statDelta);
         const isAlive = newStats.health > 0 && newStats.mental > 0;
         if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, 'poissard'))); clearSave(); }
         return {
           ...state,
           character: { ...c, stats: newStats, respect: c.respect - 2, alive: isAlive },
-          eventResult: { text: L(`🚨 Raté ! Repéré en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoché.`, `🚨 Failed! Spotted trying to steal ${target.labelEn}, you flee amid insults, a little battered.`), statChanges: statDelta, respectChange: -2, image: '/assets/result-steal-fail.webp' },
+          eventResult: {
+            text: rossee
+              ? L(`🦺 Raté ! Les vigiles vous « raccompagnent » loin de ${target.label}, réglementairement mais très fermement. Tout fait mal.`, `🦺 Failed! The guards "escort" you away from ${target.labelEn}, by the book but very firmly. Everything hurts.`)
+              : L(`🚨 Raté ! Repéré en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoché.`, `🚨 Failed! Spotted trying to steal ${target.labelEn}, you flee amid insults, a little battered.`),
+            statChanges: statDelta, respectChange: -2, image: '/assets/result-steal-fail.webp',
+          },
           screen: isAlive ? 'main' : 'game-over',
         };
       }
 
-      // Réussite (ok / jackpot / sortie à chaud en plein bouclage).
+      // Réussite (ok / jackpot / sortie à chaud) : le butin suit le profil de
+      // la cible. Objet : garanti au coup de maître, une chance sur deux sinon.
       const jackpot = action.tier === 'jackpot';
       const hot = action.tier === 'hot';
-      const moneyDelta = jackpot ? 10 + Math.floor(Math.random() * 9) : 3 + Math.floor(Math.random() * 5);
-      const respectDelta = jackpot ? 2 : hot ? 2 : 0;
+      const roll = target.moneyMin + Math.floor(Math.random() * (target.moneyMax - target.moneyMin + 1));
+      const moneyDelta = jackpot ? target.moneyMax + 3 : hot ? Math.min(target.moneyMax, roll + 2) : roll;
+      const respectDelta = hot ? (target.difficulty === 'grand' ? 3 : 2) : jackpot ? 2 : 0;
+      const gotItem = target.item && (jackpot || Math.random() < 0.5) ? target.item : undefined;
       const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 6 } : hot ? { dignity: -5, mental: 5 } : { dignity: -6, mental: 2 };
       const newStats = applyStatDelta(c.stats, statDelta);
-      const text = jackpot
-        ? L(`💎 Coup de maître ! Vous repartez avec ${target.label} sans que personne ne remarque rien. Revente express au coin de la rue : ${moneyDelta}€.`, `💎 Masterstroke! You walk off with ${target.labelEn} without anyone noticing a thing. Quick resale on the corner: €${moneyDelta}.`)
+      const itemNote = gotItem ? L(` Et dans le sac : ${gotItem.name} ${gotItem.emoji}.`, ` And into the bag: ${gotItem.name} ${gotItem.emoji}.`) : '';
+      const text = (jackpot
+        ? L(`💎 Coup de maître ! Vous repartez avec ${target.label} sans que personne ne remarque rien : ${moneyDelta}€.`, `💎 Masterstroke! You walk off with ${target.labelEn} without anyone noticing a thing: €${moneyDelta}.`)
         : hot
-          ? L(`🚨 Sortie en plein bouclage ! Vous filez avec ${target.label} sous le nez des renforts. Le quartier ne parle que de votre culot : ${moneyDelta}€ et +2 respect.`, `🚨 Out mid-lockdown! You slip away with ${target.labelEn} right under the reinforcements' noses. The block talks of nothing but your nerve: €${moneyDelta} and +2 respect.`)
-          : L(`🤫 Vol réussi. Vous filez avec ${target.label}, le cœur battant. Ça vaut bien ${moneyDelta}€.`, `🤫 Theft successful. You slip away with ${target.labelEn}, heart pounding. Worth a good €${moneyDelta}.`);
+          ? L(`🚨 Sortie en plein bouclage ! Vous filez avec ${target.label} sous le nez des renforts. Le quartier ne parle que de votre culot : ${moneyDelta}€.`, `🚨 Out mid-lockdown! You slip away with ${target.labelEn} right under the reinforcements' noses. The block talks of nothing but your nerve: €${moneyDelta}.`)
+          : L(`🤫 Vol réussi. Vous filez avec ${target.label}, le cœur battant. Ça vaut bien ${moneyDelta}€.`, `🤫 Theft successful. You slip away with ${target.labelEn}, heart pounding. Worth a good €${moneyDelta}.`)) + itemNote;
       return {
         ...state,
-        character: { ...c, stats: newStats, money: c.money + moneyDelta, respect: c.respect + respectDelta },
+        character: {
+          ...c, stats: newStats, money: c.money + moneyDelta, respect: c.respect + respectDelta,
+          inventory: gotItem ? [...c.inventory, gotItem] : c.inventory,
+        },
         eventResult: { text, statChanges: statDelta, moneyChange: moneyDelta, respectChange: respectDelta, image: '/assets/result-steal-success.webp' },
         screen: 'main',
       };

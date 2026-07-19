@@ -128,3 +128,5 @@ personnage). Toute image qui s'en écarte sera refusée.
   Les Palettes Consignées : Derrière l'entrepôt, une pile de palettes Europe : les bleues, les consignées, celles qui valent une vraie pièce chacune. Le mur est bas. Le chien, en revanche, est théorique : le panneau « chien méchant » est rouillé.
 - `steal-buvette-stade.webp`
   La Buvette du Stade : Mi-temps au stade municipal : la buvette est prise d'assaut, le bénévole est seul, et la caisse est une boîte à chaussures. Le chaos organisé, sauf que personne n'organise.
+- `combat-vigile-choc.webp`
+  Le Vigile de Choc : un vigile immense en gilet de sécurité, ancien videur, bras croisés devant une sortie qu'il bouche entièrement. Il ne court pas : il n'en a pas besoin. Diorama de face, menaçant et imperturbable.
