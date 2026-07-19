@@ -20,7 +20,7 @@ Gemini Pro...) : chaque pack contient tout le contexte, la DA et le protocole.
 | Pack | Contenu | Images | Priorité |
 |---|---|---|---|
 | ~~pack-1~~ | ✅ TERMINÉ (livré et intégré) | 30 | Fait |
-| `pack-2-explorer-50.md` | Nouveaux événements Explorer | 50 | Ensuite |
+| ~~pack-2~~ | ✅ TERMINÉ (livré et intégré) | 50 | Fait |
 | ~~pack-3~~ | ✅ TERMINÉ (livré et intégré) | 50 | Fait |
 | ~~pack-4~~ | ✅ TERMINÉ (livré et intégré) | 47 | Fait |
 | `pack-5-suites-10.md` | ⚠️ 9/10 intégrées, MANQUE followup-prophetie-toit.webp | 1 | Reliquat |
