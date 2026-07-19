@@ -21,7 +21,7 @@ Gemini Pro...) : chaque pack contient tout le contexte, la DA et le protocole.
 |---|---|---|---|
 | ~~pack-1~~ | ✅ TERMINÉ (livré et intégré) | 30 | Fait |
 | `pack-2-explorer-50.md` | Nouveaux événements Explorer | 50 | Ensuite |
-| `pack-3-dormir-50.md` | Nouveaux événements Dormir | 50 | Ensuite |
+| ~~pack-3~~ | ✅ TERMINÉ (livré et intégré) | 50 | Fait |
 | `pack-4-mendier-voler-46.md` | Mendier (15) + Voler (31) | 46 | Ensuite |
 | `pack-5-suites-10.md` | Les 10 nouvelles suites narratives | 10 | Ensuite |
 | `pack-6-voyager-30.md` | Nouveaux événements Voyager | 30 | Ensuite |
