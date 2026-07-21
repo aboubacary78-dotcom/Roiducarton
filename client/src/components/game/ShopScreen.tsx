@@ -29,6 +29,10 @@ export default function ShopScreen() {
   const [buyAnimation, setBuyAnimation] = useState<string | null>(null);
   const [shopEvent, setShopEvent] = useState<ShopEvent | null>(null);
   const [reopeningId, setReopeningId] = useState<string | null>(null);
+  // Combien de fois chaque article a été acheté dans cette visite de boutique :
+  // affiché en badge « ×N » pour rendre l'achat répété lisible (on reste sur
+  // place, on peut ré-appuyer autant qu'on veut tant qu'on a de l'argent).
+  const [bought, setBought] = useState<Record<string, number>>({});
 
   // « Coup de main » via pub récompensée : la boutique rouvre, avec une
   // résolution aussi absurde que la panne.
@@ -54,6 +58,7 @@ export default function ShopScreen() {
     } else {
       setShopEvent(null);
     }
+    setBought({});
   }, [selectedShop]);
 
   const handleBuy = (item: ShopItem) => {
@@ -62,13 +67,10 @@ export default function ShopScreen() {
     if (item.giveItem && char.inventory.length >= 20) return;
 
     setBuyAnimation(item.id);
-    setTimeout(() => setBuyAnimation(null), 600);
+    setTimeout(() => setBuyAnimation(null), 350);
+    setBought((b) => ({ ...b, [item.id]: (b[item.id] || 0) + 1 }));
     playCoin();
     dispatch({ type: 'BUY_ITEM', shopItem: item, actualPrice });
-    pushToast(
-      `${tr('Acheté', 'Bought')} : ${tc(item.name)}${actualPrice > 0 ? ` (−${actualPrice}€)` : ''}`,
-      { emoji: '🛍️', tone: 'good' },
-    );
   };
 
   const handleShopEvent = () => {
@@ -186,6 +188,11 @@ export default function ShopScreen() {
                       >
                         {tr(cat.label, cat.labelEn)}
                       </span>
+                      {bought[item.id] > 0 && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-[#4A9B5F]/15 text-[#3d8b4f]">
+                          ✓ ×{bought[item.id]}
+                        </span>
+                      )}
                     </div>
                     <p className="text-[11px] text-[#6B5740] mt-0.5">{tc(item.description)}</p>
                     <div className="flex gap-1.5 flex-wrap mt-1.5">

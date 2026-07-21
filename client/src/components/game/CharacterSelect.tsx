@@ -1,7 +1,9 @@
 import { useGame, type Character } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import CardboardAvatar from './CardboardAvatar';
 import { useLang, tr, tc } from '@/lib/lang';
+import { showRewarded, isAdsRemoved } from '@/lib/ads';
 
 function CharacterCard({ char, index, onSelect }: { char: Character; index: number; onSelect: () => void }) {
   return (
@@ -64,6 +66,27 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
 export default function CharacterSelect() {
   const { state, dispatch } = useGame();
   useLang();
+  // Le premier relancer du tirage est offert ; les suivants passent par une
+  // pub récompensée (gratuits si le joueur a acheté « Sans pub »).
+  const [rerolls, setRerolls] = useState(0);
+  const [loadingAd, setLoadingAd] = useState(false);
+  const freeReroll = rerolls === 0 || isAdsRemoved();
+
+  async function handleReroll() {
+    if (loadingAd) return;
+    if (freeReroll) {
+      setRerolls((n) => n + 1);
+      dispatch({ type: 'GENERATE_CHARACTERS' });
+      return;
+    }
+    setLoadingAd(true);
+    const ok = await showRewarded();
+    setLoadingAd(false);
+    if (ok) {
+      setRerolls((n) => n + 1);
+      dispatch({ type: 'GENERATE_CHARACTERS' });
+    }
+  }
 
   return (
     <div className="min-h-screen bg-texture p-4 flex flex-col gap-4">
@@ -91,15 +114,20 @@ export default function CharacterSelect() {
         ))}
       </div>
 
-      {/* Reroll */}
+      {/* Reroll : 1er offert, puis pub récompensée */}
       <motion.button
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7 }}
-        onClick={() => dispatch({ type: 'START_GAME' })}
-        className="text-sm text-[#A08B70] font-medium text-center py-2 hover:text-[#6B5740] transition-colors"
+        onClick={handleReroll}
+        disabled={loadingAd}
+        className="text-sm text-[#A08B70] font-medium text-center py-2 hover:text-[#6B5740] transition-colors disabled:opacity-60"
       >
-        {tr('Relancer les dés', 'Reroll')}
+        {loadingAd
+          ? tr('⏳ Chargement…', '⏳ Loading…')
+          : freeReroll
+            ? tr('🎲 Relancer les dés', '🎲 Reroll')
+            : tr('🎬 Relancer les dés (pub)', '🎬 Reroll (ad)')}
       </motion.button>
     </div>
   );

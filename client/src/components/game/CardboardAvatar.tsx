@@ -40,7 +40,7 @@ function hashSeed(s: string): number {
   return h >>> 0;
 }
 
-export default function CardboardAvatar({ seed, gender, size = 40, className = '', accessories }: { seed: string; gender?: 'm' | 'f'; size?: number; className?: string; accessories?: Partial<Record<AccessorySlot, string>> }) {
+export default function CardboardAvatar({ seed, gender, size = 40, className = '', accessories, condition }: { seed: string; gender?: 'm' | 'f'; size?: number; className?: string; accessories?: Partial<Record<AccessorySlot, string>>; condition?: number }) {
   const s = seed || 'anon';
   const female = gender === 'f';
   // Un tirage indépendant par caractéristique (graine + sel).
@@ -631,6 +631,32 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         <g stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round">
           <path d="M28 30 Q26 14 52 15 Q76 16 72 27 Q58 31 42 31 Q34 31 28 30 Z" fill="#B5432F" />
           <circle cx="52" cy="14" r="2" fill="#8E3423" />
+        </g>
+      )}
+
+      {/* ---- Calque d'ÉTAT (dérivé des jauges, voir condition) ----
+          Superposé au visage : bas = mine dégradée (teint verdâtre, cernes,
+          sueur, bouche tombante) ; haut = bonne forme (joues roses, éclat). */}
+      {typeof condition === 'number' && condition < 0.34 && (
+        <g style={{ pointerEvents: 'none' }}>
+          {/* voile blafard/verdâtre */}
+          <rect x="14" y="26" width="72" height="60" rx="26" fill="#7C8B5A" opacity={0.16 + (0.34 - condition) * 0.5} />
+          {/* cernes */}
+          <path d={`M${eyeL - 6} ${eyeY + 6} Q${eyeL} ${eyeY + 9} ${eyeL + 6} ${eyeY + 6}`} stroke="#6E5A4E" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
+          <path d={`M${eyeR - 6} ${eyeY + 6} Q${eyeR} ${eyeY + 9} ${eyeR + 6} ${eyeY + 6}`} stroke="#6E5A4E" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
+          {/* bouche tombante par-dessus */}
+          <path d="M42 70 Q50 64 58 70" stroke={OUTLINE} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+          {/* goutte de sueur */}
+          <path d="M74 40 q-3 5 0 8 q3 -3 0 -8 Z" fill="#8FB8D8" stroke="#5E86A6" strokeWidth="0.6" opacity="0.9" />
+        </g>
+      )}
+      {typeof condition === 'number' && condition > 0.72 && (
+        <g style={{ pointerEvents: 'none' }}>
+          {/* joues roses */}
+          <circle cx="30" cy="60" r="6" fill="#E8927C" opacity={0.18 + (condition - 0.72) * 0.6} />
+          <circle cx="70" cy="60" r="6" fill="#E8927C" opacity={0.18 + (condition - 0.72) * 0.6} />
+          {/* petite étincelle de forme */}
+          <path d="M78 30 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4 Z" fill="#F5D06B" opacity="0.9" />
         </g>
       )}
     </svg>

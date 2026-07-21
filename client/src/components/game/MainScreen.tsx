@@ -109,11 +109,23 @@ function getAmbientText(location: string, day: number): string {
   return texts[day % texts.length];
 }
 
+// Couleur d'état de l'avatar : du vert (en forme) au rouge (au plus mal).
+function conditionColor(c: number): string {
+  if (c >= 0.56) return '#4A9B5F';
+  if (c >= 0.4) return '#D9A73E';
+  if (c >= 0.24) return '#E8842C';
+  return '#D94F4F';
+}
+
 export default function MainScreen() {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character!;
   const loc = LOCATIONS[char.location];
+  // État général (0 = à l'agonie, 1 = en pleine forme) : moyenne des jauges
+  // vitales, hors dignité (plus sociale). Nourrit le visage et le liseré de
+  // l'avatar pour rendre lisible la dégradation ou le mieux-être.
+  const condition = (char.stats.health + char.stats.mental + char.stats.hunger + char.stats.thirst + char.stats.sleep) / 500;
   const actionsLeft = state.maxDayActions - state.dayActions;
   // Avancement de la journée (0 = matin frais, 1 = nuit tombée) : ce sont les
   // actions consommées qui font tourner la lumière sur la scène du quartier.
@@ -139,10 +151,11 @@ export default function MainScreen() {
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => { playClick(); dispatch({ type: 'SET_SCREEN', screen: 'wardrobe' }); }}
-              className="relative w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-[#E8D5C0] active:scale-95 transition-transform"
+              className="relative w-10 h-10 rounded-xl overflow-hidden shadow-sm active:scale-95 transition-transform"
+              style={{ border: `2px solid ${conditionColor(condition)}`, transition: 'border-color 0.6s' }}
               aria-label="Personnaliser mon personnage"
             >
-              <CardboardAvatar seed={char.seed} gender={char.gender} size={40} accessories={getEquipped()} />
+              <CardboardAvatar seed={char.seed} gender={char.gender} size={40} accessories={getEquipped()} condition={condition} />
               <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#B8860B] text-white text-[9px] flex items-center justify-center shadow">✎</span>
             </button>
             <div>
