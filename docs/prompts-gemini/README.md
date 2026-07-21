@@ -61,3 +61,6 @@ décor, ambiance opposée. Même protocole que les packs précédents.
 Sursaut/fantômes, bannières Cimetière/Registre. Presque tous SANS le héros
 (voir l'avertissement en tête du pack). Les emplacements sont déjà câblés dans
 le code : chaque image s'affiche dès qu'elle arrive.
+
+### Phase 2 — suivi
+- ✅ `phase2-pack-1-explorer-A.md` : 50/50 intégrées.
