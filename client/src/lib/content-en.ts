@@ -6,6 +6,14 @@
  * complète la traduction, par lots.
  */
 export const CONTENT_EN: Record<string, string> = {
+  // ============ BRICOLAGE (établi) ============
+  'Réchaud de fortune': 'Makeshift stove',
+  'Matelas de carton': 'Cardboard mattress',
+  'Arme de fortune': 'Makeshift weapon',
+  'Protection de fortune': 'Makeshift armor',
+  'Trousse de secours bricolée': 'Rigged first-aid kit',
+  'Talisman de carton': 'Cardboard talisman',
+
   // ============ ENNEMIS ============
   'Commerçant Furieux': 'Furious Shopkeeper',
   'Il vous a pris la main dans le sac. Et il a de la poigne.': 'He caught you red-handed. And he\'s got a grip.',

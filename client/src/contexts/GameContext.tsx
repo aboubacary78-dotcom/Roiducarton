@@ -32,6 +32,7 @@ import {
   combatDeathMessage, SIGNS, SPECIAL_DEFS,
 } from './data/combat';
 import { getHeistTarget, HEIST_TARGETS } from './data/heist';
+import { RECIPES, recipeCost, pickMaterials } from './data/crafting';
 
 // Façade stable : ré-exporte types & données pour les composants existants.
 export * from './types';
@@ -44,6 +45,7 @@ export * from './data/shops';
 export * from './data/events';
 export * from './data/combat';
 export * from './data/heist';
+export * from './data/crafting';
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
@@ -166,6 +168,7 @@ type GameAction =
   | { type: 'SET_SCREEN'; screen: GameScreen }
   | { type: 'USE_ITEM'; itemId: string }
   | { type: 'SELL_ITEM'; itemId: string }
+  | { type: 'CRAFT'; recipeId: string }
   | { type: 'GAME_OVER' }
   | { type: 'RESTART' }
   | { type: 'REVIVE' }
@@ -763,6 +766,34 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         character: { ...state.character, money: state.character.money + price, inventory: newInv },
         eventResult: { text: L(`Vous revendez ${item.name} pour ${price}€. Chaque euro compte.`, `You sell the ${tc(item.name)} for €${price}. Every euro counts.`), moneyChange: price },
+      };
+    }
+
+    case 'CRAFT': {
+      if (!state.character) return state;
+      const c = state.character;
+      const recipe = RECIPES.find(r => r.id === action.recipeId);
+      if (!recipe) return state;
+      // Les recettes avancées demandent le trait Bricoleur.
+      if (recipe.advanced && !hasTrait(c, 'bricoleur')) return state;
+      const cost = recipeCost(recipe, c);
+      // Consomme les objets « bazar » les moins précieux d'abord (par index).
+      const rmIdx = pickMaterials(c, cost);
+      if (rmIdx.length < cost) return state;
+      const rm = new Set(rmIdx);
+      const result = recipe.make();
+      // On retire au moins un objet avant d'en ajouter un : jamais de débordement.
+      const newInv = c.inventory.filter((_, i) => !rm.has(i));
+      newInv.push(result);
+      return {
+        ...state,
+        character: { ...c, inventory: newInv },
+        eventResult: {
+          text: L(
+            `Vos mains se souviennent : vous bricolez ${recipe.name} ! Rien ne se perd, tout se transforme.`,
+            `Your hands remember: you tinker up ${tc(recipe.name)}! Nothing is lost, everything gets remade.`,
+          ),
+        },
       };
     }
 

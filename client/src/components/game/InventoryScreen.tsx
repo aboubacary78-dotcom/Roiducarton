@@ -1,4 +1,4 @@
-import { useGame, getSellPrice, hasTrait, STAT_META, type Stats } from '@/contexts/GameContext';
+import { useGame, getSellPrice, hasTrait, STAT_META, craftableRecipes, recipeCost, materialCount, canCraft, type Stats } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
@@ -17,6 +17,9 @@ export default function InventoryScreen() {
   const { state, dispatch } = useGame();
   const en = useLang() === 'en';
   const char = state.character!;
+  const recipes = craftableRecipes(char);
+  const materials = materialCount(char);
+  const isBricoleur = hasTrait(char, 'bricoleur');
 
   return (
     <div className="min-h-screen bg-texture p-4 flex flex-col gap-3">
@@ -107,6 +110,78 @@ export default function InventoryScreen() {
           })}
         </div>
       )}
+
+      {/* Établi : transformer le bazar en objets utiles */}
+      <motion.div
+        initial={{ y: 8, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="craft-card p-3.5 flex flex-col gap-2.5"
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-[#2A1F1A] flex items-center gap-1.5">
+            🔨 {tr('Établi', 'Workbench')}
+          </h3>
+          <span
+            className="text-[10px] px-2 py-0.5 rounded-full font-mono font-medium"
+            style={{ backgroundColor: '#B8860B15', color: '#B8860B' }}
+          >
+            🧩 {materials} {tr('bazar', 'junk')}
+          </span>
+        </div>
+        <p className="text-[11px] text-[#8B6B4A] -mt-1.5 leading-snug">
+          {isBricoleur
+            ? tr('Vos mains d\'or transforment le bazar : recettes avancées débloquées, un objet de moins par recette.',
+                 'Your golden hands turn junk into gear: advanced recipes unlocked, one fewer item per recipe.')
+            : tr('Assemblez des objets « bazar » pour bricoler quelque chose d\'utile.',
+                 'Combine "junk" items to tinker something useful.')}
+        </p>
+
+        {materials === 0 ? (
+          <p className="text-xs text-[#A08B70] italic py-1">
+            {tr('Ramassez du bazar (objets sans usage) pour bricoler.', 'Pick up junk (useless items) to start tinkering.')}
+          </p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {recipes.map((recipe) => {
+              const cost = recipeCost(recipe, char);
+              const ok = canCraft(recipe, char);
+              return (
+                <div
+                  key={recipe.id}
+                  className="flex items-center gap-2.5 rounded-lg p-2"
+                  style={{ background: '#F5EDE4', border: '1px solid #E8D5C0', opacity: ok ? 1 : 0.55 }}
+                >
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0" style={{ background: '#fff', border: '1px solid #E8D5C0' }}>
+                    {recipe.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-semibold text-[#2A1F1A]">{tc(recipe.name)}</span>
+                      {recipe.advanced && (
+                        <span className="text-[8px] px-1 py-0.5 rounded-full font-bold" style={{ background: '#7B68EE20', color: '#6A57DD' }}>
+                          🔨 {tr('Bricoleur', 'Tinkerer')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-[#8B6B4A] leading-snug mt-0.5">{en ? recipe.hintEn : recipe.hint}</p>
+                  </div>
+                  <button
+                    onClick={() => ok && dispatch({ type: 'CRAFT', recipeId: recipe.id })}
+                    disabled={!ok}
+                    className="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg shrink-0 disabled:cursor-not-allowed"
+                    style={ok
+                      ? { background: 'linear-gradient(135deg, #D4874D, #B86B34)', color: '#fff', boxShadow: '0 2px 6px rgba(184,107,52,0.25)' }
+                      : { background: '#EDE2D4', color: '#B0A088' }}
+                  >
+                    {tr('Bricoler', 'Craft')} · 🧩{cost}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </motion.div>
 
       <button
         onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
