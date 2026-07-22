@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META } from '@/contexts/GameContext';
+import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay, SOLIDARITY_FLAG, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META } from '@/contexts/GameContext';
 import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
@@ -93,7 +93,7 @@ export default function ShopScreen() {
   }
 
   const handleBuy = (item: ShopItem) => {
-    const actualPrice = getDiscountedPrice(item.price, char.respect);
+    const actualPrice = marketPrice(item, selectedShop!.id, char.respect, char.day).final;
     if (char.money < actualPrice) return;
     if (item.giveItem && char.inventory.length >= 20) return;
 
@@ -117,6 +117,22 @@ export default function ShopScreen() {
       setShopEvent(null);
     }
   };
+
+  // Distribution solidaire du jour : une part gratuite via pub récompensée,
+  // une seule fois par jour (mémorisée par un drapeau daté).
+  const solidarityDay = isSolidarityDay(char.day);
+  const solidarityDone = char.activeFlags.includes(SOLIDARITY_FLAG(char.day));
+  const [claimingSolid, setClaimingSolid] = useState(false);
+  async function claimSolidarity() {
+    if (claimingSolid || solidarityDone) return;
+    setClaimingSolid(true);
+    const rewarded = await showRewarded();
+    if (rewarded) {
+      dispatch({ type: 'CLAIM_SOLIDARITY' });
+      pushToast(tr('Distribution solidaire : soupe, pain et eau. Ça tiendra au chaud.', 'Food bank: soup, bread and water. That\'ll keep you going.'), { emoji: '🥣', tone: 'good' });
+    }
+    setClaimingSolid(false);
+  }
 
   // Barre d'argent : argent animé + étiquettes qui s'envolent + total dépensé
   // + remise fidélité.
@@ -197,6 +213,21 @@ export default function ShopScreen() {
           )}
         </motion.div>
 
+        {/* Bandeau braderie : cette boutique est en promo aujourd'hui */}
+        {getBraderie(selectedShop.id, char.day) > 0 && (
+          <motion.div
+            initial={{ scale: 0.96, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex items-center gap-2 py-2 px-3 rounded-lg shrink-0"
+            style={{ background: 'linear-gradient(135deg, #D9743E15, #B8860B15)', border: '1px solid #D9743E40' }}
+          >
+            <span className="text-lg">🏷️</span>
+            <p className="text-xs font-bold text-[#B8541E]">
+              {tr('Braderie du jour', 'Today\'s clearance sale')} · −{Math.round(getBraderie(selectedShop.id, char.day) * 100)}% {tr('sur tout !', 'on everything!')}
+            </p>
+          </motion.div>
+        )}
+
         {/* Shop Event */}
         <AnimatePresence>
           {shopEvent && (
@@ -223,8 +254,8 @@ export default function ShopScreen() {
         <div className="flex flex-col gap-2 flex-1 overflow-y-auto -mx-1 px-1">
           {selectedShop.items.map((item, i) => {
             const cat = CATEGORY_COLORS[item.category] || CATEGORY_COLORS.special;
-            const actualPrice = getDiscountedPrice(item.price, char.respect);
-            const hasDiscount = actualPrice < item.price;
+            const { base, final: actualPrice, braderie: itemBraderie } = marketPrice(item, selectedShop.id, char.respect, char.day);
+            const hasDiscount = actualPrice < base;
             const canAfford = char.money >= actualPrice;
             const inventoryFull = !!(item.giveItem && char.inventory.length >= 20);
             const isBuying = buyAnimation === item.id;
@@ -270,6 +301,11 @@ export default function ShopScreen() {
                       >
                         {tr(cat.label, cat.labelEn)}
                       </span>
+                      {itemBraderie > 0 && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#D9743E]/15 text-[#B8541E]">
+                          🏷️ {tr('promo', 'sale')} −{Math.round(itemBraderie * 100)}%
+                        </span>
+                      )}
                       {count > 0 && (
                         <motion.span
                           key={count}
@@ -331,7 +367,7 @@ export default function ShopScreen() {
                     >
                       {hasDiscount ? (
                         <>
-                          <span className="text-[9px] line-through opacity-60 font-mono">{item.price}€</span>
+                          <span className="text-[9px] line-through opacity-60 font-mono">{base}€</span>
                           <span className="text-sm font-bold font-mono">{actualPrice}€</span>
                         </>
                       ) : (
@@ -401,6 +437,38 @@ export default function ShopScreen() {
         </div>
       )}
 
+      {/* Distribution solidaire du jour (part gratuite via pub) */}
+      {solidarityDay && (
+        <motion.div
+          initial={{ y: 8, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="craft-card p-3.5 flex items-center gap-3"
+          style={{ border: '1px solid #4A9B5F40', background: 'linear-gradient(135deg, #4A9B5F10, transparent)' }}
+        >
+          <span className="text-2xl shrink-0">🥣</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-[#2A1F1A]">{tr('Distribution solidaire', 'Food bank today')}</p>
+            <p className="text-[11px] text-[#6B5740] leading-snug">
+              {tr('Une tournée passe aujourd\'hui : repartez avec soupe, pain et eau.', 'A round is passing today: leave with soup, bread and water.')}
+            </p>
+          </div>
+          {solidarityDone ? (
+            <span className="shrink-0 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-[#4A9B5F]/15 text-[#3d8b4f]">
+              {tr('✅ Récupéré', '✅ Claimed')}
+            </span>
+          ) : (
+            <button
+              onClick={claimSolidarity}
+              disabled={claimingSolid}
+              className="shrink-0 py-2 px-3 text-xs font-semibold text-white rounded-lg disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)' }}
+            >
+              {claimingSolid ? tr('⏳', '⏳') : tr('🎬 Ma part (pub)', '🎬 My share (ad)')}
+            </button>
+          )}
+        </motion.div>
+      )}
+
       {shops.length === 0 ? (
         <div className="craft-card p-8 text-center">
           <p className="text-3xl mb-2">🏜️</p>
@@ -409,10 +477,11 @@ export default function ShopScreen() {
       ) : (
         <div className="flex flex-col gap-2">
           {shops.map((shop, i) => {
-            const prices = shop.items.map(it => getDiscountedPrice(it.price, char.respect));
+            const prices = shop.items.map(it => marketPrice(it, shop.id, char.respect, char.day).final);
             const cheapest = Math.min(...prices);
             const mostExpensive = Math.max(...prices);
             const canAffordSomething = prices.some(p => char.money >= p);
+            const shopBraderie = getBraderie(shop.id, char.day);
             // Boutique en panne/fermée : raison loufoque + « coup de main » via pub.
             const closed = shopClosure(char, shop.id);
             const daysLeft = closed ? closed.untilDay - char.day : 0;
@@ -467,7 +536,14 @@ export default function ShopScreen() {
                   {shop.emoji}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-[#2A1F1A] block">{tc(shop.name)}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-semibold text-[#2A1F1A]">{tc(shop.name)}</span>
+                    {shopBraderie > 0 && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#D9743E]/15 text-[#B8541E] whitespace-nowrap">
+                        🏷️ {tr('braderie', 'sale')} −{Math.round(shopBraderie * 100)}%
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-[#6B5740] block">{tc(shop.description)}</span>
                   <span className="text-[10px] font-mono text-[#A08B70]">
                     {shop.items.length} {tr('articles', 'items')} · {cheapest === mostExpensive ? `${cheapest}€` : `${cheapest}€ – ${mostExpensive}€`}

@@ -17,6 +17,7 @@ import InventoryScreen from '@/components/game/InventoryScreen';
 import GameOverScreen from '@/components/game/GameOverScreen';
 import CombatScreen from '@/components/game/CombatScreen';
 import EventResultOverlay from '@/components/game/EventResultOverlay';
+import OriginStoryOverlay from '@/components/game/OriginStoryOverlay';
 import ShopScreen from '@/components/game/ShopScreen';
 import SettingsScreen from '@/components/game/SettingsScreen';
 import StealHeist from '@/components/game/StealHeist';
@@ -95,8 +96,11 @@ export default function Home() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Tutoriel guidé (écran principal uniquement) */}
-        {state.screen === 'main' && <TutorialOverlay />}
+        {/* Récit d'origine « La Chute de… », une fois au départ de la partie */}
+        <OriginStoryOverlay />
+
+        {/* Tutoriel guidé (écran principal uniquement, après le récit d'origine) */}
+        {state.screen === 'main' && state.character?.activeFlags?.includes('origin-vu') && <TutorialOverlay />}
 
         {/* Overlay météo : actif sur tous les écrans de jeu sauf titre et sélection */}
         {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game', 'wardrobe'].includes(state.screen) && (

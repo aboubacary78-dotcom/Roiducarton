@@ -21,7 +21,7 @@ import { generateCharacter, hasTrait, computeScore, genderFromName, HERITAGE_KIT
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
 import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
 import { ENEMIES, rollSignRound } from './data/enemies';
-import { SHOPS, shopClosure, rollShopClosure, getSellPrice } from './data/shops';
+import { SHOPS, shopClosure, rollShopClosure, getSellPrice, SOLIDARITY_GIFT, SOLIDARITY_FLAG } from './data/shops';
 import {
   generateEvents, generateBegEvents, generateRestEvents, generateTravelEvent,
   freshPool, rememberEvent, flavorFrom, makeLegendEvent, dueSursaut,
@@ -46,6 +46,7 @@ export * from './data/events';
 export * from './data/combat';
 export * from './data/heist';
 export * from './data/crafting';
+export * from './data/backstory';
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
@@ -181,6 +182,8 @@ type GameAction =
   | { type: 'PLAY_CARD'; cardId: string; junkItemId?: string }
   | { type: 'BUY_ITEM'; shopItem: ShopItem; actualPrice: number }
   | { type: 'REOPEN_SHOP'; shopId: string }
+  | { type: 'CLAIM_SOLIDARITY' }
+  | { type: 'DISMISS_ORIGIN' }
   | { type: 'TRIGGER_SHOP_EVENT'; event: ShopEvent };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -1221,6 +1224,35 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...state.character, stats: newStats, money: newMoney, inventory: newInventory },
+      };
+    }
+
+    case 'DISMISS_ORIGIN': {
+      // Le récit d'origine ne se montre qu'au départ : on pose un drapeau
+      // (sauvegardé avec le personnage) pour ne plus le rejouer.
+      if (!state.character) return state;
+      if (state.character.activeFlags.includes('origin-vu')) return state;
+      return {
+        ...state,
+        character: { ...state.character, activeFlags: [...state.character.activeFlags, 'origin-vu'] },
+      };
+    }
+
+    case 'CLAIM_SOLIDARITY': {
+      if (!state.character) return state;
+      const c = state.character;
+      const flag = SOLIDARITY_FLAG(c.day);
+      // Une seule part par jour.
+      if (c.activeFlags.includes(flag)) return state;
+      // On ajoute les dons dans la limite du sac (20).
+      const newInventory = [...c.inventory];
+      for (const gift of SOLIDARITY_GIFT) {
+        if (newInventory.length >= 20) break;
+        newInventory.push({ ...gift });
+      }
+      return {
+        ...state,
+        character: { ...c, inventory: newInventory, activeFlags: [...c.activeFlags, flag] },
       };
     }
 

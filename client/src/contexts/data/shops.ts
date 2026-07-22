@@ -335,3 +335,67 @@ export function getNextDiscountTier(respect: number): { needed: number; discount
 export function getSellPrice(item: InventoryItem): number {
   return Math.max(1, Math.round((item.value || 1) * 0.6));
 }
+
+// ============ ÉCONOMIE : PRIX GONFLÉS, BRADERIES & SOLIDARITÉ ============
+
+// Coup de pouce d'inflation : l'argent doit peser. Le prix « catalogue » (celui
+// barré à l'écran) est le prix de base × ce facteur. On change une constante et
+// toute la boutique suit, barré compris.
+export const PRICE_SCALE = 1.5;
+
+export function getBasePrice(item: ShopItem): number {
+  if (!item.price) return 0;
+  return Math.max(1, Math.round(item.price * PRICE_SCALE));
+}
+
+// Petit générateur déterministe seedé par le jour : la braderie et la
+// distribution solidaire sont les mêmes pour tout le monde à un jour donné,
+// sans être stockées (pas de sauvegarde à alourdir).
+function hashDay(day: number, salt = 0): number {
+  let h = ((day + 1) * 2654435761 + salt * 40503) >>> 0;
+  h = (h ^ (h >>> 13)) >>> 0;
+  h = (h * 1274126177) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+
+// Braderie du jour : une boutique tournante affiche une remise « coup de folie ».
+export function getBraderieShop(day: number): { shopId: string; discount: number } {
+  const shop = SHOPS[hashDay(day, 1) % SHOPS.length];
+  const discount = [0.2, 0.3, 0.4][hashDay(day, 2) % 3];
+  return { shopId: shop.id, discount };
+}
+
+// Remise braderie applicable à une boutique donnée ce jour-là (0 sinon).
+export function getBraderie(shopId: string, day: number): number {
+  return getBraderieShop(day).shopId === shopId ? getBraderieShop(day).discount : 0;
+}
+
+// Prix final d'un article : base gonflée, puis remises braderie et respect
+// cumulées (multiplicatives). Renvoie aussi de quoi afficher le barré/les tags.
+export function marketPrice(item: ShopItem, shopId: string, respect: number, day: number): {
+  base: number; final: number; braderie: number;
+} {
+  const base = getBasePrice(item);
+  if (base === 0) return { base: 0, final: 0, braderie: 0 };
+  const braderie = getBraderie(shopId, day);
+  const resp = getDiscount(respect);
+  const combined = 1 - (1 - braderie) * (1 - resp);
+  const final = Math.max(1, Math.round(base * (1 - combined)));
+  return { base, final, braderie };
+}
+
+// Distribution solidaire : certains jours, une banque alimentaire fait une
+// tournée. Le joueur peut « récupérer sa part » (via pub récompensée) une fois
+// par jour. On garde le thème sans être punitif.
+export function isSolidarityDay(day: number): boolean {
+  return hashDay(day, 7) % 2 === 0;
+}
+
+export const SOLIDARITY_FLAG = (day: number) => `solidarite-${day}`;
+
+// Ce qu'on repart avec : de quoi tenir un jour de plus.
+export const SOLIDARITY_GIFT: InventoryItem[] = [
+  { id: 'don-soupe', name: 'Soupe populaire', emoji: '🥣', type: 'food', value: 1, effect: { hunger: 25, health: 5 } },
+  { id: 'don-pain', name: 'Pain solidaire', emoji: '🍞', type: 'food', value: 1, effect: { hunger: 18 } },
+  { id: 'don-eau', name: 'Bouteille d\'eau', emoji: '💧', type: 'food', value: 1, effect: { thirst: 22 } },
+];
