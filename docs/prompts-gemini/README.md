@@ -33,6 +33,14 @@ Gemini Pro...) : chaque pack contient tout le contexte, la DA et le protocole.
 l'intégration) ; 1 fichier corrompu. D'où : webp réel OU png honnête ≤ 1600 px,
 < 200 Ko visé, et livraison zip uniquement.
 
+## Pack Origines (récit d'origine « La Chute de… »)
+
+`pack-origines-17.md` : **17 images**, une par métier, pour l'écran d'intro qui
+raconte comment le personnage a fini à la rue. **Particularité** : le perso y
+est encore **présentable** (dans sa tenue de métier), saisi au moment comique
+de la bascule — pas encore le SDF barbu. En leur absence, l'écran retombe
+proprement sur une scène de rue dessinée.
+
 ## Phase 2 (plus tard, optionnel)
 
 Les variantes d'issue `result-<id>-good/bad.webp` des 186 nouveaux événements
