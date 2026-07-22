@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGame, getShopsForLocation, getDiscountedPrice, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META } from '@/contexts/GameContext';
 import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import { playCoin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
@@ -19,6 +19,20 @@ const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string
   special: { bg: '#B8860B15', color: '#B8860B', label: 'Service', labelEn: 'Service' },
 };
 
+// Compteur d'argent qui « roule » d'une valeur à l'autre : l'œil suit la
+// dépense au lieu de voir le chiffre sauter d'un coup.
+function MoneyCounter({ value }: { value: number }) {
+  const mv = useMotionValue(value);
+  const [display, setDisplay] = useState(value);
+  useEffect(() => {
+    const controls = animate(mv, value, {
+      duration: 0.45, ease: 'easeOut',
+      onUpdate: (v) => setDisplay(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+  return <>{display}€</>;
+}
 
 export default function ShopScreen() {
   const { state, dispatch } = useGame();
@@ -29,10 +43,12 @@ export default function ShopScreen() {
   const [buyAnimation, setBuyAnimation] = useState<string | null>(null);
   const [shopEvent, setShopEvent] = useState<ShopEvent | null>(null);
   const [reopeningId, setReopeningId] = useState<string | null>(null);
-  // Combien de fois chaque article a été acheté dans cette visite de boutique :
-  // affiché en badge « ×N » pour rendre l'achat répété lisible (on reste sur
-  // place, on peut ré-appuyer autant qu'on veut tant qu'on a de l'argent).
+  // Combien de fois chaque article a été acheté dans cette visite (badge ×N).
   const [bought, setBought] = useState<Record<string, number>>({});
+  // Total dépensé pendant cette visite de boutique (barre d'argent).
+  const [spent, setSpent] = useState(0);
+  // Petites étiquettes « -X€ » qui s'envolent depuis l'argent à chaque achat.
+  const [deltas, setDeltas] = useState<{ id: number; amt: number }[]>([]);
 
   // « Coup de main » via pub récompensée : la boutique rouvre, avec une
   // résolution aussi absurde que la panne.
@@ -58,8 +74,23 @@ export default function ShopScreen() {
     } else {
       setShopEvent(null);
     }
+    // Nouvelle boutique = nouvelle visite : on repart de zéro.
     setBought({});
+    setSpent(0);
+    setDeltas([]);
   }, [selectedShop]);
+
+  // Résumé compact des effets d'un achat, pour le toast de confirmation.
+  function buyToast(item: ShopItem) {
+    if (item.giveItem) {
+      pushToast(`${item.emoji} ${tr('Ajouté au sac', 'Added to bag')} : ${tc(item.name)}`, { emoji: '🛍️', tone: 'good' });
+      return;
+    }
+    const parts = Object.entries(item.effect || {})
+      .filter(([, v]) => !!v)
+      .map(([k, v]) => `${STAT_META[k as keyof Stats]?.emoji ?? ''}${v! > 0 ? '+' : ''}${v}`);
+    pushToast(`${item.emoji} ${tc(item.name)}${parts.length ? ' · ' + parts.join(' ') : ''}`, { emoji: '🛍️', tone: 'good' });
+  }
 
   const handleBuy = (item: ShopItem) => {
     const actualPrice = getDiscountedPrice(item.price, char.respect);
@@ -69,7 +100,14 @@ export default function ShopScreen() {
     setBuyAnimation(item.id);
     setTimeout(() => setBuyAnimation(null), 350);
     setBought((b) => ({ ...b, [item.id]: (b[item.id] || 0) + 1 }));
+    setSpent((s) => s + actualPrice);
+    if (actualPrice > 0) {
+      const id = Date.now() + Math.random();
+      setDeltas((d) => [...d, { id, amt: actualPrice }]);
+      setTimeout(() => setDeltas((d) => d.filter((x) => x.id !== id)), 1000);
+    }
     playCoin();
+    buyToast(item);
     dispatch({ type: 'BUY_ITEM', shopItem: item, actualPrice });
   };
 
@@ -80,6 +118,44 @@ export default function ShopScreen() {
     }
   };
 
+  // Barre d'argent : argent animé + étiquettes qui s'envolent + total dépensé
+  // + remise fidélité.
+  const moneyBar = (
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-1.5">
+        <span className="text-base">💰</span>
+        <span className="relative font-mono font-bold text-[#B8860B] text-lg leading-none">
+          <MoneyCounter value={char.money} />
+          <AnimatePresence>
+            {deltas.map((d) => (
+              <motion.span
+                key={d.id}
+                initial={{ y: 0, opacity: 0.9, scale: 0.9 }}
+                animate={{ y: -22, opacity: 0, scale: 1 }}
+                transition={{ duration: 1 }}
+                className="absolute left-full ml-1 top-0 text-xs font-bold text-[#B84A3A] pointer-events-none whitespace-nowrap"
+              >
+                −{d.amt}€
+              </motion.span>
+            ))}
+          </AnimatePresence>
+        </span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        {spent > 0 && (
+          <span className="text-[10px] font-semibold text-[#8B6B4A] font-mono">
+            🛍️ {tr('dépensé', 'spent')} {spent}€
+          </span>
+        )}
+        {discountLabel && (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#4A9B5F]/15 text-[#3d8b4f]">
+            ⭐ {discountLabel}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+
   // Shop detail view
   if (selectedShop) {
     return (
@@ -88,24 +164,28 @@ export default function ShopScreen() {
         <motion.div
           initial={{ y: -15, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="craft-card p-3.5"
+          className="craft-card p-0 overflow-hidden shrink-0"
         >
-          <SafeImg src={`/assets/shop-${selectedShop.id}.webp`} className="w-full h-24 object-cover rounded-lg mb-2.5" />
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl">{selectedShop.emoji}</span>
-              <div>
-                <h2 className="text-lg text-[#2A1F1A]">{tc(selectedShop.name)}</h2>
-                <p className="text-xs text-[#8B6B4A]">{tc(selectedShop.description)}</p>
+          <div className="relative h-24 w-full">
+            <SafeImg src={`/assets/shop-${selectedShop.id}.webp`} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 flex items-end gap-2.5 p-3">
+              <span className="text-2xl drop-shadow">{selectedShop.emoji}</span>
+              <div className="min-w-0">
+                <h2 className="text-lg text-white drop-shadow leading-tight">{tc(selectedShop.name)}</h2>
+                <p className="text-[11px] text-white/85 drop-shadow leading-snug line-clamp-1">{tc(selectedShop.description)}</p>
               </div>
             </div>
-            <div className="text-right font-mono">
-              <div className="text-sm font-semibold text-[#B8860B]">{char.money}€</div>
-              {discountLabel && (
-                <div className="text-[10px] text-[#4A9B5F] font-medium">{discountLabel}</div>
-              )}
-            </div>
           </div>
+        </motion.div>
+
+        {/* Barre d'argent (toujours visible au-dessus de la liste) */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="craft-card px-3.5 py-2.5 shrink-0"
+        >
+          {moneyBar}
           {nextTier && (
             <div className="mt-2 pt-2 border-t border-[#E8D5C0] flex items-center gap-1.5 text-[10px] text-[#8B6B4A]">
               <span>⭐</span>
@@ -125,7 +205,7 @@ export default function ShopScreen() {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               onClick={handleShopEvent}
-              className="w-full craft-card p-3 text-left border-[#D4874D]/30 bg-[#D4874D]/5"
+              className="w-full craft-card p-3 text-left border-[#D4874D]/30 bg-[#D4874D]/5 shrink-0"
             >
               <div className="flex items-center gap-2">
                 <span className="text-xl">✨</span>
@@ -139,48 +219,50 @@ export default function ShopScreen() {
           )}
         </AnimatePresence>
 
-        {/* Discount Banner */}
-        {discountLabel && (
-          <motion.div
-            initial={{ x: -10, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            className="flex items-center gap-2 py-2 px-3 rounded-lg bg-[#4A9B5F]/6 border border-[#4A9B5F]/15"
-          >
-            <span className="text-sm">⭐</span>
-            <p className="text-xs text-[#4A9B5F] font-medium">
-              Réduction fidélité : {discountLabel}
-            </p>
-          </motion.div>
-        )}
-
         {/* Items */}
-        <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
+        <div className="flex flex-col gap-2 flex-1 overflow-y-auto -mx-1 px-1">
           {selectedShop.items.map((item, i) => {
             const cat = CATEGORY_COLORS[item.category] || CATEGORY_COLORS.special;
             const actualPrice = getDiscountedPrice(item.price, char.respect);
             const hasDiscount = actualPrice < item.price;
             const canAfford = char.money >= actualPrice;
-            const inventoryFull = item.giveItem && char.inventory.length >= 20;
-            const disabled = !canAfford || !!inventoryFull;
+            const inventoryFull = !!(item.giveItem && char.inventory.length >= 20);
             const isBuying = buyAnimation === item.id;
+            const count = bought[item.id] || 0;
+            const shortfall = actualPrice - char.money;
 
             return (
               <motion.div
                 key={item.id}
                 initial={{ y: 8, opacity: 0 }}
-                animate={{ y: 0, opacity: 1, scale: isBuying ? [1, 1.02, 1] : 1 }}
-                transition={{ delay: i * 0.04 }}
-                className={`craft-card p-3 ${disabled ? 'opacity-50' : ''}`}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: i * 0.035 }}
+                className="craft-card p-0 overflow-hidden relative"
               >
-                <div className="flex items-start gap-2.5">
+                {/* Liseré de catégorie à gauche */}
+                <span className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: cat.color }} />
+                {/* Flash vert bref à l'achat */}
+                <AnimatePresence>
+                  {isBuying && (
+                    <motion.span
+                      initial={{ opacity: 0.35 }}
+                      animate={{ opacity: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="absolute inset-0 bg-[#4A9B5F] pointer-events-none"
+                    />
+                  )}
+                </AnimatePresence>
+
+                <div className={`flex items-start gap-2.5 p-3 pl-4 ${inventoryFull ? 'opacity-60' : ''}`}>
                   <div
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0"
-                    style={{ backgroundColor: cat.bg, border: `1px solid ${cat.color}20` }}
+                    className="w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0"
+                    style={{ backgroundColor: cat.bg, border: `1px solid ${cat.color}25` }}
                   >
                     {item.emoji}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-sm font-semibold text-[#2A1F1A]">{tc(item.name)}</span>
                       <span
                         className="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
@@ -188,13 +270,19 @@ export default function ShopScreen() {
                       >
                         {tr(cat.label, cat.labelEn)}
                       </span>
-                      {bought[item.id] > 0 && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-[#4A9B5F]/15 text-[#3d8b4f]">
-                          ✓ ×{bought[item.id]}
-                        </span>
+                      {count > 0 && (
+                        <motion.span
+                          key={count}
+                          initial={{ scale: 0.6 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+                          className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-[#4A9B5F]/15 text-[#3d8b4f]"
+                        >
+                          ✓ ×{count}
+                        </motion.span>
                       )}
                     </div>
-                    <p className="text-[11px] text-[#6B5740] mt-0.5">{tc(item.description)}</p>
+                    <p className="text-[11px] text-[#6B5740] mt-0.5 leading-snug">{tc(item.description)}</p>
                     <div className="flex gap-1.5 flex-wrap mt-1.5">
                       {item.effect && Object.entries(item.effect).map(([key, val]) => {
                         const stat = STAT_META[key as keyof Stats];
@@ -222,24 +310,36 @@ export default function ShopScreen() {
                       )}
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleBuy(item)}
-                    disabled={disabled}
-                    className={`shrink-0 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-                      disabled
-                        ? 'bg-[#E8D5C0] text-[#A08B70] cursor-not-allowed'
-                        : 'btn-primary'
-                    }`}
-                  >
-                    {hasDiscount ? (
-                      <span className="flex flex-col items-center">
-                        <span className="text-[9px] line-through opacity-60">{item.price}€</span>
-                        <span>{actualPrice}€</span>
+
+                  {/* Bouton d'achat / état */}
+                  {inventoryFull ? (
+                    <div className="shrink-0 self-center px-3 py-2 rounded-lg bg-[#E8D5C0] text-center">
+                      <span className="text-[10px] font-semibold text-[#8B6B4A]">{tr('Sac plein', 'Bag full')}</span>
+                    </div>
+                  ) : !canAfford ? (
+                    <div className="shrink-0 self-center px-3 py-2 rounded-lg bg-[#D94F4F]/8 border border-[#D94F4F]/20 text-center flex flex-col items-center gap-0.5">
+                      <span className="text-xs font-bold text-[#B84A3A] font-mono">{actualPrice}€</span>
+                      <span className="text-[9px] font-medium text-[#B84A3A] whitespace-nowrap">
+                        {tr('manque', 'need')} {shortfall}€
                       </span>
-                    ) : (
-                      <span>{actualPrice === 0 ? tr('Gratuit', 'Free') : `${actualPrice}€`}</span>
-                    )}
-                  </button>
+                    </div>
+                  ) : (
+                    <motion.button
+                      onClick={() => handleBuy(item)}
+                      whileTap={{ scale: 0.9 }}
+                      className="shrink-0 self-center btn-primary px-3.5 py-2 rounded-xl flex flex-col items-center leading-none gap-0.5"
+                    >
+                      {hasDiscount ? (
+                        <>
+                          <span className="text-[9px] line-through opacity-60 font-mono">{item.price}€</span>
+                          <span className="text-sm font-bold font-mono">{actualPrice}€</span>
+                        </>
+                      ) : (
+                        <span className="text-sm font-bold font-mono">{actualPrice === 0 ? tr('Gratuit', 'Free') : `${actualPrice}€`}</span>
+                      )}
+                      <span className="text-[8px] opacity-85">🛒 {tr('Acheter', 'Buy')}</span>
+                    </motion.button>
+                  )}
                 </div>
               </motion.div>
             );
@@ -248,7 +348,7 @@ export default function ShopScreen() {
 
         <button
           onClick={() => setSelectedShop(null)}
-          className="action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
+          className="action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5 shrink-0"
         >
           ← {tr('Autres boutiques', 'Other shops')}
         </button>
@@ -304,7 +404,7 @@ export default function ShopScreen() {
       {shops.length === 0 ? (
         <div className="craft-card p-8 text-center">
           <p className="text-3xl mb-2">🏜️</p>
-          <p className="text-sm text-[#8B6B4A]">Aucune boutique ici. Essayez un autre quartier.</p>
+          <p className="text-sm text-[#8B6B4A]">{tr('Aucune boutique ici. Essayez un autre quartier.', 'No shops here. Try another neighborhood.')}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -370,7 +470,7 @@ export default function ShopScreen() {
                   <span className="text-sm font-semibold text-[#2A1F1A] block">{tc(shop.name)}</span>
                   <span className="text-xs text-[#6B5740] block">{tc(shop.description)}</span>
                   <span className="text-[10px] font-mono text-[#A08B70]">
-                    {shop.items.length} articles · {cheapest === mostExpensive ? `${cheapest}€` : `${cheapest}€ – ${mostExpensive}€`}
+                    {shop.items.length} {tr('articles', 'items')} · {cheapest === mostExpensive ? `${cheapest}€` : `${cheapest}€ – ${mostExpensive}€`}
                   </span>
                 </div>
                 <span className="text-[#A08B70]">→</span>
@@ -384,7 +484,7 @@ export default function ShopScreen() {
         onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
         className="mt-auto action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
       >
-        ← Retour
+        ← {tr('Retour', 'Back')}
       </button>
     </div>
   );

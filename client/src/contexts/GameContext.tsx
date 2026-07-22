@@ -1214,16 +1214,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       const newMoney = state.character.money - actualPrice;
-      const discountText = actualPrice < shopItem.price ? ` (r\u00e9duit de ${shopItem.price}\u20ac gr\u00e2ce \u00e0 votre r\u00e9putation)` : '';
 
+      // Pas d'overlay bloquant \u00e0 l'achat : la boutique donne un retour INLINE
+      // (argent anim\u00e9, -X\u20ac qui s'envole, badge \u00d7N, toast d'effet). On veut
+      // pouvoir encha\u00eener les achats sans qu'un pop-up coupe le geste.
       return {
         ...state,
         character: { ...state.character, stats: newStats, money: newMoney, inventory: newInventory },
-        eventResult: {
-          text: `Vous achetez ${shopItem.name} pour ${actualPrice}\u20ac${discountText}. ${shopItem.description}`,
-          statChanges: shopItem.effect,
-          moneyChange: -actualPrice,
-        },
       };
     }
 
