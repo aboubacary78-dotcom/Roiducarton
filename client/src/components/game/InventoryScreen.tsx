@@ -2,6 +2,7 @@ import { useGame, getSellPrice, hasTrait, STAT_META, craftableRecipes, recipeCos
 import { motion } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
+import SafeImg from './SafeImg';
 
 const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: string; bg: string }> = {
   food: { label: 'Nourriture', labelEn: 'Food', color: '#4A9B5F', bg: '#4A9B5F15' },
@@ -118,6 +119,8 @@ export default function InventoryScreen() {
         transition={{ delay: 0.1 }}
         className="craft-card p-3.5 flex flex-col gap-2.5"
       >
+        {/* Bandeau de l'établi (atelier.webp) ; masqué tant que l'image n'existe pas */}
+        <SafeImg src="/assets/atelier.webp" className="w-full h-16 object-cover rounded-lg -mt-0.5" />
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-[#2A1F1A] flex items-center gap-1.5">
             🔨 {tr('Établi', 'Workbench')}

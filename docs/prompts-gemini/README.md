@@ -33,6 +33,13 @@ Gemini Pro...) : chaque pack contient tout le contexte, la DA et le protocole.
 l'intégration) ; 1 fichier corrompu. D'où : webp réel OU png honnête ≤ 1600 px,
 < 200 Ko visé, et livraison zip uniquement.
 
+## Pack Nouveautés (bricolage, solidarité, braderie)
+
+`pack-nouveautes-9.md` : **9 images** pour les fonctions récentes — les 6
+objets fabriqués à l'établi (`craft-*`), la scène de l'atelier (`atelier`), la
+distribution solidaire (`solidarite`) et la braderie du marché (`braderie`).
+Emplacements déjà câblés (repli emoji/scène en attendant).
+
 ## Pack Origines (récit d'origine « La Chute de… »)
 
 `pack-origines-17.md` : **17 images**, une par métier, pour l'écran d'intro qui

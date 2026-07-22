@@ -221,7 +221,10 @@ export default function ShopScreen() {
             className="flex items-center gap-2 py-2 px-3 rounded-lg shrink-0"
             style={{ background: 'linear-gradient(135deg, #D9743E15, #B8860B15)', border: '1px solid #D9743E40' }}
           >
-            <span className="text-lg">🏷️</span>
+            <div className="relative w-8 h-8 rounded-md overflow-hidden shrink-0 flex items-center justify-center">
+              <span className="text-lg">🏷️</span>
+              <SafeImg src="/assets/braderie.webp" className="absolute inset-0 w-full h-full object-cover" />
+            </div>
             <p className="text-xs font-bold text-[#B8541E]">
               {tr('Braderie du jour', 'Today\'s clearance sale')} · −{Math.round(getBraderie(selectedShop.id, char.day) * 100)}% {tr('sur tout !', 'on everything!')}
             </p>
@@ -445,7 +448,10 @@ export default function ShopScreen() {
           className="craft-card p-3.5 flex items-center gap-3"
           style={{ border: '1px solid #4A9B5F40', background: 'linear-gradient(135deg, #4A9B5F10, transparent)' }}
         >
-          <span className="text-2xl shrink-0">🥣</span>
+          <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-[#4A9B5F]/10">
+            <span className="text-2xl">🥣</span>
+            <SafeImg src="/assets/solidarite.webp" className="absolute inset-0 w-full h-full object-cover" />
+          </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-[#2A1F1A]">{tr('Distribution solidaire', 'Food bank today')}</p>
             <p className="text-[11px] text-[#6B5740] leading-snug">

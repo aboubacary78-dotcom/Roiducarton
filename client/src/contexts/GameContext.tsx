@@ -799,6 +799,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             `Vos mains se souviennent : vous bricolez ${recipe.name} ! Rien ne se perd, tout se transforme.`,
             `Your hands remember: you tinker up ${tc(recipe.name)}! Nothing is lost, everything gets remade.`,
           ),
+          // L'objet fabriqué (craft-<id>.webp) ; repli scène dessinée si absent.
+          image: `/assets/${result.id}.webp`,
         },
       };
     }
