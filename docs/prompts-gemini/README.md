@@ -41,7 +41,11 @@ distribution solidaire (`solidarite`) et la braderie du marché (`braderie`).
 
 **✅ Livré et intégré (9/9 vrais .webp, 1200 px, < 200 Ko chacun).**
 
-## Pack Origines (récit d'origine « La Chute de… »)
+## Pack Origines (récit d'origine « La Chute de… ») — ✅ TERMINÉ
+
+**✅ Livré et intégré (17/17 vrais .webp, 1200 px). v2 : réécrit pour l'humour
+noir (gag burlesque, expression exagérée) après un premier jet trop sage.**
+
 
 `pack-origines-17.md` : **17 images**, une par métier, pour l'écran d'intro qui
 raconte comment le personnage a fini à la rue. **Particularité** : le perso y
