@@ -33,6 +33,7 @@ import {
 } from './data/combat';
 import { getHeistTarget, HEIST_TARGETS } from './data/heist';
 import { RECIPES, recipeCost, pickMaterials } from './data/crafting';
+import { encounterFlag } from './data/npc';
 
 // Façade stable : ré-exporte types & données pour les composants existants.
 export * from './types';
@@ -47,6 +48,7 @@ export * from './data/combat';
 export * from './data/heist';
 export * from './data/crafting';
 export * from './data/backstory';
+export * from './data/npc';
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
@@ -184,6 +186,7 @@ type GameAction =
   | { type: 'REOPEN_SHOP'; shopId: string }
   | { type: 'CLAIM_SOLIDARITY' }
   | { type: 'DISMISS_ORIGIN' }
+  | { type: 'RESOLVE_ENCOUNTER'; kind: 'share' | 'trade' | 'pass'; offer?: { item: InventoryItem; price: number } }
   | { type: 'TRIGGER_SHOP_EVENT'; event: ShopEvent };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -1235,6 +1238,48 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...state.character, activeFlags: [...state.character.activeFlags, 'origin-vu'] },
+      };
+    }
+
+    case 'RESOLVE_ENCOUNTER': {
+      if (!state.character) return state;
+      const c = state.character;
+      const flag = encounterFlag(c.day, c.location);
+      // Déjà rencontré ce PNJ aujourd'hui ici.
+      if (c.activeFlags.includes(flag)) return state;
+
+      let stats = { ...c.stats };
+      let money = c.money;
+      let inventory = [...c.inventory];
+
+      if (action.kind === 'share') {
+        // Partager à manger : on sacrifie un aliment (le moins précieux).
+        const foodIdx = inventory
+          .map((it, i) => ({ it, i }))
+          .filter((x) => x.it.type === 'food')
+          .sort((a, b) => (a.it.value || 0) - (b.it.value || 0))[0]?.i;
+        if (foodIdx === undefined) return state; // rien à partager
+        inventory = [...inventory.slice(0, foodIdx), ...inventory.slice(foodIdx + 1)];
+        stats = applyStatDelta(stats, { mental: 6, dignity: 2 });
+      } else if (action.kind === 'trade') {
+        // Troc : on achète l'objet proposé par le PNJ.
+        if (!action.offer || money < action.offer.price || inventory.length >= 20) return state;
+        money -= action.offer.price;
+        inventory = [...inventory, { ...action.offer.item }];
+      }
+      // 'pass' : on ne fait que poser le drapeau (rencontre consommée).
+
+      const respectGain = action.kind === 'share' ? 3 : 0;
+      return {
+        ...state,
+        character: {
+          ...c,
+          stats,
+          money,
+          inventory,
+          respect: c.respect + respectGain,
+          activeFlags: [...c.activeFlags, flag],
+        },
       };
     }
 

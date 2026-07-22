@@ -6,6 +6,15 @@
  * complète la traduction, par lots.
  */
 export const CONTENT_EN: Record<string, string> = {
+  // ============ PNJ ERRANTS & SOLIDARITÉ (objets de troc/dons) ============
+  'Conserve cabossée': 'Dented tin can',
+  'Bout de couverture': 'Scrap of blanket',
+  'Lampe de poche': 'Flashlight',
+  'Petite radio': 'Little radio',
+  'Gants dépareillés': 'Mismatched gloves',
+  'Soupe populaire': 'Soup-kitchen soup',
+  'Pain solidaire': 'Charity bread',
+
   // ============ BRICOLAGE (établi) ============
   'Réchaud de fortune': 'Makeshift stove',
   'Matelas de carton': 'Cardboard mattress',

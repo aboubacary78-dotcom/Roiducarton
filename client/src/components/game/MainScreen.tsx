@@ -1,7 +1,9 @@
-import { useGame, streetTitleFor, getContract, LOCATIONS } from '@/contexts/GameContext';
+import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import StatBars from './StatBars';
 import CardboardAvatar from './CardboardAvatar';
+import StreetEncounter from './StreetEncounter';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
 import { playClick, playNextDay } from '@/lib/sound';
 import { getEquipped } from '@/lib/profile';
@@ -137,6 +139,13 @@ export default function MainScreen() {
   const weather = WEATHER_TYPES[state.weather];
   const nextWeatherType = getNextWeather(state.weather);
   const nextWeather = WEATHER_TYPES[nextWeatherType];
+
+  // PNJ errant du jour (lieux sociaux) : présent tant qu'on ne l'a pas
+  // rencontré. Déterministe par jour/lieu, donc il « bouge » d'un jour à l'autre.
+  const [encounterOpen, setEncounterOpen] = useState(false);
+  const streetNpc = npcAt(char.day, char.location, char.seed);
+  const encounterDone = char.activeFlags?.includes(encounterFlag(char.day, char.location));
+  const showNpc = !!streetNpc && !encounterDone;
 
   return (
     <div className="min-h-screen bg-texture p-4 flex flex-col gap-3">
@@ -281,6 +290,33 @@ export default function MainScreen() {
           "{getAmbientText(char.location, char.day)}"
         </p>
       </motion.div>
+
+      {/* PNJ errant : une autre âme de la rue traîne dans le coin */}
+      {showNpc && streetNpc && (
+        <motion.button
+          initial={{ x: -12, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setEncounterOpen(true)}
+          className="craft-card p-2.5 flex items-center gap-2.5 text-left"
+        >
+          <div className="w-9 h-9 rounded-lg overflow-hidden border border-[#E8D5C0] shrink-0">
+            <CardboardAvatar seed={streetNpc.seed} gender={streetNpc.gender} size={36} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-[#2A1F1A] leading-tight">
+              👋 {tr(`${streetNpc.name} traîne dans le coin`, `${streetNpc.name} is hanging around`)}
+            </p>
+            <p className="text-[10px] text-[#8B6B4A] leading-snug line-clamp-1">{tr(streetNpc.situationFr, streetNpc.situationEn)}</p>
+          </div>
+          <span className="text-[10px] font-semibold text-[#C4723A] shrink-0">{tr('Aller voir', 'Go see')} →</span>
+        </motion.button>
+      )}
+
+      {encounterOpen && streetNpc && (
+        <StreetEncounter npc={streetNpc} onClose={() => setEncounterOpen(false)} />
+      )}
 
       {/* Actions */}
       <motion.div
