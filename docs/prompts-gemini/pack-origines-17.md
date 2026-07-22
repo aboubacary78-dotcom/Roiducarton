@@ -8,80 +8,98 @@ survit jour après jour dans une ville française. Direction artistique
 kraft fait main**, comme une maquette artisanale photographiée.
 
 Ces 17 images servent **l'écran d'introduction** de chaque partie : le
-**« récit d'origine »** qui raconte, en humour noir, comment le personnage a
-fini à la rue, selon son ancien métier.
+**« récit d'origine »** qui raconte, en **humour noir**, comment le personnage
+a fini à la rue, selon son ancien métier.
 
-### ⚠️ Particularité de CE pack (différent des précédents)
+### 🎯 LE PLUS IMPORTANT : c'est un GAG, pas un portrait
 
-Sur les autres packs, le héros est déjà un SDF (barbe grise, manteau
-rapiécé). **PAS ICI.** Ces images montrent le personnage **AVANT / le jour
-exact de la bascule** : encore **présentable, dans la tenue de son ancien
-métier**, saisi au moment absurde et comique de sa chute. On veut sentir le
-« juste avant » — avec un **petit indice de la rue qui arrive** (un carton de
-déménagement, un baluchon, une valise posée au sol).
+La consigne n°1, celle qui a été ratée à la première tentative : **chaque image
+doit être DRÔLE, un instantané de comédie burlesque.** On ne veut PAS un
+personnage qui pose calmement. On veut **l'instant précis de la catastrophe**,
+saisi en plein mouvement, comme un photogramme de dessin animé.
+
+Pour chaque image, applique ces 4 règles comiques :
+1. **Le moment du gag, en pleine action** : la chute est en train de se
+   produire MAINTENANT (l'objet s'envole, le personnage glisse, tout
+   s'effondre) — jamais figé ni « après coup ».
+2. **Une expression de visage TRÈS marquée et exagérée** : effroi comique,
+   fierté aveugle au désastre, extase à contretemps, dépit, panique polie…
+   Le visage (dessiné au feutre) porte la blague.
+3. **Le décalage absurde bien visible** : le personnage est souvent **le seul
+   à ne pas voir** la catastrophe, ou reste digne en plein chaos. C'est ce
+   contraste qui fait rire (humour noir).
+4. **Pose et détail exagérés** : gestes amples, objet absurde au premier plan,
+   posture burlesque. Pense Buster Keaton / Aardman (Wallace & Gromit).
+
+### ⚠️ Particularité de CE pack
+
+Le personnage est montré **AVANT / le jour exact de la bascule** : encore
+**présentable, dans la tenue de son ancien métier** (PAS le SDF barbu des autres
+packs). On veut le « juste avant » — avec un **petit indice de la rue qui
+arrive** (carton de déménagement, baluchon, valise posée au sol).
 
 **Style OBLIGATOIRE pour chaque image :**
 - diorama en carton kraft, textures carton ondulé et papier découpé visibles ;
-- personnage en carton découpé, **visage dessiné au feutre**, mais habillé et
-  soigné (costume, blouse, uniforme… selon le métier indiqué) ;
-- **le moment de la chute** joué avec humour noir tendre, jamais glauque ni
-  misérabiliste — c'est drôle et un peu bête ;
-- un discret **indice du basculement** (carton, valise, baluchon) dans le décor ;
+- personnage en carton découpé, **visage dessiné au feutre très expressif**,
+  habillé et soigné selon le métier ;
+- **le moment de la chute joué comme un gag** (voir les 4 règles ci-dessus) ;
+- un discret indice du basculement (carton, valise, baluchon) ;
 - lumière chaude d'atelier, petite guirlande lumineuse en fond ;
-- **format paysage 3:2, AUCUN texte ni lettre dans l'image.**
+- **format paysage 3:2, AUCUN texte, chiffre ni lettre dans l'image**
+  (un « 0/20 » ou une pancarte se suggèrent par une croix, une forme, jamais
+  par des caractères lisibles).
 
 **Des images de référence te sont fournies en pièces jointes** (zip
-`references-style.zip`) : observe la matière, la lumière et le style « carton »,
-et imite-les exactement. Seule différence : ici le personnage est bien habillé,
-pas encore à la rue.
+`references-style.zip`) : imite la matière, la lumière et le style « carton ».
+Seule différence : ici le personnage est bien habillé et l'image est **drôle**.
 
-## 🚚 Protocole de livraison (les points 2 et 4 ont déjà été ratés par le passé)
+## 🚚 Protocole de livraison (les points 2 et 4 ont déjà été ratés)
 
 1. **Noms de fichiers EXACTS**, copiés depuis la liste ci-dessous.
-2. **VRAIS fichiers .webp** : un PNG renommé en .webp ne compte pas. Si tu ne
-   sais pas encoder en webp, livre des **.png honnêtes** (extension .png),
-   max 1600 px de large : la conversion sera faite à l'intégration.
+2. **VRAIS fichiers .webp** : un PNG renommé en .webp ne compte pas. Sinon,
+   livre des **.png honnêtes** (extension .png), max 1600 px : conversion à
+   l'intégration.
 3. **Poids raisonnable** : ≤ 1200 px de large, objectif < 200 Ko par image.
-4. **Génère UNIQUEMENT les 17 fichiers de la liste.** Rien d'autre, pas de
-   variantes non demandées.
+4. **Génère UNIQUEMENT les 17 fichiers de la liste.** Rien d'autre.
 5. **Livraison : un fichier ZIP** contenant un dossier `assets/`. Lots partiels
-   bienvenus : chaque image s'active dès son intégration.
+   bienvenus.
 
 ---
 
-Chaque image = un métier, saisi au moment de sa chute (humour noir).
+Chaque image = le GAG de la chute d'un métier. L'expression du visage et
+l'action en cours sont indiquées : respecte-les, c'est là qu'est la blague.
 
 - `origin-comptable.webp`
-  Un comptable en costume-cravate et lunettes, à un bureau en carton croulant sous les factures ; une virgule géante en papier s'envole avec une liasse de billets. Un carton de déménagement l'attend déjà près de la porte.
+  Panique polie : le comptable, bouche pincée et yeux écarquillés, tend le bras en vain pour rattraper une liasse de billets qu'une virgule géante en papier emporte dans les airs. Bureau croulant sous les factures, un pied déjà dans un carton de déménagement.
 - `origin-ouvrier.webp`
-  Un ouvrier en bleu de travail et casque, sa tasse de café à la main, devant son usine en carton dont l'enseigne s'envole vers l'horizon (délocalisée). Un baluchon à ses pieds.
+  Ahurissement total : l'ouvrier, la tasse de café figée à deux centimètres des lèvres et la mâchoire tombante, regarde son usine en carton s'éloigner sur des roulettes vers l'horizon. Baluchon abandonné à ses pieds.
 - `origin-professeur.webp`
-  Un professeur en veste à coudières, craie à la main, corrigeant au feutre rouge sa propre lettre de licenciement sur un tableau. Des cartons de livres autour de lui.
+  Fierté déplacée : le professeur, sourcil levé et petit air satisfait, trace une grosse croix rouge sur sa propre lettre de licenciement (feuille sans texte) — sans réaliser que c'est la sienne. Cartons de livres autour, craie à la main.
 - `origin-sommelier.webp`
-  Un sommelier en tablier, tire-bouchon au cou, goûtant une bouteille à la lumière, l'air béat ; derrière lui, une cave en carton entièrement vidée. Une petite valise posée au sol.
+  Extase à contretemps : le sommelier, yeux mi-clos et sourire béat, savoure une gorgée les joues roses, pendant que derrière lui la cave en carton est totalement VIDE, une dernière bouteille roulant au sol. Il ne voit rien. Petite valise posée.
 - `origin-cascadeur.webp`
-  Un cascadeur en combinaison et casque, glissant spectaculairement sur un savon dans une salle de bain en carton ; ses trophées dégringolent. Burlesque, humour noir.
+  Effroi burlesque : le cascadeur en pleine glissade, jambes en l'air façon peau de banane, part en arrière après avoir marché sur un savon dans sa salle de bain en carton ; ses trophées dégringolent en cascade. Bouche grande ouverte.
 - `origin-informaticien.webp`
-  Un informaticien à lunettes, dépité, devant un vieil ordinateur en carton à l'écran vide ; un post-it prend feu à côté du clavier, câbles emmêlés partout. Un carton l'attend.
+  Panique : l'informaticien, mains plaquées sur les joues et bouche béante d'horreur, fixe son écran de carton vide pendant qu'un post-it s'enflamme gaiement près du clavier. Câbles emmêlés, un carton l'attend.
 - `origin-cuisinier.webp`
-  Un cuisinier en toque et tablier tendant fièrement une belle assiette à un critique pincé ; derrière, un petit rat en carton s'échappe de la cuisine. Décor de restaurant.
+  Décalage comique : le cuisinier présente son plat avec un immense sourire fier, sans voir le petit rat en carton assis DANS l'assiette ; face à lui, le critique vire au vert et se retient de vomir. Décor de restaurant.
 - `origin-infirmier.webp`
-  Un infirmier en blouse et stéthoscope, devant sa propre porte d'appartement fermée, les clés visibles restées à l'intérieur derrière la vitre. Une valise médicale posée à côté.
+  « C'est pas possible » : l'infirmier se tape le front, dépité, devant sa propre porte fermée, ses clés bien en évidence de l'autre côté de la vitre. Valise médicale posée à côté, mine catastrophée mais digne.
 - `origin-artiste.webp`
-  Un artiste en béret, convaincu, présentant une toile entièrement blanche dans une galerie en carton vide ; des cartons d'œuvres vendues empilés dans un coin.
+  Sérieux imperturbable (donc hilarant) : l'artiste en béret, main sur le cœur et menton levé avec émotion, présente une toile PARFAITEMENT blanche à une galerie en carton totalement vide — seul un pigeon en papier « admire ». Cartons d'œuvres vendues empilés.
 - `origin-militaire.webp`
-  Un ancien militaire en tenue kaki, au garde-à-vous devant un guichet administratif en carton fermé ; de la paperasse s'envole. Son barda posé à ses pieds.
+  Contraste comique : le militaire au garde-à-vous impeccable, visage stoïque, salue un guichet administratif en carton fermé, enseveli sous une avalanche de paperasse qui vole partout. Barda à ses pieds, pas un cil ne bouge.
 - `origin-bibliothecaire.webp`
-  Un bibliothécaire à lunettes serrant un livre contre lui, devant une bibliothèque en carton dont on baisse le rideau de fer. Piles de livres et cartons autour.
+  Petit gag physique : le bibliothécaire serre un unique livre contre son cœur, l'air tragique, pendant que le rideau de fer qu'on baisse lui coince le pan du manteau. Piles de livres et cartons autour.
 - `origin-vendeur.webp`
-  Un vendeur de voitures en costume brillant et grand sourire commercial, devant une voiture en carton à moitié écrasée ; une file de clients en papier revient, tickets à la main.
+  Décalage total : le vendeur de voitures, sourire commercial ultra-large et pouce levé, pose fièrement à côté d'une voiture en carton écrabouillée en accordéon ; une file de clients en papier fonce sur lui, furieux, tickets à la main.
 - `origin-jardinier.webp`
-  Un jardinier en salopette et chapeau de paille, arrosoir à la main, souriant sur un toit d'immeuble en carton qui ploie sous un potager luxuriant en train de basculer.
+  Chute imminente : le jardinier, arrosoir à la main et sourire serein, arrose tranquillement son potager luxuriant sur un toit d'immeuble en carton qui s'effondre sous ses pieds — il ne réalise pas encore. Planches qui cèdent.
 - `origin-avocat.webp`
-  Un avocat en robe noire plaidant avec fougue… face à un miroir (il est son propre adversaire), dans un petit tribunal en carton ; un pigeon en papier perché sur la barre.
+  Absurde : l'avocat en robe noire plaide avec une fougue théâtrale, index pointé… sur son propre reflet dans un grand miroir (son unique adversaire), tout aussi furieux. Un pigeon en papier, blasé, fait le juge. Petit tribunal en carton.
 - `origin-musicien.webp`
-  Un musicien élégant sur une petite scène en carton, son harmonica cassé net en deux à la première note ; public de papier clairsemé, guirlande lumineuse en fond.
+  L'instant du gag : le musicien élégant, en pleine envolée lyrique, yeux fermés et joues gonflées, souffle dans son harmonica qui se brise net en deux en crachant un petit ressort. Public de deux pigeons sur une scène en carton, guirlande en fond.
 - `origin-boxeur.webp`
-  Un boxeur en short et gants, ceinture de champion à la taille, glissant sur cette même ceinture posée au sol d'un ring en carton ; trophées alignés derrière. Burlesque.
+  Burlesque : le boxeur triomphant, bras levés au ciel, glisse sur sa propre ceinture de champion posée au sol et part en arrière, les quatre fers en l'air, l'air stupéfait. Trophées alignés derrière, ring en carton.
 - `origin-poete.webp`
-  Un poète mélancolique en écharpe, plume à la main, regardant un ticket de caisse s'envoler vers une benne en carton, sous un réverbère ; ambiance nocturne et douce.
+  Mélancolie exagérée : le poète en écharpe, main tendue vers le ciel dans un geste dramatique et une larme à l'œil, regarde son unique feuille de vers s'envoler pile à l'intérieur d'une benne en carton. Réverbère, ambiance nocturne douce.
