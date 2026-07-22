@@ -219,6 +219,8 @@ export function makeCombatState(enemy: Enemy, character: Character): CombatState
     specialCharged: false,
     specialUses: 0,
     trapRounds: 0,
-    dodgePenalty: 1,
+    // Le Vigile de Choc est un vrai mur : sa phase d'esquive est nettement
+    // plus dense (en plus de ses grosses stats).
+    dodgePenalty: enemy.name === 'Vigile de Choc' ? 1.5 : 1,
   };
 }

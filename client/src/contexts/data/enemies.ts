@@ -27,7 +27,7 @@ export const ENEMIES: Enemy[] = [
   // Le boss des échecs de « grand coup » (voir data/heist.ts) : il ne rôde
   // nulle part ailleurs, on ne le croise qu'en ratant un casse gardé. Très
   // dur à battre, mais le vaincre paie en respect et en trophée.
-  { name: 'Vigile de Choc', emoji: '🦺', health: 60, attack: 17, description: 'Ancien videur, actuel mur. Il ne court pas : il n\'en a pas besoin.', image: '/assets/combat-vigile-choc.webp', loot: { money: 8, respect: 6, item: { id: 'badge-vigile', name: 'Badge de vigile (trophée)', emoji: '🪪', type: 'junk', value: 12 } } },
+  { name: 'Vigile de Choc', emoji: '🦺', health: 95, attack: 21, description: 'Ancien videur, actuel mur. Il ne court pas : il n\'en a pas besoin.', image: '/assets/combat-vigile-choc.webp', loot: { money: 8, respect: 6, item: { id: 'badge-vigile', name: 'Badge de vigile (trophée)', emoji: '🪪', type: 'junk', value: 12 } } },
 ];
 
 // Images (dioramas) des ennemis effectivement affrontés via « Bagarre » mais

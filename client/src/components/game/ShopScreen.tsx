@@ -49,6 +49,8 @@ export default function ShopScreen() {
   const [spent, setSpent] = useState(0);
   // Petites étiquettes « -X€ » qui s'envolent depuis l'argent à chaque achat.
   const [deltas, setDeltas] = useState<{ id: number; amt: number }[]>([]);
+  // Fontaine du parc en cours de chargement de pub (anti-exploit eau gratuite).
+  const [fountainBusy, setFountainBusy] = useState(false);
 
   // « Coup de main » via pub récompensée : la boutique rouvre, avec une
   // résolution aussi absurde que la panne.
@@ -92,7 +94,21 @@ export default function ShopScreen() {
     pushToast(`${item.emoji} ${tc(item.name)}${parts.length ? ' · ' + parts.join(' ') : ''}`, { emoji: '🛍️', tone: 'good' });
   }
 
-  const handleBuy = (item: ShopItem) => {
+  const handleBuy = async (item: ShopItem) => {
+    // Fontaine du parc : l'eau est gratuite, mais toutes les 3 gorgées elle
+    // fait des siennes — on regarde une pub pour que ça se débloque.
+    if (item.id === 'eau-fontaine' && (char.fountainUses || 0) % 3 === 2) {
+      if (fountainBusy) return;
+      setFountainBusy(true);
+      pushToast(tr('La fontaine tousse, crachote… et un attroupement se forme.', 'The fountain sputters, coughs… and a crowd gathers.'), { emoji: '⛲' });
+      const ok = await showRewarded();
+      setFountainBusy(false);
+      if (!ok) {
+        pushToast(tr('Tant pis : vous restez sur votre soif pour l\'instant.', 'Too bad: you stay thirsty for now.'), { emoji: '😩', tone: 'bad' });
+        return;
+      }
+    }
+
     const actualPrice = marketPrice(item, selectedShop!.id, char.respect, char.day).final;
     if (char.money < actualPrice) return;
     if (item.giveItem && char.inventory.length >= 20) return;

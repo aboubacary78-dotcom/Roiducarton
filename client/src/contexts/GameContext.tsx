@@ -1222,13 +1222,17 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       const newMoney = state.character.money - actualPrice;
+      // Compte les gorg\u00e9es de fontaine (eau gratuite) pour l'anti-exploit.
+      const fountainBump = shopItem.id === 'eau-fontaine'
+        ? { fountainUses: (state.character.fountainUses || 0) + 1 }
+        : {};
 
       // Pas d'overlay bloquant \u00e0 l'achat : la boutique donne un retour INLINE
       // (argent anim\u00e9, -X\u20ac qui s'envole, badge \u00d7N, toast d'effet). On veut
       // pouvoir encha\u00eener les achats sans qu'un pop-up coupe le geste.
       return {
         ...state,
-        character: { ...state.character, stats: newStats, money: newMoney, inventory: newInventory },
+        character: { ...state.character, stats: newStats, money: newMoney, inventory: newInventory, ...fountainBump },
       };
     }
 

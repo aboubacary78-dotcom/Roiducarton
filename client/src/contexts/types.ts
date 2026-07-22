@@ -65,6 +65,9 @@ export interface Character {
   // Nombre de casses tentés durant cette partie : chaque vol rend le
   // prochain mini-jeu plus difficile (voir StealHeist).
   stealCount: number;
+  // Nombre de gorgées prises à la fontaine du parc (eau gratuite) : toutes les
+  // 3 gorgées, la fontaine fait des siennes (pub récompensée). Anti-exploit.
+  fountainUses?: number;
   // Mémoire courte : les derniers événements vus, pour éviter les répétitions.
   recentEvents?: string[];
   // Boutiques en panne/fermées pendant la partie (voir ShopClosure).

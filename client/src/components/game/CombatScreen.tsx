@@ -21,8 +21,8 @@ import { pushToast } from '@/lib/toast';
  */
 
 const ARENA = 300;          // côté de l'arène en px
-const DURATION = 3600;      // durée d'une esquive de rattrapage (ms)
-const IFRAME = 560;         // invulnérabilité après une touche (ms)
+const DURATION = 3900;      // durée d'une esquive de rattrapage (ms) — un peu plus longue
+const IFRAME = 440;         // invulnérabilité après une touche (ms) — moins clémente
 
 type Dir = 'up' | 'down' | 'left' | 'right';
 interface Proj { id: number; x: number; y: number; vx: number; vy: number; size: number; kind: string; armUntil: number; }
@@ -362,8 +362,8 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
   // Les ennemis qui cognent fort tirent plus dense : un adversaire à 17 d'attaque
   // (le Vigile de Choc) rend l'esquive nettement plus serrée qu'un pigeon.
   const atkMul = 1 + Math.max(0, combat.enemyAttack - 8) * 0.035;
-  const densityMul = 1.25 * atkMul * (1 + (combat.round - 1) * 0.14) * (combat.enemyStunned ? 0.5 : 1) * (combat.dodgePenalty || 1);
-  const speedMul = 1.07 * (1 + (combat.round - 1) * 0.07) * (combat.enemyStunned ? 0.8 : 1);
+  const densityMul = 1.42 * atkMul * (1 + (combat.round - 1) * 0.14) * (combat.enemyStunned ? 0.5 : 1) * (combat.dodgePenalty || 1);
+  const speedMul = 1.16 * (1 + (combat.round - 1) * 0.07) * (combat.enemyStunned ? 0.8 : 1);
 
   const posRef = useRef({ x: ARENA / 2, y: ARENA - 40 });
   const projRef = useRef<Proj[]>([]);

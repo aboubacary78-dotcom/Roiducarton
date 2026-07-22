@@ -7,6 +7,7 @@ import CardboardAvatar from './CardboardAvatar';
 import { getEquipped } from '@/lib/profile';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import SafeImg from './SafeImg';
+import { pushToast } from '@/lib/toast';
 
 /*
  * Mini-jeu de vol « casse en grille » (façon Pac-Man) : on entre dans un lieu,
@@ -163,7 +164,7 @@ const CATCHER_UI: Record<HeistTarget['catcher'], { fr: string; en: string }> = {
 };
 
 function HeistCasing({ onPick }: { onPick: (t: HeistTarget) => void }) {
-  const { state } = useGame();
+  const { state, dispatch } = useGame();
   useLang();
   const char = state.character;
   const location = char?.location ?? 'parc';
@@ -216,6 +217,20 @@ function HeistCasing({ onPick }: { onPick: (t: HeistTarget) => void }) {
           ? tr(`Casier de la partie : ${steals - 1} casse${steals > 2 ? 's' : ''} déjà tenté${steals > 2 ? 's' : ''}. La surveillance s'en souvient.`, `This run's record: ${steals - 1} heist${steals > 2 ? 's' : ''} already attempted. Security remembers.`)
           : tr('Premier casse de la partie : la surveillance ne vous connaît pas encore.', 'First heist of the run: security doesn\'t know you yet.')}
       </p>
+
+      {/* Se dégonfler : rebrousser chemin sans rien tenter. */}
+      <button
+        onClick={() => {
+          pushToast(
+            tr('Vous réalisez que vous n\'avez pas le cran ce soir. Vous rebroussez chemin.', 'You realize you don\'t have the guts tonight. You turn back.'),
+            { emoji: '😰' },
+          );
+          dispatch({ type: 'SET_SCREEN', screen: 'main' });
+        }}
+        className="mt-1 py-2.5 px-4 text-sm text-[#A08B70] font-medium hover:text-[#6B5740] transition-colors"
+      >
+        ← {tr('Pas ce soir… rebrousser chemin', 'Not tonight… turn back')}
+      </button>
     </div>
   );
 }
