@@ -12,7 +12,9 @@ kraft fait main**, comme une maquette artisanale photographiée.
 - le héros : SDF en carton découpé, barbe grise, manteau rapiécé, visage
   dessiné au feutre ;
 - lumière chaude d'atelier, petite guirlande lumineuse en fond ;
-- humour noir tendre, jamais glauque ni misérabiliste ;
+- **HUMOUR NOIR : chaque image doit être DRÔLE**, jamais triste ni
+  misérabiliste. Même les échecs sont comiques (absurde, ironie, petit gag
+  visuel) ; le héros a une expression très marquée et expressive ;
 - **format paysage 3:2, AUCUN texte ni lettre dans l'image.**
 
 **Des images de référence te sont fournies en pièces jointes** avec ce brief :
@@ -41,16 +43,21 @@ personnage). Toute image qui s'en écarte sera refusée.
 Chaque événement du jeu a désormais son illustration principale. Cette phase
 ajoute, pour chaque événement, DEUX variantes montrant COMMENT ça s'est fini :
 
-- `result-<id>-good.webp` : l'issue HEUREUSE. Même décor que la scène de
-  base, mais l'ambiance est chaleureuse : le SDF sourit, lumière dorée,
-  petit détail de victoire (pièces, sourire, poignée de main...).
-- `result-<id>-bad.webp` : l'issue RATÉE. Même décor, mais l'ambiance est
-  dépitée : épaules basses, lumière grise ou pluie fine, petit détail de
-  déroute (fuite, engueulade, objet cassé...).
+- `result-<id>-good.webp` : l'issue HEUREUSE. Même décor, le héros JUBILE :
+  grand sourire, lumière dorée, petit détail de victoire (pièces, pouce levé,
+  poignée de main). Franchement réjouissant.
+- `result-<id>-bad.webp` : l'issue RATÉE, mais **jouée POUR RIRE (humour
+  noir)**, JAMAIS triste. C'est un gag de malchance : le héros catastrophé,
+  exaspéré ou dépité-comique, saisi EN PLEINE mésaventure absurde (il glisse,
+  se fait surprendre, l'objet casse au pire moment, tout part de travers).
+  Expression exagérée, situation burlesque, comme un photogramme de comédie.
+  PAS d'épaules basses mélancoliques, PAS de pluie grise déprimante : ici le
+  malheur est COMIQUE, on doit sourire en regardant l'image.
 
-La description sous chaque nom de fichier raconte l'issue exacte à illustrer.
-Reste dans le MÊME décor que l'événement de base : c'est la suite immédiate
-de la même scène, pas un nouveau lieu.
+⚠️ La description sous chaque nom raconte la BLAGUE : illustre le MOMENT
+COMIQUE qu'elle décrit, et fais porter le gag par l'expression du héros. Reste
+dans le MÊME décor que l'événement de base (c'est la suite immédiate de la même
+scène, pas un nouveau lieu).
 
 ---
 
