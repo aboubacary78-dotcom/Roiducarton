@@ -149,7 +149,9 @@ export function generateCharacter(): Character {
     respect: 0,
     inventory: startingItems,
     day: 1,
-    location: 'parc',
+    // Point de départ aléatoire : chaque partie commence dans un quartier
+    // différent (parc, centre-ville, gare, marché, zone industrielle).
+    location: randomFromArray(Object.keys(LOCATIONS)),
     alive: true,
     activeFlags: [],
     stealCount: 0,
