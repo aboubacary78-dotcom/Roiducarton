@@ -67,8 +67,8 @@ décor, ambiance opposée. Même protocole que les packs précédents.
 
 | Pack | Images |
 |---|---|
-| `phase2-pack-1-explorer-A.md` | 50 |
-| `phase2-pack-2-explorer-B.md` | 50 |
+| ~~`phase2-pack-1-explorer-A.md`~~ | 50 ✅ |
+| ~~`phase2-pack-2-explorer-B.md`~~ | 50 ✅ |
 | `phase2-pack-3-dormir-A.md` | 50 |
 | `phase2-pack-4-dormir-B.md` | 50 |
 | `phase2-pack-5-mendier-suites.md` | 50 |
@@ -86,3 +86,4 @@ le code : chaque image s'affiche dès qu'elle arrive.
 
 ### Phase 2 — suivi
 - ✅ `phase2-pack-1-explorer-A.md` : 50/50 intégrées.
+- ✅ `phase2-pack-2-explorer-B.md` : 50/50 intégrées.
