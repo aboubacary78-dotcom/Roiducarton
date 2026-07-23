@@ -73,6 +73,9 @@ export default function EventResultOverlay() {
     return false;
   })();
 
+  // Victoire en combat : on tamponne un « K.O. » sur l'image de l'adversaire.
+  const isVictory = /^Victoire|^Victory/.test(result.text);
+
   return (
     <AnimatePresence>
       <motion.div
@@ -104,7 +107,39 @@ export default function EventResultOverlay() {
               <SceneIllustration theme={sceneFor(result.text, isPositive ? 'coins' : 'street')} mood={moodFor(result.text, isPositive)} className="w-full h-full" sway />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
-            <span className="absolute top-2 right-2 text-2xl drop-shadow">{isPositive ? '✨' : '😓'}</span>
+            <span className="absolute top-2 right-2 text-2xl drop-shadow">{isVictory ? '🏆' : isPositive ? '✨' : '😓'}</span>
+
+            {/* Tampon K.O. quand l'adversaire est mis à terre */}
+            {isVictory && (
+              <>
+                <div className="absolute inset-0 bg-black/30" />
+                <motion.div
+                  initial={{ scale: 3, rotate: -28, opacity: 0 }}
+                  animate={{ scale: 1, rotate: -11, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 11, delay: 0.18 }}
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                >
+                  <span
+                    className="text-5xl font-black tracking-widest"
+                    style={{ color: '#FFD34E', WebkitTextStroke: '2px #B84A3A', textShadow: '0 3px 6px rgba(0,0,0,0.6)' }}
+                  >
+                    K.O.
+                  </span>
+                </motion.div>
+                {[[18, 30], [78, 26], [30, 70], [70, 66]].map(([l, t], i) => (
+                  <motion.span
+                    key={i}
+                    initial={{ scale: 0, rotate: 0, opacity: 0 }}
+                    animate={{ scale: [0, 1.3, 1], rotate: 360, opacity: [0, 1, 0.9] }}
+                    transition={{ delay: 0.35 + i * 0.08, duration: 0.7 }}
+                    className="absolute text-xl pointer-events-none drop-shadow"
+                    style={{ left: `${l}%`, top: `${t}%` }}
+                  >
+                    ⭐
+                  </motion.span>
+                ))}
+              </>
+            )}
           </motion.div>
 
           {/* Result text */}

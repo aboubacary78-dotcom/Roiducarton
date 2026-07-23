@@ -36,6 +36,20 @@ const KIND_STYLE: Record<string, { color: string; shape: 'circle' | 'rect' }> = 
   peck: { color: '#4A8FBF', shape: 'circle' },
 };
 
+// « Comment la bagarre a commencé » : une amorce d'humour noir montrée à
+// l'ouverture de chaque combat (tirée au hasard, stable pour ce combat).
+const BRAWL_STARTS: { fr: string; en: string }[] = [
+  { fr: 'Un mot de trop, un regard de travers, et voilà.', en: 'One word too many, one wrong look, and here we are.' },
+  { fr: "Personne ne sait qui a commencé. Ça n'a plus d'importance.", en: "Nobody knows who started it. Doesn't matter now." },
+  { fr: 'Il voulait votre coin de trottoir. Vous y teniez.', en: 'It wanted your patch of pavement. You were attached to it.' },
+  { fr: 'Vous vous êtes croisés au pire moment possible.', en: 'You crossed paths at the worst possible moment.' },
+  { fr: "Il n'a pas apprécié votre existence, tout simplement.", en: "It simply didn't appreciate your existence." },
+  { fr: 'Une histoire de regard mal interprété. Un classique.', en: 'A misread glance. A classic.' },
+  { fr: 'Ça devait mal tourner. Ça tourne toujours mal.', en: 'It was bound to go wrong. It always does.' },
+  { fr: 'Vous avez dit bonjour. C\'était visiblement de trop.', en: 'You said hello. Apparently that was too much.' },
+  { fr: 'Vous étiez là avant lui. Ou l\'inverse. Bref, ça cogne.', en: 'You were there first. Or it was. Either way, fists fly.' },
+];
+
 export default function CombatScreen() {
   const [ready, setReady] = useState(() => introSeen('combat2'));
   if (!ready) {
@@ -69,6 +83,14 @@ function CombatScreenInner() {
   // Cri de l'ennemi à son entrée en scène (famille sonore = son pattern).
   const pattern = currentCombat?.pattern;
   useEffect(() => { if (pattern) playEnemyCry(pattern); }, [pattern, currentCombat?.enemyName]);
+  // Ouverture du combat : petite mise en scène « VS » + comment ça a commencé.
+  const [intro, setIntro] = useState(true);
+  const brawl = useState(() => BRAWL_STARTS[Math.floor(Math.random() * BRAWL_STARTS.length)])[0];
+  useEffect(() => {
+    if (!intro) return;
+    const t = setTimeout(() => setIntro(false), 2500);
+    return () => clearTimeout(t);
+  }, [intro]);
   // Toast quand le coup spécial vient d'être chargé (manche gagnée).
   const prevCharged = useRef(false);
   useEffect(() => {
@@ -85,7 +107,7 @@ function CombatScreenInner() {
   const playerHpPercent = character.stats.health;
 
   return (
-    <div className="min-h-screen bg-texture p-4 flex flex-col items-center gap-3 select-none">
+    <div className="relative min-h-screen bg-texture p-4 flex flex-col items-center gap-3 select-none">
       {/* En-tête ennemi */}
       <motion.div
         initial={{ y: -16, opacity: 0 }}
@@ -154,6 +176,71 @@ function CombatScreenInner() {
             character={character}
             onPlay={(cardId) => dispatch({ type: 'PLAY_CARD', cardId })}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Ouverture : le combat s'enclenche (VS + comment ça a commencé) */}
+      <AnimatePresence>
+        {intro && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIntro(false)}
+            style={{ background: 'rgba(24,18,14,0.94)' }}
+            className="absolute inset-0 z-[60] flex flex-col items-center justify-center p-6 text-center cursor-pointer"
+          >
+            <motion.div
+              initial={{ scale: 0.3, rotate: -14, y: -60, opacity: 0 }}
+              animate={{ scale: 1, rotate: 0, y: 0, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 13 }}
+              className="mb-3"
+            >
+              <motion.div
+                animate={{ rotate: [0, -6, 6, -4, 4, 0] }}
+                transition={{ duration: 0.6, delay: 0.25 }}
+                className="w-28 h-28 mx-auto rounded-2xl overflow-hidden border-4 border-[#D94F4F] shadow-[0_6px_24px_rgba(217,79,79,0.5)] flex items-center justify-center bg-[#2A1F1A]"
+              >
+                {currentCombat.image && !imgError ? (
+                  <img src={currentCombat.image} alt="" onError={() => setImgError(true)} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-6xl">{currentCombat.enemyEmoji}</span>
+                )}
+              </motion.div>
+            </motion.div>
+            <motion.div
+              initial={{ scale: 2.2, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 12, delay: 0.12 }}
+              className="text-4xl font-black text-[#D94F4F] drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] tracking-widest"
+            >
+              ⚔️ {tr('BAGARRE', 'FIGHT')} ⚔️
+            </motion.div>
+            <motion.h2
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.28 }}
+              className="text-xl text-white font-bold mt-2 drop-shadow"
+            >
+              {currentCombat.enemyEmoji} {tc(currentCombat.enemyName)}
+            </motion.h2>
+            <motion.p
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.42 }}
+              className="text-sm text-white/85 italic mt-2 max-w-xs leading-snug"
+            >
+              « {tr(brawl.fr, brawl.en)} »
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              transition={{ delay: 1.1 }}
+              className="text-[11px] text-white/60 mt-5"
+            >
+              {tr('Touchez pour commencer', 'Tap to begin')}
+            </motion.p>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
