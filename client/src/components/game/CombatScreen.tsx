@@ -130,23 +130,42 @@ function CombatScreenInner() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-base font-bold text-[#2A1F1A] truncate">{tc(currentCombat.enemyName)}</h2>
-            <span className="text-[10px] font-mono text-[#B84A3A] shrink-0">{currentCombat.enemyHealth}/{currentCombat.enemyMaxHealth}</span>
+            <span className="text-xs font-mono font-bold text-[#B84A3A] shrink-0">❤️ {currentCombat.enemyHealth}/{currentCombat.enemyMaxHealth}</span>
           </div>
-          <div className="mt-1 h-2.5 bg-[#F0E0D2] rounded-full overflow-hidden">
+          <div className="mt-1 h-3 bg-[#F0E0D2] rounded-full overflow-hidden border border-[#D94F4F]/20">
             <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg,#D94F4F,#E86B5A)' }} animate={{ width: `${hpPercent}%` }} transition={{ duration: 0.35 }} />
           </div>
           <p className="text-[10px] text-[#8B6B4A] italic mt-1 truncate">{tr('Round', 'Round')} {currentCombat.round} · {tc(currentCombat.description)}</p>
         </div>
       </motion.div>
 
-      {/* Barre de vie du joueur */}
-      <div className="w-full max-w-sm flex items-center gap-2">
-        <span className="text-[10px] font-mono text-[#3d8b4f] w-8">{tr('PV', 'HP')}</span>
-        <div className="flex-1 h-2.5 bg-[#E9E0D4] rounded-full overflow-hidden">
-          <motion.div className="h-full rounded-full" style={{ background: playerHpPercent > 40 ? 'linear-gradient(90deg,#4A9B5F,#5CB870)' : 'linear-gradient(90deg,#8B2020,#D94F4F)' }} animate={{ width: `${playerHpPercent}%` }} transition={{ duration: 0.35 }} />
+      {/* Barre de vie du JOUEUR : carte symétrique à l'ennemi, avec le visage
+          du perso + « VOTRE SANTÉ », pour qu'on comprenne que c'est la sienne. */}
+      <motion.div
+        initial={{ y: 12, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.08 }}
+        className="w-full max-w-sm craft-card p-2.5 flex items-center gap-2.5"
+        style={{ borderColor: playerHpPercent <= 25 ? '#D94F4F' : undefined }}
+      >
+        <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 border-2 border-[#4A9B5F]/40">
+          <CardboardAvatar seed={character.seed} gender={character.gender} size={44} />
         </div>
-        <span className="text-[10px] font-mono text-[#3d8b4f] w-8 text-right">{Math.round(character.stats.health)}</span>
-      </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-bold text-[#2A1F1A]">🙂 {tr('VOTRE SANTÉ', 'YOUR HEALTH')}</span>
+            <span className="text-sm font-mono font-bold text-[#3d8b4f] shrink-0">❤️ {Math.round(character.stats.health)}/100</span>
+          </div>
+          <div className="mt-1 h-3 bg-[#E9E0D4] rounded-full overflow-hidden border border-[#4A9B5F]/20">
+            <motion.div className="h-full rounded-full" style={{ background: playerHpPercent > 40 ? 'linear-gradient(90deg,#4A9B5F,#5CB870)' : 'linear-gradient(90deg,#8B2020,#D94F4F)' }} animate={{ width: `${playerHpPercent}%` }} transition={{ duration: 0.35 }} />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Repère « qui est qui » */}
+      <p className="-mt-1 text-[10px] text-[#A08B70] text-center">
+        {tr('En haut : l\'adversaire · Ici : vous', 'Top: your opponent · Here: you')}
+      </p>
 
       {/* Phase courante */}
       <AnimatePresence mode="wait">
