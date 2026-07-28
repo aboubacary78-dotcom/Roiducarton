@@ -209,7 +209,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       let inventory = [...char.inventory];
       let money = char.money;
       const gifts: string[] = [];
-      if (legacy && inventory.length < 20) {
+      // Le Sceptre du Roi ne se transmet jamais, même par un legs enregistré
+      // avant cette règle : la couronne s'arrache, elle ne s'hérite pas.
+      if (legacy && legacy.item?.id !== 'sceptre-roi' && inventory.length < 20) {
         inventory.push(legacy.item);
         gifts.push(L(`${legacy.item.name}, l'héritage de ${legacy.from}`, `the ${tc(legacy.item.name)}, ${legacy.from}'s legacy`));
       }

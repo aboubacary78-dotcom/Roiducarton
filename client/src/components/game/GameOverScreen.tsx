@@ -8,6 +8,7 @@ import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
 import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown } from '@/lib/necrology';
 import { getEquipped } from '@/lib/profile';
+import { pushToast } from '@/lib/toast';
 
 /*
  * L'écran de fin est une « une de journal » : la mort du personnage devient
@@ -102,7 +103,21 @@ export default function GameOverScreen() {
     }
   }
 
+  // Le Sceptre du Roi ne se lègue pas : la couronne se mérite au combat, elle
+  // ne se transmet pas dans un testament.
+  function isBequeathable(item: InventoryItem) {
+    return item.id !== 'sceptre-roi';
+  }
+
   function chooseLegacy(item: InventoryItem) {
+    if (!isBequeathable(item)) {
+      pushToast(
+        tr('Le Sceptre ne se lègue pas : il faut prouver sa valeur en reprenant la couronne.',
+           "The Sceptre cannot be bequeathed: you must prove your worth by taking the crown."),
+        { emoji: '👑', tone: 'bad' },
+      );
+      return;
+    }
     if (!char) return;
     if (legacyId === item.id) { setLegacyId(null); clearLegacy(); return; }
     setLegacyId(item.id);
@@ -247,21 +262,35 @@ export default function GameOverScreen() {
             {tr('Léguez UN objet : il attendra votre prochain personnage, posé sur votre carton.', 'Bequeath ONE item: it will await your next character, left on your cardboard.')}
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {char.inventory.map((item, i) => (
-              <button
-                key={`${item.id}-${i}`}
-                onClick={() => chooseLegacy(item)}
-                className={`px-2 py-1.5 rounded-lg text-[11px] flex items-center gap-1.5 border transition-all ${
-                  legacyId === item.id
-                    ? 'border-[#F2C14E] bg-[#F2C14E]/15 text-[#F2C14E] font-semibold'
-                    : 'border-[#4A3048] text-[#C8B0A0] hover:bg-white/5'
-                }`}
-              >
-                <span>{item.emoji}</span>
-                <span className="max-w-28 truncate">{tc(item.name)}</span>
-              </button>
-            ))}
+            {char.inventory.map((item, i) => {
+              const locked = !isBequeathable(item);
+              return (
+                <button
+                  key={`${item.id}-${i}`}
+                  onClick={() => chooseLegacy(item)}
+                  title={locked ? tr('Ne se lègue pas', 'Cannot be bequeathed') : undefined}
+                  className={`px-2 py-1.5 rounded-lg text-[11px] flex items-center gap-1.5 border transition-all ${
+                    locked
+                      ? 'border-[#5A4030] text-[#7A6450] opacity-70 cursor-not-allowed line-through decoration-[#7A6450]'
+                      : legacyId === item.id
+                        ? 'border-[#F2C14E] bg-[#F2C14E]/15 text-[#F2C14E] font-semibold'
+                        : 'border-[#4A3048] text-[#C8B0A0] hover:bg-white/5'
+                  }`}
+                >
+                  <span>{item.emoji}</span>
+                  <span className="max-w-28 truncate">{tc(item.name)}</span>
+                  {locked && <span className="text-[10px]">🔒</span>}
+                </button>
+              );
+            })}
           </div>
+          {/* Le Sceptre est dans le sac : on explique pourquoi il reste au mort. */}
+          {char.inventory.some((it) => !isBequeathable(it)) && (
+            <p className="text-[10px] text-[#C89B5A] mt-1.5 leading-snug">
+              👑 {tr('Le Sceptre du Roi part avec vous dans la tombe : la couronne ne s\'hérite pas, elle s\'arrache au combat.',
+                     "The King's Sceptre goes to the grave with you: the crown isn't inherited, it's taken by force.")}
+            </p>
+          )}
           {legacyId && (
             <p className="text-[10px] text-[#F2C14E] mt-1.5">
               ✓ {tr('Posé sur votre tombe pour le prochain.', 'Left on your grave for the next one.')}
