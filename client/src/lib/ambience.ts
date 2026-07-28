@@ -49,8 +49,13 @@ function sync(): void {
 function armGesture(): void {
   if (gestureArmed || typeof window === 'undefined') return;
   gestureArmed = true;
+  // On écoute PLUSIEURS types de gestes (et sur la phase de capture) : le
+  // premier contact déverrouille le son avant même que le bouton ne réagisse,
+  // pour que le thème du menu se fasse entendre au lieu d'être manqué.
+  const EVENTS = ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'click'] as const;
   const kick = () => {
     gestureArmed = false;
+    EVENTS.forEach((e) => window.removeEventListener(e, kick, true));
     const ac = getAudio();
     if (ac && ac.state === 'suspended') {
       ac.resume().then(sync).catch(() => { /* silent */ });
@@ -58,7 +63,7 @@ function armGesture(): void {
       sync();
     }
   };
-  window.addEventListener('pointerdown', kick, { once: true });
+  EVENTS.forEach((e) => window.addEventListener(e, kick, { capture: true }));
 }
 
 onMuteChange(() => sync());
@@ -209,25 +214,49 @@ function startTitle(ac: AudioContext): Stopper {
 
   const BEAT = 0.75;                                   // ≈ 80 bpm
   const BASSES = [110, 87.31, 130.81, 98];             // A2, F2, C3, G2
+  // Accords tenus sous la mélodie : Am, F, C, G. C'est eux qui donnent au
+  // menu son côté « vraie musique » plutôt que simple nappe.
+  const CHORDS: number[][] = [
+    [220, 261.63, 329.63],                             // Am : A3 C4 E4
+    [174.61, 220, 261.63],                             // F  : F3 A3 C4
+    [261.63, 329.63, 392],                             // C  : C4 E4 G4
+    [196, 246.94, 293.66],                             // G  : G3 B3 D4
+  ];
   const MOTIFS: number[][] = [
     [440, 0, 523.25, 392],                             // A4 · C5 G4
     [329.63, 392, 440, 0],                             // E4 G4 A4 ·
     [523.25, 440, 392, 329.63],                        // C5 A4 G4 E4
     [440, 0, 0, 293.66],                               // A4 · · D4
     [0, 329.63, 261.63, 293.66],                       // · E4 C4 D4
+    [659.25, 587.33, 523.25, 0],                       // E5 D5 C5 ·
   ];
 
   const schedulePhrase = () => {
     if (kit.stopped) return;
-    // 4 mesures de 4 temps : une basse par mesure, un motif mélodique dessus.
+    // 4 mesures de 4 temps : basse + accord tenu, motif mélodique dessus,
+    // et un petit battement de carton pour tenir le tempo.
     for (let bar = 0; bar < 4; bar++) {
       const delayBar = bar * 4 * BEAT * 1000;
       const bass = BASSES[bar];
-      kit.timers.push(setTimeout(() => { if (!kit.stopped) note(kit, bass, BEAT * 3.6, 'triangle', 0.05); }, delayBar));
+      kit.timers.push(setTimeout(() => {
+        if (kit.stopped) return;
+        note(kit, bass, BEAT * 3.6, 'triangle', 0.062);
+        // L'accord, très doux, en arrière-plan.
+        CHORDS[bar].forEach((f, i) => note(kit, f, BEAT * 3.4, 'sine', 0.019 - i * 0.003));
+      }, delayBar));
+      // Battement discret sur les temps 1 et 3 (une caisse en carton, quoi).
+      [0, 2].forEach((beat) => {
+        kit.timers.push(setTimeout(() => {
+          if (!kit.stopped) note(kit, beat === 0 ? 78 : 62, 0.1, 'sine', 0.05, 46);
+        }, delayBar + beat * BEAT * 1000));
+      });
       const motif = MOTIFS[Math.floor(Math.random() * MOTIFS.length)];
       motif.forEach((f, i) => {
-        if (!f || Math.random() < 0.15) return;        // silences : la mélodie respire
-        kit.timers.push(setTimeout(() => { if (!kit.stopped) note(kit, f, BEAT * 0.9, 'sine', 0.038); }, delayBar + i * BEAT * 1000));
+        if (!f || Math.random() < 0.12) return;        // silences : la mélodie respire
+        const at = delayBar + i * BEAT * 1000;
+        kit.timers.push(setTimeout(() => { if (!kit.stopped) note(kit, f, BEAT * 0.9, 'sine', 0.055); }, at));
+        // Écho léger à l'octave : ça remplit sans alourdir.
+        kit.timers.push(setTimeout(() => { if (!kit.stopped) note(kit, f * 2, BEAT * 0.5, 'sine', 0.013); }, at + BEAT * 380));
       });
     }
     kit.timers.push(setTimeout(schedulePhrase, 16 * BEAT * 1000));
