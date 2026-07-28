@@ -53,10 +53,32 @@ export function loadKarma(): number {
   try { return Number(localStorage.getItem(KARMA_KEY) || 0) || 0; } catch { return 0; }
 }
 
+// Mémoire de la dernière mort traitée. Sert à deux choses : ignorer un simple
+// re-montage de l'écran de fin, et surtout gérer la SECONDE CHANCE (pub) —
+// le personnage meurt, revit, puis remeurt quelques jours plus tard. C'est la
+// même vie : une seule tombe, un seul lot de karma (complété du delta).
+interface SeenDeath {
+  seed: string;
+  day: number;
+  respect: number;
+  ids: string[];
+  newIds: string[];
+  karmaGained: number;
+}
+
+function readSeen(): SeenDeath | null {
+  try {
+    const s = JSON.parse(localStorage.getItem(SEEN_KEY) || 'null');
+    return s && s.seed ? s as SeenDeath : null;
+  } catch { return null; }
+}
+
 /**
- * Enregistre une mort : marque les fins découvertes, crédite le Karma de Rue.
- * Idempotent pour une même mort (clé seed+jour+ids) : si l'écran de fin se
- * re-monte, on renvoie le MÊME résultat (mémorisé) sans recompter.
+ * Enregistre une mort : marque les fins découvertes, crédite le Karma de Rue,
+ * dresse la tombe. Un personnage (une graine) ne produit JAMAIS qu'une seule
+ * tombe et qu'un seul lot de karma, même s'il meurt, revit par une pub, puis
+ * meurt à nouveau : la deuxième mort met la tombe à jour et ne crédite que la
+ * différence (jours en plus, respect en plus, fins inédites en plus).
  */
 export function recordDeath(params: {
   ids: string[];            // fins correspondant à cette mort (catégorie + circonstances + ennemi)
@@ -66,34 +88,49 @@ export function recordDeath(params: {
   seed: string;
   grave?: Omit<Grave, 'at' | 'golden'>; // la tombe à dresser au Cimetière
 }): { newIds: string[]; karmaGained: number; karmaTotal: number } {
-  const dedupe = `${params.seed}:${params.day}:${params.ids.join(',')}`;
-  try {
-    const seen = JSON.parse(localStorage.getItem(SEEN_KEY) || 'null');
-    if (seen && seen.dedupe === dedupe) {
-      return { newIds: seen.newIds || [], karmaGained: seen.karmaGained || 0, karmaTotal: loadKarma() };
-    }
-  } catch { /* silent */ }
+  const seen = readSeen();
+  const sameLife = !!seen && seen.seed === params.seed;
+
+  // Simple re-montage de l'écran de fin : on renvoie le résultat mémorisé.
+  if (sameLife && seen!.day === params.day && seen!.ids.join(',') === params.ids.join(',')) {
+    return { newIds: seen!.newIds, karmaGained: seen!.karmaGained, karmaTotal: loadKarma() };
+  }
 
   const book = loadDeathBook();
   const newIds = params.ids.filter(id => !book[id]);
   const now = Date.now();
   newIds.forEach(id => { book[id] = { name: params.name, day: params.day, at: now }; });
 
-  const karmaGained = params.day * 2 + Math.max(0, params.respect) + newIds.length * 10;
+  // Après une seconde chance, on ne recompte que ce que la rallonge a apporté.
+  const days = sameLife ? Math.max(0, params.day - seen!.day) : params.day;
+  const respect = sameLife ? Math.max(0, params.respect - seen!.respect) : Math.max(0, params.respect);
+  const karmaGained = days * 2 + respect + newIds.length * 10;
   const karmaTotal = loadKarma() + karmaGained;
+
+  // Ce que l'écran de fin affiche : le bilan de TOUTE la vie du personnage.
+  const runNewIds = sameLife ? [...seen!.newIds, ...newIds] : newIds;
+  const runKarma = sameLife ? seen!.karmaGained + karmaGained : karmaGained;
+
   try {
     localStorage.setItem(BOOK_KEY, JSON.stringify(book));
     localStorage.setItem(KARMA_KEY, String(karmaTotal));
-    localStorage.setItem(SEEN_KEY, JSON.stringify({ dedupe, newIds, karmaGained }));
+    localStorage.setItem(SEEN_KEY, JSON.stringify({
+      seed: params.seed, day: params.day, respect: params.respect,
+      ids: params.ids, newIds: runNewIds, karmaGained: runKarma,
+    } satisfies SeenDeath));
   } catch { /* silent */ }
 
   // La tombe rejoint le Cimetière des Cartons (dorée si la vanité l'attendait).
+  // Une seule par personnage : une seconde mort remplace la première.
   if (params.grave) {
     const h = loadHeritage();
-    pushGrave({ ...params.grave, golden: h.goldenEpitaph, at: now });
-    if (h.goldenEpitaph) setGoldenEpitaph(false);
+    const golden = sameLife
+      ? (loadGraves().find(g => g.seed === params.seed)?.golden || h.goldenEpitaph)
+      : h.goldenEpitaph;
+    upsertGrave({ ...params.grave, golden, at: now });
+    if (h.goldenEpitaph && !sameLife) setGoldenEpitaph(false);
   }
-  return { newIds, karmaGained, karmaTotal };
+  return { newIds: runNewIds, karmaGained: runKarma, karmaTotal };
 }
 
 // ---- Le Cimetière des Cartons : une tombe par personnage tombé ----
@@ -112,15 +149,42 @@ export interface Grave {
   accessories?: Record<string, string>;
 }
 
+/**
+ * Les tombes, la plus récente d'abord. UNE SEULE par personnage : les
+ * sauvegardes d'avant ce correctif pouvaient contenir deux fois le même
+ * défunt (mort → seconde chance par pub → nouvelle mort), on ne garde donc
+ * que la plus avancée de chaque graine.
+ */
 export function loadGraves(): Grave[] {
-  try { return JSON.parse(localStorage.getItem(GRAVES_KEY) || '[]'); } catch { return []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(GRAVES_KEY) || '[]') as Grave[];
+    if (!Array.isArray(raw)) return [];
+    const bySeed = new Map<string, Grave>();
+    for (const g of raw) {
+      if (!g || !g.seed) continue;
+      const prev = bySeed.get(g.seed);
+      // On garde la mort la plus tardive : le vrai bout de la vie du perso.
+      if (!prev || (g.day ?? 0) > (prev.day ?? 0)) bySeed.set(g.seed, prev ? { ...g, golden: g.golden || prev.golden } : g);
+      else if (g.golden && !prev.golden) bySeed.set(g.seed, { ...prev, golden: true });
+    }
+    // L'ordre d'origine (le plus récent d'abord) est conservé.
+    const seen = new Set<string>();
+    const out: Grave[] = [];
+    for (const g of raw) {
+      if (!g || !g.seed || seen.has(g.seed)) continue;
+      seen.add(g.seed);
+      out.push(bySeed.get(g.seed)!);
+    }
+    return out;
+  } catch { return []; }
 }
 
-function pushGrave(g: Grave): void {
+/** Dresse la tombe d'un personnage, ou met à jour la sienne s'il en a déjà une. */
+function upsertGrave(g: Grave): void {
   try {
-    const graves = loadGraves();
+    const graves = loadGraves().filter(x => x.seed !== g.seed);
     graves.unshift(g);
-    localStorage.setItem(GRAVES_KEY, JSON.stringify(graves.slice(0, 40))); // les 40 dernières
+    localStorage.setItem(GRAVES_KEY, JSON.stringify(graves.slice(0, 40))); // les 40 derniers
   } catch { /* silent */ }
 }
 

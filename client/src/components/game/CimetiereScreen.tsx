@@ -178,7 +178,7 @@ export default function CimetiereScreen() {
               }}
             >
               <div className={`w-11 h-11 rounded-full overflow-hidden mx-auto mb-1 border ${g.golden ? 'border-[#F2C14E]' : 'border-[#4A5844]'} grayscale-[45%]`}>
-                <CardboardAvatar seed={g.seed} gender={g.gender as 'm' | 'f'} size={44} />
+                <CardboardAvatar seed={g.seed} gender={g.gender as 'm' | 'f'} size={44} accessories={g.accessories} />
               </div>
               <p className={`text-[12px] font-bold leading-tight ${g.golden ? 'text-[#F2C14E]' : 'text-[#D8E0C8]'}`}>
                 {g.golden ? '✨ ' : ''}{g.jobEmoji} {g.name}

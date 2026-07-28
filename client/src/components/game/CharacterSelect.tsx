@@ -1,7 +1,7 @@
 import { useGame, type Character } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import CardboardAvatar from './CardboardAvatar';
+import PlayerFace from './PlayerFace';
 import { useLang, tr, tc } from '@/lib/lang';
 import { showRewarded, isAdsRemoved } from '@/lib/ads';
 
@@ -19,7 +19,7 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
       {/* Character header */}
       <div className="flex items-center gap-3 mb-3">
         <div className="w-12 h-12 rounded-xl overflow-hidden shadow-sm shrink-0 border border-[#E8D5C0]">
-          <CardboardAvatar seed={char.seed} gender={char.gender} size={48} />
+          <PlayerFace char={char} size={48} />
         </div>
         <div>
           <h3 className="text-xl text-[#2A1F1A]">{char.name}</h3>

@@ -1,0 +1,39 @@
+/*
+ * LE visage du personnage joué, rendu de la même façon PARTOUT.
+ *
+ * Le portrait carton dépend de trois choses : la graine du personnage, les
+ * accessoires équipés dans la garde-robe, et son état (dérivé des jauges).
+ * Quand un écran en oubliait une, le joueur voyait soudain une autre tête que
+ * la sienne — sans casquette en plein combat, par exemple — et croyait
+ * retrouver un ancien personnage. Un seul composant, plus de dérive possible.
+ */
+import type { Character } from '@/contexts/types';
+import { getEquipped } from '@/lib/profile';
+import CardboardAvatar from './CardboardAvatar';
+
+/** État général du personnage, de 0 (à l'agonie) à 1 (en pleine forme). */
+export function faceCondition(char: Character): number {
+  const s = char.stats;
+  return (s.health + s.mental + s.hunger + s.thirst + s.sleep) / 500;
+}
+
+export default function PlayerFace({
+  char,
+  size = 40,
+  className = '',
+}: {
+  char: Character;
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <CardboardAvatar
+      seed={char.seed}
+      gender={char.gender}
+      size={size}
+      className={className}
+      accessories={getEquipped()}
+      condition={faceCondition(char)}
+    />
+  );
+}

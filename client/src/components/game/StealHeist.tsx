@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt, playStep, playSpotted } from '@/lib/sound';
 import { useLang, tr } from '@/lib/lang';
-import CardboardAvatar from './CardboardAvatar';
-import { getEquipped } from '@/lib/profile';
+import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import SafeImg from './SafeImg';
 import { pushToast } from '@/lib/toast';
@@ -557,7 +556,7 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
                     transition={{ repeat: Infinity, duration: 1.1 }}
                     className="drop-shadow flex items-center justify-center"
                   >
-                    <CardboardAvatar seed={char.seed} gender={char.gender} size={30} accessories={getEquipped()} />
+                    <PlayerFace char={char} size={30} />
                   </motion.span>
                 ) : guard ? (
                   <span>{guard.kind === 'camper' ? '🔦' : guard.kind === 'chaser' ? chaserEmoji : guardEmoji}</span>

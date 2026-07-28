@@ -5,7 +5,7 @@ import { playPaper } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import SceneIllustration from './SceneIllustration';
 import SafeImg from './SafeImg';
-import CardboardAvatar from './CardboardAvatar';
+import PlayerFace from './PlayerFace';
 
 /*
  * Récit d'origine « La Chute de… » : carte d'intro montrée UNE fois au départ
@@ -53,7 +53,7 @@ export default function OriginStoryOverlay() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
             {/* Le visage carton du personnage, coin bas-gauche */}
             <div className="absolute bottom-2 left-2 w-12 h-12 rounded-lg overflow-hidden border-2 border-white/80 shadow-md">
-              <CardboardAvatar seed={char.seed} gender={char.gender} size={48} />
+              <PlayerFace char={char} size={48} />
             </div>
             <span className="absolute top-2 right-2 text-2xl drop-shadow">{char.job.emoji}</span>
           </motion.div>

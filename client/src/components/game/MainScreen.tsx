@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import StatBars from './StatBars';
 import CardboardAvatar from './CardboardAvatar';
+import PlayerFace, { faceCondition } from './PlayerFace';
 import StreetEncounter from './StreetEncounter';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
 import { playClick, playNextDay } from '@/lib/sound';
-import { getEquipped } from '@/lib/profile';
 import { useLang, tr } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
@@ -86,7 +86,7 @@ export default function MainScreen() {
   // État général (0 = à l'agonie, 1 = en pleine forme) : moyenne des jauges
   // vitales, hors dignité (plus sociale). Nourrit le visage et le liseré de
   // l'avatar pour rendre lisible la dégradation ou le mieux-être.
-  const condition = (char.stats.health + char.stats.mental + char.stats.hunger + char.stats.thirst + char.stats.sleep) / 500;
+  const condition = faceCondition(char);
   const actionsLeft = state.maxDayActions - state.dayActions;
   // Avancement de la journée (0 = matin frais, 1 = nuit tombée) : ce sont les
   // actions consommées qui font tourner la lumière sur la scène du quartier.
@@ -123,7 +123,7 @@ export default function MainScreen() {
               style={{ border: `2px solid ${conditionColor(condition)}`, transition: 'border-color 0.6s' }}
               aria-label="Personnaliser mon personnage"
             >
-              <CardboardAvatar seed={char.seed} gender={char.gender} size={40} accessories={getEquipped()} condition={condition} />
+              <PlayerFace char={char} size={40} />
               <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#B8860B] text-white text-[9px] flex items-center justify-center shadow">✎</span>
             </button>
             <div>

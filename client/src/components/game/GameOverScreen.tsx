@@ -3,7 +3,7 @@ import type { InventoryItem } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect, useMemo } from 'react';
 import { showInterstitial, showRewarded } from '@/lib/ads';
-import CardboardAvatar from './CardboardAvatar';
+import PlayerFace from './PlayerFace';
 import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
 import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown } from '@/lib/necrology';
@@ -192,7 +192,7 @@ export default function GameOverScreen() {
         <p className="text-[12px] text-[#3D3020] leading-snug mb-2">{deathCause}</p>
         <div className="flex items-center gap-2.5 border-t border-[#C8B896] pt-2">
           <div className="w-11 h-11 rounded overflow-hidden border border-[#B8A888] shrink-0 grayscale-[35%]">
-            <CardboardAvatar seed={char.seed} gender={char.gender} size={44} />
+            <PlayerFace char={char} size={44} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[12px] font-bold text-[#2A1F1A] truncate">{char.job.emoji} {char.name}</p>

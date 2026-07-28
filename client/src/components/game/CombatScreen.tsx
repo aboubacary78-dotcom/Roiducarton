@@ -5,8 +5,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { playHurt, playWhoosh, playEnemyCry, playFightStart, playKingArrival } from '@/lib/sound';
 import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
-import CardboardAvatar from './CardboardAvatar';
-import { getEquipped } from '@/lib/profile';
+import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import { stampTap, liftHover } from '@/lib/anim';
 import { pushToast } from '@/lib/toast';
@@ -157,7 +156,7 @@ function CombatScreenInner() {
         style={{ borderColor: playerHpPercent <= 25 ? '#D94F4F' : undefined }}
       >
         <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 border-2 border-[#4A9B5F]/40">
-          <CardboardAvatar seed={character.seed} gender={character.gender} size={44} />
+          <PlayerFace char={character} size={44} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
@@ -719,7 +718,7 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
           transition={{ duration: 0.16 }}
         >
           <div className="w-full h-full rounded-full overflow-hidden" style={{ boxShadow: flash ? '0 0 0 3px #D94F4F' : '0 0 0 2px rgba(242,193,78,0.7)' }}>
-            <CardboardAvatar seed={character.seed} gender={character.gender} size={Math.round(R * 2.4)} accessories={getEquipped()} />
+            <PlayerFace char={character} size={Math.round(R * 2.4)} />
           </div>
         </motion.div>
       </div>
