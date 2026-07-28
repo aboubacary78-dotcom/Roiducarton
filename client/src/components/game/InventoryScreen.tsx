@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import SafeImg from './SafeImg';
+import { playCraft, playCoin, playSuccess } from '@/lib/sound';
 
 const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: string; bg: string }> = {
   food: { label: 'Nourriture', labelEn: 'Food', color: '#4A9B5F', bg: '#4A9B5F15' },
@@ -91,7 +92,7 @@ export default function InventoryScreen() {
                 <div className="shrink-0 flex flex-col gap-1.5">
                   {hasEffect && (
                     <button
-                      onClick={() => dispatch({ type: 'USE_ITEM', itemId: item.id })}
+                      onClick={() => { playSuccess(); dispatch({ type: 'USE_ITEM', itemId: item.id }); }}
                       className="px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg"
                       style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)', boxShadow: '0 2px 6px rgba(74, 155, 95, 0.25)' }}
                     >
@@ -99,7 +100,7 @@ export default function InventoryScreen() {
                     </button>
                   )}
                   <button
-                    onClick={() => dispatch({ type: 'SELL_ITEM', itemId: item.id })}
+                    onClick={() => { playCoin(); dispatch({ type: 'SELL_ITEM', itemId: item.id }); }}
                     className="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-[#8B6B4A]"
                     style={{ background: '#F5EDE4', border: '1px solid #E8D5C0' }}
                   >
@@ -170,7 +171,7 @@ export default function InventoryScreen() {
                     <p className="text-[10px] text-[#8B6B4A] leading-snug mt-0.5">{en ? recipe.hintEn : recipe.hint}</p>
                   </div>
                   <button
-                    onClick={() => ok && dispatch({ type: 'CRAFT', recipeId: recipe.id })}
+                    onClick={() => { if (!ok) return; playCraft(); dispatch({ type: 'CRAFT', recipeId: recipe.id }); }}
                     disabled={!ok}
                     className="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg shrink-0 disabled:cursor-not-allowed"
                     style={ok

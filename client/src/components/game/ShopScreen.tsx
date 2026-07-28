@@ -3,7 +3,7 @@ import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay
 import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
-import { playCoin } from '@/lib/sound';
+import { playCoin, playShare } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { pushToast } from '@/lib/toast';
@@ -144,6 +144,7 @@ export default function ShopScreen() {
     setClaimingSolid(true);
     const rewarded = await showRewarded();
     if (rewarded) {
+      playShare();
       dispatch({ type: 'CLAIM_SOLIDARITY' });
       pushToast(tr('Distribution solidaire : soupe, pain et eau. Ça tiendra au chaud.', 'Food bank: soup, bread and water. That\'ll keep you going.'), { emoji: '🥣', tone: 'good' });
     }

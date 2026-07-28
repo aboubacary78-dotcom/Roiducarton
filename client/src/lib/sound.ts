@@ -219,6 +219,61 @@ export function playEnemyCry(pattern: string): void {
   vibrate(35);
 }
 
+/** Gong d'ouverture de bagarre : le combat s'enclenche. */
+export function playFightStart(): void {
+  if (muted) return;
+  // Coup de gong : impact large + longue résonance grave.
+  noise(0.25, 0.13, 200);
+  tone(160, 0.9, 'sine', 0.11, 78);
+  tone(240, 0.7, 'triangle', 0.06, 120);
+  setTimeout(() => tone(320, 0.45, 'sine', 0.045, 190), 90);
+  vibrate([0, 60, 40, 90]);
+}
+
+/** K.O. : l'adversaire s'écroule (impact sourd + chute + petite fanfare). */
+export function playKO(): void {
+  if (muted) return;
+  // Le coup de grâce.
+  noise(0.16, 0.18, 500);
+  tone(120, 0.28, 'triangle', 0.16, 55);
+  // La chute, lourde.
+  setTimeout(() => { noise(0.22, 0.12, 160); tone(90, 0.4, 'sine', 0.12, 45); }, 170);
+  // Les petites étoiles qui tournent.
+  setTimeout(() => [1320, 1050, 1560].forEach((f, i) => setTimeout(() => tone(f, 0.1, 'triangle', 0.05), i * 80)), 430);
+  vibrate([0, 80, 50, 120]);
+}
+
+/** Bricolage réussi : on scie, on visse, ça tient. */
+export function playCraft(): void {
+  if (muted) return;
+  // Deux passes de scie/ponçage.
+  noise(0.13, 0.05, 1400);
+  setTimeout(() => noise(0.13, 0.05, 1200), 150);
+  // Deux coups de marteau secs.
+  setTimeout(() => { tone(210, 0.07, 'square', 0.07, 130); noise(0.05, 0.06, 900); }, 320);
+  setTimeout(() => { tone(240, 0.07, 'square', 0.07, 150); noise(0.05, 0.06, 900); }, 440);
+  // Ça marche !
+  setTimeout(() => { tone(660, 0.12, 'triangle', 0.07); setTimeout(() => tone(880, 0.16, 'triangle', 0.07), 100); }, 580);
+  vibrate([0, 25, 60, 25]);
+}
+
+/** Geste de partage / troc conclu avec une autre âme de la rue. */
+export function playShare(): void {
+  if (muted) return;
+  // Deux notes chaudes, en tierce : la poignée de main.
+  tone(440, 0.16, 'sine', 0.075);
+  setTimeout(() => tone(554, 0.2, 'sine', 0.075), 90);
+  setTimeout(() => tone(659, 0.26, 'sine', 0.06), 190);
+}
+
+/** Récit d'origine : vieux papier qu'on déplie, un peu solennel. */
+export function playPaper(): void {
+  if (muted) return;
+  noise(0.18, 0.035, 2200);
+  setTimeout(() => noise(0.14, 0.028, 1800), 160);
+  setTimeout(() => tone(330, 0.5, 'sine', 0.045, 262), 260);
+}
+
 /** Vibration haptique (Android / app native). Sans effet si non supporté. */
 export function vibrate(pattern: number | number[]): void {
   if (muted) return;

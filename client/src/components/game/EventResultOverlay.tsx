@@ -2,7 +2,7 @@ import { useGame, STAT_META, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showRewarded } from '@/lib/ads';
-import { playSuccess, playFail, playWin } from '@/lib/sound';
+import { playSuccess, playFail, playWin, playKO } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, moodFor } from './SceneIllustration';
@@ -38,7 +38,8 @@ export default function EventResultOverlay() {
     const positive = (result.moneyChange || 0) > 0 || (result.respectChange || 0) > 0 ||
       Object.values(result.statChanges || {}).reduce((s, v) => s + (v || 0), 0) > 0;
     const isVictory = /^Victoire|^Victory/.test(result.text);
-    if (isVictory) playWin();
+    // Victoire en combat : le K.O. tombe d'abord, la fanfare enchaîne.
+    if (isVictory) { playKO(); setTimeout(() => playWin(), 620); }
     else if (positive) playSuccess();
     else playFail();
     // eslint-disable-next-line react-hooks/exhaustive-deps

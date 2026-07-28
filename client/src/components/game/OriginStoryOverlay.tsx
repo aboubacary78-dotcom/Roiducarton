@@ -1,5 +1,7 @@
 import { useGame, generateOrigin } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect } from 'react';
+import { playPaper } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import SceneIllustration from './SceneIllustration';
 import SafeImg from './SafeImg';
@@ -16,7 +18,11 @@ export default function OriginStoryOverlay() {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character;
-  if (!char || state.screen !== 'main' || char.activeFlags?.includes('origin-vu')) return null;
+  const visible = !!char && state.screen === 'main' && !char.activeFlags?.includes('origin-vu');
+  // Froissement de vieux papier quand le récit se déplie (hook AVANT tout
+  // retour anticipé : l'ordre des hooks doit rester stable).
+  useEffect(() => { if (visible) playPaper(); }, [visible]);
+  if (!char || !visible) return null;
 
   const story = generateOrigin(char);
 

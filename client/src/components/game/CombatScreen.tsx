@@ -2,7 +2,7 @@ import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon 
 import type { Character, CombatState, CombatCard, SignId } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { playHurt, playWhoosh, playEnemyCry } from '@/lib/sound';
+import { playHurt, playWhoosh, playEnemyCry, playFightStart } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
 import { getEquipped } from '@/lib/profile';
@@ -86,6 +86,8 @@ function CombatScreenInner() {
   // Ouverture du combat : petite mise en scène « VS » + comment ça a commencé.
   const [intro, setIntro] = useState(true);
   const brawl = useState(() => BRAWL_STARTS[Math.floor(Math.random() * BRAWL_STARTS.length)])[0];
+  // Gong d'ouverture au tout premier rendu de la mise en scène.
+  useEffect(() => { playFightStart(); }, []);
   useEffect(() => {
     if (!intro) return;
     const t = setTimeout(() => setIntro(false), 2500);
