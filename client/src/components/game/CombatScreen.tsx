@@ -81,8 +81,11 @@ function CombatScreenInner() {
   const [imgError, setImgError] = useState(false);
   useEffect(() => { setImgError(false); }, [currentCombat?.enemyName]);
   // Cri de l'ennemi à son entrée en scène (famille sonore = son pattern).
+  // Cri d'entrée : la voix dépend de l'ESPÈCE (emoji), pas seulement du pattern.
   const pattern = currentCombat?.pattern;
-  useEffect(() => { if (pattern) playEnemyCry(pattern); }, [pattern, currentCombat?.enemyName]);
+  const enemyEmoji = currentCombat?.enemyEmoji;
+  const enemyName = currentCombat?.enemyName;
+  useEffect(() => { if (pattern) playEnemyCry(pattern, enemyEmoji, enemyName); }, [pattern, enemyEmoji, enemyName]);
   // Ouverture du combat : petite mise en scène « VS » + comment ça a commencé.
   const [intro, setIntro] = useState(true);
   const brawl = useState(() => BRAWL_STARTS[Math.floor(Math.random() * BRAWL_STARTS.length)])[0];

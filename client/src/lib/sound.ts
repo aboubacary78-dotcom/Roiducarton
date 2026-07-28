@@ -188,12 +188,64 @@ export function playWhoosh(): void {
 }
 
 /**
- * Cri de l'ennemi à son entrée en combat, selon sa silhouette (le « pattern »
- * de projectiles sert aussi de famille sonore) : criaillement d'oiseau,
- * feulement de chat, grognement de bête, clink d'ivrogne, grognement humain.
+ * Voix propre à chaque ESPÈCE d'ennemi, déduite de son emoji (et de son nom
+ * pour les humains). Renvoie null si on ne connaît pas : on retombe alors sur
+ * la famille générique du pattern de projectiles.
  */
-export function playEnemyCry(pattern: string): void {
+function speciesVoice(emoji?: string, name?: string): (() => void) | null {
+  switch (emoji) {
+    case '🦅': // mouette : deux criaillements rauques qui descendent
+      return () => { [2100, 1750].forEach((f, i) => setTimeout(() => { tone(f, 0.16, 'sawtooth', 0.05, f * 0.45); }, i * 210)); };
+    case '🐦': // pigeon : roucoulement doux et bête
+      return () => { [420, 360, 330].forEach((f, i) => setTimeout(() => tone(f, 0.17, 'sine', 0.06, f * 0.82), i * 150)); };
+    case '🐦‍⬛': // corbeau : croassement râpeux, trois fois
+      return () => { [0, 190, 380].forEach((d) => setTimeout(() => { tone(320, 0.13, 'sawtooth', 0.06, 210); noise(0.09, 0.04, 900); }, d)); };
+    case '🦆': // canard : coin-coin nasillard
+      return () => { [0, 160, 320].forEach((d) => setTimeout(() => tone(560, 0.11, 'square', 0.05, 430), d)); };
+    case '🪿': // oie : klaxon agressif, plus grave
+      return () => { [0, 230].forEach((d) => setTimeout(() => { tone(300, 0.22, 'square', 0.07, 240); noise(0.06, 0.03, 700); }, d)); };
+    case '🦢': // cygne : long sifflement menaçant + battement d'ailes
+      return () => { noise(0.42, 0.05, 2600); setTimeout(() => { noise(0.12, 0.06, 300); noise(0.12, 0.05, 300); }, 380); };
+    case '🐓': // coq : cocorico qui monte puis casse
+      return () => { tone(620, 0.16, 'square', 0.055, 880); setTimeout(() => tone(880, 0.14, 'square', 0.05), 170); setTimeout(() => tone(700, 0.26, 'sawtooth', 0.05, 420), 320); };
+    case '🐱': case '😾': case '🐈': // chat : miaulement qui vire au feulement
+      return () => { tone(700, 0.26, 'sawtooth', 0.05, 1050); setTimeout(() => noise(0.34, 0.05, 3000), 260); };
+    case '🐕': // chien : deux aboiements secs puis grondement
+      return () => { [0, 190].forEach((d) => setTimeout(() => { tone(280, 0.09, 'square', 0.08, 150); noise(0.07, 0.06, 500); }, d)); setTimeout(() => tone(110, 0.34, 'sawtooth', 0.06, 80), 380); };
+    case '🐀': // rat : couinements suraigus et rapides
+      return () => { [0, 90, 180].forEach((d, i) => setTimeout(() => tone(2500 + i * 250, 0.06, 'square', 0.035, 1900), d)); };
+    case '🐿️': // écureuil : mitraillette de petits cris
+      return () => { for (let i = 0; i < 5; i++) setTimeout(() => tone(2000 + Math.random() * 700, 0.04, 'square', 0.03), i * 65); };
+    case '🦝': // raton laveur : trille grognon
+      return () => { [0, 120, 240].forEach((d, i) => setTimeout(() => tone(520 - i * 60, 0.12, 'sawtooth', 0.05, 700), d)); };
+    case '🤡': // clown : klaxon de nez + rire descendant, très inquiétant
+      return () => { tone(420, 0.12, 'square', 0.08, 300); setTimeout(() => tone(300, 0.12, 'square', 0.07, 210), 130); [0, 1, 2, 3].forEach((i) => setTimeout(() => tone(700 - i * 90, 0.1, 'triangle', 0.05), 320 + i * 110)); };
+    case '👮': case '🔦': // vigile / agent : coup de sifflet strident
+      return () => { tone(2300, 0.3, 'square', 0.045, 2500); setTimeout(() => tone(2400, 0.18, 'square', 0.04), 340); };
+    case '🦺': // vigile de choc : souffle lourd + cervicales qui craquent
+      return () => { noise(0.3, 0.06, 200); tone(90, 0.5, 'sawtooth', 0.09, 62); setTimeout(() => { noise(0.04, 0.09, 1800); noise(0.04, 0.08, 1500); }, 420); };
+    case '😡': // commerçant furieux : gueulante humaine
+      return () => { tone(240, 0.3, 'sawtooth', 0.075, 380); setTimeout(() => tone(300, 0.22, 'sawtooth', 0.07, 200), 300); };
+    case '🧔': // voyou : grognement sourd + craquement de doigts
+      return () => { tone(130, 0.34, 'sawtooth', 0.07, 90); setTimeout(() => noise(0.05, 0.07, 1600), 320); };
+    case '🍺': case '🍾': // ivrogne : bouteilles + rot, évidemment
+      return () => { tone(1650, 0.06, 'triangle', 0.055); setTimeout(() => tone(1240, 0.08, 'triangle', 0.05), 85); setTimeout(() => tone(150, 0.34, 'sawtooth', 0.055, 75), 250); };
+    default:
+      // Humains non listés : on reconnaît quelques rôles au nom.
+      if (name && /vigile|agent|s[ée]curit|polic/i.test(name)) return () => { tone(2300, 0.3, 'square', 0.045, 2500); };
+      return null;
+  }
+}
+
+/**
+ * Cri de l'ennemi à son entrée en combat. On joue d'abord la voix propre à son
+ * ESPÈCE (mouette, chat, clown, vigile…) ; à défaut, la famille générique
+ * déduite de son pattern de projectiles.
+ */
+export function playEnemyCry(pattern: string, emoji?: string, name?: string): void {
   if (muted) return;
+  const voice = speciesVoice(emoji, name);
+  if (voice) { voice(); vibrate(35); return; }
   switch (pattern) {
     case 'bird': // criaillement : trois chirps stridents descendants
       [1900, 2300, 1500].forEach((f, i) => setTimeout(() => tone(f, 0.09, 'square', 0.045, f * 0.55), i * 95));
