@@ -107,6 +107,9 @@ export interface Grave {
   cause: string;        // cause courte (FR, langue de la partie au moment de la mort)
   golden?: boolean;     // épitaphe dorée (vanité achetée dans L'Héritage)
   at: number;
+  // Tenue portée le jour de sa mort : figée ici, sinon la galerie de l'écran
+  // titre habillerait tous les anciens avec les accessoires du jour.
+  accessories?: Record<string, string>;
 }
 
 export function loadGraves(): Grave[] {

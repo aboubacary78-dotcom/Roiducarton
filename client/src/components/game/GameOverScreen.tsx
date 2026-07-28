@@ -7,6 +7,7 @@ import CardboardAvatar from './CardboardAvatar';
 import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
 import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown } from '@/lib/necrology';
+import { getEquipped } from '@/lib/profile';
 
 /*
  * L'écran de fin est une « une de journal » : la mort du personnage devient
@@ -80,7 +81,7 @@ export default function GameOverScreen() {
     }
     return recordDeath({
       ids, name: char.name, day: char.day, respect: char.respect, seed: char.seed,
-      grave: { name: char.name, seed: char.seed, gender: char.gender, day: char.day, jobEmoji: char.job.emoji, jobName: char.job.name, cause: headline },
+      grave: { name: char.name, seed: char.seed, gender: char.gender, day: char.day, jobEmoji: char.job.emoji, jobName: char.job.name, cause: headline, accessories: getEquipped() as Record<string, string> },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [char?.seed]);

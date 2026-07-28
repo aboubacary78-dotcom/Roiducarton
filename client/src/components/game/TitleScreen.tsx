@@ -18,15 +18,22 @@ export default function TitleScreen() {
   // dernier tombé. Il porte les accessoires que le joueur lui a équipés
   // (garde-robe, conservée d'une partie à l'autre).
   const [face, setFace] = useState<{ seed: string; gender: 'm' | 'f'; name: string } | null>(null);
+  // La lignée : tous les personnages joués, le plus récent d'abord.
+  const [lineage, setLineage] = useState<{ seed: string; gender: 'm' | 'f'; name: string; day: number; acc?: Record<string, string>; alive?: boolean }[]>([]);
   const equipped = getEquipped();
   const crown = loadCrown();
   useEffect(() => {
     try {
       const saved = localStorage.getItem(SAVE_KEY);
       const c = saved ? JSON.parse(saved).character : null;
-      if (c?.seed) { setFace({ seed: c.seed, gender: c.gender === 'f' ? 'f' : 'm', name: c.name }); return; }
-      const last = loadGraves()[0];
-      if (last?.seed) setFace({ seed: last.seed, gender: last.gender === 'f' ? 'f' : 'm', name: last.name });
+      const graves = loadGraves();
+      const list: typeof lineage = [];
+      // Le personnage en cours ouvre la lignée (avec sa tenue actuelle).
+      if (c?.seed) list.push({ seed: c.seed, gender: c.gender === 'f' ? 'f' : 'm', name: c.name, day: c.day ?? 1, acc: getEquipped() as Record<string, string>, alive: true });
+      // Puis les défunts, chacun dans la tenue qu'il portait ce jour-là.
+      for (const g of graves) list.push({ seed: g.seed, gender: g.gender === 'f' ? 'f' : 'm', name: g.name, day: g.day, acc: g.accessories });
+      setLineage(list);
+      if (list.length) setFace({ seed: list[0].seed, gender: list[0].gender, name: list[0].name });
     } catch { /* silent */ }
   }, []);
   // Avancement du Registre des Morts + Karma de Rue (méta persistante).
@@ -91,6 +98,51 @@ export default function TitleScreen() {
           </motion.div>
         )}
       </motion.div>
+
+      {/* La lignée : tous les personnages joués, du dernier au premier.
+          Chacun porte la tenue qu'il avait ; le roi en titre a sa couronne. */}
+      {lineage.length > 1 && (
+        <motion.div
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.75 }}
+          className="w-full -mt-1"
+        >
+          <p className="text-[10px] text-[#A08B70] text-center mb-1.5">
+            {tr(`Votre lignée · ${lineage.length} âmes`, `Your lineage · ${lineage.length} souls`)}
+          </p>
+          <div className="flex gap-2 overflow-x-auto pb-1 px-0.5 snap-x">
+            {lineage.slice(0, 24).map((p, i) => {
+              const reigns = crown?.seed === p.seed;
+              return (
+                <motion.div
+                  key={`${p.seed}-${i}`}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.8 + i * 0.045 }}
+                  className="flex flex-col items-center shrink-0 snap-start"
+                  title={`${p.name} · ${p.day} ${p.day > 1 ? 'jours' : 'jour'}`}
+                >
+                  <div className="relative">
+                    <div
+                      className="w-10 h-10 rounded-full overflow-hidden shadow-sm"
+                      style={{
+                        border: `2px solid ${reigns ? '#FFD34E' : p.alive ? '#4A9B5F' : '#E8D5C0'}`,
+                        filter: p.alive ? 'none' : 'grayscale(0.45)',
+                      }}
+                    >
+                      <CardboardAvatar seed={p.seed} gender={p.gender} size={40} accessories={p.acc} />
+                    </div>
+                    {reigns && <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[11px]">👑</span>}
+                  </div>
+                  <span className="text-[8px] text-[#8B6B4A] mt-0.5 max-w-[44px] truncate">{p.name}</span>
+                  <span className="text-[8px] font-mono text-[#A08B70] leading-none">{p.day}j</span>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* Title */}
       <motion.div
