@@ -14,13 +14,9 @@ export default function TitleScreen() {
   useLang();
   const [hasSave, setHasSave] = useState(false);
   const legend = getLegend(state.highScores);
-  // Le visage du LOGO : le personnage en cours si la partie continue, sinon le
-  // dernier tombé. Il porte les accessoires que le joueur lui a équipés
-  // (garde-robe, conservée d'une partie à l'autre).
-  const [face, setFace] = useState<{ seed: string; gender: 'm' | 'f'; name: string } | null>(null);
-  // La lignée : tous les personnages joués, le plus récent d'abord.
+  // La lignée : tous les personnages joués, le plus récent d'abord. Elle
+  // défile en procession sur la rue de l'illustration (voir StreetParade).
   const [lineage, setLineage] = useState<{ seed: string; gender: 'm' | 'f'; name: string; day: number; acc?: Record<string, string>; alive?: boolean }[]>([]);
-  const equipped = getEquipped();
   const crown = loadCrown();
   useEffect(() => {
     try {
@@ -33,7 +29,6 @@ export default function TitleScreen() {
       // Puis les défunts, chacun dans la tenue qu'il portait ce jour-là.
       for (const g of graves) list.push({ seed: g.seed, gender: g.gender === 'f' ? 'f' : 'm', name: g.name, day: g.day, acc: g.accessories });
       setLineage(list);
-      if (list.length) setFace({ seed: list[0].seed, gender: list[0].gender, name: list[0].name });
     } catch { /* silent */ }
   }, []);
   // Avancement du Registre des Morts + Karma de Rue (méta persistante).
@@ -62,87 +57,8 @@ export default function TitleScreen() {
         transition={{ duration: 0.7 }}
         className="w-full rounded-xl overflow-hidden shadow-[0_8px_32px_rgba(42,31,26,0.12)] relative"
       >
-        <CardboardCityHero />
-
-        {/* Le visage du joueur, en médaillon sur le logo : son perso avec les
-            accessoires qu'il lui a mis. Couronné s'il règne sur la rue. */}
-        {face && (
-          <motion.div
-            initial={{ scale: 0, y: 14, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 220, damping: 15, delay: 0.5 }}
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center"
-          >
-            <div className="relative">
-              <div
-                className="w-16 h-16 rounded-full overflow-hidden shadow-[0_4px_14px_rgba(42,31,26,0.35)]"
-                style={{ border: `3px solid ${crown ? '#FFD34E' : '#F5EEDC'}` }}
-              >
-                <CardboardAvatar seed={face.seed} gender={face.gender} size={64} accessories={equipped} />
-              </div>
-              {/* Couronne posée sur la tête si ce personnage règne. */}
-              {crown && crown.seed === face.seed && (
-                <motion.span
-                  initial={{ y: -6, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.9 }}
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 text-xl drop-shadow"
-                >
-                  👑
-                </motion.span>
-              )}
-            </div>
-            <span className="mt-1 text-[10px] font-semibold text-white px-2 py-0.5 rounded-full bg-black/45 backdrop-blur-sm">
-              {face.name}
-            </span>
-          </motion.div>
-        )}
+        <CardboardCityHero lineage={lineage} crownSeed={crown?.seed} />
       </motion.div>
-
-      {/* La lignée : tous les personnages joués, du dernier au premier.
-          Chacun porte la tenue qu'il avait ; le roi en titre a sa couronne. */}
-      {lineage.length > 1 && (
-        <motion.div
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.75 }}
-          className="w-full -mt-1"
-        >
-          <p className="text-[10px] text-[#A08B70] text-center mb-1.5">
-            {tr(`Votre lignée · ${lineage.length} âmes`, `Your lineage · ${lineage.length} souls`)}
-          </p>
-          <div className="flex gap-2 overflow-x-auto pb-1 px-0.5 snap-x">
-            {lineage.slice(0, 24).map((p, i) => {
-              const reigns = crown?.seed === p.seed;
-              return (
-                <motion.div
-                  key={`${p.seed}-${i}`}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.8 + i * 0.045 }}
-                  className="flex flex-col items-center shrink-0 snap-start"
-                  title={`${p.name} · ${p.day} ${p.day > 1 ? 'jours' : 'jour'}`}
-                >
-                  <div className="relative">
-                    <div
-                      className="w-10 h-10 rounded-full overflow-hidden shadow-sm"
-                      style={{
-                        border: `2px solid ${reigns ? '#FFD34E' : p.alive ? '#4A9B5F' : '#E8D5C0'}`,
-                        filter: p.alive ? 'none' : 'grayscale(0.45)',
-                      }}
-                    >
-                      <CardboardAvatar seed={p.seed} gender={p.gender} size={40} accessories={p.acc} />
-                    </div>
-                    {reigns && <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[11px]">👑</span>}
-                  </div>
-                  <span className="text-[8px] text-[#8B6B4A] mt-0.5 max-w-[44px] truncate">{p.name}</span>
-                  <span className="text-[8px] font-mono text-[#A08B70] leading-none">{p.day}j</span>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
 
       {/* Title */}
       <motion.div
@@ -329,7 +245,69 @@ function sampleSky(t: number): SkyKey {
   };
 }
 
-function CardboardCityHero() {
+// La procession : tous les personnages joués traversent la rue de l'écran
+// titre. Les défunts sont grisés et translucides, comme des fantômes ; le
+// personnage en vie passe en couleur, un peu plus grand, bien vivant.
+type Walker = { seed: string; gender: 'm' | 'f'; name: string; day: number; acc?: Record<string, string>; alive?: boolean };
+
+function StreetParade({ lineage, crownSeed }: { lineage: Walker[]; crownSeed?: string }) {
+  if (!lineage.length) return null;
+  const SPACING = 3.1;                                   // secondes entre deux marcheurs
+  const WALK = 17;                                       // durée d'une traversée
+  const cycle = Math.max(lineage.length * SPACING, WALK + 2.5);
+  // On fait défiler du plus ancien au plus récent : le vivant ferme la marche.
+  const order = [...lineage].reverse();
+
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      {order.map((p, i) => {
+        const reigns = crownSeed && crownSeed === p.seed;
+        const size = p.alive ? 34 : 28;
+        return (
+          <motion.div
+            key={`${p.seed}-${i}`}
+            className="absolute"
+            style={{ bottom: p.alive ? 13 : 17, left: -46 }}
+            initial={{ x: 0 }}
+            animate={{ x: 436 }}
+            transition={{ duration: WALK, ease: 'linear', repeat: Infinity, repeatDelay: cycle - WALK, delay: i * SPACING }}
+          >
+            {/* petit balancement de marche */}
+            <motion.div
+              animate={{ y: [0, -2.5, 0], rotate: [-1.5, 1.5, -1.5] }}
+              transition={{ duration: 0.62, repeat: Infinity, ease: 'easeInOut' }}
+              className="flex flex-col items-center"
+            >
+              <div className="relative">
+                <div
+                  className="rounded-full overflow-hidden"
+                  style={{
+                    width: size, height: size,
+                    border: `2px solid ${reigns ? '#FFD34E' : p.alive ? '#F5EEDC' : '#C9BDA8'}`,
+                    filter: p.alive ? 'none' : 'grayscale(1)',
+                    opacity: p.alive ? 1 : 0.58,
+                    boxShadow: p.alive ? '0 3px 10px rgba(0,0,0,0.35)' : 'none',
+                  }}
+                >
+                  <CardboardAvatar seed={p.seed} gender={p.gender} size={size} accessories={p.acc} />
+                </div>
+                {reigns && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-sm drop-shadow">👑</span>}
+              </div>
+              {/* Le vivant dit son nom ; les fantômes passent en silence. */}
+              {p.alive && (
+                <span className="mt-0.5 text-[8px] font-semibold text-white px-1.5 rounded-full bg-black/45 whitespace-nowrap">
+                  {p.name} · {p.day}j
+                </span>
+              )}
+            </motion.div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+function CardboardCityHero({ lineage = [], crownSeed }: { lineage?: Walker[]; crownSeed?: string }) {
   // On démarre au coucher de soleil (l'identité visuelle du jeu), puis ça vit.
   const [t, setT] = useState(0.28);
   useEffect(() => {
@@ -407,6 +385,8 @@ function CardboardCityHero() {
       {/* rue */}
       <rect x="0" y="180" width="390" height="12" fill="#5A4636" />
     </svg>
+    {/* La lignée du joueur défile sur cette rue. */}
+    <StreetParade lineage={lineage} crownSeed={crownSeed} />
     </div>
   );
 }
