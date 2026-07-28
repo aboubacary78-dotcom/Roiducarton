@@ -7,6 +7,15 @@ survit jour après jour dans une ville française. Direction artistique
 **« Carton Craft »** : chaque illustration est un **diorama miniature en carton
 kraft fait main**, comme une maquette artisanale photographiée.
 
+## ⚠️ RÈGLE N°1 — L'HUMOUR EST LA SIGNATURE DU JEU
+
+« Le Roi du Carton » est une COMÉDIE noire, et TOUTE sa direction artistique
+repose là-dessus : on rit de la misère avec tendresse, on ne s'y vautre jamais.
+**CHAQUE image doit faire sourire** — une situation absurde, un gag visuel, une
+expression comique du personnage. Une image simplement triste, plate ou
+déprimante est HORS SUJET et sera refusée, même si elle est techniquement
+réussie. Garde ce ton comique et malicieux du premier au dernier fichier.
+
 **Style OBLIGATOIRE pour chaque image :**
 - diorama en carton kraft, textures carton ondulé et papier découpé visibles ;
 - le héros : SDF en carton découpé, barbe grise, manteau rapiécé, visage
