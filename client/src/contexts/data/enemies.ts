@@ -1,5 +1,5 @@
 // ============ ENNEMIS, PROJECTILES & DUEL DE SIGNES ============
-import type { Enemy, ProjectilePattern, SignId, Character } from '../types';
+import type { Enemy, ProjectilePattern, SignId, Character, InventoryItem } from '../types';
 
 export const ENEMIES: Enemy[] = [
   { name: 'Commerçant Furieux', emoji: '😡', health: 32, attack: 11, description: 'Il vous a pris la main dans le sac. Et il a de la poigne.', loot: { respect: 2, item: { id: 'sandwich-confisque', name: 'Sandwich de l\'étal', emoji: '🥪', type: 'food', value: 5, effect: { hunger: 15 } } } },
@@ -28,7 +28,35 @@ export const ENEMIES: Enemy[] = [
   // nulle part ailleurs, on ne le croise qu'en ratant un casse gardé. Très
   // dur à battre, mais le vaincre paie en respect et en trophée.
   { name: 'Vigile de Choc', emoji: '🦺', health: 95, attack: 21, description: 'Ancien videur, actuel mur. Il ne court pas : il n\'en a pas besoin.', image: '/assets/combat-vigile-choc.webp', loot: { money: 8, respect: 6, item: { id: 'badge-vigile', name: 'Badge de vigile (trophée)', emoji: '🪪', type: 'junk', value: 12 } } },
+  // Humains croisés par la « Bagarre » : ils ont désormais leur fiche (donc
+  // leur motif d'esquive, leur voix et leur butin).
+  { name: 'Pickpocket', emoji: '🤏', health: 22, attack: 9, description: 'Il veut vos poches. Vous n\'avez que des poches.', loot: { money: 6, respect: 2 } },
+  { name: 'Squatteur Territorial', emoji: '😠', health: 52, attack: 17, description: 'Ce hangar est à lui. Il l\'a décidé tout seul.', loot: { money: 5, respect: 4 } },
+  { name: 'Concurrent Agressif', emoji: '💢', health: 38, attack: 13, description: 'Un autre sans-abri qui veut votre coin. La rue est petite.', loot: { money: 4, respect: 3 } },
 ];
+
+// ============ LE BOSS : LE ROI DÉCHU ============
+// Le précédent Roi du Carton. Immense, increvable, et très mauvais perdant.
+// Conçu pour être quasi imbattable : le vaincre est l'exploit ultime du jeu et
+// rapporte la seule arme légendaire.
+export const ULTIMATE_WEAPON: InventoryItem = {
+  id: 'sceptre-roi', name: 'Sceptre du Roi', emoji: '👑', type: 'weapon', value: 120,
+  attackBonus: 14, combatStyle: 'heavy',
+};
+
+export const BOSS: Enemy = {
+  name: 'Le Roi Déchu', emoji: '👑', health: 260, attack: 34,
+  description: 'Le précédent Roi du Carton. Il n\'a jamais rendu la couronne.',
+  image: '/assets/combat-roi-dechu.webp',
+  loot: { money: 60, respect: 40, item: ULTIMATE_WEAPON },
+};
+
+// Le Roi Déchu ne rôde qu'après une longue survie, et reste rare.
+export function rollBoss(day: number, respect: number): Enemy | null {
+  if (day < 10) return null;
+  const chance = Math.min(0.05 + (day - 10) * 0.005 + respect * 0.0007, 0.16);
+  return Math.random() < chance ? BOSS : null;
+}
 
 // Images (dioramas) des ennemis effectivement affrontés via « Bagarre » mais
 // qui n'en avaient pas encore. Nom d'ennemi → fichier à venir dans /assets.
@@ -85,6 +113,11 @@ export const PROJECTILE_PATTERNS: Record<string, ProjectilePattern> = {
   bigguard: { id: 'bigguard', label: 'Le mur avance', labelEn: 'The wall advances', kind: 'fist', motion: 'straight', spawnMs: 745, speed: 122, size: 24 },
   merchant: { id: 'merchant', label: 'Tout y passe', labelEn: 'Everything flies', kind: 'bottle', motion: 'lob', spawnMs: 615, speed: 131, size: 16 },
   thug:     { id: 'thug',     label: 'Poings du voyou', labelEn: 'Thug fists', kind: 'fist', motion: 'straight', spawnMs: 690, speed: 146, size: 19 },
+  pickpocket: { id: 'pickpocket', label: 'Mains lestes', labelEn: 'Nimble hands', kind: 'claw', motion: 'homing', spawnMs: 480, speed: 178, size: 12 },
+  squatter: { id: 'squatter', label: 'Jets de gravats', labelEn: 'Flung rubble', kind: 'bottle', motion: 'lob', spawnMs: 585, speed: 140, size: 18 },
+  rival:    { id: 'rival',    label: 'Bagarre de rue', labelEn: 'Street scrap', kind: 'fist', motion: 'homing', spawnMs: 620, speed: 158, size: 16 },
+  // Le boss : tout à la fois, dense, rapide et énorme.
+  king:     { id: 'king',     label: 'Colère du Roi', labelEn: "The King's wrath", kind: 'dash', motion: 'homing', spawnMs: 330, speed: 205, size: 20 },
 };
 
 // Famille de comportement de chaque motif : sert aux tendances du duel de
@@ -96,6 +129,7 @@ const PATTERN_FAMILY: Record<string, 'bird' | 'small' | 'beast' | 'drunk' | 'bru
   cat: 'small', rat: 'small', squirrel: 'small',
   dog: 'beast', raccoon: 'beast',
   clown: 'brute', cop: 'brute', bigguard: 'brute', merchant: 'brute', thug: 'brute',
+  pickpocket: 'small', squatter: 'brute', rival: 'brute', king: 'brute',
 };
 
 // Tous les ennemis « connus » du jeu (fiches canoniques + adversaires de la
@@ -114,7 +148,35 @@ const SPECIES_PATTERN: Record<string, string> = {
   '🐕': 'dog', '🦝': 'raccoon',
   '🤡': 'clown', '👮': 'cop', '🔦': 'cop', '🦺': 'bigguard', '😡': 'merchant', '🧔': 'thug',
   '🍺': 'drunk', '🍾': 'drunk',
+  '🤏': 'pickpocket', '😠': 'squatter', '💢': 'rival', '👑': 'king',
 };
+
+// ---- Qui rôde où ----
+// La « Bagarre » puisait dans une liste codée en dur de l'écran principal :
+// 12 adversaires seulement, et 12 fiches du catalogue restaient introuvables.
+// On tire désormais dans le CATALOGUE, réparti par quartier.
+const LOCATION_ROSTER: Record<string, string[]> = {
+  'parc': ['Pigeon Alpha', 'Mouette Furibonde', 'Chat de Gouttière', 'Écureuil Enragé', 'Corbeau Géant', 'Cygne Furieux', 'Canard Psychopathe', 'Oie Territoriale'],
+  'centre-ville': ['Voyou du Coin', 'Agent de Sécurité', 'Ivrogne Agressif', 'Clown Sinistre', 'Commerçant Furieux', 'Vigile Zélé', 'Pickpocket'],
+  'zone-industrielle': ['Rat Géant', 'Chien Errant', 'Raton Laveur', 'Raton Laveur Alpha', 'Chat Sauvage', 'Squatteur Territorial', 'Corbeau Géant'],
+  'gare': ['Voyou du Coin', 'Rat Géant', 'Pickpocket', 'Vigile Zélé', 'Chat Territorial', 'Concurrent Agressif'],
+  'marche': ['Chat de Gouttière', 'Mouette Furibonde', 'Mouette Géante', 'Commerçant Furieux', 'Coq de Combat', 'Concurrent Agressif'],
+};
+
+/** Adversaires possibles dans un quartier (issus du catalogue ENEMIES). */
+export function enemiesForLocation(location: string): Enemy[] {
+  const names = LOCATION_ROSTER[location] || LOCATION_ROSTER['parc'];
+  const found = names.map(n => ENEMIES.find(e => e.name === n)).filter(Boolean) as Enemy[];
+  return found.length ? found : ENEMIES.slice(0, 4);
+}
+
+/** Tire l'adversaire d'une « Bagarre » : le Roi Déchu, sinon la faune du coin. */
+export function pickFightEnemy(location: string, day: number, respect: number): Enemy {
+  const boss = rollBoss(day, respect);
+  if (boss) return boss;
+  const pool = enemiesForLocation(location);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 // Choisit le motif d'après l'ennemi (espèce d'abord, sinon silhouette + stats).
 export function getPattern(enemy: { name: string; emoji: string; attack: number; health: number }): string {
@@ -136,6 +198,12 @@ export function getPattern(enemy: { name: string; emoji: string; attack: number;
 // Chaque ennemi a ses habitudes au duel, déduites de sa silhouette : les
 // vigiles se couvrent, les brutes cognent, les oiseaux feintent… C'est ce qui
 // transforme le hasard en lecture : on apprend les ennemis, puis on anticipe.
+// Un adversaire HUMAIN (ou le Roi) : il réfléchit, il bluffe, il vous lit.
+const HUMAN_EMOJIS = ['🧔', '👮', '🔦', '🦺', '😡', '🤡', '🤏', '😠', '💢', '👑', '🍺'];
+export function isHumanEnemy(enemy: { name: string; emoji: string }): boolean {
+  return HUMAN_EMOJIS.includes(enemy.emoji) || /vigile|agent|s[ée]curit|polic|voyou|squatteur|pickpocket|concurrent|roi/i.test(enemy.name);
+}
+
 function signTendency(enemy: { name: string; emoji: string; attack: number; health: number }): Record<SignId, number> {
   if (/vigile|agent|s[ée]curit|commer[çc]ant|polic|concierge/i.test(enemy.name)) {
     return { strike: 0.3, feint: 0.15, guard: 0.55 };
@@ -158,16 +226,31 @@ export function rollSignRound(
   enemy: { name: string; emoji: string; attack: number; health: number },
   character: Character,
   guaranteed: boolean,
+  lastPlayerSign?: SignId | null,
 ): { enemySign: SignId; tellSign: SignId | null; tellSure: boolean } {
-  const tendency = signTendency(enemy);
   const all: SignId[] = ['strike', 'feint', 'guard'];
-  let r = Math.random();
-  let enemySign: SignId = 'strike';
-  for (const id of all) { r -= tendency[id]; if (r <= 0) { enemySign = id; break; } }
+  // Ce qui bat X : Châtaigne bat Feinte, Feinte bat Garde, Garde bat Châtaigne.
+  const COUNTER: Record<SignId, SignId> = { feint: 'strike', guard: 'feint', strike: 'guard' };
+  const human = isHumanEnemy(enemy);
+
+  let enemySign: SignId;
+  // Un HUMAIN vous observe : il suppose que vous allez rejouer le même signe
+  // et sort le contre. Le Roi Déchu, lui, se trompe rarement.
+  const readChance = enemy.emoji === '👑' ? 0.62 : 0.42;
+  if (human && lastPlayerSign && Math.random() < readChance) {
+    enemySign = COUNTER[lastPlayerSign];
+  } else {
+    const tendency = signTendency(enemy);
+    let r = Math.random();
+    enemySign = 'strike';
+    for (const id of all) { r -= tendency[id]; if (r <= 0) { enemySign = id; break; } }
+  }
+
   const sharp = character.traits.some(t => t.id === 'paranoiaque' || t.id === 'nez-sensible');
-  const tellChance = guaranteed ? 1 : 0.5 + (sharp ? 0.25 : 0);
+  // Les humains se livrent moins : moins d'indices, et ils mentent plus.
+  const tellChance = guaranteed ? 1 : (human ? 0.36 : 0.5) + (sharp ? 0.25 : 0);
   if (Math.random() >= tellChance) return { enemySign, tellSign: null, tellSure: false };
-  const truthful = guaranteed || Math.random() < 0.7;
+  const truthful = guaranteed || Math.random() < (human ? 0.5 : 0.7);
   const others = all.filter(s => s !== enemySign);
   const tellSign = truthful ? enemySign : others[Math.floor(Math.random() * others.length)];
   return { enemySign, tellSign, tellSure: guaranteed };

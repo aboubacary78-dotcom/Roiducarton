@@ -826,6 +826,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const eSign = combat.enemySign;
       const eDef = SIGNS[eSign];
       const enemyLike = { name: combat.enemyName, emoji: combat.enemyEmoji, attack: combat.enemyAttack, health: combat.enemyMaxHealth };
+      // Signe que le JOUEUR vient de jouer : les adversaires humains s'en
+      // servent pour anticiper la manche suivante (voir rollSignRound).
+      const playerSign: SignId | null = action.sign === 'special' ? (combat.lastPlayerSign ?? null) : action.sign;
       // Le piège se dégrade à chaque manche résolue (posé = 2 manches de vie).
       const trapAfter = Math.max(0, combat.trapRounds - 1);
 
@@ -848,7 +851,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         signNonce: combat.signNonce + 1,
         enemyStunned: false,
         trapRounds: trapAfter,
-        ...rollSignRound(enemyLike, c, guaranteedTell),
+        lastPlayerSign: playerSign,
+        ...rollSignRound(enemyLike, c, guaranteedTell, playerSign),
         ...over,
       });
 
@@ -961,7 +965,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state,
           character: cUpd,
-          currentCombat: { ...combat, enemyHealth: eHp, trapRounds: trapAfter, signNonce: combat.signNonce + 1, hand: [], ...rollSignRound(enemyLike, c, false) },
+          currentCombat: { ...combat, enemyHealth: eHp, trapRounds: trapAfter, signNonce: combat.signNonce + 1, hand: [], ...rollSignRound(enemyLike, c, false, combat.lastPlayerSign) },
           combatLog: logs,
         };
       }
@@ -997,7 +1001,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...c, stats: clampStats({ ...c.stats, health: hp, dignity: c.stats.dignity - 3 }) },
-        currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], ...rollSignRound(enemyLike, c, false) },
+        currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], ...rollSignRound(enemyLike, c, false, combat.lastPlayerSign) },
         combatLog: logs,
       };
     }
@@ -1047,7 +1051,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: cUpd,
-        currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], enemyAtkDebuff: 0, dodgePenalty: 1, enemyStunned: false, ...rollSignRound(enemyLike, cUpd, false) },
+        currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], enemyAtkDebuff: 0, dodgePenalty: 1, enemyStunned: false, ...rollSignRound(enemyLike, cUpd, false, combat.lastPlayerSign) },
         combatLog: logs,
       };
     }
@@ -1102,7 +1106,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state,
           character: { ...c, inventory: newInv, stats: clampStats({ ...c.stats, health: c.stats.health + gain }) },
-          currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], atkBuff: 0, enemyStunned: false, ...rollSignRound(enemyLike, c, combat.enemyStunned) },
+          currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], atkBuff: 0, enemyStunned: false, ...rollSignRound(enemyLike, c, combat.enemyStunned, combat.lastPlayerSign) },
           combatLog: logs,
         };
       }
@@ -1112,7 +1116,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         logs.push(L('📣 CRI DE GUERRE ! Vous vous galvanisez pour le prochain coup.', '📣 WAR CRY! You psych yourself up for the next blow.'));
         return {
           ...state,
-          currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], atkBuff: combat.atkBuff + 6, enemyStunned: false, ...rollSignRound(enemyLike, c, combat.enemyStunned) },
+          currentCombat: { ...combat, phase: 'sign', round: combat.round + 1, signNonce: combat.signNonce + 1, hand: [], atkBuff: combat.atkBuff + 6, enemyStunned: false, ...rollSignRound(enemyLike, c, combat.enemyStunned, combat.lastPlayerSign) },
           combatLog: logs,
         };
       }
@@ -1183,7 +1187,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           atkBuff: 0,
           enemyStunned: false,
           enemyAtkDebuff: combat.enemyAtkDebuff + atkDebuff,
-          ...rollSignRound(enemyLike, c, stun || combat.enemyStunned),
+          ...rollSignRound(enemyLike, c, stun || combat.enemyStunned, combat.lastPlayerSign),
         },
         combatLog: logs,
       };

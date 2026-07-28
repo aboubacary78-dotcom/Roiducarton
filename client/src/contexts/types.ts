@@ -211,6 +211,9 @@ export interface CombatState {
   tellSign: SignId | null;
   tellSure: boolean;
   signNonce: number;
+  // Dernier signe joué par le JOUEUR : les adversaires humains s'en servent
+  // pour anticiper (voir rollSignRound).
+  lastPlayerSign?: SignId | null;
   // Coup spécial du personnage (déterminé par ses traits, null sinon).
   specialId: SpecialId | null;
   specialCharged: boolean;

@@ -6,6 +6,14 @@
  * complète la traduction, par lots.
  */
 export const CONTENT_EN: Record<string, string> = {
+  // ============ LE BOSS & LES HUMAINS DE LA BAGARRE ============
+  'Le Roi Déchu': 'The Fallen King',
+  'Le précédent Roi du Carton. Il n\'a jamais rendu la couronne.': 'The previous Cardboard King. He never gave the crown back.',
+  'Sceptre du Roi': "The King's Sceptre",
+  'Il veut vos poches. Vous n\'avez que des poches.': 'He wants your pockets. Pockets are all you have.',
+  'Ce hangar est à lui. Il l\'a décidé tout seul.': 'This warehouse is his. He decided that all by himself.',
+  'Un autre sans-abri qui veut votre coin. La rue est petite.': 'Another homeless man after your spot. The street is small.',
+
   // ============ PNJ ERRANTS & SOLIDARITÉ (objets de troc/dons) ============
   'Conserve cabossée': 'Dented tin can',
   'Bout de couverture': 'Scrap of blanket',

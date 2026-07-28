@@ -1,4 +1,4 @@
-import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag } from '@/contexts/GameContext';
+import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, pickFightEnemy } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import StatBars from './StatBars';
@@ -31,47 +31,6 @@ function dayVeil(p: number): string {
   return `rgba(${mix(a[1], b[1])}, ${mix(a[2], b[2])}, ${mix(a[3], b[3])}, ${alpha.toFixed(3)})`;
 }
 
-interface Enemy {
-  name: string;
-  emoji: string;
-  health: number;
-  attack: number;
-  description: string;
-  image?: string;
-  loot?: { money?: number; respect?: number };
-}
-
-function getLocationEnemies(location: string): Enemy[] {
-  const allEnemies: Record<string, Enemy[]> = {
-    'parc': [
-      { name: 'Pigeon Alpha', emoji: '🐦', health: 15, attack: 6, description: 'Le chef du gang de pigeons.', loot: { money: 1, respect: 1 } },
-      { name: 'Mouette Furibonde', emoji: '🦅', health: 20, attack: 8, description: 'Elle veut votre sandwich.', loot: { respect: 2 } },
-      { name: 'Chat de Gouttière', emoji: '🐱', health: 18, attack: 9, description: 'Petit mais vicieux.', loot: { money: 1 } },
-    ],
-    'centre-ville': [
-      { name: 'Voyou du Coin', emoji: '🧔', health: 55, attack: 18, description: 'Un type louche qui veut votre spot.', loot: { money: 8, respect: 5 } },
-      { name: 'Agent de Sécurité', emoji: '👮', health: 45, attack: 14, description: 'Il fait du zèle.', loot: { respect: 4 } },
-      { name: 'Ivrogne Agressif', emoji: '🍺', health: 35, attack: 20, description: 'Il titube mais frappe fort.', loot: { money: 3 } },
-    ],
-    'zone-industrielle': [
-      { name: 'Rat Géant', emoji: '🐀', health: 25, attack: 10, description: 'Un rat de la taille d\'un chihuahua.', loot: { money: 2, respect: 1 } },
-      { name: 'Chien Errant', emoji: '🐕', health: 40, attack: 15, description: 'Un molosse sans collier.', loot: { money: 3, respect: 3 } },
-      { name: 'Raton Laveur', emoji: '🦝', health: 30, attack: 12, description: 'Il fouille VOTRE poubelle.', loot: { money: 3, respect: 2 } },
-      { name: 'Squatteur Territorial', emoji: '😠', health: 50, attack: 16, description: 'Ce hangar est à lui.', loot: { money: 5, respect: 4 } },
-    ],
-    'gare': [
-      { name: 'Voyou du Coin', emoji: '🧔', health: 55, attack: 18, description: 'Un type louche.', loot: { money: 8, respect: 5 } },
-      { name: 'Rat Géant', emoji: '🐀', health: 25, attack: 10, description: 'Les rats de la gare sont agressifs.', loot: { money: 2, respect: 1 } },
-      { name: 'Pickpocket', emoji: '🤏', health: 20, attack: 8, description: 'Il veut vos poches.', loot: { money: 6, respect: 2 } },
-    ],
-    'marche': [
-      { name: 'Chat de Gouttière', emoji: '🐱', health: 18, attack: 9, description: 'Il garde le poisson.', loot: { money: 1 } },
-      { name: 'Mouette Furibonde', emoji: '🦅', health: 20, attack: 8, description: 'Attirée par l\'odeur du poisson.', loot: { respect: 2 } },
-      { name: 'Concurrent Agressif', emoji: '💢', health: 35, attack: 12, description: 'Un autre sans-abri qui veut votre coin.', loot: { money: 4, respect: 3 } },
-    ],
-  };
-  return allEnemies[location] || allEnemies['parc'];
-}
 
 const AMBIENT_TEXTS: Record<string, string[]> = {
   'parc': [
@@ -359,11 +318,10 @@ export default function MainScreen() {
           <ActionTile
             emoji="🥊" title={tr('Bagarre', 'Fight')} desc={tr('Provoquer un combat', 'Pick a fight')} accent="#D94F4F" disabled={actionsLeft <= 0} danger
             onClick={() => {
-              const enemies = getLocationEnemies(char.location);
-              if (enemies.length > 0) {
-                const enemy = enemies[Math.floor(Math.random() * enemies.length)];
-                dispatch({ type: 'START_COMBAT', enemy });
-              }
+              // Adversaire tiré dans le CATALOGUE du quartier (et, rarement,
+              // le Roi Déchu si vous avez survécu assez longtemps).
+              const enemy = pickFightEnemy(char.location, char.day, char.respect);
+              dispatch({ type: 'START_COMBAT', enemy });
             }}
           />
         </div>

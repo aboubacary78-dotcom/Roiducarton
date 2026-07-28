@@ -63,3 +63,15 @@ bricoler à partir de bric-à-brac récupéré. Objet bien lisible au premier pl
   Une **distribution solidaire** (soupe populaire / banque alimentaire) : une petite table en carton, une grande marmite fumante, des cartons de pain et des bouteilles d'eau ; un bénévole en carton sert une louche au héros qui tend son bol. Chaleureux, digne.
 - `braderie.webp`
   Une **braderie de marché** : un étal en carton débordant d'articles, avec de petites étiquettes de prix en papier (formes seules, AUCUN chiffre), guirlandes de fête, ambiance « tout doit partir ». Le héros farfouille les bonnes affaires, réjoui.
+
+---
+
+## ➕ Ajout : le BOSS (1 image)
+
+- `combat-roi-dechu.webp`
+  **Le Roi Déchu**, boss final du jeu. Un SDF colossal en carton, torse bombé,
+  couronne de carton doré cabossée de travers sur la tête, manteau en lambeaux
+  porté comme un manteau royal, sceptre bricolé (tuyau + capsules) au poing.
+  Il trône sur un amoncellement de cartons empilés en trône, dans une ruelle.
+  Regard mauvais et menton levé : il ne rendra JAMAIS la couronne. Humour noir :
+  la majesté absolue, en carton, sur un tas d'ordures. Format 3:2, aucun texte.
