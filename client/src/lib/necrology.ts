@@ -191,3 +191,41 @@ export function peekLegacy(): Legacy | null {
 export function clearLegacy(): void {
   try { localStorage.removeItem(LEGACY_KEY); } catch { /* silent */ }
 }
+
+// ============ LA COURONNE : LE ROI SE TRANSMET ENTRE PARTIES ============
+// Battre le Roi Déchu fait de VOTRE personnage le nouveau Roi du Carton.
+// Quand ce personnage-roi meurt, il ne disparaît pas : il devient le boss des
+// parties suivantes. Le prochain personnage devra donc affronter votre
+// ancien héros pour lui reprendre la couronne.
+
+const CROWN_KEY = 'roi-du-carton-couronne';
+
+export interface CrownHolder {
+  name: string;
+  seed: string;
+  gender: 'm' | 'f';
+  jobName: string;   // libellé du métier (« Ancien Musicien »)
+  jobEmoji: string;
+  days: number;      // jours survécus par ce roi
+  crownedAt: number; // horodatage du sacre
+  reigns: number;    // nombre de rois qu'il a lui-même détrônés
+}
+
+/** Le roi actuel (votre ancien perso), ou null si le trône est au Roi Déchu. */
+export function loadCrown(): CrownHolder | null {
+  try {
+    const raw = localStorage.getItem(CROWN_KEY);
+    if (!raw) return null;
+    const c = JSON.parse(raw) as CrownHolder;
+    return c && c.name ? c : null;
+  } catch { return null; }
+}
+
+/** Sacre un personnage : il devient le Roi (et le futur boss). */
+export function setCrown(holder: CrownHolder): void {
+  try { localStorage.setItem(CROWN_KEY, JSON.stringify(holder)); } catch { /* silent */ }
+}
+
+export function clearCrown(): void {
+  try { localStorage.removeItem(CROWN_KEY); } catch { /* silent */ }
+}

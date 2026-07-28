@@ -1,5 +1,7 @@
 // ============ ENNEMIS, PROJECTILES & DUEL DE SIGNES ============
 import type { Enemy, ProjectilePattern, SignId, Character, InventoryItem } from '../types';
+import { loadCrown } from '@/lib/necrology';
+import { L } from './util';
 
 export const ENEMIES: Enemy[] = [
   { name: 'Commerçant Furieux', emoji: '😡', health: 32, attack: 11, description: 'Il vous a pris la main dans le sac. Et il a de la poigne.', loot: { respect: 2, item: { id: 'sandwich-confisque', name: 'Sandwich de l\'étal', emoji: '🥪', type: 'food', value: 5, effect: { hunger: 15 } } } },
@@ -51,11 +53,57 @@ export const BOSS: Enemy = {
   loot: { money: 60, respect: 40, item: ULTIMATE_WEAPON },
 };
 
-// Le Roi Déchu ne rôde qu'après une longue survie, et reste rare.
+// Le Roi actuellement sur le trône : le Roi Déchu par défaut, ou VOTRE ancien
+// personnage s'il a été sacré puis est mort (voir lib/necrology, la couronne).
+// Un roi hérité est d'autant plus coriace qu'il a survécu longtemps et détrôné
+// de rois avant vous.
+// Pourquoi un mort se bat-il encore ? Parce qu'à la rue, on ne meurt pas :
+// on est DÉCLARÉ mort. Le certificat est signé, la tombe est creusée, le
+// dossier est classé… mais personne n'a pensé à prévenir l'intéressé.
+// (Le jeu se moque de l'administration depuis le début : elle a le dernier
+// mot, même sur la mort.)
+const KING_ALIBIS: { fr: string; en: string }[] = [
+  { fr: "Déclaré mort, enterré sur le papier. Personne n'a pensé à le prévenir.", en: 'Pronounced dead, buried on paper. Nobody thought to tell him.' },
+  { fr: 'Sa tombe est occupée par quelqu\'un d\'autre. Lui, il avait mieux à faire.', en: "Someone else is in his grave. He had better things to do." },
+  { fr: "On l'a enterré un mardi. Il est revenu le mercredi, vexé.", en: 'They buried him on a Tuesday. He came back Wednesday, offended.' },
+  { fr: "Mort administrativement. Vivant dans tous les autres domaines.", en: 'Administratively deceased. Alive in every other respect.' },
+  { fr: "La rue l'a enterré, la rue l'a recraché. Elle fait ça parfois.", en: 'The street buried him, then spat him back out. It does that sometimes.' },
+];
+
+export function currentKing(): Enemy {
+  const crown = loadCrown();
+  if (!crown) return BOSS;
+  const bonus = Math.min(crown.days * 3, 120) + crown.reigns * 25;
+  // Alibi stable pour un roi donné (seedé sur son sacre) : il raconte toujours
+  // la même version, sinon ça sentirait le mensonge.
+  const alibi = KING_ALIBIS[crown.crownedAt % KING_ALIBIS.length];
+  const fem = crown.gender === 'f';
+  return {
+    name: L(
+      `${crown.name} ${fem ? 'la Couronnée' : 'le Couronné'}`,
+      `${crown.name} the Crowned`,
+    ),
+    emoji: '👑',
+    health: 200 + bonus,
+    attack: 30 + Math.min(Math.floor(crown.days / 4) + crown.reigns * 2, 14),
+    description: L(
+      `${crown.jobEmoji} ${crown.jobName}, ${crown.days} jours de règne. ${alibi.fr}`,
+      `${crown.jobEmoji} ${crown.jobName}, ${crown.days} days of reign. ${alibi.en}`,
+    ),
+    loot: { money: 60, respect: 40, item: ULTIMATE_WEAPON },
+  };
+}
+
+/** Ce Roi est-il un ancien personnage du joueur (et non le Roi Déchu) ? */
+export function kingIsHeir(): boolean {
+  return loadCrown() !== null;
+}
+
+// Le Roi ne rôde qu'après une longue survie, et reste rare.
 export function rollBoss(day: number, respect: number): Enemy | null {
   if (day < 10) return null;
   const chance = Math.min(0.05 + (day - 10) * 0.005 + respect * 0.0007, 0.16);
-  return Math.random() < chance ? BOSS : null;
+  return Math.random() < chance ? currentKing() : null;
 }
 
 // Images (dioramas) des ennemis effectivement affrontés via « Bagarre » mais

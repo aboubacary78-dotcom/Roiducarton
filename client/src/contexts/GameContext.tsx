@@ -864,10 +864,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const en = tc(combat.enemyName);
         logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
         if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
+        // Avoir battu le Roi en place, c'est ceindre la couronne.
+        const wasKing = combat.enemyEmoji === '\u{1F451}';
+        if (wasKing) logs.push(L('\u{1F451} La couronne vous revient : vous êtes le Roi du Carton !', '\u{1F451} The crown is yours: you are the Cardboard King!'));
         return {
           ...state,
           contract: state.contract?.id === 'contrat-combatif' ? { id: state.contract.id, done: true } : state.contract,
-          character: { ...cUpd, money: cUpd.money + lootMoney, respect: cUpd.respect + lootRespect, inventory: drop ? [...cUpd.inventory, drop] : cUpd.inventory },
+          character: { ...cUpd, money: cUpd.money + lootMoney, respect: cUpd.respect + lootRespect, inventory: drop ? [...cUpd.inventory, drop] : cUpd.inventory,
+            ...(wasKing ? { crowned: true, kingsBeaten: (cUpd.kingsBeaten ?? 0) + 1 } : {}) },
           currentCombat: null,
           combatLog: logs,
           eventResult: { text: `${L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim())}${drop ? L(` Il lâche ${drop.name} ${drop.emoji} !`, ` It drops the ${tc(drop.name)} ${drop.emoji}!`) : ''}`, moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
@@ -1161,10 +1165,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const en = tc(combat.enemyName);
         logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
         if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
+        // Avoir battu le Roi en place, c'est ceindre la couronne.
+        const wonCrown = combat.enemyEmoji === '\u{1F451}';
+        if (wonCrown) logs.push(L('\u{1F451} La couronne vous revient : vous êtes le Roi du Carton !', '\u{1F451} The crown is yours: you are the Cardboard King!'));
         return {
           ...state,
           contract: state.contract?.id === 'contrat-combatif' ? { id: state.contract.id, done: true } : state.contract,
-          character: { ...c, inventory: drop ? [...inventory, drop] : inventory, money: c.money + lootMoney, respect: c.respect + lootRespect },
+          character: { ...c, inventory: drop ? [...inventory, drop] : inventory, money: c.money + lootMoney, respect: c.respect + lootRespect,
+            ...(wonCrown ? { crowned: true, kingsBeaten: (c.kingsBeaten ?? 0) + 1 } : {}) },
           currentCombat: null,
           combatLog: logs,
           eventResult: { text: `${L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim())}${drop ? L(` Il lâche ${drop.name} ${drop.emoji} !`, ` It drops the ${tc(drop.name)} ${drop.emoji}!`) : ''}`, moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },

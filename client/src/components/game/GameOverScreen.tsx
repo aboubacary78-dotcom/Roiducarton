@@ -6,7 +6,7 @@ import { showInterstitial, showRewarded } from '@/lib/ads';
 import CardboardAvatar from './CardboardAvatar';
 import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
-import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy } from '@/lib/necrology';
+import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown } from '@/lib/necrology';
 
 /*
  * L'écran de fin est une « une de journal » : la mort du personnage devient
@@ -68,6 +68,16 @@ export default function GameOverScreen() {
     if (char.money >= 30) ids.push('mort-riche');
     if (state.weather === 'heatwave') ids.push('mort-canicule');
     if (char.day >= 10) ids.push('mort-doyen');
+    // LA COURONNE SE TRANSMET : un personnage sacré Roi ne s'éteint pas, il
+    // monte sur le trône et devient le boss des parties suivantes, jusqu'à ce
+    // qu'un prochain personnage vienne le détrôner.
+    if (char.crowned) {
+      setCrown({
+        name: char.name, seed: char.seed, gender: char.gender,
+        jobName: char.job.name, jobEmoji: char.job.emoji,
+        days: char.day, crownedAt: Date.now(), reigns: char.kingsBeaten ?? 1,
+      });
+    }
     return recordDeath({
       ids, name: char.name, day: char.day, respect: char.respect, seed: char.seed,
       grave: { name: char.name, seed: char.seed, gender: char.gender, day: char.day, jobEmoji: char.job.emoji, jobName: char.job.name, cause: headline },

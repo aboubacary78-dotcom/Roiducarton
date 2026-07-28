@@ -2,7 +2,8 @@ import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon 
 import type { Character, CombatState, CombatCard, SignId } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { playHurt, playWhoosh, playEnemyCry, playFightStart } from '@/lib/sound';
+import { playHurt, playWhoosh, playEnemyCry, playFightStart, playKingArrival } from '@/lib/sound';
+import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
 import { getEquipped } from '@/lib/profile';
@@ -89,13 +90,15 @@ function CombatScreenInner() {
   // Ouverture du combat : petite mise en scène « VS » + comment ça a commencé.
   const [intro, setIntro] = useState(true);
   const brawl = useState(() => BRAWL_STARTS[Math.floor(Math.random() * BRAWL_STARTS.length)])[0];
+  // Le Roi (boss) a droit à une entrée royale, plus longue et sonore.
+  const isKing = currentCombat?.enemyEmoji === '👑';
   // Gong d'ouverture au tout premier rendu de la mise en scène.
-  useEffect(() => { playFightStart(); }, []);
+  useEffect(() => { if (isKing) playKingArrival(); else playFightStart(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!intro) return;
-    const t = setTimeout(() => setIntro(false), 2500);
+    const t = setTimeout(() => setIntro(false), isKing ? 4600 : 2500);
     return () => clearTimeout(t);
-  }, [intro]);
+  }, [intro, isKing]);
   // Toast quand le coup spécial vient d'être chargé (manche gagnée).
   const prevCharged = useRef(false);
   useEffect(() => {
@@ -211,9 +214,55 @@ function CombatScreenInner() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIntro(false)}
-            style={{ background: 'rgba(24,18,14,0.94)' }}
-            className="absolute inset-0 z-[60] flex flex-col items-center justify-center p-6 text-center cursor-pointer"
+            style={{ background: isKing ? 'rgba(12,8,5,0.985)' : 'rgba(24,18,14,0.94)' }}
+            className="absolute inset-0 z-[60] flex flex-col items-center justify-center p-6 text-center cursor-pointer overflow-hidden"
           >
+            {/* ---- ENTRÉE ROYALE : réservée au Roi, pour qu'on sente la rareté ---- */}
+            {isKing && (
+              <>
+                {/* Halo doré qui pulse */}
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [0, 2.2, 1.8], opacity: [0, 0.5, 0.25] }}
+                  transition={{ duration: 2.6, times: [0, 0.4, 1] }}
+                  className="absolute w-72 h-72 rounded-full pointer-events-none"
+                  style={{ background: 'radial-gradient(circle, rgba(255,211,78,0.55) 0%, transparent 70%)' }}
+                />
+                {/* Anneaux d'onde de choc */}
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ scale: 0.2, opacity: 0.8 }}
+                    animate={{ scale: 3.2, opacity: 0 }}
+                    transition={{ duration: 2, delay: 0.6 + i * 0.62, ease: 'easeOut' }}
+                    className="absolute w-56 h-56 rounded-full border-2 border-[#FFD34E]/60 pointer-events-none"
+                  />
+                ))}
+                {/* Pluie de paillettes dorées */}
+                {Array.from({ length: 14 }).map((_, i) => (
+                  <motion.span
+                    key={`s${i}`}
+                    initial={{ y: -60, opacity: 0, rotate: 0 }}
+                    animate={{ y: 520, opacity: [0, 1, 0], rotate: 420 }}
+                    transition={{ duration: 3.4, delay: 0.9 + i * 0.13, ease: 'easeIn' }}
+                    className="absolute text-sm pointer-events-none"
+                    style={{ left: `${5 + i * 6.7}%` }}
+                  >
+                    ✨
+                  </motion.span>
+                ))}
+                {/* Bandeau « RENCONTRE LÉGENDAIRE » */}
+                <motion.div
+                  initial={{ x: '-120%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 90, damping: 14, delay: 0.35 }}
+                  className="absolute top-16 left-0 right-0 py-1.5 text-[11px] font-black tracking-[0.3em] text-[#2A1F1A]"
+                  style={{ background: 'linear-gradient(90deg, transparent, #FFD34E, #FFB020, #FFD34E, transparent)' }}
+                >
+                  {tr('★ RENCONTRE LÉGENDAIRE ★', '★ LEGENDARY ENCOUNTER ★')}
+                </motion.div>
+              </>
+            )}
             <motion.div
               initial={{ scale: 0.3, rotate: -14, y: -60, opacity: 0 }}
               animate={{ scale: 1, rotate: 0, y: 0, opacity: 1 }}
@@ -236,9 +285,10 @@ function CombatScreenInner() {
               initial={{ scale: 2.2, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 260, damping: 12, delay: 0.12 }}
-              className="text-4xl font-black text-[#D94F4F] drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] tracking-widest"
+              className={`font-black drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] tracking-widest ${isKing ? 'text-3xl' : 'text-4xl'}`}
+              style={isKing ? { color: '#FFD34E', WebkitTextStroke: '1px #8B5A00' } : { color: '#D94F4F' }}
             >
-              ⚔️ {tr('BAGARRE', 'FIGHT')} ⚔️
+              {isKing ? tr('👑 LE ROI EN PERSONNE 👑', '👑 THE KING HIMSELF 👑') : `⚔️ ${tr('BAGARRE', 'FIGHT')} ⚔️`}
             </motion.div>
             <motion.h2
               initial={{ y: 10, opacity: 0 }}
@@ -254,8 +304,25 @@ function CombatScreenInner() {
               transition={{ delay: 0.42 }}
               className="text-sm text-white/85 italic mt-2 max-w-xs leading-snug"
             >
-              « {tr(brawl.fr, brawl.en)} »
+              {isKing
+                ? tc(currentCombat.description)
+                : `« ${tr(brawl.fr, brawl.en)} »`}
             </motion.p>
+            {/* L'enjeu, dit clairement : c'est la couronne qui se joue. */}
+            {isKing && (
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.5 }}
+                className="text-xs font-bold text-[#FFD34E] mt-3 max-w-xs leading-snug"
+              >
+                {kingIsHeir()
+                  ? tr('Battez-le et la couronne vous revient. Perdez, et il règne encore.',
+                       'Beat him and the crown is yours. Lose, and he reigns on.')
+                  : tr('Le tout premier Roi du Carton. Personne ne l\'a jamais détrôné.',
+                       'The very first Cardboard King. Nobody has ever dethroned him.')}
+              </motion.p>
+            )}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.6 }}

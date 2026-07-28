@@ -68,6 +68,11 @@ export interface Character {
   // Nombre de gorgées prises à la fontaine du parc (eau gratuite) : toutes les
   // 3 gorgées, la fontaine fait des siennes (pub récompensée). Anti-exploit.
   fountainUses?: number;
+  // Sacré Roi du Carton (a battu le Roi en place). À sa mort, ce personnage
+  // devient le boss des parties suivantes (voir la couronne, lib/necrology).
+  crowned?: boolean;
+  // Nombre de rois que ce personnage a détrônés (durcit son règne s'il gagne).
+  kingsBeaten?: number;
   // Mémoire courte : les derniers événements vus, pour éviter les répétitions.
   recentEvents?: string[];
   // Boutiques en panne/fermées pendant la partie (voir ShopClosure).

@@ -282,6 +282,22 @@ export function playFightStart(): void {
   vibrate([0, 60, 40, 90]);
 }
 
+/** Arrivée du Roi : cloches graves, fanfare menaçante, la rue retient son souffle. */
+export function playKingArrival(): void {
+  if (muted) return;
+  // Trois cloches d'église, lourdes et espacées.
+  [0, 620, 1240].forEach((d) => setTimeout(() => {
+    noise(0.3, 0.1, 150);
+    tone(110, 1.4, 'sine', 0.13, 54);
+    tone(165, 1.0, 'triangle', 0.07, 82);
+  }, d));
+  // Fanfare sinistre en mineur, qui monte.
+  [1900, 2050, 2200, 2350].forEach((d, i) => setTimeout(() => tone([196, 233, 294, 349][i], 0.4, 'sawtooth', 0.075), d));
+  // Grondement final : il est là.
+  setTimeout(() => { noise(0.5, 0.08, 90); tone(70, 0.9, 'sawtooth', 0.11, 48); }, 2750);
+  vibrate([0, 120, 90, 120, 90, 220]);
+}
+
 /** K.O. : l'adversaire s'écroule (impact sourd + chute + petite fanfare). */
 export function playKO(): void {
   if (muted) return;
