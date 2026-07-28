@@ -6,6 +6,7 @@ import { useLang, tr, tc } from '@/lib/lang';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
 import { stampTap, liftHover } from '@/lib/anim';
+import { playEventSfx } from '@/lib/eventSfx';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.webp';
 
@@ -58,6 +59,13 @@ export default function EventScreen() {
   // Repli propre si l'image de l'événement n'existe pas encore (fichier absent).
   const [imgError, setImgError] = useState(false);
   useEffect(() => { setImgError(false); }, [event?.id]);
+  // Bruitage propre à la rencontre : le chien aboie, le mariage sonne les
+  // cloches, la gare siffle… (aiguillé sur l'id + le titre, voir lib/eventSfx).
+  useEffect(() => {
+    if (!state.currentEvent) return;
+    const e = state.currentEvent;
+    playEventSfx(`${e.id} ${e.title} ${e.description}`);
+  }, [state.currentEvent?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function activateBoost() {
     if (loadingBoost || boosted) return;
