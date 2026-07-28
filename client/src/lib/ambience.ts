@@ -205,63 +205,93 @@ function every(kit: Kit, minMs: number, maxMs: number, fn: () => void): void {
 /* Les ambiances                                                       */
 /* ------------------------------------------------------------------ */
 
-// Thème du titre : boucle douce-amère en la mineur, basse ronde + mélodie
-// clairsemée piochée dans de petits motifs (jamais deux fois la même phrase).
+// ============ LE THÈME DU JEU ============
+// Une VRAIE chanson, pas une nappe : valse musette en la mineur, façon
+// guinguette parisienne un peu bancale. Doux, nostalgique, et juste assez
+// pataud pour faire sourire — c'est un roi en carton, après tout.
+//
+// Structure : 8 mesures à 3 temps (oum-pah-pah), jouées deux fois. La reprise
+// ajoute une voix à l'octave et une petite glissade comique en fin de phrase.
+const T = {
+  // mélodie
+  A4: 440, B4: 493.88, C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46,
+  G5: 783.99, GS5: 830.61, A5: 880, C6: 1046.5,
+  // accompagnement
+  A3: 220, C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, GS4: 415.30,
+  // basses
+  A2: 110, D3: 146.83, E3: 164.81, F2: 87.31,
+};
+
+// Une mesure = une basse (temps 1), deux plaquages d'accord (temps 2 et 3),
+// et les notes de la mélodie repérées en temps (0, 1, 2 ou demi-temps).
+interface Bar { bass: number; chord: number[]; mel: [number, number, number][]; }
+
+const THEME: Bar[] = [
+  // Am — « il était une fois un type sur un carton »
+  { bass: T.A2, chord: [T.A3, T.C4, T.E4], mel: [[T.A4, 0, 0.9], [T.C5, 1, 0.9], [T.E5, 2, 0.9]] },
+  { bass: T.A2, chord: [T.A3, T.C4, T.E4], mel: [[T.D5, 0, 0.9], [T.C5, 1, 0.45], [T.B4, 1.5, 0.45], [T.C5, 2, 0.9]] },
+  // Dm — la phrase s'ouvre
+  { bass: T.D3, chord: [T.D4, T.F4, T.A4], mel: [[T.D5, 0, 0.9], [T.F5, 1, 0.9], [T.A5, 2, 0.9]] },
+  // E7 — tension
+  { bass: T.E3, chord: [T.E4, T.GS4, T.D5], mel: [[T.GS5, 0, 0.9], [T.E5, 1, 0.9], [T.B4, 2, 0.9]] },
+  // Am — retour au thème
+  { bass: T.A2, chord: [T.A3, T.C4, T.E4], mel: [[T.A4, 0, 0.9], [T.C5, 1, 0.9], [T.E5, 2, 0.9]] },
+  // F — le moment tendre
+  { bass: T.F2, chord: [T.C4, T.F4, T.A4], mel: [[T.F5, 0, 0.9], [T.E5, 1, 0.9], [T.D5, 2, 0.9]] },
+  // E7 — on redescend
+  { bass: T.E3, chord: [T.E4, T.GS4, T.D5], mel: [[T.E5, 0, 0.9], [T.D5, 1, 0.45], [T.C5, 1.5, 0.45], [T.B4, 2, 0.9]] },
+  // Am — la chute (tenue)
+  { bass: T.A2, chord: [T.A3, T.C4, T.E4], mel: [[T.A4, 0, 2.4]] },
+];
+
 function startTitle(ac: AudioContext): Stopper {
   const kit = makeKit(ac);
   // Chaleur « vinyle » sous la musique.
   bedNoise(kit, { type: 'lowpass', freq: 900, gain: 0.006, lfoRate: 0.09, lfoDepth: 0.4 });
 
-  const BEAT = 0.75;                                   // ≈ 80 bpm
-  const BASSES = [110, 87.31, 130.81, 98];             // A2, F2, C3, G2
-  // Accords tenus sous la mélodie : Am, F, C, G. C'est eux qui donnent au
-  // menu son côté « vraie musique » plutôt que simple nappe.
-  const CHORDS: number[][] = [
-    [220, 261.63, 329.63],                             // Am : A3 C4 E4
-    [174.61, 220, 261.63],                             // F  : F3 A3 C4
-    [261.63, 329.63, 392],                             // C  : C4 E4 G4
-    [196, 246.94, 293.66],                             // G  : G3 B3 D4
-  ];
-  const MOTIFS: number[][] = [
-    [440, 0, 523.25, 392],                             // A4 · C5 G4
-    [329.63, 392, 440, 0],                             // E4 G4 A4 ·
-    [523.25, 440, 392, 329.63],                        // C5 A4 G4 E4
-    [440, 0, 0, 293.66],                               // A4 · · D4
-    [0, 329.63, 261.63, 293.66],                       // · E4 C4 D4
-    [659.25, 587.33, 523.25, 0],                       // E5 D5 C5 ·
-  ];
-
-  const schedulePhrase = () => {
-    if (kit.stopped) return;
-    // 4 mesures de 4 temps : basse + accord tenu, motif mélodique dessus,
-    // et un petit battement de carton pour tenir le tempo.
-    for (let bar = 0; bar < 4; bar++) {
-      const delayBar = bar * 4 * BEAT * 1000;
-      const bass = BASSES[bar];
-      kit.timers.push(setTimeout(() => {
-        if (kit.stopped) return;
-        note(kit, bass, BEAT * 3.6, 'triangle', 0.062);
-        // L'accord, très doux, en arrière-plan.
-        CHORDS[bar].forEach((f, i) => note(kit, f, BEAT * 3.4, 'sine', 0.019 - i * 0.003));
-      }, delayBar));
-      // Battement discret sur les temps 1 et 3 (une caisse en carton, quoi).
-      [0, 2].forEach((beat) => {
-        kit.timers.push(setTimeout(() => {
-          if (!kit.stopped) note(kit, beat === 0 ? 78 : 62, 0.1, 'sine', 0.05, 46);
-        }, delayBar + beat * BEAT * 1000));
-      });
-      const motif = MOTIFS[Math.floor(Math.random() * MOTIFS.length)];
-      motif.forEach((f, i) => {
-        if (!f || Math.random() < 0.12) return;        // silences : la mélodie respire
-        const at = delayBar + i * BEAT * 1000;
-        kit.timers.push(setTimeout(() => { if (!kit.stopped) note(kit, f, BEAT * 0.9, 'sine', 0.055); }, at));
-        // Écho léger à l'octave : ça remplit sans alourdir.
-        kit.timers.push(setTimeout(() => { if (!kit.stopped) note(kit, f * 2, BEAT * 0.5, 'sine', 0.013); }, at + BEAT * 380));
-      });
-    }
-    kit.timers.push(setTimeout(schedulePhrase, 16 * BEAT * 1000));
+  const BEAT = 0.42;                 // ≈ 143 bpm à 3 temps : une valse qui trotte
+  const BAR = BEAT * 3;
+  const at = (ms: number, fn: () => void) => {
+    kit.timers.push(setTimeout(() => { if (!kit.stopped) fn(); }, ms));
   };
-  schedulePhrase();
+
+  const playRound = (offset: number, second: boolean) => {
+    THEME.forEach((bar, i) => {
+      const t0 = offset + i * BAR * 1000;
+      // OUM : la basse, ronde, sur le premier temps.
+      at(t0, () => note(kit, bar.bass, BEAT * 1.5, 'triangle', 0.075));
+      // PAH-PAH : l'accord plaqué, court, sur les temps 2 et 3.
+      [1, 2].forEach((beat) => {
+        at(t0 + beat * BEAT * 1000, () => {
+          bar.chord.forEach((f, k) => note(kit, f, BEAT * 0.42, 'triangle', 0.026 - k * 0.005));
+        });
+      });
+      // La mélodie, en notes piquées (façon accordéon pincé).
+      bar.mel.forEach(([f, beat, dur]) => {
+        const tm = t0 + beat * BEAT * 1000;
+        at(tm, () => {
+          note(kit, f, BEAT * dur, 'sine', 0.062);
+          note(kit, f * 2, BEAT * dur * 0.5, 'sine', 0.011);   // brillance
+        });
+        // Reprise : une tierce au-dessus, l'air se remplit.
+        if (second) at(tm + 18, () => note(kit, f * 1.5, BEAT * dur * 0.8, 'sine', 0.02));
+      });
+    });
+    // Le gag : en fin de reprise, la valse « glisse » et retombe, pataude.
+    if (second) {
+      const tEnd = offset + 7.4 * BAR * 1000;
+      at(tEnd, () => note(kit, T.A4, 0.55, 'triangle', 0.05, T.A4 / 2.02));
+      at(tEnd + 260, () => note(kit, T.A2, 0.3, 'sine', 0.045, 78));
+    }
+  };
+
+  const loop = () => {
+    if (kit.stopped) return;
+    playRound(0, false);
+    playRound(8 * BAR * 1000, true);
+    kit.timers.push(setTimeout(loop, 16 * BAR * 1000));
+  };
+  loop();
   return kitStopper(kit);
 }
 
