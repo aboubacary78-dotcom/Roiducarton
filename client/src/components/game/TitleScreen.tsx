@@ -2,8 +2,10 @@ import { useGame, getLegend } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useLang, tr } from '@/lib/lang';
-import { DEATH_DEFS, loadDeathBook, loadKarma } from '@/lib/necrology';
+import { DEATH_DEFS, loadDeathBook, loadKarma, loadGraves, loadCrown } from '@/lib/necrology';
 import { knownEnemyNames } from '@/contexts/GameContext';
+import { getEquipped } from '@/lib/profile';
+import CardboardAvatar from './CardboardAvatar';
 
 const SAVE_KEY = 'roi-du-carton-save';
 
@@ -12,6 +14,21 @@ export default function TitleScreen() {
   useLang();
   const [hasSave, setHasSave] = useState(false);
   const legend = getLegend(state.highScores);
+  // Le visage du LOGO : le personnage en cours si la partie continue, sinon le
+  // dernier tombé. Il porte les accessoires que le joueur lui a équipés
+  // (garde-robe, conservée d'une partie à l'autre).
+  const [face, setFace] = useState<{ seed: string; gender: 'm' | 'f'; name: string } | null>(null);
+  const equipped = getEquipped();
+  const crown = loadCrown();
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(SAVE_KEY);
+      const c = saved ? JSON.parse(saved).character : null;
+      if (c?.seed) { setFace({ seed: c.seed, gender: c.gender === 'f' ? 'f' : 'm', name: c.name }); return; }
+      const last = loadGraves()[0];
+      if (last?.seed) setFace({ seed: last.seed, gender: last.gender === 'f' ? 'f' : 'm', name: last.name });
+    } catch { /* silent */ }
+  }, []);
   // Avancement du Registre des Morts + Karma de Rue (méta persistante).
   const deathsFound = Object.keys(loadDeathBook()).length;
   const deathsTotal = DEATH_DEFS.length + knownEnemyNames().length;
@@ -36,9 +53,43 @@ export default function TitleScreen() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7 }}
-        className="w-full rounded-xl overflow-hidden shadow-[0_8px_32px_rgba(42,31,26,0.12)]"
+        className="w-full rounded-xl overflow-hidden shadow-[0_8px_32px_rgba(42,31,26,0.12)] relative"
       >
         <CardboardCityHero />
+
+        {/* Le visage du joueur, en médaillon sur le logo : son perso avec les
+            accessoires qu'il lui a mis. Couronné s'il règne sur la rue. */}
+        {face && (
+          <motion.div
+            initial={{ scale: 0, y: 14, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 220, damping: 15, delay: 0.5 }}
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-col items-center"
+          >
+            <div className="relative">
+              <div
+                className="w-16 h-16 rounded-full overflow-hidden shadow-[0_4px_14px_rgba(42,31,26,0.35)]"
+                style={{ border: `3px solid ${crown ? '#FFD34E' : '#F5EEDC'}` }}
+              >
+                <CardboardAvatar seed={face.seed} gender={face.gender} size={64} accessories={equipped} />
+              </div>
+              {/* Couronne posée sur la tête si ce personnage règne. */}
+              {crown && crown.seed === face.seed && (
+                <motion.span
+                  initial={{ y: -6, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.9 }}
+                  className="absolute -top-3 left-1/2 -translate-x-1/2 text-xl drop-shadow"
+                >
+                  👑
+                </motion.span>
+              )}
+            </div>
+            <span className="mt-1 text-[10px] font-semibold text-white px-2 py-0.5 rounded-full bg-black/45 backdrop-blur-sm">
+              {face.name}
+            </span>
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Title */}
