@@ -40,6 +40,9 @@ type Tier = 0 | 1 | 2 | 3;
 type EndTier = 'fail' | 'ok' | 'jackpot' | 'hot';
 
 const k = (x: number, y: number) => `${x},${y}`;
+// Libellé d'accessibilité de la case voisine que l'on peut atteindre.
+const STEP_LABEL = (dx: number, dy: number) =>
+  dy < 0 ? 'Monter' : dy > 0 ? 'Descendre' : dx < 0 ? 'Aller à gauche' : 'Aller à droite';
 const manhattan = (a: Cell, b: Cell) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 const cheby = (a: Cell, b: Cell) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 
@@ -145,7 +148,7 @@ export default function StealHeist() {
           { emoji: '👁️', fr: 'Frôler un gardien ou traverser sa ligne de vue fait monter l\'alerte. Planqué, elle retombe, mais jamais sous le palier atteint.', en: 'Brushing past a guard or crossing its line of sight raises the alert. Hidden, it drops, but never below the tier you reached.' },
           { emoji: '🚨', fr: 'Repéré = des renforts débarquent, et plus la cible est grosse, plus il en vient. Au bouclage, un vigile campe la sortie.', en: 'Spotted = reinforcements arrive, and the bigger the target, the more of them come. At lockdown, a watchman camps the exit.' },
           { emoji: '💎', fr: 'Sortir sans alerte = coup de maître (butin max). Sortir en plein bouclage = bonus de respect, le culot, ça se respecte.', en: 'Escape with zero alert = masterstroke (max loot). Escape mid-lockdown = respect bonus, nerve earns respect.' },
-          { emoji: '🕹️', fr: 'Glissez sur la grille ou utilisez les flèches pour bouger. Toucher un gardien = pris.', en: 'Swipe on the grid or use the arrows to move. Touch a guard = caught.' },
+          { emoji: '👆', fr: 'Touchez une case voisine pour y faire un pas (ou glissez le doigt). Toucher un gardien = pris.', en: 'Tap a neighbouring tile to step there (or swipe). Touching a guard = caught.' },
         ]}
         onStart={() => setReady(true)}
       />
@@ -279,6 +282,11 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
   const spawnedRef = useRef({ chaser: false, camper: false });
   const tickCount = useRef(0);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  // Le glissé déclenche aussi un clic fantôme sur la case de départ : on le
+  // neutralise pendant un court instant pour ne pas avancer deux fois.
+  const swipedAt = useRef(0);
+  // Premier pas effectué : les cases voisines cessent de clignoter.
+  const [moved, setMoved] = useState(false);
 
   const finish = useCallback((result: EndTier) => {
     if (statusRef.current !== 'playing') return;
@@ -444,6 +452,13 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
     return () => clearInterval(id);
   }, [layout, chaseProb, tickMs, finish, tier, hasHaleine, hasAgile, raiseAlert]);
 
+  // Un pas, quelle que soit la façon dont il a été demandé (touche, glissé,
+  // clavier). Le premier pas calme le clignotement des cases voisines.
+  const stepTo = useCallback((dx: number, dy: number) => {
+    setMoved(true);
+    move(dx, dy);
+  }, [move]);
+
   // Flèches du clavier (confort sur ordinateur).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -451,11 +466,11 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
         ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0],
       };
       const d = map[e.key];
-      if (d) { e.preventDefault(); move(d[0], d[1]); }
+      if (d) { e.preventDefault(); stepTo(d[0], d[1]); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [move]);
+  }, [stepTo]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
@@ -467,9 +482,12 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
     const t = e.changedTouches[0];
     const dx = t.clientX - s.x, dy = t.clientY - s.y;
     touchStart.current = null;
+    // En dessous du seuil, c'est une tape : la case touchée s'en charge.
     if (Math.abs(dx) < 14 && Math.abs(dy) < 14) return;
-    if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 1 : -1, 0);
-    else move(0, dy > 0 ? 1 : -1);
+    // Un vrai glissé : on avance, et on empêche la tape de rejouer le coup.
+    swipedAt.current = Date.now();
+    if (Math.abs(dx) > Math.abs(dy)) stepTo(dx > 0 ? 1 : -1, 0);
+    else stepTo(0, dy > 0 ? 1 : -1);
   };
 
   if (!char) return null;
@@ -539,6 +557,10 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
             const isLoot = !hasLoot && layout.loot.x === x && layout.loot.y === y;
             const isExit = layout.exit.x === x && layout.exit.y === y;
             const isWall = layout.blocked.has(k(x, y));
+            // Les quatre cases atteignables : elles se touchent du doigt, et
+            // le liseré pointillé le dit sans avoir besoin d'une croix.
+            const dx = x - player.x, dy = y - player.y;
+            const isStep = status === 'playing' && !isWall && Math.abs(dx) + Math.abs(dy) === 1;
             let bg = '#F0E2CE';
             if (isWall) bg = '#DCC4A6';
             else if (isExit) bg = hasLoot ? '#CDE8C6' : '#E4EAD8';
@@ -546,9 +568,20 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
             return (
               <div
                 key={k(x, y)}
-                className="aspect-square rounded-md flex items-center justify-center text-lg select-none"
+                onClick={isStep ? () => { if (Date.now() - swipedAt.current < 400) return; stepTo(dx, dy); } : undefined}
+                role={isStep ? 'button' : undefined}
+                aria-label={isStep ? STEP_LABEL(dx, dy) : undefined}
+                className={`relative aspect-square rounded-md flex items-center justify-center text-lg select-none ${isStep ? 'cursor-pointer' : ''}`}
                 style={{ background: bg, boxShadow: 'inset 0 0 0 1px rgba(58,42,30,0.06)' }}
               >
+                {isStep && (
+                  <motion.span
+                    className="absolute inset-0.5 rounded-md pointer-events-none"
+                    style={{ border: '2px dashed rgba(184,134,11,0.55)' }}
+                    animate={moved ? { opacity: 0.55 } : { opacity: [0.3, 1, 0.3] }}
+                    transition={moved ? { duration: 0.2 } : { repeat: Infinity, duration: 1.3 }}
+                  />
+                )}
                 {isPlayer ? (
                   <motion.span
                     key="player"
@@ -606,18 +639,8 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
         </AnimatePresence>
       </div>
 
-      {/* Croix directionnelle */}
-      <div className="grid grid-cols-3 gap-1.5 w-40 select-none" aria-label="Déplacements">
-        <span />
-        <button onClick={() => move(0, -1)} className="action-btn aspect-square flex items-center justify-center text-lg">▲</button>
-        <span />
-        <button onClick={() => move(-1, 0)} className="action-btn aspect-square flex items-center justify-center text-lg">◀</button>
-        <button onClick={() => move(0, 1)} className="action-btn aspect-square flex items-center justify-center text-lg">▼</button>
-        <button onClick={() => move(1, 0)} className="action-btn aspect-square flex items-center justify-center text-lg">▶</button>
-      </div>
-
       <p className="text-[11px] text-[#8B6B4A] text-center">
-        {tr('Glissez sur la grille ou utilisez les flèches.', 'Swipe on the grid or use the arrows.')} {guardEmoji} {tr('patrouille, restez hors de vue, la jauge monte vite.', 'is on patrol, stay out of sight, the gauge climbs fast.')}
+        {tr('Touchez une case voisine pour y aller (ou glissez le doigt).', 'Tap a neighbouring tile to step there (or swipe).')} {guardEmoji} {tr('patrouille, restez hors de vue, la jauge monte vite.', 'is on patrol, stay out of sight, the gauge climbs fast.')}
       </p>
     </div>
   );

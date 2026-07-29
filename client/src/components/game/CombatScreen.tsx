@@ -1,5 +1,5 @@
-import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon } from '@/contexts/GameContext';
-import type { Character, CombatState, CombatCard, SignId } from '@/contexts/GameContext';
+import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon, ARENA, spawnWave, stepProjectiles } from '@/contexts/GameContext';
+import type { Character, CombatState, CombatCard, SignId, DodgeProj } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { playHurt, playWhoosh, playEnemyCry, playFightStart, playKingArrival } from '@/lib/sound';
@@ -20,12 +20,10 @@ import { pushToast } from '@/lib/toast';
  * que jouer et remonter le choix.
  */
 
-const ARENA = 300;          // côté de l'arène en px
 const DURATION = 3900;      // durée d'une esquive de rattrapage (ms) — un peu plus longue
 const IFRAME = 440;         // invulnérabilité après une touche (ms) — moins clémente
 
 type Dir = 'up' | 'down' | 'left' | 'right';
-interface Proj { id: number; x: number; y: number; vx: number; vy: number; size: number; kind: string; armUntil: number; }
 
 const KIND_STYLE: Record<string, { color: string; shape: 'circle' | 'rect' }> = {
   feather: { color: '#7B68A8', shape: 'circle' },
@@ -538,12 +536,16 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
   const SPEED = hasAgile ? 205 : 168;
   // Les ennemis qui cognent fort tirent plus dense : un adversaire à 17 d'attaque
   // (le Vigile de Choc) rend l'esquive nettement plus serrée qu'un pigeon.
+  // La cadence de base est modérée parce que les tirs sont désormais ADRESSÉS
+  // (voir data/dodge) : moins de projectiles, mais tous pour vous.
   const atkMul = 1 + Math.max(0, combat.enemyAttack - 8) * 0.035;
-  const densityMul = 1.42 * atkMul * (1 + (combat.round - 1) * 0.14) * (combat.enemyStunned ? 0.5 : 1) * (combat.dodgePenalty || 1);
+  const densityMul = 1.05 * atkMul * (1 + (combat.round - 1) * 0.14) * (combat.enemyStunned ? 0.5 : 1) * (combat.dodgePenalty || 1);
   const speedMul = 1.16 * (1 + (combat.round - 1) * 0.07) * (combat.enemyStunned ? 0.8 : 1);
 
-  const posRef = useRef({ x: ARENA / 2, y: ARENA - 40 });
-  const projRef = useRef<Proj[]>([]);
+  // On démarre au centre : tous les côtés de l'arène sont à portée, et aucun
+  // coin ne peut plus servir d'abri.
+  const posRef = useRef({ x: ARENA / 2, y: ARENA / 2 });
+  const projRef = useRef<DodgeProj[]>([]);
   const keysRef = useRef<Set<Dir>>(new Set());
   const hitsRef = useRef(0);
   const iframeRef = useRef(0);
@@ -552,33 +554,18 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
   const [flash, setFlash] = useState(false);
   const [timeLeft, setTimeLeft] = useState(1);
   const doneRef = useRef(false);
+  // Tant que le joueur n'a pas posé le doigt, on lui montre comment faire.
+  const [touched, setTouched] = useState(false);
 
   const spawn = useCallback((now: number) => {
-    const p = posRef.current;
-    const add = (px: number, py: number, vx: number, vy: number) => {
-      projRef.current.push({ id: ++projId.current, x: px, y: py, vx, vy, size: pattern.size, kind: pattern.kind, armUntil: telegraph ? now + 420 : 0 });
-    };
-    const speed = pattern.speed * speedMul;
-    if (pattern.motion === 'spread') {
-      // Éventail depuis le haut vers le bas.
-      const cx = 40 + Math.random() * (ARENA - 80);
-      for (let i = -1; i <= 1; i++) add(cx, -10, i * 55, speed);
-    } else if (pattern.motion === 'lob') {
-      // Cloche : part du haut, retombe (accélération verticale via vy croissant).
-      add(30 + Math.random() * (ARENA - 60), -10, (Math.random() - 0.5) * 60, speed * 0.5);
-    } else if (pattern.motion === 'homing') {
-      // Depuis un bord aléatoire, vise le joueur.
-      const edge = Math.floor(Math.random() * 4);
-      const sx = edge === 0 ? -10 : edge === 1 ? ARENA + 10 : Math.random() * ARENA;
-      const sy = edge === 2 ? -10 : edge === 3 ? ARENA + 10 : Math.random() * ARENA;
-      const dx = p.x - sx, dy = p.y - sy; const d = Math.hypot(dx, dy) || 1;
-      add(sx, sy, (dx / d) * speed, (dy / d) * speed);
-    } else {
-      // straight : d'un bord vers le point opposé.
-      const fromTop = Math.random() < 0.5;
-      if (fromTop) add(Math.random() * ARENA, -10, (Math.random() - 0.5) * 40, speed);
-      else { const left = Math.random() < 0.5; add(left ? -10 : ARENA + 10, Math.random() * ARENA * 0.7, (left ? 1 : -1) * speed, 20); }
-    }
+    const wave = spawnWave(
+      pattern,
+      posRef.current,
+      pattern.speed * speedMul,
+      () => ++projId.current,
+      telegraph ? now + 420 : 0,
+    );
+    projRef.current.push(...wave);
   }, [pattern, speedMul, telegraph]);
 
   useEffect(() => {
@@ -604,28 +591,13 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
       while (now >= nextSpawn && elapsed < DURATION) { spawn(now); nextSpawn += interval; }
 
       // Déplacement + collisions.
-      const p = posRef.current;
-      const alive: Proj[] = [];
-      for (const pr of projRef.current) {
-        pr.x += pr.vx * dt; pr.y += pr.vy * dt;
-        if (pattern.motion === 'lob') pr.vy += 260 * dt; // gravité
-        if (pattern.motion === 'homing' && elapsed < DURATION) {
-          const ax = p.x - pr.x, ay = p.y - pr.y; const d = Math.hypot(ax, ay) || 1;
-          pr.vx += (ax / d) * 60 * dt; pr.vy += (ay / d) * 60 * dt;
-        }
-        if (pr.x < -40 || pr.x > ARENA + 40 || pr.y < -40 || pr.y > ARENA + 40) continue;
-        const armed = pr.armUntil === 0 || now >= pr.armUntil;
-        if (armed && now >= iframeRef.current) {
-          const dist = Math.hypot(pr.x - p.x, pr.y - p.y);
-          if (dist < R + pr.size / 2) {
-            hitsRef.current += 1; iframeRef.current = now + IFRAME;
-            setFlash(true); setTimeout(() => setFlash(false), 160); playHurt();
-            continue; // le projectile disparaît après impact
-          }
-        }
-        alive.push(pr);
-      }
-      projRef.current = alive;
+      projRef.current = stepProjectiles(
+        projRef.current, pattern, posRef.current, R, dt, now, () => iframeRef.current,
+        () => {
+          hitsRef.current += 1; iframeRef.current = now + IFRAME;
+          setFlash(true); setTimeout(() => setFlash(false), 160); playHurt();
+        },
+      );
       force((n) => n + 1);
 
       if (elapsed >= DURATION) {
@@ -645,25 +617,44 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
       arrowup: 'up', z: 'up', w: 'up', arrowdown: 'down', s: 'down',
       arrowleft: 'left', q: 'left', a: 'left', arrowright: 'right', d: 'right',
     };
-    const down = (e: KeyboardEvent) => { const dir = map[e.key.toLowerCase()]; if (dir) { e.preventDefault(); keysRef.current.add(dir); } };
+    const down = (e: KeyboardEvent) => { const dir = map[e.key.toLowerCase()]; if (dir) { e.preventDefault(); keysRef.current.add(dir); setTouched(true); } };
     const up = (e: KeyboardEvent) => { const dir = map[e.key.toLowerCase()]; if (dir) keysRef.current.delete(dir); };
     window.addEventListener('keydown', down); window.addEventListener('keyup', up);
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); };
   }, []);
 
-  // Tactile : glissé direct sur l'arène (le doigt tire le personnage).
-  const dragRef = useRef(false);
+  /* ---- Le doigt, et rien d'autre ----------------------------------------
+   * Plus de croix directionnelle : on tient le personnage et on le promène.
+   * Le glissé est RELATIF (on garde l'écart entre le doigt et le personnage),
+   * pour que la main ne vienne pas masquer ce qu'on essaie d'esquiver. Poser
+   * le doigt loin du personnage l'amène quand même sous le doigt : ça évite
+   * de chercher la « poignée » en pleine volée de projectiles.
+   */
+  const dragRef = useRef<{ dx: number; dy: number } | null>(null);
   const arenaRef = useRef<HTMLDivElement | null>(null);
-  const moveTo = (clientX: number, clientY: number) => {
-    const el = arenaRef.current; if (!el) return;
+  const toArena = (clientX: number, clientY: number) => {
+    const el = arenaRef.current; if (!el) return null;
     const rect = el.getBoundingClientRect();
     const scale = ARENA / rect.width;
-    const x = (clientX - rect.left) * scale; const y = (clientY - rect.top) * scale;
+    return { x: (clientX - rect.left) * scale, y: (clientY - rect.top) * scale };
+  };
+  const place = (x: number, y: number) => {
     posRef.current.x = Math.max(R, Math.min(ARENA - R, x));
     posRef.current.y = Math.max(R, Math.min(ARENA - R, y));
   };
-
-  const hold = (dir: Dir, on: boolean) => { if (on) keysRef.current.add(dir); else keysRef.current.delete(dir); };
+  const grab = (clientX: number, clientY: number) => {
+    const a = toArena(clientX, clientY); if (!a) return;
+    const p0 = posRef.current;
+    const far = Math.hypot(a.x - p0.x, a.y - p0.y) > 62;
+    if (far) { place(a.x, a.y); dragRef.current = { dx: 0, dy: 0 }; }
+    else dragRef.current = { dx: p0.x - a.x, dy: p0.y - a.y };
+    setTouched(true);
+  };
+  const drag = (clientX: number, clientY: number) => {
+    const d = dragRef.current; if (!d) return;
+    const a = toArena(clientX, clientY); if (!a) return;
+    place(a.x + d.dx, a.y + d.dy);
+  };
 
   const p = posRef.current;
 
@@ -679,12 +670,14 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
       {/* Arène */}
       <div
         ref={arenaRef}
+        role="application"
+        aria-label={tr('Arène d\'esquive : glissez le doigt pour déplacer votre personnage', 'Dodge arena: drag your finger to move your character')}
         className="relative rounded-xl overflow-hidden"
         style={{ width: 'min(300px, 82vw)', aspectRatio: '1 / 1', background: 'radial-gradient(circle at 50% 40%, #2E2438, #1C1622)', border: '3px solid #3A2A1E', touchAction: 'none' }}
-        onPointerDown={(e) => { dragRef.current = true; moveTo(e.clientX, e.clientY); }}
-        onPointerMove={(e) => { if (dragRef.current) moveTo(e.clientX, e.clientY); }}
-        onPointerUp={() => { dragRef.current = false; }}
-        onPointerLeave={() => { dragRef.current = false; }}
+        onPointerDown={(e) => { e.currentTarget.setPointerCapture?.(e.pointerId); grab(e.clientX, e.clientY); }}
+        onPointerMove={(e) => drag(e.clientX, e.clientY)}
+        onPointerUp={() => { dragRef.current = null; }}
+        onPointerCancel={() => { dragRef.current = null; }}
       >
         {/* jauge de temps */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-black/30">
@@ -717,38 +710,53 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
           animate={{ opacity: flash ? [1, 0.2, 1] : 1 }}
           transition={{ duration: 0.16 }}
         >
+          {/* Tant que le doigt n'est pas venu, un halo respire autour du
+              personnage : c'est LUI qu'on attrape. */}
+          {!touched && (
+            <motion.span
+              className="absolute rounded-full pointer-events-none"
+              style={{ inset: -14, border: '2px dashed rgba(242,193,78,0.85)' }}
+              animate={{ scale: [1, 1.16, 1], opacity: [0.9, 0.35, 0.9] }}
+              transition={{ repeat: Infinity, duration: 1.25 }}
+            />
+          )}
           <div className="w-full h-full rounded-full overflow-hidden" style={{ boxShadow: flash ? '0 0 0 3px #D94F4F' : '0 0 0 2px rgba(242,193,78,0.7)' }}>
             <PlayerFace char={character} size={Math.round(R * 2.4)} />
           </div>
         </motion.div>
+
+        {/* Apprentissage sans texte : un doigt fantôme fait la démonstration
+            du glissé, et disparaît dès que le joueur prend la main. */}
+        <AnimatePresence>
+          {!touched && (
+            <motion.div
+              key="hint"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 pointer-events-none flex flex-col items-center justify-end pb-3"
+            >
+              <motion.span
+                className="text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
+                style={{ position: 'absolute', top: '50%', marginTop: R + 10 }}
+                animate={{ x: [-52, 52, -52], opacity: [0.45, 1, 0.45] }}
+                transition={{ repeat: Infinity, duration: 2.1, ease: 'easeInOut' }}
+              >
+                👆
+              </motion.span>
+              <span className="text-[11px] font-semibold text-[#F2C14E] bg-black/45 rounded-full px-2.5 py-1">
+                {tr('Glissez le doigt pour esquiver', 'Drag your finger to dodge')}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Croix directionnelle tactile */}
-      <div className="grid grid-cols-3 gap-1 w-36 mt-1" aria-label={tr('Déplacements', 'Movement')}>
-        <span />
-        <PadBtn label="▲" onHold={(on) => hold('up', on)} />
-        <span />
-        <PadBtn label="◀" onHold={(on) => hold('left', on)} />
-        <PadBtn label="▼" onHold={(on) => hold('down', on)} />
-        <PadBtn label="▶" onHold={(on) => hold('right', on)} />
-      </div>
-      <p className="text-[10px] text-[#8B6B4A]">{tr('Glissez dans l\'arène, ZQSD/flèches, ou la croix.', 'Drag in the arena, WASD/arrows, or the pad.')}</p>
+      <p className="text-[10px] text-[#8B6B4A]">
+        {tr('Tenez votre personnage et promenez-le. (ZQSD / flèches au clavier)',
+            'Hold your character and move them around. (WASD / arrows on keyboard)')}
+      </p>
     </motion.div>
-  );
-}
-
-function PadBtn({ label, onHold }: { label: string; onHold: (on: boolean) => void }) {
-  return (
-    <button
-      className="action-btn aspect-square flex items-center justify-center text-base"
-      style={{ touchAction: 'none' }}
-      onPointerDown={(e) => { e.preventDefault(); onHold(true); }}
-      onPointerUp={() => onHold(false)}
-      onPointerLeave={() => onHold(false)}
-      onPointerCancel={() => onHold(false)}
-    >
-      {label}
-    </button>
   );
 }
 

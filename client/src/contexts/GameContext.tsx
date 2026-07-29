@@ -49,6 +49,7 @@ export * from './data/heist';
 export * from './data/crafting';
 export * from './data/backstory';
 export * from './data/npc';
+export * from './data/dodge';
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
