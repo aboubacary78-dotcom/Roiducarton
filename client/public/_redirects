@@ -1,0 +1,4 @@
+# Page unique : toute URL renvoie index.html (sinon un rechargement = 404).
+# Ce fichier est copié tel quel dans dist/public, il sert donc aussi quand on
+# dépose le dossier construit à la main sur Netlify Drop.
+/*  /index.html  200

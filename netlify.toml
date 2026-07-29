@@ -1,0 +1,39 @@
+# Déploiement Netlify.
+#
+# Le jeu est entièrement statique : aucun appel serveur, tout vit dans le
+# navigateur (localStorage). `pnpm build` produit AUSSI un bundle serveur dans
+# dist/, qui ne sert qu'à l'aperçu local — ce qu'il faut publier, c'est
+# uniquement dist/public.
+
+[build]
+  command = "pnpm build"
+  publish = "dist/public"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Corepack installe la version de pnpm épinglée dans package.json.
+  NPM_FLAGS = "--version"
+
+# L'application est une page unique (wouter gère les routes côté navigateur) :
+# toute URL doit renvoyer index.html, sinon un rechargement tombe sur un 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Le hachage des noms de fichiers permet un cache long sur les ressources ;
+# index.html, lui, doit toujours être revalidé pour livrer la nouvelle version.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
