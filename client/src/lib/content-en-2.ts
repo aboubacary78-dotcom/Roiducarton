@@ -1456,4 +1456,10 @@ export const CONTENT_EN_2: Record<string, string> = {
   'Lucie ouvre pendant le dépôt. Silence dense. Puis : « au moins vous rendez. Café ? » Vingt minutes de conversation dans l\'embrasure, les coussins entre vous comme des otages libérés. Elle garde le mot d\'excuse « pour la postérité ».': 'Lucie opens the door mid-drop-off. Dense silence. Then: "at least you return things. Coffee?" Twenty minutes of conversation in the doorway, the cushions between you like freed hostages. She keeps the apology note "for posterity".',
   'Garder le butin et changer de hall': 'Keep the loot and change lobbies',
   'Vous emportez plaid et coussins vers un autre quartier. Le confort reste, le mot de Lucie aussi, quelque part entre les côtes. « Sérieusement. Il fait froid. » Elle avait raison sur toute la ligne, et c\'est bien le problème.': 'You carry the throw and cushions to another neighborhood. The comfort stays; so does Lucie\'s note, somewhere between your ribs. "Seriously. It\'s cold out." She was right about everything, and that\'s exactly the problem.',
+  // --- La Récup' (mini-jeu de tri) ---
+  'Ferraille récupérée': 'Salvaged scrap',
+  'Câble récupéré': 'Salvaged cable',
+  'Tissu récupéré': 'Salvaged cloth',
+  'Bâche récupérée': 'Salvaged tarp',
+  'Pièces détachées': 'Spare parts',
 };

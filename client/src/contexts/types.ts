@@ -363,7 +363,7 @@ export interface Contract {
 }
 
 // ============ ÉTAT GLOBAL ============
-export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'game-over' | 'shop' | 'registre' | 'cimetiere' | 'settings' | 'steal-game' | 'beg-game' | 'wardrobe';
+export type GameScreen = 'title' | 'character-select' | 'main' | 'event' | 'combat' | 'travel' | 'inventory' | 'game-over' | 'shop' | 'registre' | 'cimetiere' | 'settings' | 'steal-game' | 'beg-game' | 'salvage-game' | 'wardrobe';
 
 export interface GameState {
   screen: GameScreen;

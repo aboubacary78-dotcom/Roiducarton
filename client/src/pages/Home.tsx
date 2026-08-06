@@ -22,6 +22,7 @@ import ShopScreen from '@/components/game/ShopScreen';
 import SettingsScreen from '@/components/game/SettingsScreen';
 import StealHeist from '@/components/game/StealHeist';
 import BegMinigame from '@/components/game/BegMinigame';
+import SalvageMinigame from '@/components/game/SalvageMinigame';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import WeatherOverlay from '@/components/game/WeatherOverlay';
 import WardrobeScreen from '@/components/game/WardrobeScreen';
@@ -45,6 +46,7 @@ function renderScreen(screen: string) {
     case 'shop': return <ShopScreen />;
     case 'steal-game': return <StealHeist />;
     case 'beg-game': return <BegMinigame />;
+    case 'salvage-game': return <SalvageMinigame />;
     case 'settings': return <SettingsScreen />;
     case 'wardrobe': return <WardrobeScreen />;
     case 'game-over': return <GameOverScreen />;
@@ -64,7 +66,7 @@ export default function Home() {
   useEffect(() => {
     const s = state.screen;
     if (s === 'title' || s === 'character-select') setAmbience('title');
-    else if (s === 'combat' || s === 'steal-game' || s === 'beg-game' || s === 'game-over') setAmbience(null);
+    else if (s === 'combat' || s === 'steal-game' || s === 'beg-game' || s === 'salvage-game' || s === 'game-over') setAmbience(null);
     else if (location) setAmbience(location as AmbienceId);
     else setAmbience(null);
   }, [state.screen, location]);
@@ -103,7 +105,7 @@ export default function Home() {
         {state.screen === 'main' && state.character?.activeFlags?.includes('origin-vu') && <TutorialOverlay />}
 
         {/* Overlay météo : actif sur tous les écrans de jeu sauf titre et sélection */}
-        {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game', 'wardrobe'].includes(state.screen) && (
+        {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game', 'salvage-game', 'wardrobe'].includes(state.screen) && (
           <WeatherOverlay />
         )}
 

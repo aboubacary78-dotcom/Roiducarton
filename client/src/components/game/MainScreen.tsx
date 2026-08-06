@@ -326,6 +326,22 @@ export default function MainScreen() {
           />
         </div>
 
+        {/* La Récup' : la source de matière première de l'atelier. Elle paie
+            mal et coûte à la fierté, mais elle ne dépend de personne. */}
+        <motion.button
+          whileHover={actionsLeft <= 0 ? {} : liftHover}
+          whileTap={actionsLeft <= 0 ? {} : stampTap}
+          onClick={actionsLeft <= 0 ? undefined : () => { playClick(); dispatch({ type: 'SALVAGE' }); }}
+          disabled={actionsLeft <= 0}
+          className={`action-btn p-2.5 flex items-center justify-center gap-2 border-[#7C8B5A]/30 ${
+            actionsLeft <= 0 ? 'opacity-35 pointer-events-none' : ''
+          }`}
+        >
+          <span className="text-lg">♻️</span>
+          <span className="text-xs font-medium text-[#3D3020]">{tr('La Récup\'', 'Salvage')}</span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#7C8B5A]/12 text-[#5E7A3A] font-mono">{tr('matériaux', 'materials')}</span>
+        </motion.button>
+
         {/* Action risquée : Voler */}
         <motion.button
           whileHover={actionsLeft <= 0 ? {} : liftHover}

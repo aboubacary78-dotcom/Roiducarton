@@ -18,6 +18,7 @@ import type {
 } from './types';
 import { randomFromArray, L } from './data/util';
 import { generateCharacterTrio, hasTrait, computeScore, genderFromName, HERITAGE_KITS, STARTING_ITEMS } from './data/world';
+import { SALVAGE_JUNK, SALVAGE_MAX_KEPT, salvagePayout } from './data/salvage';
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
 import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
 import { ENEMIES, rollSignRound } from './data/enemies';
@@ -50,6 +51,7 @@ export * from './data/crafting';
 export * from './data/backstory';
 export * from './data/npc';
 export * from './data/dodge';
+export * from './data/salvage';
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
@@ -162,6 +164,8 @@ type GameAction =
   | { type: 'STEAL' }
   | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot' | 'hot'; targetId: string }
   | { type: 'RESOLVE_BEG'; coins: number; copTapped: boolean }
+  | { type: 'SALVAGE' }
+  | { type: 'RESOLVE_SALVAGE'; centimes: number; bazar: number; sick: boolean }
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
   | { type: 'TRAVEL'; location: string }
@@ -332,6 +336,56 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         character: { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive },
         eventResult: { text: prefix + tc(flavorFrom(BEG_EVENTS, money > 0)) + weatherNote + dignityNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta, image: `/assets/result-${begEvt.id}-${money > 0 ? 'good' : 'bad'}.webp`, fallbackImage: begEvt.image },
+        screen: isAlive ? 'main' : 'game-over',
+      };
+    }
+
+    case 'SALVAGE': {
+      if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      return { ...state, screen: 'salvage-game', dayActions: state.dayActions + 1 };
+    }
+
+    case 'RESOLVE_SALVAGE': {
+      if (!state.character) return state;
+      const c = state.character;
+      // Fouiller, ça paie mal et ça coûte à la fierté : c'est le contrepoint
+      // de la manche, qui rapporte plus mais dépend des autres.
+      const money = salvagePayout(action.centimes);
+      // Le Bricoleur repart avec une pièce de plus : il sait quoi garder.
+      const kept = Math.min(SALVAGE_MAX_KEPT, Math.max(0, action.bazar + (hasTrait(c, 'bricoleur') && action.bazar > 0 ? 1 : 0)));
+      const inventory = [...c.inventory];
+      let added = 0;
+      for (let i = 0; i < kept && inventory.length < 20; i++) {
+        inventory.push({ ...randomFromArray(SALVAGE_JUNK) });
+        added++;
+      }
+      const statDelta: Partial<Stats> = action.sick
+        ? { dignity: -6, mental: -8, health: -4, hunger: -4 }
+        : { dignity: -5, mental: money > 0 || added > 0 ? 2 : -3, hunger: -3 };
+      const newStats = applyStatDelta(c.stats, statDelta);
+      const isAlive = newStats.health > 0 && newStats.mental > 0;
+      if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, hasTrait(c, 'poissard'))); clearSave(); }
+
+      const full = added < kept;
+      const text = action.sick
+        ? L(
+            `🤮 Le container a gagné. Vous ressortez plié en deux, les mains vides ou presque${money > 0 ? `, avec ${money}€ de consigne` : ''}. La dignité reste au fond du bac.`,
+            `🤮 The bin won. You come out doubled over, empty-handed or close to it${money > 0 ? `, with €${money} of deposit` : ''}. Your dignity stays at the bottom.`,
+          )
+        : money === 0 && added === 0
+          ? L(
+              '🗑️ Vingt minutes les bras dans les ordures pour rien. Même les rats vous ont regardé avec pitié.',
+              '🗑️ Twenty minutes elbow-deep in rubbish for nothing. Even the rats looked at you with pity.',
+            )
+          : L(
+              `♻️ Le tri a payé : ${money > 0 ? `${money}€ de consigne` : 'pas un centime de consigne'}${added > 0 ? ` et ${added} pièce${added > 1 ? 's' : ''} pour l'atelier` : ''}.${full ? ' Vos poches débordent, le reste est resté sur place.' : ''}`,
+              `♻️ Sorting paid off: ${money > 0 ? `€${money} of deposit` : 'not a cent of deposit'}${added > 0 ? ` and ${added} part${added > 1 ? 's' : ''} for the workshop` : ''}.${full ? ' Your pockets are full, the rest stayed behind.' : ''}`,
+            );
+
+      return {
+        ...state,
+        character: { ...c, stats: newStats, money: c.money + money, inventory, alive: isAlive },
+        eventResult: { text, statChanges: statDelta, moneyChange: money },
         screen: isAlive ? 'main' : 'game-over',
       };
     }
