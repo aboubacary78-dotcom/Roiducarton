@@ -398,3 +398,146 @@ sans décision : le même défaut que la version actuelle, mieux habillé.
 qui vous regarde vraiment, avant qu'elle ne se ravise. Très simple à faire et
 à comprendre, joli avec nos visages générés, mais mince à long terme : c'est
 un jeu d'observation pure, il s'épuise en quelques parties.
+
+---
+
+# Troisième passage — la DS *et* la 3DS, et pourquoi La Récup' ne tient pas
+
+## Le constat, sans complaisance
+
+La Récup' souffre exactement du défaut que je reprochais à l'ancienne manche.
+J'avais écrit que sa décision était « est-ce que ça vaut le geste ». C'est
+faux. Ignorer un déchet **ne coûte rien** : il n'y a donc pas d'arbitrage, il
+y a une bonne réponse évidente (prendre ce qui vaut, laisser le reste) et une
+exécution au doigt. C'est un test de reconnaissance plus un test de vitesse.
+Exactement la même famille que « taper les pièces ».
+
+Ma propre grille de l'audit le disait déjà, je ne l'ai pas appliquée à moi-même :
+
+> **Une décision au moins, sinon ce n'est pas un jeu.**
+
+Une décision, ce n'est pas « choisir la bonne case ». C'est **renoncer à
+quelque chose**. Tant qu'aucun choix ne ferme une porte, il n'y a pas de jeu.
+
+## Ce que la 3DS ajoute au tableau
+
+### 🥇 SteamWorld Dig (2013)
+
+On creuse vers le bas. Plus on descend, plus le minerai vaut cher — mais la
+lanterne s'épuise, les poches se remplissent, et il faut **remonter pour
+vendre**. Chaque coup de pioche est la même question : encore un, ou je rentre ?
+
+**La leçon :** le *press your luck*. Une récolte non sécurisée, un risque qui
+monte, et un bouton « je rentre » disponible à tout moment. Le joueur se fait
+son propre malheur, et c'est pour ça qu'il recommence.
+
+### 🥈 Rusty's Real Deal Baseball (2014)
+
+On **marchande** le prix des jeux avec un chien criblé de dettes, qui pleure,
+argumente et culpabilise. Le marchandage est le jeu.
+
+**La leçon :** une négociation peut être un mini-jeu à part entière. Et chez
+nous, il existe un endroit tout désigné où l'on discute un prix : la boutique.
+
+### 🥉 The Legend of Zelda: A Link Between Worlds (2013)
+
+On **loue** les objets au lieu de les gagner. C'est bon marché, on a tout tout
+de suite — mais à la mort, le loueur récupère tout d'un coup.
+
+**La leçon :** un système d'équipement peut être un pari permanent. Louer une
+arme pour la journée en sachant qu'on la perd si on meurt, c'est notre jeu.
+
+### Luigi's Mansion 2 (2013)
+
+L'aspirateur : on accroche, le fantôme résiste, on tire à contre-sens. Un
+bras de fer tactile où la résistance se sent.
+
+**La leçon :** extraire quelque chose de coincé peut être un geste à part
+entière, physique et lisible. Parfait pour sortir une grosse pièce d'un
+container.
+
+### Pocket Card Jockey (2016)
+
+Un solitaire de golf, mais chaque partie pilote un cheval de course. Deux
+univers sans rapport, collés, et ça marche.
+
+**La leçon :** une mécanique connue et simple devient neuve quand la fiction
+qui l'entoure change les enjeux.
+
+### Sakura Samurai (2011), Kid Icarus: Uprising (2012), Theatrhythm (2012)
+
+Le premier : des duels au contre-temps, on tourne autour de l'adversaire et on
+frappe à l'instant exact. Le deuxième : la visée au stylet. Le troisième : le
+rythme en tapé / maintenu / glissé.
+
+**La leçon :** trois grammaires tactiles distinctes et lisibles. Nous en avons
+déjà trois occupées (choisir, glisser, avancer d'une case) ; ce sont les
+suivantes disponibles.
+
+### Pushmo (2011), BoxBoy! (2015), Picross 3D (2009)
+
+Puzzles spatiaux excellents — et hors-sol, comme les Picross du premier
+passage. Même verdict : rien là-dedans ne raconte la rue.
+
+### Etrian Odyssey IV (2012)
+
+On dessine sa propre carte sur l'écran du bas en explorant.
+
+**La leçon :** faire produire au joueur une trace persistante de ce qu'il a
+vécu. Le Cimetière et le Registre jouent déjà ce rôle chez nous.
+
+### Fantasy Life (2012), Animal Crossing: New Leaf (2012)
+
+Des boucles quotidiennes courtes, un métier avec sa mini-mécanique propre, et
+la satisfaction de revenir demain.
+
+**La leçon :** nos actions journalières sont la bonne structure. Ce qui
+manque, ce n'est pas le cadre, c'est la tension à l'intérieur.
+
+### StreetPass — Find Mii (2011)
+
+Les inconnus croisés dans la vraie vie viennent se battre pour vous.
+
+**La leçon :** la foule comme ressource plutôt que comme décor. La nouvelle
+manche s'en approche déjà.
+
+## La Récup' v2 : le fond du container
+
+Garder la fiction, jeter la mécanique. On ne trie plus une pluie d'objets : on
+**fouille en profondeur**, et on décide quand s'arrêter.
+
+**Le geste.** Le container est plein. On frotte le doigt sur les détritus pour
+déblayer — le tas s'écarte là où on passe, et ce qu'il y a dessous apparaît.
+C'est un geste continu, sale, et physiquement juste.
+
+**La couche.** Ce qu'on trouve dépend de la profondeur atteinte :
+surface = consigne (petit et sûr), milieu = ferraille et bricoles, fond = la
+trouvaille (un vrai objet, parfois une arme).
+
+**La décision, toutes les quelques secondes.** Deux boutons permanents :
+
+- **Remonter** — tout ce qu'on a est acquis, définitivement.
+- **Creuser encore** — la couche suivante paie mieux, et le risque monte.
+
+**Le risque.** Une jauge unique qui grimpe à chaque couche : l'odeur, le bruit,
+le gardien de la déchetterie qui fait sa ronde, le rat qu'on finit par
+réveiller. Si elle éclate, on perd **tout ce qu'on n'a pas sécurisé** — pas la
+partie, juste la fouille. La punition doit rester du domaine du « zut »,
+jamais du « j'arrête de jouer ».
+
+**Pourquoi c'est mieux.** Renoncer devient l'action principale. Chaque couche
+supplémentaire est un pari que le joueur prend seul, contre son propre butin.
+Et ça se raconte : « j'avais trois bricoles, j'ai voulu la quatrième ».
+
+## Deux autres chantiers que la 3DS a mis en évidence
+
+Ils ne concernent pas La Récup' mais valent d'être posés :
+
+**Marchander en boutique** (Rusty's Real Deal). Le commerçant annonce son
+prix, on propose le sien. Il accepte, refuse, se vexe. Le respect et la
+dignité pèsent sur sa patience. Ça donnerait enfin un jeu à un écran qui n'est
+aujourd'hui qu'une liste de prix.
+
+**Louer plutôt qu'acheter** (A Link Between Worlds). Une arme correcte pour la
+journée, à petit prix — perdue si le personnage meurt. Un pari qui colle
+parfaitement à un jeu où l'on meurt souvent.
