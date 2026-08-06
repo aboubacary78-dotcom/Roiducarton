@@ -1,79 +1,75 @@
 /*
- * LA RÉCUP' — fouiller les containers et trier ce qui en sort.
+ * LA RÉCUP' — le fond du container.
  *
  * Pourquoi cette action existe : le bricolage (voir data/crafting) consomme du
- * « bazar », et jusqu'ici AUCUNE action n'en produisait — on n'en trouvait
- * qu'au hasard des événements. L'atelier était donc une belle mécanique sans
- * matière première. La Récup' est cette source.
+ * « bazar », et aucune autre action n'en produit. La Récup' est cette source.
  *
- * Le geste : les objets tombent du container, on les envoie d'une chiquenaude
- * vers le bac qui va bien. La consigne fait de l'argent, la ferraille fait du
- * bazar, et le reste, on le laisse tomber — littéralement. Y toucher, c'est
- * remplir sa jauge de dégoût pour rien.
+ * POURQUOI CETTE VERSION. La première mouture faisait trier des objets qui
+ * tombaient : prendre ce qui vaut, laisser le reste. Ignorer un déchet ne
+ * coûtait rien, donc il n'y avait pas d'arbitrage — juste une bonne réponse
+ * évidente et une exécution au doigt. Un test de réflexes déguisé en jeu.
+ *
+ * Ici, la seule vraie décision est de RENONCER. On déblaie une couche du
+ * doigt, on ramasse ce qu'elle cache, puis on choisit : remonter avec le
+ * butin, ou descendre d'une couche. Plus bas, ça vaut plus cher — et le tas
+ * s'agite. S'il se réveille avant qu'on soit ressorti, on perd TOUT ce qu'on
+ * n'a pas mis à l'abri. Le joueur se fait son propre malheur, et c'est ce qui
+ * donne envie de recommencer.
  */
 import type { InventoryItem } from '../types';
 import { randomFromArray } from './util';
 
-/** Bac de destination, ou rien du tout pour ce qui ne vaut pas le geste. */
-export type SalvageBin = 'consigne' | 'bazar';
-export type SalvageKind = SalvageBin | 'dechet' | 'piege';
+export type FindKind = 'consigne' | 'bazar' | 'trouvaille' | 'piege';
 
-export interface SalvageDef {
+export interface SalvageFind {
   id: string;
   emoji: string;
   name: string;      // en français, traduit à l'affichage par tc()
-  kind: SalvageKind;
-  value: number;     // centimes pour la consigne, valeur de revente pour le bazar
+  kind: FindKind;
+  value: number;     // centimes pour la consigne ; sans objet ailleurs
 }
 
-// ---- Ce qui sort d'un container ------------------------------------------
-// La consigne rapporte peu et sûrement ; le bazar nourrit l'atelier ; les
-// déchets sont là pour qu'on ait quelque chose à ne PAS ramasser (sans quoi
-// trier ne serait pas un choix) ; les pièges mordent.
+// ---- Ce qu'on peut sortir d'un container ---------------------------------
 
-export const SALVAGE_ITEMS: SalvageDef[] = [
-  // ♻️ Consigne — bouteilles et canettes, l'argent de poche du trottoir
-  // Valeurs en centimes, calibrées pour qu'une bonne fouille rende 2 à 3 €.
-  // À la moitié de ça, le bac de gauche ne servait à rien : on ne franchissait
-  // jamais l'euro et le joueur n'avait aucune raison de viser la consigne.
+export const CONSIGNE_FINDS: SalvageFind[] = [
   { id: 'canette', emoji: '🥤', name: 'Canette écrasée', kind: 'consigne', value: 26 },
   { id: 'bouteille-verre', emoji: '🍾', name: 'Bouteille de verre', kind: 'consigne', value: 45 },
   { id: 'bouteille-plastique', emoji: '🧴', name: 'Bouteille en plastique', kind: 'consigne', value: 22 },
   { id: 'cageot', emoji: '🧺', name: 'Cageot du marché', kind: 'consigne', value: 52 },
   { id: 'carton-plie', emoji: '📦', name: 'Carton plié', kind: 'consigne', value: 36 },
   { id: 'boite-conserve', emoji: '🥫', name: 'Boîte de conserve', kind: 'consigne', value: 25 },
+];
 
-  // 🔧 Bazar — la matière première de l'atelier
-  { id: 'ferraille', emoji: '🔩', name: 'Poignée de ferraille', kind: 'bazar', value: 4 },
-  { id: 'cable', emoji: '🔌', name: 'Câble emmêlé', kind: 'bazar', value: 5 },
-  { id: 'tissu', emoji: '🧵', name: 'Chute de tissu', kind: 'bazar', value: 3 },
-  { id: 'ressort', emoji: '🪛', name: 'Ressort et deux vis', kind: 'bazar', value: 4 },
-  { id: 'bache', emoji: '🪟', name: 'Bout de bâche', kind: 'bazar', value: 6 },
-  { id: 'roulette', emoji: '🛞', name: 'Roulette de caddie', kind: 'bazar', value: 5 },
-  { id: 'reveil', emoji: '⏰', name: 'Réveil sans aiguilles', kind: 'bazar', value: 7 },
+export const BAZAR_FINDS: SalvageFind[] = [
+  { id: 'ferraille', emoji: '🔩', name: 'Poignée de ferraille', kind: 'bazar', value: 0 },
+  { id: 'cable', emoji: '🔌', name: 'Câble emmêlé', kind: 'bazar', value: 0 },
+  { id: 'tissu', emoji: '🧵', name: 'Chute de tissu', kind: 'bazar', value: 0 },
+  { id: 'ressort', emoji: '🪛', name: 'Ressort et deux vis', kind: 'bazar', value: 0 },
+  { id: 'bache', emoji: '🪟', name: 'Bout de bâche', kind: 'bazar', value: 0 },
+  { id: 'roulette', emoji: '🛞', name: 'Roulette de caddie', kind: 'bazar', value: 0 },
+];
 
-  // 🗑️ Déchets — à laisser filer, ils ne valent que du dégoût
-  { id: 'couche', emoji: '🩲', name: 'Chose molle et tiède', kind: 'dechet', value: 0 },
-  { id: 'poisson', emoji: '🐟', name: 'Poisson d\'avant-hier', kind: 'dechet', value: 0 },
-  { id: 'mouchoir', emoji: '🤧', name: 'Mouchoir très utilisé', kind: 'dechet', value: 0 },
-  { id: 'yaourt', emoji: '🦠', name: 'Yaourt devenu autonome', kind: 'dechet', value: 0 },
-  { id: 'os', emoji: '🦴', name: 'Os douteux', kind: 'dechet', value: 0 },
-  { id: 'chaussette', emoji: '🧦', name: 'Chaussette solitaire', kind: 'dechet', value: 0 },
-
-  // ⚠️ Pièges — ça mord ou ça pique
+/** Ce qui mord, pique ou pue : révélé, ça agite le tas d'un coup. */
+export const PIEGE_FINDS: SalvageFind[] = [
   { id: 'rat', emoji: '🐀', name: 'Un rat. Il était là avant vous.', kind: 'piege', value: 0 },
   { id: 'verre-casse', emoji: '🔪', name: 'Tesson de bouteille', kind: 'piege', value: 0 },
   { id: 'guepes', emoji: '🐝', name: 'Un nid. Occupé.', kind: 'piege', value: 0 },
+  { id: 'poisson', emoji: '🐟', name: 'Poisson d\'avant-hier', kind: 'piege', value: 0 },
+  { id: 'couche', emoji: '🩲', name: 'Chose molle et tiède', kind: 'piege', value: 0 },
+  { id: 'yaourt', emoji: '🦠', name: 'Yaourt devenu autonome', kind: 'piege', value: 0 },
 ];
 
-// Ce que le bac à bazar rend, une fois trié : de vrais objets d'inventaire,
-// utilisables par l'atelier.
-//
-// Valeurs volontairement BASSES. Un objet se revend 60 % de sa valeur : à 5,
-// une bonne fouille rapportait plus de vingt euros à la revente et écrasait
-// la mendicité. Ces bricoles valent par ce qu'on en FAIT, pas par ce qu'on en
-// tire au comptoir. Effet de bord heureux : l'établi consommant toujours le
-// moins précieux d'abord, elles passent à l'atelier avant les trouvailles.
+/** Les vraies trouvailles du fond : ce pour quoi on prend le risque. */
+export const TROUVAILLES: InventoryItem[] = [
+  { id: 'recup-manteau', name: 'Manteau militaire (presque propre)', emoji: '🧥', type: 'armor', value: 14, defenseBonus: 4 },
+  { id: 'recup-barre', name: 'Barre de fer', emoji: '🔧', type: 'weapon', value: 12, attackBonus: 5, combatStyle: 'heavy' },
+  { id: 'recup-duvet', name: 'Duvet oublié', emoji: '🛌', type: 'tool', value: 11, effect: { sleep: 26, health: 5 } },
+  { id: 'recup-conserves', name: 'Carton de conserves (périmées de peu)', emoji: '🥫', type: 'food', value: 10, effect: { hunger: 30 } },
+  { id: 'recup-radio', name: 'Radio qui grésille', emoji: '📻', type: 'special', value: 9, effect: { mental: 16 } },
+  { id: 'recup-chaussures', name: 'Chaussures à votre taille', emoji: '👟', type: 'tool', value: 13, effect: { health: 10, dignity: 8 } },
+];
+
+/** Les bricoles rapportées, côté inventaire. Voir la note de valeur plus bas. */
 export const SALVAGE_JUNK: InventoryItem[] = [
   { id: 'ferraille-recup', name: 'Ferraille récupérée', emoji: '🔩', type: 'junk', value: 2 },
   { id: 'cable-recup', name: 'Câble récupéré', emoji: '🔌', type: 'junk', value: 2 },
@@ -81,63 +77,102 @@ export const SALVAGE_JUNK: InventoryItem[] = [
   { id: 'bache-recup', name: 'Bâche récupérée', emoji: '🪟', type: 'junk', value: 2 },
   { id: 'piece-recup', name: 'Pièces détachées', emoji: '🪛', type: 'junk', value: 2 },
 ];
+// Valeurs volontairement basses : un objet se revend 60 % de sa valeur, et à
+// 5 une bonne fouille rapportait plus de vingt euros, ce qui écrasait la
+// mendicité. Ces bricoles valent par ce qu'on en FAIT. Effet heureux :
+// l'établi consommant le moins précieux d'abord, elles partent avant les
+// trouvailles.
 
-/** Plafond de bricoles rapportées en une fouille : on n'a que deux poches. */
-export const SALVAGE_MAX_KEPT = 6;
+// ---- Les couches ----------------------------------------------------------
 
-// ---- Réglage --------------------------------------------------------------
-// Une manche courte, dense, qui s'arrête net quand le cœur ne suit plus.
+export interface SalvageLayer {
+  name: string;        // en français, traduit par tc()
+  nameEn: string;
+  /** Nombre d'objets cachés sous la couche. */
+  finds: number;
+  /** Part de ces objets qui est de la consigne, puis du bazar. Le reste pique. */
+  consigne: number;
+  bazar: number;
+  /** Chance qu'une trouvaille se cache dans cette couche. */
+  trouvaille: number;
+  /** Agitation gagnée d'un coup en descendant jusqu'ici. */
+  entryRisk: number;
+  /** Agitation gagnée par seconde passée à fouiller cette couche. */
+  riskPerS: number;
+}
+
+// Réglage cherché par simulation (20 000 fouilles par stratégie), pas au
+// jugé. La forme visée : l'espérance de gain culmine à la couche 4, et le
+// fond reste un PARI — on n'y descend pas pour l'argent mais pour la
+// trouvaille, en acceptant une fouille sur deux perdue.
+//
+// Trois réglages testés et écartés. Un coût d'entrée fort (12/18/24/30) :
+// le fond devenait impossible, 98 % d'échec, personne n'y serait jamais allé.
+// Un temps de fouille coûteux : ça punissait le joueur méthodique, exactement
+// à l'envers de ce qu'on veut. Et un coût d'entrée cumulé trop lourd mangeait
+// le budget de risque AVANT d'arriver en bas, ce qui revenait au premier cas.
+//
+// L'essentiel du danger vient donc de ce qu'on RÉVEILLE, pas d'une taxe de
+// passage : c'est le tas qui décide, et il décide pendant qu'on fouille.
+export const LAYERS: SalvageLayer[] = [
+  { name: 'La surface', nameEn: 'The surface', finds: 4, consigne: 0.75, bazar: 0.20, trouvaille: 0, entryRisk: 0, riskPerS: 0.5 },
+  { name: 'Sous les sacs', nameEn: 'Under the bags', finds: 4, consigne: 0.45, bazar: 0.42, trouvaille: 0.05, entryRisk: 5, riskPerS: 0.9 },
+  { name: 'Le milieu du tas', nameEn: 'Mid-pile', finds: 5, consigne: 0.25, bazar: 0.55, trouvaille: 0.18, entryRisk: 8, riskPerS: 1.4 },
+  { name: 'Là où ça colle', nameEn: 'Where it sticks', finds: 5, consigne: 0.12, bazar: 0.62, trouvaille: 0.35, entryRisk: 10, riskPerS: 1.9 },
+  { name: 'Le fond', nameEn: 'The bottom', finds: 6, consigne: 0.05, bazar: 0.63, trouvaille: 0.7, entryRisk: 12, riskPerS: 2.5 },
+];
 
 export const SALVAGE_TUNING = {
-  roundMs: 22000,      // durée d'une fouille
-  // Cadence et chute recalées sur la zone de jeu plein écran : avec l'ancien
-  // réglage, prévu pour un carré de 300 px, deux objets seulement flottaient
-  // dans une colonne deux fois plus haute. Le container avait l'air vide.
-  spawnMs: 640,        // un objet toutes les ~0,6 s
-  fallMs: 3000,        // temps de chute d'un objet, du rebord jusqu'aux caisses
-  disgustMax: 100,     // au-delà, on rend son déjeuner et on s'arrête
-  disgustDechet: 22,   // toucher une saleté
-  disgustPiege: 30,    // se faire mordre ou couper
-  disgustDrift: 1.1,   // montée lente rien qu'à rester le nez dedans (par seconde)
+  riskMax: 100,        // au-delà, le tas se réveille et on repart les mains vides
+  piegeRisk: 10,       // agitation gagnée en réveillant une saleté
+  gridW: 7,            // colonnes de détritus à déblayer
+  gridH: 9,            // lignes
+  /** Part de la couche à déblayer avant de pouvoir descendre. */
+  clearToDig: 0.55,
+  maxKept: 6,          // on n'a que deux poches, et l'établi n'en demande pas plus
 } as const;
 
-/** Proportions du tirage : il faut assez de déchets pour que trier soit un choix. */
-const WEIGHTS: Record<SalvageKind, number> = {
-  consigne: 34,
-  bazar: 30,
-  dechet: 26,
-  piege: 10,
-};
+/** Comment le tas se réveille, quand il se réveille. */
+export const BUST_REASONS: { fr: string; en: string; emoji: string }[] = [
+  { emoji: '🐀', fr: 'Le tas se met à bouger tout seul. Puis à couiner. Vous partez sans discuter, et sans rien.', en: 'The pile starts moving on its own. Then squeaking. You leave without arguing, and without anything.' },
+  { emoji: '🔦', fr: 'Une torche vous cueille les bras dans le container. « Ça, c\'est la propriété de la commune. » Tout y reste.', en: 'A torch catches you elbow-deep in the bin. "That is municipal property." All of it stays.' },
+  { emoji: '🧱', fr: 'Tout s\'effondre d\'un coup. Vous ressortez en toussant, les poches retournées.', en: 'The whole thing collapses at once. You come out coughing, pockets turned out.' },
+  { emoji: '🚛', fr: 'Le camion-benne arrive avec vingt minutes d\'avance. Votre récolte part au traitement.', en: 'The rubbish truck shows up twenty minutes early. Your haul goes off for processing.' },
+];
 
-/**
- * Un objet qui sort du container. `luck` (le trait Poissard, la pluie…) pousse
- * le tirage vers les saletés ; `flair` ne change pas le tirage, il sert à
- * l'affichage (le nez sensible voit venir ce qui pue, côté écran).
- */
-export function rollSalvageItem(malus = 0): SalvageDef {
-  const w = { ...WEIGHTS };
-  w.dechet += malus * 10;
-  w.piege += malus * 5;
-  const total = w.consigne + w.bazar + w.dechet + w.piege;
-  let r = Math.random() * total;
-  let kind: SalvageKind = 'consigne';
-  for (const k of ['consigne', 'bazar', 'dechet', 'piege'] as SalvageKind[]) {
-    if (r < w[k]) { kind = k; break; }
-    r -= w[k];
+/** Ce que cache une couche : objets utiles, saletés, et parfois le gros lot. */
+export function rollLayerFinds(depth: number, malus = 0): SalvageFind[] {
+  const layer = LAYERS[Math.min(depth, LAYERS.length - 1)];
+  const out: SalvageFind[] = [];
+  for (let i = 0; i < layer.finds; i++) {
+    // Le Poissard sort plus de saletés du même container. C'est sa vie.
+    const r = Math.random() + malus * 0.18;
+    if (r < layer.consigne) out.push(randomFromArray(CONSIGNE_FINDS));
+    else if (r < layer.consigne + layer.bazar) out.push(randomFromArray(BAZAR_FINDS));
+    else out.push(randomFromArray(PIEGE_FINDS));
   }
-  return randomFromArray(SALVAGE_ITEMS.filter(i => i.kind === kind));
+  if (Math.random() < layer.trouvaille) {
+    const t = randomFromArray(TROUVAILLES);
+    out.push({ id: t.id, emoji: t.emoji, name: t.name, kind: 'trouvaille', value: 0 });
+  }
+  return out.sort(() => Math.random() - 0.5);
 }
 
-/** Le bac attendu pour un objet, ou null s'il vaut mieux le laisser tomber. */
-export function expectedBin(def: SalvageDef): SalvageBin | null {
-  return def.kind === 'consigne' || def.kind === 'bazar' ? def.kind : null;
+export function trouvailleById(id: string): InventoryItem | null {
+  return TROUVAILLES.find(t => t.id === id) || null;
 }
 
 /**
- * Conversion de fin de manche. La consigne se compte en centimes et s'arrondit
- * à l'euro inférieur : il faut vraiment remplir le sac pour toucher quelque
- * chose, comme au vrai comptoir de la déchetterie.
+ * Le risque annoncé AVANT de descendre : ce qu'on prend d'un coup, et ce que
+ * la couche coûtera par seconde. Affiché tel quel — un pari qui cache ses
+ * chances n'est pas un pari, c'est une loterie.
  */
+export function nextLayerRisk(depth: number): { entry: number; perS: number } | null {
+  const next = LAYERS[depth + 1];
+  return next ? { entry: next.entryRisk, perS: next.riskPerS } : null;
+}
+
+/** Conversion finale : la consigne se compte en centimes, l'euro est entier. */
 export function salvagePayout(centimes: number): number {
   return Math.floor(centimes / 100);
 }

@@ -1462,4 +1462,10 @@ export const CONTENT_EN_2: Record<string, string> = {
   'Tissu récupéré': 'Salvaged cloth',
   'Bâche récupérée': 'Salvaged tarp',
   'Pièces détachées': 'Spare parts',
+  'Manteau militaire (presque propre)': 'Army coat (nearly clean)',
+  'Barre de fer': 'Iron bar',
+  'Duvet oublié': 'Forgotten sleeping bag',
+  'Carton de conserves (périmées de peu)': 'Box of tins (barely expired)',
+  'Radio qui grésille': 'Crackling radio',
+  'Chaussures à votre taille': 'Shoes in your size',
 };

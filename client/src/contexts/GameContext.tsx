@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { randomFromArray, L } from './data/util';
 import { generateCharacterTrio, hasTrait, computeScore, genderFromName, HERITAGE_KITS, STARTING_ITEMS } from './data/world';
-import { SALVAGE_JUNK, SALVAGE_MAX_KEPT, salvagePayout } from './data/salvage';
+import { SALVAGE_JUNK, SALVAGE_TUNING, salvagePayout, trouvailleById } from './data/salvage';
 import { enemyByName, BEG_TUNING } from './data/passersby';
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
 import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
@@ -167,7 +167,7 @@ type GameAction =
   | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot' | 'hot'; targetId: string }
   | { type: 'RESOLVE_BEG'; coins: number; copTapped: boolean; dignitySpent?: number; fightWith?: string }
   | { type: 'SALVAGE' }
-  | { type: 'RESOLVE_SALVAGE'; centimes: number; bazar: number; sick: boolean }
+  | { type: 'RESOLVE_SALVAGE'; centimes: number; bazar: number; trouvailles: string[]; depth: number; busted: boolean }
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
   | { type: 'TRAVEL'; location: string }
@@ -375,38 +375,59 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'RESOLVE_SALVAGE': {
       if (!state.character) return state;
       const c = state.character;
-      // Fouiller, ça paie mal et ça coûte à la fierté : c'est le contrepoint
-      // de la manche, qui rapporte plus mais dépend des autres.
       const money = salvagePayout(action.centimes);
-      // Le Bricoleur repart avec une pièce de plus : il sait quoi garder.
-      const kept = Math.min(SALVAGE_MAX_KEPT, Math.max(0, action.bazar + (hasTrait(c, 'bricoleur') && action.bazar > 0 ? 1 : 0)));
+      // Le Bricoleur sait quoi garder : une bricole de plus dans les poches.
+      const wanted = action.bazar + (hasTrait(c, 'bricoleur') && action.bazar > 0 ? 1 : 0);
+      const kept = Math.min(SALVAGE_TUNING.maxKept, Math.max(0, wanted));
       const inventory = [...c.inventory];
       let added = 0;
       for (let i = 0; i < kept && inventory.length < 20; i++) {
         inventory.push({ ...randomFromArray(SALVAGE_JUNK) });
         added++;
       }
-      const statDelta: Partial<Stats> = action.sick
-        ? { dignity: -6, mental: -8, health: -4, hunger: -4 }
-        : { dignity: -5, mental: money > 0 || added > 0 ? 2 : -3, hunger: -3 };
+      // Les trouvailles du fond passent avant les bricoles dans le sac ; si
+      // l'inventaire déborde, c'est la ferraille qu'on laisse, pas le manteau.
+      const found: string[] = [];
+      for (const id of action.trouvailles) {
+        const item = trouvailleById(id);
+        if (!item) continue;
+        if (inventory.length >= 20) {
+          const junkIdx = inventory.findIndex(i => i.type === 'junk');
+          if (junkIdx === -1) break;
+          inventory.splice(junkIdx, 1);
+          if (added > 0) added--;
+        }
+        inventory.push({ ...item });
+        found.push(tc(item.name));
+      }
+
+      // Fouiller les poubelles coûte à la fierté, et d'autant plus qu'on est
+      // descendu bas. Se faire surprendre les bras dedans achève le moral.
+      const deep = action.depth;
+      const statDelta: Partial<Stats> = action.busted
+        ? { dignity: -6 - deep, mental: -9, health: -4, hunger: -4 }
+        : { dignity: -4 - Math.floor(deep / 2), mental: money > 0 || added > 0 || found.length > 0 ? 3 : -3, hunger: -3 };
       const newStats = applyStatDelta(c.stats, statDelta);
       const isAlive = newStats.health > 0 && newStats.mental > 0;
       if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, hasTrait(c, 'poissard'))); clearSave(); }
 
-      const full = added < kept;
-      const text = action.sick
+      const haul = [
+        money > 0 ? L(`${money}€ de consigne`, `€${money} of deposit`) : '',
+        added > 0 ? L(`${added} bricole${added > 1 ? 's' : ''}`, `${added} part${added > 1 ? 's' : ''}`) : '',
+        found.length > 0 ? found.join(', ') : '',
+      ].filter(Boolean).join(L(', ', ', '));
+
+      const text = action.busted
         ? L(
-            `🤮 Le container a gagné. Vous ressortez plié en deux, les mains vides ou presque${money > 0 ? `, avec ${money}€ de consigne` : ''}. La dignité reste au fond du bac.`,
-            `🤮 The bin won. You come out doubled over, empty-handed or close to it${money > 0 ? `, with €${money} of deposit` : ''}. Your dignity stays at the bottom.`,
+            `🐀 Vous ressortez du container les mains vides. Tout ce que vous aviez trié est resté au fond, avec le reste. ${deep >= 3 ? 'Il fallait remonter plus tôt.' : 'Ça arrive.'}`,
+            `🐀 You climb out of the bin empty-handed. Everything you'd sorted stayed down there with the rest. ${deep >= 3 ? 'You should have climbed out sooner.' : 'It happens.'}`,
           )
-        : money === 0 && added === 0
-          ? L(
-              '🗑️ Vingt minutes les bras dans les ordures pour rien. Même les rats vous ont regardé avec pitié.',
-              '🗑️ Twenty minutes elbow-deep in rubbish for nothing. Even the rats looked at you with pity.',
-            )
+        : haul === ''
+          ? L('🗑️ Vingt minutes les bras dans les ordures pour rien. Même les rats vous ont regardé avec pitié.',
+              '🗑️ Twenty minutes elbow-deep in rubbish for nothing. Even the rats looked at you with pity.')
           : L(
-              `♻️ Le tri a payé : ${money > 0 ? `${money}€ de consigne` : 'pas un centime de consigne'}${added > 0 ? ` et ${added} pièce${added > 1 ? 's' : ''} pour l'atelier` : ''}.${full ? ' Vos poches débordent, le reste est resté sur place.' : ''}`,
-              `♻️ Sorting paid off: ${money > 0 ? `€${money} of deposit` : 'not a cent of deposit'}${added > 0 ? ` and ${added} part${added > 1 ? 's' : ''} for the workshop` : ''}.${full ? ' Your pockets are full, the rest stayed behind.' : ''}`,
+              `♻️ Vous ressortez avec ${haul}.${deep >= 3 ? ' Vous êtes descendu loin, et vous êtes remonté à temps.' : ''}`,
+              `♻️ You come out with ${haul}.${deep >= 3 ? ' You went deep, and you got out in time.' : ''}`,
             );
 
       return {
