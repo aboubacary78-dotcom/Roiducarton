@@ -202,6 +202,15 @@ export default function ShopScreen() {
           <div className="relative h-24 w-full">
             <SafeImg src={`/assets/shop-${selectedShop.id}.webp`} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
+            {/* La porte de sortie, en haut à droite comme dans un vrai magasin :
+                elle rend la rue en un seul geste, sans repasser par la liste. */}
+            <button
+              onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
+              className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-[#2A1F1A] shadow-md active:scale-95 transition-transform"
+              style={{ background: 'rgba(247,238,226,0.94)', border: '1.5px solid #3A2A1E' }}
+            >
+              🚪 {tr('Retour au trottoir', 'Back to the pavement')}
+            </button>
             <div className="absolute bottom-0 left-0 right-0 flex items-end gap-2.5 p-3">
               <span className="text-2xl drop-shadow">{selectedShop.emoji}</span>
               <div className="min-w-0">
@@ -402,22 +411,14 @@ export default function ShopScreen() {
           })}
         </div>
 
-        {/* Deux sorties : revenir choisir une autre boutique, ou repartir
-            directement dans la rue sans repasser par la liste. */}
-        <div className="flex gap-2 shrink-0">
-          <button
-            onClick={() => setSelectedShop(null)}
-            className="flex-1 action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
-          >
-            ← {tr('Autres boutiques', 'Other shops')}
-          </button>
-          <button
-            onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
-            className="flex-1 btn-primary py-3 text-sm font-semibold flex items-center justify-center gap-1.5"
-          >
-            🏙️ {tr('Retour au jeu', 'Back to the game')}
-          </button>
-        </div>
+        {/* La sortie vers la rue est en haut de l'écran (voir l'en-tête) ;
+            ici, on ne propose que de retourner choisir une autre boutique. */}
+        <button
+          onClick={() => setSelectedShop(null)}
+          className="action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5 shrink-0"
+        >
+          ← {tr('Autres boutiques', 'Other shops')}
+        </button>
       </div>
     );
   }
