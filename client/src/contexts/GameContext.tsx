@@ -19,6 +19,7 @@ import type {
 import { randomFromArray, L } from './data/util';
 import { generateCharacterTrio, hasTrait, computeScore, genderFromName, HERITAGE_KITS, STARTING_ITEMS } from './data/world';
 import { SALVAGE_JUNK, SALVAGE_MAX_KEPT, salvagePayout } from './data/salvage';
+import { enemyByName, BEG_TUNING } from './data/passersby';
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
 import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
 import { ENEMIES, rollSignRound } from './data/enemies';
@@ -52,6 +53,7 @@ export * from './data/backstory';
 export * from './data/npc';
 export * from './data/dodge';
 export * from './data/salvage';
+export * from './data/passersby';
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
@@ -163,7 +165,7 @@ type GameAction =
   | { type: 'BEG' }
   | { type: 'STEAL' }
   | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot' | 'hot'; targetId: string }
-  | { type: 'RESOLVE_BEG'; coins: number; copTapped: boolean }
+  | { type: 'RESOLVE_BEG'; coins: number; copTapped: boolean; dignitySpent?: number; fightWith?: string }
   | { type: 'SALVAGE' }
   | { type: 'RESOLVE_SALVAGE'; centimes: number; bazar: number; sick: boolean }
   | { type: 'REST' }
@@ -313,9 +315,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // (×0,7 à 0 de dignité → ×1,2 à 100).
       const dignityMod = 0.7 + (c.stats.dignity / 100) * 0.5;
       const money = Math.round(action.coins * modifier * dignityMod);
+      // La fierté qu'on a laissée en insistant, passant par passant, s'ajoute
+      // au coût de base de la manche. Forcer le regard, ça se paie.
+      const insisted = Math.min(BEG_TUNING.maxDignitySpent, Math.max(0, Math.round(action.dignitySpent || 0)));
       const statDelta: Partial<Stats> = money >= 6
-        ? { dignity: -3, mental: 6 }
-        : { dignity: -4, mental: money > 0 ? 2 : -4 };
+        ? { dignity: -3 - insisted, mental: 6 }
+        : { dignity: -4 - insisted, mental: money > 0 ? 2 : -4 };
       const respectDelta = money >= 8 ? 1 : 0;
       const newStats = applyStatDelta(c.stats, statDelta);
       const isAlive = newStats.health > 0 && newStats.mental > 0;
@@ -325,6 +330,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const weatherNote = modifier !== 1 ? (modifier > 1 ? L(' Le beau temps a rendu les passants généreux.', ' The good weather made passers-by generous.') : L(' Le mauvais temps a fait fuir les passants.', ' The bad weather scared off passers-by.')) : '';
       const dignityNote = c.stats.dignity >= 70 ? L(' Votre allure soignée a inspiré confiance.', ' Your neat appearance inspired trust.')
         : c.stats.dignity < 25 ? L(' Votre allure négligée a fait fuir plus d\'un passant.', ' Your unkempt look scared off more than one passer-by.') : '';
+      const insistNote = insisted >= 8 ? L(' Vous avez retenu des manches un peu trop longtemps : ça se paie en fierté.', ' You held on to a few sleeves a bit too long: that costs pride.')
+        : insisted >= 3 ? L(' Vous avez un peu insisté.', ' You pushed it a little.') : '';
       if (!isAlive) {
         saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, hasTrait(c, 'poissard')));
         clearSave();
@@ -332,10 +339,30 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Variante réussite/échec par scène de manche (result-beg-<id>-good/bad),
       // avec repli sur l'image de base de la scène.
       const begEvt = randomFromArray(BEG_EVENTS);
+      const cUpd = { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive };
+
+      // On a poussé quelqu'un à bout : il ne s'en va pas, il se retourne.
+      // La récolte est acquise, mais la journée continue les poings serrés.
+      if (isAlive && action.fightWith) {
+        const foe = enemyByName(action.fightWith);
+        if (foe) {
+          return {
+            ...state,
+            character: cUpd,
+            screen: 'combat',
+            currentCombat: makeCombatState(foe, cUpd),
+            combatLog: [L(
+              `${foe.emoji} Vous avez insisté une seconde de trop. ${foe.name} se retourne : « tu me lâches, oui ? »`,
+              `${foe.emoji} You pushed it one second too far. ${tc(foe.name)} turns around: "will you get off my back?"`,
+            )],
+          };
+        }
+      }
+
       return {
         ...state,
-        character: { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive },
-        eventResult: { text: prefix + tc(flavorFrom(BEG_EVENTS, money > 0)) + weatherNote + dignityNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta, image: `/assets/result-${begEvt.id}-${money > 0 ? 'good' : 'bad'}.webp`, fallbackImage: begEvt.image },
+        character: cUpd,
+        eventResult: { text: prefix + tc(flavorFrom(BEG_EVENTS, money > 0)) + weatherNote + dignityNote + insistNote, statChanges: statDelta, moneyChange: money, respectChange: respectDelta, image: `/assets/result-${begEvt.id}-${money > 0 ? 'good' : 'bad'}.webp`, fallbackImage: begEvt.image },
         screen: isAlive ? 'main' : 'game-over',
       };
     }

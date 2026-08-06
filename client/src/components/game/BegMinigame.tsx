@@ -1,35 +1,65 @@
-import { useGame, BEG_SPOTS, randomFromArray } from '@/contexts/GameContext';
+import {
+  useGame, BEG_SPOTS, randomFromArray, hasTrait,
+  BEG_TUNING, rollPasserBy, passerByEnemy, gazeSpeed,
+} from '@/contexts/GameContext';
+import type { PasserBy } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { playHit, playCrit, playHurt } from '@/lib/sound';
-import { useLang, tr } from '@/lib/lang';
+import { playHit, playCrit, playHurt, playStep } from '@/lib/sound';
+import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import CardboardAvatar from './CardboardAvatar';
+import LocationBackdrop from './LocationBackdrop';
 
 /*
- * Mini-jeu de mendicité : pendant quelques secondes, des pièces (et parfois
- * des billets) apparaissent, tape dessus pour les ramasser. Si tu touches
- * le policier, il te déloge et la manche s'arrête net.
- * Le trait Charismatique fait apparaître plus de dons.
+ * LA MANCHE — « tenir le regard ».
+ *
+ * L'ancien mini-jeu consistait à taper des pièces qui apparaissaient au
+ * hasard : aucune décision, aucun rapport avec le fait de mendier. Celui-ci
+ * part du sujet. Mendier, c'est :
+ *   - se faire voir (l'anneau qui se remplit pendant qu'on tient le regard) ;
+ *   - CHOISIR qui solliciter, puisqu'on ne peut en suivre qu'un à la fois ;
+ *   - insister, ou pas — ça rapporte plus et ça coûte de la dignité ;
+ *   - savoir s'arrêter quand la ronde passe ;
+ *   - et savoir à qui on s'adresse : certains, poussés à bout, ne se
+ *     contentent pas de râler (voir data/passersby).
+ *
+ * La rue est celle du quartier où l'on mendie (LocationBackdrop) et la foule
+ * aussi : la gare a ses touristes, la zone industrielle a surtout des ennuis.
  */
 
-const ROUND_MS = 8000;
-const ITEM_TTL = 900;
+const W = 320;          // largeur logique de la rue
+const H = 300;          // hauteur logique
+const LANES = [0.34, 0.52, 0.7, 0.86]; // hauteurs de marche (perspective)
 
-interface Item { id: number; x: number; y: number; kind: 'coin' | 'bill' | 'cop'; }
+interface Walker {
+  id: number;
+  def: PasserBy;
+  seed: string;
+  lane: number;
+  dir: 1 | -1;          // sens de marche
+  born: number;
+  gaze: number;         // 0..1 : le regard accroché
+  insistS: number;      // secondes d'insistance au-delà de l'anneau plein
+  done?: 'gave' | 'left' | 'angry';
+  gain: number;         // ce qu'on lui a soutiré
+}
 
 export default function BegMinigame() {
-  const [ready, setReady] = useState(() => introSeen('beg'));
+  const [ready, setReady] = useState(() => introSeen('beg2'));
   if (!ready) {
     return (
       <MinigameIntro
-        id="beg"
+        id="beg2"
         emoji="🎩"
         title="La manche"
         titleEn="Begging"
         lines={[
-          { emoji: '🪙', fr: 'Des pièces et des billets 💶 apparaissent : tapez dessus vite avant qu\'ils ne disparaissent.', en: 'Coins and notes 💶 pop up: tap them fast before they vanish.' },
-          { emoji: '👮', fr: 'Ne touchez JAMAIS le policier, sinon il vous déloge et la manche s\'arrête net.', en: 'NEVER tap the cop, or he moves you along and begging ends at once.' },
-          { emoji: '👔', fr: 'Une allure soignée (dignité haute) fait donner les passants plus généreusement.', en: 'A tidy look (high dignity) makes passers-by give more generously.' },
+          { emoji: '👆', fr: 'Posez le doigt sur un passant et SUIVEZ-LE sans lâcher : l\'anneau se remplit tant que vous tenez son regard.', en: 'Put a finger on a passer-by and FOLLOW them without letting go: the ring fills while you hold their gaze.' },
+          { emoji: '🎯', fr: 'Vous ne pouvez en suivre qu\'un. Lâcher quelqu\'un à mi-anneau pour un meilleur passant, c\'est tout le jeu.', en: 'You can only follow one. Dropping someone half-way for a better mark is the whole game.' },
+          { emoji: '👑', fr: 'Une allure soignée vous fait remarquer plus vite. Débraillé, on regarde ailleurs.', en: 'A tidy look gets you noticed faster. Unkempt, people look away.' },
+          { emoji: '😤', fr: 'Continuez APRÈS l\'anneau plein et vous soutirez davantage — mais vous y laissez votre dignité, et certains se braquent.', en: 'Keep going AFTER the ring fills and you squeeze out more — but it costs your dignity, and some people snap.' },
+          { emoji: '👮', fr: 'Quand la ronde passe, LÂCHEZ TOUT LE MONDE. Ne rien faire, à ce moment-là, c\'est jouer.', en: 'When the patrol goes by, LET GO OF EVERYONE. Doing nothing, right then, is playing.' },
         ]}
         onStart={() => setReady(true)}
       />
@@ -42,143 +72,377 @@ function BegMinigameInner() {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character;
-  const charisma = !!char?.traits.some(t => t.id === 'charismatique');
+  const charisma = !!char && hasTrait(char, 'charismatique');
+  const location = char?.location || 'centre-ville';
 
+  const T = BEG_TUNING;
   const [spot] = useState(() => randomFromArray(BEG_SPOTS));
-  const [items, setItems] = useState<Item[]>([]);
+  const [walkers, setWalkers] = useState<Walker[]>([]);
   const [coins, setCoins] = useState(0);
-  const [ended, setEnded] = useState<null | 'time' | 'cop'>(null);
+  const [dignitySpent, setDignitySpent] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(1);
+  const [copOn, setCopOn] = useState(false);
+  const [copX, setCopX] = useState(-0.2);
+  const [held, setHeld] = useState<number | null>(null);
+  const [ended, setEnded] = useState<null | 'time' | 'cop' | 'fight'>(null);
+  const [toast, setToast] = useState<{ txt: string; tone: 'good' | 'bad'; key: number } | null>(null);
 
+  const walkersRef = useRef<Walker[]>([]);
   const idRef = useRef(0);
   const coinsRef = useRef(0);
+  const dignityRef = useRef(0);
+  const heldRef = useRef<number | null>(null);
   const endedRef = useRef(false);
-  const timersRef = useRef<ReturnType<typeof setInterval>[]>([]);
-  // Timeouts de disparition des pièces : suivis pour être annulés en fin
-  // de manche (sinon ils continuent de modifier l'état après la fin).
-  const itemTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
-  const timeBarRef = useRef<HTMLDivElement | null>(null);
+  const copRef = useRef(false);
+  const fightRef = useRef<string | null>(null);
+  const streetRef = useRef<HTMLDivElement | null>(null);
 
-  function clearAllTimers() {
-    timersRef.current.forEach(clearInterval);
-    itemTimeoutsRef.current.forEach(clearTimeout);
-    itemTimeoutsRef.current.clear();
-  }
+  const speed = gazeSpeed(char?.stats.dignity ?? 40, charisma);
 
-  function finish(reason: 'time' | 'cop') {
+  function finish(reason: 'time' | 'cop' | 'fight') {
     if (endedRef.current) return;
     endedRef.current = true;
-    clearAllTimers();
     setEnded(reason);
-    if (reason === 'cop') playHurt();
-    setTimeout(() => dispatch({ type: 'RESOLVE_BEG', coins: coinsRef.current, copTapped: reason === 'cop' }), 1200);
+    if (reason !== 'time') playHurt();
+    setTimeout(() => dispatch({
+      type: 'RESOLVE_BEG',
+      coins: Math.round(coinsRef.current),
+      copTapped: reason === 'cop',
+      dignitySpent: Math.round(dignityRef.current),
+      fightWith: reason === 'fight' ? fightRef.current || undefined : undefined,
+    }), 1300);
   }
 
+  function say(txt: string, tone: 'good' | 'bad') {
+    setToast({ txt, tone, key: Date.now() });
+  }
+
+  // ---- Boucle de jeu ----
   useEffect(() => {
-    const spawnEvery = charisma ? 480 : 600;
-    const end = performance.now() + ROUND_MS;
-    const spawner = setInterval(() => {
-      if (endedRef.current) return;
-      const roll = Math.random();
-      // Plus de policiers qu'avant : il faut viser, pas mitrailler.
-      const kind: Item['kind'] = roll < 0.22 ? 'cop' : roll < 0.34 ? 'bill' : 'coin';
-      const item: Item = { id: ++idRef.current, x: 8 + Math.random() * 76, y: 8 + Math.random() * 76, kind };
-      setItems(prev => [...prev, item]);
-      const to = setTimeout(() => {
-        itemTimeoutsRef.current.delete(to);
-        setItems(prev => prev.filter(i => i.id !== item.id));
-      }, ITEM_TTL);
-      itemTimeoutsRef.current.add(to);
-    }, spawnEvery);
-    // Barre de temps pilotée par ref : pas de re-rendu toutes les 100 ms.
-    const ticker = setInterval(() => {
-      const left = Math.max(0, end - performance.now());
-      if (timeBarRef.current) {
-        const pct = (left / ROUND_MS) * 100;
-        timeBarRef.current.style.width = `${pct}%`;
-        timeBarRef.current.style.background = pct > 30 ? 'linear-gradient(90deg, #C4723A, #9B5B3A)' : '#D94F4F';
+    let raf = 0;
+    const start = performance.now();
+    let last = start;
+    let nextSpawn = start + 400;
+    let nextCop = start + T.copEveryMs;
+    let copUntil = 0;
+
+    const loop = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      const elapsed = now - start;
+      setTimeLeft(Math.max(0, 1 - elapsed / T.roundMs));
+
+      // La ronde de police : elle traverse, et pendant ce temps il faut
+      // avoir les mains dans les poches.
+      if (now >= nextCop && elapsed < T.roundMs - 2000) {
+        copUntil = now + T.copStayMs;
+        nextCop = now + T.copEveryMs + Math.random() * 3000;
       }
-      if (left <= 0) finish('time');
-    }, 100);
-    timersRef.current = [spawner, ticker];
-    return () => clearAllTimers();
+      const copHere = now < copUntil;
+      if (copHere !== copRef.current) { copRef.current = copHere; setCopOn(copHere); }
+      if (copHere) setCopX(1 - (copUntil - now) / T.copStayMs);
+
+      // Arrivée des passants.
+      const alive = walkersRef.current.filter(w => !w.done);
+      if (now >= nextSpawn && elapsed < T.roundMs - 1500 && alive.length < T.maxOnScreen) {
+        const dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+        walkersRef.current = [...walkersRef.current, {
+          id: ++idRef.current,
+          def: rollPasserBy(location),
+          seed: `passant-${idRef.current}-${Math.random().toString(36).slice(2, 7)}`,
+          lane: LANES[Math.floor(Math.random() * LANES.length)],
+          dir, born: now, gaze: 0, insistS: 0, gain: 0,
+        }];
+        nextSpawn = now + T.spawnMs;
+      }
+
+      const heldId = heldRef.current;
+      walkersRef.current = walkersRef.current.filter(w => {
+        if (w.done) return now - w.born < 60000; // gardés le temps de l'animation de sortie
+        const t = (now - w.born) / (w.def.crossS * 1000);
+        if (t >= 1) { w.done = 'left'; return true; }
+
+        if (w.id === heldId && !copRef.current) {
+          if (w.gaze < 1) {
+            // On tient son regard : l'anneau se remplit.
+            w.gaze = Math.min(1, w.gaze + (dt / w.def.holdS) * speed);
+            if (w.gaze >= 1) {
+              w.gain += w.def.give;
+              coinsRef.current += w.def.give;
+              setCoins(coinsRef.current);
+              playCrit();
+              say(tr(`${w.def.tell} +${w.def.give}`, `${w.def.tell} +${w.def.give}`), 'good');
+            }
+          } else {
+            // Anneau plein et on ne lâche pas : on insiste.
+            w.insistS += dt;
+            const add = w.def.insistGive * dt;
+            w.gain += add;
+            coinsRef.current += add;
+            dignityRef.current += w.def.insistCost * dt;
+            setCoins(coinsRef.current);
+            setDignitySpent(dignityRef.current);
+            if (w.insistS >= w.def.patienceS) {
+              // La patience est finie. Certains râlent, d'autres cognent.
+              w.done = 'angry';
+              heldRef.current = null; setHeld(null);
+              const enemy = passerByEnemy(w.def);
+              if (enemy && Math.random() < (w.def.fightChance ?? 0)) {
+                fightRef.current = enemy.name;
+                playHurt();
+                finish('fight');
+                return true;
+              }
+              dignityRef.current += 4;
+              setDignitySpent(dignityRef.current);
+              playHurt();
+              say(tr('« Lâchez-moi ! »', '"Leave me alone!"'), 'bad');
+            }
+          }
+        }
+        return true;
+      });
+
+      setWalkers([...walkersRef.current]);
+      if (elapsed >= T.roundMs) { finish('time'); return; }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function tap(item: Item) {
+  // Position horizontale d'un passant, 0..1 dans le sens de sa marche.
+  const posX = (w: Walker) => {
+    const t = Math.min(1, (performance.now() - w.born) / (w.def.crossS * 1000));
+    return w.dir === 1 ? t : 1 - t;
+  };
+
+  function toStreet(clientX: number, clientY: number) {
+    const el = streetRef.current; if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: ((clientX - r.left) / r.width) * W, y: ((clientY - r.top) / r.height) * H };
+  }
+
+  function grab(clientX: number, clientY: number) {
     if (endedRef.current) return;
-    setItems(prev => prev.filter(i => i.id !== item.id));
-    if (item.kind === 'cop') { finish('cop'); return; }
-    const gain = item.kind === 'bill' ? 2 : 1;
-    coinsRef.current += gain;
-    setCoins(coinsRef.current);
-    if (item.kind === 'bill') playCrit(); else playHit();
+    const p = toStreet(clientX, clientY); if (!p) return;
+    // Solliciter pendant la ronde, c'est chercher les ennuis.
+    if (copRef.current) {
+      finish('cop');
+      return;
+    }
+    let best: Walker | null = null, bestD = Infinity;
+    for (const w of walkersRef.current) {
+      if (w.done) continue;
+      const d = Math.hypot(posX(w) * W - p.x, w.lane * H - p.y);
+      if (d < T.grabR && d < bestD) { best = w; bestD = d; }
+    }
+    if (!best) return;
+    heldRef.current = best.id;
+    setHeld(best.id);
+    playStep();
+  }
+
+  function track(clientX: number, clientY: number) {
+    const id = heldRef.current; if (id === null) return;
+    const p = toStreet(clientX, clientY); if (!p) return;
+    const w = walkersRef.current.find(x => x.id === id);
+    // On perd le regard si le doigt décroche de la personne.
+    if (!w || w.done || Math.hypot(posX(w) * W - p.x, w.lane * H - p.y) > T.grabR + 18) {
+      heldRef.current = null; setHeld(null);
+      if (w && !w.done && w.gaze > 0 && w.gaze < 1) playHit();
+    }
   }
 
   if (!char) return null;
 
+  const heldWalker = walkers.find(w => w.id === held);
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-texture p-5 flex flex-col gap-4"
-    >
-      <div className="text-center">
-        <div className="text-4xl mb-1">🎩</div>
+    <div className="min-h-screen bg-texture p-4 flex flex-col items-center gap-2.5 select-none">
+      {/* En-tête */}
+      <div className="text-center shrink-0">
         <h1 className="text-2xl text-[#2A1F1A]">{tr('La manche', 'Begging')}</h1>
-        <p className="text-sm text-[#6B5740] mt-1.5">{tr('Vous tendez votre chapeau', 'You hold out your hat')} <strong>{spot}</strong>.</p>
-        <p className="text-xs text-[#8B6B4A] mt-1">{tr('Ramassez les pièces 🪙 et billets 💶. Ne touchez pas le policier 👮, sinon c\'est l\'amende !', 'Grab coins 🪙 and notes 💶. Don\'t touch the cop 👮, or you\'ll be fined!')}</p>
-        {charisma && <p className="text-[11px] text-[#B8860B] mt-1">{tr('✨ Charismatique : les passants donnent plus souvent.', '✨ Charismatic: passers-by give more often.')}</p>}
-        {char.stats.dignity >= 70 && <p className="text-[11px] text-[#3d8b4f] mt-1">{tr('👔 Allure soignée : les passants donnent davantage.', '👔 Well-groomed: passers-by give more.')}</p>}
-        {char.stats.dignity < 25 && <p className="text-[11px] text-[#D94F4F] mt-1">{tr('🫥 Allure négligée : les passants se méfient (gains réduits).', '🫥 Unkempt: passers-by are wary (reduced gains).')}</p>}
+        <p className="text-xs text-[#8B6B4A] mt-0.5">{tc(spot)}</p>
       </div>
 
-      {/* Timer + compteur */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 stat-bar-track" style={{ height: '10px' }}>
-          <div ref={timeBarRef} className="h-full rounded-full transition-[width] duration-100" style={{ width: '100%', background: 'linear-gradient(90deg, #C4723A, #9B5B3A)' }} />
+      {/* Récolte + dignité dépensée */}
+      <div className="w-full max-w-sm flex gap-2 shrink-0">
+        <div className="flex-1 craft-card px-3 py-2 flex items-center justify-between">
+          <span className="text-xs font-semibold text-[#6B5740]">🎩 {tr('Chapeau', 'Hat')}</span>
+          <span className="text-sm font-mono font-bold text-[#B8860B]">{Math.round(coins)}</span>
         </div>
-        <span className="text-sm font-bold font-mono text-[#B8860B] w-14 text-right">🪙 {coins}</span>
+        <div className="flex-1 craft-card px-3 py-2 flex items-center justify-between">
+          <span className="text-xs font-semibold text-[#6B5740]">👑 {tr('Fierté laissée', 'Pride spent')}</span>
+          <span className="text-sm font-mono font-bold text-[#B84A3A]">−{Math.round(dignitySpent)}</span>
+        </div>
       </div>
 
-      {/* Aire de jeu */}
-      <div className="craft-card relative flex-1 overflow-hidden">
-        <AnimatePresence>
-          {items.map(item => (
-            <motion.button
-              key={item.id}
-              initial={{ scale: 0, opacity: 0, y: 0 }}
-              animate={{ scale: 1, opacity: 1, y: 30 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{
-                scale: { type: 'spring', damping: 16, stiffness: 400 },
-                opacity: { duration: 0.15 },
-                y: { duration: ITEM_TTL / 1000, ease: 'linear' },
+      {/* La rue du quartier */}
+      <div
+        ref={streetRef}
+        role="application"
+        aria-label={tr('Rue : suivez un passant du doigt pour tenir son regard', 'Street: follow a passer-by with your finger to hold their gaze')}
+        className="relative rounded-xl overflow-hidden shrink-0"
+        style={{
+          width: 'min(320px, 90vw)', aspectRatio: '320 / 300', touchAction: 'none',
+          border: '3px solid #3A2A1E',
+        }}
+        onPointerDown={(e) => { e.currentTarget.setPointerCapture?.(e.pointerId); grab(e.clientX, e.clientY); }}
+        onPointerMove={(e) => track(e.clientX, e.clientY)}
+        onPointerUp={() => { heldRef.current = null; setHeld(null); }}
+        onPointerCancel={() => { heldRef.current = null; setHeld(null); }}
+      >
+        {/* Le décor DU QUARTIER où l'on a choisi de mendier */}
+        <div className="absolute inset-0">
+          <LocationBackdrop location={location} />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/25" />
+        </div>
+
+        {/* jauge de temps */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-black/35 z-20">
+          <div className="h-full bg-[#F2C14E]" style={{ width: `${timeLeft * 100}%` }} />
+        </div>
+
+        {/* les passants */}
+        {walkers.map((w) => {
+          const x = posX(w);
+          const size = 30 + w.lane * 18;      // plus bas = plus près = plus grand
+          const isHeld = held === w.id;
+          const R = size * 0.78;
+          const circ = 2 * Math.PI * R;
+          return (
+            <motion.div
+              key={w.id}
+              animate={{ opacity: w.done ? 0 : 1, scale: w.done === 'angry' ? 1.15 : 1 }}
+              transition={{ duration: 0.35 }}
+              style={{
+                position: 'absolute',
+                left: `${x * 100}%`, top: `${w.lane * 100}%`,
+                transform: 'translate(-50%,-50%)',
+                zIndex: Math.round(w.lane * 10),
               }}
-              onClick={() => tap(item)}
-              className="absolute text-3xl leading-none select-none"
-              style={{ left: `${item.x}%`, top: `${item.y}%`, filter: item.kind === 'bill' ? 'drop-shadow(0 0 6px rgba(184,134,11,0.55))' : undefined }}
-              aria-label={item.kind}
             >
-              {item.kind === 'coin' ? '🪙' : item.kind === 'bill' ? '💶' : '👮'}
-            </motion.button>
-          ))}
+              {/* l'anneau du regard */}
+              {(isHeld || w.gaze > 0) && !w.done && (
+                <svg
+                  className="absolute pointer-events-none"
+                  style={{ left: '50%', top: '50%', transform: 'translate(-50%,-50%) rotate(-90deg)' }}
+                  width={R * 2 + 8} height={R * 2 + 8} viewBox={`0 0 ${R * 2 + 8} ${R * 2 + 8}`}
+                >
+                  <circle cx={R + 4} cy={R + 4} r={R} fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="4" />
+                  <circle
+                    cx={R + 4} cy={R + 4} r={R} fill="none"
+                    stroke={w.gaze >= 1 ? '#D94F4F' : '#F2C14E'} strokeWidth="4" strokeLinecap="round"
+                    strokeDasharray={circ}
+                    strokeDashoffset={circ * (1 - (w.gaze >= 1 ? Math.min(1, w.insistS / w.def.patienceS) : w.gaze))}
+                  />
+                </svg>
+              )}
+              <div
+                className="rounded-full overflow-hidden border-2 shadow-md"
+                style={{ width: size, height: size, borderColor: isHeld ? '#F2C14E' : 'rgba(58,42,30,0.5)' }}
+              >
+                <CardboardAvatar seed={w.seed} size={size} />
+              </div>
+              {/* le détail qu'on lit d'un coup d'œil */}
+              <span
+                className="absolute -bottom-1 -right-1 text-sm drop-shadow"
+                style={{ fontSize: size * 0.42 }}
+              >
+                {w.def.tell}
+              </span>
+              {w.done === 'angry' && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg">💢</span>
+              )}
+            </motion.div>
+          );
+        })}
+
+        {/* la ronde : tant qu'elle est là, on ne touche à personne */}
+        <AnimatePresence>
+          {copOn && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 z-30 pointer-events-none"
+            >
+              <div className="absolute inset-0 bg-[#4A6FA5]/20" />
+              <div
+                className="absolute text-4xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
+                style={{ left: `${copX * 100}%`, top: '78%', transform: 'translate(-50%,-50%)' }}
+              >
+                👮
+              </div>
+              <motion.p
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ repeat: Infinity, duration: 0.8 }}
+                className="absolute top-4 left-0 right-0 text-center text-[11px] font-black tracking-wider text-white"
+                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
+              >
+                {tr('LA RONDE PASSE · MAINS DANS LES POCHES', 'PATROL PASSING · HANDS IN POCKETS')}
+              </motion.p>
+            </motion.div>
+          )}
         </AnimatePresence>
 
-        {/* Fin de manche */}
-        {ended && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="absolute inset-0 flex flex-col items-center justify-center gap-2"
-            style={{ background: 'rgba(251,246,240,0.88)' }}
-          >
-            <span className="text-4xl">{ended === 'cop' ? '👮' : '🎩'}</span>
-            <span className="text-xl font-bold" style={{ color: ended === 'cop' ? '#D94F4F' : '#B8860B' }}>
-              {ended === 'cop' ? tr('Circulez !', 'Move along!') : `${coins} ${tr(coins > 1 ? 'pièces' : 'pièce', coins > 1 ? 'coins' : 'coin')} !`}
-            </span>
-          </motion.div>
+        {/* petit retour du dernier geste */}
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              key={toast.key}
+              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: -10 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.7 }}
+              className="absolute left-0 right-0 top-8 text-center pointer-events-none z-30"
+            >
+              <span
+                className="text-sm font-bold px-2.5 py-1 rounded-full"
+                style={{ background: 'rgba(24,18,14,0.72)', color: toast.tone === 'good' ? '#7BD48A' : '#F09A8A' }}
+              >
+                {toast.txt}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* fin de session */}
+        <AnimatePresence>
+          {ended && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="absolute inset-0 z-40 flex flex-col items-center justify-center text-center px-5"
+              style={{ background: 'rgba(24,18,14,0.9)' }}
+            >
+              <div className="text-5xl mb-2">
+                {ended === 'cop' ? '👮' : ended === 'fight' ? '🥊' : '🎩'}
+              </div>
+              <p className="text-lg font-bold text-white">
+                {ended === 'cop' ? tr('Pris la main tendue.', 'Caught with your hand out.')
+                  : ended === 'fight' ? tr('Vous avez trop insisté.', 'You pushed it too far.')
+                  : tr('La rue se vide.', 'The street empties out.')}
+              </p>
+              {ended !== 'cop' && (
+                <p className="text-xs text-white/80 mt-1">🎩 {Math.round(coins)} · 👑 −{Math.round(dignitySpent)}</p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Qui est-ce qu'on tient, au juste ? */}
+      <div className="h-8 flex items-center">
+        {heldWalker ? (
+          <p className="text-[11px] font-semibold text-[#3D3020]">
+            {heldWalker.def.tell} {tc(heldWalker.def.label)}
+            {heldWalker.gaze >= 1 && (
+              <span className="text-[#B84A3A]"> · {tr('vous insistez…', 'you\'re pushing it…')}</span>
+            )}
+          </p>
+        ) : (
+          <p className="text-[11px] text-[#8B6B4A]">
+            {tr('Posez le doigt sur quelqu\'un et suivez-le.', 'Put a finger on someone and follow them.')}
+          </p>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
