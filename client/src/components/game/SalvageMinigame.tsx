@@ -26,11 +26,14 @@ import LocationBackdrop from './LocationBackdrop';
 const T = SALVAGE_TUNING;
 const CELLS = T.gridW * T.gridH;
 
-// Les détritus qui recouvrent une couche : purement décoratifs, mais il en
-// faut assez de variété pour qu'on ait envie de gratter.
-const MUCK = ['🗞️', '🧻', '🥡', '🍂', '🧃', '📄', '🍌', '🧺', '📰', '🥚'];
+// La couche de détritus qui recouvre tout. ATTENTION : surtout pas d'emoji
+// ici. La première version en mettait — journal, œuf, banane — et le joueur
+// ne pouvait pas distinguer ce qu'il devait DÉBLAYER de ce qu'il devait
+// TROUVER : les deux étaient des petits dessins. On ne comprenait rien.
+// Le tas est donc une matière : des nuances de brun sale, sans forme lisible.
+const MUCK_TONES = ['#6B5B45', '#5E4F3C', '#75634A', '#544733', '#6F5E46'];
 
-interface Cell { muck: string; cleared: boolean; find?: SalvageFind; revealed?: boolean }
+interface Cell { tone: string; tilt: number; cleared: boolean; find?: SalvageFind; revealed?: boolean }
 
 export default function SalvageMinigame() {
   const [ready, setReady] = useState(() => introSeen('recup2'));
@@ -58,7 +61,8 @@ export default function SalvageMinigame() {
 function makeLayer(depth: number, malus: number): Cell[] {
   const finds = rollLayerFinds(depth, malus);
   const cells: Cell[] = Array.from({ length: CELLS }, () => ({
-    muck: MUCK[Math.floor(Math.random() * MUCK.length)],
+    tone: MUCK_TONES[Math.floor(Math.random() * MUCK_TONES.length)],
+    tilt: Math.random() * 30 - 15,
     cleared: false,
   }));
   // Les objets sont placés au hasard, jamais sur la première rangée : sinon
@@ -87,6 +91,8 @@ function SalvageInner() {
   const [trouvailles, setTrouvailles] = useState<string[]>([]);
   const [ended, setEnded] = useState<null | { how: 'out' | 'bust'; reason?: typeof BUST_REASONS[number] }>(null);
   const [pop, setPop] = useState<{ f: SalvageFind; key: number } | null>(null);
+  // Tant que le doigt n'a rien frotté, on montre le geste au lieu de l'écrire.
+  const [touched, setTouched] = useState(false);
 
   const cellsRef = useRef(cells);
   const riskRef = useRef(0);
@@ -156,6 +162,7 @@ function SalvageInner() {
     const cell = cellsRef.current[i];
     if (!cell || cell.cleared) return;
 
+    setTouched(true);
     const next = [...cellsRef.current];
     next[i] = { ...cell, cleared: true, revealed: !!cell.find };
     cellsRef.current = next;
@@ -198,14 +205,13 @@ function SalvageInner() {
       {/* Ce qu'on tient — et qu'on peut encore tout perdre */}
       <div className="w-full max-w-sm flex gap-1.5 shrink-0">
         {([
-          ['♻️', `${centimes}c`, held > 0 ? `${held}€` : '', '#B8860B'],
-          ['🔧', `×${bazar}`, '', '#8B6B4A'],
-          ['💎', `×${trouvailles.length}`, '', '#7B68EE'],
-        ] as const).map(([emo, main, sub, col], i) => (
-          <div key={i} className="flex-1 craft-card px-2 py-1.5 text-center">
-            <div className="text-[10px] text-[#8B6B4A] leading-none">{emo}</div>
-            <div className="text-sm font-mono font-bold leading-tight" style={{ color: col }}>{main}</div>
-            {sub && <div className="text-[9px] text-[#A08B70] leading-none">{sub}</div>}
+          ['♻️', tr('Consigne', 'Deposit'), held > 0 ? `${held}€` : `${centimes}c`, '#B8860B'],
+          ['🔧', tr('Bricoles', 'Parts'), `×${bazar}`, '#8B6B4A'],
+          ['💎', tr('Trouvailles', 'Finds'), `×${trouvailles.length}`, '#7B68EE'],
+        ] as const).map(([emo, label, val, col], i) => (
+          <div key={i} className="flex-1 craft-card px-1.5 py-1.5 text-center">
+            <div className="text-[9px] text-[#8B6B4A] leading-tight">{emo} {label}</div>
+            <div className="text-base font-mono font-bold leading-tight" style={{ color: col }}>{val}</div>
           </div>
         ))}
       </div>
@@ -226,10 +232,22 @@ function SalvageInner() {
         </div>
       </div>
 
-      {/* La couche en cours */}
-      <p className="text-[11px] font-bold text-[#3D3020] shrink-0">
-        {tr(layer.name, layer.nameEn)} · {tr('couche', 'layer')} {depth + 1}/{LAYERS.length}
-      </p>
+      {/* Où l'on en est, et ce qu'il faut faire MAINTENANT. Une seule ligne,
+          qui change avec l'état : c'est elle qui remplace le mode d'emploi. */}
+      <div className="text-center shrink-0 leading-tight">
+        <p className="text-[11px] font-bold text-[#3D3020]">
+          {tr(layer.name, layer.nameEn)} · {tr('couche', 'layer')} {depth + 1}/{LAYERS.length}
+        </p>
+        <p className="text-[11px] text-[#8B6B4A]">
+          {clearedPct < 0.1
+            ? tr('👆 Frottez le tas pour fouiller dedans', '👆 Rub the pile to dig through it')
+            : canDig
+              ? tr('Assez fouillé : remontez, ou creusez plus bas', 'Dug enough: climb out, or go deeper')
+              : depth >= LAYERS.length - 1
+                ? tr('Vous êtes au fond. Chaque case peut être la bonne.', 'You\'re at the bottom. Any tile could be the one.')
+                : tr(`Continuez, ${Math.round(T.clearToDig * 100)}% pour pouvoir creuser`, `Keep going, ${Math.round(T.clearToDig * 100)}% to be able to dig`)}
+        </p>
+      </div>
 
       {/* Le tas à déblayer */}
       <div
@@ -255,37 +273,66 @@ function SalvageInner() {
         >
           {cells.map((c, i) => (
             <div key={`${depth}-${i}`} className="relative flex items-center justify-center">
-              {/* ce que la case cachait */}
+              {/* Le trou, une fois la case déblayée : c'est lui qui montre
+                  la progression d'un coup d'œil. */}
+              {c.cleared && (
+                <span className="absolute inset-0" style={{ background: 'rgba(10,7,4,0.55)', boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.6)' }} />
+              )}
+              {/* Ce que la case cachait : gros, net, avec un halo pour les
+                  bonnes surprises. C'est LA récompense du geste. */}
               {c.cleared && c.find && (
                 <motion.span
-                  initial={{ scale: 0.4, opacity: 0 }}
-                  animate={{ scale: 1, opacity: c.find.kind === 'piege' ? 0.7 : 1 }}
-                  className="text-xl"
+                  initial={{ scale: 0.3, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 16 }}
+                  className="relative text-2xl drop-shadow-[0_2px_3px_rgba(0,0,0,0.7)]"
+                  style={{
+                    filter: c.find.kind === 'trouvaille' ? 'drop-shadow(0 0 7px #C9B6FF)'
+                      : c.find.kind === 'piege' ? 'drop-shadow(0 0 6px #D94F4F)' : 'drop-shadow(0 0 5px #7BD48A)',
+                  }}
                 >
                   {c.find.emoji}
                 </motion.span>
               )}
-              {/* les détritus par-dessus */}
+              {/* La matière à déblayer : une croûte, pas un objet. */}
               <AnimatePresence>
                 {!c.cleared && (
                   <motion.span
-                    exit={{ opacity: 0, scale: 1.4, rotate: 25 }}
-                    transition={{ duration: 0.18 }}
-                    className="absolute inset-0 flex items-center justify-center text-lg"
+                    exit={{ opacity: 0, scale: 1.5, rotate: c.tilt * 2 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-[1px] rounded-[3px]"
                     style={{
-                      background: 'linear-gradient(150deg,#6B5B45,#4A3E2E)',
-                      boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.25)',
-                      // Le flair fait transparaître ce qui pue avant qu'on y touche.
-                      filter: flair && c.find?.kind === 'piege' ? 'hue-rotate(70deg) brightness(0.85)' : undefined,
+                      background: `linear-gradient(${135 + c.tilt}deg, ${c.tone}, #3E3427)`,
+                      boxShadow: 'inset 0 1px 0 rgba(255,240,210,0.10), inset 0 -2px 4px rgba(0,0,0,0.35)',
+                      // Le flair fait verdir ce qui pue avant qu'on y touche.
+                      outline: flair && c.find?.kind === 'piege' ? '2px dashed rgba(124,139,90,0.85)' : undefined,
+                      outlineOffset: '-3px',
                     }}
-                  >
-                    {c.muck}
-                  </motion.span>
+                  />
                 )}
               </AnimatePresence>
             </div>
           ))}
         </div>
+
+        {/* Le geste, montré : un doigt fantôme frotte le tas jusqu'à ce que
+            le joueur prenne la main. Plus efficace qu'une phrase. */}
+        <AnimatePresence>
+          {!touched && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center"
+            >
+              <motion.span
+                className="text-4xl drop-shadow-[0_2px_5px_rgba(0,0,0,0.7)]"
+                animate={{ x: [-70, 70, -70], y: [-20, 20, -20], rotate: [-8, 8, -8] }}
+                transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
+              >
+                👆
+              </motion.span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* le nom de ce qu'on vient de sortir */}
         <AnimatePresence>
@@ -359,8 +406,8 @@ function SalvageInner() {
         </button>
       </div>
       <p className="text-[10px] text-[#A08B70] text-center shrink-0">
-        {tr(`Déblayé : ${Math.round(clearedPct * 100)}% · tout est perdu si le tas se réveille`,
-            `Cleared: ${Math.round(clearedPct * 100)}% · everything is lost if the pile wakes`)}
+        {tr(`Déblayé ${Math.round(clearedPct * 100)}% · si le tas se réveille, vous perdez TOUT`,
+            `${Math.round(clearedPct * 100)}% cleared · if the pile wakes, you lose EVERYTHING`)}
       </p>
     </div>
   );

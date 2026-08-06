@@ -125,8 +125,10 @@ export const LAYERS: SalvageLayer[] = [
 export const SALVAGE_TUNING = {
   riskMax: 100,        // au-delà, le tas se réveille et on repart les mains vides
   piegeRisk: 10,       // agitation gagnée en réveillant une saleté
-  gridW: 7,            // colonnes de détritus à déblayer
-  gridH: 9,            // lignes
+  // Grille volontairement petite : à 7x9 les cases étaient minuscules et la
+  // fouille interminable. Moins de cases, plus grandes, on voit ce qu'on fait.
+  gridW: 6,            // colonnes de détritus à déblayer
+  gridH: 7,            // lignes
   /** Part de la couche à déblayer avant de pouvoir descendre. */
   clearToDig: 0.55,
   maxKept: 6,          // on n'a que deux poches, et l'établi n'en demande pas plus
