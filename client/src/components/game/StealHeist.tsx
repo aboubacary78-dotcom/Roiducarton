@@ -6,6 +6,7 @@ import { useLang, tr } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import SafeImg from './SafeImg';
+import LocationBackdrop from './LocationBackdrop';
 import { pushToast } from '@/lib/toast';
 
 /*
@@ -542,14 +543,19 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
         </div>
       </div>
 
-      {/* Grille */}
+      {/* Grille, posée sur le quartier où l'on est en train de voler. Le décor
+          reste très en retrait : la grille doit rester lisible au premier coup
+          d'œil, c'est un jeu de placement, pas un tableau. */}
       <div
-        className="w-full max-w-sm craft-card p-2 relative"
+        className="w-full max-w-sm craft-card p-2 relative overflow-hidden"
         style={{ touchAction: 'none' }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${GRID_W}, 1fr)` }}>
+        <div className="absolute inset-0 opacity-25 pointer-events-none">
+          <LocationBackdrop location={char.location} />
+        </div>
+        <div className="grid gap-1 relative" style={{ gridTemplateColumns: `repeat(${GRID_W}, 1fr)` }}>
           {cells.map(({ x, y }) => {
             const isPlayer = player.x === x && player.y === y;
             const guard = guardAt(x, y);
