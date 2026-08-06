@@ -16,8 +16,9 @@
  * n'a pas mis à l'abri. Le joueur se fait son propre malheur, et c'est ce qui
  * donne envie de recommencer.
  */
-import type { InventoryItem } from '../types';
+import type { Character, InventoryItem } from '../types';
 import { randomFromArray } from './util';
+import { hasTrait } from './world';
 
 export type FindKind = 'consigne' | 'bazar' | 'trouvaille' | 'piege';
 
@@ -68,6 +69,14 @@ export const TROUVAILLES: InventoryItem[] = [
   { id: 'recup-radio', name: 'Radio qui grésille', emoji: '📻', type: 'special', value: 9, effect: { mental: 16 } },
   { id: 'recup-chaussures', name: 'Chaussures à votre taille', emoji: '👟', type: 'tool', value: 13, effect: { health: 10, dignity: 8 } },
 ];
+
+/**
+ * Ce que seule une Main Verte remarque au fond d'un container : un truc qui
+ * pousse encore. Pour tout le monde, c'est un déchet ; pour elle, c'est vivant.
+ */
+export const TROUVAILLE_VERTE: InventoryItem = {
+  id: 'recup-basilic', name: 'Pot de basilic (vivant, contre toute attente)', emoji: '🪴', type: 'food', value: 8, effect: { hunger: 12, mental: 14 },
+};
 
 /** Les bricoles rapportées, côté inventaire. Voir la note de valeur plus bas. */
 export const SALVAGE_JUNK: InventoryItem[] = [
@@ -143,7 +152,7 @@ export const BUST_REASONS: { fr: string; en: string; emoji: string }[] = [
 ];
 
 /** Ce que cache une couche : objets utiles, saletés, et parfois le gros lot. */
-export function rollLayerFinds(depth: number, malus = 0): SalvageFind[] {
+export function rollLayerFinds(depth: number, malus = 0, greenThumb = false): SalvageFind[] {
   const layer = LAYERS[Math.min(depth, LAYERS.length - 1)];
   const out: SalvageFind[] = [];
   for (let i = 0; i < layer.finds; i++) {
@@ -157,10 +166,17 @@ export function rollLayerFinds(depth: number, malus = 0): SalvageFind[] {
     const t = randomFromArray(TROUVAILLES);
     out.push({ id: t.id, emoji: t.emoji, name: t.name, kind: 'trouvaille', value: 0 });
   }
+  // La Main Verte voit ce que les autres jettent : quelque chose qui pousse
+  // encore, sous les épluchures. Personne d'autre ne le remarquerait.
+  if (greenThumb && depth >= 1 && Math.random() < 0.22) {
+    const t = TROUVAILLE_VERTE;
+    out.push({ id: t.id, emoji: t.emoji, name: t.name, kind: 'trouvaille', value: 0 });
+  }
   return out.sort(() => Math.random() - 0.5);
 }
 
 export function trouvailleById(id: string): InventoryItem | null {
+  if (id === TROUVAILLE_VERTE.id) return TROUVAILLE_VERTE;
   return TROUVAILLES.find(t => t.id === id) || null;
 }
 
@@ -177,4 +193,78 @@ export function nextLayerRisk(depth: number): { entry: number; perS: number } | 
 /** Conversion finale : la consigne se compte en centimes, l'euro est entier. */
 export function salvagePayout(centimes: number): number {
   return Math.floor(centimes / 100);
+}
+
+// ---- Ce que le caractère change dans un container -------------------------
+//
+// Un trait qui ne se voit nulle part n'existe pas. Chacun de ceux qui suivent
+// a un effet DÉDUIT de sa fiction, pas plaqué dessus : le phobique des rats
+// panique quand il en réveille un, l'haleine redoutable les fait fuir,
+// l'agile sauve les meubles quand tout s'écroule, le ventre sur pattes mange
+// ce qu'il déterre. Les mauvais traits mordent autant que les bons aident.
+
+export interface SalvageMods {
+  /** Décale le tirage vers les saletés (Poissard). */
+  malus: number;
+  /** Multiplie l'agitation gagnée en fouillant (Bricoleur, discret). */
+  riskMul: number;
+  /** Multiplie l'agitation d'entrée dans une couche (Insomniaque, nocturne). */
+  entryMul: number;
+  /** Bricoles gardées en plus (Collectionneur, Bricoleur). */
+  extraKept: number;
+  /** Cases dégagées d'office à chaque nouvelle couche (Ami des Pigeons, Orientation). */
+  freeReveals: number;
+  /** Voit les saletés avant de les toucher (Nez Sensible, Paranoïaque). */
+  flair: boolean;
+  /** Part du butin sauvée si le tas se réveille (Agile). */
+  saveOnBust: number;
+  /** Seuil d'agitation à partir duquel on prévient le joueur (Paranoïaque). */
+  warnAt: number;
+  /** Déniche ce qui pousse encore sous les épluchures (Main Verte). */
+  greenThumb: boolean;
+}
+
+/** Les saletés « molles » : ce qui pue plutôt que ce qui mord. */
+const SOFT_PIEGES = ['poisson', 'couche', 'yaourt'];
+
+/** Ce qu'une saleté coûte à CE personnage, en agitation. */
+export function piegeCostFor(c: Character, findId: string): number {
+  let n: number = SALVAGE_TUNING.piegeRisk;
+  // Il en a vu d'autres : le pourri ne l'impressionne plus.
+  if (SOFT_PIEGES.includes(findId) && hasTrait(c, 'estomac-acier')) n *= 0.5;
+  // Son haleine part devant : les rats déguerpissent sans faire d'histoire.
+  if (findId === 'rat' && hasTrait(c, 'haleine')) n = 0;
+  // Sauf si les rats sont justement ce qu'il redoute le plus au monde.
+  else if (findId === 'rat' && hasTrait(c, 'phobie-rats')) n *= 2.2;
+  return Math.round(n);
+}
+
+/** Ce qu'une saleté coûte au CORPS, en plus de l'agitation. */
+export function piegeHurts(c: Character, findId: string): { health: number; hunger: number } {
+  const out = { health: 0, hunger: 0 };
+  // Des os en mousse dans un container plein de tessons : mauvaise idée.
+  if (hasTrait(c, 'os-mousse') && (findId === 'verre-casse' || findId === 'rat' || findId === 'guepes')) out.health -= 2;
+  // Il ne va quand même pas laisser perdre ça.
+  if (hasTrait(c, 'ventre-pattes') && SOFT_PIEGES.includes(findId)) out.hunger += 5;
+  return out;
+}
+
+export function salvageMods(c: Character): SalvageMods {
+  return {
+    malus: hasTrait(c, 'poissard') ? 1 : 0,
+    // Le Bricoleur sait fouiller sans faire trembler tout le tas.
+    riskMul: hasTrait(c, 'bricoleur') ? 0.8 : 1,
+    // L'Insomniaque fouille à des heures où personne ne surveille rien.
+    entryMul: hasTrait(c, 'insomniaque') ? 0.75 : 1,
+    extraKept: (hasTrait(c, 'collectionneur') ? 2 : 0) + (hasTrait(c, 'bricoleur') ? 1 : 0),
+    // Les pigeons grattent avec lui ; celui qui a le sens de l'orientation
+    // sait d'instinct de quel côté du tas regarder.
+    freeReveals: (hasTrait(c, 'ami-pigeons') ? 2 : 0) + (hasTrait(c, 'orientation') ? 1 : 0),
+    flair: hasTrait(c, 'nez-sensible') || hasTrait(c, 'paranoiaque'),
+    // Quand tout s'écroule, l'Agile ressort avec ce qu'il avait dans les mains.
+    saveOnBust: hasTrait(c, 'agile') ? 0.5 : 0,
+    // Le Paranoïaque sent le moment où il faudrait arrêter. Les autres non.
+    warnAt: hasTrait(c, 'paranoiaque') ? 55 : 80,
+    greenThumb: hasTrait(c, 'main-verte'),
+  };
 }

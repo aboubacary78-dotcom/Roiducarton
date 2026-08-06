@@ -1,6 +1,6 @@
 import {
   useGame, LAYERS, SALVAGE_TUNING, rollLayerFinds, nextLayerRisk, salvagePayout,
-  BUST_REASONS, hasTrait, randomFromArray,
+  BUST_REASONS, salvageMods, piegeCostFor, randomFromArray,
 } from '@/contexts/GameContext';
 import type { SalvageFind } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -58,8 +58,8 @@ export default function SalvageMinigame() {
   return <SalvageInner />;
 }
 
-function makeLayer(depth: number, malus: number): Cell[] {
-  const finds = rollLayerFinds(depth, malus);
+function makeLayer(depth: number, mods: ReturnType<typeof salvageMods>): Cell[] {
+  const finds = rollLayerFinds(depth, mods.malus, mods.greenThumb);
   const cells: Cell[] = Array.from({ length: CELLS }, () => ({
     tone: MUCK_TONES[Math.floor(Math.random() * MUCK_TONES.length)],
     tilt: Math.random() * 30 - 15,
@@ -69,6 +69,10 @@ function makeLayer(depth: number, malus: number): Cell[] {
   // un simple effleurement suffirait et il n'y aurait rien à fouiller.
   const spots = Array.from({ length: CELLS - T.gridW }, (_, i) => i + T.gridW).sort(() => Math.random() - 0.5);
   finds.forEach((f, i) => { if (spots[i] !== undefined) cells[spots[i]].find = f; });
+  // Les pigeons grattent avec vous, et le sens de l'orientation dit de quel
+  // côté chercher : quelques cases sont déjà dégagées à l'arrivée.
+  const free = cells.map((_, i) => i).filter(i => !cells[i].find).sort(() => Math.random() - 0.5);
+  for (let i = 0; i < mods.freeReveals && free[i] !== undefined; i++) cells[free[i]].cleared = true;
   return cells;
 }
 
@@ -76,15 +80,14 @@ function SalvageInner() {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character;
-  const flair = !!char && (hasTrait(char, 'nez-sensible') || hasTrait(char, 'paranoiaque'));
-  const poissard = !!char && hasTrait(char, 'poissard');
-  const bricoleur = !!char && hasTrait(char, 'bricoleur');
-  const malus = poissard ? 1 : 0;
-  // Le Bricoleur fouille sans faire de bruit : le tas s'agite moins vite.
-  const riskMul = bricoleur ? 0.8 : 1;
+  // Tout ce que le caractère change ici, en un seul endroit (voir data/salvage).
+  const mods = useState(() => salvageMods(state.character!))[0];
+  const flair = mods.flair;
+  const malus = mods.malus;
+  const riskMul = mods.riskMul;
 
   const [depth, setDepth] = useState(0);
-  const [cells, setCells] = useState<Cell[]>(() => makeLayer(0, malus));
+  const [cells, setCells] = useState<Cell[]>(() => makeLayer(0, salvageMods(state.character!)));
   const [risk, setRisk] = useState(0);
   const [centimes, setCentimes] = useState(0);
   const [bazar, setBazar] = useState(0);
@@ -102,6 +105,8 @@ function SalvageInner() {
   const trouvaillesRef = useRef<string[]>([]);
   const endedRef = useRef(false);
   const rubbingRef = useRef(false);
+  // Les saletés réveillées, transmises au reducer pour les dégâts au corps.
+  const hurtsRef = useRef<string[]>([]);
   const gridRef = useRef<HTMLDivElement | null>(null);
 
   const layer = LAYERS[Math.min(depth, LAYERS.length - 1)];
@@ -116,11 +121,15 @@ function SalvageInner() {
     if (how === 'bust') playHurt(); else playCrit();
     setTimeout(() => dispatch({
       type: 'RESOLVE_SALVAGE',
-      centimes: how === 'bust' ? 0 : centimesRef.current,
-      bazar: how === 'bust' ? 0 : bazarRef.current,
-      trouvailles: how === 'bust' ? [] : trouvaillesRef.current,
+      // L'Agile ressort avec ce qu'il avait dans les mains, même quand tout
+      // s'écroule : c'est sa fuite, pas sa chance.
+      centimes: how === 'bust' ? Math.round(centimesRef.current * mods.saveOnBust) : centimesRef.current,
+      bazar: how === 'bust' ? Math.floor(bazarRef.current * mods.saveOnBust) : bazarRef.current,
+      trouvailles: how === 'bust' ? trouvaillesRef.current.slice(0, Math.floor(trouvaillesRef.current.length * mods.saveOnBust)) : trouvaillesRef.current,
       depth: depthRef.current,
       busted: how === 'bust',
+      hurts: hurtsRef.current,
+      extraKept: mods.extraKept,
     }), 1600);
   }
 
@@ -179,7 +188,10 @@ function SalvageInner() {
       trouvaillesRef.current = [...trouvaillesRef.current, f.id];
       setTrouvailles(trouvaillesRef.current); playCrit();
     } else {
-      playHurt(); addRisk(T.piegeRisk);
+      // Ce qu'une saleté coûte dépend de qui fouille : l'haleine redoutable
+      // fait fuir les rats, le phobique en fait une attaque de panique.
+      playHurt(); addRisk(piegeCostFor(state.character!, f.id));
+      hurtsRef.current.push(f.id);
     }
   }
 
@@ -188,10 +200,10 @@ function SalvageInner() {
     const d = depthRef.current + 1;
     depthRef.current = d; setDepth(d);
     const l = LAYERS[Math.min(d, LAYERS.length - 1)];
-    const fresh = makeLayer(d, malus);
+    const fresh = makeLayer(d, mods);
     cellsRef.current = fresh; setCells(fresh);
     playHit();
-    addRisk(l.entryRisk);
+    addRisk(Math.round(l.entryRisk * mods.entryMul));
   }
 
   if (!char) return null;

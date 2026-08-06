@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { randomFromArray, L } from './data/util';
 import { generateCharacterTrio, hasTrait, computeScore, genderFromName, HERITAGE_KITS, STARTING_ITEMS } from './data/world';
-import { SALVAGE_JUNK, SALVAGE_TUNING, salvagePayout, trouvailleById } from './data/salvage';
+import { SALVAGE_JUNK, SALVAGE_TUNING, salvagePayout, trouvailleById, piegeHurts } from './data/salvage';
 import { enemyByName, BEG_TUNING } from './data/passersby';
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
 import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
@@ -167,7 +167,7 @@ type GameAction =
   | { type: 'RESOLVE_STEAL'; tier: 'fail' | 'ok' | 'jackpot' | 'hot'; targetId: string }
   | { type: 'RESOLVE_BEG'; coins: number; copTapped: boolean; dignitySpent?: number; fightWith?: string }
   | { type: 'SALVAGE' }
-  | { type: 'RESOLVE_SALVAGE'; centimes: number; bazar: number; trouvailles: string[]; depth: number; busted: boolean }
+  | { type: 'RESOLVE_SALVAGE'; centimes: number; bazar: number; trouvailles: string[]; depth: number; busted: boolean; hurts: string[]; extraKept: number }
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
   | { type: 'TRAVEL'; location: string }
@@ -377,8 +377,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const c = state.character;
       const money = salvagePayout(action.centimes);
       // Le Bricoleur sait quoi garder : une bricole de plus dans les poches.
-      const wanted = action.bazar + (hasTrait(c, 'bricoleur') && action.bazar > 0 ? 1 : 0);
-      const kept = Math.min(SALVAGE_TUNING.maxKept, Math.max(0, wanted));
+      // Le Collectionneur et le Bricoleur repartent les poches plus pleines.
+      const wanted = action.bazar + (action.bazar > 0 ? action.extraKept : 0);
+      const kept = Math.min(SALVAGE_TUNING.maxKept + action.extraKept, Math.max(0, wanted));
       const inventory = [...c.inventory];
       let added = 0;
       for (let i = 0; i < kept && inventory.length < 20; i++) {
@@ -404,9 +405,29 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Fouiller les poubelles coûte à la fierté, et d'autant plus qu'on est
       // descendu bas. Se faire surprendre les bras dedans achève le moral.
       const deep = action.depth;
+      // Ce que les saletés réveillées ont fait AU CORPS : les os en mousse se
+      // coupent sur les tessons, le ventre sur pattes mange ce qu'il déterre.
+      const bodily = action.hurts.reduce((acc, id) => {
+        const h = piegeHurts(c, id);
+        return { health: acc.health + h.health, hunger: acc.hunger + h.hunger };
+      }, { health: 0, hunger: 0 });
+      // L'Optimiste ne se laisse pas abattre par une fouille ratée.
+      const moralMul = hasTrait(c, 'optimiste') ? 0.5 : 1;
+      // Un métabolisme rapide transforme la fouille en fringale.
+      const hungerMul = hasTrait(c, 'metabolisme') ? 2 : 1;
       const statDelta: Partial<Stats> = action.busted
-        ? { dignity: -6 - deep, mental: -9, health: -4, hunger: -4 }
-        : { dignity: -4 - Math.floor(deep / 2), mental: money > 0 || added > 0 || found.length > 0 ? 3 : -3, hunger: -3 };
+        ? {
+            dignity: -6 - deep,
+            mental: Math.round(-9 * moralMul),
+            health: -4 + bodily.health,
+            hunger: Math.round(-4 * hungerMul) + bodily.hunger,
+          }
+        : {
+            dignity: -4 - Math.floor(deep / 2),
+            mental: money > 0 || added > 0 || found.length > 0 ? 3 : Math.round(-3 * moralMul),
+            health: bodily.health,
+            hunger: Math.round(-3 * hungerMul) + bodily.hunger,
+          };
       const newStats = applyStatDelta(c.stats, statDelta);
       const isAlive = newStats.health > 0 && newStats.mental > 0;
       if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, hasTrait(c, 'poissard'))); clearSave(); }
@@ -417,10 +438,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         found.length > 0 ? found.join(', ') : '',
       ].filter(Boolean).join(L(', ', ', '));
 
+      const savedNote = action.busted && (money > 0 || added > 0)
+        ? L(' Vous avez quand même filé avec ce que vous teniez.', ' You still legged it with what was in your hands.')
+        : '';
       const text = action.busted
         ? L(
-            `🐀 Vous ressortez du container les mains vides. Tout ce que vous aviez trié est resté au fond, avec le reste. ${deep >= 3 ? 'Il fallait remonter plus tôt.' : 'Ça arrive.'}`,
-            `🐀 You climb out of the bin empty-handed. Everything you'd sorted stayed down there with the rest. ${deep >= 3 ? 'You should have climbed out sooner.' : 'It happens.'}`,
+            `🐀 Le tas a gagné. Ce que vous aviez sorti est resté au fond, avec le reste.${savedNote} ${deep >= 3 ? 'Il fallait remonter plus tôt.' : 'Ça arrive.'}`,
+            `🐀 The pile won. What you'd pulled out stayed down there with the rest.${savedNote} ${deep >= 3 ? 'You should have climbed out sooner.' : 'It happens.'}`,
           )
         : haul === ''
           ? L('🗑️ Vingt minutes les bras dans les ordures pour rien. Même les rats vous ont regardé avec pitié.',

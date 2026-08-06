@@ -1,6 +1,6 @@
 import {
-  useGame, BEG_SPOTS, randomFromArray, hasTrait,
-  BEG_TUNING, rollPasserBy, passerByEnemy, gazeSpeed,
+  useGame, BEG_SPOTS, randomFromArray,
+  BEG_TUNING, rollPasserByFor, passerByEnemy, gazeSpeed, begMods,
 } from '@/contexts/GameContext';
 import type { PasserBy } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -72,10 +72,15 @@ function BegMinigameInner() {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character;
-  const charisma = !!char && hasTrait(char, 'charismatique');
+  // Tout ce que le caractère change dans la rue, en un endroit (data/passersby).
+  const mods = useState(() => begMods(state.character!))[0];
   const location = char?.location || 'centre-ville';
 
   const T = BEG_TUNING;
+  // Par mauvais temps, tout le monde rentre. Le Résistant au Froid, lui, reste
+  // planté là : sa session dure plus longtemps là où les autres abandonnent.
+  const roughWeather = state.weather === 'rainy' || state.weather === 'snow' || state.weather === 'storm';
+  const roundMs = T.roundMs * (mods.coldProof && roughWeather ? 1.35 : 1);
   const [spot] = useState(() => randomFromArray(BEG_SPOTS));
   const [walkers, setWalkers] = useState<Walker[]>([]);
   const [coins, setCoins] = useState(0);
@@ -83,6 +88,7 @@ function BegMinigameInner() {
   const [timeLeft, setTimeLeft] = useState(1);
   const [copOn, setCopOn] = useState(false);
   const [copX, setCopX] = useState(-0.2);
+  const [copSoon, setCopSoon] = useState(false);
   const [held, setHeld] = useState<number | null>(null);
   const [ended, setEnded] = useState<null | 'time' | 'cop' | 'fight'>(null);
   const [toast, setToast] = useState<{ txt: string; tone: 'good' | 'bad'; key: number } | null>(null);
@@ -94,10 +100,12 @@ function BegMinigameInner() {
   const heldRef = useRef<number | null>(null);
   const endedRef = useRef(false);
   const copRef = useRef(false);
+  const warnRef = useRef(false);
   const fightRef = useRef<string | null>(null);
   const streetRef = useRef<HTMLDivElement | null>(null);
 
-  const speed = gazeSpeed(char?.stats.dignity ?? 40, charisma);
+  // L'allure fait l'essentiel ; le caractère module (charisme, haleine).
+  const speed = gazeSpeed(char?.stats.dignity ?? 40, false) * mods.gazeMul;
 
   function finish(reason: 'time' | 'cop' | 'fight') {
     if (endedRef.current) return;
@@ -129,28 +137,36 @@ function BegMinigameInner() {
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       const elapsed = now - start;
-      setTimeLeft(Math.max(0, 1 - elapsed / T.roundMs));
+      setTimeLeft(Math.max(0, 1 - elapsed / roundMs));
 
       // La ronde de police : elle traverse, et pendant ce temps il faut
       // avoir les mains dans les poches.
-      if (now >= nextCop && elapsed < T.roundMs - 2000) {
+      if (now >= nextCop && elapsed < roundMs - 2000) {
         copUntil = now + T.copStayMs;
         nextCop = now + T.copEveryMs + Math.random() * 3000;
       }
+      // Le nez sensible et le paranoïaque sentent la ronde arriver : ils ont
+      // le temps de retirer la main, les autres se font cueillir.
+      const warn = mods.copWarnMs > 0 && now >= nextCop - mods.copWarnMs && now < nextCop;
+      if (warn !== warnRef.current) { warnRef.current = warn; setCopSoon(warn); }
       const copHere = now < copUntil;
       if (copHere !== copRef.current) { copRef.current = copHere; setCopOn(copHere); }
       if (copHere) setCopX(1 - (copUntil - now) / T.copStayMs);
 
       // Arrivée des passants.
       const alive = walkersRef.current.filter(w => !w.done);
-      if (now >= nextSpawn && elapsed < T.roundMs - 1500 && alive.length < T.maxOnScreen) {
+      if (now >= nextSpawn && elapsed < roundMs - 1500 && alive.length < T.maxOnScreen) {
         const dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
         walkersRef.current = [...walkersRef.current, {
           id: ++idRef.current,
-          def: rollPasserBy(location),
+          def: rollPasserByFor(location, mods),
           seed: `passant-${idRef.current}-${Math.random().toString(36).slice(2, 7)}`,
           lane: LANES[Math.floor(Math.random() * LANES.length)],
-          dir, born: now, gaze: 0, insistS: 0, gain: 0,
+          dir, born: now,
+          // Un pigeon sur l'épaule et certains s'arrêtent d'eux-mêmes : le
+          // regard est déjà à moitié accroché avant même qu'on les touche.
+          gaze: mods.autoStop > 0 && Math.random() < mods.autoStop ? 0.6 : 0,
+          insistS: 0, gain: 0,
         }];
         nextSpawn = now + T.spawnMs;
       }
@@ -203,7 +219,7 @@ function BegMinigameInner() {
       });
 
       setWalkers([...walkersRef.current]);
-      if (elapsed >= T.roundMs) { finish('time'); return; }
+      if (elapsed >= roundMs) { finish('time'); return; }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
@@ -248,7 +264,7 @@ function BegMinigameInner() {
     const p = toStreet(clientX, clientY); if (!p) return;
     const w = walkersRef.current.find(x => x.id === id);
     // On perd le regard si le doigt décroche de la personne.
-    if (!w || w.done || Math.hypot(posX(w) * W - p.x, w.lane * H - p.y) > T.grabR + 18) {
+    if (!w || w.done || Math.hypot(posX(w) * W - p.x, w.lane * H - p.y) > T.grabR + 18 + mods.extraGrab) {
       heldRef.current = null; setHeld(null);
       if (w && !w.done && w.gaze > 0 && w.gaze < 1) playHit();
     }
@@ -358,6 +374,19 @@ function BegMinigameInner() {
             </motion.div>
           );
         })}
+
+        {/* Le flair : « ça sent le flic ». Un temps d'avance, rien de plus. */}
+        <AnimatePresence>
+          {copSoon && !copOn && (
+            <motion.p
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute top-4 left-0 right-0 text-center text-[11px] font-black tracking-wider text-[#F2C14E] z-30 pointer-events-none"
+              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.85)' }}
+            >
+              {tr('👃 ÇA SENT LE FLIC…', '👃 SMELLS LIKE COPS…')}
+            </motion.p>
+          )}
+        </AnimatePresence>
 
         {/* la ronde : tant qu'elle est là, on ne touche à personne */}
         <AnimatePresence>

@@ -1468,4 +1468,5 @@ export const CONTENT_EN_2: Record<string, string> = {
   'Carton de conserves (périmées de peu)': 'Box of tins (barely expired)',
   'Radio qui grésille': 'Crackling radio',
   'Chaussures à votre taille': 'Shoes in your size',
+  'Pot de basilic (vivant, contre toute attente)': 'Pot of basil (alive, against all odds)',
 };

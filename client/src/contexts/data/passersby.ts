@@ -15,8 +15,9 @@
  * La faune change avec le quartier : la gare a ses touristes, le marché ses
  * cabas, la zone industrielle n'a presque personne et beaucoup d'ennuis.
  */
-import type { Enemy } from '../types';
+import type { Character, Enemy } from '../types';
 import { ENEMIES } from './enemies';
+import { hasTrait } from './world';
 import { randomFromArray } from './util';
 
 export interface PasserBy {
@@ -160,4 +161,60 @@ export const BEG_TUNING = {
  */
 export function gazeSpeed(dignity: number, charismatic: boolean): number {
   return (0.62 + (dignity / 100) * 0.75) * (charismatic ? 1.3 : 1);
+}
+
+// ---- Ce que le caractère change dans la rue -------------------------------
+//
+// Même règle que pour la fouille : l'effet doit découler du trait, pas être
+// collé dessus. Le charismatique accroche les regards, l'haleine redoutable
+// les fait fuir, le paranoïaque voit la ronde arriver avant tout le monde,
+// l'agile colle aux basques de sa cible, et les pigeons de l'ami des pigeons
+// arrêtent les passants tout seuls.
+
+export interface BegMods {
+  /** Vitesse de remplissage du regard. */
+  gazeMul: number;
+  /** Marge de suivi au doigt, en unités logiques (Agile). */
+  extraGrab: number;
+  /** Avertissement avant la ronde, en millisecondes (flair). */
+  copWarnMs: number;
+  /** Décale la foule vers les mauvaises rencontres (Poissard). */
+  hostileBias: number;
+  /** Chance qu'un habitué du quartier remplace un passant quelconque. */
+  habitueBoost: number;
+  /** Chance qu'un passant s'arrête de lui-même (Ami des Pigeons). */
+  autoStop: number;
+  /** Allonge la session quand il fait mauvais (Résistant au Froid). */
+  coldProof: boolean;
+}
+
+export function begMods(c: Character): BegMods {
+  const flair = hasTrait(c, 'nez-sensible') || hasTrait(c, 'paranoiaque');
+  return {
+    // Le charisme accroche ; l'haleine fait reculer d'un pas.
+    gazeMul: (hasTrait(c, 'charismatique') ? 1.3 : 1) * (hasTrait(c, 'haleine') ? 0.75 : 1),
+    extraGrab: hasTrait(c, 'agile') ? 16 : 0,
+    copWarnMs: flair ? 1400 : 0,
+    hostileBias: hasTrait(c, 'poissard') ? 0.22 : 0,
+    // Qui connaît le quartier y connaît du monde. Et le monde le lui rend.
+    habitueBoost: hasTrait(c, 'orientation') ? 0.25 : 0,
+    // Un pigeon posé sur l'épaule, et les gens s'arrêtent d'eux-mêmes.
+    autoStop: hasTrait(c, 'ami-pigeons') ? 0.14 : 0,
+    // Les autres rentrent se mettre à l'abri. Lui reste, et la rue est à lui.
+    coldProof: hasTrait(c, 'resistant-froid'),
+  };
+}
+
+/** Le prochain passant, en tenant compte du caractère du personnage. */
+export function rollPasserByFor(location: string, mods: BegMods): PasserBy {
+  const pool = passersByFor(location);
+  if (mods.habitueBoost > 0 && Math.random() < mods.habitueBoost) {
+    const habitue = PASSERSBY.find(p => p.id === 'habitue');
+    if (habitue) return habitue;
+  }
+  if (mods.hostileBias > 0 && Math.random() < mods.hostileBias) {
+    const bad = pool.filter(p => p.fight);
+    if (bad.length) return randomFromArray(bad);
+  }
+  return randomFromArray(pool);
 }
