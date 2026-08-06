@@ -74,19 +74,46 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   const accFace = accessories?.face;
   const accNeck = accessories?.neck;
   const accBg = accessories?.bg;
-  // Un chapeau-accessoire masque les cheveux, sauf ceux qui se posent dessus
-  // (auréole flottante, couronne de fleurs en serre-tête).
-  const accHidesHair = !!accHat && accHat !== 'halo' && accHat !== 'flower-crown';
-  // Les cheveux sont masqués si un chapeau les couvre : chapeau procédural
-  // RÉELLEMENT dessiné (donc pas supprimé par un accessoire) ou chapeau-
-  // accessoire couvrant. Sans le « !accHat », l'auréole/couronne de fleurs
-  // rendrait chauve un personnage dont la graine portait déjà un chapeau.
-  const showHat = (!accHat && (hat === 1 || hat === 2)) || accHidesHair;
+  // Un chapeau ne rend plus chauve : on garde les cheveux et on ne coupe que
+  // ce qui passerait AU TRAVERS du couvre-chef. Chaque chapeau a donc sa
+  // « ligne de coupe » : au-dessus, le chapeau ; en dessous, les cheveux qui
+  // dépassent. Plus le chapeau est posé haut (béret, toque, chapeau de fête),
+  // plus la ligne est basse et plus la chevelure reste visible.
+  const HAT_HAIR_LINE: Record<string, number> = {
+    party: 24, beret: 26, graduation: 28, 'cap-back': 31, 'pirate-hat': 32,
+    cowboy: 33, tophat: 34, chef: 35, crown: 36, santa: 36, beanie: 36, wizard: 36,
+  };
+  // L'auréole flotte et la couronne de fleurs est un serre-tête : rien à couper.
+  const accCovers = !!accHat && accHat !== 'halo' && accHat !== 'flower-crown';
+  // Chapeau procédural (bonnet / casquette) : dessiné seulement si aucun
+  // chapeau-accessoire ne l'a remplacé.
+  const procHat = !accHat && (hat === 1 || hat === 2);
+  const hairLine = accCovers ? (HAT_HAIR_LINE[accHat!] ?? 34) : procHat ? 33 : null;
+  // Identifiant de découpe propre à cet avatar : plusieurs visages coexistent
+  // sur un même écran, leurs clipPath ne doivent pas se marcher dessus.
+  const clipId = `hairclip-${hashSeed(`${s}|hair`)}`;
+  const hairClip = hairLine !== null ? `url(#${clipId})` : undefined;
+  // Les coiffures courtes (1 court, 2 touffe, 3 raie, 5 dégarni) ne descendent
+  // pas sous la ligne du chapeau : les rogner ne laisserait rien, le
+  // personnage aurait encore l'air rasé. On lui dessine donc les mèches qui
+  // dépassent sur les tempes. Les coiffures longues (4, 6) ont déjà leur
+  // volume derrière la tête, elles n'en ont pas besoin.
+  const needsTufts = hairLine !== null && [1, 2, 3, 5].includes(hairStyle);
+  const L = hairLine ?? 0;
 
   const eyeL = 40, eyeR = 60, eyeY = 47;
 
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} className={className} role="img" aria-label="Visage du personnage">
+      {/* Découpe des cheveux sous la ligne du chapeau (voir hairLine) */}
+      {hairLine !== null && (
+        <defs>
+          <clipPath id={clipId}>
+            <rect x="0" y={hairLine} width="100" height={100 - hairLine} />
+          </clipPath>
+        </defs>
+      )}
+
       {/* Fond kraft */}
       <rect x="0" y="0" width="100" height="100" rx="20" fill={bg} />
 
@@ -186,11 +213,13 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
       {/* Cou */}
       <rect x="43" y="70" width="14" height="16" rx="4" fill={skin} stroke={OUTLINE} strokeWidth="2" />
 
-      {/* Cheveux "arrière" (volume / longs) */}
-      {!showHat && hairStyle === 4 && <ellipse cx="50" cy="44" rx="30" ry="30" fill={hair} />}
-      {!showHat && hairStyle === 6 && (
-        <path d="M20 42 Q20 16 50 16 Q80 16 80 42 L80 74 Q75 62 71 60 L71 42 Q71 30 50 30 Q29 30 29 42 L29 60 Q25 62 20 74 Z" fill={hair} />
-      )}
+      {/* Cheveux "arrière" (volume / longs), rognés sous le chapeau */}
+      <g clipPath={hairClip}>
+        {hairStyle === 4 && <ellipse cx="50" cy="44" rx="30" ry="30" fill={hair} />}
+        {hairStyle === 6 && (
+          <path d="M20 42 Q20 16 50 16 Q80 16 80 42 L80 74 Q75 62 71 60 L71 42 Q71 30 50 30 Q29 30 29 42 L29 60 Q25 62 20 74 Z" fill={hair} />
+        )}
+      </g>
 
       {/* Tête */}
       <rect x="25" y="20" width="50" height="56" rx="21" fill={skin} stroke={OUTLINE} strokeWidth="2.5" />
@@ -198,24 +227,35 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
       <ellipse cx="25" cy="50" rx="4.5" ry="6" fill={skin} stroke={OUTLINE} strokeWidth="2" />
       <ellipse cx="75" cy="50" rx="4.5" ry="6" fill={skin} stroke={OUTLINE} strokeWidth="2" />
 
-      {/* Cheveux "avant" */}
-      {!showHat && hairStyle === 1 && (
-        <path d="M25 40 Q28 20 50 19 Q72 20 75 40 Q70 30 50 30 Q30 30 25 40 Z" fill={hair} />
-      )}
-      {!showHat && hairStyle === 2 && (
-        <path d="M27 38 Q30 18 42 22 Q46 14 54 20 Q62 15 66 24 Q74 24 73 40 Q66 28 50 29 Q34 29 27 38 Z" fill={hair} />
-      )}
-      {!showHat && hairStyle === 3 && (
-        <path d="M25 41 Q26 21 50 20 Q74 21 75 41 Q64 27 44 30 Q40 24 25 41 Z" fill={hair} />
-      )}
-      {!showHat && hairStyle === 4 && (
-        <path d="M24 40 Q26 16 50 16 Q74 16 76 40 Q68 27 50 27 Q32 27 24 40 Z" fill={hair} />
-      )}
-      {!showHat && hairStyle === 5 && (
-        <path d="M25 44 Q25 27 34 25 Q31 35 30 45 Z M75 44 Q75 27 66 25 Q69 35 70 45 Z" fill={hair} />
-      )}
-      {!showHat && hairStyle === 6 && (
-        <path d="M26 40 Q28 20 50 19 Q72 20 74 40 Q66 29 50 29 Q34 29 26 40 Z" fill={hair} />
+      {/* Cheveux "avant", rognés sous le chapeau */}
+      <g clipPath={hairClip}>
+        {hairStyle === 1 && (
+          <path d="M25 40 Q28 20 50 19 Q72 20 75 40 Q70 30 50 30 Q30 30 25 40 Z" fill={hair} />
+        )}
+        {hairStyle === 2 && (
+          <path d="M27 38 Q30 18 42 22 Q46 14 54 20 Q62 15 66 24 Q74 24 73 40 Q66 28 50 29 Q34 29 27 38 Z" fill={hair} />
+        )}
+        {hairStyle === 3 && (
+          <path d="M25 41 Q26 21 50 20 Q74 21 75 41 Q64 27 44 30 Q40 24 25 41 Z" fill={hair} />
+        )}
+        {hairStyle === 4 && (
+          <path d="M24 40 Q26 16 50 16 Q74 16 76 40 Q68 27 50 27 Q32 27 24 40 Z" fill={hair} />
+        )}
+        {hairStyle === 5 && (
+          <path d="M25 44 Q25 27 34 25 Q31 35 30 45 Z M75 44 Q75 27 66 25 Q69 35 70 45 Z" fill={hair} />
+        )}
+        {hairStyle === 6 && (
+          <path d="M26 40 Q28 20 50 19 Q72 20 74 40 Q66 29 50 29 Q34 29 26 40 Z" fill={hair} />
+        )}
+      </g>
+
+      {/* Mèches des tempes : ce qui dépasse du chapeau quand la coiffure est
+          courte. Sans elles, un bonnet donnait l'illusion d'un crâne rasé. */}
+      {needsTufts && (
+        <g fill={hair}>
+          <path d={`M24.5 ${L} Q23 ${L + 9} 26.5 ${L + 15} Q30.5 ${L + 7} 31.5 ${L} Z`} />
+          <path d={`M75.5 ${L} Q77 ${L + 9} 73.5 ${L + 15} Q69.5 ${L + 7} 68.5 ${L} Z`} />
+        </g>
       )}
 
       {/* Sourcils */}

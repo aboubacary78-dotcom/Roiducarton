@@ -402,12 +402,22 @@ export default function ShopScreen() {
           })}
         </div>
 
-        <button
-          onClick={() => setSelectedShop(null)}
-          className="action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5 shrink-0"
-        >
-          ← {tr('Autres boutiques', 'Other shops')}
-        </button>
+        {/* Deux sorties : revenir choisir une autre boutique, ou repartir
+            directement dans la rue sans repasser par la liste. */}
+        <div className="flex gap-2 shrink-0">
+          <button
+            onClick={() => setSelectedShop(null)}
+            className="flex-1 action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
+          >
+            ← {tr('Autres boutiques', 'Other shops')}
+          </button>
+          <button
+            onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
+            className="flex-1 btn-primary py-3 text-sm font-semibold flex items-center justify-center gap-1.5"
+          >
+            🏙️ {tr('Retour au jeu', 'Back to the game')}
+          </button>
+        </div>
       </div>
     );
   }

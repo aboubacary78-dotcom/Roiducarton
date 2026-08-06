@@ -160,6 +160,32 @@ export function generateCharacter(): Character {
   };
 }
 
+/**
+ * Les trois candidats de l'écran de choix, avec des PRÉNOMS DISTINCTS.
+ * Tirés indépendamment, deux Marcel tombaient côte à côte environ une fois
+ * sur sept (20 prénoms, 3 tirages) : on ne savait plus lequel on choisissait.
+ */
+export function generateCharacterTrio(): Character[] {
+  const trio: Character[] = [];
+  const used = new Set<string>();
+  for (let i = 0; i < 3; i++) {
+    let c = generateCharacter();
+    for (let attempt = 0; attempt < 30 && used.has(c.name); attempt++) c = generateCharacter();
+    // Si le hasard s'entête, on prend d'autorité un prénom encore libre (et le
+    // genre qui va avec, sinon le visage ne correspondrait plus au prénom).
+    if (used.has(c.name)) {
+      const free = NAMES.filter(n => !used.has(n));
+      if (free.length > 0) {
+        const name = randomFromArray(free);
+        c = { ...c, name, gender: genderFromName(name) };
+      }
+    }
+    used.add(c.name);
+    trio.push(c);
+  }
+  return trio;
+}
+
 // Un personnage possède-t-il un trait donné ? (raccourci très fréquent)
 export function hasTrait(c: Character, id: string): boolean {
   return c.traits.some(t => t.id === id);

@@ -17,7 +17,7 @@ import type {
   ShopItem, ShopEvent, EventOutcome, InventoryItem,
 } from './types';
 import { randomFromArray, L } from './data/util';
-import { generateCharacter, hasTrait, computeScore, genderFromName, HERITAGE_KITS, STARTING_ITEMS } from './data/world';
+import { generateCharacterTrio, hasTrait, computeScore, genderFromName, HERITAGE_KITS, STARTING_ITEMS } from './data/world';
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
 import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
 import { ENEMIES, rollSignRound } from './data/enemies';
@@ -194,10 +194,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'START_GAME':
       clearSave();
-      return { ...state, screen: 'character-select', characterChoices: [generateCharacter(), generateCharacter(), generateCharacter()], deathCause: null };
+      return { ...state, screen: 'character-select', characterChoices: generateCharacterTrio(), deathCause: null };
 
     case 'GENERATE_CHARACTERS':
-      return { ...state, characterChoices: [generateCharacter(), generateCharacter(), generateCharacter()] };
+      return { ...state, characterChoices: generateCharacterTrio() };
 
     case 'SELECT_CHARACTER': {
       const char = state.characterChoices[action.index];
