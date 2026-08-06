@@ -147,6 +147,11 @@ function SalvageInner() {
 
   // Position verticale d'un objet, 0 (haut) → 1 (sol).
   const progress = (it: Falling) => Math.min(1, (performance.now() - it.born) / fallMs);
+  // Sa hauteur RÉELLE à l'écran, en unités logiques. La chute se joue entre le
+  // rebord du container (8 %) et le haut des caisses (82 %) : le test de
+  // préhension doit viser exactement là où l'objet est dessiné, sinon on
+  // attrape le vide.
+  const screenY = (it: Falling) => ((8 + progress(it) * 74) / 100) * H;
 
   function toZone(clientX: number, clientY: number) {
     const el = zoneRef.current; if (!el) return null;
@@ -160,7 +165,7 @@ function SalvageInner() {
     // On attrape le plus proche dans le rayon de préhension.
     let best: Falling | null = null, bestD = Infinity;
     for (const it of itemsRef.current) {
-      const d = Math.hypot(it.x - p.x, progress(it) * H - p.y);
+      const d = Math.hypot(it.x - p.x, screenY(it) - p.y);
       if (d < GRAB_R && d < bestD) { best = it; bestD = d; }
     }
     if (!best) return;
@@ -209,7 +214,7 @@ function SalvageInner() {
   const disgustPct = (disgust / SALVAGE_TUNING.disgustMax) * 100;
 
   return (
-    <div className="min-h-screen bg-texture p-4 flex flex-col items-center gap-3 select-none">
+    <div className="h-screen bg-texture p-4 flex flex-col items-center gap-2.5 select-none overflow-hidden">
       {/* En-tête */}
       <div className="text-center shrink-0">
         <h1 className="text-2xl text-[#2A1F1A]">{tr('La Récup\'', 'Salvage')}</h1>
@@ -250,10 +255,10 @@ function SalvageInner() {
         ref={zoneRef}
         role="application"
         aria-label={tr('Container : attrapez un objet et lancez-le vers une caisse', 'Bin: grab an item and fling it into a crate')}
-        className="relative rounded-xl overflow-hidden shrink-0"
+        className="relative w-full max-w-sm flex-1 min-h-[340px] rounded-xl overflow-hidden"
         style={{
-          width: 'min(300px, 86vw)', aspectRatio: '1 / 1', touchAction: 'none',
-          background: 'radial-gradient(circle at 50% 0%, #4A4234, #241E18)',
+          touchAction: 'none',
+          background: 'radial-gradient(ellipse at 50% -10%, #554B3A, #241E18 70%)',
           border: '3px solid #3A2A1E',
         }}
         onPointerDown={(e) => { e.currentTarget.setPointerCapture?.(e.pointerId); onDown(e.clientX, e.clientY); }}
@@ -265,10 +270,37 @@ function SalvageInner() {
           <div className="h-full bg-[#F2C14E]" style={{ width: `${timeLeft * 100}%` }} />
         </div>
 
-        {/* repères des deux moitiés */}
-        <div className="absolute inset-y-0 left-1/2 w-px bg-white/10" />
-        <span className="absolute bottom-1.5 left-3 text-[10px] font-bold text-[#F0D9C4]/70">♻️ {tr('consigne', 'deposit')}</span>
-        <span className="absolute bottom-1.5 right-3 text-[10px] font-bold text-[#F0D9C4]/70">{tr('bazar', 'scrap')} 🔧</span>
+        {/* Le container renversé, en haut : c'est de là que ça tombe. */}
+        <div className="absolute top-0 left-0 right-0 h-7 pointer-events-none">
+          <div className="absolute inset-x-6 top-0 h-5 rounded-b-lg" style={{ background: 'linear-gradient(180deg,#6B5B45,#463B2C)', boxShadow: '0 3px 8px rgba(0,0,0,0.5)' }} />
+          <div className="absolute inset-x-3 top-4 h-2 rounded-full" style={{ background: '#2A231A' }} />
+        </div>
+
+        {/* La ligne de partage, et les DEUX CAISSES au sol : on relâche
+            du côté de celle qui convient. Sans elles, la consigne d'usage
+            (« du bon côté ») n'avait aucune cible à regarder. */}
+        <div className="absolute inset-y-7 left-1/2 w-px bg-white/8" />
+        {([['consigne', '♻️', '#4A9B5F'], ['bazar', '🔧', '#B8894A']] as const).map(([id, emo, col], i) => (
+          <div
+            key={id}
+            className="absolute bottom-0 h-16 flex flex-col items-center justify-end pb-1.5 pointer-events-none"
+            style={{ left: i === 0 ? 0 : '50%', width: '50%' }}
+          >
+            <div
+              className="w-[78%] h-9 rounded-t-md flex items-center justify-center gap-1.5 transition-colors"
+              style={{
+                background: flash?.bin === id ? `${col}` : 'linear-gradient(180deg,#5C4C36,#3B3125)',
+                border: `2px solid ${flash?.bin === id ? col : 'rgba(240,217,196,0.25)'}`,
+                borderBottom: 'none',
+              }}
+            >
+              <span className="text-base">{emo}</span>
+              <span className="text-[10px] font-bold text-[#F0D9C4]">
+                {id === 'consigne' ? tr('CONSIGNE', 'DEPOSIT') : tr('BAZAR', 'SCRAP')}
+              </span>
+            </div>
+          </div>
+        ))}
 
         {/* objets qui tombent */}
         {items.map((it) => {
@@ -285,7 +317,7 @@ function SalvageInner() {
               style={{
                 position: 'absolute',
                 left: `${(it.x / W) * 100}%`,
-                top: `${t * 100}%`,
+                top: `${8 + t * 74}%`,
                 transform: 'translate(-50%,-50%)',
               }}
             >
@@ -351,13 +383,9 @@ function SalvageInner() {
         </AnimatePresence>
       </div>
 
-      <p className="text-[10px] text-[#8B6B4A] text-center max-w-xs">
-        {tr('Prenez un objet et relâchez du côté de la bonne caisse. Un objet touché est un objet engagé.',
-            'Pick an item up and let go on the correct crate\'s side. Touch it and you\'ve committed to it.')}
-      </p>
-      <p className="text-[10px] text-[#A08B70] text-center">
-        {tr(`Il faut 100c pour faire 1€ · récolte actuelle : ${salvagePayout(centimes)}€`,
-            `100c makes €1 · current haul: €${salvagePayout(centimes)}`)}
+      <p className="text-[10px] text-[#A08B70] text-center shrink-0">
+        {tr(`100c = 1€ · dans la poche : ${salvagePayout(centimes)}€`,
+            `100c = €1 · in your pocket: €${salvagePayout(centimes)}`)}
       </p>
     </div>
   );

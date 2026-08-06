@@ -90,8 +90,11 @@ export const SALVAGE_MAX_KEPT = 6;
 
 export const SALVAGE_TUNING = {
   roundMs: 22000,      // durée d'une fouille
-  spawnMs: 780,        // un objet toutes les ~0,8 s
-  fallMs: 2600,        // temps de chute d'un objet, du haut au sol
+  // Cadence et chute recalées sur la zone de jeu plein écran : avec l'ancien
+  // réglage, prévu pour un carré de 300 px, deux objets seulement flottaient
+  // dans une colonne deux fois plus haute. Le container avait l'air vide.
+  spawnMs: 640,        // un objet toutes les ~0,6 s
+  fallMs: 3000,        // temps de chute d'un objet, du rebord jusqu'aux caisses
   disgustMax: 100,     // au-delà, on rend son déjeuner et on s'arrête
   disgustDechet: 22,   // toucher une saleté
   disgustPiege: 30,    // se faire mordre ou couper
