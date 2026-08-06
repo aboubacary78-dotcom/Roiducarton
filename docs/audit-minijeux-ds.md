@@ -250,3 +250,151 @@ Tirées de ce qui marchait sur DS, et de nos propres ratés :
    l'esquive.
 6. **Le son fait la moitié du travail.** Il porte le rythme, la réussite et
    l'échec avant que l'œil ne suive.
+
+---
+
+# Second passage — spécial mendicité
+
+Les trois pistes du premier tour (rythme, rythme à l'oreille, retrouver un
+visage) ont été jugées trop faibles. À raison : le rythme était surtout
+séduisant parce qu'on avait déjà le moteur audio, ce qui est un argument de
+production, pas de game design. Reprenons par le bon bout.
+
+## Qu'est-ce qu'on essaie de simuler, au juste ?
+
+Mendier, ce n'est pas recevoir. C'est :
+
+1. **être invisible et devoir se faire voir** ;
+2. **choisir qui solliciter**, parce qu'on ne peut pas tous les arrêter ;
+3. **tenir l'attention quelques secondes**, le temps que la personne décide ;
+4. **payer en dignité** ce qu'on gagne en pièces ;
+5. **savoir s'arrêter** quand la mauvaise personne arrive.
+
+Aucun de ces cinq points n'est dans le mini-jeu actuel. Le rythme pur n'en
+couvrait que le troisième. Voilà pourquoi ça ne suffisait pas.
+
+Point de systémique important : **la dignité est une jauge centrale que rien
+ne fait dépenser de façon interactive**. Elle monte et descend par effets de
+bord. Un bon mini-jeu de mendicité devrait en faire une monnaie qu'on décide
+de dépenser, au coup par coup.
+
+## Les mécaniques DS que j'avais laissées de côté
+
+### The World Ends With You (2007)
+
+Dans Shibuya, on **scanne la foule** pour lire les pensées des passants, et on
+« imprime » une idée chez quelqu'un pour changer son comportement. En combat,
+chaque badge équipé a **son propre geste** (trancher, tapoter, gratter,
+maintenir) : l'équipement ne change pas des chiffres, il change ce que fait
+votre pouce.
+
+**À retenir :** une foule où chaque tête a une pensée lisible, et un
+inventaire qui redéfinit les gestes plutôt que les statistiques.
+
+### Pokémon Ranger (2006)
+
+On ne lance pas de balle : on **encercle** la créature avec le stylet, en
+traçant des boucles sans lâcher, pendant qu'elle bouge et attaque. Le contact
+maintenu *est* la mécanique.
+
+**À retenir :** maintenir le contact avec une cible mobile est un geste
+physique riche, ludique, et faisable au pouce. C'est aussi la meilleure
+métaphore tactile de « capter l'attention de quelqu'un » que je connaisse.
+
+### Henry Hatsworth in the Puzzling Adventure (2009)
+
+Un jeu de plateforme sur l'écran du haut **et** un match-3 sur celui du bas,
+en même temps. Les deux se nourrissent l'un l'autre, et l'attention devient la
+vraie ressource.
+
+**À retenir :** deux tâches qui se disputent le joueur, ça crée une tension
+qu'aucune difficulté brute n'égale.
+
+### Big Bang Mini (2009)
+
+On lance des feux d'artifice vers le haut d'un doigt tout en esquivant les
+retombées en bas. Une action offensive et une action défensive, un seul doigt.
+
+**À retenir :** le même doigt sert à gagner et à se protéger. Chaque geste est
+un arbitrage.
+
+### Yoshi Touch & Go (2005)
+
+Deux verbes simultanés : dessiner des nuages pour guider, tapoter pour lancer
+des œufs.
+
+**À retenir :** deux verbes, oui, mais seulement s'ils sont physiquement
+distincts (tracer / tapoter). Sinon le pouce s'emmêle.
+
+### Puzzle Quest (2007)
+
+Un seul plateau de match-3 alimente **plusieurs monnaies** : dégâts, mana, or.
+Le même geste sert des objectifs différents selon ce qu'on aligne.
+
+**À retenir :** un mini-jeu peut produire plusieurs ressources et laisser le
+joueur choisir laquelle poursuivre. Chez nous : pièces contre dignité.
+
+### Mario Party DS (2007) et Zelda: Phantom Hourglass (2007)
+
+Le premier pour son bloc de mini-jeux tactiles, le second pour les gestes hors
+écran (souffler dans le micro pour éteindre des bougies, crier).
+
+**À retenir :** rien pour nous côté micro — permission navigateur, jouabilité
+en public, silence obligatoire dans le bus. À écarter, mais méritait d'être
+tranché plutôt que passé sous silence.
+
+## Ma nouvelle recommandation : « Tenir le regard »
+
+Un seul geste, qui coche les cinq points du départ.
+
+**Le principe.** Les passants traversent l'écran, chacun avec sa tête (on a
+déjà le générateur de visages en carton, ils seront tous différents) et sa
+démarche. On pose le pouce sur quelqu'un et **on le suit**, sans lâcher : un
+anneau se remplit autour de lui. Rempli avant qu'il ne sorte de l'écran, il
+s'arrête et donne. Lâché en route, tout est perdu pour celui-là.
+
+**Ce que ça produit, mécaniquement.**
+
+- *Se faire voir* : le remplissage de l'anneau, c'est le regard qu'on
+  accroche. La vitesse dépend de la **dignité** — bien tenu, on est vu plus
+  vite.
+- *Choisir qui* : ils sont plusieurs à l'écran, on ne peut en suivre qu'un.
+  Abandonner quelqu'un à mi-anneau pour un meilleur passant qui arrive, c'est
+  la décision qui fait le sel du jeu.
+- *Tenir* : la poursuite au pouce est une vraie compétence physique, celle de
+  Pokémon Ranger. Les gens accélèrent, s'arrêtent, changent de file.
+- *Payer en dignité* : certains passants ne cèdent qu'en **insistant** —
+  maintenir au-delà de l'anneau plein donne plus, mais entame la dignité. On
+  décide, personne par personne, ce qu'on est prêt à laisser.
+- *Savoir s'arrêter* : le policier traverse. Tant qu'il est là, **il faut
+  lâcher tout le monde**. Le jeu consiste alors à ne rien faire, ce qui est
+  bien plus intéressant que « ne tape pas cette icône ».
+
+**Les têtes se lisent**, façon World Ends With You : le costume-cravate au
+téléphone ne s'arrêtera jamais et s'agace si on insiste ; la dame au cabas
+donne peu mais vite ; le touriste donne gros mais marche vite ; l'ado en
+groupe se moque et fait perdre de la dignité ; l'habitué du quartier donne
+plus si votre **respect** est haut. On apprend la faune du quartier en jouant,
+ce qui donne une raison de rejouer.
+
+**Pourquoi c'est mieux que le rythme.** Le rythme n'avait qu'une compétence
+(le timing) et aucune décision. Là, il y a un geste continu *et* un flux de
+choix, c'est la structure des bons jeux de pouce. Et surtout, ça parle du
+sujet : mendier, c'est retenir l'attention de quelqu'un juste assez longtemps.
+
+**Coût.** Modéré. Pas de moteur physique : des passants qui glissent, un
+anneau qui se remplit, un suivi de pointeur. On réutilise `CardboardAvatar`,
+les traits (Charismatique élargit la tolérance, Poissard fait fuir), la météo
+(foule plus clairsemée sous la pluie) et les lieux (BEG_SPOTS existe déjà).
+
+## Deux solutions de repli, si celle-là ne te parle pas
+
+**« Le Numéro »** — le tour de chant en chaîne de gestes, façon Cooking Mama :
+sortir l'instrument, jouer, saluer, tendre le gobelet, chacun avec son geste
+propre, noté séparément. Sympathique, lisible, mais c'est une suite d'épreuves
+sans décision : le même défaut que la version actuelle, mieux habillé.
+
+**« La Foule »** — retrouver, façon *Wanted!*, la seule personne de la foule
+qui vous regarde vraiment, avant qu'elle ne se ravise. Très simple à faire et
+à comprendre, joli avec nos visages générés, mais mince à long terme : c'est
+un jeu d'observation pure, il s'épuise en quelques parties.
