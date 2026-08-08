@@ -151,6 +151,8 @@ export default function StealHeist() {
           { emoji: '💎', fr: 'Sortir sans alerte = coup de maître (butin max). Sortir en plein bouclage = bonus de respect, le culot, ça se respecte.', en: 'Escape with zero alert = masterstroke (max loot). Escape mid-lockdown = respect bonus, nerve earns respect.' },
           { emoji: '👆', fr: 'Touchez une case voisine pour y faire un pas (ou glissez le doigt). Toucher un gardien = pris.', en: 'Tap a neighbouring tile to step there (or swipe). Touching a guard = caught.' },
         ]}
+        image="/assets/intro-casse.webp"
+        scene="street"
         onStart={() => setReady(true)}
       />
     );

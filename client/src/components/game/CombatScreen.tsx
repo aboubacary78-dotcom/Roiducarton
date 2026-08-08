@@ -7,6 +7,7 @@ import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import SafeImg from './SafeImg';
 import { stampTap, liftHover } from '@/lib/anim';
 import { pushToast } from '@/lib/toast';
 
@@ -64,6 +65,8 @@ export default function CombatScreen() {
           { emoji: '⚡', fr: 'Vos traits débloquent un coup spécial (haleine, piège…) : gagnez des manches pour le charger, 2 usages par combat.', en: 'Your traits unlock a special move (breath, trap…): win rounds to charge it, 2 uses per fight.' },
           { emoji: '💀', fr: 'Les touches entament votre vraie santé. Videz les PV de l\'ennemi avant que les vôtres tombent à zéro.', en: 'Hits chip your real health. Empty the enemy\'s HP before yours drops to zero.' },
         ]}
+        image="/assets/intro-bagarre.webp"
+        scene="fight"
         onStart={() => setReady(true)}
       />
     );
@@ -679,6 +682,10 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
         onPointerUp={() => { dragRef.current = null; }}
         onPointerCancel={() => { dragRef.current = null; }}
       >
+        {/* Le sol de l'arène : diorama s'il existe, dégradé sinon. Volontairement
+            en retrait — les projectiles doivent rester lisibles par-dessus. */}
+        <SafeImg src="/assets/arene-esquive.webp" className="absolute inset-0 w-full h-full object-cover opacity-45" />
+
         {/* jauge de temps */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-black/30">
           <div className="h-full bg-[#F2C14E]" style={{ width: `${timeLeft * 100}%` }} />

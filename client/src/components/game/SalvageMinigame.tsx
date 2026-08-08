@@ -9,6 +9,7 @@ import { playHit, playCrit, playHurt, playStep } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import LocationBackdrop from './LocationBackdrop';
+import SafeImg from './SafeImg';
 
 /*
  * LA RÉCUP' — le fond du container.
@@ -51,6 +52,8 @@ export default function SalvageMinigame() {
           { emoji: '🐀', fr: 'Mais le tas s\'agite : à chaque couche, et à chaque saleté que vous réveillez.', en: 'But the pile stirs: with every layer, and every nasty thing you wake up.' },
           { emoji: '💀', fr: 'S\'il se réveille avant que vous soyez ressorti, vous perdez TOUT. Savoir s\'arrêter, c\'est le jeu.', en: 'If it wakes before you\'re out, you lose EVERYTHING. Knowing when to stop is the game.' },
         ]}
+        image="/assets/intro-recup.webp"
+        scene="discovery"
         onStart={() => setReady(true)}
       />
     );
@@ -273,10 +276,13 @@ function SalvageInner() {
         onPointerUp={() => { rubbingRef.current = false; }}
         onPointerCancel={() => { rubbingRef.current = false; }}
       >
-        {/* Le fond du container, c'est le quartier où l'on fouille */}
+        {/* Le fond du container : le diorama dédié s'il existe, sinon le
+            quartier où l'on fouille. Très assombri dans les deux cas : la
+            grille de détritus doit rester le sujet. */}
         <div className="absolute inset-0 opacity-40">
           <LocationBackdrop location={char.location} />
         </div>
+        <SafeImg src="/assets/recup-container.webp" className="absolute inset-0 w-full h-full object-cover opacity-55" />
         <div className="absolute inset-0 bg-[#1C1710]/55" />
 
         <div

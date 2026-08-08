@@ -61,6 +61,8 @@ export default function BegMinigame() {
           { emoji: '😤', fr: 'Continuez APRÈS l\'anneau plein et vous soutirez davantage — mais vous y laissez votre dignité, et certains se braquent.', en: 'Keep going AFTER the ring fills and you squeeze out more — but it costs your dignity, and some people snap.' },
           { emoji: '👮', fr: 'Quand la ronde passe, LÂCHEZ TOUT LE MONDE. Ne rien faire, à ce moment-là, c\'est jouer.', en: 'When the patrol goes by, LET GO OF EVERYONE. Doing nothing, right then, is playing.' },
         ]}
+        image="/assets/intro-manche.webp"
+        scene="friend"
         onStart={() => setReady(true)}
       />
     );
