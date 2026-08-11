@@ -24,6 +24,7 @@ import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather
 import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
 import { ENEMIES, rollSignRound } from './data/enemies';
 import { SHOPS, shopClosure, rollShopClosure, getSellPrice, SOLIDARITY_GIFT, SOLIDARITY_FLAG } from './data/shops';
+import { HAGGLE_TUNING, HAGGLED_FLAG } from './data/haggle';
 import {
   generateEvents, generateBegEvents, generateRestEvents, generateTravelEvent,
   freshPool, rememberEvent, flavorFrom, makeLegendEvent, dueSursaut,
@@ -54,6 +55,7 @@ export * from './data/npc';
 export * from './data/dodge';
 export * from './data/salvage';
 export * from './data/passersby';
+export * from './data/haggle';
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
@@ -62,6 +64,13 @@ function applyStatDelta(stats: Stats, delta: Partial<Stats>): Stats {
   const s = { ...stats };
   Object.entries(delta).forEach(([k, v]) => { if (v) s[k as keyof Stats] += v; });
   return clampStats(s);
+}
+
+/** Retire UN exemplaire d'un objet, pas toute la pile : troquer une conserve
+ *  ne doit pas vider le sac de toutes les conserves. */
+function removeOne(inv: InventoryItem[], id: string): InventoryItem[] {
+  const i = inv.findIndex(it => it.id === id);
+  return i < 0 ? inv : [...inv.slice(0, i), ...inv.slice(i + 1)];
 }
 
 function clampStats(stats: Stats): Stats {
@@ -190,6 +199,7 @@ type GameAction =
   | { type: 'DODGE_RESULT'; hits: number }
   | { type: 'PLAY_CARD'; cardId: string; junkItemId?: string }
   | { type: 'BUY_ITEM'; shopItem: ShopItem; actualPrice: number }
+  | { type: 'RESOLVE_HAGGLE'; shopId: string; broken: boolean; cut: number; spent: Partial<Stats>; tradedItemId?: string }
   | { type: 'REOPEN_SHOP'; shopId: string }
   | { type: 'CLAIM_SOLIDARITY' }
   | { type: 'DISMISS_ORIGIN' }
@@ -1338,6 +1348,48 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         character: {
           ...state.character,
           shopClosures: (state.character.shopClosures || []).filter(c => c.shopId !== action.shopId),
+        },
+      };
+    }
+
+    case 'RESOLVE_HAGGLE': {
+      // Suite d'un marchandage (voir HaggleMinigame). Ce qu'on a engagé est
+      // payé dans tous les cas — on a montré son jeu, gagné ou perdu.
+      if (!state.character) return state;
+      const c = state.character;
+      const stats = clampStats(
+        Object.entries(action.spent).reduce(
+          (acc, [k, v]) => ({ ...acc, [k]: acc[k as keyof Stats] - (v || 0) }),
+          { ...c.stats },
+        ),
+      );
+      // Sanction d'une négociation cassée : il ne vous sert plus aujourd'hui.
+      // Une porte qui se ferme, pas une amende (voir data/haggle.ts).
+      const closures = [...(c.shopClosures || [])];
+      if (action.broken) {
+        closures.push({
+          shopId: action.shopId, untilDay: c.day + 1,
+          reason: 'vous avez trop tiré sur la corde. Le patron ne vous sert plus aujourd\'hui.',
+          reasonEn: 'you pushed your luck. The owner won\'t serve you today.',
+        });
+      }
+      // Une vraie affaire se sait dans le quartier.
+      const gained = !action.broken && action.cut >= HAGGLE_TUNING.goodDealCut
+        ? HAGGLE_TUNING.respectOnGoodDeal : 0;
+      // On ne marchande qu'une fois par jour et par boutique : sans ça, on
+      // recommencerait jusqu'à tomber sur une bonne série.
+      const haggleFlag = HAGGLED_FLAG(action.shopId, c.day);
+      return {
+        ...state,
+        character: {
+          ...c,
+          stats,
+          shopClosures: closures,
+          respect: Math.max(0, c.respect + gained),
+          activeFlags: c.activeFlags.includes(haggleFlag) ? c.activeFlags : [...c.activeFlags, haggleFlag],
+          inventory: action.tradedItemId
+            ? removeOne(c.inventory, action.tradedItemId)
+            : c.inventory,
         },
       };
     }

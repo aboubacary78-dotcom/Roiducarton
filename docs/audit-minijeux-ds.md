@@ -541,3 +541,77 @@ aujourd'hui qu'une liste de prix.
 **Louer plutôt qu'acheter** (A Link Between Worlds). Une arme correcte pour la
 journée, à petit prix — perdue si le personnage meurt. Un pari qui colle
 parfaitement à un jeu où l'on meurt souvent.
+
+---
+
+# Quatrième passe — les jeux où l'on pousse quelqu'un
+
+*Menée pour le chantier du marchandage.*
+
+Refaire le tour des « meilleurs jeux DS » ne servait à rien : sur la
+négociation, il n'en sort que Rusty's Real Deal, déjà noté plus haut. Mais une
+famille entière est passée sous le radar des trois premières passes, parce
+qu'elle ne ressemble pas à un mini-jeu d'adresse : les jeux où l'on **parle à
+quelqu'un et où l'on appuie**. C'est exactement la matière d'un marchandage.
+
+## Phoenix Wright: Ace Attorney (DS, 2005)
+
+Le témoin raconte. On dispose de **deux verbes seulement** : *Presser* et
+*Présenter*. Presser, c'est relancer sans preuve — gratuit, ça fait parler,
+parfois ça ne donne rien. Présenter, c'est engager une preuve précise sur une
+phrase précise : juste, ça fait tout basculer ; faux, ça coûte une part de la
+barre de crédibilité.
+
+**Les leçons, et elles sont grosses :**
+
+1. **Deux verbes suffisent.** Toute la profondeur vient de *quand* et *sur
+   quoi*, pas du nombre d'options. C'est le contraire du menu à six boutons.
+2. **Un coup gratuit et un coup qui engage.** Le gratuit fait avancer et
+   informe ; l'engageant est le vrai choix. Sans le gratuit, le joueur n'ose
+   rien ; sans l'engageant, il n'y a pas de jeu.
+3. **La ressource dépensée n'est pas de l'argent, c'est du crédit.** On perd la
+   confiance d'en face. Ça se voit sur un visage, ça se comprend sans notice.
+4. **Le témoin se trahit.** Chaque personnage a son tic quand il ment. Le jeu
+   se rejoue parce qu'on apprend les gens, pas des chiffres.
+
+## Hotel Dusk: Room 215 (DS, 2007)
+
+Les conversations peuvent **casser**. Insister au mauvais moment ferme la
+porte, et le jeu continue sans ce que la personne allait dire. On n'échoue pas,
+on **perd une occasion**.
+
+**La leçon :** l'échec d'une négociation ne doit pas être une punition
+chiffrée, mais une porte qui se ferme. « Il ne veut plus me voir aujourd'hui »
+est une sanction que tout le monde comprend, et qui ne décourage pas.
+
+## Ghost Trick (DS, 2010)
+
+On agit **dans une fenêtre de temps** : quatre minutes avant la mort, chaque
+manipulation compte, et l'on voit le sablier.
+
+**La leçon :** une contrainte de temps *diégétique* (la file d'attente derrière
+soi, le rideau qui va tomber) vaut mieux qu'un chronomètre posé sur l'écran.
+
+## Trace Memory / Another Code (DS, 2005) et Ouendan (DS, 2005)
+
+Le premier : des énigmes qui exploitent le matériel lui-même (fermer la
+console). Le second : le rythme comme moteur d'émotion, on encourage quelqu'un
+qui flanche.
+
+**La leçon commune, mais mineure ici :** le geste doit *ressembler* à ce qu'il
+raconte. Marchander n'est pas taper en rythme ; c'est tenir, lâcher, revenir.
+
+## Ce que cette passe change
+
+Les trois premières passes m'avaient orienté vers des jeux d'adresse — viser,
+frotter, esquiver. Pour la boutique, ce serait une erreur : le marchandage
+n'est pas une question d'habileté du pouce, c'est une question de **culot et de
+lecture**. Le modèle n'est donc pas SteamWorld Dig (qu'on vient d'utiliser pour
+La Récup', et qu'il serait mauvais de recopier), mais Ace Attorney :
+
+- **deux verbes**, pas six ;
+- un coup **gratuit** qui informe, un coup qui **engage** ;
+- une ressource dépensée qui est **la patience du commerçant**, lisible sur son
+  visage ;
+- des commerçants qui ont chacun leur **tic**, pour qu'on apprenne les gens ;
+- l'échec = **la porte qui se ferme aujourd'hui**, pas une amende.

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay, SOLIDARITY_FLAG, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META } from '@/contexts/GameContext';
+import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay, SOLIDARITY_FLAG, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META, shopkeeperFor, HAGGLED_FLAG, HAGGLE_TUNING } from '@/contexts/GameContext';
 import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
-import { playCoin, playShare } from '@/lib/sound';
+import { playCoin, playShare, playClick } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { pushToast } from '@/lib/toast';
 import SafeImg from './SafeImg';
+import HaggleMinigame from './HaggleMinigame';
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string; label: string; labelEn: string }> = {
   food: { bg: '#4A9B5F15', color: '#4A9B5F', label: 'Nourriture', labelEn: 'Food' },
@@ -51,6 +52,8 @@ export default function ShopScreen() {
   const [deltas, setDeltas] = useState<{ id: number; amt: number }[]>([]);
   // Fontaine du parc en cours de chargement de pub (anti-exploit eau gratuite).
   const [fountainBusy, setFountainBusy] = useState(false);
+  // Négociation en cours : l'article discuté et le prix demandé au départ.
+  const [haggling, setHaggling] = useState<{ item: ShopItem; asking: number } | null>(null);
 
   // « Coup de main » via pub récompensée : la boutique rouvre, avec une
   // résolution aussi absurde que la panne.
@@ -191,6 +194,11 @@ export default function ShopScreen() {
 
   // Shop detail view
   if (selectedShop) {
+    // Le marchandage : y a-t-il un patron derrière ce comptoir, et lui a-t-on
+    // déjà pris la tête aujourd'hui ? (voir data/haggle.ts)
+    const keeper = shopkeeperFor(selectedShop.id);
+    const alreadyHaggled = char.activeFlags.includes(HAGGLED_FLAG(selectedShop.id, char.day));
+
     return (
       <div className="min-h-screen bg-texture p-4 flex flex-col gap-3">
         {/* Shop Header */}
@@ -406,6 +414,20 @@ export default function ShopScreen() {
                     </motion.button>
                   )}
                 </div>
+
+                {/* Marchander : proposé sous l'article, jamais imposé. Une fois
+                    par jour et par boutique, et seulement quand il y a
+                    réellement quelque chose à discuter (voir minToHaggle). */}
+                {keeper && !alreadyHaggled && !inventoryFull && actualPrice >= HAGGLE_TUNING.minToHaggle && (
+                  <button
+                    onClick={() => { playClick(); setHaggling({ item, asking: actualPrice }); }}
+                    className="w-full py-2 text-[11px] font-semibold text-[#8B6B4A] flex items-center justify-center gap-1.5 border-t"
+                    style={{ borderColor: '#E8D5C0', background: '#FBF6F0' }}
+                  >
+                    🤝 {tr('Marchander', 'Haggle')}
+                    <span className="font-normal text-[#A08B70]">· {tc(keeper.role)}</span>
+                  </button>
+                )}
               </motion.div>
             );
           })}
@@ -419,6 +441,47 @@ export default function ShopScreen() {
         >
           ← {tr('Autres boutiques', 'Other shops')}
         </button>
+
+        <AnimatePresence>
+          {haggling && (
+            <HaggleMinigame
+              keeper={keeper!}
+              item={haggling.item}
+              asking={haggling.asking}
+              onClose={(res) => {
+                const { item } = haggling;
+                setHaggling(null);
+                // Ce qu'on a engagé se paie dans tous les cas : dignité, fatigue,
+                // objet troqué, et la porte close si on a tiré sur la corde.
+                dispatch({
+                  type: 'RESOLVE_HAGGLE', shopId: selectedShop.id,
+                  broken: res.price === null, cut: res.cut,
+                  spent: res.spent as Partial<Stats>, tradedItemId: res.tradedItemId,
+                });
+                if (res.price === null) {
+                  pushToast(tr('Vous avez trop tiré sur la corde. Il ne vous sert plus aujourd\'hui.',
+                    'You pushed too far. He won\'t serve you today.'), { emoji: '🚪', tone: 'bad' });
+                  setSelectedShop(null);
+                  return;
+                }
+                if (char.money < res.price) {
+                  pushToast(tr('Beau marchandage… mais vous n\'avez même pas ça.',
+                    'Nice haggling… but you don\'t even have that.'), { emoji: '💸', tone: 'bad' });
+                  return;
+                }
+                setBought(b => ({ ...b, [item.id]: (b[item.id] || 0) + 1 }));
+                setSpent(s => s + res.price!);
+                playCoin();
+                buyToast(item);
+                if (res.cut > 0.005) {
+                  pushToast(`${tr('Négocié', 'Haggled')} −${Math.round(res.cut * 100)} % · ${haggling.asking}€ → ${res.price}€`,
+                    { emoji: '🤝', tone: 'good' });
+                }
+                dispatch({ type: 'BUY_ITEM', shopItem: item, actualPrice: res.price });
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     );
   }
