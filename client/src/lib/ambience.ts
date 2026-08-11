@@ -1,8 +1,19 @@
 /*
- * Ambiances sonores continues, 100 % Web Audio, comme sound.ts (aucun
- * fichier à télécharger). Chaque ambiance est un petit orchestre procédural :
- * une nappe de fond (bruit filtré, bourdon) + des événements aléatoires
- * (pépiements, klaxons, clangs, annonces…) reprogrammés par minuterie.
+ * Ambiances sonores continues.
+ *
+ * Deux moteurs, dans cet ordre :
+ *
+ *   1. LES FICHIERS. Depuis le pack son 1, chaque quartier a sa vraie boucle
+ *      enregistrée (`/audio/amb-<lieu>.m4a`), et le ciel sa couche par-dessus
+ *      (`/audio/meteo-<temps>.m4a`). C'est ce qu'on entend normalement.
+ *   2. LA SYNTHÈSE. Si un fichier manque ou ne se décode pas, on retombe sur
+ *      le petit orchestre procédural d'origine — une nappe de bruit filtré
+ *      plus des événements reprogrammés par minuterie. Le jeu n'est donc
+ *      jamais muet, et un pack livré à moitié s'active fichier par fichier,
+ *      exactement comme les images.
+ *
+ * Le thème de l'écran-titre ('title') reste synthétisé : il plaît tel quel,
+ * on n'y touche pas.
  *
  *  - 'title'            : le thème musical du jeu (boucle douce-amère).
  *  - 'parc'             : brise + oiseaux + roucoulements.
@@ -13,10 +24,12 @@
  *
  * setAmbience(id | null) mémorise le souhait et le réalise dès que possible :
  * si le navigateur bloque l'audio avant le premier geste (politique
- * d'autoplay), on s'arme sur le prochain toucher. La sourdine des Options
+ * d'autoplay), on s'arme sur le prochain toucher. setWeatherLayer(type | null)
+ * pose la couche météo, indépendamment du quartier. La sourdine des Options
  * coupe/relance proprement (voir onMuteChange dans sound.ts).
  */
 import { getAudio, isMuted, onMuteChange } from './sound';
+import { loadAudio, startLoop, type Loop } from './audioFiles';
 
 export type AmbienceId = 'title' | 'parc' | 'centre-ville' | 'zone-industrielle' | 'gare' | 'marche';
 
@@ -26,6 +39,8 @@ const MASTER_GAIN = 0.55; // les ambiances restent un lit sous les effets
 
 let desired: AmbienceId | null = null;
 let running: { id: AmbienceId; stop: Stopper } | null = null;
+// Boucle jouée depuis un vrai fichier (prioritaire sur la synthèse).
+let fileLoop: { id: AmbienceId; loop: Loop } | null = null;
 let gestureArmed = false;
 
 export function setAmbience(id: AmbienceId | null): void {
@@ -33,15 +48,78 @@ export function setAmbience(id: AmbienceId | null): void {
   sync();
 }
 
-function sync(): void {
-  if (running && running.id === desired && !isMuted()) return;
-  if (running) { running.stop(); running = null; }
-  if (!desired || isMuted()) return;
+// ---- Couche météo ---------------------------------------------------------
+// Elle se pose PAR-DESSUS le quartier : il peut pleuvoir au parc comme à la
+// gare. Seuls les temps qui s'entendent ont une couche — un ciel dégagé ou
+// nuageux ne fait pas de bruit.
+export type WeatherLayerId = 'pluie' | 'orage' | 'neige' | 'brouillard' | 'canicule';
+
+const WEATHER_FILE: Record<string, WeatherLayerId> = {
+  rainy: 'pluie', storm: 'orage', snow: 'neige', fog: 'brouillard', heatwave: 'canicule',
+};
+
+/** Traduit le temps du jeu en couche sonore (null = un ciel silencieux). */
+export function weatherLayerFor(weather: string): WeatherLayerId | null {
+  return WEATHER_FILE[weather] ?? null;
+}
+
+let desiredWeather: WeatherLayerId | null = null;
+let weatherLoop: { id: WeatherLayerId; loop: Loop } | null = null;
+
+export function setWeatherLayer(id: WeatherLayerId | null): void {
+  desiredWeather = id;
+  syncWeather();
+}
+
+function syncWeather(): void {
+  const want = isMuted() || !desired ? null : desiredWeather;
+  if (weatherLoop && weatherLoop.id === want) return;
+  if (weatherLoop) { weatherLoop.loop.stop(1.4); weatherLoop = null; }
+  if (!want) return;
   const ac = getAudio();
+  if (!ac || ac.state !== 'running') { armGesture(); return; }
+  const id = want;
+  loadAudio(`/audio/meteo-${id}.m4a`).then(buf => {
+    // Le temps a pu changer pendant le décodage.
+    if (!buf || desiredWeather !== id || isMuted() || !desired) return;
+    if (weatherLoop) weatherLoop.loop.stop(0.4);
+    const loop = startLoop(buf, WEATHER_GAIN, 2.5);
+    if (loop) weatherLoop = { id, loop };
+  });
+}
+
+const WEATHER_GAIN = 0.42;  // la couche météo reste sous le lit du quartier
+
+function sync(): void {
+  const ac = getAudio();
+  const want = isMuted() ? null : desired;
+
+  // Rien à faire si on joue déjà ce qu'il faut.
+  if (running && running.id === want) { syncWeather(); return; }
+  if (fileLoop && fileLoop.id === want) { syncWeather(); return; }
+
+  if (running) { running.stop(); running = null; }
+  if (fileLoop) { fileLoop.loop.stop(1.0); fileLoop = null; }
+  if (!want) { syncWeather(); return; }
   if (!ac) return;
   if (ac.state !== 'running') { armGesture(); return; }
-  const build = BUILDERS[desired];
-  running = { id: desired, stop: build(ac) };
+
+  // Le thème du titre reste synthétisé : il plaît tel quel.
+  if (want === 'title') { running = { id: want, stop: BUILDERS[want](ac) }; syncWeather(); return; }
+
+  // On tente le vrai fichier ; s'il n'est pas là, la synthèse prend le relais.
+  loadAudio(`/audio/amb-${want}.m4a`).then(buf => {
+    if (desired !== want || isMuted()) return;        // le joueur a bougé entre-temps
+    if (running || fileLoop) return;                  // quelqu'un a déjà démarré
+    if (buf) {
+      const loop = startLoop(buf, MASTER_GAIN, 1.6);
+      if (loop) { fileLoop = { id: want, loop }; syncWeather(); return; }
+    }
+    const ac2 = getAudio();
+    if (!ac2 || ac2.state !== 'running') return;
+    running = { id: want, stop: BUILDERS[want](ac2) };
+    syncWeather();
+  });
 }
 
 // Autoplay : tant que l'utilisateur n'a pas touché l'écran, le contexte est
@@ -66,7 +144,7 @@ function armGesture(): void {
   EVENTS.forEach((e) => window.addEventListener(e, kick, { capture: true }));
 }
 
-onMuteChange(() => sync());
+onMuteChange(() => { sync(); syncWeather(); });
 
 /* ------------------------------------------------------------------ */
 /* Boîte à outils commune                                              */

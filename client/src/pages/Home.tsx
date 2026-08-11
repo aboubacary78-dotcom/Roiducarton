@@ -7,7 +7,7 @@ import { useGame } from '@/contexts/GameContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { screenIn } from '@/lib/anim';
-import { setAmbience, type AmbienceId } from '@/lib/ambience';
+import { setAmbience, setWeatherLayer, weatherLayerFor, type AmbienceId } from '@/lib/ambience';
 import TitleScreen from '@/components/game/TitleScreen';
 import CharacterSelect from '@/components/game/CharacterSelect';
 import MainScreen from '@/components/game/MainScreen';
@@ -70,7 +70,14 @@ export default function Home() {
     else if (location) setAmbience(location as AmbienceId);
     else setAmbience(null);
   }, [state.screen, location]);
-  useEffect(() => () => setAmbience(null), []);
+
+  // La météo se pose PAR-DESSUS le quartier : il peut pleuvoir au parc comme
+  // à la gare. Un ciel dégagé ou nuageux ne fait pas de bruit, d'où le null.
+  useEffect(() => {
+    setWeatherLayer(weatherLayerFor(state.weather));
+  }, [state.weather]);
+
+  useEffect(() => () => { setAmbience(null); setWeatherLayer(null); }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center"
