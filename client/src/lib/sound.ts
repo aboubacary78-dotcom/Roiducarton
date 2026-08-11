@@ -6,6 +6,8 @@
  * Un réglage "muet" est mémorisé dans le localStorage (voir l'écran Options).
  */
 
+import { loadAudio, isKnownMissing, playBuffer } from './audioFiles';
+
 const MUTE_KEY = 'roi-du-carton-muted';
 
 let muted = (() => {
@@ -118,7 +120,7 @@ export function playHurt(): void {
 }
 
 /** Petite fanfare de victoire. */
-export function playWin(): void {
+function playWinSynth(): void {
   if (muted) return;
   const notes = [523, 659, 784, 1047];
   notes.forEach((f, i) => setTimeout(() => tone(f, 0.16, 'triangle', 0.12), i * 90));
@@ -145,14 +147,14 @@ export function playFail(): void {
 }
 
 /** Tintement de pièces : achat, gain d'argent. */
-export function playCoin(): void {
+function playCoinSynth(): void {
   if (muted) return;
   tone(1180, 0.06, 'triangle', 0.08);
   setTimeout(() => tone(1560, 0.09, 'triangle', 0.07), 55);
 }
 
 /** Passage au jour suivant : cloche douce qui descend. */
-export function playNextDay(): void {
+function playNextDaySynth(): void {
   if (muted) return;
   tone(660, 0.18, 'sine', 0.09, 440);
   setTimeout(() => tone(440, 0.32, 'sine', 0.08, 300), 120);
@@ -173,7 +175,7 @@ export function playStep(): void {
 }
 
 /** Alerte : repéré par un gardien (mini-jeu de vol). */
-export function playSpotted(): void {
+function playSpottedSynth(): void {
   if (muted) return;
   tone(440, 0.1, 'square', 0.08, 680);
   setTimeout(() => tone(440, 0.12, 'square', 0.08, 680), 130);
@@ -242,8 +244,39 @@ function speciesVoice(emoji?: string, name?: string): (() => void) | null {
  * ESPÈCE (mouette, chat, clown, vigile…) ; à défaut, la famille générique
  * déduite de son pattern de projectiles.
  */
+/** Nom d'ennemi → nom de fichier. Même translittération que le brief du pack
+ *  son 4 : minuscules, accents retirés, tout le reste en tirets. */
+export function enemySlug(name: string): string {
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+/**
+ * Le cri de l'ennemi qui entre en scène.
+ *
+ * On tente d'abord SON fichier (pack son 4). S'il n'existe pas — c'est le cas
+ * d'un roi hérité, qui porte le nom du personnage mort du joueur — on retombe
+ * sur la synthèse par famille. Jamais les deux : le repli n'est déclenché que
+ * lorsque le chargement a échoué.
+ */
 export function playEnemyCry(pattern: string, emoji?: string, name?: string): void {
   if (muted) return;
+  if (name) {
+    const file = `/audio/cry-${enemySlug(name)}.m4a`;
+    if (!isKnownMissing(file)) {
+      loadAudio(file).then(buf => {
+        if (buf) playBuffer(buf, 0.85);
+        else synthEnemyCry(pattern, emoji, name);
+      });
+      vibrate(35);
+      return;
+    }
+  }
+  synthEnemyCry(pattern, emoji, name);
+}
+
+/** Le cri de secours, synthétisé par famille (voir l'en-tête). */
+function synthEnemyCry(pattern: string, emoji?: string, name?: string): void {
   const voice = speciesVoice(emoji, name);
   if (voice) { voice(); vibrate(35); return; }
   switch (pattern) {
@@ -271,6 +304,26 @@ export function playEnemyCry(pattern: string, emoji?: string, name?: string): vo
   vibrate(35);
 }
 
+
+/*
+ * LES MOMENTS ENREGISTRÉS (pack son 2)
+ * ------------------------------------
+ * Une poignée d'instants ont maintenant leur vrai bruitage. Le principe est
+ * toujours le même : on tente le fichier, et la synthèse d'origine ne se
+ * déclenche QUE s'il n'est pas là. Jamais les deux.
+ *
+ * `withFile` enveloppe donc une fonction existante sans la modifier : le repli
+ * reste exactement le son que le jeu produisait avant, ligne pour ligne.
+ */
+function withFile(file: string, gain: number, fallback: () => void): () => void {
+  return () => {
+    if (muted) return;
+    const url = `/audio/${file}.m4a`;
+    if (isKnownMissing(url)) { fallback(); return; }
+    loadAudio(url).then(buf => { if (buf) playBuffer(buf, gain); else fallback(); });
+  };
+}
+
 /** Gong d'ouverture de bagarre : le combat s'enclenche. */
 export function playFightStart(): void {
   if (muted) return;
@@ -283,7 +336,7 @@ export function playFightStart(): void {
 }
 
 /** Arrivée du Roi : cloches graves, fanfare menaçante, la rue retient son souffle. */
-export function playKingArrival(): void {
+function playKingArrivalSynth(): void {
   if (muted) return;
   // Trois cloches d'église, lourdes et espacées.
   [0, 620, 1240].forEach((d) => setTimeout(() => {
@@ -299,7 +352,7 @@ export function playKingArrival(): void {
 }
 
 /** K.O. : l'adversaire s'écroule (impact sourd + chute + petite fanfare). */
-export function playKO(): void {
+function playKOSynth(): void {
   if (muted) return;
   // Le coup de grâce.
   noise(0.16, 0.18, 500);
@@ -349,3 +402,38 @@ export function vibrate(pattern: number | number[]): void {
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate(pattern);
   } catch { /* silent */ }
 }
+
+/** playCoin : le vrai bruitage s'il est là, la synthèse sinon. */
+export const playCoin = withFile('moment-piece', 0.85, playCoinSynth);
+
+/** playNextDay : le vrai bruitage s'il est là, la synthèse sinon. */
+export const playNextDay = withFile('moment-jour-nouveau', 0.8, playNextDaySynth);
+
+/** playWin : le vrai bruitage s'il est là, la synthèse sinon. */
+export const playWin = withFile('moment-victoire', 0.85, playWinSynth);
+
+/** playKO : le vrai bruitage s'il est là, la synthèse sinon. */
+export const playKO = withFile('moment-ko', 0.9, playKOSynth);
+
+/** playKingArrival : le vrai bruitage s'il est là, la synthèse sinon. */
+export const playKingArrival = withFile('moment-sacre', 0.9, playKingArrivalSynth);
+
+/** playSpotted : le vrai bruitage s'il est là, la synthèse sinon. */
+export const playSpotted = withFile('moment-attrape', 0.9, playSpottedSynth);
+
+// ---- Les moments qui n'avaient pas encore de son à eux ----------------------
+// Chacun garde un repli parmi les sons existants : si le fichier manque, on
+// entend quelque chose de sensé plutôt que rien.
+
+/** Écran de mort : une résonance longue, puis une pièce qui roule. */
+export const playDeath = withFile('moment-mort', 0.95, playFail);
+/** « Le Sursaut » : le souvenir qui remonte, une fois par partie. */
+export const playMemory = withFile('moment-souvenir', 0.85, playUnlock);
+/** La Récup' : on déterre une vraie trouvaille. */
+export const playFind = withFile('moment-trouvaille', 0.85, playUnlock);
+/** La Récup' : le tas se réveille et on perd tout. */
+export const playCollapse = withFile('moment-craquement', 0.9, playFail);
+/** Le Culot : le marchandage aboutit, on serre la main. */
+export const playHandshake = withFile('moment-poignee-main', 0.85, playSuccess);
+/** Le Culot : le commerçant se braque et baisse le rideau. */
+export const playShutter = withFile('moment-porte-claque', 0.9, playFail);

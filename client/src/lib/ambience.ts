@@ -31,11 +31,17 @@
 import { getAudio, isMuted, onMuteChange } from './sound';
 import { loadAudio, startLoop, type Loop } from './audioFiles';
 
-export type AmbienceId = 'title' | 'parc' | 'centre-ville' | 'zone-industrielle' | 'gare' | 'marche';
+export type AmbienceId = 'title' | 'parc' | 'centre-ville' | 'zone-industrielle' | 'gare' | 'marche'
+  // Lits de mini-jeu (pack son 2). Ils n'ont pas de repli synthétisé : avant
+  // eux, ces écrans étaient simplement silencieux, et c'est donc là qu'on
+  // retombe si le fichier manque.
+  | 'mg-bagarre' | 'mg-esquive' | 'mg-casse' | 'mg-manche' | 'mg-recup' | 'mg-marchandage';
 
 type Stopper = () => void;
 
-const MASTER_GAIN = 0.55; // les ambiances restent un lit sous les effets
+const MASTER_GAIN = 0.55;   // les ambiances restent un lit sous les effets
+const MINIGAME_GAIN = 0.34; // un lit de mini-jeu passe encore plus bas : la
+                            // tension doit venir des effets, pas du fond
 
 let desired: AmbienceId | null = null;
 let running: { id: AmbienceId; stop: Stopper } | null = null;
@@ -72,7 +78,10 @@ export function setWeatherLayer(id: WeatherLayerId | null): void {
 }
 
 function syncWeather(): void {
-  const want = isMuted() || !desired ? null : desiredWeather;
+  // Pas de météo par-dessus un mini-jeu : ses écrans ont leur propre lit, et
+  // superposer la pluie brouillerait la lecture.
+  const inGame = !!desired && !desired.startsWith('mg-') && desired !== 'title';
+  const want = isMuted() || !inGame ? null : desiredWeather;
   if (weatherLoop && weatherLoop.id === want) return;
   if (weatherLoop) { weatherLoop.loop.stop(1.4); weatherLoop = null; }
   if (!want) return;
@@ -105,7 +114,20 @@ function sync(): void {
   if (ac.state !== 'running') { armGesture(); return; }
 
   // Le thème du titre reste synthétisé : il plaît tel quel.
-  if (want === 'title') { running = { id: want, stop: BUILDERS[want](ac) }; syncWeather(); return; }
+  if (want === 'title') { running = { id: want, stop: BUILDERS[want]!(ac) }; syncWeather(); return; }
+
+  // Les lits de mini-jeu : le fichier ou rien. Ils sont plus discrets que les
+  // quartiers — on joue par-dessus, la tension vient des effets.
+  if (want.startsWith('mg-')) {
+    loadAudio(`/audio/${want}.m4a`).then(buf => {
+      if (desired !== want || isMuted() || fileLoop || running) return;
+      if (!buf) return;
+      const loop = startLoop(buf, MINIGAME_GAIN, 1.8);
+      if (loop) fileLoop = { id: want, loop };
+    });
+    syncWeather();
+    return;
+  }
 
   // On tente le vrai fichier ; s'il n'est pas là, la synthèse prend le relais.
   loadAudio(`/audio/amb-${want}.m4a`).then(buf => {
@@ -117,7 +139,8 @@ function sync(): void {
     }
     const ac2 = getAudio();
     if (!ac2 || ac2.state !== 'running') return;
-    running = { id: want, stop: BUILDERS[want](ac2) };
+    const build = BUILDERS[want];
+    if (build) running = { id: want, stop: build(ac2) };
     syncWeather();
   });
 }
@@ -457,7 +480,10 @@ function startMarche(ac: AudioContext): Stopper {
   return kitStopper(kit);
 }
 
-const BUILDERS: Record<AmbienceId, (ac: AudioContext) => Stopper> = {
+// Partiel à dessein : les lits de mini-jeu n'ont pas de version synthétisée.
+// Avant le pack son 2 ces écrans étaient silencieux, et c'est très bien ainsi
+// — mieux vaut le silence qu'un ersatz.
+const BUILDERS: Partial<Record<AmbienceId, (ac: AudioContext) => Stopper>> = {
   'title': startTitle,
   'parc': startParc,
   'centre-ville': startCentreVille,

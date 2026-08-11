@@ -9,6 +9,7 @@ import { useLang, tr, tc } from '@/lib/lang';
 import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown } from '@/lib/necrology';
 import { getEquipped } from '@/lib/profile';
 import { pushToast } from '@/lib/toast';
+import { playDeath } from '@/lib/sound';
 
 /*
  * L'écran de fin est une « une de journal » : la mort du personnage devient
@@ -89,6 +90,8 @@ export default function GameOverScreen() {
 
   // Pub interstitielle à l'arrivée sur l'écran de fin (entre deux parties).
   useEffect(() => { showInterstitial(); }, []);
+  // La résonance de fin : une seule fois, à l'ouverture de l'écran.
+  useEffect(() => { playDeath(); }, []);
 
   const canRevive = !!char && !char.activeFlags.includes('revived');
 

@@ -7,6 +7,7 @@ import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
 import { stampTap, liftHover } from '@/lib/anim';
 import { playEventSfx } from '@/lib/eventSfx';
+import { playMemory } from '@/lib/sound';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.webp';
 
@@ -64,7 +65,11 @@ export default function EventScreen() {
   useEffect(() => {
     if (!state.currentEvent) return;
     const e = state.currentEvent;
-    playEventSfx(`${e.id} ${e.title} ${e.description}`);
+    // « Le Sursaut » n'arrive qu'une fois par partie, au bord du gouffre : il a
+    // son propre son plutôt que le bruitage de famille (qui le rangeait avec
+    // les fantômes).
+    if (e.id === 'sursaut') playMemory();
+    else playEventSfx(`${e.id} ${e.title} ${e.description}`);
   }, [state.currentEvent?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function activateBoost() {

@@ -3,6 +3,7 @@ import type { Character, CombatState, CombatCard, SignId, DodgeProj } from '@/co
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { playHurt, playWhoosh, playEnemyCry, playFightStart, playKingArrival } from '@/lib/sound';
+import { setAmbience } from '@/lib/ambience';
 import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
@@ -87,6 +88,12 @@ function CombatScreenInner() {
   const enemyEmoji = currentCombat?.enemyEmoji;
   const enemyName = currentCombat?.enemyName;
   useEffect(() => { if (pattern) playEnemyCry(pattern, enemyEmoji, enemyName); }, [pattern, enemyEmoji, enemyName]);
+
+  // L'esquive a son propre lit, plus nerveux que celui du duel de signes.
+  // On revient à la bagarre dès que la manche est finie.
+  useEffect(() => {
+    setAmbience(currentCombat?.phase === 'dodge' ? 'mg-esquive' : 'mg-bagarre');
+  }, [currentCombat?.phase]);
   // Ouverture du combat : petite mise en scène « VS » + comment ça a commencé.
   const [intro, setIntro] = useState(true);
   const brawl = useState(() => BRAWL_STARTS[Math.floor(Math.random() * BRAWL_STARTS.length)])[0];

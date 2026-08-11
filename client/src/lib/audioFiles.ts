@@ -57,6 +57,36 @@ export function isKnownMissing(url: string): boolean {
   return cache.get(url) === null;
 }
 
+/**
+ * Joue un tampon une fois. Sert aux bruitages ponctuels : cri d'ennemi, pièce
+ * qui tombe, rideau qui claque. Rien à arrêter, le nœud se libère tout seul.
+ */
+export function playBuffer(buffer: AudioBuffer, gain = 1): void {
+  const ac = getAudio();
+  if (!ac) return;
+  const src = ac.createBufferSource();
+  src.buffer = buffer;
+  const g = ac.createGain();
+  g.gain.value = gain;
+  src.connect(g).connect(ac.destination);
+  src.start();
+  src.onended = () => { try { src.disconnect(); g.disconnect(); } catch { /* silent */ } };
+}
+
+/**
+ * Joue un fichier une fois, s'il existe. Renvoie `true` si le son a pu être
+ * lancé — l'appelant sait ainsi s'il doit déclencher son repli synthétisé.
+ * Le premier appel décode le fichier, les suivants sont immédiats.
+ */
+export function playFile(url: string, gain = 1): Promise<boolean> {
+  if (isKnownMissing(url)) return Promise.resolve(false);
+  return loadAudio(url).then(buf => {
+    if (!buf) return false;
+    playBuffer(buf, gain);
+    return true;
+  });
+}
+
 export interface Loop {
   /** Coupe la boucle, avec un fondu de sortie. */
   stop: (fadeS?: number) => void;

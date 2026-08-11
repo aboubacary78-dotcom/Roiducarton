@@ -15,7 +15,7 @@
  * sont de petits entiers : sans le pourcentage, la moitié des coups sembleraient
  * ne rien faire (voir l'en-tête de data/haggle.ts).
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import { tr, tc } from '@/lib/lang';
@@ -26,8 +26,9 @@ import {
   moves, openingPrice, priceFor, startingPatience, tradeCandidate,
   type ArgumentId, type Shopkeeper,
 } from '@/contexts/GameContext';
-import { playClick, playSuccess, playFail, playCoin } from '@/lib/sound';
+import { playClick, playCoin, playHandshake, playShutter } from '@/lib/sound';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import { setAmbience, type AmbienceId } from '@/lib/ambience';
 
 type Phase = 'talk' | 'deal' | 'broken';
 
@@ -63,6 +64,16 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
   // négociation de la partie.
   const [intro, setIntro] = useState(!introSeen('haggle1'));
 
+  // Le marchandage se joue dans la boutique, pas sur un écran à lui : c'est
+  // donc ici qu'on pose son lit sonore, et qu'on le retire en sortant.
+  useEffect(() => {
+    if (intro) return;
+    setAmbience('mg-marchandage');
+    // En sortant on rend la boutique à son quartier : la couper au silence
+    // laisserait l'écran muet jusqu'au prochain changement d'écran.
+    return () => { setAmbience(char.location as AmbienceId); };
+  }, [intro, char.location]);
+
   const price = priceFor(open, cut);
   const mood = keeperMood(patience, maxPatience);
   const trade = tradeCandidate(char);
@@ -73,7 +84,7 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
     if (left <= 0) {
       setPhase('broken');
       setLine(keeper.snap);
-      playFail();
+      playShutter();
       return false;
     }
     return true;
@@ -129,7 +140,7 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
 
   function shake() {
     if (phase !== 'talk') return;
-    playSuccess();
+    playHandshake();
     setPhase('deal');
     setLine(keeper.deal);
   }

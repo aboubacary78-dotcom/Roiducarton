@@ -5,7 +5,7 @@ import {
 import type { SalvageFind } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { playHit, playCrit, playHurt, playStep } from '@/lib/sound';
+import { playHit, playCrit, playHurt, playStep, playFind, playCollapse } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import LocationBackdrop from './LocationBackdrop';
@@ -121,7 +121,8 @@ function SalvageInner() {
     endedRef.current = true;
     const reason = how === 'bust' ? randomFromArray(BUST_REASONS) : undefined;
     setEnded({ how, reason });
-    if (how === 'bust') playHurt(); else playCrit();
+    // Le tas qui se réveille a son propre son : c'est le moment où tout se perd.
+    if (how === 'bust') playCollapse(); else playCrit();
     setTimeout(() => dispatch({
       type: 'RESOLVE_SALVAGE',
       // L'Agile ressort avec ce qu'il avait dans les mains, même quand tout
@@ -189,7 +190,7 @@ function SalvageInner() {
       bazarRef.current += 1; setBazar(bazarRef.current); playCrit();
     } else if (f.kind === 'trouvaille') {
       trouvaillesRef.current = [...trouvaillesRef.current, f.id];
-      setTrouvailles(trouvaillesRef.current); playCrit();
+      setTrouvailles(trouvaillesRef.current); playFind();
     } else {
       // Ce qu'une saleté coûte dépend de qui fouille : l'haleine redoutable
       // fait fuir les rats, le phobique en fait une attaque de panique.

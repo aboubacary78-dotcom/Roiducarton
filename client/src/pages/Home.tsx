@@ -66,7 +66,13 @@ export default function Home() {
   useEffect(() => {
     const s = state.screen;
     if (s === 'title' || s === 'character-select') setAmbience('title');
-    else if (s === 'combat' || s === 'steal-game' || s === 'beg-game' || s === 'salvage-game' || s === 'game-over') setAmbience(null);
+    // Les mini-jeux ont désormais leur propre lit (pack son 2). L'écran de fin
+    // reste silencieux : la résonance de mort s'y suffit.
+    else if (s === 'combat') setAmbience('mg-bagarre');
+    else if (s === 'steal-game') setAmbience('mg-casse');
+    else if (s === 'beg-game') setAmbience('mg-manche');
+    else if (s === 'salvage-game') setAmbience('mg-recup');
+    else if (s === 'game-over') setAmbience(null);
     else if (location) setAmbience(location as AmbienceId);
     else setAmbience(null);
   }, [state.screen, location]);
