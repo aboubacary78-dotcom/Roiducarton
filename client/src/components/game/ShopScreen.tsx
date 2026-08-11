@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay, SOLIDARITY_FLAG, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META, shopkeeperFor, HAGGLED_FLAG, HAGGLE_TUNING } from '@/contexts/GameContext';
+import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay, SOLIDARITY_FLAG, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META, shopkeeperFor, HAGGLED_FLAG, HAGGLE_TUNING, haggleReopen } from '@/contexts/GameContext';
 import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
@@ -62,7 +62,9 @@ export default function ShopScreen() {
     setReopeningId(shop.id);
     const rewarded = await showRewarded();
     if (rewarded) {
-      const reason = absurdReopen(shop.id);
+      // Brouille de marchandage : on se réconcilie. Panne : on répare.
+      const closed = shopClosure(char, shop.id);
+      const reason = closed?.fromHaggle ? haggleReopen() : absurdReopen(shop.id);
       dispatch({ type: 'REOPEN_SHOP', shopId: shop.id });
       pushToast(`${tc(shop.name)} : ${tr(reason.fr, reason.en)}`, { emoji: '🔓', tone: 'good' });
     }

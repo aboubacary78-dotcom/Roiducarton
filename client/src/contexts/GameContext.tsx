@@ -24,7 +24,7 @@ import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather
 import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
 import { ENEMIES, rollSignRound } from './data/enemies';
 import { SHOPS, shopClosure, rollShopClosure, getSellPrice, SOLIDARITY_GIFT, SOLIDARITY_FLAG } from './data/shops';
-import { HAGGLE_TUNING, HAGGLED_FLAG } from './data/haggle';
+import { HAGGLE_TUNING, HAGGLED_FLAG, shopkeeperFor } from './data/haggle';
 import {
   generateEvents, generateBegEvents, generateRestEvents, generateTravelEvent,
   freshPool, rememberEvent, flavorFrom, makeLegendEvent, dueSursaut,
@@ -1367,11 +1367,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Une porte qui se ferme, pas une amende (voir data/haggle.ts).
       const closures = [...(c.shopClosures || [])];
       if (action.broken) {
-        closures.push({
-          shopId: action.shopId, untilDay: c.day + 1,
-          reason: 'vous avez trop tiré sur la corde. Le patron ne vous sert plus aujourd\'hui.',
-          reasonEn: 'you pushed your luck. The owner won\'t serve you today.',
-        });
+        const [reason, reasonEn] = shopkeeperFor(action.shopId)?.closure
+          ?? ['vous avez trop tiré sur la corde pendant le marchandage.',
+              'you pushed the haggling too far.'];
+        closures.push({ shopId: action.shopId, untilDay: c.day + 1, reason, reasonEn, fromHaggle: true });
       }
       // Une vraie affaire se sait dans le quartier.
       const gained = !action.broken && action.cut >= HAGGLE_TUNING.goodDealCut

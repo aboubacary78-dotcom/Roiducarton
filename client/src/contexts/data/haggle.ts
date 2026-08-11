@@ -60,6 +60,10 @@ export interface Shopkeeper {
   snap: string;
   /** Ce qu'il dit en topant. */
   deal: string;
+  /** Le motif affiché sur le rideau baissé, quand on l'a poussé à bout. Il
+   *  doit dire QUE c'est le marchandage qui a mis le feu aux poudres : sinon
+   *  le joueur retrouve une boutique fermée sans faire le lien. */
+  closure: [fr: string, en: string];
 }
 
 export const SHOPKEEPERS: Shopkeeper[] = [
@@ -70,6 +74,8 @@ export const SHOPKEEPERS: Shopkeeper[] = [
     tell: '« Là je ne peux plus. La farine, elle ne se donne pas non plus. »',
     snap: '« Écoutez, revenez demain. Là, j\'ai du monde. »',
     deal: '« Tenez. Et mangez-le, ne le revendez pas. »',
+    closure: ['vous avez tellement discuté le prix d\'un sandwich que la boulangère a mis la pancarte « FERMÉ » en vous regardant dans les yeux.',
+      'you haggled so hard over a sandwich that the baker flipped the CLOSED sign while looking you in the eye.'],
   },
   {
     shopId: 'epicerie', role: "L'épicier de nuit", floor: 0.7, patience: 88, insistCost: 20, insistBite: 0.15,
@@ -78,6 +84,8 @@ export const SHOPKEEPERS: Shopkeeper[] = [
     tell: '« Non. À ce prix-là j\'éteins et je rentre chez moi. »',
     snap: '« Bon. La caisse est fermée pour vous aujourd\'hui. »',
     deal: '« Marché conclu. Et refermez la porte en sortant. »',
+    closure: ['vous avez marchandé jusqu\'à ce que l\'épicier éteigne l\'enseigne. Il a dit que ça lui coûtait moins cher que de vous écouter.',
+      'you haggled until the grocer killed the neon sign. He said it was cheaper than listening to you.'],
   },
   {
     shopId: 'pharmacie', role: 'Le pharmacien', floor: 0.58, patience: 132, insistCost: 15, insistBite: 0.16,
@@ -86,6 +94,8 @@ export const SHOPKEEPERS: Shopkeeper[] = [
     tell: '« En dessous, c\'est moi qui rembourse la Sécu. »',
     snap: '« Je préfère qu\'on en reste là. Prenez soin de vous. »',
     deal: '« Voilà. Et buvez de l\'eau avec, hein. »',
+    closure: ['le pharmacien a fini par vous tendre un verre d\'eau et vous montrer la porte. Il paraît que vous parliez très fort du prix du sirop.',
+      'the pharmacist ended up handing you a glass of water and pointing at the door. Apparently you were quite loud about the price of cough syrup.'],
   },
   {
     shopId: 'marche-aux-puces', role: 'La brocanteuse de l\'étal', floor: 0.5, patience: 104, insistCost: 16, insistBite: 0.19,
@@ -94,6 +104,8 @@ export const SHOPKEEPERS: Shopkeeper[] = [
     tell: '« Là non. En dessous je perds de l\'argent à vous le vendre. »',
     snap: '« Circulez. J\'ai d\'autres clients, moi. »',
     deal: '« Adjugé. Vous m\'aurez bien eue. »',
+    closure: ['la brocanteuse a replié son étal plutôt que de vous entendre proposer un prix de plus. Les autres vendeurs ont applaudi.',
+      'the stallholder packed up rather than hear you name one more price. The other sellers applauded.'],
   },
   {
     shopId: 'brocanteur', role: 'Le brocanteur louche', floor: 0.45, patience: 70, insistCost: 24, insistBite: 0.2,
@@ -102,6 +114,8 @@ export const SHOPKEEPERS: Shopkeeper[] = [
     tell: '« Non. Celui-là, c\'est ce prix ou rien. Pas de question. »',
     snap: '« Dehors. Et t\'as rien vu ici. »',
     deal: '« Prends et disparais. On s\'est jamais parlé. »',
+    closure: ['le brocanteur a baissé le rideau au milieu de votre phrase. On ne marchande pas deux fois avec lui le même jour.',
+      'the dealer rolled the shutters down mid-sentence. You don\'t haggle with him twice in one day.'],
   },
   {
     shopId: 'kebab', role: 'Le kebabier', floor: 0.6, patience: 122, insistCost: 14, insistBite: 0.18,
@@ -110,6 +124,8 @@ export const SHOPKEEPERS: Shopkeeper[] = [
     tell: '« Là c\'est la viande qui coûte, mon frère. Je peux rien. »',
     snap: '« Va manger ailleurs aujourd\'hui. Sans rancune. »',
     deal: '« Tiens. Et mets de la sauce, ça fait pas de mal. »',
+    closure: ['vous avez négocié le kebab si longtemps que la broche a refroidi. Le patron vous a gentiment mis dehors.',
+      'you haggled over the kebab so long the skewer went cold. The owner politely showed you out.'],
   },
   {
     shopId: 'laverie', role: 'La gérante de la laverie', floor: 0.66, patience: 108, insistCost: 17, insistBite: 0.16,
@@ -118,6 +134,8 @@ export const SHOPKEEPERS: Shopkeeper[] = [
     tell: '« En dessous, c\'est l\'électricité que je paie de ma poche. »',
     snap: '« Revenez demain, là je ferme les machines. »',
     deal: '« Allez-y. Et prenez le tambour du fond, il chauffe mieux. »',
+    closure: ['la gérante a coupé les machines. Elle dit qu\'un lavage se paie, et qu\'elle n\'a pas que ça à faire.',
+      'the manager shut the machines off. She says a wash costs what it costs, and she has other things to do.'],
   },
   {
     shopId: 'herboriste', role: "L'herboriste", floor: 0.56, patience: 144, insistCost: 12, insistBite: 0.14,
@@ -126,6 +144,8 @@ export const SHOPKEEPERS: Shopkeeper[] = [
     tell: '« Non. La plante a mis six mois à pousser, elle vaut ça. »',
     snap: '« Je crois qu\'il vaut mieux se quitter là. Respirez. »',
     deal: '« Emportez-la. Elle vous attendait, je crois. »',
+    closure: ['l\'herboriste a fermé les yeux, respiré très lentement, puis fermé la boutique. Votre marchandage avait « troublé l\'équilibre ».',
+      'the herbalist closed her eyes, breathed very slowly, then closed the shop. Your haggling had \'disturbed the balance\'.'],
   },
 ];
 
@@ -143,6 +163,25 @@ export const NO_HAGGLE: Record<string, string> = {
   distributeur: 'On ne marchande pas avec un distributeur. On le secoue, et encore.',
   fontaine: "L'eau est déjà gratuite. Difficile de faire baisser ce prix-là.",
 };
+
+/** Réouverture après une brouille de marchandage. `absurdReopen` ne convient
+ *  pas ici : il raconte une panne réparée (« vous rallumez le four »), alors
+ *  qu'il n'y a rien à réparer — juste quelqu'un à qui reparler. */
+const HAGGLE_REOPEN: Array<[string, string]> = [
+  ['Vous revenez la tête basse et vous payez le prix affiché sans un mot. Le rideau se relève.',
+   'You come back sheepish and pay the asking price without a word. The shutters roll up.'],
+  ['Vous présentez des excuses maladroites mais sincères. On vous refait une place.',
+   'You offer clumsy but honest apologies. Room is made for you again.'],
+  ['Un client témoigne que vous n\'êtes « pas si pénible que ça ». Le patron soupire et rouvre.',
+   'A customer testifies you\'re "not that bad really". The owner sighs and reopens.'],
+  ['Vous ne dites rien du tout, cette fois. C\'est exactement ce qu\'il fallait faire.',
+   'You say nothing at all this time. That was exactly the right move.'],
+];
+
+export function haggleReopen(): { fr: string; en: string } {
+  const [fr, en] = randomFromArray(HAGGLE_REOPEN);
+  return { fr, en };
+}
 
 // ---- Les arguments --------------------------------------------------------
 
@@ -215,6 +254,11 @@ export const HAGGLE_TUNING = {
   insistDecay: 1.5,
   /** Gain en dessous duquel « il ne bouge plus ». */
   deadGain: 0.012,
+  /** Échelle fixe de la barre de remise à l'écran. Volontairement décorrélée
+   *  du plancher du commerçant : la barre montre ce qu'on a arraché, pas ce
+   *  qu'il reste à arracher. Rien ne doit souffler au joueur « encore un
+   *  effort, il va lâcher ». */
+  barScale: 0.5,
   /** Bonus quand l'argument touche la corde sensible du commerçant. */
   softBoost: 1.3,
   /** Dignité dépensée par « Ravaler sa fierté ». */
@@ -409,12 +453,3 @@ export function keeperMood(patience: number, max: number): { emoji: string; labe
   return { emoji: '🤬', label: 'la main sur le rideau' };
 }
 
-/** À quelle remise le prix affiché tombera-t-il à l'euro inférieur ? Sert à
- *  poser un repère sur la barre : sans lui, une remise de 10 % qui laisse le
- *  prix inchangé donne l'impression que le coup n'a rien fait. */
-export function nextEuroCut(asking: number, cut: number): number | null {
-  const price = priceFor(asking, cut);
-  if (price <= HAGGLE_TUNING.minPrice) return null;
-  const needed = 1 - (price - 0.5) / asking;
-  return needed > cut ? needed : null;
-}

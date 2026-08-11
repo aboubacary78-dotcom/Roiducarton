@@ -23,7 +23,7 @@ import type { ShopItem } from '@/contexts/types';
 import {
   ARGUMENTS, HAGGLE_TUNING, argumentGain, argumentLands, availableArguments,
   costMultiplier, grumbleLine, haggleMods, insistGain, keeperMood, maxCutFor,
-  moves, nextEuroCut, openingPrice, priceFor, startingPatience, tradeCandidate,
+  moves, openingPrice, priceFor, startingPatience, tradeCandidate,
   type ArgumentId, type Shopkeeper,
 } from '@/contexts/GameContext';
 import { playClick, playSuccess, playFail, playCoin } from '@/lib/sound';
@@ -64,7 +64,6 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
   const [intro, setIntro] = useState(!introSeen('haggle1'));
 
   const price = priceFor(open, cut);
-  const nextEuro = nextEuroCut(open, cut);
   const mood = keeperMood(patience, maxPatience);
   const trade = tradeCandidate(char);
 
@@ -237,25 +236,16 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
           {/* La barre de remise : c'est elle qui bouge à chaque coup, même quand
               l'euro reste au même chiffre. Sans elle, la moitié des actions
               sembleraient sans effet. */}
-          <div className="relative h-1.5 mt-2 rounded-full bg-[#E8D5C0]">
+          {/* La barre dit ce qu'on a OBTENU, jamais ce qui reste à obtenir.
+              Elle est calée sur une échelle fixe (voir barScale) et non sur le
+              plancher du commerçant : sinon elle trahirait jusqu'où il peut
+              descendre, et personne ne vous souffle ça dans une vraie
+              négociation. Le tic du commerçant reste le seul signal, et il ne
+              parle que du présent. */}
+          <div className="relative h-1.5 mt-2 rounded-full bg-[#E8D5C0] overflow-hidden">
             <motion.div className="h-full rounded-full bg-[#4A9B5F]"
-              animate={{ width: `${Math.min(100, (cut / maxCut) * 100)}%` }} />
-            {/* Repère du prochain euro. Sans lui, une remise qui passe de 6 % à
-                10 % sans faire bouger le chiffre donne l'impression que le coup
-                n'a servi à rien. Là, on voit qu'on s'en approche. */}
-            {nextEuro !== null && nextEuro < maxCut && (
-              <span
-                className="absolute -top-1 w-0.5 h-3.5 rounded-full bg-[#B8860B]"
-                style={{ left: `${Math.min(100, (nextEuro / maxCut) * 100)}%` }}
-                title={tr('à partir d\'ici, un euro de moins', 'one euro less from here')}
-              />
-            )}
+              animate={{ width: `${Math.min(100, (cut / HAGGLE_TUNING.barScale) * 100)}%` }} />
           </div>
-          {nextEuro !== null && nextEuro < maxCut && (
-            <p className="relative text-[9px] text-[#A08B70] mt-1.5">
-              ▲ {tr('encore un effort et ça passe à', 'a bit more and it drops to')} {price - 1} €
-            </p>
-          )}
         </div>
 
         {/* ---- Ce qu'il dit ---- */}

@@ -331,6 +331,9 @@ export interface ShopClosure {
   shopId: string;
   untilDay: number;   // la boutique rouvre à partir de ce jour
   reason: string; reasonEn: string;
+  // Fermeture provoquée par un marchandage qui a mal tourné (et non par une
+  // panne). Change le texte de réouverture : on ne répare rien, on s'excuse.
+  fromHaggle?: boolean;
 }
 
 // ============ MÉTA / PROGRESSION ============
