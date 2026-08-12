@@ -2,9 +2,11 @@ import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { isMuted, setMuted } from '@/lib/sound';
-import { isAdsRemoved, purchaseRemoveAds } from '@/lib/ads';
+import { isAdsRemoved, purchaseRemoveAds, reopenConsentForm } from '@/lib/ads';
+import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
 import { useLang, setLang, tr } from '@/lib/lang';
+import { pushToast } from '@/lib/toast';
 
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
@@ -17,7 +19,7 @@ import { useLang, setLang, tr } from '@/lib/lang';
 // lien s'ouvre correctement dans l'application native, où `target="_blank"`
 // passe la main au navigateur du système.
 const PRIVACY_URL = '/confidentialite.html';
-const APP_VERSION = '3.4.0';
+const APP_VERSION = '3.5.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -26,6 +28,7 @@ export default function SettingsScreen() {
   const [muted, setMutedState] = useState(isMuted());
   const [noAds, setNoAds] = useState(isAdsRemoved());
   const [buying, setBuying] = useState(false);
+  const [consentBusy, setConsentBusy] = useState(false);
 
   async function handleBuyNoAds() {
     if (buying || noAds) return;
@@ -182,6 +185,30 @@ export default function SettingsScreen() {
         >
           📖 {tr('Revoir le tutoriel', 'Replay the tutorial')}
         </button>
+
+        {/* Revenir sur son consentement publicitaire. Obligatoire en Europe :
+            un consentement doit pouvoir être retiré aussi facilement qu'il a
+            été donné. Le bouton ne s'affiche que dans l'application native —
+            la version web n'a pas de publicité, donc rien à consentir. */}
+        {Capacitor.isNativePlatform() && (
+          <button
+            onClick={async () => {
+              setConsentBusy(true);
+              const ok = await reopenConsentForm();
+              setConsentBusy(false);
+              if (!ok) {
+                pushToast(tr('Formulaire indisponible pour le moment.', 'Consent form unavailable right now.'),
+                  { emoji: '⚠️', tone: 'bad' });
+              }
+            }}
+            disabled={consentBusy}
+            className="action-btn p-3 text-sm text-[#3D3020] flex items-center gap-2 disabled:opacity-50"
+          >
+            📋 {consentBusy
+              ? tr('Ouverture…', 'Opening…')
+              : tr('Mes choix publicitaires', 'My ad choices')}
+          </button>
+        )}
 
         <a
           href={PRIVACY_URL}

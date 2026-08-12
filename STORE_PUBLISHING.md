@@ -87,8 +87,42 @@ Ouvre **`client/src/lib/ads.ts`** et :
 <string>ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY</string>
 ```
 
-(iOS 14+) Ajoute aussi la demande de suivi `NSUserTrackingUsageDescription` si tu
-actives les pubs personnalisées.
+**iOS 14+ — la demande de suivi est OBLIGATOIRE**, elle n'est plus facultative
+depuis que le consentement est implémenté (`client/src/lib/ads.ts`). Sans ce
+texte, l'application plante à l'ouverture du formulaire, ou Apple la refuse en
+revue :
+
+```xml
+<key>NSUserTrackingUsageDescription</key>
+<string>Cette autorisation permet de vous proposer des publicités adaptées. Vous pouvez refuser : le jeu reste identique, les publicités seront simplement moins pertinentes.</string>
+```
+
+Le texte doit dire ce qu'on y gagne, sans culpabiliser ni promettre quoi que
+ce soit en échange : Apple refuse les formulations qui conditionnent l'accès au
+jeu à l'acceptation.
+
+### 3.4 Configurer les messages de consentement dans la console AdMob
+
+Le code appelle le SDK UMP de Google, mais **c'est la console AdMob qui décide
+de ce qui s'affiche**. Sans ces deux messages, le formulaire ne s'ouvrira jamais
+et le consentement restera « inconnu » — donc publicité non personnalisée
+partout, y compris là où elle serait permise.
+
+Dans **Confidentialité et messages** :
+
+1. **Message de consentement RGPD** — à créer et publier pour l'EEE, le
+   Royaume-Uni et la Suisse. C'est lui que Google exige depuis janvier 2024.
+2. **Message ATT** (iOS uniquement) — c'est lui qui déclenche la demande
+   d'autorisation de suivi d'Apple, avant le message RGPD.
+
+Publie les deux **pour chacune des deux applications** (Android et iOS)
+séparément.
+
+### Comment tester le consentement sans être en Europe
+
+`AdMob.requestConsentInfo()` accepte `debugGeography: AdmobConsentDebugGeography.EEA`
+et une liste d'identifiants d'appareils de test. C'est le seul moyen de voir le
+formulaire depuis un pays non concerné. À retirer avant publication.
 
 ---
 
