@@ -31,7 +31,7 @@ l'objet.
 `{find.emoji}` dans une balise texte ; il faudra passer à une image, avec repli
 sur l'emoji tant qu'une vignette manque — le même principe que pour les sons.
 
-## `pack-12-derniers-svg.md` — 8 images
+## `pack-12-derniers-svg.md` — 8 images ✅ LIVRÉ
 
 Quand le jeu n'a pas d'illustration pour un écran, il en dessine une à la
 volée. Ce filet de sécurité se voit : c'est un tracé vectoriel gris au milieu
@@ -43,10 +43,9 @@ ce pack. Les cinq autres sont de petites cartes de résultat très fréquentes :
 utiliser un objet, en manger un, en revendre un, le cadeau laissé sur le
 carton, la seconde chance.
 
-**Le code est déjà prêt** : il réclame ces huit images dès maintenant. En
-attendant, les trois fins de La Récup' retombent sur des dioramas de
-déchetterie déjà livrés — plus aucun tracé vectoriel sur cet écran. Les cinq
-autres cartes basculeront dès que les fichiers seront déposés dans `assets/`.
+**Livré et intégré.** Les huit images sont en place, vérifiées en jeu : la fin
+de La Récup' montre bien `result-recup-good` / `-vide` / `-bust` selon l'issue,
+et non plus le diorama de déchetterie qui servait de repli.
 
 ## `pack-13-vols-classiques.md` — 6 images
 
@@ -73,10 +72,8 @@ choix du joueur. Elles montrent la tentation, jamais le résultat.
 
 ## Ordre conseillé
 
-Le pack 12 d'abord : c'est celui qui supprime les derniers écrans dessinés du
-jeu, et le pack 10 en dépend un peu (même famille de cartes de résultat).
-Le pack 13 ensuite : six cartes très fréquentes, aujourd'hui illustrées par
-des scènes voisines qui font l'affaire sans être justes. Le pack 10 est court
-et se voit tout de suite. Le pack 11 est plus long mais
-c'est lui qui change le plus l'allure du jeu : La Récup' est le seul écran où
-il reste des emoji à la place d'illustrations.
+Le pack 12 est fait. Le pack 13 ensuite : six cartes très fréquentes,
+aujourd'hui illustrées par des scènes voisines qui font l'affaire sans être
+justes. Le pack 10 est court et se voit tout de suite. Le pack 11 est plus
+long, mais c'est lui qui change le plus l'allure du jeu : La Récup' est le
+seul écran où il reste des emoji à la place d'illustrations.
