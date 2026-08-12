@@ -42,7 +42,15 @@ export function loadAudio(url: string): Promise<AudioBuffer | null> {
   if (!ac) return Promise.resolve(null);
 
   const p = fetch(url)
-    .then(r => (r.ok ? r.arrayBuffer() : Promise.reject(new Error('absent'))))
+    .then(r => {
+      // Un fichier absent peut revenir en 200 avec la page d'accueil (règle
+      // attrape-tout d'une application à page unique). On refuse donc tout ce
+      // qui n'est pas de l'audio avant de le passer au décodeur : ça évite une
+      // erreur de décodage dans la console à chaque son pas encore livré.
+      const type = r.headers.get('content-type') || '';
+      if (!r.ok || /text\/html/i.test(type)) return Promise.reject(new Error('absent'));
+      return r.arrayBuffer();
+    })
     .then(buf => ac.decodeAudioData(buf))
     .then(decoded => { cache.set(url, decoded); return decoded; })
     .catch(() => { cache.set(url, null); return null; })

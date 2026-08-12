@@ -262,7 +262,7 @@ export function enemySlug(name: string): string {
 export function playEnemyCry(pattern: string, emoji?: string, name?: string): void {
   if (muted) return;
   if (name) {
-    const file = `/audio/cry-${enemySlug(name)}.m4a`;
+    const file = `/audio/cry-${enemySlug(name)}.mp3`;
     if (!isKnownMissing(file)) {
       loadAudio(file).then(buf => {
         if (buf) playBuffer(buf, 0.85);
@@ -318,7 +318,7 @@ function synthEnemyCry(pattern: string, emoji?: string, name?: string): void {
 function withFile(file: string, gain: number, fallback: () => void): () => void {
   return () => {
     if (muted) return;
-    const url = `/audio/${file}.m4a`;
+    const url = `/audio/${file}.mp3`;
     if (isKnownMissing(url)) { fallback(); return; }
     loadAudio(url).then(buf => { if (buf) playBuffer(buf, gain); else fallback(); });
   };

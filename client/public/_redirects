@@ -1,4 +1,13 @@
 # Page unique : toute URL renvoie index.html (sinon un rechargement = 404).
 # Ce fichier est copié tel quel dans dist/public, il sert donc aussi quand on
 # dépose le dossier construit à la main sur Netlify Drop.
+# Les médias ne sont PAS des routes de l'application : un fichier absent doit
+# répondre 404 franchement. Sans ces deux lignes, la règle attrape-tout renvoie
+# index.html avec un code 200, et le jeu télécharge une page HTML à la place
+# d'un son ou d'une image avant de comprendre son erreur. Netlify sert les
+# fichiers existants AVANT d'appliquer les redirections : ces règles ne
+# frappent donc que ce qui manque vraiment.
+/audio/*   /media-absent  404
+/assets/*  /media-absent  404
+
 /*  /index.html  200

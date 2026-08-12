@@ -4,8 +4,8 @@
  * Deux moteurs, dans cet ordre :
  *
  *   1. LES FICHIERS. Depuis le pack son 1, chaque quartier a sa vraie boucle
- *      enregistrée (`/audio/amb-<lieu>.m4a`), et le ciel sa couche par-dessus
- *      (`/audio/meteo-<temps>.m4a`). C'est ce qu'on entend normalement.
+ *      enregistrée (`/audio/amb-<lieu>.mp3`), et le ciel sa couche par-dessus
+ *      (`/audio/meteo-<temps>.mp3`). C'est ce qu'on entend normalement.
  *   2. LA SYNTHÈSE. Si un fichier manque ou ne se décode pas, on retombe sur
  *      le petit orchestre procédural d'origine — une nappe de bruit filtré
  *      plus des événements reprogrammés par minuterie. Le jeu n'est donc
@@ -88,7 +88,7 @@ function syncWeather(): void {
   const ac = getAudio();
   if (!ac || ac.state !== 'running') { armGesture(); return; }
   const id = want;
-  loadAudio(`/audio/meteo-${id}.m4a`).then(buf => {
+  loadAudio(`/audio/meteo-${id}.mp3`).then(buf => {
     // Le temps a pu changer pendant le décodage.
     if (!buf || desiredWeather !== id || isMuted() || !desired) return;
     if (weatherLoop) weatherLoop.loop.stop(0.4);
@@ -119,7 +119,7 @@ function sync(): void {
   // Les lits de mini-jeu : le fichier ou rien. Ils sont plus discrets que les
   // quartiers — on joue par-dessus, la tension vient des effets.
   if (want.startsWith('mg-')) {
-    loadAudio(`/audio/${want}.m4a`).then(buf => {
+    loadAudio(`/audio/${want}.mp3`).then(buf => {
       if (desired !== want || isMuted() || fileLoop || running) return;
       if (!buf) return;
       const loop = startLoop(buf, MINIGAME_GAIN, 1.8);
@@ -130,7 +130,7 @@ function sync(): void {
   }
 
   // On tente le vrai fichier ; s'il n'est pas là, la synthèse prend le relais.
-  loadAudio(`/audio/amb-${want}.m4a`).then(buf => {
+  loadAudio(`/audio/amb-${want}.mp3`).then(buf => {
     if (desired !== want || isMuted()) return;        // le joueur a bougé entre-temps
     if (running || fileLoop) return;                  // quelqu'un a déjà démarré
     if (buf) {

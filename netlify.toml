@@ -16,6 +16,19 @@
 
 # L'application est une page unique (wouter gère les routes côté navigateur) :
 # toute URL doit renvoyer index.html, sinon un rechargement tombe sur un 404.
+# Un média absent doit répondre 404, pas la page d'accueil : sinon le jeu
+# télécharge index.html à la place d'un son et ne s'en aperçoit qu'au décodage.
+# Les fichiers qui existent sont servis avant toute redirection.
+[[redirects]]
+  from = "/audio/*"
+  to = "/media-absent"
+  status = 404
+
+[[redirects]]
+  from = "/assets/*"
+  to = "/media-absent"
+  status = 404
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
