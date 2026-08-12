@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { randomFromArray, L } from './data/util';
 import { generateCharacterTrio, hasTrait, computeScore, genderFromName, HERITAGE_KITS, STARTING_ITEMS } from './data/world';
-import { SALVAGE_JUNK, SALVAGE_TUNING, salvagePayout, trouvailleById, piegeHurts } from './data/salvage';
+import { SALVAGE_JUNK, SALVAGE_TUNING, salvagePayout, trouvailleById, piegeHurts, salvageResultImage } from './data/salvage';
 import { enemyByName, BEG_TUNING } from './data/passersby';
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
 import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
@@ -248,6 +248,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
               `🎁 Sur votre carton, quelqu'un a déposé : ${gifts.join(', ')}. La rue se souvient.`,
               `🎁 Left on your cardboard: ${gifts.join(', ')}. The street remembers.`,
             ),
+            image: '/assets/result-cadeau-carton.webp',
           },
         };
       }
@@ -467,7 +468,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...c, stats: newStats, money: c.money + money, inventory, alive: isAlive },
-        eventResult: { text, statChanges: statDelta, moneyChange: money },
+        eventResult: { text, statChanges: statDelta, moneyChange: money, ...salvageResultImage(action.busted, haul === '') },
         screen: isAlive ? 'main' : 'game-over',
       };
     }
@@ -879,7 +880,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state,
           character: { ...state.character, stats: applyStatDelta(state.character.stats, junkDelta), inventory: newInv },
-          eventResult: { text: L(`Vous mangez… ${item.name}. Oui, ça se mange. Enfin, VOUS, vous le mangez.`, `You eat… the ${tc(item.name)}. Yes, it's edible. Well, YOU eat it.`), statChanges: junkDelta },
+          eventResult: { text: L(`Vous mangez… ${item.name}. Oui, ça se mange. Enfin, VOUS, vous le mangez.`, `You eat… the ${tc(item.name)}. Yes, it's edible. Well, YOU eat it.`), statChanges: junkDelta, image: '/assets/result-objet-mange.webp' },
         };
       }
       if (!item.effect) return state;
@@ -896,7 +897,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...state.character, stats: newStats, inventory: newInv },
-        eventResult: { text: L(`Vous utilisez ${item.name}. Ça fait du bien !`, `You use the ${tc(item.name)}. That feels good!`), statChanges: effect },
+        eventResult: { text: L(`Vous utilisez ${item.name}. Ça fait du bien !`, `You use the ${tc(item.name)}. That feels good!`), statChanges: effect, image: '/assets/result-objet-utilise.webp' },
       };
     }
 
@@ -910,7 +911,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...state.character, money: state.character.money + price, inventory: newInv },
-        eventResult: { text: L(`Vous revendez ${item.name} pour ${price}€. Chaque euro compte.`, `You sell the ${tc(item.name)} for €${price}. Every euro counts.`), moneyChange: price },
+        eventResult: { text: L(`Vous revendez ${item.name} pour ${price}€. Chaque euro compte.`, `You sell the ${tc(item.name)} for €${price}. Every euro counts.`), moneyChange: price, image: '/assets/result-objet-vendu.webp' },
       };
     }
 
@@ -1132,7 +1133,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return {
           ...state, character: { ...c, stats: newStats }, currentCombat: null,
           combatLog: [...logs, L('🏃 Vous filez avant l\'échange ! Fuite réussie !', '🏃 You bolt before the exchange! Escape successful!')],
-          eventResult: { text: L('Vous avez fui le combat. Votre dignité en prend un coup...', 'You fled the fight. Your dignity takes a hit...'), statChanges: { dignity: -5 } },
+          eventResult: { text: L('Vous avez fui le combat. Votre dignité en prend un coup...', 'You fled the fight. Your dignity takes a hit...'), statChanges: { dignity: -5 }, image: combat.image },
           screen: 'main',
         };
       }
@@ -1222,7 +1223,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           return {
             ...state, character: { ...c, stats: newStats }, currentCombat: null,
             combatLog: [...logs, L('🏃 Vous prenez vos jambes à votre cou ! Fuite réussie !', '🏃 You take to your heels! Escape successful!')],
-            eventResult: { text: L('Vous avez fui le combat. Votre dignité en prend un coup...', 'You fled the fight. Your dignity takes a hit...'), statChanges: { dignity: -5 } },
+            eventResult: { text: L('Vous avez fui le combat. Votre dignité en prend un coup...', 'You fled the fight. Your dignity takes a hit...'), statChanges: { dignity: -5 }, image: combat.image },
             screen: 'main',
           };
         }
@@ -1527,6 +1528,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           statChanges: outcome.statChanges,
           moneyChange: outcome.moneyChange,
           respectChange: outcome.respectChange,
+          // Une scène de boutique se passe DANS la boutique : sa devanture
+          // vaut mieux qu'une scène dessinée en repli.
+          image: `/assets/shop-${shopEvt.shopId}.webp`,
         },
       };
     }
@@ -1552,7 +1556,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         currentCombat: null,
         combatLog: [],
         deathCause: null,
-        eventResult: { text: '🌅 Une âme charitable vous a porté secours. Vous reprenez vos esprits. La rue ne vous a pas encore eu...' },
+        eventResult: { text: '🌅 Une âme charitable vous a porté secours. Vous reprenez vos esprits. La rue ne vous a pas encore eu...', image: '/assets/result-seconde-chance.webp' },
         character: {
           ...state.character,
           stats: revivedStats,

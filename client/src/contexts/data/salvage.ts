@@ -249,6 +249,22 @@ export function piegeHurts(c: Character, findId: string): { health: number; hung
   return out;
 }
 
+/*
+ * L'IMAGE DE FIN DE FOUILLE.
+ *
+ * La fouille se termine de trois façons — on remonte les poches pleines, on
+ * remonte les mains vides, ou le tas se réveille et tout reste au fond — et
+ * chacune a son diorama. Tant que les trois images propres au mini-jeu ne sont
+ * pas livrées, on retombe sur un diorama de déchetterie déjà en place plutôt
+ * que sur la scène dessinée en repli : l'écran de fin d'un mini-jeu ne doit
+ * jamais être le seul endroit du jeu où l'illustration est un tracé vectoriel.
+ */
+export function salvageResultImage(busted: boolean, empty: boolean): { image: string; fallbackImage: string } {
+  if (busted) return { image: '/assets/result-recup-bust.webp', fallbackImage: '/assets/result-exp-poubelle-bureau-bad.webp' };
+  if (empty) return { image: '/assets/result-recup-vide.webp', fallbackImage: '/assets/result-exp-dechetterie-bad.webp' };
+  return { image: '/assets/result-recup-good.webp', fallbackImage: '/assets/result-exp-dechetterie-good.webp' };
+}
+
 export function salvageMods(c: Character): SalvageMods {
   return {
     malus: hasTrait(c, 'poissard') ? 1 : 0,
