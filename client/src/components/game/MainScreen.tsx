@@ -2,6 +2,7 @@ import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import StatBars from './StatBars';
+import { tierAtRisk } from '@/contexts/data/dignity';
 import CardboardAvatar from './CardboardAvatar';
 import PlayerFace, { faceCondition } from './PlayerFace';
 import StreetEncounter from './StreetEncounter';
@@ -93,6 +94,15 @@ export default function MainScreen() {
   const dayProgress = state.maxDayActions > 0 ? state.dayActions / state.maxDayActions : 0;
   // Titre de rue (palier de jours) et contrat du matin.
   const streetTitle = streetTitleFor(char.day);
+  // Une action qui ferait descendre d'un palier de Dignité se signale AVANT
+  // d'être touchée : c'est le moment où la mécanique centrale du jeu devient
+  // visible. Le texte dit « peut », jamais « va » — le coût exact dépend du
+  // déroulement du mini-jeu, et une annonce qui promet plus qu'elle ne sait se
+  // repère tout de suite.
+  const risqueMendier = tierAtRisk(char.stats.dignity, 'beg');
+  const risqueRecup = tierAtRisk(char.stats.dignity, 'salvage');
+  const risqueVoler = tierAtRisk(char.stats.dignity, 'steal');
+
   const contractDef = state.contract ? getContract(state.contract.id) : undefined;
   const contractDone = !!state.contract?.done || (contractDef?.check ? contractDef.check(char) : false);
   const weather = WEATHER_TYPES[state.weather];
@@ -313,7 +323,11 @@ export default function MainScreen() {
         {/* Main actions grid */}
         <div id="tuto-actions" className="grid grid-cols-2 gap-2">
           <ActionTile emoji="🔍" title={tr('Explorer', 'Explore')} desc={tr('Tenter une rencontre', 'Look for an encounter')} accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
-          <ActionTile emoji="🙏" title={tr('Mendier', 'Beg')} desc={tr('Récolter des pièces', 'Collect coins')} accent="#B8860B" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })} />
+          <ActionTile
+            emoji="🙏" title={tr('Mendier', 'Beg')} desc={tr('Récolter des pièces', 'Collect coins')} accent="#B8860B"
+            warn={risqueMendier ? tr(`peut vous faire quitter « ${risqueMendier.fr} »`, `may cost you "${risqueMendier.en}"`) : null}
+            disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })}
+          />
           <ActionTile emoji="😴" title={tr('Dormir', 'Sleep')} desc={tr('Récupérer du sommeil', 'Recover sleep')} accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
           <ActionTile
             emoji="🥊" title={tr('Bagarre', 'Fight')} desc={tr('Provoquer un combat', 'Pick a fight')} accent="#D94F4F" disabled={actionsLeft <= 0} danger
@@ -339,7 +353,11 @@ export default function MainScreen() {
         >
           <span className="text-lg">♻️</span>
           <span className="text-xs font-medium text-[#3D3020]">{tr('La Récup\'', 'Salvage')}</span>
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#7C8B5A]/12 text-[#5E7A3A] font-mono">{tr('matériaux', 'materials')}</span>
+          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${risqueRecup ? 'bg-[#B8703A]/12 text-[#B8703A]' : 'bg-[#7C8B5A]/12 text-[#5E7A3A]'}`}>
+            {risqueRecup
+              ? tr(`quitte « ${risqueRecup.fr} » ?`, `costs "${risqueRecup.en}"?`)
+              : tr('matériaux', 'materials')}
+          </span>
         </motion.button>
 
         {/* Action risquée : Voler */}
@@ -354,7 +372,11 @@ export default function MainScreen() {
         >
           <span className="text-lg">🥷</span>
           <span className="text-xs font-medium text-[#3D3020]">{tr('Voler', 'Steal')}</span>
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#D94F4F]/10 text-[#D94F4F] font-mono">{tr('risqué', 'risky')}</span>
+          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${risqueVoler ? 'bg-[#B8703A]/12 text-[#B8703A]' : 'bg-[#D94F4F]/10 text-[#D94F4F]'}`}>
+            {risqueVoler
+              ? tr(`quitte « ${risqueVoler.fr} » ?`, `costs "${risqueVoler.en}"?`)
+              : tr('risqué', 'risky')}
+          </span>
         </motion.button>
 
         {/* Secondary actions */}
@@ -382,8 +404,10 @@ export default function MainScreen() {
   );
 }
 
-function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small }: {
+function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small, warn }: {
   emoji: string; title: string; desc?: string; accent?: string; disabled: boolean; onClick: () => void; danger?: boolean; small?: boolean;
+  /** Palier de Dignité que cette action risque de faire quitter. */
+  warn?: string | null;
 }) {
   return (
     <motion.button
@@ -408,8 +432,11 @@ function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, sma
       <span className={`${small ? 'text-[10px]' : 'text-sm'} font-semibold text-[#3D3020] text-center leading-tight`}>
         {title}
       </span>
-      {desc && !small && (
+      {desc && !small && !warn && (
         <span className="text-[10px] text-[#A08B70] text-center leading-tight">{desc}</span>
+      )}
+      {warn && !small && (
+        <span className="text-[10px] text-[#B8703A] text-center leading-tight font-medium">{warn}</span>
       )}
     </motion.button>
   );
