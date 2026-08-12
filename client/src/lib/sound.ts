@@ -32,7 +32,29 @@ function audio(): AudioContext | null {
 
 // Contexte partagé avec le module d'ambiances (lib/ambience.ts).
 export function getAudio(): AudioContext | null {
-  return audio();
+  const ac = audio();
+  if (ac) preloadGestures();
+  return ac;
+}
+
+/*
+ * Les gestes sont préchargés dès que le son se débloque.
+ *
+ * Ils pèsent 84 Ko à eux treize, et ce sont les plus entendus du jeu : sans
+ * ça, le tout premier clic attendrait son téléchargement et se sentirait comme
+ * une latence de l'interface. Les autres familles n'en ont pas besoin — un cri
+ * d'ennemi ou un bruitage de rencontre a toujours une animation devant lui.
+ */
+const GESTURES = [
+  'geste-clic', 'geste-pas', 'geste-coup', 'geste-coup-fort', 'geste-encaisse',
+  'geste-souffle', 'geste-reussite', 'geste-echec', 'geste-gong',
+  'geste-bricole', 'geste-succes', 'geste-papier', 'geste-troc',
+];
+let gesturesAsked = false;
+function preloadGestures(): void {
+  if (gesturesAsked) return;
+  gesturesAsked = true;
+  for (const g of GESTURES) loadAudio(`/audio/${g}.mp3`);
 }
 
 export function isMuted(): boolean {
@@ -98,14 +120,14 @@ function noise(dur: number, gain: number, hp = 800) {
 }
 
 /** Coup normal porté : petit "thud" sourd + impact. */
-export function playHit(): void {
+function playHitSynth(): void {
   if (muted) return;
   tone(150, 0.13, 'triangle', 0.14, 70);
   noise(0.09, 0.09, 600);
 }
 
 /** Coup critique : impact plus vif et brillant. */
-export function playCrit(): void {
+function playCritSynth(): void {
   if (muted) return;
   noise(0.14, 0.16, 900);
   tone(320, 0.16, 'square', 0.1, 640);
@@ -114,7 +136,7 @@ export function playCrit(): void {
 }
 
 /** Le joueur encaisse un coup : tonalité descendante. */
-export function playHurt(): void {
+function playHurtSynth(): void {
   if (muted) return;
   tone(300, 0.18, 'sawtooth', 0.08, 110);
 }
@@ -127,20 +149,20 @@ function playWinSynth(): void {
 }
 
 /** Petit clic d'interface (boutons d'action). */
-export function playClick(): void {
+function playClickSynth(): void {
   if (muted) return;
   tone(880, 0.045, 'triangle', 0.045);
 }
 
 /** Résultat positif : deux notes ascendantes. */
-export function playSuccess(): void {
+function playSuccessSynth(): void {
   if (muted) return;
   tone(523, 0.12, 'triangle', 0.09);
   setTimeout(() => tone(784, 0.16, 'triangle', 0.09), 110);
 }
 
 /** Résultat négatif : deux notes descendantes. */
-export function playFail(): void {
+function playFailSynth(): void {
   if (muted) return;
   tone(330, 0.14, 'triangle', 0.08);
   setTimeout(() => tone(220, 0.2, 'triangle', 0.08), 120);
@@ -161,7 +183,7 @@ function playNextDaySynth(): void {
 }
 
 /** Succès débloqué : petite cascade scintillante. */
-export function playUnlock(): void {
+function playUnlockSynth(): void {
   if (muted) return;
   const notes = [784, 988, 1319, 1568];
   notes.forEach((f, i) => setTimeout(() => tone(f, 0.14, 'triangle', 0.09), i * 70));
@@ -169,7 +191,7 @@ export function playUnlock(): void {
 }
 
 /** Pas feutré sur la grille (mini-jeu de vol). */
-export function playStep(): void {
+function playStepSynth(): void {
   if (muted) return;
   tone(190, 0.03, 'sine', 0.05);
 }
@@ -183,7 +205,7 @@ function playSpottedSynth(): void {
 }
 
 /** Départ en voyage : petit souffle. */
-export function playWhoosh(): void {
+function playWhooshSynth(): void {
   if (muted) return;
   noise(0.32, 0.05, 400);
   tone(300, 0.28, 'sine', 0.05, 700);
@@ -325,7 +347,7 @@ function withFile(file: string, gain: number, fallback: () => void): () => void 
 }
 
 /** Gong d'ouverture de bagarre : le combat s'enclenche. */
-export function playFightStart(): void {
+function playFightStartSynth(): void {
   if (muted) return;
   // Coup de gong : impact large + longue résonance grave.
   noise(0.25, 0.13, 200);
@@ -365,7 +387,7 @@ function playKOSynth(): void {
 }
 
 /** Bricolage réussi : on scie, on visse, ça tient. */
-export function playCraft(): void {
+function playCraftSynth(): void {
   if (muted) return;
   // Deux passes de scie/ponçage.
   noise(0.13, 0.05, 1400);
@@ -379,7 +401,7 @@ export function playCraft(): void {
 }
 
 /** Geste de partage / troc conclu avec une autre âme de la rue. */
-export function playShare(): void {
+function playShareSynth(): void {
   if (muted) return;
   // Deux notes chaudes, en tierce : la poignée de main.
   tone(440, 0.16, 'sine', 0.075);
@@ -388,7 +410,7 @@ export function playShare(): void {
 }
 
 /** Récit d'origine : vieux papier qu'on déplie, un peu solennel. */
-export function playPaper(): void {
+function playPaperSynth(): void {
   if (muted) return;
   noise(0.18, 0.035, 2200);
   setTimeout(() => noise(0.14, 0.028, 1800), 160);
@@ -426,14 +448,53 @@ export const playSpotted = withFile('moment-attrape', 0.9, playSpottedSynth);
 // entend quelque chose de sensé plutôt que rien.
 
 /** Écran de mort : une résonance longue, puis une pièce qui roule. */
-export const playDeath = withFile('moment-mort', 0.95, playFail);
+export const playDeath = withFile('moment-mort', 0.95, () => playFail());
 /** « Le Sursaut » : le souvenir qui remonte, une fois par partie. */
-export const playMemory = withFile('moment-souvenir', 0.85, playUnlock);
+export const playMemory = withFile('moment-souvenir', 0.85, () => playUnlock());
 /** La Récup' : on déterre une vraie trouvaille. */
-export const playFind = withFile('moment-trouvaille', 0.85, playUnlock);
+export const playFind = withFile('moment-trouvaille', 0.85, () => playUnlock());
 /** La Récup' : le tas se réveille et on perd tout. */
-export const playCollapse = withFile('moment-craquement', 0.9, playFail);
+export const playCollapse = withFile('moment-craquement', 0.9, () => playFail());
 /** Le Culot : le marchandage aboutit, on serre la main. */
-export const playHandshake = withFile('moment-poignee-main', 0.85, playSuccess);
+export const playHandshake = withFile('moment-poignee-main', 0.85, () => playSuccess());
 /** Le Culot : le commerçant se braque et baisse le rideau. */
-export const playShutter = withFile('moment-porte-claque', 0.9, playFail);
+export const playShutter = withFile('moment-porte-claque', 0.9, () => playFail());
+
+/** playClick : le geste enregistré s'il est là, la synthèse sinon. */
+export const playClick = withFile('geste-clic', 0.7, playClickSynth);
+
+/** playStep : le geste enregistré s'il est là, la synthèse sinon. */
+export const playStep = withFile('geste-pas', 0.8, playStepSynth);
+
+/** playHit : le geste enregistré s'il est là, la synthèse sinon. */
+export const playHit = withFile('geste-coup', 0.85, playHitSynth);
+
+/** playCrit : le geste enregistré s'il est là, la synthèse sinon. */
+export const playCrit = withFile('geste-coup-fort', 0.9, playCritSynth);
+
+/** playHurt : le geste enregistré s'il est là, la synthèse sinon. */
+export const playHurt = withFile('geste-encaisse', 0.9, playHurtSynth);
+
+/** playWhoosh : le geste enregistré s'il est là, la synthèse sinon. */
+export const playWhoosh = withFile('geste-souffle', 0.8, playWhooshSynth);
+
+/** playSuccess : le geste enregistré s'il est là, la synthèse sinon. */
+export const playSuccess = withFile('geste-reussite', 0.85, playSuccessSynth);
+
+/** playFail : le geste enregistré s'il est là, la synthèse sinon. */
+export const playFail = withFile('geste-echec', 0.85, playFailSynth);
+
+/** playFightStart : le geste enregistré s'il est là, la synthèse sinon. */
+export const playFightStart = withFile('geste-gong', 0.9, playFightStartSynth);
+
+/** playCraft : le geste enregistré s'il est là, la synthèse sinon. */
+export const playCraft = withFile('geste-bricole', 0.85, playCraftSynth);
+
+/** playUnlock : le geste enregistré s'il est là, la synthèse sinon. */
+export const playUnlock = withFile('geste-succes', 0.85, playUnlockSynth);
+
+/** playPaper : le geste enregistré s'il est là, la synthèse sinon. */
+export const playPaper = withFile('geste-papier', 0.8, playPaperSynth);
+
+/** playShare : le geste enregistré s'il est là, la synthèse sinon. */
+export const playShare = withFile('geste-troc', 0.85, playShareSynth);
