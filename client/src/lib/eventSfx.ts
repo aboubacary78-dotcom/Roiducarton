@@ -12,6 +12,7 @@
  * Tout est synthétisé (Web Audio) : aucun fichier à télécharger.
  */
 import { getAudio, isMuted } from './sound';
+import { loadAudio, isKnownMissing, playBuffer } from './audioFiles';
 
 // ---- petites briques de synthèse (locales, pour ne pas alourdir sound.ts) ----
 
@@ -215,9 +216,29 @@ export function sfxFor(text: string): EventSfx {
   return 'discover';
 }
 
-/** Joue le bruitage d'un événement. Respecte le réglage « muet ». */
-export function playEventSfx(text: string): EventSfx {
-  const id = sfxFor(text);
-  if (!isMuted()) { try { BANK[id](); } catch { /* silent */ } }
-  return id;
+/**
+ * Joue le bruitage d'un événement.
+ *
+ * Ordre de priorité :
+ *   1. `/audio/sfx-<identifiant>.m4a` — le son écrit POUR cette rencontre-là.
+ *   2. la banque thématique synthétisée, choisie en lisant le texte.
+ *
+ * Le second n'est déclenché que si le premier n'existe pas : jamais les deux.
+ * Les 296 fichiers arrivent par lots, et chacun s'active dès qu'il est là.
+ */
+export function playEventSfx(text: string, eventId?: string): EventSfx {
+  const fam = sfxFor(text);
+  if (isMuted()) return fam;
+  if (eventId) {
+    const url = `/audio/sfx-${eventId}.m4a`;
+    if (!isKnownMissing(url)) {
+      loadAudio(url).then(buf => {
+        if (buf) playBuffer(buf, 0.8);
+        else { try { BANK[fam](); } catch { /* silent */ } }
+      });
+      return fam;
+    }
+  }
+  try { BANK[fam](); } catch { /* silent */ }
+  return fam;
 }

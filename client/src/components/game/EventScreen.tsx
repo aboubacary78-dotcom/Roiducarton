@@ -69,7 +69,7 @@ export default function EventScreen() {
     // son propre son plutôt que le bruitage de famille (qui le rangeait avec
     // les fantômes).
     if (e.id === 'sursaut') playMemory();
-    else playEventSfx(`${e.id} ${e.title} ${e.description}`);
+    else playEventSfx(`${e.id} ${e.title} ${e.description}`, e.id);
   }, [state.currentEvent?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function activateBoost() {
