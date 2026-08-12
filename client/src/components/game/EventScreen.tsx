@@ -57,9 +57,11 @@ export default function EventScreen() {
   const event = state.currentEvent ?? lastEventRef.current;
   const [boosted, setBoosted] = useState(false);
   const [loadingBoost, setLoadingBoost] = useState(false);
-  // Repli propre si l'image de l'événement n'existe pas encore (fichier absent).
-  const [imgError, setImgError] = useState(false);
-  useEffect(() => { setImgError(false); }, [event?.id]);
+  // Repli propre si l'image de l'événement n'existe pas encore (fichier
+  // absent) : on descend la chaîne image → diorama voisin → scène dessinée,
+  // un cran par échec de chargement.
+  const [imgError, setImgError] = useState(0);
+  useEffect(() => { setImgError(0); }, [event?.id]);
   // Bruitage propre à la rencontre : le chien aboie, le mariage sonne les
   // cloches, la gare siffle… (aiguillé sur l'id + le titre, voir lib/eventSfx).
   useEffect(() => {
@@ -84,7 +86,8 @@ export default function EventScreen() {
 
   const isCombat = event.type === 'combat';
   const isFollowUp = event.isFollowUp;
-  const eventImage = event.image || (isCombat ? COMBAT_IMG_FALLBACK : null);
+  const candidates = [event.image, event.fallbackImage, isCombat ? COMBAT_IMG_FALLBACK : null].filter(Boolean) as string[];
+  const eventImage = imgError < candidates.length ? candidates[imgError] : null;
   const typeInfo = TYPE_LABELS[event.type] || TYPE_LABELS['narrative'];
 
   return (
@@ -103,13 +106,13 @@ export default function EventScreen() {
       )}
 
       {/* Event illustration */}
-      {eventImage && !imgError ? (
+      {eventImage ? (
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="w-full h-44 rounded-xl overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.1)] relative"
         >
-          <KenBurnsImage src={eventImage} alt={event.title} onError={() => setImgError(true)} />
+          <KenBurnsImage key={eventImage} src={eventImage} alt={event.title} onError={() => setImgError(n => n + 1)} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
         </motion.div>
       ) : (

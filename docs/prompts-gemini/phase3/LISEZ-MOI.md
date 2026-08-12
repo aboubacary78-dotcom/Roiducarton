@@ -1,4 +1,4 @@
-# Phase 3 — trois packs d'images
+# Phase 3 — quatre packs d'images
 
 ## `pack-10-fins.md` — 4 images
 
@@ -48,12 +48,35 @@ attendant, les trois fins de La Récup' retombent sur des dioramas de
 déchetterie déjà livrés — plus aucun tracé vectoriel sur cet écran. Les cinq
 autres cartes basculeront dès que les fichiers seront déposés dans `assets/`.
 
+## `pack-13-vols-classiques.md` — 6 images
+
+Le jeu compte 292 rencontres. **286 avaient leur diorama, six ne l'avaient
+jamais eu** : les six plus anciens vols, écrits avant que la direction
+artistique n'existe. Ils passaient sous le radar de l'audit précédent, qui
+comparait « images réclamées » et « fichiers présents » — or ces six-là ne
+réclamaient rien du tout.
+
+Ce sont pourtant les vols que le joueur croise le plus souvent : L'Étal du
+Marché, La Poche du Costard, Le Supermarché, Le Vélo Mal Attaché, Le Tronc de
+l'Église, Le Linge qui Sèche.
+
+**Le code est déjà prêt**, et ces six cartes sont illustrées **dès
+maintenant** : chacune se replie sur la scène voisine la plus proche déjà
+livrée (les cageots à l'aube pour le marché, le wagon de train pour le
+costard, les jetons de caddies pour le supermarché…). Les vraies images
+prendront le relais toutes seules au dépôt des fichiers.
+
+**Attention à la consigne propre à ce pack** : ces images s'affichent AVANT le
+choix du joueur. Elles montrent la tentation, jamais le résultat.
+
 ---
 
 ## Ordre conseillé
 
 Le pack 12 d'abord : c'est celui qui supprime les derniers écrans dessinés du
-jeu, et le pack 10 en dépend un peu (même famille de cartes de résultat). Le
-pack 10 est court et se voit tout de suite. Le pack 11 est plus long mais
+jeu, et le pack 10 en dépend un peu (même famille de cartes de résultat).
+Le pack 13 ensuite : six cartes très fréquentes, aujourd'hui illustrées par
+des scènes voisines qui font l'affaire sans être justes. Le pack 10 est court
+et se voit tout de suite. Le pack 11 est plus long mais
 c'est lui qui change le plus l'allure du jeu : La Récup' est le seul écran où
 il reste des emoji à la place d'illustrations.

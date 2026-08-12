@@ -847,6 +847,7 @@ export const BEG_EVENTS: GameEvent[] = [
 export const STEAL_EVENTS: GameEvent[] = [
   {
     id: 'steal-etal-marche', title: 'L\'Étal du Marché', type: 'discovery',
+    image: '/assets/steal-etal-marche.webp', fallbackImage: '/assets/steal-cageots-aube.webp',
     description: 'Un primeur a le dos tourné. Ses fruits sont à portée de main. Personne ne regarde... ou presque.',
     choices: [
       { text: 'Chiper deux pommes vite fait', risk: 'normal', emoji: '🍎', outcomes: [
@@ -861,6 +862,7 @@ export const STEAL_EVENTS: GameEvent[] = [
   },
   {
     id: 'steal-poche-costard', title: 'La Poche du Costard', type: 'discovery',
+    image: '/assets/steal-poche-costard.webp', fallbackImage: '/assets/rest-wagon-train-Nh3WT9QiYunMe4t55bsuDu.webp',
     description: 'Un homme d\'affaires dort dans le train, portefeuille qui dépasse. La tentation est énorme.',
     choices: [
       { text: 'Faire les poches en douceur', risk: 'risky', emoji: '🤏', outcomes: [
@@ -874,6 +876,7 @@ export const STEAL_EVENTS: GameEvent[] = [
   },
   {
     id: 'steal-supermarche', title: 'Le Supermarché', type: 'discovery',
+    image: '/assets/steal-supermarche.webp', fallbackImage: '/assets/steal-jetons-caddies.webp',
     description: 'Rayons remplis, vigile à moitié endormi. Une boîte de conserve glisserait si bien sous la veste.',
     choices: [
       { text: 'Glisser de la nourriture sous la veste', risk: 'normal', emoji: '🥫', outcomes: [
@@ -888,6 +891,7 @@ export const STEAL_EVENTS: GameEvent[] = [
   },
   {
     id: 'steal-velo', title: 'Le Vélo Mal Attaché', type: 'discovery',
+    image: '/assets/steal-velo.webp', fallbackImage: '/assets/steal-panier-velo.webp',
     description: 'Un vélo électrique, antivol bon marché à peine fermé. Il vaut une petite fortune à la revente.',
     choices: [
       { text: 'Forcer l\'antivol et filer', risk: 'risky', emoji: '🚲', outcomes: [
@@ -902,6 +906,7 @@ export const STEAL_EVENTS: GameEvent[] = [
   },
   {
     id: 'steal-tronc-eglise', title: 'Le Tronc de l\'Église', type: 'discovery',
+    image: '/assets/steal-tronc-eglise.webp', fallbackImage: '/assets/exp-eglise-2mK4FcdNW7pYwWeFopWXmF.webp',
     description: 'L\'église est vide. Le tronc des offrandes déborde de pièces. Dieu regarde, paraît-il.',
     choices: [
       { text: 'Se servir dans le tronc', risk: 'risky', emoji: '⛪', outcomes: [
@@ -916,6 +921,7 @@ export const STEAL_EVENTS: GameEvent[] = [
   },
   {
     id: 'steal-etendage', title: 'Le Linge qui Sèche', type: 'discovery',
+    image: '/assets/steal-etendage.webp', fallbackImage: '/assets/steal-pressing-costume.webp',
     description: 'Au rez-de-chaussée, du linge sèche à une fenêtre ouverte. Un manteau chaud vous ferait du bien.',
     choices: [
       { text: 'Décrocher le manteau', risk: 'normal', emoji: '🧥', outcomes: [

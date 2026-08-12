@@ -108,6 +108,10 @@ export interface GameEvent {
   type: 'narrative' | 'combat' | 'discovery' | 'social';
   location?: string;
   image?: string;
+  // Diorama de secours quand `image` n'est pas encore livrée : une scène
+  // voisine déjà en place vaut mieux que le tracé vectoriel de repli, qui
+  // détonne au milieu des dioramas photographiés.
+  fallbackImage?: string;
   requiresFlag?: string;
   isFollowUp?: boolean;
 }
