@@ -2,7 +2,7 @@ import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon,
 import type { Character, CombatState, CombatCard, SignId, DodgeProj } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { playHurt, playWhoosh, playEnemyCry, playFightStart, playKingArrival } from '@/lib/sound';
+import { playHurt, playWhoosh, playEnemyCry, playFightStart, playKingArrival, playHit, playCrit } from '@/lib/sound';
 import { setAmbience } from '@/lib/ambience';
 import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -106,6 +106,29 @@ function CombatScreenInner() {
     const t = setTimeout(() => setIntro(false), isKing ? 4600 : 2500);
     return () => clearTimeout(t);
   }, [intro, isKing]);
+  // Le coup qui porte. Il n'avait AUCUN son : on lançait la carte (un souffle),
+  // puis les dégâts tombaient en silence. Or c'est le retour le plus important
+  // d'une bagarre — savoir qu'on a touché. On surveille donc la santé de
+  // l'adversaire, et on distingue le coup franc du coup décisif.
+  // On mémorise AUSSI de qui il s'agissait : un nouvel adversaire moins
+  // vaillant que le précédent aurait sinon déclenché un bruit de coup dès son
+  // arrivée, alors que personne n'a encore frappé.
+  const prevEnemyHp = useRef<{ name: string; hp: number } | null>(null);
+  useEffect(() => {
+    const hp = currentCombat?.enemyHealth;
+    const name = currentCombat?.enemyName;
+    if (hp == null || !name) { prevEnemyHp.current = null; return; }
+    const before = prevEnemyHp.current;
+    prevEnemyHp.current = { name, hp };
+    // Premier rendu, ou changement d'adversaire : rien à annoncer.
+    if (!before || before.name !== name || hp >= before.hp) return;
+    const dmg = before.hp - hp;
+    // « Gros coup » relatif à l'adversaire : un cygne et le Roi n'encaissent
+    // pas la même chose, le seuil suit donc sa carrure.
+    const big = dmg >= Math.max(6, (currentCombat?.enemyMaxHealth ?? 30) * 0.2);
+    if (big) playCrit(); else playHit();
+  }, [currentCombat?.enemyHealth, currentCombat?.enemyMaxHealth, currentCombat?.enemyName]);
+
   // Toast quand le coup spécial vient d'être chargé (manche gagnée).
   const prevCharged = useRef(false);
   useEffect(() => {
