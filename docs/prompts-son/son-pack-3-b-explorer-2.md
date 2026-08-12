@@ -69,6 +69,76 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 
 ---
 
+# ⚠️ CE LOT EST À REFAIRE — lisez d'abord cette page
+
+Une première version de ce lot a été livrée. Elle est correcte sur la forme :
+les 47 noms sont exacts, les durées sont dans la cible, les niveaux sont
+réguliers, rien n'écrête. **Le problème est ailleurs : les sons se ressemblent
+trop entre eux.**
+
+Ce n'est pas une impression, c'est une mesure. En comparant deux à deux le
+profil sonore des fichiers d'un même lot :
+
+| | Ressemblance moyenne entre deux sons |
+|---|---|
+| Le lot précédent (Explorer, première moitié) | 0,60 |
+| **Ce lot, première version** | **0,78** |
+| Entre les deux lots | 0,68 |
+
+La ressemblance est **plus forte à l'intérieur de ce lot qu'entre les deux
+lots**. Ce n'est donc pas un effet du sujet — vérifié : ce lot couvre même plus
+de familles de scènes que le précédent. Il avait davantage de matière pour
+varier, et il a moins varié.
+
+## Les quatorze paires qui se confondent
+
+Voici précisément les couples que la mesure a rapprochés. **Ce sont eux qu'il
+faut écarter l'un de l'autre.** Chaque ligne donne la ressemblance mesurée puis
+les deux scènes concernées : elles n'ont rien à voir entre elles, et pourtant
+elles sonnent presque pareil.
+
+| Proximité | Une scène | Et l'autre |
+|---|---|---|
+| 0.97 | **L'Atelier Vélo Associatif** — *Un atelier associatif répare des vélos dans une arrière-cour. Ça sent la grais* | **La Machine à Pince** — *Dans le hall de la laverie, une machine à pince pleine de peluches délavées. U* |
+| 0.96 | **Le Cirque s'Installe** — *Un petit cirque familial monte son chapiteau sur le terrain vague. Ça manque d* | **La Partie de Pêche** — *Le pêcheur du canal vous fait signe. "Hé ! J'ai apporté une canne pour toi !"* |
+| 0.96 | **Le Bus de Touristes Égaré** — *Un bus à impériale plein de touristes s'est égaré dans la zone industrielle. L* | **La Caravane de la Voyante** — *Une caravane mauve s'est garée sur le terrain vague. « Madame Esperanza, aveni* |
+| 0.95 | **Le Trousseau Perdu** — *Un trousseau de clés gît sur le trottoir : sept clés, une patte de lapin usée,* | **Le Drone Écrasé** — *Un drone de livraison gît dans un buisson, hélices tordues, colis intact accro* |
+| 0.95 | **Les Arbres de la Ville** — *Les pommiers « décoratifs » plantés par la mairie croulent sous les fruits. Pe* | **Le Colleur d'Affiches** — *Un colleur d'affiches se bat seul contre le vent avec une affiche de cirque de* |
+| 0.95 | **L'Égoutier Philosophe** — *Un égoutier en pause remonte de sa bouche d'égout, s'assoit sur le rebord et v* | **Vos Tomates** — *Le coin de terre que le vieux vous a appris à cultiver a bien travaillé : des * |
+| 0.94 | **La Cave de l'Antiquaire** — *L'antiquaire vide sa cave sur le trottoir : « je prends ma retraite, tout doit* | **Le Serrurier Pédagogue** — *Un serrurier forme son apprenti sur une porte cochère. L'apprenti transpire. L* |
+| 0.94 | **Le Joueur d'Échecs** — *Dans le parc, un vieux monsieur joue aux échecs contre personne depuis des ann* | **Le Duo Musical** — *Le musicien du métro vous reconnaît ! "Hé ! On refait un duo ? J'ai gagné le d* |
+| 0.94 | **Le Buffet du Séminaire** — *Par la baie vitrée de l'hôtel d'affaires : un séminaire « Excellence & Leaders* | **La Partie de Pêche** — *Le pêcheur du canal vous fait signe. "Hé ! J'ai apporté une canne pour toi !"* |
+| 0.94 | **Le Bus de Touristes Égaré** — *Un bus à impériale plein de touristes s'est égaré dans la zone industrielle. L* | **Le Cirque s'Installe** — *Un petit cirque familial monte son chapiteau sur le terrain vague. Ça manque d* |
+| 0.94 | **Le Billet dans le Vent** — *Un billet de dix euros danse dans le vent, à deux mètres du sol, ivre de liber* | **Les Ruches du Toit** — *Sur le toit du gymnase, un apiculteur urbain en combinaison blanche s'agite en* |
+| 0.94 | **L'Égoutier Philosophe** — *Un égoutier en pause remonte de sa bouche d'égout, s'assoit sur le rebord et v* | **Le Serrurier Pédagogue** — *Un serrurier forme son apprenti sur une porte cochère. L'apprenti transpire. L* |
+| 0.94 | **La Cave de l'Antiquaire** — *L'antiquaire vide sa cave sur le trottoir : « je prends ma retraite, tout doit* | **Le Stand de Hot-Dogs Abandonné** — *Un stand de hot-dogs fume tout seul au coin de la rue. Le vendeur est parti en* |
+| 0.94 | **Le Trousseau Perdu** — *Un trousseau de clés gît sur le trottoir : sept clés, une patte de lapin usée,* | **L'Horodateur Fou** — *Un horodateur imprime des tickets en continu, dans le vide, avec un petit brui* |
+
+Regardez la première ligne : un **atelier de vélo** et une **machine à pince**
+de fête foraine à 0,97 de ressemblance. Ce sont deux univers différents, deux
+gestes différents, deux matières différentes. Ils doivent s'entendre comme tels.
+
+## Comment les séparer
+
+- **Changer la matière.** Le même geste sur du carton, du métal ou du papier
+  journal ne donne pas le même son. Si deux scènes appellent toutes deux « du
+  métal », l'une prend de la tôle fine, l'autre de la fonte.
+- **Changer le rythme.** Un coup sec, deux coups espacés, un frottement
+  continu : la silhouette dans le temps se reconnaît bien mieux que le timbre.
+  C'est le levier le plus efficace des trois.
+- **Changer ce qu'on écoute.** Une scène contient souvent trois sons possibles.
+  Si une scène voisine a pris le plus évident, prenez-en un autre. Pour
+  l'atelier de vélo : la chaîne qui tourne à vide plutôt qu'un cliquetis
+  d'outils.
+
+## Le contrôle à faire avant de livrer
+
+**Jouez les 47 à la suite, les yeux fermés.** Si deux se confondent, l'un des
+deux est à refaire — même si chacun, pris isolément, est réussi.
+
+---
+
+
 # 🎯 Ce pack : un bruitage par rencontre
 
 Le jeu compte **296 rencontres**, et chacune a maintenant droit à SON bruitage.
