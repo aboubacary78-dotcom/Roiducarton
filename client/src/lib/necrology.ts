@@ -27,19 +27,28 @@ export interface DeathDef {
   emoji: string;
   title: string; titleEn: string;
   epitaph: string; epitaphEn: string;
+  /*
+   * L'AMORCE d'une fin pas encore trouvée.
+   *
+   * Une case vide ne retient rien : la mémoire ne maintient en tension qu'une
+   * tâche dont elle a déjà une représentation. Tant que la fin est verrouillée,
+   * on ne montre donc pas « ??? » mais la CONDITION, sans la chute — le joueur
+   * doit savoir quoi tenter, pas ce qu'il va lire.
+   */
+  hint: string; hintEn: string;
 }
 
 export const DEATH_DEFS: DeathDef[] = [
-  { id: 'mort-despair', emoji: '🌧️', title: 'Le Moral à Zéro', titleEn: 'Spirit at Zero', epitaph: 'L\'esprit a lâché avant le corps. La rue gagne souvent comme ça.', epitaphEn: 'The mind gave out before the body. That\'s how the street usually wins.' },
-  { id: 'mort-hunger', emoji: '🍽️', title: 'Le Ventre Vide', titleEn: 'The Empty Stomach', epitaph: 'Mort de faim dans une ville pleine de restaurants. L\'ironie ne nourrit pas.', epitaphEn: 'Starved in a city full of restaurants. Irony isn\'t food.' },
-  { id: 'mort-thirst', emoji: '🏜️', title: 'La Grande Soif', titleEn: 'The Great Thirst', epitaph: 'Assoiffé au pays des fontaines publiques. Elles étaient toutes « en travaux ».', epitaphEn: 'Died of thirst in the land of public fountains. All of them "under maintenance".' },
-  { id: 'mort-exhaustion', emoji: '😴', title: 'La Dernière Sieste', titleEn: 'The Last Nap', epitaph: 'Il voulait juste dormir un peu. Le corps a pris ça au pied de la lettre.', epitaphEn: 'He just wanted a little sleep. The body took that literally.' },
-  { id: 'mort-cold', emoji: '❄️', title: 'La Nuit Glaciale', titleEn: 'The Freezing Night', epitaph: 'La rue est glaciale avec ses rois. Surtout en hiver.', epitaphEn: 'The street is icy to its kings. Especially in winter.' },
-  { id: 'mort-injury', emoji: '🩹', title: 'Trop de Coups', titleEn: 'One Blow Too Many', epitaph: 'Trop de coups, pas assez de pansements. L\'arithmétique de la rue.', epitaphEn: 'Too many blows, not enough bandages. Street arithmetic.' },
-  { id: 'mort-jour-1', emoji: '⚡', title: 'Le Speedrun', titleEn: 'The Speedrun', epitaph: 'Mort le premier jour. Un record, dans un sens.', epitaphEn: 'Dead on day one. A record, in a way.' },
-  { id: 'mort-riche', emoji: '💰', title: 'Riche et Mort Quand Même', titleEn: 'Rich and Dead Anyway', epitaph: 'Parti avec plus de 30€ en poche. L\'argent ne fait pas la survie.', epitaphEn: 'Left with over €30 in pocket. Money doesn\'t buy survival.' },
-  { id: 'mort-canicule', emoji: '🥵', title: 'Cuit par la Canicule', titleEn: 'Cooked by the Heatwave', epitaph: 'Le bitume était une plancha. Vous étiez dessus.', epitaphEn: 'The asphalt was a griddle. You were on it.' },
-  { id: 'mort-doyen', emoji: '🧓', title: 'Le Doyen', titleEn: 'The Elder', epitaph: 'Tombé après 10 jours de règne. Les légendes aussi finissent en carton.', epitaphEn: 'Fell after a 10-day reign. Even legends end up as cardboard.' },
+  { id: 'mort-despair', emoji: '🌧️', title: 'Le Moral à Zéro', titleEn: 'Spirit at Zero', epitaph: 'L\'esprit a lâché avant le corps. La rue gagne souvent comme ça.', epitaphEn: 'The mind gave out before the body. That\'s how the street usually wins.', hint: 'Une fin qui vient de la tête, jamais du corps.', hintEn: 'An ending that comes from the mind, never the body.' },
+  { id: 'mort-hunger', emoji: '🍽️', title: 'Le Ventre Vide', titleEn: 'The Empty Stomach', epitaph: 'Mort de faim dans une ville pleine de restaurants. L\'ironie ne nourrit pas.', epitaphEn: 'Starved in a city full of restaurants. Irony isn\'t food.', hint: 'Une fin pour qui oublie trop longtemps de manger.', hintEn: 'An ending for those who forget to eat for too long.' },
+  { id: 'mort-thirst', emoji: '🏜️', title: 'La Grande Soif', titleEn: 'The Great Thirst', epitaph: 'Assoiffé au pays des fontaines publiques. Elles étaient toutes « en travaux ».', epitaphEn: 'Died of thirst in the land of public fountains. All of them "under maintenance".', hint: 'Une fin pour qui oublie trop longtemps de boire.', hintEn: 'An ending for those who forget to drink for too long.' },
+  { id: 'mort-exhaustion', emoji: '😴', title: 'La Dernière Sieste', titleEn: 'The Last Nap', epitaph: 'Il voulait juste dormir un peu. Le corps a pris ça au pied de la lettre.', epitaphEn: 'He just wanted a little sleep. The body took that literally.', hint: 'Une fin qui attend ceux qui ne dorment jamais.', hintEn: 'An ending that waits for those who never sleep.' },
+  { id: 'mort-cold', emoji: '❄️', title: 'La Nuit Glaciale', titleEn: 'The Freezing Night', epitaph: 'La rue est glaciale avec ses rois. Surtout en hiver.', epitaphEn: 'The street is icy to its kings. Especially in winter.', hint: 'Une fin qui ne peut arriver que par très mauvais temps.', hintEn: 'An ending that can only happen in foul weather.' },
+  { id: 'mort-injury', emoji: '🩹', title: 'Trop de Coups', titleEn: 'One Blow Too Many', epitaph: 'Trop de coups, pas assez de pansements. L\'arithmétique de la rue.', epitaphEn: 'Too many blows, not enough bandages. Street arithmetic.', hint: 'Une fin pour qui encaisse un coup de trop.', hintEn: 'An ending for those who take one blow too many.' },
+  { id: 'mort-jour-1', emoji: '⚡', title: 'Le Speedrun', titleEn: 'The Speedrun', epitaph: 'Mort le premier jour. Un record, dans un sens.', epitaphEn: 'Dead on day one. A record, in a way.', hint: 'Une fin qui ne peut arriver que le premier jour.', hintEn: 'An ending that can only happen on day one.' },
+  { id: 'mort-riche', emoji: '💰', title: 'Riche et Mort Quand Même', titleEn: 'Rich and Dead Anyway', epitaph: 'Parti avec plus de 30€ en poche. L\'argent ne fait pas la survie.', epitaphEn: 'Left with over €30 in pocket. Money doesn\'t buy survival.', hint: 'Une fin qui demande d\'avoir au moins 30 € en poche.', hintEn: 'An ending that requires at least \u20ac30 in your pocket.' },
+  { id: 'mort-canicule', emoji: '🥵', title: 'Cuit par la Canicule', titleEn: 'Cooked by the Heatwave', epitaph: 'Le bitume était une plancha. Vous étiez dessus.', epitaphEn: 'The asphalt was a griddle. You were on it.', hint: 'Une fin qui ne s\'ouvre qu\'un jour de canicule.', hintEn: 'An ending that only opens on a heatwave day.' },
+  { id: 'mort-doyen', emoji: '🧓', title: 'Le Doyen', titleEn: 'The Elder', epitaph: 'Tombé après 10 jours de règne. Les légendes aussi finissent en carton.', epitaphEn: 'Fell after a 10-day reign. Even legends end up as cardboard.', hint: 'Une fin qui demande de tenir au moins dix jours.', hintEn: 'An ending that requires surviving at least ten days.' },
 ];
 
 export interface BookEntry { name: string; day: number; at: number }
