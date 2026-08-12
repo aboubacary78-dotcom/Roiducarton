@@ -96,7 +96,7 @@ function SalvageInner() {
   const [centimes, setCentimes] = useState(0);
   const [bazar, setBazar] = useState(0);
   const [trouvailles, setTrouvailles] = useState<string[]>([]);
-  const [ended, setEnded] = useState<null | { how: 'out' | 'bust'; reason?: typeof BUST_REASONS[number] }>(null);
+  const [ended, setEnded] = useState<null | { how: 'out' | 'bust'; reason?: typeof BUST_REASONS[number]; missed?: SalvageFind }>(null);
   const [pop, setPop] = useState<{ f: SalvageFind; key: number } | null>(null);
   // Tant que le doigt n'a rien frotté, on montre le geste au lieu de l'écrire.
   const [touched, setTouched] = useState(false);
@@ -117,11 +117,34 @@ function SalvageInner() {
   const clearedPct = cells.filter(c => c.cleared).length / CELLS;
   const canDig = clearedPct >= T.clearToDig && depth < LAYERS.length - 1;
 
+  /*
+   * CE QU'IL Y AVAIT JUSTE À CÔTÉ.
+   *
+   * Quand le tas s'écroule, on révèle la meilleure chose encore enfouie dans
+   * la couche qu'on fouillait. C'est ce qui donne envie de recommencer tout de
+   * suite — et c'est VRAI : l'objet était réellement dans la grille, à une
+   * case près. On ne fabrique jamais ce regret, et s'il n'y avait plus rien à
+   * trouver, on ne dit rien. Un presque-gagné inventé s'évente vite, et le jeu
+   * en garde l'étiquette.
+   */
+  function bestMissed(): SalvageFind | undefined {
+    const rang = { trouvaille: 3, consigne: 2, bazar: 1, piege: 0 } as const;
+    let best: SalvageFind | undefined;
+    for (const c of cellsRef.current) {
+      if (c.cleared || !c.find || c.find.kind === 'piege') continue;
+      if (!best || rang[c.find.kind] > rang[best.kind]
+        || (rang[c.find.kind] === rang[best.kind] && (c.find.value ?? 0) > (best.value ?? 0))) {
+        best = c.find;
+      }
+    }
+    return best;
+  }
+
   function finish(how: 'out' | 'bust') {
     if (endedRef.current) return;
     endedRef.current = true;
     const reason = how === 'bust' ? randomFromArray(BUST_REASONS) : undefined;
-    setEnded({ how, reason });
+    setEnded({ how, reason, missed: how === 'bust' ? bestMissed() : undefined });
     // Le tas qui se réveille a son propre son : c'est le moment où tout se perd.
     if (how === 'bust') { playCollapse(); haptic('heavy'); } else { playCrit(); haptic('medium'); }
     setTimeout(() => dispatch({
@@ -394,6 +417,18 @@ function SalvageInner() {
                 <p className="text-xs text-white/80 mt-2">
                   ♻️ {centimes}c · 🔧 ×{bazar}{trouvailles.length > 0 ? ` · 💎 ×${trouvailles.length}` : ''}
                 </p>
+              )}
+              {/* Le presque : ce qui dormait à une case de là. */}
+              {ended.how === 'bust' && ended.missed && (
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.55 }}
+                  className="text-xs mt-3 px-3 py-1.5 rounded-full"
+                  style={{ background: 'rgba(242,193,78,0.12)', color: '#F2C14E' }}
+                >
+                  {tr('Sous vos pieds, il y avait encore', 'Under your feet there was still')} {ended.missed.emoji} {tc(ended.missed.name)}.
+                </motion.p>
               )}
             </motion.div>
           )}

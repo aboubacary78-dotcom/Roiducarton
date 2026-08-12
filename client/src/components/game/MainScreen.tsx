@@ -1,4 +1,4 @@
-import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, pickFightEnemy } from '@/contexts/GameContext';
+import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, pickFightEnemy, STREET_TITLES } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import StatBars from './StatBars';
@@ -94,6 +94,10 @@ export default function MainScreen() {
   const dayProgress = state.maxDayActions > 0 ? state.dayActions / state.maxDayActions : 0;
   // Titre de rue (palier de jours) et contrat du matin.
   const streetTitle = streetTitleFor(char.day);
+  // Le titre SUIVANT, annoncé dès le deuxième jour. Une progression ne tire
+  // que si on voit le but : jusqu'ici le titre n'apparaissait qu'une fois
+  // obtenu, et toute la montée était perdue.
+  const nextTitle = char.day >= 2 ? STREET_TITLES.find(t => t.day > char.day) : undefined;
   // Une action qui ferait descendre d'un palier de Dignité se signale AVANT
   // d'être touchée : c'est le moment où la mécanique centrale du jeu devient
   // visible. Le texte dit « peut », jamais « va » — le coût exact dépend du
@@ -141,6 +145,14 @@ export default function MainScreen() {
               <p className="text-xs text-[#8B6B4A]">
                 {loc.emoji} {tr(loc.name, loc.nameEn || loc.name)} · {tr('Jour', 'Day')} {char.day}{streetTitle ? ` · ${streetTitle.emoji} ${tr(streetTitle.fr, streetTitle.en)}` : ''}
               </p>
+              {nextTitle && (
+                <p className="text-[10px] text-[#B8860B] font-medium leading-tight">
+                  {nextTitle.emoji} {tr(
+                    `${nextTitle.fr} dans ${nextTitle.day - char.day} jour${nextTitle.day - char.day > 1 ? 's' : ''}`,
+                    `${nextTitle.en} in ${nextTitle.day - char.day} day${nextTitle.day - char.day > 1 ? 's' : ''}`,
+                  )}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2">

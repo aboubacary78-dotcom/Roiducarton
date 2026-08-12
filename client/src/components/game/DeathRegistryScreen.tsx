@@ -33,6 +33,18 @@ export default function DeathRegistryScreen() {
   const enemies = knownEnemyNames();
 
   const finsTrouvees = DEATH_DEFS.filter(d => book[d.id]).length;
+
+  /*
+   * Les fins encore scellées passent devant, et parmi elles celles qu'on peut
+   * tenter dès ce soir. Ce qui est déjà trouvé descend en bas : le haut de
+   * l'écran doit être un reste à faire, pas une vitrine.
+   */
+  const finsTriees = [...DEATH_DEFS].sort((a, b) => {
+    const va = book[a.id] ? 1 : 0;
+    const vb = book[b.id] ? 1 : 0;
+    if (va !== vb) return va - vb;
+    return a.reach - b.reach;
+  });
   const ennemisTombes = enemies.filter(n => book[`mort-ennemi-${n}`]).length;
 
   const back = () => {
@@ -86,7 +98,7 @@ export default function DeathRegistryScreen() {
         )}
       </div>
       <div className="grid grid-cols-2 gap-2">
-        {DEATH_DEFS.map((d, i) => {
+        {finsTriees.map((d, i) => {
           const e = book[d.id];
           return (
             <motion.div

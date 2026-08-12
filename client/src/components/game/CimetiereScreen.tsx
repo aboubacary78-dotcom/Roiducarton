@@ -28,6 +28,25 @@ export default function CimetiereScreen() {
   const graves = loadGraves();
   const lockedJobs = JOBS.filter(j => j.locked);
 
+  /*
+   * CE QU'IL EST LE PLUS PRÈS DE S'OFFRIR.
+   *
+   * L'effort accélère à l'approche du but, et disproportionnellement sur les
+   * derniers dixièmes. Une liste triée par prix ne dit rien de cette distance ;
+   * une phrase qui nomme l'objet et le manque exact, si. On ne retient que ce
+   * qui n'est pas encore acquis, et on affiche l'écart réel.
+   */
+  const prochainAchat = (() => {
+    const offres: { label: string; cost: number }[] = [
+      ...HERITAGE_KITS.map(k => ({ label: tr(k.name, k.nameEn), cost: k.cost })),
+      ...lockedJobs.filter(j => !heritage.jobs.includes(j.id)).map(j => ({ label: tc(j.name), cost: 40 })),
+      ...(heritage.goldenEpitaph ? [] : [{ label: tr('l\'Épitaphe Dorée', 'the Golden Epitaph'), cost: 25 }]),
+    ].filter(o => o.cost > karma);
+    if (offres.length === 0) return null;
+    offres.sort((a, b) => a.cost - b.cost);
+    return { ...offres[0], manque: offres[0].cost - karma };
+  })();
+
   const back = () => {
     const target = state.character && !state.character.alive ? 'game-over' : 'title';
     dispatch({ type: 'SET_SCREEN', screen: target });
@@ -72,6 +91,19 @@ export default function CimetiereScreen() {
         <p className="text-[10px] text-[#8FA080] mb-2.5">
           {tr('Le Karma de vos morts s\'échange ici. Rien qui adoucisse la rue, juste de quoi l\'aborder autrement.', 'Your deaths\' Karma is traded here. Nothing that softens the street, just new ways to face it.')}
         </p>
+
+        {/* Le plus proche, nommé, avec l'écart exact. */}
+        {prochainAchat && (
+          <div className="flex items-center gap-2 rounded-lg px-2.5 py-2 mb-2.5" style={{ background: 'rgba(242,193,78,0.10)', border: '1px solid rgba(242,193,78,0.25)' }}>
+            <span className="text-sm">👑</span>
+            <p className="text-[11px] text-[#F2C14E] leading-snug flex-1">
+              {tr(
+                `Il vous manque ${prochainAchat.manque} karma pour ${prochainAchat.label}.`,
+                `You are ${prochainAchat.manque} karma short of ${prochainAchat.label}.`,
+              )}
+            </p>
+          </div>
+        )}
 
         {/* Kits consommables */}
         <div className="flex flex-col gap-1.5 mb-2.5">
