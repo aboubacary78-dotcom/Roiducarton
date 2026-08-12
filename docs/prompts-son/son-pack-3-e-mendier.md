@@ -69,6 +69,71 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 
 ---
 
+# ⚠️ CE LOT EST À REFAIRE — lisez d'abord cette page
+
+Une première version a été livrée. Elle est correcte sur la forme : 47 noms
+exacts, durées dans la cible, aucun écrêtage, aucune paire strictement
+identique. **Mais les sons se ressemblent trop entre eux**, et deux lots livrés
+depuis montrent qu'on peut faire nettement mieux.
+
+| Lot | Ressemblance moyenne entre deux de ses sons |
+|---|---|
+| Dormir | 0,53 |
+| Voyager | 0,53 |
+| **Ce lot, première version** | **0,69** |
+
+## L'excuse facile ne tient pas
+
+On pourrait croire que ces scènes se ressemblent par nature : elles se passent
+presque toutes sur le même trottoir, avec les mêmes passants. Sauf que ce lot
+contient aussi **dix suites de rencontre** qui, elles, se déroulent ailleurs —
+une bibliothèque, une boulangerie, un toit. Si le décor commun était en cause,
+ces dix-là devraient se distinguer nettement du reste.
+
+Mesuré : **0,69 entre les scènes de rue, 0,65 entre les suites, 0,68 entre les
+deux groupes.** Les trois valeurs se confondent. L'élévation est uniforme et ne
+vient donc pas du sujet.
+
+## Les quatorze paires qui se confondent
+
+| Proximité | Une scène | Et l'autre |
+|---|---|---|
+| 0.95 | **La Sortie du Karaoké** — *Le bar karaoké recrache ses clients à 2h : cordes vocales détruites, egos * | **Le Club de Lecture** — *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
+| 0.95 | **Le Cinéma** — *Le cinéma vient de projeter un film. Les spectateurs sortent.* | **La Sortie de Mariage** — *Un mariage se termine. Les invités sortent, éméchés et généreux.* |
+| 0.95 | **La Sortie du Match** — *Le match de foot est fini. Les supporters envahissent les rues.* | **Le Club de Lecture** — *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
+| 0.95 | **Le Cinéma** — *Le cinéma vient de projeter un film. Les spectateurs sortent.* | **La Station de Métro** — *L'entrée du métro. Flux constant de passagers pressés.* |
+| 0.95 | **L'Averse Soudaine** — *Un orage éclate sans prévenir sur la place. Vous êtes le seul être humain * | **La Vendetta du Père Noël** — *Le Père Noël du marché vous a retrouvé. Il a fait le tour des commerçants * |
+| 0.95 | **La Sortie du Loto des Anciens** — *La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des * | **Le Distributeur de Billets** — *Un distributeur automatique de billets. Des gens retirent de l'argent.* |
+| 0.95 | **La Sortie de Mariage** — *Un mariage se termine. Les invités sortent, éméchés et généreux.* | **La Station de Métro** — *L'entrée du métro. Flux constant de passagers pressés.* |
+| 0.95 | **La Sortie du Loto des Anciens** — *La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des * | **Le Club de Lecture** — *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
+| 0.95 | **La Station de Métro** — *L'entrée du métro. Flux constant de passagers pressés.* | **Le Bonnet Otage** — *Le vendeur de hot-dogs a puni votre larcin en épinglant votre bonnet EN HA* |
+| 0.94 | **La Sortie du Karaoké** — *Le bar karaoké recrache ses clients à 2h : cordes vocales détruites, egos * | **La Sortie du Match** — *Le match de foot est fini. Les supporters envahissent les rues.* |
+| 0.94 | **Le Musicien du Métro** — *Un musicien joue de l'accordéon dans le métro. Il gagne bien sa vie.* | **Le Bonnet Otage** — *Le vendeur de hot-dogs a puni votre larcin en épinglant votre bonnet EN HA* |
+| 0.94 | **La Sortie du Loto des Anciens** — *La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des * | **Le Marché de Noël** — *Vin chaud, sapins, chorales et culpabilité de fin d'année : le marché de N* |
+| 0.94 | **Le Distributeur de Billets** — *Un distributeur automatique de billets. Des gens retirent de l'argent.* | **Le Club de Lecture** — *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
+| 0.94 | **Le Fleuriste** — *Le fleuriste jette ses fleurs fanées. Elles sont encore belles.* | **La Terrasse du Brunch** — *Le dimanche, la terrasse du brunch déborde d'avocado toasts à 17€ et de co* |
+
+Un karaoké et une carte de bibliothèque à 0,96 : rien ne les rapproche, ni le
+lieu, ni le geste, ni la matière.
+
+## Comment les séparer, du plus efficace au moins
+
+- **Le rythme.** Un coup sec, deux coups espacés, un frottement continu : la
+  silhouette dans le temps se reconnaît bien mieux que le timbre. C'est le
+  levier qui sépare vraiment.
+- **La matière.** Si deux scènes appellent toutes deux « du métal », l'une
+  prend de la tôle fine, l'autre de la fonte.
+- **Ce qu'on écoute.** Une scène contient souvent trois sons possibles. Si une
+  scène voisine a pris le plus évident, prenez-en un autre.
+
+## Le contrôle à faire avant de livrer
+
+**Jouez les 47 à la suite, les yeux fermés.** Si deux se confondent, l'un des
+deux est à refaire — même si chacun, pris isolément, est réussi.
+
+---
+
+
 # 🎯 Ce pack : un bruitage par rencontre
 
 Le jeu compte **296 rencontres**, et chacune a maintenant droit à SON bruitage.
