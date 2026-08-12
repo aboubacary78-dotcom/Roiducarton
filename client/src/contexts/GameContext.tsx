@@ -169,6 +169,10 @@ export function getLegend(scores: { name: string; days: number; score: number }[
 type GameAction =
   | { type: 'START_GAME' }
   | { type: 'GENERATE_CHARACTERS' }
+  // Tire le personnage suivant PENDANT l'écran de mort, pour pouvoir
+  // l'annoncer par son nom : on ne quitte plus une partie finie, on quitte une
+  // partie déjà commencée (voir GameOverScreen).
+  | { type: 'PREPARE_SUCCESSOR' }
   | { type: 'SELECT_CHARACTER'; index: number }
   | { type: 'EXPLORE' }
   | { type: 'BEG' }
@@ -215,6 +219,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'GENERATE_CHARACTERS':
       return { ...state, characterChoices: generateCharacterTrio() };
 
+    case 'PREPARE_SUCCESSOR':
+      // Une seule fois par mort : le successeur annoncé doit rester le même
+      // tant que le joueur est sur l'écran de fin.
+      if (state.characterChoices.length > 0) return state;
+      return { ...state, characterChoices: generateCharacterTrio() };
+
     case 'SELECT_CHARACTER': {
       const char = state.characterChoices[action.index];
       // Dernières volontés + kits de L'Héritage : tout ce qui attendait le
@@ -242,6 +252,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (gifts.length > 0) {
         return {
           ...state, screen: 'main', dayActions: 0, contract: firstContract,
+          // Le trio est consommé : sans ça, la mort suivante annoncerait comme
+          // successeur un personnage de ce trio-ci, déjà joué.
+          characterChoices: [],
           character: { ...char, inventory, money },
           eventResult: {
             text: L(
@@ -252,7 +265,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           },
         };
       }
-      return { ...state, screen: 'main', character: char, dayActions: 0, contract: firstContract };
+      return { ...state, screen: 'main', character: char, characterChoices: [], dayActions: 0, contract: firstContract };
     }
 
     case 'CONTINUE_SAVE': {
@@ -1573,7 +1586,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'RESTART':
       clearSave();
-      return { ...initialState, highScores: loadHighScores() };
+      // On repart directement sur le choix du personnage, avec le successeur
+      // déjà annoncé en tête : le joueur reprend là où l'écran de fin l'a
+      // laissé, sans repasser par l'écran-titre.
+      return {
+        ...initialState,
+        highScores: loadHighScores(),
+        screen: state.characterChoices.length > 0 ? 'character-select' : 'title',
+        characterChoices: state.characterChoices,
+      };
 
     default:
       return state;

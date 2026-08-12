@@ -6,7 +6,8 @@ import { showInterstitial, showRewarded } from '@/lib/ads';
 import PlayerFace from './PlayerFace';
 import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
-import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown } from '@/lib/necrology';
+import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown, loadDeathBook } from '@/lib/necrology';
+import { STREET_TITLES } from '@/contexts/data/progression';
 import { getEquipped } from '@/lib/profile';
 import { pushToast } from '@/lib/toast';
 import { playDeath } from '@/lib/sound';
@@ -17,6 +18,59 @@ import { playDeath } from '@/lib/sound';
  * méta : fins découvertes (Registre des Morts), Karma de Rue gagné, et les
  * Dernières Volontés (l'objet légué au prochain personnage).
  */
+
+/*
+ * LE « PRESQUE ».
+ *
+ * Un écran de fin qui ne montre que ce qui a été obtenu se referme. On cherche
+ * donc, parmi tout ce qui progresse, ce dont le joueur s'est le plus approché
+ * SANS l'atteindre, et on le lui dit. Rien n'est fabriqué : on ne retient que
+ * des écarts réels, et on garde le plus petit.
+ */
+function nearestMiss(day: number, bestDay: number, found: number, total: number): { fr: string; en: string } | null {
+  const candidates: { gap: number; fr: string; en: string }[] = [];
+
+  // Le prochain titre de rue.
+  const nextTitle = STREET_TITLES.find(t => t.day > day);
+  if (nextTitle) {
+    const d = nextTitle.day - day;
+    candidates.push({
+      gap: d,
+      fr: `Il vous manquait ${d} jour${d > 1 ? 's' : ''} pour devenir ${nextTitle.fr}.`,
+      en: `You were ${d} day${d > 1 ? 's' : ''} short of becoming ${nextTitle.en}.`,
+    });
+  }
+
+  // Le record personnel, tant qu'il n'est pas battu.
+  if (bestDay > day) {
+    const d = bestDay - day;
+    candidates.push({
+      gap: d,
+      fr: `Il vous manquait ${d} jour${d > 1 ? 's' : ''} pour battre votre record.`,
+      en: `You were ${d} day${d > 1 ? 's' : ''} short of your own record.`,
+    });
+  }
+
+  // Le prochain palier du Registre (par cinquièmes, puis la complétion).
+  if (found < total) {
+    const step = Math.ceil(total / 5);
+    const next = Math.min(total, (Math.floor(found / step) + 1) * step);
+    const d = next - found;
+    candidates.push({
+      gap: d,
+      fr: next >= total
+        ? `Il vous manque ${d} fin${d > 1 ? 's' : ''} pour compléter le Registre.`
+        : `Il vous manque ${d} fin${d > 1 ? 's' : ''} pour atteindre ${next} sur ${total}.`,
+      en: next >= total
+        ? `You are ${d} ending${d > 1 ? 's' : ''} from completing the Book.`
+        : `You are ${d} ending${d > 1 ? 's' : ''} from reaching ${next} of ${total}.`,
+    });
+  }
+
+  if (candidates.length === 0) return null;
+  candidates.sort((a, b) => a.gap - b.gap);
+  return candidates[0];
+}
 
 // Gros titre selon la catégorie de mort (l'ennemi a le sien, voir plus bas).
 const HEADLINES: Record<string, { fr: string; en: string }> = {
@@ -88,6 +142,11 @@ export default function GameOverScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [char?.seed]);
 
+  // Le successeur est tiré AVANT le bilan : l'écran de fin ne clôt plus une
+  // partie, il en ouvre une. Le joueur repart avec un nom en tête.
+  useEffect(() => { dispatch({ type: 'PREPARE_SUCCESSOR' }); }, [dispatch]);
+  const successor = state.characterChoices[0] ?? null;
+
   // Pub interstitielle à l'arrivée sur l'écran de fin (entre deux parties).
   useEffect(() => { showInterstitial(); }, []);
   // La résonance de fin : une seule fois, à l'ouverture de l'écran.
@@ -145,6 +204,17 @@ export default function GameOverScreen() {
 
   const score = computeScore(char.day, char.respect, char.money, hasTrait(char, 'poissard'));
   const highScores = loadHighScores();
+
+  // Ce dont il s'est le plus approché sans l'avoir : l'écran ne se referme
+  // jamais sur un bilan seulement positif.
+  const book = loadDeathBook();
+  const totalFins = DEATH_DEFS.length + knownEnemyNames().length;
+  const miss = nearestMiss(
+    char.day,
+    highScores.length > 0 ? Math.max(...highScores.map(h => h.days)) : 0,
+    Object.keys(book).length,
+    totalFins,
+  );
 
   // Fiches des fins découvertes pour l'encadré « inédit ».
   const newCards = (harvest?.newIds || []).map(id => {
@@ -207,6 +277,57 @@ export default function GameOverScreen() {
           </div>
         </div>
       </motion.div>
+
+      {/* ---- LE SUCCESSEUR : la partie suivante est déjà commencée ----
+           Placé AVANT le bilan, et avant tout ce qui ressemble à une clôture.
+           Le joueur ne quitte plus une partie finie, il quitte quelqu'un qui
+           l'attend. C'est aussi le texte des rappels (voir lib/notifications). */}
+      {successor && (
+        <motion.div
+          initial={{ y: 14, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.25 }}
+          className="w-full max-w-sm rounded-xl p-3 border border-[#5A3A28]"
+          style={{ background: 'linear-gradient(135deg, #3A2A20, #241A16)' }}
+        >
+          {miss && (
+            <p className="text-[11px] text-[#C89B5A] leading-snug mb-2.5">
+              ↯ {tr(miss.fr, miss.en)}
+            </p>
+          )}
+          <div className="flex items-center gap-2.5">
+            <div className="w-11 h-11 rounded-lg overflow-hidden border border-[#6B4A32] shrink-0">
+              <PlayerFace char={successor} size={44} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] tracking-widest uppercase text-[#8B6B4A] font-mono">
+                {tr('Le suivant sur la liste', 'Next in line')}
+              </p>
+              <p className="text-[13px] font-bold text-[#F0D9C4] truncate">
+                {successor.name} · {successor.job.emoji} {tc(successor.job.name)}
+              </p>
+              <p className="text-[10px] text-[#A08060] truncate">
+                {successor.traits.map(t => `${t.emoji} ${tc(t.name)}`).join(' · ')}
+              </p>
+            </div>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => dispatch({ type: 'RESTART' })}
+            className="w-full mt-3 py-3.5 text-[15px] font-bold text-white rounded-xl"
+            style={{
+              background: 'linear-gradient(135deg, #D4874D, #9B5B3A)',
+              boxShadow: '0 4px 18px rgba(212, 135, 77, 0.35)',
+            }}
+          >
+            {tr(`Reprendre la rue avec ${successor.name}`, `Take the street with ${successor.name}`)}
+          </motion.button>
+          <p className="text-[9px] text-[#8B6B4A] text-center mt-1.5">
+            {tr('Vous pourrez encore changer d\'avis.', 'You can still change your mind.')}
+          </p>
+        </motion.div>
+      )}
 
       {/* ---- LA RÉCOLTE : fins découvertes + Karma ---- */}
       <motion.div
@@ -349,7 +470,8 @@ export default function GameOverScreen() {
         </motion.button>
       )}
 
-      {/* Restart */}
+      {/* Reprise — répétée en bas de page pour qui a tout lu, et repli complet
+          si le successeur n'a pas pu être tiré. */}
       <motion.button
         initial={{ y: 15, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -357,13 +479,17 @@ export default function GameOverScreen() {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
         onClick={() => dispatch({ type: 'RESTART' })}
-        className="w-full max-w-sm py-3.5 text-sm font-semibold text-white rounded-xl"
-        style={{
+        className={successor
+          ? 'w-full max-w-sm py-2.5 text-[12px] font-semibold text-[#E8A87C] rounded-xl border border-[#4A3048]'
+          : 'w-full max-w-sm py-3.5 text-sm font-semibold text-white rounded-xl'}
+        style={successor ? undefined : {
           background: 'linear-gradient(135deg, #D4874D, #9B5B3A)',
           boxShadow: '0 4px 16px rgba(212, 135, 77, 0.3)',
         }}
       >
-        {tr('Recommencer', 'Play Again')}
+        {successor
+          ? tr('↻ Reprendre la rue', '↻ Take the street')
+          : tr('Recommencer', 'Play Again')}
       </motion.button>
     </motion.div>
   );
