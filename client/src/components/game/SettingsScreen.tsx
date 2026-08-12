@@ -8,8 +8,16 @@ import { useLang, setLang, tr } from '@/lib/lang';
 
 // ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
 // avant publication (obligatoire avec des publicités sur les stores).
-const PRIVACY_URL = 'https://example.com/roi-du-carton/confidentialite';
-const APP_VERSION = '3.3.0';
+// La page est livrée avec le site (client/public/confidentialite.html), donc
+// ce chemin fonctionne partout où le jeu est hébergé, sans domaine en dur.
+//
+// ⚠ Les stores réclament en plus une URL ABSOLUE et publique, consultable sans
+// installer l'application. Dès que le domaine définitif est connu, remplacer
+// cette valeur par l'adresse complète : c'est aussi ce qui garantit que le
+// lien s'ouvre correctement dans l'application native, où `target="_blank"`
+// passe la main au navigateur du système.
+const PRIVACY_URL = '/confidentialite.html';
+const APP_VERSION = '3.4.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
