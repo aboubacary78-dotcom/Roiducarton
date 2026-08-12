@@ -7,6 +7,7 @@
  */
 
 import { loadAudio, isKnownMissing, playBuffer } from './audioFiles';
+import { haptic, hapticPattern } from './haptics';
 
 const MUTE_KEY = 'roi-du-carton-muted';
 
@@ -417,12 +418,18 @@ function playPaperSynth(): void {
   setTimeout(() => tone(330, 0.5, 'sine', 0.045, 262), 260);
 }
 
-/** Vibration haptique (Android / app native). Sans effet si non supporté. */
+/*
+ * Vibration haptique. Déléguée à lib/haptics : elle a son propre réglage,
+ * indépendant de la sourdine (couper le son est justement le moment où le
+ * retour tactile devient le seul canal), et elle passe par le pont natif —
+ * `navigator.vibrate` n'existe pas dans le WKWebView d'iOS.
+ */
 export function vibrate(pattern: number | number[]): void {
-  if (muted) return;
-  try {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate(pattern);
-  } catch { /* silent */ }
+  if (typeof pattern === 'number') {
+    haptic(pattern >= 90 ? 'heavy' : pattern >= 45 ? 'medium' : 'light');
+  } else {
+    hapticPattern(pattern);
+  }
 }
 
 /** playCoin : le vrai bruitage s'il est là, la synthèse sinon. */

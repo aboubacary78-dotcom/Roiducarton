@@ -6,6 +6,7 @@ import type { SalvageFind } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt, playStep, playFind, playCollapse } from '@/lib/sound';
+import { haptic } from '@/lib/haptics';
 import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import LocationBackdrop from './LocationBackdrop';
@@ -122,7 +123,7 @@ function SalvageInner() {
     const reason = how === 'bust' ? randomFromArray(BUST_REASONS) : undefined;
     setEnded({ how, reason });
     // Le tas qui se réveille a son propre son : c'est le moment où tout se perd.
-    if (how === 'bust') playCollapse(); else playCrit();
+    if (how === 'bust') { playCollapse(); haptic('heavy'); } else { playCrit(); haptic('medium'); }
     setTimeout(() => dispatch({
       type: 'RESOLVE_SALVAGE',
       // L'Agile ressort avec ce qu'il avait dans les mains, même quand tout
@@ -181,16 +182,16 @@ function SalvageInner() {
     cellsRef.current = next;
     setCells(next);
 
-    if (!cell.find) { playStep(); return; }
+    if (!cell.find) { playStep(); haptic('light'); return; }
     const f = cell.find;
     setPop({ f, key: Date.now() });
     if (f.kind === 'consigne') {
-      centimesRef.current += f.value; setCentimes(centimesRef.current); playCrit();
+      centimesRef.current += f.value; setCentimes(centimesRef.current); playCrit(); haptic('medium');
     } else if (f.kind === 'bazar') {
-      bazarRef.current += 1; setBazar(bazarRef.current); playCrit();
+      bazarRef.current += 1; setBazar(bazarRef.current); playCrit(); haptic('medium');
     } else if (f.kind === 'trouvaille') {
       trouvaillesRef.current = [...trouvaillesRef.current, f.id];
-      setTrouvailles(trouvaillesRef.current); playFind();
+      setTrouvailles(trouvaillesRef.current); playFind(); haptic('heavy');
     } else {
       // Ce qu'une saleté coûte dépend de qui fouille : l'haleine redoutable
       // fait fuir les rats, le phobique en fait une attaque de panique.
