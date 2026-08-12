@@ -105,6 +105,27 @@ raison.**
 Le troisième colonne est ce qu'on attend. À chaque fois : **un geste concret,
 une matière, et si possible un silence bien placé.**
 
+## ⚠️ Le contrôle qui compte : ils doivent différer ENTRE EUX
+
+Le premier lot livré était bon sur ce point ; le deuxième nettement moins —
+mesuré, pas ressenti : ses sons se ressemblaient sensiblement plus entre eux,
+alors qu'ils couvraient des scènes tout aussi variées. C'est le piège d'une
+commande en nombre, et c'est ce qui ruinerait l'intérêt d'avoir un son par
+rencontre plutôt qu'un son par catégorie.
+
+**Le test, à faire avant de livrer : jouez tout le lot à la suite, les yeux
+fermés.** Si deux bruitages sont difficiles à distinguer, l'un des deux est à
+refaire — même si chacun, pris seul, est réussi.
+
+Trois leviers pour varier, quand deux scènes se ressemblent :
+
+- **changer la matière** : le même geste sur du carton, sur du métal, sur du
+  papier journal ne donne pas le même son ;
+- **changer le rythme** : un coup sec, deux coups espacés, un frottement
+  continu — la silhouette temporelle se reconnaît mieux que le timbre ;
+- **changer ce qu'on écoute** : dans une scène il y a souvent trois sons
+  possibles. Si la précédente a pris le plus évident, prenez-en un autre.
+
 ## Règles communes à tous les fichiers
 
 - **Durée : 0,4 à 1,2 seconde.** Pas plus. C'est une ponctuation, pas une scène.
