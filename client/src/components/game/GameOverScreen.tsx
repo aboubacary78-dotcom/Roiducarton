@@ -1,7 +1,7 @@
 import { useGame, computeScore, hasTrait, loadHighScores, knownEnemyNames } from '@/contexts/GameContext';
 import type { InventoryItem } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { showInterstitial, showRewarded } from '@/lib/ads';
 import PlayerFace from './PlayerFace';
 import KenBurnsImage from './KenBurnsImage';
@@ -13,6 +13,8 @@ import { pushToast } from '@/lib/toast';
 import { playDeath, playCoin } from '@/lib/sound';
 import { haptic } from '@/lib/haptics';
 import { rememberSuccessor } from '@/lib/notifications';
+import { worthSharing, shareRewardAvailable, markShareRewarded, shareFrontPage } from '@/lib/partage';
+import { addKarma } from '@/lib/necrology';
 
 /*
  * L'écran de fin est une « une de journal » : la mort du personnage devient
@@ -53,19 +55,17 @@ function nearestMiss(day: number, bestDay: number, found: number, total: number)
     });
   }
 
-  // Le prochain palier du Registre (par cinquièmes, puis la complétion).
+  // Le Registre : la fin suivante, ou la complétion s'il n'en manque qu'une.
   if (found < total) {
-    const step = Math.ceil(total / 5);
-    const next = Math.min(total, (Math.floor(found / step) + 1) * step);
-    const d = next - found;
+    const reste = total - found;
     candidates.push({
-      gap: d,
-      fr: next >= total
-        ? `Il vous manque ${d} fin${d > 1 ? 's' : ''} pour compléter le Registre.`
-        : `Il vous manque ${d} fin${d > 1 ? 's' : ''} pour atteindre ${next} sur ${total}.`,
-      en: next >= total
-        ? `You are ${d} ending${d > 1 ? 's' : ''} from completing the Book.`
-        : `You are ${d} ending${d > 1 ? 's' : ''} from reaching ${next} of ${total}.`,
+      gap: 1,
+      fr: reste === 1
+        ? 'Il ne vous manque qu\'une fin pour compléter le Registre.'
+        : `Encore une fin et vous serez à ${found + 1} sur ${total}.`,
+      en: reste === 1
+        ? 'You are one ending from completing the Book.'
+        : `One more ending puts you at ${found + 1} of ${total}.`,
     });
   }
 
@@ -204,6 +204,34 @@ export default function GameOverScreen() {
    */
   const [pochesOuvertes, setPochesOuvertes] = useState(0);
 
+  /*
+   * LA UNE SE PARTAGE — mais pas à chaque mort.
+   *
+   * Un partage proposé systématiquement n'est plus proposé, il est subi : le
+   * joueur apprend à ignorer le bouton. On ne l'affiche que sur les morts qui
+   * valent le coup d'œil, et le Karma qui va avec n'est dû qu'une fois par
+   * jour, sinon il suffirait de mourir en boucle pour le farmer.
+   */
+  const uneRef = useRef<HTMLDivElement | null>(null);
+  const [partage, setPartage] = useState<'idle' | 'busy' | 'done'>('idle');
+
+  async function partagerLaUne() {
+    if (!uneRef.current || partage === 'busy') return;
+    setPartage('busy');
+    const ok = await shareFrontPage(
+      uneRef.current,
+      tr(`${char!.name} a tenu ${char!.day} jour${char!.day > 1 ? 's' : ''} dans la rue. Le Roi du Carton.`,
+         `${char!.name} lasted ${char!.day} day${char!.day > 1 ? 's' : ''} on the street. Cardboard King.`),
+    );
+    if (!ok) { setPartage('idle'); return; }
+    if (shareRewardAvailable()) {
+      addKarma(15);
+      markShareRewarded();
+      pushToast(tr('Merci pour la publicité : +15 karma.', 'Thanks for the publicity: +15 karma.'), { emoji: '📰', tone: 'good' });
+    }
+    setPartage('done');
+  }
+
   // La poche des fins est toujours la dernière : tant qu'elle n'est pas
   // ouverte, les cartes « nouvelle fin » restent cachées.
   const poches = harvest?.pockets ?? [];
@@ -273,13 +301,15 @@ export default function GameOverScreen() {
 
   // Ce dont il s'est le plus approché sans l'avoir : l'écran ne se referme
   // jamais sur un bilan seulement positif.
+  // Le compteur du « presque » porte sur les FINS seules, comme le Registre et
+  // l'écran-titre depuis la scission des collections. Il annonçait encore un
+  // total de 36, ce qui ne correspondait plus à rien de ce que le joueur voit.
   const book = loadDeathBook();
-  const totalFins = DEATH_DEFS.length + knownEnemyNames().length;
   const miss = nearestMiss(
     char.day,
     highScores.length > 0 ? Math.max(...highScores.map(h => h.days)) : 0,
-    Object.keys(book).length,
-    totalFins,
+    DEATH_DEFS.filter(d => book[d.id]).length,
+    DEATH_DEFS.length,
   );
 
   // Fiches des fins découvertes pour l'encadré « inédit ».
@@ -345,6 +375,7 @@ export default function GameOverScreen() {
 
       {/* ---- LA UNE DE JOURNAL ---- */}
       <motion.div
+        ref={uneRef}
         initial={{ y: 18, opacity: 0, rotate: -0.6 }}
         animate={{ y: 0, opacity: 1, rotate: 0 }}
         transition={{ type: 'spring', damping: 20 }}
@@ -393,6 +424,32 @@ export default function GameOverScreen() {
           </div>
         </div>
       </motion.div>
+
+      {/* Le partage, seulement quand la mort vaut le coup d'œil. */}
+      {worthSharing({
+        newEndings: harvest?.newIds.length ?? 0,
+        day: char.day,
+        bestDay: highScores.length > 0 ? Math.max(...highScores.map(h => h.days)) : 0,
+        money: char.money,
+        crowned: char.crowned,
+      }) && (
+        <motion.button
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          whileTap={{ scale: 0.98 }}
+          disabled={partage !== 'idle'}
+          onClick={partagerLaUne}
+          className="w-full max-w-sm py-2.5 text-[12px] font-semibold rounded-xl border disabled:opacity-60"
+          style={{ borderColor: '#4A3048', color: '#E8A87C' }}
+        >
+          {partage === 'busy'
+            ? tr('⏳ Préparation…', '⏳ Preparing…')
+            : partage === 'done'
+              ? tr('✓ Une envoyée', '✓ Front page sent')
+              : tr('📰 Montrer cette une', '📰 Share this front page')}
+        </motion.button>
+      )}
 
       {/* ---- LE SUCCESSEUR : la partie suivante est déjà commencée ----
            Placé AVANT le bilan, et avant tout ce qui ressemble à une clôture.
