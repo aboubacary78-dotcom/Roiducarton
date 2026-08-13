@@ -34,6 +34,9 @@ export default function PlayerFace({
       className={className}
       accessories={getEquipped()}
       condition={faceCondition(char)}
+      // Le second axe : la tenue, pilotée par la Dignité. Le corps et
+      // l'allure se dégradent séparément, et c'est tout l'intérêt.
+      dignity={char.stats.dignity}
     />
   );
 }

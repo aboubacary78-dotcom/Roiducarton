@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import CardboardAvatar from './CardboardAvatar';
+import { faceCondition } from './PlayerFace';
 import { playClick } from '@/lib/sound';
 import {
   ACCESSORIES,
@@ -67,7 +68,14 @@ export default function WardrobeScreen() {
         className="craft-card p-4 flex items-center gap-4"
       >
         <div className="shrink-0 rounded-2xl overflow-hidden shadow-[0_3px_10px_rgba(0,0,0,0.1)]">
-          <CardboardAvatar seed={seed} gender={gender} size={96} accessories={profile.equipped} />
+          {/* Le grand aperçu montre l'état RÉEL : c'est l'écran où l'on se
+              regarde le plus longtemps, et un visage pimpant ici pendant que
+              la tenue s'effondre ailleurs annulerait tout le signal. */}
+          <CardboardAvatar
+            seed={seed} gender={gender} size={96} accessories={profile.equipped}
+            condition={char ? faceCondition(char) : undefined}
+            dignity={char?.stats.dignity}
+          />
         </div>
         <div className="flex-1">
           <p className="text-base font-semibold text-[#2A1F1A]">{char?.name || tr('Votre personnage', 'Your character')}</p>

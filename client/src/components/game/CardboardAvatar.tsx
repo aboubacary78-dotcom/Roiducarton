@@ -40,7 +40,22 @@ function hashSeed(s: string): number {
   return h >>> 0;
 }
 
-export default function CardboardAvatar({ seed, gender, size = 40, className = '', accessories, condition }: { seed: string; gender?: 'm' | 'f'; size?: number; className?: string; accessories?: Partial<Record<AccessorySlot, string>>; condition?: number }) {
+/*
+ * DEUX AXES SUR LE VISAGE.
+ *
+ * `condition` (la moyenne des cinq jauges de survie) dit dans quel ÉTAT est le
+ * corps : le teint, les cernes, les joues.
+ *
+ * `dignity` dit dans quelle TENUE il est, ce qui n'est pas la même chose. Un
+ * personnage peut être en pleine forme et complètement débraillé, et c'est
+ * exactement la tension du jeu.
+ *
+ * Ce second axe manquait, alors que la Dignité est la mécanique centrale et
+ * que le joueur regarde ce visage plus souvent que n'importe quelle barre.
+ * Le carton s'écorne, le trait de feutre bave, le col se plie : on lit ce que
+ * la survie coûte sans qu'aucun texte ne le dise.
+ */
+export default function CardboardAvatar({ seed, gender, size = 40, className = '', accessories, condition, dignity }: { seed: string; gender?: 'm' | 'f'; size?: number; className?: string; accessories?: Partial<Record<AccessorySlot, string>>; condition?: number; dignity?: number }) {
   const s = seed || 'anon';
   const female = gender === 'f';
   // Un tirage indépendant par caractéristique (graine + sel).
@@ -697,6 +712,37 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           <circle cx="70" cy="60" r="6" fill="#E8927C" opacity={0.18 + (condition - 0.72) * 0.6} />
           {/* petite étincelle de forme */}
           <path d="M78 30 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4 Z" fill="#F5D06B" opacity="0.9" />
+        </g>
+      )}
+
+      {/* ---- Calque de TENUE (dérivé de la Dignité) ----
+          Quatre paliers, quatre crans discrets. Rien de dramatique : c'est la
+          présentation qui se dégrade, pas la santé. Sous 75, le carton
+          commence à s'écorner ; sous 50, le trait de feutre bave ; sous 25, la
+          barbe gagne et le col se plie pour de bon. */}
+      {typeof dignity === 'number' && dignity < 75 && (
+        <g style={{ pointerEvents: 'none' }}>
+          {/* Un coin de carton corné, en haut à gauche du visage. */}
+          <path d="M20 30 l7 -3 -1 6 Z" fill="#C9A97E" stroke={OUTLINE} strokeWidth="1.2" strokeLinejoin="round" opacity="0.85" />
+        </g>
+      )}
+      {typeof dignity === 'number' && dignity < 50 && (
+        <g style={{ pointerEvents: 'none' }}>
+          {/* Le feutre bave : deux coulures sous le trait du visage. */}
+          <path d="M36 78 q1.5 5 0 8" stroke={OUTLINE} strokeWidth="1.4" fill="none" strokeLinecap="round" opacity="0.5" />
+          <path d="M64 76 q-1.2 6 0.4 9" stroke={OUTLINE} strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.42" />
+          {/* Une éraflure sur la joue droite. */}
+          <path d="M74 56 l5 4" stroke="#9A7B5A" strokeWidth="1.4" strokeLinecap="round" opacity="0.7" />
+        </g>
+      )}
+      {typeof dignity === 'number' && dignity < 25 && (
+        <g style={{ pointerEvents: 'none' }}>
+          {/* Le col plié, franchement de travers. */}
+          <path d="M30 86 l10 -5 -2 7 Z" fill="#B9986E" stroke={OUTLINE} strokeWidth="1.2" strokeLinejoin="round" opacity="0.9" />
+          {/* Des poils qui dépassent partout : la barbe a gagné. */}
+          <path d="M24 64 l-5 2 M25 70 l-5 3 M76 64 l5 2 M75 70 l5 3" stroke={OUTLINE} strokeWidth="1.3" strokeLinecap="round" opacity="0.55" />
+          {/* Un voile terne sur l'ensemble : plus personne ne vous regarde. */}
+          <rect x="14" y="26" width="72" height="60" rx="26" fill="#6B5740" opacity="0.13" />
         </g>
       )}
     </svg>
