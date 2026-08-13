@@ -194,14 +194,19 @@ function HeistCasing({ onPick }: { onPick: (t: HeistTarget) => void }) {
       <div className="w-full max-w-sm flex flex-col gap-2.5">
         {targets.map((t, i) => {
           const tune = HEIST_TUNING[t.difficulty];
+          // Un grand coup par jour : après un gros casse réussi, la ville
+          // entière garde un œil sur ses caisses jusqu'au lendemain.
+          const verrouille = t.difficulty === 'grand' && char?.bigScoreDay !== undefined && char.bigScoreDay === char.day;
           return (
             <motion.button
               key={t.id}
               initial={{ y: 14, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: i * 0.08 }}
-              onClick={() => onPick(t)}
-              className="craft-card p-3 text-left flex flex-col gap-1.5"
+              onClick={() => { if (!verrouille) onPick(t); }}
+              disabled={verrouille}
+              aria-disabled={verrouille}
+              className={`craft-card p-3 text-left flex flex-col gap-1.5 ${verrouille ? 'opacity-55' : ''}`}
             >
               <SafeImg src={`/assets/${t.id}.webp`} className="w-full h-20 object-cover rounded-lg -mb-0.5" />
               <div className="flex items-center justify-between">
@@ -211,12 +216,18 @@ function HeistCasing({ onPick }: { onPick: (t: HeistTarget) => void }) {
                 </span>
               </div>
               <p className="text-xs text-[#6B5740] leading-snug">{tr(t.desc, t.descEn)}</p>
-              <div className="flex items-center justify-between text-[11px] font-medium">
-                <span className="text-[#3d8b4f]">
-                  💶 ≈ {t.moneyMin}-{t.moneyMax}€{t.item ? ` + ${t.item.emoji}` : ''}
-                </span>
-                <span className="text-[#B84A3A]">{tr(CATCHER_UI[t.catcher].fr, CATCHER_UI[t.catcher].en)}</span>
-              </div>
+              {verrouille ? (
+                <p className="text-[11px] font-medium text-[#B84A3A] leading-snug">
+                  🔒 {tr('Fermé pour aujourd\'hui : après votre coup de ce matin, toute la ville compte sa caisse deux fois. Revenez demain.', 'Closed for today: after your job this morning, the whole city counts its till twice. Come back tomorrow.')}
+                </p>
+              ) : (
+                <div className="flex items-center justify-between text-[11px] font-medium">
+                  <span className="text-[#3d8b4f]">
+                    💶 ≈ {t.moneyMin}-{t.moneyMax}€{t.item ? ` + ${t.item.emoji}` : ''}
+                  </span>
+                  <span className="text-[#B84A3A]">{tr(CATCHER_UI[t.catcher].fr, CATCHER_UI[t.catcher].en)}</span>
+                </div>
+              )}
             </motion.button>
           );
         })}

@@ -241,7 +241,7 @@ type GameAction =
   | { type: 'RESOLVE_ENCOUNTER'; kind: 'share' | 'trade' | 'pass'; offer?: { item: InventoryItem; price: number } }
   | { type: 'TRIGGER_SHOP_EVENT'; event: ShopEvent };
 
-function gameReducer(state: GameState, action: GameAction): GameState {
+export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'START_GAME':
       clearSave();
@@ -629,15 +629,33 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       // Réussite (ok / jackpot / sortie à chaud) : le butin suit le profil de
       // la cible. Objet : garanti au coup de maître, une chance sur deux sinon.
+      //
+      // LE COUP DE MAÎTRE CHOISIT SON BUTIN. Il cumulait le maximum d'argent,
+      // l'objet garanti, le respect ET un gros regain de moral : mieux que
+      // toutes les autres issues sur tous les axes à la fois, donc la seule
+      // qu'un joueur entraîné cherchait. Désormais, quand la cible a un objet,
+      // c'est l'objet qui est la récompense et l'argent redescend au plancher.
+      // La maîtrise réduit le danger, elle ne double plus la paie.
       const jackpot = action.tier === 'jackpot';
       const hot = action.tier === 'hot';
       const roll = target.moneyMin + Math.floor(Math.random() * (target.moneyMax - target.moneyMin + 1));
-      const moneyDelta = jackpot ? target.moneyMax + 3 : hot ? Math.min(target.moneyMax, roll + 2) : roll;
+      const moneyDelta = jackpot
+        ? (target.item ? target.moneyMin + 2 : target.moneyMax + 3)
+        : hot ? Math.min(target.moneyMax, roll + 2) : roll;
       const respectDelta = hot ? (target.difficulty === 'grand' ? 3 : 2) : jackpot ? 2 : 0;
-      const gotItem = target.item && (jackpot || Math.random() < 0.5) ? target.item : undefined;
-      const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 6 } : hot ? { dignity: -5, mental: 5 } : { dignity: -6, mental: 2 };
+      // Le sac déborde à 20 objets partout ailleurs (fouille, combat, cadeaux) :
+      // le vol était le seul chemin qui l'ignorait, ce qui en faisait aussi le
+      // seul entrepôt à revendre sans limite.
+      const sacPlein = c.inventory.length >= 20;
+      const convoite = target.item && (jackpot || Math.random() < 0.5) ? target.item : undefined;
+      const gotItem = convoite && !sacPlein ? convoite : undefined;
+      const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 2 } : hot ? { dignity: -5, mental: 5 } : { dignity: -6, mental: 2 };
       const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
-      const itemNote = gotItem ? L(` Et dans le sac : ${gotItem.name} ${gotItem.emoji}.`, ` And into the bag: ${gotItem.name} ${gotItem.emoji}.`) : '';
+      const itemNote = gotItem
+        ? L(` Et dans le sac : ${gotItem.name} ${gotItem.emoji}.`, ` And into the bag: ${gotItem.name} ${gotItem.emoji}.`)
+        : convoite
+          ? L(` ${convoite.name} ${convoite.emoji} était là, mais votre sac est plein à craquer : vous le laissez sur place, la mort dans l'âme.`, ` ${convoite.name} ${convoite.emoji} was right there, but your bag is bursting: you leave it behind, heartbroken.`)
+          : '';
       const text = (jackpot
         ? L(`💎 Coup de maître ! Vous repartez avec ${target.label} sans que personne ne remarque rien : ${moneyDelta}€.`, `💎 Masterstroke! You walk off with ${target.labelEn} without anyone noticing a thing: €${moneyDelta}.`)
         : hot
@@ -648,6 +666,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         character: {
           ...c, stats: newStats, money: c.money + moneyDelta, respect: c.respect + respectDelta,
           inventory: gotItem ? [...c.inventory, gotItem] : c.inventory,
+          // Un grand coup réussi met toute la ville sur les nerfs pour la
+          // journée : plus de grosse cible avant demain, ici comme ailleurs.
+          // Le voyage étant gratuit, un quota par quartier ne coûterait rien.
+          bigScoreDay: target.difficulty === 'grand' ? c.day : c.bigScoreDay,
         },
         eventResult: { text, statChanges: statDelta, moneyChange: moneyDelta, respectChange: respectDelta, image: '/assets/result-steal-success.webp' },
         screen: 'main',

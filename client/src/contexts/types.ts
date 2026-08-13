@@ -65,6 +65,10 @@ export interface Character {
   // Nombre de casses tentés durant cette partie : chaque vol rend le
   // prochain mini-jeu plus difficile (voir StealHeist).
   stealCount: number;
+  // Jour du dernier GRAND coup réussi. Un quartier ne se laisse pas dévaliser
+  // deux fois dans la même journée : tant que ce jour est le jour courant, les
+  // grosses cibles sont hors de portée, partout. Absent = jamais réussi.
+  bigScoreDay?: number;
   // Nombre de gorgées prises à la fontaine du parc (eau gratuite) : toutes les
   // 3 gorgées, la fontaine fait des siennes (pub récompensée). Anti-exploit.
   fountainUses?: number;
