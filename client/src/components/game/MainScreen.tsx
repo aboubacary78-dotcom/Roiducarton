@@ -203,15 +203,76 @@ export default function MainScreen() {
         </div>
       </motion.div>
 
-      {/* Stats */}
+      {/* ---- LES DEUX BUTS, EN TÊTE ----
+           Le contrat du jour donne sa direction à la journée entière, et il
+           était rendu en 10 px, en gris, entre les pastilles et les boutons :
+           le plus faible poids visuel de l'écran pour l'information la plus
+           structurante. Il monte donc sous l'identité, en taille de corps, avec
+           la commande de la semaine juste dessous — deux horizons visibles à
+           tout instant, un court et un long. */}
       <motion.div
-        id="tuto-stats"
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.05 }}
-        className="craft-card p-3"
+        transition={{ delay: 0.04 }}
+        className="craft-card p-3 flex flex-col gap-2.5"
       >
-        <StatBars stats={char.stats} />
+        {contractDef && (
+          <div className="flex items-start gap-2.5">
+            <span className="text-lg leading-none mt-0.5">{contractDone ? '✅' : '📋'}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[9px] tracking-widest uppercase text-[#A08B70] font-mono">
+                {tr('Contrat du jour', "Today's contract")}
+              </p>
+              <p className={`text-[13px] font-semibold leading-snug ${contractDone ? 'text-[#3d8b4f]' : 'text-[#3D3020]'}`}>
+                {tr(contractDef.label, contractDef.labelEn)}
+              </p>
+            </div>
+            <span className="text-[11px] font-mono font-bold text-[#B8860B] shrink-0 mt-0.5">
+              {tr(contractDef.rewardLabel, contractDef.rewardLabelEn)}
+            </span>
+          </div>
+        )}
+
+        {/* La commande de la semaine : l'horizon long, toujours visible. */}
+        <button
+          onClick={commandeFaite && !commande.claimed ? encaisserCommande : undefined}
+          disabled={!commandeFaite || commande.claimed}
+          className={`w-full rounded-xl px-3 py-2 border text-left ${
+            commande.claimed
+              ? 'border-[#E8D5C0] opacity-60'
+              : commandeFaite
+                ? 'border-[#3d8b4f]/45 bg-[#4A9B5F]/8'
+                : 'border-[#E8D5C0]'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{commandeD.emoji}</span>
+            <span className="flex-1 text-[10px] text-[#6B5740] leading-snug">
+              {tr(commandeD.fr, commandeD.en)}
+            </span>
+            <span className="text-[10px] font-mono text-[#8B6B4A] shrink-0">
+              {commande.claimed
+                ? '✓'
+                : `${commande.count}/${commandeD.target}`}
+            </span>
+          </div>
+          <div className="h-1 rounded-full bg-[#E8D5C0] overflow-hidden mt-1.5">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: commandeFaite ? 'linear-gradient(90deg,#4A9B5F,#7BD48A)' : 'linear-gradient(90deg,#B8860B,#F2C14E)' }}
+              animate={{ width: `${Math.min(100, (commande.count / commandeD.target) * 100)}%` }}
+              transition={{ duration: 0.6 }}
+            />
+          </div>
+          <p className="text-[9px] text-[#A08B70] mt-1">
+            {commande.claimed
+              ? tr('Encaissée. Nouvelle commande lundi.', 'Filled. New order on Monday.')
+              : commandeFaite
+                ? tr(`Terminée — toucher pour encaisser +${commandeD.karma} 👑`, `Done — tap to collect +${commandeD.karma} 👑`)
+                : tr(`+${commandeD.karma} 👑 · ${daysLeft()} jour${daysLeft() > 1 ? 's' : ''} restant${daysLeft() > 1 ? 's' : ''}`,
+                     `+${commandeD.karma} 👑 · ${daysLeft()} day${daysLeft() > 1 ? 's' : ''} left`)}
+          </p>
+        </button>
       </motion.div>
 
       {/* Météo */}
@@ -338,6 +399,21 @@ export default function MainScreen() {
         transition={{ delay: 0.12 }}
         className="flex flex-col gap-2 flex-1"
       >
+      {/* ---- LES JAUGES, EN VEILLE ----
+           Descendues sous la météo : elles n'ont pas besoin d'être lues, mais
+           d'être vues quand ça va mal. Le seuil de danger les fait pulser et
+           fait apparaître leur chiffre — c'est ce rappel-là qui compte, pas
+           leur place en haut de l'écran. */}
+      <motion.div
+        id="tuto-stats"
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.05 }}
+        className="craft-card p-3"
+      >
+        <StatBars stats={char.stats} />
+      </motion.div>
+
         {/* Actions counter */}
         <div className="flex items-center justify-center gap-1.5">
           {Array.from({ length: state.maxDayActions }).map((_, i) => (
@@ -354,56 +430,6 @@ export default function MainScreen() {
             {actionsLeft} {tr(`action${actionsLeft > 1 ? 's' : ''}`, `action${actionsLeft > 1 ? 's' : ''}`)}
           </span>
         </div>
-
-        {/* La commande de la semaine : l'horizon long, toujours visible. */}
-        <button
-          onClick={commandeFaite && !commande.claimed ? encaisserCommande : undefined}
-          disabled={!commandeFaite || commande.claimed}
-          className={`w-full rounded-xl px-3 py-2 border text-left ${
-            commande.claimed
-              ? 'border-[#E8D5C0] opacity-60'
-              : commandeFaite
-                ? 'border-[#3d8b4f]/45 bg-[#4A9B5F]/8'
-                : 'border-[#E8D5C0]'
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-sm">{commandeD.emoji}</span>
-            <span className="flex-1 text-[10px] text-[#6B5740] leading-snug">
-              {tr(commandeD.fr, commandeD.en)}
-            </span>
-            <span className="text-[10px] font-mono text-[#8B6B4A] shrink-0">
-              {commande.claimed
-                ? '✓'
-                : `${commande.count}/${commandeD.target}`}
-            </span>
-          </div>
-          <div className="h-1 rounded-full bg-[#E8D5C0] overflow-hidden mt-1.5">
-            <motion.div
-              className="h-full rounded-full"
-              style={{ background: commandeFaite ? 'linear-gradient(90deg,#4A9B5F,#7BD48A)' : 'linear-gradient(90deg,#B8860B,#F2C14E)' }}
-              animate={{ width: `${Math.min(100, (commande.count / commandeD.target) * 100)}%` }}
-              transition={{ duration: 0.6 }}
-            />
-          </div>
-          <p className="text-[9px] text-[#A08B70] mt-1">
-            {commande.claimed
-              ? tr('Encaissée. Nouvelle commande lundi.', 'Filled. New order on Monday.')
-              : commandeFaite
-                ? tr(`Terminée — toucher pour encaisser +${commandeD.karma} 👑`, `Done — tap to collect +${commandeD.karma} 👑`)
-                : tr(`+${commandeD.karma} 👑 · ${daysLeft()} jour${daysLeft() > 1 ? 's' : ''} restant${daysLeft() > 1 ? 's' : ''}`,
-                     `+${commandeD.karma} 👑 · ${daysLeft()} day${daysLeft() > 1 ? 's' : ''} left`)}
-          </p>
-        </button>
-
-        {/* Contrat du matin : le micro-objectif du jour */}
-        {contractDef && (
-          <div className={`flex items-center justify-center gap-1.5 text-[10px] mt-1 ${contractDone ? 'text-[#3d8b4f]' : 'text-[#8B6B4A]'}`}>
-            <span>{contractDone ? '✅' : '📋'}</span>
-            <span className="font-medium">{tr(contractDef.label, contractDef.labelEn)}</span>
-            <span className="font-mono text-[#B8860B]">({tr(contractDef.rewardLabel, contractDef.rewardLabelEn)})</span>
-          </div>
-        )}
 
         {/* Main actions grid */}
         <div id="tuto-actions" className="grid grid-cols-2 gap-2">
