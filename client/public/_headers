@@ -1,0 +1,15 @@
+# Mêmes en-têtes que netlify.toml, en version fichier.
+#
+# netlify.toml n'est lu que par les déploiements branchés sur le dépôt. Quand
+# on dépose le dossier construit à la main sur Netlify Drop, seuls _redirects
+# et _headers sont pris en compte : sans ce fichier, une préversion perd le
+# cache long et ne se comporte plus comme le site réel.
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
