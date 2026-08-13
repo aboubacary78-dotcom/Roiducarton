@@ -3,11 +3,14 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import StatBars from './StatBars';
 import { tierAtRisk } from '@/contexts/data/dignity';
+import { loadCommande, commandeDef, markClaimed, daysLeft } from '@/lib/commande';
+import { addKarma } from '@/lib/necrology';
+import { pushToast } from '@/lib/toast';
 import CardboardAvatar from './CardboardAvatar';
 import PlayerFace, { faceCondition } from './PlayerFace';
 import StreetEncounter from './StreetEncounter';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
-import { playClick, playNextDay } from '@/lib/sound';
+import { playClick, playNextDay, playCoin } from '@/lib/sound';
 import { useLang, tr } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
@@ -106,6 +109,31 @@ export default function MainScreen() {
   const risqueMendier = tierAtRisk(char.stats.dignity, 'beg');
   const risqueRecup = tierAtRisk(char.stats.dignity, 'salvage');
   const risqueVoler = tierAtRisk(char.stats.dignity, 'steal');
+
+  /*
+   * LA COMMANDE DE LA SEMAINE.
+   *
+   * L'horizon long, celui qui traverse les parties. Elle est affichée en
+   * permanence à côté du contrat du jour : deux buts visibles à tout instant,
+   * un court et un long, pour qu'aucun moment du jeu ne soit jamais loin de
+   * quelque chose.
+   */
+  const [, refreshCommande] = useState(0);
+  const commande = loadCommande();
+  const commandeD = commandeDef(commande);
+  const commandeFaite = commande.count >= commandeD.target;
+
+  function encaisserCommande() {
+    if (!commandeFaite || commande.claimed) return;
+    addKarma(commandeD.karma);
+    markClaimed();
+    playCoin();
+    pushToast(
+      tr(`Commande honorée : +${commandeD.karma} karma.`, `Order filled: +${commandeD.karma} karma.`),
+      { emoji: commandeD.emoji, tone: 'good' },
+    );
+    refreshCommande(n => n + 1);
+  }
 
   const contractDef = state.contract ? getContract(state.contract.id) : undefined;
   const contractDone = !!state.contract?.done || (contractDef?.check ? contractDef.check(char) : false);
@@ -322,6 +350,47 @@ export default function MainScreen() {
             {actionsLeft} {tr(`action${actionsLeft > 1 ? 's' : ''}`, `action${actionsLeft > 1 ? 's' : ''}`)}
           </span>
         </div>
+
+        {/* La commande de la semaine : l'horizon long, toujours visible. */}
+        <button
+          onClick={commandeFaite && !commande.claimed ? encaisserCommande : undefined}
+          disabled={!commandeFaite || commande.claimed}
+          className={`w-full rounded-xl px-3 py-2 border text-left ${
+            commande.claimed
+              ? 'border-[#E8D5C0] opacity-60'
+              : commandeFaite
+                ? 'border-[#3d8b4f]/45 bg-[#4A9B5F]/8'
+                : 'border-[#E8D5C0]'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{commandeD.emoji}</span>
+            <span className="flex-1 text-[10px] text-[#6B5740] leading-snug">
+              {tr(commandeD.fr, commandeD.en)}
+            </span>
+            <span className="text-[10px] font-mono text-[#8B6B4A] shrink-0">
+              {commande.claimed
+                ? '✓'
+                : `${commande.count}/${commandeD.target}`}
+            </span>
+          </div>
+          <div className="h-1 rounded-full bg-[#E8D5C0] overflow-hidden mt-1.5">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: commandeFaite ? 'linear-gradient(90deg,#4A9B5F,#7BD48A)' : 'linear-gradient(90deg,#B8860B,#F2C14E)' }}
+              animate={{ width: `${Math.min(100, (commande.count / commandeD.target) * 100)}%` }}
+              transition={{ duration: 0.6 }}
+            />
+          </div>
+          <p className="text-[9px] text-[#A08B70] mt-1">
+            {commande.claimed
+              ? tr('Encaissée. Nouvelle commande lundi.', 'Filled. New order on Monday.')
+              : commandeFaite
+                ? tr(`Terminée — toucher pour encaisser +${commandeD.karma} 👑`, `Done — tap to collect +${commandeD.karma} 👑`)
+                : tr(`+${commandeD.karma} 👑 · ${daysLeft()} jour${daysLeft() > 1 ? 's' : ''} restant${daysLeft() > 1 ? 's' : ''}`,
+                     `+${commandeD.karma} 👑 · ${daysLeft()} day${daysLeft() > 1 ? 's' : ''} left`)}
+          </p>
+        </button>
 
         {/* Contrat du matin : le micro-objectif du jour */}
         {contractDef && (

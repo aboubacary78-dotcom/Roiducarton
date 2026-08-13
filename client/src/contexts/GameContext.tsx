@@ -26,6 +26,7 @@ import { ENEMIES, rollSignRound } from './data/enemies';
 import { SHOPS, shopClosure, rollShopClosure, getSellPrice, SOLIDARITY_GIFT, SOLIDARITY_FLAG } from './data/shops';
 import { HAGGLE_TUNING, HAGGLED_FLAG, shopkeeperFor } from './data/haggle';
 import { takePendingGifts } from '@/lib/daily';
+import { progress as commandeProgress } from '@/lib/commande';
 import { DIGNITY_TIERS } from './data/dignity';
 import {
   generateEvents, generateBegEvents, generateRestEvents, generateTravelEvent,
@@ -380,6 +381,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Variante réussite/échec par scène de manche (result-beg-<id>-good/bad),
       // avec repli sur l'image de base de la scène.
       const begEvt = randomFromArray(BEG_EVENTS);
+      if (money > 0) commandeProgress('euros', money);
       const cUpd = { ...c, stats: newStats, money: c.money + money, respect: c.respect + respectDelta, alive: isAlive };
 
       // On a poussé quelqu'un à bout : il ne s'en va pas, il se retourne.
@@ -494,6 +496,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
               `♻️ Vous ressortez avec ${haul}.${deep >= 3 ? ' Vous êtes descendu loin, et vous êtes remonté à temps.' : ''}`,
               `♻️ You come out with ${haul}.${deep >= 3 ? ' You went deep, and you got out in time.' : ''}`,
             );
+
+      // Commande de la semaine : une descente de plus, et les bricoles rapportées.
+      commandeProgress('fouilles', 1);
+      commandeProgress('bricoles', added + found.length);
+      if (money > 0) commandeProgress('euros', money);
 
       return {
         ...state,
@@ -782,6 +789,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'NEXT_DAY': {
       if (!state.character) return state;
       const ch = state.character;
+      // Commande de la semaine : les jours se cumulent d'un personnage à
+      // l'autre, c'est le seul compteur du jeu que la mort n'efface pas.
+      commandeProgress('jours', 1);
       const nextWeather = getNextWeather(state.weather);
       const weatherData = WEATHER_TYPES[state.weather];
       const weatherPenalty = weatherData.dailyPenalty;
@@ -1347,6 +1357,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       const newEnemyHp = Math.max(0, combat.enemyHealth - dmg);
+      // Commande de la semaine : un coup placé de plus.
+      if (dmg > 0) commandeProgress('coups', 1);
       const inventory = consumeJunk ? c.inventory.filter(i => i !== consumeJunk) : c.inventory;
 
       // Victoire ?
@@ -1429,6 +1441,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       // Une vraie affaire se sait dans le quartier.
       const gained = !action.broken && action.cut >= HAGGLE_TUNING.goodDealCut
         ? HAGGLE_TUNING.respectOnGoodDeal : 0;
+      // Commande de la semaine : un marchandage emporté de plus.
+      if (!action.broken && action.cut > 0) commandeProgress('marchandages', 1);
       // On ne marchande qu'une fois par jour et par boutique : sans ça, on
       // recommencerait jusqu'à tomber sur une bonne série.
       const haggleFlag = HAGGLED_FLAG(action.shopId, c.day);

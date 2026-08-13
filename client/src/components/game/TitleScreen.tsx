@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useLang, tr } from '@/lib/lang';
 import { DEATH_DEFS, loadDeathBook, loadKarma, loadGraves, loadCrown } from '@/lib/necrology';
-import { knownEnemyNames } from '@/contexts/GameContext';
 import { getEquipped } from '@/lib/profile';
 import CardboardAvatar from './CardboardAvatar';
 
@@ -38,8 +37,12 @@ export default function TitleScreen() {
     } catch { /* silent */ }
   }, []);
   // Avancement du Registre des Morts + Karma de Rue (méta persistante).
-  const deathsFound = Object.keys(loadDeathBook()).length;
-  const deathsTotal = DEATH_DEFS.length + knownEnemyNames().length;
+  // Le compteur porte sur les FINS seules, comme dans le Registre : dix est un
+  // dénominateur qu'on peut viser, trente-six décourage. Les adversaires ont
+  // leur propre tableau de chasse à l'intérieur.
+  const book = loadDeathBook();
+  const deathsFound = DEATH_DEFS.filter(d => book[d.id]).length;
+  const deathsTotal = DEATH_DEFS.length;
   const karma = loadKarma();
 
   useEffect(() => {
