@@ -29,6 +29,9 @@ export default function OriginStoryOverlay() {
   const visible = !!char
     && state.screen === 'main'
     && state.dayActions >= 1
+    // Le résultat de l'action passe d'abord : les deux se déclenchent au même
+    // instant, et le récit se posait par-dessus le butin qu'on venait de faire.
+    && !state.eventResult
     && !char.activeFlags?.includes('origin-vu');
   // Froissement de vieux papier quand le récit se déplie (hook AVANT tout
   // retour anticipé : l'ordre des hooks doit rester stable).

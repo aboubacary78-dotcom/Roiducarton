@@ -7,6 +7,7 @@ import { useGame } from '@/contexts/GameContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { screenIn } from '@/lib/anim';
+import { tapOrigin } from '@/lib/tapOrigin';
 import { setAmbience, setWeatherLayer, weatherLayerFor, type AmbienceId } from '@/lib/ambience';
 import TitleScreen from '@/components/game/TitleScreen';
 import CharacterSelect from '@/components/game/CharacterSelect';
@@ -127,6 +128,8 @@ export default function Home() {
         {/* Transition douce entre écrans : chaque changement d'écran fond en
             fondu + léger glissé, pour que la navigation « réponde » au clic. */}
         <AnimatePresence mode="wait">
+          {/* L'écran s'ouvre depuis l'endroit où le doigt s'est posé : la
+              transition suit le geste au lieu de le subir (voir lib/tapOrigin). */}
           <motion.div
             key={state.screen}
             initial={screenIn.initial}
@@ -134,6 +137,7 @@ export default function Home() {
             exit={screenIn.exit}
             transition={screenIn.transition}
             className="w-full"
+            style={{ transformOrigin: tapOrigin() }}
           >
             {renderScreen(state.screen)}
           </motion.div>

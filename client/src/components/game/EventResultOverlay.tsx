@@ -114,7 +114,16 @@ export default function EventResultOverlay() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 overlay-backdrop"
+        /*
+         * ANCRÉE EN BAS, PAS AU CENTRE.
+         *
+         * Les mini-jeux ont leurs boutons de sortie collés au bas de l'écran ;
+         * la fenêtre de résultat les avait au milieu. Le pouce devait donc
+         * remonter entre le geste et sa conclusion — c'est ce déplacement qui
+         * sépare deux actions au lieu de les enchaîner. Le « Continuer » se
+         * retrouve maintenant là où était le bouton qu'on venait de toucher.
+         */
+        className="fixed inset-0 z-50 flex items-end justify-center p-4 overlay-backdrop"
         onClick={() => dispatch({ type: 'DISMISS_RESULT' })}
       >
         <motion.div
@@ -122,7 +131,7 @@ export default function EventResultOverlay() {
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 15 }}
           transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-          className="craft-card-solid p-5 max-w-sm w-full"
+          className="craft-card-solid p-5 max-w-sm w-full max-h-[92vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Illustration de résultat : la vraie image (diorama) de l'événement

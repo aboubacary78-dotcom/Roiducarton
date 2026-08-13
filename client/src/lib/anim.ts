@@ -27,8 +27,14 @@ export const paperSway: TargetAndTransition = {
 };
 
 // Transition d'écran : léger glissé + micro-rotation, comme un panneau posé.
+/*
+ * L'écran entrant part plus petit qu'avant (0,94 au lieu de 0,985) : couplé au
+ * `transform-origin` posé sur le point de contact, il donne l'impression de
+ * sortir du bouton qu'on vient de toucher. À 0,985 le mouvement était trop
+ * faible pour qu'on lise d'où il vient.
+ */
 export const screenIn = {
-  initial: { opacity: 0, y: 10, scale: 0.985, rotate: 0.5 },
+  initial: { opacity: 0, y: 10, scale: 0.94, rotate: 0.5 },
   animate: { opacity: 1, y: 0, scale: 1, rotate: 0 },
   exit: { opacity: 0, y: -8, scale: 0.985, rotate: -0.5 },
   transition: { duration: 0.26, ease: [0.34, 1.32, 0.5, 1] as [number, number, number, number] },

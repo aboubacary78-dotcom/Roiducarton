@@ -15,6 +15,7 @@ import { playClick, playNextDay, playCoin } from '@/lib/sound';
 import { useLang, tr } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
+import { noteTap } from '@/lib/tapOrigin';
 
 // Couleur du voile de lumière selon l'avancement de la journée : or du matin,
 // plein jour transparent, orange du soir, bleu de nuit. Interpolation linéaire
@@ -456,7 +457,7 @@ export default function MainScreen() {
         <motion.button
           whileHover={actionsLeft <= 0 ? {} : liftHover}
           whileTap={actionsLeft <= 0 ? {} : stampTap}
-          onClick={actionsLeft <= 0 ? undefined : () => { playClick(); dispatch({ type: 'SALVAGE' }); }}
+          onClick={actionsLeft <= 0 ? undefined : (e) => { noteTap(e); playClick(); dispatch({ type: 'SALVAGE' }); }}
           disabled={actionsLeft <= 0}
           className={`action-btn p-2.5 flex items-center justify-center gap-2 border-[#7C8B5A]/30 ${
             actionsLeft <= 0 ? 'opacity-35 pointer-events-none' : ''
@@ -475,7 +476,7 @@ export default function MainScreen() {
         <motion.button
           whileHover={actionsLeft <= 0 ? {} : liftHover}
           whileTap={actionsLeft <= 0 ? {} : stampTap}
-          onClick={actionsLeft <= 0 ? undefined : () => { playClick(); dispatch({ type: 'STEAL' }); }}
+          onClick={actionsLeft <= 0 ? undefined : (e) => { noteTap(e); playClick(); dispatch({ type: 'STEAL' }); }}
           disabled={actionsLeft <= 0}
           className={`action-btn p-2.5 flex items-center justify-center gap-2 border-[#D94F4F]/30 ${
             actionsLeft <= 0 ? 'opacity-35 pointer-events-none' : ''
@@ -524,7 +525,7 @@ function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, sma
     <motion.button
       whileHover={disabled ? {} : liftHover}
       whileTap={disabled ? {} : stampTap}
-      onClick={disabled ? undefined : () => { playClick(); onClick(); }}
+      onClick={disabled ? undefined : (e) => { noteTap(e); playClick(); onClick(); }}
       disabled={disabled}
       className={`action-btn ${small ? 'p-2.5 flex-1' : 'p-3'} flex flex-col items-center justify-center gap-1 ${
         disabled ? 'opacity-35 pointer-events-none' : ''
