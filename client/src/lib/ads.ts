@@ -270,7 +270,40 @@ export async function showInterstitial(): Promise<void> {
  * Sur le web : renvoie true immédiatement (pour tester la mécanique de
  * récompense sans pub réelle).
  */
-export async function showRewarded(): Promise<boolean> {
+/*
+ * LE PLAFOND DE SOLLICITATIONS.
+ *
+ * Une vidéo récompensée se propose, elle ne se subit pas. Au-delà de trois
+ * offres dans la même session, le joueur cesse de voir un jeu et commence à
+ * voir un distributeur — et c'est la session SUIVANTE qu'on perd. Le compteur
+ * vit en mémoire : il repart à zéro à chaque lancement de l'application, ce
+ * qui est exactement ce qu'on veut.
+ */
+const MAX_OFFRES_PAR_SESSION = 3;
+let offresFaites = 0;
+
+/*
+ * Reste-t-il de la place pour PROPOSER une vidéo ?
+ *
+ * Le plafond ne concerne que ce que le jeu met devant le joueur sans qu'il ait
+ * rien demandé : doubler ses gains, forcer un résultat, garder son allure. Ce
+ * qu'il vient chercher lui-même — relancer le trio de personnages, rouvrir une
+ * boutique, la fontaine, la distribution solidaire — passe en `exempt` et
+ * reste toujours disponible. Barrer un service qu'on est venu demander serait
+ * une punition, pas une limite.
+ */
+export function canOfferRewarded(): boolean {
+  return offresFaites < MAX_OFFRES_PAR_SESSION;
+}
+
+/**
+ * `exempt` : la seconde chance à la mort échappe au plafond. C'est le meilleur
+ * emplacement du jeu — une vidéo restaure bien mieux une perte qu'elle
+ * n'offre un gain — et il est déjà limité à une fois par partie. Le priver
+ * parce que le joueur a doublé trois gains dans la journée serait absurde.
+ */
+export async function showRewarded(opts?: { exempt?: boolean }): Promise<boolean> {
+  if (!opts?.exempt) offresFaites++;
   if (!isNative()) {
     // En dev/web, on considère la récompense acquise pour pouvoir tester.
     return true;

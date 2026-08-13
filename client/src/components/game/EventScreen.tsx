@@ -1,7 +1,7 @@
 import { useGame, STAT_META, type Character, type EventChoice } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { showRewarded } from '@/lib/ads';
+import { showRewarded, canOfferRewarded } from '@/lib/ads';
 import { useLang, tr, tc } from '@/lib/lang';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
@@ -190,7 +190,7 @@ export default function EventScreen() {
           <div className="mt-3 text-center text-xs font-semibold text-[#B8860B]">
             {tr('✨ Coup de pouce actif : votre prochain choix réussira au mieux.', '✨ Boost active: your next choice will get the best outcome.')}
           </div>
-        ) : (
+        ) : canOfferRewarded() ? (
           <button
             onClick={activateBoost}
             disabled={loadingBoost}
@@ -199,7 +199,7 @@ export default function EventScreen() {
           >
             {loadingBoost ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Coup de pouce (pub), garantir le meilleur résultat', '🎬 Boost (ad), guarantee the best outcome')}
           </button>
-        )}
+        ) : null}
       </motion.div>
 
       {/* Back */}

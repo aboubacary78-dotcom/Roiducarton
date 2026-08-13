@@ -378,7 +378,7 @@ export interface GameState {
   characterChoices: Character[];
   currentEvent: GameEvent | null;
   currentCombat: CombatState | null;
-  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; image?: string; fallbackImage?: string } | null;
+  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; faceKept?: boolean; image?: string; fallbackImage?: string } | null;
   // Bilan de la nuit affiché après « Jour suivant » : nouveau jour, météo,
   // pertes/gains de jauges de la nuit, et éventuels effets de traits.
   daySummary: { day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number; notes: string[]; notesEn: string[] } | null;

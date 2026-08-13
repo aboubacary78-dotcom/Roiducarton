@@ -80,7 +80,7 @@ export default function CharacterSelect() {
       return;
     }
     setLoadingAd(true);
-    const ok = await showRewarded();
+    const ok = await showRewarded({ exempt: true });
     setLoadingAd(false);
     if (ok) {
       setRerolls((n) => n + 1);

@@ -60,7 +60,7 @@ export default function ShopScreen() {
   async function reopenWithAd(shop: Shop) {
     if (reopeningId) return;
     setReopeningId(shop.id);
-    const rewarded = await showRewarded();
+    const rewarded = await showRewarded({ exempt: true });
     if (rewarded) {
       // Brouille de marchandage : on se réconcilie. Panne : on répare.
       const closed = shopClosure(char, shop.id);
@@ -106,7 +106,7 @@ export default function ShopScreen() {
       if (fountainBusy) return;
       setFountainBusy(true);
       pushToast(tr('La fontaine tousse, crachote… et un attroupement se forme.', 'The fountain sputters, coughs… and a crowd gathers.'), { emoji: '⛲' });
-      const ok = await showRewarded();
+      const ok = await showRewarded({ exempt: true });
       setFountainBusy(false);
       if (!ok) {
         pushToast(tr('Tant pis : vous restez sur votre soif pour l\'instant.', 'Too bad: you stay thirsty for now.'), { emoji: '😩', tone: 'bad' });
@@ -147,7 +147,7 @@ export default function ShopScreen() {
   async function claimSolidarity() {
     if (claimingSolid || solidarityDone) return;
     setClaimingSolid(true);
-    const rewarded = await showRewarded();
+    const rewarded = await showRewarded({ exempt: true });
     if (rewarded) {
       playShare();
       dispatch({ type: 'CLAIM_SOLIDARITY' });

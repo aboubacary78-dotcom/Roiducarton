@@ -1,6 +1,6 @@
 import { useGame, computeScore, hasTrait, loadHighScores, knownEnemyNames } from '@/contexts/GameContext';
 import type { InventoryItem } from '@/contexts/GameContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo } from 'react';
 import { showInterstitial, showRewarded } from '@/lib/ads';
 import PlayerFace from './PlayerFace';
@@ -154,14 +154,30 @@ export default function GameOverScreen() {
 
   const canRevive = !!char && !char.activeFlags.includes('revived');
 
+  /*
+   * LA SECONDE CHANCE SE PROPOSE AU PIC, PAS APRÈS LE BILAN.
+   *
+   * Une vidéo récompensée convertit bien mieux pour RESTAURER une perte que
+   * pour offrir un gain. La perte est chaude à l'instant exact de la mort ;
+   * dix secondes plus tard, le joueur a lu son récapitulatif, encaissé son
+   * Karma et accepté sa fin — l'offre arrive alors sur quelqu'un qui a déjà
+   * fait son deuil. L'offre passe donc devant tout le reste, une seule fois,
+   * et se referme sans insister. Le bouton reste disponible plus bas pour qui
+   * change d'avis.
+   */
+  const [peakOffer, setPeakOffer] = useState(true);
+
   async function handleRevive() {
     if (reviving) return;
     setReviving(true);
-    const rewarded = await showRewarded();
+    // Exempté du plafond de sollicitations : c'est le meilleur emplacement du
+    // jeu, et il est déjà limité à une fois par partie.
+    const rewarded = await showRewarded({ exempt: true });
     if (rewarded) {
       dispatch({ type: 'REVIVE' });
     } else {
       setReviving(false);
+      setPeakOffer(false);
     }
   }
 
@@ -231,6 +247,52 @@ export default function GameOverScreen() {
       className="min-h-screen p-4 flex flex-col items-center gap-3"
       style={{ background: 'radial-gradient(95% 45% at 50% 0%, rgba(217,79,79,0.16), transparent 60%), linear-gradient(180deg, #3A2436 0%, #1C1322 100%)' }}
     >
+      {/* ---- L'OFFRE AU PIC : avant le bilan, tant que la perte est chaude ---- */}
+      <AnimatePresence>
+        {canRevive && peakOffer && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] flex items-center justify-center p-5"
+            style={{ background: 'rgba(12,8,14,0.975)', backdropFilter: 'blur(3px)' }}
+          >
+            <motion.div
+              initial={{ scale: 0.92, y: 14 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', damping: 22 }}
+              className="w-full max-w-sm text-center"
+            >
+              <p className="text-4xl mb-3">🌅</p>
+              <h2 className="text-xl font-bold text-[#F0D9C4] leading-tight mb-1.5">
+                {tr('Pas tout de suite.', 'Not just yet.')}
+              </h2>
+              <p className="text-[13px] text-[#A08060] leading-snug mb-5">
+                {tr(
+                  `${char.name} est encore là, de justesse. Une âme charitable peut passer — mais une seule fois par partie.`,
+                  `${char.name} is still here, barely. A kind soul may come by — but only once per game.`,
+                )}
+              </p>
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                disabled={reviving}
+                onClick={handleRevive}
+                className="w-full py-3.5 text-[15px] font-bold text-white rounded-xl disabled:opacity-60"
+                style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)', boxShadow: '0 4px 18px rgba(74,155,95,0.35)' }}
+              >
+                {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Se relever (regarder une pub)', '🎬 Get back up (watch an ad)')}
+              </motion.button>
+              <button
+                onClick={() => setPeakOffer(false)}
+                className="w-full mt-2.5 py-2.5 text-[12px] font-semibold text-[#8B6B4A]"
+              >
+                {tr('Non, c\'est fini', 'No, it\'s over')}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ---- LA UNE DE JOURNAL ---- */}
       <motion.div
         initial={{ y: 18, opacity: 0, rotate: -0.6 }}

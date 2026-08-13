@@ -25,6 +25,7 @@ import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/pr
 import { ENEMIES, rollSignRound } from './data/enemies';
 import { SHOPS, shopClosure, rollShopClosure, getSellPrice, SOLIDARITY_GIFT, SOLIDARITY_FLAG } from './data/shops';
 import { HAGGLE_TUNING, HAGGLED_FLAG, shopkeeperFor } from './data/haggle';
+import { DIGNITY_TIERS } from './data/dignity';
 import {
   generateEvents, generateBegEvents, generateRestEvents, generateTravelEvent,
   freshPool, rememberEvent, flavorFrom, makeLegendEvent, dueSursaut,
@@ -56,6 +57,7 @@ export * from './data/dodge';
 export * from './data/salvage';
 export * from './data/passersby';
 export * from './data/haggle';
+export * from './data/dignity';
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
@@ -183,6 +185,9 @@ type GameAction =
   | { type: 'RESOLVE_SALVAGE'; centimes: number; bazar: number; trouvailles: string[]; depth: number; busted: boolean; hurts: string[]; extraKept: number }
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
+  // Rachète la dignité tout juste perdue, juste assez pour ne pas quitter son
+  // palier : une pub restaure une perte bien mieux qu'elle n'offre un gain.
+  | { type: 'KEEP_FACE' }
   | { type: 'TRAVEL'; location: string }
   | { type: 'CHOOSE_EVENT'; choiceIndex: number; boosted?: boolean }
   | { type: 'DISMISS_RESULT' }
@@ -619,6 +624,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const restEvent = randomFromArray(restEvents);
       return { ...state, screen: 'event', currentEvent: restEvent, dayActions: state.dayActions + 1,
         character: { ...state.character, recentEvents: rememberEvent(state.character.recentEvents, restEvent.id) } };
+    }
+
+    case 'KEEP_FACE': {
+      if (!state.character || !state.eventResult || state.eventResult.faceKept) return state;
+      const c = state.character;
+      // On remonte au plancher du palier qu'on vient de quitter — pas plus.
+      // L'offre restaure une allure, elle ne fabrique pas de la fierté.
+      const perdu = Math.abs(state.eventResult.statChanges?.dignity ?? 0);
+      const avant = Math.min(100, c.stats.dignity + perdu);
+      const cible = DIGNITY_TIERS.find(t => avant >= t.min);
+      if (!cible || c.stats.dignity >= cible.min) return state;
+      return {
+        ...state,
+        character: { ...c, stats: { ...c.stats, dignity: cible.min } },
+        eventResult: { ...state.eventResult, faceKept: true },
+      };
     }
 
     case 'DOUBLE_REWARD': {

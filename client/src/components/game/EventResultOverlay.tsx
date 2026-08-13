@@ -1,7 +1,8 @@
 import { useGame, STAT_META, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { showRewarded } from '@/lib/ads';
+import { showRewarded, canOfferRewarded } from '@/lib/ads';
+import { DIGNITY_TIERS, dignityTierIndex } from '@/contexts/data/dignity';
 import { playSuccess, playFail, playWin, playKO } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import KenBurnsImage from './KenBurnsImage';
@@ -25,6 +26,7 @@ export default function EventResultOverlay() {
   useLang();
   const result = state.eventResult;
   const [doubling, setDoubling] = useState(false);
+  const [keeping, setKeeping] = useState(false);
   // Chaîne de replis pour l'image : variante réussite/échec → image de la
   // rencontre → scène dessinée. errorCount compte les échecs de chargement.
   const [errorCount, setErrorCount] = useState(0);
@@ -47,7 +49,7 @@ export default function EventResultOverlay() {
 
   if (!result) return null;
 
-  const canDouble = !!result.moneyChange && result.moneyChange > 0 && !result.doubled;
+  const canDouble = !!result.moneyChange && result.moneyChange > 0 && !result.doubled && canOfferRewarded();
 
   async function handleDouble() {
     if (doubling) return;
@@ -57,6 +59,35 @@ export default function EventResultOverlay() {
       dispatch({ type: 'DOUBLE_REWARD' });
     }
     setDoubling(false);
+  }
+
+  /*
+   * GARDER SON ALLURE.
+   *
+   * Cette action vient de faire quitter un palier de Dignité. Une vidéo
+   * récompensée convertit bien mieux pour restaurer une perte que pour offrir
+   * un gain — et il n'y a pas de perte plus lisible dans ce jeu que celle-là,
+   * puisqu'elle a un nom que le joueur voit disparaître de son écran. On ne
+   * rend que le strict nécessaire pour rester dans le palier : l'offre
+   * restaure une allure, elle ne fabrique pas de la fierté.
+   */
+  const perduDignite = Math.abs(result.statChanges?.dignity ?? 0);
+  const digniteActuelle = state.character?.stats.dignity ?? 0;
+  const paliersPerdus = perduDignite > 0
+    && dignityTierIndex(digniteActuelle) > dignityTierIndex(Math.min(100, digniteActuelle + perduDignite));
+  const palierQuitte = paliersPerdus
+    ? DIGNITY_TIERS.find(t => Math.min(100, digniteActuelle + perduDignite) >= t.min)
+    : undefined;
+  const canKeepFace = !!palierQuitte && !result.faceKept && canOfferRewarded();
+
+  async function handleKeepFace() {
+    if (keeping) return;
+    setKeeping(true);
+    const rewarded = await showRewarded();
+    if (rewarded) {
+      dispatch({ type: 'KEEP_FACE' });
+    }
+    setKeeping(false);
   }
 
   const hasChanges = result.statChanges || result.moneyChange || result.respectChange;
@@ -208,6 +239,35 @@ export default function EventResultOverlay() {
                 {tr('Cette rencontre pourrait avoir une suite...', 'This encounter might have a sequel...')}
               </p>
             </motion.div>
+          )}
+
+          {/* Garder son allure : racheter le palier de Dignité qu'on vient de
+              quitter. Passe AVANT le doublement des gains — c'est la perte la
+              plus fraîche, et la seule qui ait un nom. */}
+          {canKeepFace && palierQuitte && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.36 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={keeping}
+              onClick={handleKeepFace}
+              className="w-full py-3 text-sm font-semibold text-white rounded-xl mb-2 disabled:opacity-60"
+              style={{
+                background: 'linear-gradient(135deg, #B8703A, #94552A)',
+                boxShadow: '0 4px 16px rgba(184, 112, 58, 0.3)',
+              }}
+            >
+              {keeping
+                ? tr('⏳ Chargement…', '⏳ Loading…')
+                : `🎬 ${tr(`Rester « ${palierQuitte.fr} »`, `Stay "${palierQuitte.en}"`)}`}
+            </motion.button>
+          )}
+
+          {result.faceKept && (
+            <p className="text-[11px] text-[#B8703A] text-center mb-2 font-medium">
+              👑 {tr('Vous avez sauvé les apparences.', 'You kept up appearances.')}
+            </p>
           )}
 
           {/* Doubler les gains (pub récompensée) */}
