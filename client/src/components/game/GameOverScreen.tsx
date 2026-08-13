@@ -6,7 +6,7 @@ import { showInterstitial, showRewarded } from '@/lib/ads';
 import PlayerFace from './PlayerFace';
 import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
-import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown, loadDeathBook } from '@/lib/necrology';
+import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown, loadDeathBook, enemyDeathImages } from '@/lib/necrology';
 import { STREET_TITLES } from '@/contexts/data/progression';
 import { getEquipped } from '@/lib/profile';
 import { pushToast } from '@/lib/toast';
@@ -75,6 +75,19 @@ function nearestMiss(day: number, bestDay: number, found: number, total: number)
 }
 
 // Gros titre selon la catégorie de mort (l'ennemi a le sien, voir plus bas).
+/*
+ * Gros titres des FINS PARTICULIÈRES. Ils priment sur ceux de la cause, comme
+ * l'image : le titre et la photo doivent raconter la même mort.
+ */
+const SPECIAL_HEADLINES: Record<string, { fr: string; en: string }> = {
+  // Tournures sans pronom ni participe accordé : le personnage peut être de
+  // n'importe quel genre, et une une de journal se passe très bien de sujet.
+  'doyen': { fr: 'FIN DE RÈGNE SUR LE TROTTOIR', en: 'END OF A REIGN ON THE PAVEMENT' },
+  'jour-1': { fr: 'VINGT-QUATRE HEURES, PAS UNE DE PLUS', en: 'TWENTY-FOUR HOURS, NOT ONE MORE' },
+  'canicule': { fr: 'LE BITUME A GAGNÉ CE JOUR-LÀ', en: 'THE ASPHALT WON THAT DAY' },
+  'riche': { fr: 'DE L\'ARGENT PLEIN LES POCHES, ET RIEN À FAIRE', en: 'POCKETS FULL OF MONEY, AND NOTHING IT COULD DO' },
+};
+
 const HEADLINES: Record<string, { fr: string; en: string }> = {
   despair: { fr: 'IL AVAIT TOUT, SAUF LE MORAL', en: 'HE HAD EVERYTHING BUT HOPE' },
   hunger: { fr: 'MORT LE VENTRE VIDE DANS UNE VILLE PLEINE', en: 'STARVED IN A CITY FULL OF FOOD' },
@@ -102,6 +115,12 @@ export default function GameOverScreen() {
     : char.stats.sleep <= 8 ? 'exhaustion'
     : (state.weather === 'snow' || state.weather === 'storm') ? 'cold'
     : 'injury';
+  // L'ennemi vainqueur, retrouvé dans la cause de mort (elle contient son nom).
+  const killerEnemy = useMemo(() => {
+    if (!state.deathCause) return null;
+    return knownEnemyNames().find(n => state.deathCause!.includes(n) || state.deathCause!.includes(tc(n))) || null;
+  }, [state.deathCause]);
+
   /*
    * L'IMAGE DE LA UNE : la fin PARTICULIÈRE avant la cause générique.
    *
@@ -115,31 +134,38 @@ export default function GameOverScreen() {
    * L'ordre suit la rareté : dix jours de règne raconte plus qu'une mort au
    * premier jour, qui raconte plus qu'un portefeuille bien garni.
    */
+  /*
+   * La fin particulière, s'il y en a une, dans l'ordre de la rareté. Elle sert
+   * à LA FOIS l'image et le gros titre : les faire choisir séparément donnait
+   * une une qui se contredisait — un enterrement d'État en photo sous un titre
+   * parlant de coups reçus.
+   */
+  const specialEnding = !char ? null
+    : char.day >= 10 ? 'doyen'
+    : char.day <= 1 ? 'jour-1'
+    : state.weather === 'heatwave' ? 'canicule'
+    : char.money >= 30 ? 'riche'
+    : null;
+
   const deathCandidates = useMemo(() => {
     const out: string[] = [];
-    if (char) {
-      if (char.day >= 10) out.push('/assets/death-doyen.webp');
-      if (char.day <= 1) out.push('/assets/death-jour-1.webp');
-      if (state.weather === 'heatwave') out.push('/assets/death-canicule.webp');
-      if (char.money >= 30) out.push('/assets/death-riche.webp');
-    }
+    // L'adversaire d'abord quand il y en a un : le gros titre le nomme, et
+    // l'image doit dire la même chose que le titre.
+    if (killerEnemy) out.push(...enemyDeathImages(killerEnemy));
+    if (specialEnding) out.push(`/assets/death-${specialEnding}.webp`);
     out.push(`/assets/death-${deathCat}.webp`);
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [char?.seed, char?.day, char?.money, state.weather, deathCat]);
-
-  // L'ennemi vainqueur, retrouvé dans la cause de mort (elle contient son nom).
-  const killerEnemy = useMemo(() => {
-    if (!state.deathCause) return null;
-    return knownEnemyNames().find(n => state.deathCause!.includes(n) || state.deathCause!.includes(tc(n))) || null;
-  }, [state.deathCause]);
+  }, [char?.seed, specialEnding, deathCat, killerEnemy]);
 
   // Gros titre de la une (sert aussi d'épitaphe sur la tombe du Cimetière).
   const headline = killerEnemy
     ? tr(`${tc(killerEnemy).toUpperCase()} TERRASSE UN HOMME EN PLEINE RUE`, `${tc(killerEnemy).toUpperCase()} FELLS A MAN IN BROAD DAYLIGHT`)
-    : deathCat === 'combat'
-      ? tr('RIXE FATALE DANS LE QUARTIER', 'FATAL BRAWL IN THE NEIGHBORHOOD')
-      : tr(HEADLINES[deathCat].fr, HEADLINES[deathCat].en);
+    : specialEnding
+      ? tr(SPECIAL_HEADLINES[specialEnding].fr, SPECIAL_HEADLINES[specialEnding].en)
+      : deathCat === 'combat'
+        ? tr('RIXE FATALE DANS LE QUARTIER', 'FATAL BRAWL IN THE NEIGHBORHOOD')
+        : tr(HEADLINES[deathCat].fr, HEADLINES[deathCat].en);
 
   // ---- Registre des Morts + Karma + tombe : enregistrés UNE fois par mort ----
   const harvest = useMemo(() => {

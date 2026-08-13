@@ -374,3 +374,39 @@ export function setCrown(holder: CrownHolder): void {
 export function clearCrown(): void {
   try { localStorage.removeItem(CROWN_KEY); } catch { /* silent */ }
 }
+
+/*
+ * L'IMAGE DE LA MORT AU COMBAT.
+ *
+ * Les adversaires portent des noms complets — « Pigeon Alpha », « Mouette
+ * Furibonde » — alors qu'une même bestiole en couvre souvent plusieurs. On
+ * descend donc trois crans : l'adversaire exact, puis sa FAMILLE (le pigeon,
+ * la mouette), puis l'image générique de rixe. Une seule illustration de
+ * mouette sert ainsi la Furibonde et la Géante, sans qu'on ait à la livrer
+ * deux fois sous deux noms.
+ *
+ * L'ordre importe pour une autre raison : le gros titre de la une nomme
+ * l'adversaire quand il y en a un. L'image doit dire la même chose que le
+ * titre, sinon la page se contredit.
+ */
+const FAMILLES_ENNEMIS = [
+  'pigeon', 'corbeau', 'mouette', 'oie', 'canard', 'cygne', 'coq',
+  'rat', 'raton', 'chien', 'chat', 'ecureuil',
+  'clown', 'vigile', 'voyou', 'pickpocket', 'squatteur', 'ivrogne',
+  'commercant', 'concurrent', 'roi',
+];
+
+/** Enlève accents et ponctuation : « Mouette Furibonde » → « mouette-furibonde ». */
+export function enemyImageSlug(name: string): string {
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+/** Les images à essayer pour une mort face à cet adversaire, du plus précis au moins. */
+export function enemyDeathImages(name: string): string[] {
+  const slug = enemyImageSlug(name);
+  const out = [`/assets/death-${slug}.webp`];
+  const famille = FAMILLES_ENNEMIS.find(f => slug.split('-').includes(f));
+  if (famille && famille !== slug) out.push(`/assets/death-${famille}.webp`);
+  return out;
+}
