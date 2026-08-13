@@ -33,6 +33,7 @@ import DeathRegistryScreen from '@/components/game/DeathRegistryScreen';
 import CimetiereScreen from '@/components/game/CimetiereScreen';
 import CartonMatinOverlay from '@/components/game/CartonMatinOverlay';
 import { noteSessionHour, rescheduleAll } from '@/lib/notifications';
+import { bumpSession } from '@/components/game/MinigameIntro';
 import { loadDaily } from '@/lib/daily';
 
 // Rendu de l'écran courant. Les superpositions (résultat, météo, tutoriel,
@@ -69,6 +70,9 @@ export default function Home() {
    */
   useEffect(() => {
     noteSessionHour();
+    // Un lancement de plus : sert à savoir quand une règle de mini-jeu
+    // commence à s'oublier (voir MinigameIntro).
+    bumpSession();
     const replanifier = () => {
       if (document.visibilityState === 'hidden') {
         rescheduleAll({ fr: !document.documentElement.lang.startsWith('en'), streak: loadDaily().streak });

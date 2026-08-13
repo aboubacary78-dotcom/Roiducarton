@@ -5,6 +5,7 @@ import { playHit, playCrit, playHurt, playStep, playSpotted } from '@/lib/sound'
 import { useLang, tr } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import MinigameHelpButton from './MinigameHelpButton';
 import SafeImg from './SafeImg';
 import LocationBackdrop from './LocationBackdrop';
 import { pushToast } from '@/lib/toast';
@@ -157,8 +158,12 @@ export default function StealHeist() {
       />
     );
   }
-  if (!target) return <HeistCasing onPick={setTarget} />;
-  return <StealHeistInner target={target} />;
+  return (
+    <>
+      <MinigameHelpButton onOpen={() => setReady(false)} />
+      {!target ? <HeistCasing onPick={setTarget} /> : <StealHeistInner target={target} />}
+    </>
+  );
 }
 
 // ---- Le Repérage : choisir sa cible dans le quartier ----

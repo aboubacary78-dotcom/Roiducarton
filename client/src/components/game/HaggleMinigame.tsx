@@ -28,6 +28,7 @@ import {
 } from '@/contexts/GameContext';
 import { playClick, playCoin, playHandshake, playShutter } from '@/lib/sound';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import MinigameHelpButton from './MinigameHelpButton';
 import { setAmbience, type AmbienceId } from '@/lib/ambience';
 
 type Phase = 'talk' | 'deal' | 'broken';
@@ -174,6 +175,9 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
       onClick={() => { if (phase !== 'talk') finish(); }}
       role="dialog" aria-label={tr('Marchandage', 'Haggling')}
     >
+      {/* Le « ? » rouvre les règles : Le Culot est le mini-jeu le plus espacé
+          du jeu, c'est celui qu'on oublie en premier. */}
+      <MinigameHelpButton onOpen={() => setIntro(true)} />
       <motion.div
         initial={{ y: 40 }} animate={{ y: 0 }}
         transition={{ type: 'spring', damping: 26, stiffness: 320 }}

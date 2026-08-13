@@ -8,6 +8,7 @@ import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import MinigameHelpButton from './MinigameHelpButton';
 import SafeImg from './SafeImg';
 import { stampTap, liftHover } from '@/lib/anim';
 import { pushToast } from '@/lib/toast';
@@ -72,7 +73,12 @@ export default function CombatScreen() {
       />
     );
   }
-  return <CombatScreenInner />;
+  return (
+    <>
+      <MinigameHelpButton onOpen={() => setReady(false)} />
+      <CombatScreenInner />
+    </>
+  );
 }
 
 function CombatScreenInner() {

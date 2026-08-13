@@ -11,6 +11,7 @@ import { isFirstEverRun } from '@/lib/coach';
 import { loadGraves } from '@/lib/necrology';
 import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import MinigameHelpButton from './MinigameHelpButton';
 import LocationBackdrop from './LocationBackdrop';
 import SafeImg from './SafeImg';
 
@@ -61,7 +62,13 @@ export default function SalvageMinigame() {
       />
     );
   }
-  return <SalvageInner />;
+  // Le « ? » rouvre la carte des règles à tout moment.
+  return (
+    <>
+      <MinigameHelpButton onOpen={() => setReady(false)} />
+      <SalvageInner />
+    </>
+  );
 }
 
 function makeLayer(depth: number, mods: ReturnType<typeof salvageMods>): Cell[] {

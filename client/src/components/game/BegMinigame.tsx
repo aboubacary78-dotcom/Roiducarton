@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt, playStep } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
+import MinigameHelpButton from './MinigameHelpButton';
 import CardboardAvatar from './CardboardAvatar';
 import LocationBackdrop from './LocationBackdrop';
 
@@ -67,7 +68,12 @@ export default function BegMinigame() {
       />
     );
   }
-  return <BegMinigameInner />;
+  return (
+    <>
+      <MinigameHelpButton onOpen={() => setReady(false)} />
+      <BegMinigameInner />
+    </>
+  );
 }
 
 function BegMinigameInner() {

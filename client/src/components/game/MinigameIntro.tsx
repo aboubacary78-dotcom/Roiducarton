@@ -12,27 +12,63 @@ import SceneIllustration, { type SceneTheme } from './SceneIllustration';
  * ses minuteurs ne tournent pas pendant la lecture.
  */
 
-const INTRO_KEY = 'roi-du-carton-minigame-intro-v1';
+const INTRO_KEY = 'roi-du-carton-minigame-intro-v2';
+const SESSION_KEY = 'roi-du-carton-lancements';
+
+/*
+ * QUAND UNE RÈGLE S'OUBLIE.
+ *
+ * La carte n'était montrée qu'une fois, définitivement. Or les mini-jeux sont
+ * espacés : on peut ne pas croiser Le Culot pendant plusieurs sessions et le
+ * retrouver sans rappel. Une règle oubliée casse le flow bien plus sûrement
+ * qu'une explication de trop.
+ *
+ * On compte donc les LANCEMENTS DE L'APPLICATION, pas les jours : c'est le
+ * nombre de sessions qui prédit l'oubli, pas le calendrier. Quelqu'un qui joue
+ * six fois dans la journée n'a pas besoin qu'on lui réexplique ; quelqu'un qui
+ * revient après trois lancements sans avoir touché à ce mini-jeu, si.
+ */
+const OUBLI_APRES = 3;
+
+/** Numéro du lancement en cours. Incrémenté une fois par démarrage. */
+export function sessionNumber(): number {
+  try {
+    const n = Number(localStorage.getItem(SESSION_KEY) || 0) || 0;
+    return n;
+  } catch { return 0; }
+}
+
+export function bumpSession(): void {
+  try { localStorage.setItem(SESSION_KEY, String(sessionNumber() + 1)); } catch { /* silent */ }
+}
+
+/** Dernier lancement où ce mini-jeu a été joué, par identifiant. */
+function lastSeen(): Record<string, number> {
+  try { return JSON.parse(localStorage.getItem(INTRO_KEY) || '{}'); } catch { return {}; }
+}
 
 export function introSeen(id: string): boolean {
-  try {
-    const raw = localStorage.getItem(INTRO_KEY);
-    if (!raw) return false;
-    return (JSON.parse(raw) as string[]).includes(id);
-  } catch {
-    return false;
-  }
+  const vu = lastSeen()[id];
+  if (vu === undefined) return false;
+  // Assez de lancements sans y toucher : on remontre la carte.
+  return sessionNumber() - vu < OUBLI_APRES;
 }
 
 function markSeen(id: string): void {
   try {
-    const raw = localStorage.getItem(INTRO_KEY);
-    const list: string[] = raw ? JSON.parse(raw) : [];
-    if (!list.includes(id)) list.push(id);
-    localStorage.setItem(INTRO_KEY, JSON.stringify(list));
-  } catch {
-    /* silent */
-  }
+    const l = lastSeen();
+    l[id] = sessionNumber();
+    localStorage.setItem(INTRO_KEY, JSON.stringify(l));
+  } catch { /* silent */ }
+}
+
+/** Rouvre la carte à la demande (bouton « ? » dans les mini-jeux). */
+export function forgetIntro(id: string): void {
+  try {
+    const l = lastSeen();
+    delete l[id];
+    localStorage.setItem(INTRO_KEY, JSON.stringify(l));
+  } catch { /* silent */ }
 }
 
 interface Line {
