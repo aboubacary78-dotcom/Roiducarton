@@ -31,6 +31,7 @@ import Toaster from '@/components/game/Toaster';
 import DaySummaryOverlay from '@/components/game/DaySummaryOverlay';
 import DeathRegistryScreen from '@/components/game/DeathRegistryScreen';
 import CimetiereScreen from '@/components/game/CimetiereScreen';
+import CartonMatinOverlay from '@/components/game/CartonMatinOverlay';
 
 // Rendu de l'écran courant. Les superpositions (résultat, météo, tutoriel,
 // succès) sont gérées à part pour ne pas être rejouées à chaque transition.
@@ -121,6 +122,11 @@ export default function Home() {
         {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game', 'salvage-game', 'wardrobe'].includes(state.screen) && (
           <WeatherOverlay />
         )}
+
+        {/* Le carton du matin : première ouverture d'un jour calendaire. Passe
+            au-dessus de tout, y compris de l'écran-titre — c'est le rendez-vous
+            quotidien, il ne dépend pas d'une partie en cours. */}
+        <CartonMatinOverlay />
 
         {/* Notification de succès (accessoire débloqué), au-dessus de tout écran */}
         <AchievementToast />

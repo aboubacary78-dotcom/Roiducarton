@@ -25,6 +25,7 @@ import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/pr
 import { ENEMIES, rollSignRound } from './data/enemies';
 import { SHOPS, shopClosure, rollShopClosure, getSellPrice, SOLIDARITY_GIFT, SOLIDARITY_FLAG } from './data/shops';
 import { HAGGLE_TUNING, HAGGLED_FLAG, shopkeeperFor } from './data/haggle';
+import { takePendingGifts } from '@/lib/daily';
 import { DIGNITY_TIERS } from './data/dignity';
 import {
   generateEvents, generateBegEvents, generateRestEvents, generateTravelEvent,
@@ -188,6 +189,9 @@ type GameAction =
   // Rachète la dignité tout juste perdue, juste assez pour ne pas quitter son
   // palier : une pub restaure une perte bien mieux qu'elle n'offre un gain.
   | { type: 'KEEP_FACE' }
+  // Le carton du matin dépose son cadeau dans le sac quand une partie est en
+  // cours (sinon il attend le prochain personnage, voir lib/daily).
+  | { type: 'CLAIM_CARTON'; item: InventoryItem }
   | { type: 'TRAVEL'; location: string }
   | { type: 'CHOOSE_EVENT'; choiceIndex: number; boosted?: boolean }
   | { type: 'DISMISS_RESULT' }
@@ -237,6 +241,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const legacy = peekLegacy();
       clearLegacy();
       const kits = takePendingKits();
+      const cartons = takePendingGifts();
       const firstContract = { id: randomFromArray(CONTRACTS).id, done: false };
       let inventory = [...char.inventory];
       let money = char.money;
@@ -246,6 +251,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (legacy && legacy.item?.id !== 'sceptre-roi' && inventory.length < 20) {
         inventory.push(legacy.item);
         gifts.push(L(`${legacy.item.name}, l'héritage de ${legacy.from}`, `the ${tc(legacy.item.name)}, ${legacy.from}'s legacy`));
+      }
+      // Ce que le carton du matin a laissé pendant qu'aucune partie ne tournait.
+      for (const id of cartons) {
+        const def = SALVAGE_JUNK.find(i => i.id === id) || trouvailleById(id);
+        if (!def || inventory.length >= 20) continue;
+        inventory.push({ ...def });
+        gifts.push(L(def.name, tc(def.name)));
       }
       for (const kit of kits) {
         const def = HERITAGE_KITS.find(k => k.id === kit);
@@ -624,6 +636,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const restEvent = randomFromArray(restEvents);
       return { ...state, screen: 'event', currentEvent: restEvent, dayActions: state.dayActions + 1,
         character: { ...state.character, recentEvents: rememberEvent(state.character.recentEvents, restEvent.id) } };
+    }
+
+    case 'CLAIM_CARTON': {
+      if (!state.character) return state;
+      const c = state.character;
+      if (c.inventory.length >= 20) return state;
+      return { ...state, character: { ...c, inventory: [...c.inventory, { ...action.item }] } };
     }
 
     case 'KEEP_FACE': {

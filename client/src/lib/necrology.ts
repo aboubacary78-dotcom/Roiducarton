@@ -279,6 +279,13 @@ function saveHeritage(h: HeritageState): void {
   try { localStorage.setItem(HERITAGE_KEY, JSON.stringify(h)); } catch { /* silent */ }
 }
 
+/** Crédite du Karma hors mort : carton du matin, paliers de série, partage. */
+export function addKarma(n: number): number {
+  const total = loadKarma() + Math.max(0, Math.round(n));
+  try { localStorage.setItem(KARMA_KEY, String(total)); } catch { /* silent */ }
+  return total;
+}
+
 export function spendKarma(cost: number): boolean {
   const k = loadKarma();
   if (k < cost) return false;
