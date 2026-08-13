@@ -2,6 +2,7 @@ import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import StatBars from './StatBars';
+import CoachTip from './CoachTip';
 import { tierAtRisk } from '@/contexts/data/dignity';
 import { loadCommande, commandeDef, markClaimed, daysLeft } from '@/lib/commande';
 import { addKarma } from '@/lib/necrology';
@@ -150,6 +151,9 @@ export default function MainScreen() {
 
   return (
     <div className="min-h-screen bg-texture p-4 flex flex-col gap-3">
+      {/* Le conseil du moment : une phrase, au moment où elle sert. */}
+      <CoachTip ctx={{ char, actionsLeft, weather: state.weather }} />
+
       {/* Top Bar */}
       <motion.div
         id="tuto-header"

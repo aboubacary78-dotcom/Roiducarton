@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
 import { syncRecords, recordGameEnd } from '@/lib/profile';
 import { getLang, tc } from '@/lib/lang';
-import { peekLegacy, clearLegacy, takePendingKits } from '@/lib/necrology';
+import { peekLegacy, clearLegacy, takePendingKits, loadGraves } from '@/lib/necrology';
 
 // ============================================================================
 // LE MONOLITHE, DÉCOUPÉ
@@ -26,6 +26,7 @@ import { ENEMIES, rollSignRound } from './data/enemies';
 import { SHOPS, shopClosure, rollShopClosure, getSellPrice, SOLIDARITY_GIFT, SOLIDARITY_FLAG } from './data/shops';
 import { HAGGLE_TUNING, HAGGLED_FLAG, shopkeeperFor } from './data/haggle';
 import { takePendingGifts } from '@/lib/daily';
+import { isFirstEverRun } from '@/lib/coach';
 import { progress as commandeProgress } from '@/lib/commande';
 import { DIGNITY_TIERS } from './data/dignity';
 import {
@@ -60,6 +61,26 @@ export * from './data/salvage';
 export * from './data/passersby';
 export * from './data/haggle';
 export * from './data/dignity';
+
+/*
+ * LE FILET DE LA TOUTE PREMIÈRE PARTIE.
+ *
+ * Mourir au jour un de sa première partie, c'est n'avoir rien vu du jeu — et
+ * les premières minutes décident de presque toute la rétention du lendemain.
+ * On empêche donc cette mort-là, et uniquement celle-là : dès qu'il existe un
+ * score ou une tombe, la rue reprend tous ses droits.
+ *
+ * Invisible pour le joueur, qui croit simplement s'en être sorti de justesse.
+ */
+function survivesFirstDay(c: Character): boolean {
+  return c.day <= 1 && isFirstEverRun(loadHighScores().length, loadGraves().length);
+}
+
+/** Applique le filet : les jauges vitales ne descendent pas sous 1. */
+function withFirstDayNet(c: Character, stats: Stats): Stats {
+  if (!survivesFirstDay(c)) return stats;
+  return { ...stats, health: Math.max(1, stats.health), mental: Math.max(1, stats.mental) };
+}
 
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
@@ -339,7 +360,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (action.copTapped) {
         const amende = Math.min(c.money, 4 + Math.floor(Math.random() * 4)); // 4-7€ selon les moyens
         const statDelta: Partial<Stats> = { dignity: -10, mental: -6 };
-        const newStats = applyStatDelta(c.stats, statDelta);
+        const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
         const isAlive = newStats.health > 0 && newStats.mental > 0;
         if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, hasTrait(c, 'poissard'))); clearSave(); }
         return {
@@ -364,7 +385,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ? { dignity: -3 - insisted, mental: 6 }
         : { dignity: -4 - insisted, mental: money > 0 ? 2 : -4 };
       const respectDelta = money >= 8 ? 1 : 0;
-      const newStats = applyStatDelta(c.stats, statDelta);
+      const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
       const isAlive = newStats.health > 0 && newStats.mental > 0;
       const prefix = money >= 8 ? L('🎩 Manche exceptionnelle ! ', '🎩 An exceptional haul! ')
         : money > 0 ? L('🪙 Quelques pièces au fond du chapeau. ', '🪙 A few coins in the bottom of the hat. ')
@@ -471,7 +492,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
             health: bodily.health,
             hunger: Math.round(-3 * hungerMul) + bodily.hunger,
           };
-      const newStats = applyStatDelta(c.stats, statDelta);
+      const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
       const isAlive = newStats.health > 0 && newStats.mental > 0;
       if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, hasTrait(c, 'poissard'))); clearSave(); }
 
@@ -571,7 +592,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           // (proportionnelle à l'ambition du coup).
           const amende = Math.min(c.money, target.difficulty === 'grand' ? 12 : target.difficulty === 'risque' ? 5 : 3);
           const statDelta: Partial<Stats> = { dignity: -15, mental: -8 };
-          const newStats = applyStatDelta(c.stats, statDelta);
+          const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
           const isAlive = newStats.health > 0 && newStats.mental > 0;
           if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, hasTrait(c, 'poissard'))); clearSave(); }
           return {
@@ -590,7 +611,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         const statDelta: Partial<Stats> = rossee
           ? { dignity: -14, health: -12, mental: -8 }
           : { dignity: -12, health: -6, mental: -6 };
-        const newStats = applyStatDelta(c.stats, statDelta);
+        const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
         const isAlive = newStats.health > 0 && newStats.mental > 0;
         if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, 'poissard'))); clearSave(); }
         return {
@@ -615,7 +636,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const respectDelta = hot ? (target.difficulty === 'grand' ? 3 : 2) : jackpot ? 2 : 0;
       const gotItem = target.item && (jackpot || Math.random() < 0.5) ? target.item : undefined;
       const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 6 } : hot ? { dignity: -5, mental: 5 } : { dignity: -6, mental: 2 };
-      const newStats = applyStatDelta(c.stats, statDelta);
+      const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
       const itemNote = gotItem ? L(` Et dans le sac : ${gotItem.name} ${gotItem.emoji}.`, ` And into the bag: ${gotItem.name} ${gotItem.emoji}.`) : '';
       const text = (jackpot
         ? L(`💎 Coup de maître ! Vous repartez avec ${target.label} sans que personne ne remarque rien : ${moneyDelta}€.`, `💎 Masterstroke! You walk off with ${target.labelEn} without anyone noticing a thing: €${moneyDelta}.`)
@@ -730,7 +751,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           if (val) newStats[key as keyof Stats] += val;
         });
       }
-      newStats = clampStats(newStats);
+      // Le filet de la première partie s'applique ici aussi : c'est le chemin
+      // le plus fréquent au jour un.
+      newStats = withFirstDayNet(state.character, clampStats(newStats));
 
       let newMoney = Math.max(0, state.character.money + (outcome.moneyChange || 0));
       if (newMoney < 0) newMoney = 0;
@@ -898,7 +921,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
-      const decayedStats = clampStats(s);
+      const decayedStats = withFirstDayNet(ch, clampStats(s));
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
 
       if (!isAlive) {

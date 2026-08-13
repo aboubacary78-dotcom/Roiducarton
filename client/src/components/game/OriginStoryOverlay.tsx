@@ -18,7 +18,18 @@ export default function OriginStoryOverlay() {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character;
-  const visible = !!char && state.screen === 'main' && !char.activeFlags?.includes('origin-vu');
+  /*
+   * LE RÉCIT ARRIVE APRÈS LA PREMIÈRE ACTION, PAS AVANT.
+   *
+   * C'est une récompense narrative, pas un préambule. Placé au départ, il
+   * s'ajoutait aux écrans qui séparent le lancement de la première décharge —
+   * or la rétention du lendemain se décide là. Placé après le premier geste,
+   * il récompense ce geste et se lit vraiment.
+   */
+  const visible = !!char
+    && state.screen === 'main'
+    && state.dayActions >= 1
+    && !char.activeFlags?.includes('origin-vu');
   // Froissement de vieux papier quand le récit se déplie (hook AVANT tout
   // retour anticipé : l'ordre des hooks doit rester stable).
   useEffect(() => { if (visible) playPaper(); }, [visible]);

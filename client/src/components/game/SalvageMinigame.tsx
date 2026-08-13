@@ -1,12 +1,14 @@
 import {
   useGame, LAYERS, SALVAGE_TUNING, rollLayerFinds, nextLayerRisk, salvagePayout,
-  BUST_REASONS, salvageMods, piegeCostFor, randomFromArray,
+  BUST_REASONS, salvageMods, piegeCostFor, randomFromArray, CONSIGNE_FINDS, loadHighScores,
 } from '@/contexts/GameContext';
 import type { SalvageFind } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playHit, playCrit, playHurt, playStep, playFind, playCollapse } from '@/lib/sound';
 import { haptic } from '@/lib/haptics';
+import { isFirstEverRun } from '@/lib/coach';
+import { loadGraves } from '@/lib/necrology';
 import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import LocationBackdrop from './LocationBackdrop';
@@ -63,7 +65,19 @@ export default function SalvageMinigame() {
 }
 
 function makeLayer(depth: number, mods: ReturnType<typeof salvageMods>): Cell[] {
-  const finds = rollLayerFinds(depth, mods.malus, mods.greenThumb);
+  let finds = rollLayerFinds(depth, mods.malus, mods.greenThumb);
+  /*
+   * LA TOUTE PREMIÈRE FOUILLE NE REPART JAMAIS BREDOUILLE.
+   *
+   * Une première partie qui commence par vingt minutes les bras dans les
+   * ordures pour rien enseigne exactement la mauvaise chose. On garantit donc
+   * au moins une consigne dans la première couche de la première partie — pas
+   * un trésor, juste de quoi comprendre que ça peut payer.
+   */
+  if (depth === 0 && isFirstEverRun(loadHighScores().length, loadGraves().length)
+      && !finds.some(f => f.kind === 'consigne' || f.kind === 'trouvaille')) {
+    finds = [randomFromArray(CONSIGNE_FINDS), ...finds.slice(1)];
+  }
   const cells: Cell[] = Array.from({ length: CELLS }, () => ({
     tone: MUCK_TONES[Math.floor(Math.random() * MUCK_TONES.length)],
     tilt: Math.random() * 30 - 15,

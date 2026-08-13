@@ -138,8 +138,12 @@ export default function Home() {
         {/* Récit d'origine « La Chute de… », une fois au départ de la partie */}
         <OriginStoryOverlay />
 
-        {/* Tutoriel guidé (écran principal uniquement, après le récit d'origine) */}
-        {state.screen === 'main' && state.character?.activeFlags?.includes('origin-vu') && <TutorialOverlay />}
+        {/* La visite guidée en huit écrans n'est plus imposée au premier
+            lancement : elle reste disponible depuis les Options pour qui la
+            veut. Au premier lancement, les conseils contextuels prennent le
+            relais (voir CoachTip) — une phrase quand elle sert, au lieu de
+            huit écrans avant la première action. */}
+        {state.screen === 'main' && <TutorialOverlay />}
 
         {/* Overlay météo : actif sur tous les écrans de jeu sauf titre et sélection */}
         {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game', 'salvage-game', 'wardrobe'].includes(state.screen) && (

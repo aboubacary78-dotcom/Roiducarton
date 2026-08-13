@@ -60,8 +60,17 @@ interface Rect { top: number; left: number; width: number; height: number; }
 
 export default function TutorialOverlay() {
   useLang();
+  // Ne s'ouvre QUE si on l'a demandé depuis les Options (qui effacent la clé).
+  // Au premier lancement, la clé est posée d'office : le joueur joue d'abord,
+  // et les conseils contextuels l'accompagnent (voir lib/coach).
   const [visible, setVisible] = useState(() => {
-    try { return localStorage.getItem(TUTORIAL_KEY) !== '1'; } catch { return false; }
+    try {
+      if (localStorage.getItem(TUTORIAL_KEY) === null) {
+        localStorage.setItem(TUTORIAL_KEY, '1');
+        return false;
+      }
+      return localStorage.getItem(TUTORIAL_KEY) !== '1';
+    } catch { return false; }
   });
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);

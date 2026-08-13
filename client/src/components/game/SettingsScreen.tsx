@@ -8,6 +8,7 @@ import { loadDaily } from '@/lib/daily';
 import { isAdsRemoved, purchaseRemoveAds, reopenConsentForm } from '@/lib/ads';
 import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
+import { resetCoaches } from '@/lib/coach';
 import { useLang, setLang, tr } from '@/lib/lang';
 import { pushToast } from '@/lib/toast';
 
@@ -224,7 +225,10 @@ export default function SettingsScreen() {
 
         <button
           onClick={() => {
+            // On remet aussi les conseils contextuels à zéro : « revoir le
+            // tutoriel » doit rendre tout ce qui explique le jeu.
             try { localStorage.removeItem(TUTORIAL_KEY); } catch { /* silent */ }
+            resetCoaches();
             dispatch({ type: 'SET_SCREEN', screen: state.character ? 'main' : 'title' });
           }}
           className="action-btn p-3 text-sm text-[#3D3020] flex items-center gap-2"
