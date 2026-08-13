@@ -1,6 +1,6 @@
-# Phase 3 — quatre packs d'images
+# Phase 3 — cinq packs d'images
 
-## `pack-10-fins.md` — 4 images
+## `pack-10-fins.md` — 4 images ⚠️ REMPLACÉ PAR LE PACK 14
 
 Quand un personnage meurt, le jeu affiche une une de journal avec une photo
 choisie selon ce qui l'a tué. Six causes ont la leur, plus une pour la mort au
@@ -68,12 +68,36 @@ prendront le relais toutes seules au dépôt des fichiers.
 **Attention à la consigne propre à ce pack** : ces images s'affichent AVANT le
 choix du joueur. Elles montrent la tentation, jamais le résultat.
 
+## `pack-14-morts-comiques.md` — 11 images
+
+Les sept images de mort existantes sont refusées : elles sont techniquement
+superbes et complètement à côté. Un homme la tête dans les mains sous un
+panneau « personne ne regarde », un corps effondré sur un trottoir — c'est du
+misérabilisme, et deux d'entre elles portent en plus du texte peint dans le
+décor, ce que le protocole interdit.
+
+Ce pack les refait toutes, plus les quatre fins particulières du pack 10 qu'il
+absorbe. Onze images en tout.
+
+Il introduit surtout **deux personnages récurrents** qui portent la comédie :
+le fantôme en carton du héros, qui flotte au-dessus de son propre corps et
+commente ce qui vient d'arriver, et le pigeon, témoin impassible. Le corps peut
+alors être franchement mort sans que l'image devienne glauque — c'est le
+mécanisme du dessin animé, et c'est exactement ce qui manquait.
+
+**Le code est prêt** : la une choisit désormais la fin particulière avant la
+cause générique, et descend la chaîne image par image, ce qui laisse les onze
+s'activer une à une à la livraison.
+
 ---
 
 ## Ordre conseillé
 
-Le pack 12 est fait. Le pack 13 ensuite : six cartes très fréquentes,
+Le pack 12 est fait, et le pack 10 est absorbé par le 14.
+
+Le **pack 14** d'abord : ce sont les images les plus visibles du jeu, et les
+actuelles sont hors sujet. Le **pack 13** ensuite : six cartes très fréquentes,
 aujourd'hui illustrées par des scènes voisines qui font l'affaire sans être
-justes. Le pack 10 est court et se voit tout de suite. Le pack 11 est plus
-long, mais c'est lui qui change le plus l'allure du jeu : La Récup' est le
-seul écran où il reste des emoji à la place d'illustrations.
+justes. Le **pack 11** en dernier, parce qu'il est long — mais c'est lui qui
+change le plus l'allure du jeu : La Récup' est le seul écran où il reste des
+emoji à la place d'illustrations.

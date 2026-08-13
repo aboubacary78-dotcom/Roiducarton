@@ -1,3 +1,8 @@
+> ⚠️ **REMPLACÉ PAR LE PACK 14.** Les quatre images de ce brief sont
+> reprises dans `pack-14-morts-comiques.md`, qui refait aussi les sept
+> images de mort existantes avec un fil conducteur comique. Ne pas
+> générer ce pack-ci séparément.
+
 # Pack 10 — Les fins de partie (4 images)
 
 ## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)

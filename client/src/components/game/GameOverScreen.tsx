@@ -89,7 +89,7 @@ export default function GameOverScreen() {
   useLang();
   const char = state.character;
   const [reviving, setReviving] = useState(false);
-  const [deathImgOk, setDeathImgOk] = useState(true);
+  const [deathImgTry, setDeathImgTry] = useState(0);
   const [legacyId, setLegacyId] = useState<string | null>(null);
 
   // Catégorie de mort → image (diorama) personnalisée. Repli sur le 💀 si le
@@ -102,7 +102,31 @@ export default function GameOverScreen() {
     : char.stats.sleep <= 8 ? 'exhaustion'
     : (state.weather === 'snow' || state.weather === 'storm') ? 'cold'
     : 'injury';
-  const deathImg = `/assets/death-${deathCat}.webp`;
+  /*
+   * L'IMAGE DE LA UNE : la fin PARTICULIÈRE avant la cause générique.
+   *
+   * Le jeu reconnaît quatre morts remarquables — le premier jour, riche, cuit
+   * par la canicule, tombé après dix jours de règne. Elles sont bien plus
+   * racontables que « votre corps a lâché », et elles ne s'affichaient pas :
+   * la photo était choisie sur la seule cause. On descend maintenant la chaîne
+   * fin particulière → cause → tampon, un cran par échec de chargement, ce qui
+   * laisse aussi les nouvelles images s'activer une par une à la livraison.
+   *
+   * L'ordre suit la rareté : dix jours de règne raconte plus qu'une mort au
+   * premier jour, qui raconte plus qu'un portefeuille bien garni.
+   */
+  const deathCandidates = useMemo(() => {
+    const out: string[] = [];
+    if (char) {
+      if (char.day >= 10) out.push('/assets/death-doyen.webp');
+      if (char.day <= 1) out.push('/assets/death-jour-1.webp');
+      if (state.weather === 'heatwave') out.push('/assets/death-canicule.webp');
+      if (char.money >= 30) out.push('/assets/death-riche.webp');
+    }
+    out.push(`/assets/death-${deathCat}.webp`);
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [char?.seed, char?.day, char?.money, state.weather, deathCat]);
 
   // L'ennemi vainqueur, retrouvé dans la cause de mort (elle contient son nom).
   const killerEnemy = useMemo(() => {
@@ -340,9 +364,13 @@ export default function GameOverScreen() {
         <h1 className="text-lg font-black text-[#1A1310] leading-tight text-center mb-2">{headline}</h1>
 
         {/* Photo du drame */}
-        {deathImgOk ? (
+        {deathImgTry < deathCandidates.length ? (
           <div className="w-full h-36 overflow-hidden relative mb-2 border border-[#B8A888]">
-            <KenBurnsImage src={deathImg} onError={() => setDeathImgOk(false)} />
+            <KenBurnsImage
+              key={deathCandidates[deathImgTry]}
+              src={deathCandidates[deathImgTry]}
+              onError={() => setDeathImgTry(n => n + 1)}
+            />
             <span className="absolute bottom-1 right-2 text-xl drop-shadow">💀</span>
           </div>
         ) : (
