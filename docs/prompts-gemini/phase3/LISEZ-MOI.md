@@ -1,4 +1,4 @@
-# Phase 3 — cinq packs d'images
+# Phase 3 — six packs d'images
 
 ## `pack-10-fins.md` — 4 images ⚠️ REMPLACÉ PAR LE PACK 14
 
@@ -89,6 +89,24 @@ mécanisme du dessin animé, et c'est exactement ce qui manquait.
 cause générique, et descend la chaîne image par image, ce qui laisse les onze
 s'activer une à une à la livraison.
 
+## `pack-15-nettoyage.md` — 142 images + un protocole
+
+Un audit vient d'être passé sur **la totalité des 989 images**, par
+reconnaissance de caractères pour la partie mesurable.
+
+**Défaut mesuré exhaustivement : 142 images contiennent du texte peint dans le
+décor**, alors que le protocole l'interdit depuis le premier brief. Quarante
+d'entre elles portent du texte anglais, que lira un joueur français. Et
+au-delà de la langue, le vrai problème est de métier : la pancarte
+« ODEUR : TERRIBLE » explique une blague que l'image raconte déjà mieux
+toute seule.
+
+**Défaut échantillonné, pas mesuré : le misérabilisme sur les images
+d'échec.** Une dizaine d'images regardées une par une montrent que la plupart
+sont drôles, et que le problème se concentre sur les 295 images de résultat
+négatif. Le brief donne trois recettes et demande un premier lot de vingt
+images corrigées avant d'aller plus loin.
+
 ---
 
 ## Ordre conseillé
@@ -96,7 +114,9 @@ s'activer une à une à la livraison.
 Le pack 12 est fait, et le pack 10 est absorbé par le 14.
 
 Le **pack 14** d'abord : ce sont les images les plus visibles du jeu, et les
-actuelles sont hors sujet. Le **pack 13** ensuite : six cartes très fréquentes,
+actuelles sont hors sujet. Le **pack 15** juste après, en commençant par ses
+quarante images à texte anglais — c'est le défaut le plus large et le seul qui
+soit mesuré. Le **pack 13** ensuite : six cartes très fréquentes,
 aujourd'hui illustrées par des scènes voisines qui font l'affaire sans être
 justes. Le **pack 11** en dernier, parce qu'il est long — mais c'est lui qui
 change le plus l'allure du jeu : La Récup' est le seul écran où il reste des

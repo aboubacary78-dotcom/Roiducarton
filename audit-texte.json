@@ -1,0 +1,1179 @@
+[
+ {
+  "file": "result-beg-boulangerie-good.webp",
+  "mots": [
+   "allait",
+   "être",
+   "gaspillé",
+   "toute",
+   "façon.",
+   "ulan",
+   "Pain",
+   "frais"
+  ],
+  "conf": 91
+ },
+ {
+  "file": "result-beg-taxi-arret-bad.webp",
+  "mots": [
+   "away,",
+   "you're",
+   "scarin",
+   "customers.",
+   "CITY",
+   "empty)",
+   "LIVE",
+   "EAT."
+  ],
+  "conf": 90
+ },
+ {
+  "file": "result-exp-gardien-suite-good.webp",
+  "mots": [
+   "ANDO",
+   "GENTLE",
+   "TAKE",
+   "WHAT",
+   "SHARED",
+   "NEED",
+   "SOFT",
+   "BISCUITS"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-beg-supermarche-bad.webp",
+  "mots": [
+   "OURIEZ",
+   "HEURE,",
+   "Vous",
+   "ÊTES",
+   "SANS-ABRI",
+   "Fichés",
+   "RECOLTE"
+  ],
+  "conf": 91
+ },
+ {
+  "file": "result-rest-lavomatic-good.webp",
+  "mots": [
+   "NDRO",
+   "CLEAN",
+   "WARM",
+   "DRYER,",
+   "HOME",
+   "WHERE",
+   "RYER"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-beg-cinema-good.webp",
+  "mots": [
+   "SADDEST",
+   "MOVIE",
+   "EVER",
+   "SADDES",
+   "MOVIE",
+   "THANK"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "result-exp-pharmacie-good.webp",
+  "mots": [
+   "ACTE",
+   "PHARM",
+   "c'est",
+   "encore",
+   "hein",
+   "OUVERT."
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-beg-concert-sortie-good.webp",
+  "mots": [
+   "SORTIE",
+   "CONCERT",
+   "ROCK",
+   "DEAD",
+   "MERCI"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-beg-mairie-bad.webp",
+  "mots": [
+   "APRES",
+   "GUICHET",
+   "FERME",
+   "PRENEZ",
+   "NUMÉRO."
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-beg-mairie-good.webp",
+  "mots": [
+   "CHAQUE",
+   "PETIT",
+   "GESTE",
+   "COMPTE",
+   "RIEN"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-exp-dechetterie-good.webp",
+  "mots": [
+   "MAN'S",
+   "ANOTHER",
+   "MAN'S",
+   "EASURE",
+   "WAR."
+  ],
+  "conf": 84
+ },
+ {
+  "file": "result-exp-hopital-good.webp",
+  "mots": [
+   "CHALEUR.",
+   "VERRE",
+   "D'EAU.",
+   "PARADIS",
+   "DISCRET."
+  ],
+  "conf": 94
+ },
+ {
+  "file": "beg-mairie-eey6rmfrqRvxmw634LjgzZ.webp",
+  "mots": [
+   "GRAND",
+   "CARDBOARD",
+   "HELP,",
+   "PLEASE"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "followup-gardien.webp",
+  "mots": [
+   "CTOR",
+   "COLLE",
+   "change",
+   "another"
+  ],
+  "conf": 94
+ },
+ {
+  "file": "rest-bibliotheque-nuit-e4GzMrQe5jEJDeQou4BxEF.webp",
+  "mots": [
+   "PAPER",
+   "TALES",
+   "DREAM",
+   "CARDBOARD"
+  ],
+  "conf": 95
+ },
+ {
+  "file": "result-beg-boulangerie-bad.webp",
+  "mots": [
+   "Désolé,",
+   "sommes",
+   "rupture",
+   "stock"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "result-exp-dechetterie-bad.webp",
+  "mots": [
+   "DUMP",
+   "ONLY",
+   "RUBBLE",
+   "PLASTER"
+  ],
+  "conf": 94
+ },
+ {
+  "file": "result-exp-eglise-good.webp",
+  "mots": [
+   "maison",
+   "Dieu",
+   "ouverte",
+   "tous"
+  ],
+  "conf": 94
+ },
+ {
+  "file": "result-exp-emploi-jardin-suite-good.webp",
+  "mots": [
+   "Best.",
+   "Spot",
+   "spiri",
+   "Ever,"
+  ],
+  "conf": 89
+ },
+ {
+  "file": "result-exp-magasin-suite-good.webp",
+  "mots": [
+   "STORE",
+   "SALE",
+   "SALE",
+   "SALE"
+  ],
+  "conf": 95
+ },
+ {
+  "file": "result-exp-marche-puces-bad.webp",
+  "mots": [
+   "INTING",
+   "MATCHED",
+   "SOCKS",
+   "EACH"
+  ],
+  "conf": 87
+ },
+ {
+  "file": "result-rest-bibliotheque-nuit-bad.webp",
+  "mots": [
+   "CLOSE",
+   "WELL",
+   "BACK",
+   "WELL"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-travel-egout-bad.webp",
+  "mots": [
+   "TRAVERSE",
+   "D'ÉGOUT",
+   "ODEUR",
+   "TERRI"
+  ],
+  "conf": 86
+ },
+ {
+  "file": "beg-concert-sortie-VPCD4nBdsydTGMi5TPfd8i.webp",
+  "mots": [
+   "ONCE",
+   "PAPER",
+   "BEATS"
+  ],
+  "conf": 95
+ },
+ {
+  "file": "combat-clown-Lauu92h5boZ4Z4nRnyDEaT.webp",
+  "mots": [
+   "CARDBOARD",
+   "TERRIT",
+   "everyth"
+  ],
+  "conf": 90
+ },
+ {
+  "file": "death-combat.webp",
+  "mots": [
+   "KNOCKS",
+   "EVERYONE",
+   "DOWN"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "legend-carton.webp",
+  "mots": [
+   "RELIQUE",
+   "CHIENS",
+   "FACTU"
+  ],
+  "conf": 89
+ },
+ {
+  "file": "rest-combat-reveil-nz6rPGatE5MccSSp5M9iMT.webp",
+  "mots": [
+   "SURPRISE",
+   "COMBAT!",
+   "WHILE"
+  ],
+  "conf": 94
+ },
+ {
+  "file": "result-beg-concert-sortie-bad.webp",
+  "mots": [
+   "LIVE",
+   "ANYTH",
+   "HELp"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-beg-gare-tgv-bad.webp",
+  "mots": [
+   "KIND",
+   "Anything",
+   "helps"
+  ],
+  "conf": 91
+ },
+ {
+  "file": "result-beg-match-foot-bad.webp",
+  "mots": [
+   "STADIUM",
+   "EXIT",
+   "GAIN"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-beg-terrasse-cafe-good.webp",
+  "mots": [
+   "CAFE",
+   "CHANGE",
+   "JOURNÉE"
+  ],
+  "conf": 91
+ },
+ {
+  "file": "result-exp-animalerie-bad.webp",
+  "mots": [
+   "NIMALLERIE",
+   "FAITES",
+   "CLIENTS"
+  ],
+  "conf": 87
+ },
+ {
+  "file": "result-exp-brocante-good.webp",
+  "mots": [
+   "MARCHE",
+   "DOIT",
+   "DISPARAÎTRE."
+  ],
+  "conf": 80
+ },
+ {
+  "file": "result-exp-camion-pizza-bad.webp",
+  "mots": [
+   "DESOLE",
+   "TOUT",
+   "VENDU"
+  ],
+  "conf": 95
+ },
+ {
+  "file": "result-exp-camion-pizza-good.webp",
+  "mots": [
+   "TANA",
+   "MERCI",
+   "Pour"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "result-legend-graffiti-good.webp",
+  "mots": [
+   "CARTON",
+   "Carton",
+   "Gaston"
+  ],
+  "conf": 90
+ },
+ {
+  "file": "result-rest-banc-eglise-bad.webp",
+  "mots": [
+   "CARES",
+   "PLEASE",
+   "HELP"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "result-rest-cabine-telephone-bad.webp",
+  "mots": [
+   "HONE",
+   "REST",
+   "HOME"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "result-rest-cabine-telephone-good.webp",
+  "mots": [
+   "PHONE",
+   "INCLUDED",
+   "RENT"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-rest-container-good.webp",
+  "mots": [
+   "BEST",
+   "SLEEP",
+   "WEEKS!"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-steal-tronc-eglise-good.webp",
+  "mots": [
+   "LOVE",
+   "INDNESS",
+   "LONG"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-travel-chantier-nuit-bad.webp",
+  "mots": [
+   "CAFE",
+   "TENIR",
+   "DEMAIN"
+  ],
+  "conf": 94
+ },
+ {
+  "file": "result-travel-pont-autoroute-bad.webp",
+  "mots": [
+   "MONNAj",
+   "Bonne:",
+   "AGUES"
+  ],
+  "conf": 84
+ },
+ {
+  "file": "result-travel-velo-trouve-good.webp",
+  "mots": [
+   "LIBRE!",
+   "TROUVE",
+   "DANS"
+  ],
+  "conf": 94
+ },
+ {
+  "file": "beg-cinema-5SKZPaM25U4pgFRPzwkrku.webp",
+  "mots": [
+   "PAPER",
+   "CHASE"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "beg-parc-chien-hP9gE8EtKnSHykQy4QSKpy.webp",
+  "mots": [
+   "WATCHING",
+   "BUTTON"
+  ],
+  "conf": 81
+ },
+ {
+  "file": "combat-ivrogne-fnqUTa9w2g29Z7Y8UCPEJQ.webp",
+  "mots": [
+   "PLED",
+   "CUP”"
+  ],
+  "conf": 90
+ },
+ {
+  "file": "death-exhaustion.webp",
+  "mots": [
+   "SERVICE",
+   "THANK"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "exp-bibliotheque-2De3rMKZBHpbKjGy3dHVbf.webp",
+  "mots": [
+   "QUIET",
+   "PLEASE"
+  ],
+  "conf": 76
+ },
+ {
+  "file": "exp-brocante-m4p7AaRkiCTHLZmNAAEVB6.webp",
+  "mots": [
+   "BOARD",
+   "VELER"
+  ],
+  "conf": 91
+ },
+ {
+  "file": "exp-jardinier-CR6HfMPJyNzdVNNx5SD2YN.webp",
+  "mots": [
+   "GARDE",
+   "WELCOME"
+  ],
+  "conf": 94
+ },
+ {
+  "file": "exp-skateur-BRXHRUvw2hTywwb7KYwfjU.webp",
+  "mots": [
+   "CHANGE",
+   "LOST"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "rest-jardin-secret-D3emeTRZCkD6yK6fmxucMr.webp",
+  "mots": [
+   "SECRET",
+   "GARDEN"
+  ],
+  "conf": 97
+ },
+ {
+  "file": "result-beg-ecole-sortie-good.webp",
+  "mots": [
+   "pour",
+   "toi."
+  ],
+  "conf": 97
+ },
+ {
+  "file": "result-beg-eglise-dimanche-good.webp",
+  "mots": [
+   "ARITE",
+   "HRÉTIENNE"
+  ],
+  "conf": 91
+ },
+ {
+  "file": "result-beg-fleuriste-bad.webp",
+  "mots": [
+   "sont",
+   "compstage."
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-beg-jogger-parc-bad.webp",
+  "mots": [
+   "MATTER",
+   "JERK"
+  ],
+  "conf": 90
+ },
+ {
+  "file": "result-beg-jogger-parc-good.webp",
+  "mots": [
+   "FREE",
+   "TRAINING"
+  ],
+  "conf": 97
+ },
+ {
+  "file": "result-beg-lavage-voiture-good.webp",
+  "mots": [
+   "MERCI",
+   "PATRON"
+  ],
+  "conf": 87
+ },
+ {
+  "file": "result-beg-mariage-sortie-bad.webp",
+  "mots": [
+   "Cest",
+   "privé"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-beg-restaurant-poubelle-bad.webp",
+  "mots": [
+   "away",
+   "from"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "result-beg-station-metro-good.webp",
+  "mots": [
+   "D'ARGENT.",
+   "Bisous"
+  ],
+  "conf": 86
+ },
+ {
+  "file": "result-beg-supermarche-good.webp",
+  "mots": [
+   "PETITE",
+   "N'ATTEND"
+  ],
+  "conf": 91
+ },
+ {
+  "file": "result-beg-taxi-arret-good.webp",
+  "mots": [
+   "TAXI",
+   "anymore"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-beg-terrasse-cafe-bad.webp",
+  "mots": [
+   "customers",
+   "only."
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-beg-touriste-asiatique-good.webp",
+  "mots": [
+   "love",
+   "Your"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-exp-bagarre-chats-good.webp",
+  "mots": [
+   "ADOPTÉ",
+   "RONRON"
+  ],
+  "conf": 84
+ },
+ {
+  "file": "result-exp-bibliotheque-bad.webp",
+  "mots": [
+   "CHAUTE",
+   "MERCI"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "result-exp-bibliotheque-good.webp",
+  "mots": [
+   "PLEASE",
+   "PEOPLE"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "result-exp-brocante-bad.webp",
+  "mots": [
+   "OBJE",
+   "NÉGOCIABLES"
+  ],
+  "conf": 87
+ },
+ {
+  "file": "result-exp-cave-vin-bad.webp",
+  "mots": [
+   "(NUTHIN’",
+   "HERE)"
+  ],
+  "conf": 90
+ },
+ {
+  "file": "result-exp-cimetiere-bad.webp",
+  "mots": [
+   "LOVING",
+   "HUSBAND"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-exp-hopital-bad.webp",
+  "mots": [
+   "Avez",
+   "Vous"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-exp-jardinier-good.webp",
+  "mots": [
+   "JARDIN",
+   "SECRET"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "result-exp-mariage-bad.webp",
+  "mots": [
+   "POVERTY",
+   "VIBE."
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-exp-mentor-suite-good.webp",
+  "mots": [
+   "HoME",
+   "WHERE"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-exp-metro-bad.webp",
+  "mots": [
+   "CESE",
+   "COULO"
+  ],
+  "conf": 85
+ },
+ {
+  "file": "result-exp-skateur-good.webp",
+  "mots": [
+   "cool",
+   "man!"
+  ],
+  "conf": 87
+ },
+ {
+  "file": "result-exp-velo-suite-good.webp",
+  "mots": [
+   "TION",
+   "only"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-rest-fourgon-abandonne-bad.webp",
+  "mots": [
+   "FAIM",
+   "MERCI,"
+  ],
+  "conf": 87
+ },
+ {
+  "file": "result-rest-wagon-train-good.webp",
+  "mots": [
+   "Nowhere",
+   "FRE}"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-steal-etal-marche-bad.webp",
+  "mots": [
+   "LEGUMES",
+   "FRAIS"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-steal-etendage-good.webp",
+  "mots": [
+   "WOOL",
+   "COAT,"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "result-travel-bus-nuit-bad.webp",
+  "mots": [
+   "TICKET,",
+   "Bus."
+  ],
+  "conf": 94
+ },
+ {
+  "file": "result-travel-parc-nuit-bad.webp",
+  "mots": [
+   "PETITS",
+   "RiENS"
+  ],
+  "conf": 83
+ },
+ {
+  "file": "result-travel-riviere-good.webp",
+  "mots": [
+   "LOUER",
+   "CARTO"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "result-travel-velo-trouve-bad.webp",
+  "mots": [
+   "VELO",
+   "VOLE"
+  ],
+  "conf": 94
+ },
+ {
+  "file": "beg-couple-riche-fGABmQHzGdaNfYfNeimiRm.webp",
+  "mots": [
+   "TIFFANY"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "beg-fleuriste-bxNwHDonMVDteRKwkBfphr.webp",
+  "mots": [
+   "PAPER"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "beg-match-foot-PvcoeSj4wSQHaeZetgnJEk.webp",
+  "mots": [
+   "PROGRAMS"
+  ],
+  "conf": 89
+ },
+ {
+  "file": "beg-musicien-metro-HSvL64qd5MQEG4Qnsz4oiV.webp",
+  "mots": [
+   "METR"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "combat-cygne-Do53kfaKnGAeMKwxEmgUi4.webp",
+  "mots": [
+   "DBOARD"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "combat-mouette-furibonde.webp",
+  "mots": [
+   "d'Al"
+  ],
+  "conf": 81
+ },
+ {
+  "file": "combat-pigeon-alpha.webp",
+  "mots": [
+   "MANGER"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "combat-rat-geant.webp",
+  "mots": [
+   "|LLLUR"
+  ],
+  "conf": 80
+ },
+ {
+  "file": "combat-raton.webp",
+  "mots": [
+   "RUELLE"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "combat-vigile-8AYmxD2oRKZLSGj3y3tgdy.webp",
+  "mots": [
+   "MALL"
+  ],
+  "conf": 76
+ },
+ {
+  "file": "death-hunger.webp",
+  "mots": [
+   "TOUS"
+  ],
+  "conf": 97
+ },
+ {
+  "file": "exp-camion-pizza-gRv6sJgQcz26Svyj68t2oD.webp",
+  "mots": [
+   "PAZZA"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "exp-cimetiere-VKuW5e5DjqSmF5TNCdnKkA.webp",
+  "mots": [
+   "RECYCLED"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "exp-dechetterie-ik2udBVSfScmWvCMJtUpZE.webp",
+  "mots": [
+   "WASTE"
+  ],
+  "conf": 95
+ },
+ {
+  "file": "exp-hopital-h7QXk7kd9iu8CG5kPG7P6Y.webp",
+  "mots": [
+   "EMERGENCY"
+  ],
+  "conf": 91
+ },
+ {
+  "file": "exp-mariage-YCDbQUMdsv52wEtgeLS3bm.webp",
+  "mots": [
+   "SNEAKY"
+  ],
+  "conf": 90
+ },
+ {
+  "file": "exp-salon-coiffure-hsCZe2EwRcYAdN4ZmNo9Bf.webp",
+  "mots": [
+   "FREE"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "followup-emploi-jardin.webp",
+  "mots": [
+   "GARD"
+  ],
+  "conf": 95
+ },
+ {
+  "file": "followup-toit.webp",
+  "mots": [
+   "FORR"
+  ],
+  "conf": 83
+ },
+ {
+  "file": "legend-ancien.webp",
+  "mots": [
+   "NAITRE"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "legend-graffiti.webp",
+  "mots": [
+   "CARTON"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "rest-cabane-carton-Q65zGixABM5SKqrjKEaS4x.webp",
+  "mots": [
+   "HOME"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "rest-fourgon-abandonne-XoJDy85GdkXUPTQXiCseeQ.webp",
+  "mots": [
+   "FAST"
+  ],
+  "conf": 97
+ },
+ {
+  "file": "rest-grenier-m7geqfLCEDsNwCuwNMJhXK.webp",
+  "mots": [
+   "BOOKS"
+  ],
+  "conf": 86
+ },
+ {
+  "file": "rest-lavomatic-koaRprcJ9mvGN9vvKFySBu.webp",
+  "mots": [
+   "ENDING)"
+  ],
+  "conf": 78
+ },
+ {
+  "file": "rest-musee-nuit-TRWpZcKL5eRM9F6cUsu5qv.webp",
+  "mots": [
+   "CARDBOARD"
+  ],
+  "conf": 79
+ },
+ {
+  "file": "result-beg-couple-riche-good.webp",
+  "mots": [
+   "Milde"
+  ],
+  "conf": 97
+ },
+ {
+  "file": "result-beg-match-foot-good.webp",
+  "mots": [
+   "LOCAL"
+  ],
+  "conf": 97
+ },
+ {
+  "file": "result-beg-musicien-metro-bad.webp",
+  "mots": [
+   "SPoT!"
+  ],
+  "conf": 79
+ },
+ {
+  "file": "result-beg-musicien-metro-good.webp",
+  "mots": [
+   "SHARED"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-beg-station-metro-bad.webp",
+  "mots": [
+   "faim"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "result-exp-artiste-rue-bad.webp",
+  "mots": [
+   "TRES"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "result-exp-cave-vin-good.webp",
+  "mots": [
+   "TIME"
+  ],
+  "conf": 78
+ },
+ {
+  "file": "result-exp-chantier-bad.webp",
+  "mots": [
+   "PUBL"
+  ],
+  "conf": 88
+ },
+ {
+  "file": "result-exp-chantier-good.webp",
+  "mots": [
+   "DANGER"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "result-exp-cimetiere-good.webp",
+  "mots": [
+   "THING"
+  ],
+  "conf": 90
+ },
+ {
+  "file": "result-exp-graffiti-good.webp",
+  "mots": [
+   "HOOD"
+  ],
+  "conf": 97
+ },
+ {
+  "file": "result-exp-magasin-ferme-good.webp",
+  "mots": [
+   "TARD"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-exp-metro-good.webp",
+  "mots": [
+   "VAMA"
+  ],
+  "conf": 83
+ },
+ {
+  "file": "result-exp-pecheur-canal-good.webp",
+  "mots": [
+   "TENDRESSE"
+  ],
+  "conf": 85
+ },
+ {
+  "file": "result-exp-pharmacie-bad.webp",
+  "mots": [
+   "PEUX"
+  ],
+  "conf": 97
+ },
+ {
+  "file": "result-legend-pari-good.webp",
+  "mots": [
+   "SouP"
+  ],
+  "conf": 87
+ },
+ {
+  "file": "result-rest-cabane-carton-good.webp",
+  "mots": [
+   "Boss"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-rest-combat-reveil-good.webp",
+  "mots": [
+   "SWEET"
+  ],
+  "conf": 90
+ },
+ {
+  "file": "result-rest-lavomatic-bad.webp",
+  "mots": [
+   "Lost"
+  ],
+  "conf": 92
+ },
+ {
+  "file": "result-rest-wagon-train-bad.webp",
+  "mots": [
+   "LEFT"
+  ],
+  "conf": 96
+ },
+ {
+  "file": "result-steal-etendage-bad.webp",
+  "mots": [
+   "Spare"
+  ],
+  "conf": 80
+ },
+ {
+  "file": "result-steal-fail.webp",
+  "mots": [
+   "RUIT"
+  ],
+  "conf": 84
+ },
+ {
+  "file": "result-steal-velo-good.webp",
+  "mots": [
+   "CLIC"
+  ],
+  "conf": 93
+ },
+ {
+  "file": "result-travel-egout-good.webp",
+  "mots": [
+   "Restaur"
+  ],
+  "conf": 89
+ },
+ {
+  "file": "result-travel-gare-routiere-good.webp",
+  "mots": [
+   "TRAJET"
+  ],
+  "conf": 78
+ },
+ {
+  "file": "result-travel-marche-matin-bad.webp",
+  "mots": [
+   "marchandise"
+  ],
+  "conf": 87
+ },
+ {
+  "file": "result-travel-marche-matin-good.webp",
+  "mots": [
+   "was)"
+  ],
+  "conf": 80
+ },
+ {
+  "file": "result-travel-tramway-bad.webp",
+  "mots": [
+   "TICKET"
+  ],
+  "conf": 83
+ }
+]
