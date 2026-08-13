@@ -10,7 +10,8 @@ import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown, loadDeathBoo
 import { STREET_TITLES } from '@/contexts/data/progression';
 import { getEquipped } from '@/lib/profile';
 import { pushToast } from '@/lib/toast';
-import { playDeath } from '@/lib/sound';
+import { playDeath, playCoin } from '@/lib/sound';
+import { haptic } from '@/lib/haptics';
 
 /*
  * L'écran de fin est une « une de journal » : la mort du personnage devient
@@ -166,6 +167,26 @@ export default function GameOverScreen() {
    * change d'avis.
    */
   const [peakOffer, setPeakOffer] = useState(true);
+
+  /*
+   * On fouille les poches une par une plutôt que d'annoncer un total. Même
+   * montant, révélation fractionnée : chaque poche est une décharge séparée,
+   * et le joueur reste sur l'écran au lieu de lire un nombre et de partir.
+   */
+  const [pochesOuvertes, setPochesOuvertes] = useState(0);
+
+  // La poche des fins est toujours la dernière : tant qu'elle n'est pas
+  // ouverte, les cartes « nouvelle fin » restent cachées.
+  const poches = harvest?.pockets ?? [];
+  const indexFins = poches.findIndex(p => p.id === 'fins');
+  const finsRevelees = indexFins === -1 || pochesOuvertes > indexFins;
+
+  function ouvrirPoche() {
+    if (pochesOuvertes >= poches.length) return;
+    playCoin();
+    haptic(poches[pochesOuvertes].id === 'bonus' ? 'heavy' : 'medium');
+    setPochesOuvertes(n => n + 1);
+  }
 
   async function handleRevive() {
     if (reviving) return;
@@ -399,7 +420,67 @@ export default function GameOverScreen() {
         className="w-full max-w-sm rounded-xl p-3 border border-[#4A3048]"
         style={{ background: 'linear-gradient(135deg, #362232, #26182A)' }}
       >
-        {newCards.length > 0 && (
+        {/* ---- LA FOUILLE DES POCHES ---- */}
+        <p className="text-[10px] tracking-widest uppercase text-[#8B6B4A] font-semibold mb-1.5">
+          🧥 {tr('Fouiller les poches', 'Search the pockets')}
+        </p>
+        <div className="flex flex-col gap-1">
+          {(harvest?.pockets ?? []).map((poche, i) => {
+            const ouverte = i < pochesOuvertes;
+            const suivante = i === pochesOuvertes;
+            return (
+              <motion.button
+                key={poche.id}
+                onClick={suivante ? ouvrirPoche : undefined}
+                disabled={!suivante}
+                whileTap={suivante ? { scale: 0.98 } : undefined}
+                animate={suivante ? { scale: [1, 1.015, 1] } : { scale: 1 }}
+                transition={suivante ? { duration: 1.6, repeat: Infinity } : undefined}
+                className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-left border ${
+                  ouverte ? 'border-[#4A3048] bg-[#231525]'
+                    : suivante ? 'border-[#F2C14E]/45 bg-[#F2C14E]/8'
+                      : 'border-[#3A2436] bg-[#1E1220] opacity-45'
+                }`}
+              >
+                <span className="text-base">{ouverte ? poche.emoji : '🤚'}</span>
+                <span className={`flex-1 text-[12px] font-semibold ${ouverte ? 'text-[#F0D9C4]' : 'text-[#8B6B4A]'}`}>
+                  {ouverte
+                    ? tr(poche.fr, poche.en)
+                    : suivante ? tr('Fouiller', 'Search') : tr('…', '…')}
+                </span>
+                {ouverte && (
+                  <motion.span
+                    initial={{ scale: 0.4, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 14 }}
+                    className={`text-[13px] font-bold font-mono ${poche.id === 'bonus' ? 'text-[#7BD48A]' : 'text-[#F2C14E]'}`}
+                  >
+                    +{poche.amount} 👑
+                  </motion.span>
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {/* Le total ne s'affiche qu'une fois tout ouvert. */}
+        {pochesOuvertes >= (harvest?.pockets ?? []).length && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between mt-2 pt-2 border-t border-[#4A3048]"
+          >
+            <span className="text-[12px] text-[#F0D9C4] font-semibold">👑 {tr('Karma de Rue gagné', 'Street Karma earned')}</span>
+            <span className="text-base font-bold text-[#F2C14E] font-mono">+{harvest?.karmaGained ?? 0}</span>
+          </motion.div>
+        )}
+        {pochesOuvertes >= (harvest?.pockets ?? []).length && (
+          <p className="text-[10px] text-[#A08060] text-right font-mono">{tr('total', 'total')} : {harvest?.karmaTotal ?? 0} 👑</p>
+        )}
+
+        {/* Les fins inédites ne se montrent qu'une fois la dernière poche
+            ouverte : c'est le meilleur du bilan, il vient en dernier. */}
+        {newCards.length > 0 && finsRevelees && (
           <div className="mb-2.5">
             <p className="text-[10px] tracking-widest uppercase text-[#F2C14E] font-semibold mb-1.5">
               📕 {tr(newCards.length > 1 ? 'Nouvelles fins découvertes' : 'Nouvelle fin découverte', newCards.length > 1 ? 'New endings discovered' : 'New ending discovered')}
@@ -421,11 +502,7 @@ export default function GameOverScreen() {
             </div>
           </div>
         )}
-        <div className="flex items-center justify-between">
-          <span className="text-[12px] text-[#F0D9C4] font-semibold">👑 {tr('Karma de Rue gagné', 'Street Karma earned')}</span>
-          <span className="text-base font-bold text-[#F2C14E] font-mono">+{harvest?.karmaGained ?? 0}</span>
-        </div>
-        <p className="text-[10px] text-[#A08060] text-right font-mono">{tr('total', 'total')} : {harvest?.karmaTotal ?? 0} 👑</p>
+
         <button
           onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'registre' })}
           className="w-full mt-2 py-2 text-[11px] font-semibold text-[#E8A87C] rounded-lg border border-[#4A3048] hover:bg-white/5"

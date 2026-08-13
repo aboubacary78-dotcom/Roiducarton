@@ -82,7 +82,31 @@ interface SeenDeath {
   ids: string[];
   newIds: string[];
   karmaGained: number;
+  /** Détail du Karma, poche par poche (voir KarmaPocket). */
+  pockets?: Record<string, number>;
 }
+
+/*
+ * LA FOUILLE DES POCHES.
+ *
+ * Le Karma était annoncé d'un bloc : un nombre calculé, donc prévisible, donc
+ * ignoré dès qu'on comprend la formule. Un résultat prévisible n'active rien.
+ *
+ * La quantité ne change pas. C'est la RÉVÉLATION qui devient variable : on
+ * fouille les poches du défunt une par une, chacune est une petite décharge
+ * séparée, et une fois sur dix il en sort une poche oubliée dont personne
+ * n'avait parlé. Les fins inédites viennent en dernier — le meilleur se garde
+ * pour la fin, jamais l'inverse.
+ */
+export interface KarmaPocket {
+  id: string;
+  emoji: string;
+  fr: string; en: string;
+  amount: number;
+}
+
+/** Une fois sur dix, une poche que personne n'avait vue. */
+const CHANCE_POCHE_OUBLIEE = 0.1;
 
 function readSeen(): SeenDeath | null {
   try {
@@ -105,13 +129,16 @@ export function recordDeath(params: {
   respect: number;
   seed: string;
   grave?: Omit<Grave, 'at' | 'golden'>; // la tombe à dresser au Cimetière
-}): { newIds: string[]; karmaGained: number; karmaTotal: number } {
+}): { newIds: string[]; karmaGained: number; karmaTotal: number; pockets: KarmaPocket[] } {
   const seen = readSeen();
   const sameLife = !!seen && seen.seed === params.seed;
 
   // Simple re-montage de l'écran de fin : on renvoie le résultat mémorisé.
   if (sameLife && seen!.day === params.day && seen!.ids.join(',') === params.ids.join(',')) {
-    return { newIds: seen!.newIds, karmaGained: seen!.karmaGained, karmaTotal: loadKarma() };
+    return {
+      newIds: seen!.newIds, karmaGained: seen!.karmaGained, karmaTotal: loadKarma(),
+      pockets: buildPockets(seen!.pockets ?? {}),
+    };
   }
 
   const book = loadDeathBook();
@@ -122,19 +149,33 @@ export function recordDeath(params: {
   // Après une seconde chance, on ne recompte que ce que la rallonge a apporté.
   const days = sameLife ? Math.max(0, params.day - seen!.day) : params.day;
   const respect = sameLife ? Math.max(0, params.respect - seen!.respect) : Math.max(0, params.respect);
-  const karmaGained = days * 2 + respect + newIds.length * 10;
+  // La poche oubliée : rare, jamais annoncée, toujours spectaculaire quand
+  // elle tombe. Son montant suit la durée de vie pour rester proportionné.
+  const bonus = Math.random() < CHANCE_POCHE_OUBLIEE ? 5 + Math.floor(Math.random() * 3) * 5 + days : 0;
+
+  const karmaGained = days * 2 + respect + newIds.length * 10 + bonus;
   const karmaTotal = loadKarma() + karmaGained;
 
   // Ce que l'écran de fin affiche : le bilan de TOUTE la vie du personnage.
   const runNewIds = sameLife ? [...seen!.newIds, ...newIds] : newIds;
   const runKarma = sameLife ? seen!.karmaGained + karmaGained : karmaGained;
 
+  // Le détail, cumulé sur toute la vie (une seconde chance rallonge les mêmes
+  // poches, elle n'en ouvre pas de nouvelles).
+  const avant = (sameLife && seen!.pockets) || {};
+  const parts: Record<string, number> = {
+    jours: (avant.jours ?? 0) + days * 2,
+    respect: (avant.respect ?? 0) + respect,
+    bonus: (avant.bonus ?? 0) + bonus,
+    fins: runNewIds.length * 10,
+  };
+
   try {
     localStorage.setItem(BOOK_KEY, JSON.stringify(book));
     localStorage.setItem(KARMA_KEY, String(karmaTotal));
     localStorage.setItem(SEEN_KEY, JSON.stringify({
       seed: params.seed, day: params.day, respect: params.respect,
-      ids: params.ids, newIds: runNewIds, karmaGained: runKarma,
+      ids: params.ids, newIds: runNewIds, karmaGained: runKarma, pockets: parts,
     } satisfies SeenDeath));
   } catch { /* silent */ }
 
@@ -148,7 +189,19 @@ export function recordDeath(params: {
     upsertGrave({ ...params.grave, golden, at: now });
     if (h.goldenEpitaph && !sameLife) setGoldenEpitaph(false);
   }
-  return { newIds: runNewIds, karmaGained: runKarma, karmaTotal };
+  return { newIds: runNewIds, karmaGained: runKarma, karmaTotal, pockets: buildPockets(parts) };
+}
+
+/** Met les poches en forme, dans l'ordre où elles s'ouvrent. */
+export function buildPockets(parts: Record<string, number>): KarmaPocket[] {
+  const out: KarmaPocket[] = [
+    { id: 'jours', emoji: '🗓️', fr: 'Les jours tenus', en: 'Days survived', amount: parts.jours ?? 0 },
+    { id: 'respect', emoji: '⭐', fr: 'Ce que la rue lui devait', en: 'What the street owed', amount: parts.respect ?? 0 },
+    { id: 'bonus', emoji: '🧥', fr: 'Une poche oubliée', en: 'A forgotten pocket', amount: parts.bonus ?? 0 },
+    // En dernier : c'est le meilleur, et on ne montre jamais le meilleur en premier.
+    { id: 'fins', emoji: '📕', fr: 'Ce qu\'il a emporté avec lui', en: 'What it took along', amount: parts.fins ?? 0 },
+  ];
+  return out.filter(p => p.amount > 0);
 }
 
 // ---- Le Cimetière des Cartons : une tombe par personnage tombé ----
