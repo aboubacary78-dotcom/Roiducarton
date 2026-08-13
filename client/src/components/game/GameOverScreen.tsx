@@ -12,6 +12,7 @@ import { getEquipped } from '@/lib/profile';
 import { pushToast } from '@/lib/toast';
 import { playDeath, playCoin } from '@/lib/sound';
 import { haptic } from '@/lib/haptics';
+import { rememberSuccessor } from '@/lib/notifications';
 
 /*
  * L'écran de fin est une « une de journal » : la mort du personnage devient
@@ -147,6 +148,10 @@ export default function GameOverScreen() {
   // partie, il en ouvre une. Le joueur repart avec un nom en tête.
   useEffect(() => { dispatch({ type: 'PREPARE_SUCCESSOR' }); }, [dispatch]);
   const successor = state.characterChoices[0] ?? null;
+  // Le nom du successeur est le meilleur texte de rappel dont on dispose :
+  // « Marcel attend toujours son tour » ouvre une boucle que « Revenez
+  // jouer ! » n'ouvre pas.
+  useEffect(() => { if (successor) rememberSuccessor(successor.name); }, [successor]);
 
   // Pub interstitielle à l'arrivée sur l'écran de fin (entre deux parties).
   useEffect(() => { showInterstitial(); }, []);

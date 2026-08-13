@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { isMuted, setMuted } from '@/lib/sound';
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
+import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
+import { loadDaily } from '@/lib/daily';
 import { isAdsRemoved, purchaseRemoveAds, reopenConsentForm } from '@/lib/ads';
 import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
@@ -28,6 +30,7 @@ export default function SettingsScreen() {
   const [confirmReset, setConfirmReset] = useState(false);
   const [muted, setMutedState] = useState(isMuted());
   const [vibre, setVibre] = useState(hapticsEnabled());
+  const [rappels, setRappels] = useState(notificationsEnabled());
   const [noAds, setNoAds] = useState(isAdsRemoved());
   const [buying, setBuying] = useState(false);
   const [consentBusy, setConsentBusy] = useState(false);
@@ -142,6 +145,33 @@ export default function SettingsScreen() {
             className={`text-xs font-semibold px-3 py-1.5 rounded-full ${vibre ? 'bg-[#4A9B5F]/15 text-[#3d8b4f]' : 'bg-[#E8D5C0] text-[#8B6B4A]'}`}
           >
             {vibre ? tr('Activé', 'On') : tr('Coupé', 'Off')}
+          </span>
+        </button>
+
+        {/* Rappels : DÉSACTIVÉS par défaut, et l'autorisation système n'est
+            demandée qu'au moment où le joueur les active lui-même. */}
+        <button
+          onClick={async () => {
+            if (rappels) { setNotificationsEnabled(false); setRappels(false); return; }
+            const ok = await requestPermission();
+            if (!ok) return;
+            setNotificationsEnabled(true);
+            setRappels(true);
+            rescheduleAll({ fr: tr('fr', 'en') === 'fr', streak: loadDaily().streak });
+          }}
+          className="w-full flex items-start justify-between mt-3 pt-3 border-t border-[#E8D5C0] text-left"
+        >
+          <span className="flex-1 pr-3">
+            <span className="text-base font-semibold text-[#2A1F1A] block">🔔 {tr('Rappels', 'Reminders')}</span>
+            <span className="text-[11px] text-[#8B6B4A] leading-snug block mt-0.5">
+              {tr('Deux au maximum par jour, et plus rien après trois semaines d\'absence.',
+                  'Two a day at most, and nothing after three weeks away.')}
+            </span>
+          </span>
+          <span
+            className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full ${rappels ? 'bg-[#4A9B5F]/15 text-[#3d8b4f]' : 'bg-[#E8D5C0] text-[#8B6B4A]'}`}
+          >
+            {rappels ? tr('Activés', 'On') : tr('Coupés', 'Off')}
           </span>
         </button>
       </motion.section>

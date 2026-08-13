@@ -32,6 +32,8 @@ import DaySummaryOverlay from '@/components/game/DaySummaryOverlay';
 import DeathRegistryScreen from '@/components/game/DeathRegistryScreen';
 import CimetiereScreen from '@/components/game/CimetiereScreen';
 import CartonMatinOverlay from '@/components/game/CartonMatinOverlay';
+import { noteSessionHour, rescheduleAll } from '@/lib/notifications';
+import { loadDaily } from '@/lib/daily';
 
 // Rendu de l'écran courant. Les superpositions (résultat, météo, tutoriel,
 // succès) sont gérées à part pour ne pas être rejouées à chaque transition.
@@ -58,6 +60,27 @@ function renderScreen(screen: string) {
 }
 
 export default function Home() {
+
+  /*
+   * L'heure de cette session est notée à l'ouverture, et tout le calendrier de
+   * rappels est reprogrammé quand l'application passe en arrière-plan : les
+   * rappels partent ainsi toujours du dernier moment où le joueur était là,
+   * et à l'heure où il joue d'habitude.
+   */
+  useEffect(() => {
+    noteSessionHour();
+    const replanifier = () => {
+      if (document.visibilityState === 'hidden') {
+        rescheduleAll({ fr: !document.documentElement.lang.startsWith('en'), streak: loadDaily().streak });
+      }
+    };
+    document.addEventListener('visibilitychange', replanifier);
+    window.addEventListener('pagehide', replanifier);
+    return () => {
+      document.removeEventListener('visibilitychange', replanifier);
+      window.removeEventListener('pagehide', replanifier);
+    };
+  }, []);
   const { state } = useGame();
 
   // Ambiance sonore continue selon l'écran : thème musical sur le titre,
