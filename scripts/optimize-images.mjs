@@ -1,73 +1,89 @@
 /*
- * Ré-encode en VRAI WebP les images trop lourdes de client/public/assets/
- * (ex. des PNG déposés avec l'extension .webp), via Chrome headless (canvas),
- * donc sans dépendance native (pas besoin de cwebp/sharp).
+ * RAMÈNE LES ILLUSTRATIONS À LA TAILLE OÙ ELLES SONT VUES.
  *
- *  - redimensionne à LARGEUR_MAX de large maximum (ratio conservé)
- *  - exporte en WebP qualité QUALITE
- *  - ne touche que les fichiers dépassant SEUIL_KO
+ * Le jeu s'affiche sur une largeur de 390 points. Même à trois pixels par
+ * point — le maximum des téléphones actuels — il n'en montre jamais plus de
+ * 1170. Les sources montaient jusqu'à 2304 px de large : on expédiait quatre
+ * fois trop de pixels sur chaque scène, au joueur comme dans l'APK.
+ *
+ * Deux règles tiennent ce script :
+ *
+ * 1. ON NE GRANDIT JAMAIS. Un fichier déjà plus petit que LARGEUR_MAX est
+ *    laissé tel quel. Le redimensionner vers le haut inventerait des pixels
+ *    et alourdirait le fichier pour rien.
+ *
+ * 2. ON NE GARDE QUE CE QUI ALLÈGE. Ces images sont déjà du WebP compressé :
+ *    ré-encoder ajoute une perte de génération, et sur les fichiers déjà
+ *    optimaux le résultat peut être PLUS LOURD que l'original. Dans ce cas on
+ *    rejette le résultat et on garde la source.
+ *
+ * Le profil ICC est conservé (-metadata icc) : sans lui, des dioramas au
+ *  papier kraft virent au jaune sur les écrans larges gamut.
  *
  * Lancement :  node scripts/optimize-images.mjs
+ * Réglages  :  MAX_W=1080 QUALITY=80 node scripts/optimize-images.mjs
  */
-import puppeteer from 'puppeteer-core';
-import { readdirSync, readFileSync, writeFileSync, statSync, existsSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { readdirSync, statSync, renameSync, unlinkSync } from 'node:fs';
+import { execFile } from 'node:child_process';
+import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 
+const run = promisify(execFile);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const ASSET_DIR = resolve(root, 'client/public/assets');
-// Surchargeables : MAX_W=1200 QUALITY=0.72 THRESHOLD_KB=170 node scripts/optimize-images.mjs
-// (le jeu affiche les scènes à ~780 px max sur mobile : 1200 px suffit largement)
-const LARGEUR_MAX = Number(process.env.MAX_W || 1600);
-const QUALITE = Number(process.env.QUALITY || 0.78);
-const SEUIL_KO = Number(process.env.THRESHOLD_KB || 600); // on ne ré-encode que ce qui dépasse
+const DOSSIER = resolve(root, 'client/public/assets');
 
-function findChrome() {
-  const base = resolve(root, 'chrome');
-  if (!existsSync(base)) throw new Error('Chrome introuvable dans ./chrome');
-  const dir = readdirSync(base).find((d) => d.startsWith('linux-'));
-  return `${base}/${dir}/chrome-linux64/chrome`;
+const LARGEUR_MAX = Number(process.env.MAX_W || 1080);
+const QUALITE = Number(process.env.QUALITY || 80);
+const PARALLELE = Number(process.env.JOBS || 4);
+
+/** Largeur en pixels, lue dans l'en-tête WebP. */
+async function largeur(fichier) {
+  try {
+    const { stdout } = await run('webpinfo', [fichier]);
+    const m = stdout.match(/Canvas size\s+(\d+)\s*x/) || stdout.match(/Width:\s*(\d+)/);
+    return m ? Number(m[1]) : 0;
+  } catch { return 0; }
 }
 
-const files = readdirSync(ASSET_DIR).filter((f) => /\.(webp|png|jpe?g)$/i.test(f))
-  .filter((f) => statSync(resolve(ASSET_DIR, f)).size > SEUIL_KO * 1024);
+const fichiers = readdirSync(DOSSIER).filter(f => f.endsWith('.webp'));
+console.log(`${fichiers.length} images à examiner (cible : ${LARGEUR_MAX} px, qualité ${QUALITE}).`);
 
-if (files.length === 0) {
-  console.log('Rien à optimiser.');
-  process.exit(0);
+let traitees = 0, ignorees = 0, rejetees = 0, avant = 0, apres = 0;
+
+async function traiter(nom) {
+  const src = join(DOSSIER, nom);
+  const tailleAvant = statSync(src).size;
+  avant += tailleAvant;
+
+  const w = await largeur(src);
+  if (w === 0) { console.warn(`  ? largeur illisible, laissé tel quel : ${nom}`); apres += tailleAvant; ignorees++; return; }
+  if (w <= LARGEUR_MAX) { apres += tailleAvant; ignorees++; return; }
+
+  const tmp = `${src}.tmp`;
+  try {
+    await run('cwebp', ['-quiet', '-q', String(QUALITE), '-resize', String(LARGEUR_MAX), '0', '-metadata', 'icc', src, '-o', tmp]);
+  } catch (e) {
+    console.warn(`  ! ré-encodage échoué, laissé tel quel : ${nom}`);
+    apres += tailleAvant; ignorees++; return;
+  }
+
+  const tailleApres = statSync(tmp).size;
+  if (tailleApres >= tailleAvant) {
+    // Ré-encoder aurait coûté de la qualité sans rien gagner en poids.
+    unlinkSync(tmp);
+    apres += tailleAvant; rejetees++; return;
+  }
+  renameSync(tmp, src);
+  apres += tailleApres; traitees++;
 }
 
-const browser = await puppeteer.launch({
-  executablePath: findChrome(),
-  headless: 'new',
-  args: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
-});
-const page = await browser.newPage();
+// Petite file d'attente : cwebp est mono-thread, on en fait tourner plusieurs.
+let curseur = 0;
+await Promise.all(Array.from({ length: PARALLELE }, async () => {
+  while (curseur < fichiers.length) await traiter(fichiers[curseur++]);
+}));
 
-for (const f of files) {
-  const p = resolve(ASSET_DIR, f);
-  const before = statSync(p).size;
-  const buf = readFileSync(p);
-  // Type réel d'après la signature (l'extension peut mentir).
-  const mime = buf[0] === 0x89 && buf[1] === 0x50 ? 'image/png'
-    : buf[0] === 0xff && buf[1] === 0xd8 ? 'image/jpeg'
-    : 'image/webp';
-  const dataUrl = `data:${mime};base64,${buf.toString('base64')}`;
-  const out = await page.evaluate(async (src, maxW, q) => {
-    const img = new Image();
-    await new Promise((ok, ko) => { img.onload = ok; img.onerror = ko; img.src = src; });
-    const scale = Math.min(1, maxW / img.width);
-    const w = Math.round(img.width * scale);
-    const h = Math.round(img.height * scale);
-    const canvas = document.createElement('canvas');
-    canvas.width = w; canvas.height = h;
-    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-    return canvas.toDataURL('image/webp', q).split(',')[1];
-  }, dataUrl, LARGEUR_MAX, QUALITE);
-  const webp = Buffer.from(out, 'base64');
-  writeFileSync(p, webp);
-  console.log(`  ✓ ${f} : ${(before / 1024 / 1024).toFixed(1)} Mo → ${(webp.length / 1024).toFixed(0)} Ko`);
-}
-
-await browser.close();
-console.log(`\n${files.length} image(s) ré-encodée(s).`);
+const mo = o => (o / 1048576).toFixed(1);
+console.log(`\n${traitees} réduites, ${ignorees} déjà à la bonne taille, ${rejetees} rejetées (le résultat pesait plus lourd).`);
+console.log(`${mo(avant)} Mo → ${mo(apres)} Mo (−${(100 - (apres / avant) * 100).toFixed(0)} %).`);
