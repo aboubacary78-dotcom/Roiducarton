@@ -26,10 +26,10 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     choices: [
       { text: 'Proposer votre aide', risk: 'safe', emoji: '🌱', outcomes: [
         { probability: 0.7, text: 'Il accepte ! Vous passez une heure à jardiner. Il vous donne une tomate. "Reviens demain, petit."', statChanges: { hunger: 10, mental: 8, dignity: 5 }, addFlag: 'ami-jardinier' },
-        { probability: 0.3, text: 'Il vous regarde avec méfiance. "Dégage, c\'est mon coin." Ambiance.', statChanges: { mental: -3 } },
+        { probability: 0.3, text: 'Il vous regarde avec méfiance. "Dégage, c\'est mon coin." Il ne se remet à sarcler qu\'une fois l\'allée vide.', statChanges: { mental: -3 } },
       ]},
       { text: 'Voler quelques légumes discrètement', risk: 'risky', emoji: '🥕', outcomes: [
-        { probability: 0.4, text: 'Vous chopez 3 carottes et une courgette. Festin !', statChanges: { hunger: 20, dignity: -10 } },
+        { probability: 0.4, text: 'Vous chopez 3 carottes et une courgette. La courgette ne rentre dans aucune poche, vous la portez sous le bras comme un nourrisson.', statChanges: { hunger: 20, dignity: -10 } },
         { probability: 0.6, text: 'Il vous attrape la main. "Voleur !" Il alerte tout le parc.', statChanges: { dignity: -20, mental: -5 }, respectChange: -3 },
       ]},
       { text: 'Observer de loin et noter l\'emplacement', risk: 'safe', emoji: '👀', outcomes: [
@@ -51,7 +51,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 0.2, text: 'La police vous interroge longuement. Vous êtes suspect numéro 1.', statChanges: { dignity: -10, mental: -8 } },
       ]},
       { text: 'Passer votre chemin', risk: 'safe', emoji: '🚶', outcomes: [
-        { probability: 1, text: 'Vous partez. Le gamin pleure de plus belle. Votre conscience aussi.', statChanges: { mental: -8 } },
+        { probability: 1, text: 'Vous partez. Le gamin pleure de plus belle, et vous l\'entendez encore deux rues plus loin.', statChanges: { mental: -8 } },
       ]},
     ],
   },
@@ -65,7 +65,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 0.5, text: 'Le skate vous échappe et finit dans une flaque. L\'ado vous fusille du regard.', statChanges: { dignity: -5 } },
       ]},
       { text: 'Garder le skate', risk: 'risky', emoji: '😏', outcomes: [
-        { probability: 0.3, text: 'L\'ado part en pleurant. Vous avez un skate. Et des remords.', statChanges: { dignity: -15, mental: -5 }, itemGain: { id: 'skate', name: 'Skateboard volé', emoji: '🛹', type: 'tool', value: 15 } },
+        { probability: 0.3, text: 'L\'ado part en pleurant. Vous avez un skate, une roue qui grince, et personne à qui le rendre.', statChanges: { dignity: -15, mental: -5 }, itemGain: { id: 'skate', name: 'Skateboard volé', emoji: '🛹', type: 'tool', value: 15 } },
         { probability: 0.7, text: 'Ses potes arrivent. Vous rendez le skate très vite.', statChanges: { dignity: -10, health: -5 } },
       ]},
     ],
@@ -80,8 +80,8 @@ export const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 0.6, text: 'Le photographe vous repère. "C\'est qui celui-là ?" Expulsé manu militari.', statChanges: { dignity: -15, mental: -5 } },
       ]},
       { text: 'Applaudir de loin les mariés', risk: 'safe', emoji: '👏', outcomes: [
-        { probability: 0.8, text: 'Les mariés vous voient et vous envoient une part de gâteau ! L\'amour rend généreux.', statChanges: { hunger: 15, mental: 8, dignity: 5 } },
-        { probability: 0.2, text: 'Personne ne vous remarque. Vous regardez les gens heureux. Nostalgie.', statChanges: { mental: -5 } },
+        { probability: 0.8, text: 'Les mariés vous voient et vous font porter une part de gâteau par un enfant en nœud papillon, qui repart en courant.', statChanges: { hunger: 15, mental: 8, dignity: 5 } },
+        { probability: 0.2, text: 'Personne ne vous remarque. Vous regardez la mariée danser avec son père jusqu\'à la fin de la chanson, puis vous partez.', statChanges: { mental: -5 } },
       ]},
       { text: 'Se mêler aux invités avec assurance', risk: 'normal', emoji: '🥂', requirements: { stat: 'dignity', minValue: 55 }, outcomes: [
         { probability: 0.8, text: 'Personne ne doute de vous : champagne, petits fours, et vous portez même un toast aux mariés !', statChanges: { hunger: 25, thirst: 20, mental: 12, dignity: 3 } },
@@ -99,7 +99,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 0.2, text: 'Le portrait est... abstrait. Très abstrait. Vous ne vous reconnaissez pas.', statChanges: { mental: -3, dignity: -2 } },
       ]},
       { text: 'Demander une commission', risk: 'normal', emoji: '💰', outcomes: [
-        { probability: 0.5, text: 'L\'artiste partage : 3€ pour vous. Collaboration fructueuse !', moneyChange: 3, statChanges: { dignity: 5 } },
+        { probability: 0.5, text: 'L\'artiste partage : 3€ pour vous. Il compte les pièces deux fois, à voix haute, pour que ce soit clair.', moneyChange: 3, statChanges: { dignity: 5 } },
         { probability: 0.5, text: '"C\'est de l\'art, pas du commerce !" Il efface votre portrait, vexé.', statChanges: { mental: -5 } },
       ]},
     ],
@@ -110,13 +110,13 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Un chantier abandonné. Des matériaux traînent partout. Mais des bruits suspects viennent du fond.',
     choices: [
       { text: 'Explorer prudemment', risk: 'normal', emoji: '🔦', outcomes: [
-        { probability: 0.5, text: 'Vous trouvez une bâche imperméable et des planches. Matériaux de construction !', statChanges: { mental: 5 }, itemGain: { id: 'bache', name: 'Bâche imperméable', emoji: '🏗️', type: 'tool', value: 8 } },
+        { probability: 0.5, text: 'Vous trouvez une bâche imperméable et trois planches encore sèches, empilées derrière la benne.', statChanges: { mental: 5 }, itemGain: { id: 'bache', name: 'Bâche imperméable', emoji: '🏗️', type: 'tool', value: 8 } },
         { probability: 0.3, text: 'Un chien errant surgit ! Il grogne...', statChanges: { mental: -5 } },
         { probability: 0.2, text: 'Vous marchez sur un clou rouillé. Aïe !', statChanges: { health: -10, mental: -3 } },
       ]},
       { text: 'Récupérer du métal à revendre', risk: 'risky', emoji: '🔩', outcomes: [
         { probability: 0.4, text: 'Du cuivre ! Le ferrailleur vous en donne 8€.', moneyChange: 8, statChanges: { dignity: -5 } },
-        { probability: 0.6, text: 'Le gardien de nuit vous surprend. Course-poursuite !', statChanges: { health: -5, dignity: -10, sleep: -5 } },
+        { probability: 0.6, text: 'Le gardien de nuit vous surprend et vous poursuit jusqu\'au bout du parking en criant dans sa radio.', statChanges: { health: -5, dignity: -10, sleep: -5 } },
       ]},
     ],
   },
@@ -131,7 +131,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
       ]},
       { text: 'Proposer vos services de porteur', risk: 'normal', emoji: '💪', outcomes: [
         { probability: 0.6, text: 'Un antiquaire vous embauche pour 2h. 6€ et un sandwich.', moneyChange: 6, statChanges: { hunger: 15, sleep: -5, dignity: 5 } },
-        { probability: 0.4, text: '"On n\'a pas besoin de toi." Refus général. Dur.', statChanges: { dignity: -5, mental: -5 } },
+        { probability: 0.4, text: '"On n\'a pas besoin de toi." Quatre stands, quatre fois la même phrase, sans lever les yeux.', statChanges: { dignity: -5, mental: -5 } },
       ]},
     ],
   },
@@ -142,7 +142,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     choices: [
       { text: 'Faire le guet pour lui', risk: 'normal', emoji: '👁️', outcomes: [
         { probability: 0.6, text: 'Mission accomplie ! Il vous file 4€ et une bombe de peinture. "T\'es réglo."', moneyChange: 4, statChanges: { mental: 5 }, respectChange: 2 },
-        { probability: 0.4, text: 'La police arrive ! Vous courez ensemble. Adrénaline pure.', statChanges: { sleep: -5, mental: 3, dignity: -5 } },
+        { probability: 0.4, text: 'La police arrive ! Vous courez ensemble jusqu\'au canal, et il rit tellement qu\'il doit s\'arrêter pour souffler.', statChanges: { sleep: -5, mental: 3, dignity: -5 } },
       ]},
       { text: 'Demander à essayer', risk: 'safe', emoji: '🎨', outcomes: [
         { probability: 0.7, text: 'Vous dessinez un chat. C\'est moche mais cathartique. "Pas mal pour un débutant !"', statChanges: { mental: 10, dignity: 3 } },
@@ -157,7 +157,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     choices: [
       { text: 'Lire tranquillement au chaud', risk: 'safe', emoji: '📖', outcomes: [
         { probability: 0.8, text: 'Deux heures de lecture et de chaleur. Vous vous sentez presque normal.', statChanges: { mental: 15, sleep: 5, dignity: 3 } },
-        { probability: 0.2, text: 'Vous vous endormez et ronflez. Le bibliothécaire vous réveille. Gênant.', statChanges: { sleep: 10, dignity: -5 } },
+        { probability: 0.2, text: 'Vous vous endormez et ronflez. Le bibliothécaire vous réveille d\'une main sur l\'épaule, très doucement, ce qui est pire.', statChanges: { sleep: 10, dignity: -5 } },
       ]},
       { text: 'Utiliser les toilettes et se laver', risk: 'safe', emoji: '🚿', outcomes: [
         { probability: 1, text: 'Toilette rapide au lavabo. Vous vous sentez humain à nouveau.', statChanges: { dignity: 10, mental: 5, thirst: 5 } },
@@ -188,7 +188,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Vous descendez dans la station de métro. Il fait chaud, mais c\'est le territoire d\'autres SDF.',
     choices: [
       { text: 'Explorer les couloirs', risk: 'normal', emoji: '🚇', outcomes: [
-        { probability: 0.4, text: 'Vous trouvez un billet de 10€ par terre ! Jour de chance !', moneyChange: 10, statChanges: { mental: 8 } },
+        { probability: 0.4, text: 'Vous trouvez un billet de 10€ par terre, plié en quatre, encore chaud d\'être resté dans une poche.', moneyChange: 10, statChanges: { mental: 8 } },
         { probability: 0.3, text: 'Un autre SDF vous interpelle. "C\'est mon couloir !" Tension.', statChanges: { mental: -5, dignity: -3 } },
         { probability: 0.3, text: 'Un rat géant vous barre le passage...', statChanges: { mental: -8 } },
       ]},
@@ -208,7 +208,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 0.3, text: 'Moment de paix intérieure. Le silence fait du bien.', statChanges: { mental: 8, sleep: 5 } },
       ]},
       { text: 'Demander de l\'aide au prêtre', risk: 'safe', emoji: '🙏', outcomes: [
-        { probability: 0.6, text: 'Il vous donne l\'adresse d\'un foyer et un bon repas. Humanité.', statChanges: { hunger: 15, mental: 10, dignity: 8 }, addFlag: 'aide-eglise' },
+        { probability: 0.6, text: 'Il vous donne l\'adresse d\'un foyer et un bon repas, puis retourne balayer sans rien demander.', statChanges: { hunger: 15, mental: 10, dignity: 8 }, addFlag: 'aide-eglise' },
         { probability: 0.4, text: '"Je n\'ai pas grand-chose, mais prenez ça." 2€ et une bénédiction.', moneyChange: 2, statChanges: { mental: 5 } },
       ]},
     ],
@@ -219,8 +219,8 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Deux chats se battent férocement dans une ruelle. Les miaulements sont terrifiants.',
     choices: [
       { text: 'Les séparer bravement', risk: 'risky', emoji: '🐱', outcomes: [
-        { probability: 0.3, text: 'Vous les séparez ! Un des chats vous adopte. Compagnon de route !', statChanges: { mental: 10, health: -3 }, respectChange: 1, addFlag: 'chat-compagnon' },
-        { probability: 0.7, text: 'Les deux chats se retournent contre vous. Griffures partout !', statChanges: { health: -8, dignity: -5 } },
+        { probability: 0.3, text: 'Vous les séparez ! Un des chats vous suit jusqu\'au bout de la rue, puis encore jusqu\'à la suivante.', statChanges: { mental: 10, health: -3 }, respectChange: 1, addFlag: 'chat-compagnon' },
+        { probability: 0.7, text: 'Les deux chats se retournent contre vous, se réconcilient sur votre dos, et repartent ensemble.', statChanges: { health: -8, dignity: -5 } },
       ]},
       { text: 'Parier sur le vainqueur', risk: 'safe', emoji: '🎰', outcomes: [
         { probability: 0.5, text: 'Le chat tigré gagne ! Vous n\'avez rien parié mais vous êtes content.', statChanges: { mental: 3 } },
@@ -234,13 +234,13 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'La fontaine du parc brille de pièces jetées par les touristes. Des voeux et de l\'argent.',
     choices: [
       { text: 'Plonger la main pour récupérer des pièces', risk: 'risky', emoji: '💰', outcomes: [
-        { probability: 0.4, text: 'Vous récupérez 4€ en petite monnaie. Jackpot aquatique !', moneyChange: 4, statChanges: { dignity: -10, thirst: 5 } },
+        { probability: 0.4, text: 'Vous récupérez 4€ en petite monnaie, le bras trempé jusqu\'à l\'épaule.', moneyChange: 4, statChanges: { dignity: -10, thirst: 5 } },
         { probability: 0.3, text: 'Un gardien vous attrape. "C\'est interdit !" Amende morale.', statChanges: { dignity: -15, mental: -5 } },
         { probability: 0.3, text: 'Vous glissez et tombez dans la fontaine. Trempé mais riche de 2€.', moneyChange: 2, statChanges: { health: -5, dignity: -12, thirst: 10 } },
       ]},
       { text: 'Faire un voeu avec votre dernière pièce', risk: 'safe', emoji: '⭐', outcomes: [
         { probability: 0.5, text: 'Vous jetez 1 centime. Vous vous sentez étrangement optimiste.', moneyChange: 0, statChanges: { mental: 8 } },
-        { probability: 0.5, text: 'La pièce rebondit et touche un pigeon. Mauvais karma.', statChanges: { mental: -2 } },
+        { probability: 0.5, text: 'La pièce rebondit et touche un pigeon, qui vous regarde longuement avant de s\'envoler.', statChanges: { mental: -2 } },
       ]},
       { text: 'Se laver le visage dans l\'eau', risk: 'safe', emoji: '💧', outcomes: [
         { probability: 1, text: 'L\'eau est fraîche. Vous vous sentez revigoré.', statChanges: { dignity: 5, thirst: 8, mental: 3 } },
@@ -253,7 +253,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Un vélo cassé est attaché à un poteau. La roue avant est voilée, mais le reste semble OK.',
     choices: [
       { text: 'Tenter de le réparer', risk: 'normal', emoji: '🔧', outcomes: [
-        { probability: 0.4, text: 'Avec du fil de fer et de la patience, ça roule ! Moyen de transport acquis.', statChanges: { mental: 8, dignity: 3 }, addFlag: 'a-velo', itemGain: { id: 'velo-repare', name: 'Vélo rafistolé', emoji: '🚲', type: 'tool', value: 20 } },
+        { probability: 0.4, text: 'Avec du fil de fer et de la patience, les deux roues finissent par tourner dans le même sens.', statChanges: { mental: 8, dignity: 3 }, addFlag: 'a-velo', itemGain: { id: 'velo-repare', name: 'Vélo rafistolé', emoji: '🚲', type: 'tool', value: 20 } },
         { probability: 0.6, text: 'Impossible sans outils. Vous récupérez la sonnette au moins.', statChanges: { mental: -2 }, itemGain: { id: 'sonnette', name: 'Sonnette de vélo', emoji: '🔔', type: 'junk', value: 1 } },
       ]},
       { text: 'Récupérer les pièces détachées', risk: 'safe', emoji: '⚙️', outcomes: [
@@ -272,7 +272,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 0.3, text: '"Désolée, je ne peux pas." Elle baisse les yeux. Vous aussi.', statChanges: { mental: -5 } },
       ]},
       { text: 'Proposer de balayer devant la boutique', risk: 'safe', emoji: '🧹', outcomes: [
-        { probability: 0.8, text: 'Elle accepte ! 3€ et un tube de crème solaire. Honnête travail.', moneyChange: 3, statChanges: { dignity: 8, mental: 5 } },
+        { probability: 0.8, text: 'Elle accepte ! 3€ et un tube de crème solaire entamé, périmé depuis deux étés.', moneyChange: 3, statChanges: { dignity: 8, mental: 5 } },
         { probability: 0.2, text: '"Non merci, j\'ai un employé." Refus poli.', statChanges: { mental: -2 } },
       ]},
     ],
@@ -283,7 +283,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Un terrain vague entre deux immeubles. Des herbes folles, des déchets, et... des bruits.',
     choices: [
       { text: 'Explorer les décombres', risk: 'risky', emoji: '🏚️', outcomes: [
-        { probability: 0.3, text: 'Vous trouvez une vieille radio qui marche encore ! Compagnie nocturne.', statChanges: { mental: 8 }, itemGain: { id: 'radio', name: 'Radio portable', emoji: '📻', type: 'tool', value: 5 } },
+        { probability: 0.3, text: 'Vous trouvez une vieille radio qui marche encore, sur une seule station, qui parle d\'agriculture toute la nuit.', statChanges: { mental: 8 }, itemGain: { id: 'radio', name: 'Radio portable', emoji: '📻', type: 'tool', value: 5 } },
         { probability: 0.4, text: 'Un raton laveur surgit des buissons ! Il est pas content.', statChanges: { mental: -5, health: -3 } },
         { probability: 0.3, text: 'Vous marchez sur du verre brisé. Vos chaussures ne protègent plus grand-chose.', statChanges: { health: -8 } },
       ]},
@@ -303,7 +303,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 0.2, text: 'Le vendeur sort et vous chasse. "Tu fais fuir les clients !"', statChanges: { dignity: -8, mental: -5 } },
       ]},
       { text: 'Proposer de promener les chiens', risk: 'normal', emoji: '🦮', outcomes: [
-        { probability: 0.5, text: 'Le gérant accepte ! 2h de balade avec un labrador. 5€ et du bonheur.', moneyChange: 5, statChanges: { mental: 15, dignity: 5, sleep: -3 } },
+        { probability: 0.5, text: 'Le gérant accepte ! Deux heures avec un labrador qui tire, 5€, et le bras droit plus long que le gauche.', moneyChange: 5, statChanges: { mental: 15, dignity: 5, sleep: -3 } },
         { probability: 0.5, text: '"On n\'a pas besoin d\'aide." Refus. Les chiots vous regardent tristement.', statChanges: { mental: -3 } },
       ]},
     ],
@@ -328,14 +328,14 @@ export const EXPLORE_EVENTS: GameEvent[] = [
   {
     id: 'exp-aire-jeux', title: 'L\'Aire de Jeux Déserte', type: 'narrative',
     image: '/assets/exp-aire-jeux-Q8McpHycnXNkdRnaXA3fDZ.webp',
-    description: 'L\'aire de jeux est vide. Les balançoires grincent dans le vent. Nostalgie.',
+    description: 'L\'aire de jeux est vide. Les balançoires grincent dans le vent, toutes les trois à des rythmes différents.',
     choices: [
       { text: 'Faire de la balançoire', risk: 'safe', emoji: '🎠', outcomes: [
         { probability: 0.8, text: 'Le vent dans les cheveux, les pieds en l\'air. Vous redevenez enfant 5 minutes.', statChanges: { mental: 12, dignity: -2 } },
         { probability: 0.2, text: 'La chaîne casse. Vous atterrissez dans le sable. Aïe.', statChanges: { health: -5, mental: -3 } },
       ]},
       { text: 'Dormir dans le toboggan', risk: 'normal', emoji: '😴', outcomes: [
-        { probability: 0.6, text: 'Le toboggan est étonnamment confortable. Sieste express.', statChanges: { sleep: 12 } },
+        { probability: 0.6, text: 'Le toboggan est étonnamment confortable. Vous dormez vingt minutes et vous réveillez à mi-pente.', statChanges: { sleep: 12 } },
         { probability: 0.4, text: 'Des enfants arrivent avec leurs parents. Regard accusateur. Vous partez.', statChanges: { dignity: -10, mental: -5 } },
       ]},
     ],
@@ -364,7 +364,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 1, text: 'La ville s\'étend sous vos pieds. Vous êtes le roi du monde. Du carton, certes, mais du monde.', statChanges: { mental: 15, dignity: 5 } },
       ]},
       { text: 'Installer un campement sur le toit', risk: 'normal', emoji: '⛺', outcomes: [
-        { probability: 0.5, text: 'Spot parfait ! À l\'abri du vent, vue panoramique. Votre palace.', statChanges: { sleep: 15, mental: 10 }, addFlag: 'camp-toit' },
+        { probability: 0.5, text: 'Spot parfait : à l\'abri du vent, avec vue sur les toits et une bouche d\'aération qui souffle tiède.', statChanges: { sleep: 15, mental: 10 }, addFlag: 'camp-toit' },
         { probability: 0.5, text: 'Le concierge vous repère. "Descendez immédiatement !" Fin du rêve.', statChanges: { dignity: -8, mental: -5 } },
       ]},
     ],
