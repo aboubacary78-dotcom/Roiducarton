@@ -1469,4 +1469,7 @@ export const CONTENT_EN_2: Record<string, string> = {
   'Radio qui grésille': 'Crackling radio',
   'Chaussures à votre taille': 'Shoes in your size',
   'Pot de basilic (vivant, contre toute attente)': 'Pot of basil (alive, against all odds)',
+  "Café brûlant, biscuits mous, et une radio en état de marche « tombée du camion » qui ne capte qu'une station.": "Scalding coffee, soft biscuits, and a working radio that \"fell off a truck\" and only picks up one station.",
+  "Le concierge fait sa ronde. Vous dévalez l'escalier de service et ressortez par la cour, deux étages plus bas.": "The caretaker does his rounds. You bolt down the service stairs and come out through the yard, two floors below.",
+  "Les pigeons sont passés avant vous. Il reste une demi-tomate, becquetée du côté mûr.": "The pigeons got there first. Half a tomato is left, pecked on the ripe side.",
 };
