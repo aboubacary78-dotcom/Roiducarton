@@ -62,8 +62,13 @@ for (const { fichier, fr, frNew, enNew } of lot) {
   let trouve = false;
   for (const f of EN_FILES) {
     const dico = lire(f);
-    const cleAncienne = `"${enDouble(fr)}":`;
-    if (!dico.includes(cleAncienne)) continue;
+    // content-en.ts écrit ses clés entre guillemets doubles, content-en-2.ts
+    // entre quotes simples. Ne chercher qu'un style laissait l'ancienne clé
+    // en place et en créait une nouvelle à côté : la traduction restait, mais
+    // attachée à un français qui n'existait plus.
+    const formes = [`"${enDouble(fr)}":`, `'${enSimple(fr)}':`];
+    const cleAncienne = formes.find(f => dico.includes(f));
+    if (!cleAncienne) continue;
     trouve = true;
     if (enNew) {
       // On remplace la LIGNE entière, clé et valeur. Repérage par index plutôt

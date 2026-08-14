@@ -31,9 +31,9 @@ const orphelines = [];
 let total = 0;
 for (const f of DICOS) {
   const src = readFileSync(f, 'utf8');
-  for (const m of src.matchAll(/^\s*"((?:\\.|[^"\\])+)":/gm)) {
+  for (const m of src.matchAll(/^\s*(?:"((?:\\.|[^"\\])+)"|'((?:\\.|[^'\\])+)')\s*:/gm)) {
     total++;
-    const fr = decode(m[1]);
+    const fr = decode(m[1] ?? m[2].replace(/\\'/g, "'"));
     // La clé doit se retrouver dans les sources, échappée pour un littéral à
     // quotes simples (le cas courant) ou telle quelle (gabarits, JSX).
     if (corpus.includes(fr.replace(/\\/g, '\\\\').replace(/'/g, "\\'"))) continue;

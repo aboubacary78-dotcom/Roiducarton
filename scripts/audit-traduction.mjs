@@ -10,7 +10,12 @@ import { join } from 'node:path';
 
 const DATA = 'client/src/contexts/data';
 const dico = readFileSync('client/src/lib/content-en.ts', 'utf8') + readFileSync('client/src/lib/content-en-2.ts', 'utf8');
+// content-en.ts utilise des clés à guillemets doubles, content-en-2.ts des
+// clés à quotes simples. Ne chercher qu'un seul style fait passer 1465
+// traductions pour absentes.
 const dbl = s => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+const sgl = s => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+const traduit = t => dico.includes(`"${dbl(t)}":`) || dico.includes(`'${sgl(t)}':`);
 
 const lignes = [];
 let tt = 0, tr = 0;
@@ -23,7 +28,7 @@ for (const f of readdirSync(DATA).filter(x => x.endsWith('.ts'))) {
     // Champ frère `…En` : l'anglais est écrit en clair, pas dans le dictionnaire.
     if (new RegExp(`${m[1]}En\\s*:`).test(src.slice(m.index, m.index + m[0].length + 260))) continue;
     n++;
-    if (dico.includes(`"${dbl(t)}":`)) ok++;
+    if (traduit(t)) ok++;
   }
   if (n >= 10) { lignes.push([f, ok, n]); tt += n; tr += ok; }
 }

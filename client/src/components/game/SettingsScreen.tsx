@@ -23,7 +23,7 @@ import { pushToast } from '@/lib/toast';
 // lien s'ouvre correctement dans l'application native, où `target="_blank"`
 // passe la main au navigateur du système.
 const PRIVACY_URL = '/confidentialite.html';
-const APP_VERSION = '3.8.0';
+const APP_VERSION = '3.9.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
