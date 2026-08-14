@@ -21,12 +21,16 @@ export default function CoachTip({ ctx }: { ctx: CoachContext }) {
 
   useEffect(() => {
     if (allCoachesSeen()) return;
+    // Le récit d'origine occupe tout l'écran au premier jour : un conseil qui
+    // s'affiche par-dessous en même temps ne se lit pas, il encombre. On
+    // attend qu'il soit refermé — ce que signale le drapeau 'origin-vu'.
+    if (!ctx.char.activeFlags?.includes('origin-vu')) return;
     const c = nextCoach(ctx);
     if (!c || c.id === shown?.id) return;
     const t = setTimeout(() => setShown(c), 900);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ctx.char.day, ctx.actionsLeft, ctx.char.money, ctx.char.inventory.length, ctx.weather,
+  }, [ctx.char.activeFlags?.length, ctx.char.day, ctx.actionsLeft, ctx.char.money, ctx.char.inventory.length, ctx.weather,
       ctx.char.stats.dignity, ctx.char.stats.health, ctx.char.stats.mental]);
 
   function fermer() {

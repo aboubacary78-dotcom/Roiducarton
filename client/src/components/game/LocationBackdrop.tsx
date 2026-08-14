@@ -19,7 +19,11 @@ export default function LocationBackdrop({ location }: { location: string }) {
         <motion.img
           src={`/assets/scene-${location}.webp`}
           alt=""
-          loading="lazy"
+          // Visible dès l'ouverture de l'écran principal : la charger
+          // paresseusement laissait un trou de plusieurs secondes.
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
           onError={() => setImgOk(false)}
           className="absolute inset-0 w-full h-full object-cover"
           animate={{ scale: [1, 1.07, 1] }}

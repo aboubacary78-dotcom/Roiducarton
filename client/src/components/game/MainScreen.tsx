@@ -1,9 +1,10 @@
 import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, pickFightEnemy, STREET_TITLES } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import StatBars from './StatBars';
 import CoachTip from './CoachTip';
 import { tierAtRisk } from '@/contexts/data/dignity';
+import { STAT_META } from '@/contexts/types';
 import { loadCommande, commandeDef, markClaimed, daysLeft } from '@/lib/commande';
 import { addKarma } from '@/lib/necrology';
 import { pushToast } from '@/lib/toast';
@@ -12,10 +13,12 @@ import PlayerFace, { faceCondition } from './PlayerFace';
 import StreetEncounter from './StreetEncounter';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
 import { playClick, playNextDay, playCoin } from '@/lib/sound';
-import { useLang, tr } from '@/lib/lang';
+import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
 import { noteTap } from '@/lib/tapOrigin';
+import { prechargerActions } from '@/lib/precharge';
+import { ACTION_DIGNITY_COST } from '@/contexts/data/dignity';
 
 // Couleur du voile de lumière selon l'avancement de la journée : or du matin,
 // plein jour transparent, orange du soir, bleu de nuit. Interpolation linéaire
@@ -108,6 +111,10 @@ export default function MainScreen() {
   // visible. Le texte dit « peut », jamais « va » — le coût exact dépend du
   // déroulement du mini-jeu, et une annonce qui promet plus qu'elle ne sait se
   // repère tout de suite.
+  // Les images de résultat des actions sont demandées pendant que le joueur
+  // lit son écran, pas au moment où il faut les montrer.
+  useEffect(() => { prechargerActions(char.location); }, [char.location]);
+
   const risqueMendier = tierAtRisk(char.stats.dignity, 'beg');
   const risqueRecup = tierAtRisk(char.stats.dignity, 'salvage');
   const risqueVoler = tierAtRisk(char.stats.dignity, 'steal');
@@ -362,7 +369,7 @@ export default function MainScreen() {
         </motion.span>
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
         <p className="absolute bottom-0 left-0 right-0 px-3 pb-2 text-[11px] text-white/95 italic leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-          "{getAmbientText(char.location, char.day)}"
+          "{tc(getAmbientText(char.location, char.day))}"
         </p>
       </motion.div>
 
@@ -437,6 +444,7 @@ export default function MainScreen() {
           <ActionTile emoji="🔍" title={tr('Explorer', 'Explore')} desc={tr('Tenter une rencontre', 'Look for an encounter')} accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
           <ActionTile
             emoji="🙏" title={tr('Mendier', 'Beg')} desc={tr('Récolter des pièces', 'Collect coins')} accent="#B8860B"
+            cost={`−${ACTION_DIGNITY_COST.beg} ${STAT_META.dignity.emoji}`}
             warn={risqueMendier ? tr(`peut vous faire quitter « ${risqueMendier.fr} »`, `may cost you "${risqueMendier.en}"`) : null}
             disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })}
           />
@@ -468,7 +476,7 @@ export default function MainScreen() {
           <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${risqueRecup ? 'bg-[#B8703A]/12 text-[#B8703A]' : 'bg-[#7C8B5A]/12 text-[#5E7A3A]'}`}>
             {risqueRecup
               ? tr(`quitte « ${risqueRecup.fr} » ?`, `costs "${risqueRecup.en}"?`)
-              : tr('matériaux', 'materials')}
+              : `${tr('matériaux', 'materials')} · −${ACTION_DIGNITY_COST.salvage} ${STAT_META.dignity.emoji}`}
           </span>
         </motion.button>
 
@@ -487,7 +495,7 @@ export default function MainScreen() {
           <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${risqueVoler ? 'bg-[#B8703A]/12 text-[#B8703A]' : 'bg-[#D94F4F]/10 text-[#D94F4F]'}`}>
             {risqueVoler
               ? tr(`quitte « ${risqueVoler.fr} » ?`, `costs "${risqueVoler.en}"?`)
-              : tr('risqué', 'risky')}
+              : `${tr('risqué', 'risky')} · −${ACTION_DIGNITY_COST.steal} ${STAT_META.dignity.emoji}`}
           </span>
         </motion.button>
 
@@ -516,10 +524,12 @@ export default function MainScreen() {
   );
 }
 
-function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small, warn }: {
+function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small, warn, cost }: {
   emoji: string; title: string; desc?: string; accent?: string; disabled: boolean; onClick: () => void; danger?: boolean; small?: boolean;
   /** Palier de Dignité que cette action risque de faire quitter. */
   warn?: string | null;
+  /** Ce que l'action coûte en fierté, annoncé AVANT de la choisir. */
+  cost?: string;
 }) {
   return (
     <motion.button
@@ -549,6 +559,12 @@ function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, sma
       )}
       {warn && !small && (
         <span className="text-[10px] text-[#B8703A] text-center leading-tight font-medium">{warn}</span>
+      )}
+      {/* Le prix de l'action, visible avant de la choisir. L'avertissement de
+          palier le remplace quand il y en a un : il dit la même chose en plus
+          grave, les afficher tous les deux ne ferait que du bruit. */}
+      {cost && !warn && !small && (
+        <span className="text-[9px] text-[#A08B70] font-mono leading-none">{cost}</span>
       )}
     </motion.button>
   );

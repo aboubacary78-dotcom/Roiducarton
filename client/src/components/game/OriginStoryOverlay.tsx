@@ -19,18 +19,22 @@ export default function OriginStoryOverlay() {
   useLang();
   const char = state.character;
   /*
-   * LE RÉCIT ARRIVE APRÈS LA PREMIÈRE ACTION, PAS AVANT.
+   * LE RÉCIT ARRIVE AVANT LA PREMIÈRE ACTION.
    *
-   * C'est une récompense narrative, pas un préambule. Placé au départ, il
-   * s'ajoutait aux écrans qui séparent le lancement de la première décharge —
-   * or la rétention du lendemain se décide là. Placé après le premier geste,
-   * il récompense ce geste et se lit vraiment.
+   * Il avait été repoussé après le premier geste, pour raccourcir le chemin
+   * entre le lancement et la première décharge : neuf écrans étaient devenus
+   * trois. Mais à l'essai, le décalage se remarque — on choisit un personnage,
+   * on agit, et le jeu explique seulement ensuite qui on est. La question
+   * « pourquoi je suis là ? » arrive naturellement au moment où on découvre le
+   * personnage, pas une action plus tard.
+   *
+   * On revient donc au départ, en gardant le reste du raccourcissement : le
+   * récit est un écran de plus, mais il est à sa place.
    */
   const visible = !!char
     && state.screen === 'main'
-    && state.dayActions >= 1
-    // Le résultat de l'action passe d'abord : les deux se déclenchent au même
-    // instant, et le récit se posait par-dessus le butin qu'on venait de faire.
+    // Le résultat d'une action passe d'abord : quand les deux tombent au même
+    // instant, le récit se posait par-dessus le butin qu'on venait de faire.
     && !state.eventResult
     && !char.activeFlags?.includes('origin-vu');
   // Froissement de vieux papier quand le récit se déplie (hook AVANT tout
@@ -63,7 +67,7 @@ export default function OriginStoryOverlay() {
             className="relative w-full h-40 rounded-xl overflow-hidden mb-4 shadow-[0_3px_12px_rgba(58,42,30,0.15)]"
           >
             <SceneIllustration theme="street" mood="bad" className="absolute inset-0 w-full h-full" sway />
-            <SafeImg src={`/assets/origin-${char.job.id}.webp`} className="absolute inset-0 w-full h-full object-cover" />
+            <SafeImg src={`/assets/origin-${char.job.id}.webp`} className="absolute inset-0 w-full h-full object-cover" priority />
             <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
             {/* Le visage carton du personnage, coin bas-gauche */}
             <div className="absolute bottom-2 left-2 w-12 h-12 rounded-lg overflow-hidden border-2 border-white/80 shadow-md">
