@@ -39,6 +39,14 @@ for (const { fichier, fr, frNew, enNew } of lot) {
   const cible = enSimple(fr);
   const n = src.split(cible).length - 1;
   if (n !== 1) { soucis.push(`${n} occurrence(s) dans ${fichier} : « ${fr.slice(0, 60)}… »`); continue; }
+  // Le texte fourni doit couvrir le littéral JUSQU'À SA FIN. Sinon on remplace
+  // un préfixe et on laisse la chute derrière : « … sans jamais choisir dans
+  // quel sens. Paradis. » On perd alors précisément ce qu'on venait retirer.
+  const suite = src[src.indexOf(cible) + cible.length];
+  if (suite !== "'" && suite !== '"') {
+    soucis.push(`texte tronqué dans ${fichier} (il reste « ${src.slice(src.indexOf(cible) + cible.length).split(/['"]/)[0].slice(0, 40)} ») : « ${fr.slice(0, 50)}… »`);
+    continue;
+  }
   ecrire(fichier, src.replace(cible, enSimple(frNew)));
 
   // --- 2. le dictionnaire anglais ------------------------------------------

@@ -164,7 +164,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
       ]},
       { text: 'Chercher des livres à revendre', risk: 'risky', emoji: '📚', outcomes: [
         { probability: 0.3, text: 'Vous trouvez un livre rare oublié. Le bouquiniste vous en donne 5€.', moneyChange: 5 },
-        { probability: 0.7, text: 'La bibliothécaire vous surveille. Impossible de rien prendre.', statChanges: { mental: -3 } },
+        { probability: 0.7, text: 'La bibliothécaire vous surveille depuis son comptoir, sans jamais tourner la page qu\'elle fait semblant de lire.', statChanges: { mental: -3 } },
       ]},
     ],
   },
@@ -194,7 +194,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
       ]},
       { text: 'Rester près des tourniquets et mendier', risk: 'safe', emoji: '🎩', outcomes: [
         { probability: 0.6, text: 'Les voyageurs pressés lâchent quelques pièces. 2€ en 30 minutes.', moneyChange: 2, statChanges: { dignity: -3 } },
-        { probability: 0.4, text: 'Un agent vous demande de partir. Pas de mendicité ici.', statChanges: { dignity: -5 } },
+        { probability: 0.4, text: 'Un agent vous demande de partir : ici c\'est une gare, pas un trottoir, et la nuance compte pour lui.', statChanges: { dignity: -5 } },
       ]},
     ],
   },
@@ -299,7 +299,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'L\'animalerie a mis des chiots en vitrine. Vous vous arrêtez, hypnotisé.',
     choices: [
       { text: 'Regarder les chiots et sourire', risk: 'safe', emoji: '🐶', outcomes: [
-        { probability: 0.8, text: 'Un chiot vous lèche la vitre. Moment de bonheur pur. Des passants sourient aussi.', statChanges: { mental: 12, dignity: 3 } },
+        { probability: 0.8, text: 'Un chiot vous lèche la vitre de l\'intérieur, et deux passants s\'arrêtent pour regarder ça avec vous.', statChanges: { mental: 12, dignity: 3 } },
         { probability: 0.2, text: 'Le vendeur sort et vous chasse. "Tu fais fuir les clients !"', statChanges: { dignity: -8, mental: -5 } },
       ]},
       { text: 'Proposer de promener les chiens', risk: 'normal', emoji: '🦮', outcomes: [
@@ -317,7 +317,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
         { probability: 1, text: 'Moment de méditation. La perspective de la mort remet les choses en place.', statChanges: { mental: 8, dignity: 5 } },
       ]},
       { text: 'Boire au robinet et se laver', risk: 'safe', emoji: '🚰', outcomes: [
-        { probability: 1, text: 'Eau potable gratuite ! Vous buvez et vous débarbouiller. Luxe.', statChanges: { thirst: 20, dignity: 8 } },
+        { probability: 1, text: 'Eau potable gratuite. Vous buvez longtemps, puis vous vous débarbouillez avec les mains en coupe.', statChanges: { thirst: 20, dignity: 8 } },
       ]},
       { text: 'Récupérer les fleurs fanées pour les revendre', risk: 'risky', emoji: '💐', outcomes: [
         { probability: 0.3, text: 'Vous recomposez des bouquets. Un fleuriste vous en donne 4€.', moneyChange: 4, statChanges: { dignity: -8 } },
@@ -372,14 +372,14 @@ export const EXPLORE_EVENTS: GameEvent[] = [
   {
     id: 'exp-salon-coiffure', title: 'Le Salon de Coiffure', type: 'social',
     image: '/assets/exp-salon-coiffure-hsCZe2EwRcYAdN4ZmNo9Bf.webp',
-    description: 'Un salon de coiffure cherche un modèle pour ses apprentis. Gratuit.',
+    description: 'Un salon de coiffure cherche un modèle pour ses apprentis. L\'affichette précise "coupe offerte", en plus petit que le reste.',
     choices: [
       { text: 'Se porter volontaire', risk: 'normal', emoji: '💇', outcomes: [
         { probability: 0.6, text: 'Coupe gratuite ! Vous êtes méconnaissable. En bien. Les passants vous regardent différemment.', statChanges: { dignity: 20, mental: 10 } },
         { probability: 0.4, text: 'L\'apprenti est nerveux. Résultat... créatif. Mais c\'est propre au moins.', statChanges: { dignity: 5, mental: 3 } },
       ]},
       { text: 'Demander juste à utiliser les toilettes', risk: 'safe', emoji: '🚻', outcomes: [
-        { probability: 0.7, text: 'Ils acceptent. Toilette rapide, eau chaude. Le luxe.', statChanges: { dignity: 8, thirst: 5 } },
+        { probability: 0.7, text: 'Ils acceptent. Eau chaude, savon liquide, et une serviette qui sent la lessive de quelqu\'un d\'autre.', statChanges: { dignity: 8, thirst: 5 } },
         { probability: 0.3, text: '"Réservé aux clients." Porte fermée.', statChanges: { dignity: -3 } },
       ]},
     ],
@@ -405,7 +405,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Un vieux pêcheur est assis au bord du canal. Il a l\'air de s\'ennuyer ferme.',
     choices: [
       { text: 'Lui tenir compagnie', risk: 'safe', emoji: '🎣', outcomes: [
-        { probability: 0.7, text: 'Il vous raconte sa vie. Vous aussi. Il partage son sandwich et sa bière. Belle rencontre.', statChanges: { hunger: 12, thirst: 10, mental: 10 }, respectChange: 2, addFlag: 'ami-pecheur' },
+        { probability: 0.7, text: 'Il vous raconte sa vie, vous lui racontez la vôtre, et il coupe son sandwich en deux parts inégales en vous donnant la grosse.', statChanges: { hunger: 12, thirst: 10, mental: 10 }, respectChange: 2, addFlag: 'ami-pecheur' },
         { probability: 0.3, text: '"Chut ! Tu fais fuir les poissons !" Silence radio.', statChanges: { mental: -2 } },
       ]},
       { text: 'Demander s\'il a attrapé quelque chose', risk: 'safe', emoji: '🐟', outcomes: [
@@ -435,12 +435,12 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Un magasin a fermé définitivement. La vitrine est encore pleine de marchandises.',
     choices: [
       { text: 'Regarder à travers la vitrine', risk: 'safe', emoji: '👀', outcomes: [
-        { probability: 0.6, text: 'Vous repérez une porte arrière entrouverte. Intéressant pour plus tard...', statChanges: { mental: 3 }, addFlag: 'magasin-repere' },
-        { probability: 0.4, text: 'Juste des mannequins poussiéreux qui vous fixent. Flippant.', statChanges: { mental: -3 } },
+        { probability: 0.6, text: 'Vous repérez une porte arrière entrouverte, calée par une brique que personne n\'a pensé à retirer.', statChanges: { mental: 3 }, addFlag: 'magasin-repere' },
+        { probability: 0.4, text: 'Juste des mannequins poussiéreux, tous tournés vers la porte, comme s\'ils attendaient depuis longtemps.', statChanges: { mental: -3 } },
       ]},
       { text: 'Dormir sous l\'auvent', risk: 'safe', emoji: '🏠', outcomes: [
-        { probability: 0.7, text: 'L\'auvent protège de la pluie. Pas mal comme spot.', statChanges: { sleep: 10 } },
-        { probability: 0.3, text: 'Le vent s\'engouffre. Nuit froide.', statChanges: { sleep: 5, health: -3 } },
+        { probability: 0.7, text: 'L\'auvent protège de la pluie, et le mur derrière garde encore la chaleur de la journée.', statChanges: { sleep: 10 } },
+        { probability: 0.3, text: 'Le vent s\'engouffre par le coin ouvert et repart avec la moitié de votre couverture.', statChanges: { sleep: 5, health: -3 } },
       ]},
     ],
   },
@@ -450,11 +450,11 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'L\'hôpital est bondé. La salle d\'attente des urgences est chaude et il y a un distributeur d\'eau.',
     choices: [
       { text: 'S\'installer discrètement en salle d\'attente', risk: 'normal', emoji: '🏥', outcomes: [
-        { probability: 0.6, text: 'Personne ne vous remarque. 2h au chaud, eau gratuite, toilettes. Le paradis.', statChanges: { thirst: 15, sleep: 8, dignity: 3 } },
+        { probability: 0.6, text: 'Personne ne vous remarque. Deux heures au chaud, de l\'eau au robinet, des toilettes où la porte ferme.', statChanges: { thirst: 15, sleep: 8, dignity: 3 } },
         { probability: 0.4, text: 'Un vigile vous repère. "Vous avez un problème médical ?" Vous improvisez.', statChanges: { mental: -5 } },
       ]},
       { text: 'Demander à voir un médecin (gratuit)', risk: 'safe', emoji: '👨‍⚕️', outcomes: [
-        { probability: 0.5, text: 'Après 3h d\'attente, un médecin vous examine. Pansements et vitamines. Merci la sécu.', statChanges: { health: 15, mental: 5, sleep: -5 } },
+        { probability: 0.5, text: 'Après 3h d\'attente, un médecin vous examine, vous donne des pansements et des vitamines, et ne demande pas d\'adresse.', statChanges: { health: 15, mental: 5, sleep: -5 } },
         { probability: 0.5, text: '"Les urgences sont pour les urgences." On vous renvoie. Au moins vous avez bu de l\'eau.', statChanges: { thirst: 10, mental: -3 } },
       ]},
     ],
@@ -481,7 +481,7 @@ export const EXPLORE_EVENTS: GameEvent[] = [
     description: 'Un camion pizza est garé. L\'odeur est divine. Le pizzaiolo ferme pour la nuit.',
     choices: [
       { text: 'Demander les invendus', risk: 'safe', emoji: '🍕', outcomes: [
-        { probability: 0.6, text: '"Tiens, prends ça." Deux parts de margherita ! Festin !', statChanges: { hunger: 25, mental: 10, thirst: 5 } },
+        { probability: 0.6, text: '"Tiens, prends ça." Deux parts de margherita, encore assez chaudes pour que le fromage file.', statChanges: { hunger: 25, mental: 10, thirst: 5 } },
         { probability: 0.4, text: '"Désolé, j\'ai tout vendu." Votre estomac gronde de déception.', statChanges: { mental: -3, hunger: -5 } },
       ]},
       { text: 'Fouiller les poubelles du camion', risk: 'normal', emoji: '🗑️', outcomes: [
@@ -540,7 +540,7 @@ export const BEG_EVENTS: GameEvent[] = [
         { probability: 0.5, text: 'Le serveur vous chasse. "C\'est réservé aux clients."', statChanges: { dignity: -8, mental: -5 } },
       ]},
       { text: 'Demander un verre d\'eau', risk: 'safe', emoji: '💧', outcomes: [
-        { probability: 0.8, text: 'Le serveur vous apporte un verre d\'eau. Petit geste, grande humanité.', statChanges: { thirst: 15, dignity: 3, mental: 5 } },
+        { probability: 0.8, text: 'Le serveur vous apporte un verre d\'eau, sur un sous-verre, comme aux autres.', statChanges: { thirst: 15, dignity: 3, mental: 5 } },
         { probability: 0.2, text: '"L\'eau c\'est pour les clients." Froid.', statChanges: { mental: -5, dignity: -3 } },
       ]},
       { text: 'S\'installer et discuter comme un habitué', risk: 'normal', emoji: '🗞️', requirements: { stat: 'dignity', minValue: 45 }, outcomes: [
@@ -557,7 +557,7 @@ export const BEG_EVENTS: GameEvent[] = [
       { text: 'Mendier discrètement', risk: 'safe', emoji: '🎒', outcomes: [
         { probability: 0.5, text: 'Une maman vous donne 2€ et un goûter. "Tenez, pour vous."', statChanges: { hunger: 8, mental: 5 }, moneyChange: 2 },
         { probability: 0.3, text: 'Les parents vous évitent. Certains changent de trottoir.', statChanges: { dignity: -8, mental: -5 } },
-        { probability: 0.2, text: 'Un enfant vous donne son goûter en cachette de sa mère. Adorable.', statChanges: { hunger: 10, mental: 10 } },
+        { probability: 0.2, text: 'Un enfant vous donne son goûter en cachette de sa mère, puis remonte dans la voiture sans se retourner.', statChanges: { hunger: 10, mental: 10 } },
       ]},
       { text: 'Proposer d\'aider à traverser', risk: 'normal', emoji: '🚸', outcomes: [
         { probability: 0.4, text: 'Vous aidez les enfants à traverser pendant 30 min. Les parents apprécient. 5€ collectés.', statChanges: { dignity: 10, mental: 8 }, moneyChange: 5, respectChange: 2 },
@@ -571,13 +571,13 @@ export const BEG_EVENTS: GameEvent[] = [
     description: 'Devant le supermarché, les clients entrent et sortent avec leurs courses.',
     choices: [
       { text: 'S\'installer à l\'entrée avec un gobelet', risk: 'safe', emoji: '🥤', outcomes: [
-        { probability: 0.4, text: 'En 1h, vous récoltez 6€. Pas mal !', statChanges: { dignity: -5, mental: 3 }, moneyChange: 6 },
+        { probability: 0.4, text: 'En 1h, vous récoltez 6€, dont une pièce étrangère que personne ne prendra.', statChanges: { dignity: -5, mental: 3 }, moneyChange: 6 },
         { probability: 0.3, text: 'Le vigile vous demande de partir. "Pas de mendicité ici."', statChanges: { dignity: -8 } },
-        { probability: 0.3, text: 'Une dame vous achète un sandwich et une bouteille d\'eau. Merci.', statChanges: { hunger: 15, thirst: 15, mental: 5 } },
+        { probability: 0.3, text: 'Une dame vous achète un sandwich et une bouteille d\'eau, puis s\'excuse de ne pas avoir de monnaie.', statChanges: { hunger: 15, thirst: 15, mental: 5 } },
       ]},
       { text: 'Aider les clients à porter leurs courses', risk: 'normal', emoji: '🛒', outcomes: [
         { probability: 0.5, text: 'Plusieurs clients acceptent ! 4€ en pourboires et un pack de yaourts.', statChanges: { hunger: 10, dignity: 5, sleep: -3 }, moneyChange: 4 },
-        { probability: 0.5, text: 'Personne ne veut de votre aide. Invisible.', statChanges: { dignity: -5, mental: -5 } },
+        { probability: 0.5, text: 'Personne ne veut de votre aide. Deux personnes changent de trottoir avant même que vous ayez parlé.', statChanges: { dignity: -5, mental: -5 } },
       ]},
     ],
   },
@@ -591,7 +591,7 @@ export const BEG_EVENTS: GameEvent[] = [
         { probability: 0.4, text: '"Dégage de mon spot." Territorial, le musicien.', statChanges: { mental: -5, dignity: -3 } },
       ]},
       { text: 'Chanter à côté de lui', risk: 'risky', emoji: '🎤', outcomes: [
-        { probability: 0.3, text: 'Votre voix est... unique. Les gens donnent par pitié. 4€.', statChanges: { dignity: -5, mental: 5 }, moneyChange: 4 },
+        { probability: 0.3, text: 'Votre voix est... unique. Les gens donnent vite et repartent plus vite : 4€.', statChanges: { dignity: -5, mental: 5 }, moneyChange: 4 },
         { probability: 0.7, text: '"Tu me fais perdre des clients !" Il vous chasse à coups d\'accordéon.', statChanges: { dignity: -10, mental: -5, health: -3 } },
       ]},
     ],
@@ -599,7 +599,7 @@ export const BEG_EVENTS: GameEvent[] = [
   {
     id: 'beg-touriste-asiatique', title: 'Le Groupe de Touristes', type: 'social',
     image: '/assets/beg-touriste-asiatique-mKRWQ8vLKuJpHegK2ZAxpm.webp',
-    description: 'Un groupe de touristes asiatiques prend des photos de tout. Absolument tout.',
+    description: 'Un groupe de touristes photographie la rue, les poubelles, un pigeon, et le panneau du sens interdit.',
     choices: [
       { text: 'Proposer de prendre leur photo', risk: 'safe', emoji: '📸', outcomes: [
         { probability: 0.7, text: 'Ils sont ravis ! Selfies, photos de groupe. 5€ de pourboire et des bonbons japonais.', statChanges: { hunger: 5, mental: 8, dignity: 5 }, moneyChange: 5 },
@@ -617,11 +617,11 @@ export const BEG_EVENTS: GameEvent[] = [
     description: 'Un mariage se termine. Les invités sortent, éméchés et généreux.',
     choices: [
       { text: 'Féliciter les mariés', risk: 'safe', emoji: '💒', outcomes: [
-        { probability: 0.7, text: 'Les mariés vous invitent à prendre une part de gâteau ! Champagne inclus.', statChanges: { hunger: 20, thirst: 15, mental: 12, dignity: 5 } },
+        { probability: 0.7, text: 'Les mariés vous invitent à prendre une part de gâteau, et le serveur vous tend une coupe sans qu\'on lui demande.', statChanges: { hunger: 20, thirst: 15, mental: 12, dignity: 5 } },
         { probability: 0.3, text: 'Le père de la mariée vous éloigne. "C\'est privé."', statChanges: { dignity: -5, mental: -3 } },
       ]},
       { text: 'Ramasser le riz et les confettis (pour manger le riz)', risk: 'risky', emoji: '🍚', outcomes: [
-        { probability: 0.4, text: 'Vous récupérez assez de riz pour un repas. Débrouillardise !', statChanges: { hunger: 10, dignity: -8 } },
+        { probability: 0.4, text: 'Vous récupérez assez de riz pour un repas, dans un sac qui a déjà servi à autre chose.', statChanges: { hunger: 10, dignity: -8 } },
         { probability: 0.6, text: 'C\'est du riz décoratif, pas comestible. Votre estomac proteste.', statChanges: { hunger: -3, mental: -5 } },
       ]},
     ],
@@ -633,7 +633,7 @@ export const BEG_EVENTS: GameEvent[] = [
     choices: [
       { text: 'Engager la conversation', risk: 'safe', emoji: '🏃', outcomes: [
         { probability: 0.6, text: 'Il est coach sportif. "Tu veux que je te montre des exercices ?" Séance gratuite et 3€.', statChanges: { health: 5, mental: 8, dignity: 5 }, moneyChange: 3 },
-        { probability: 0.4, text: 'Il remet ses écouteurs et repart. Message reçu.', statChanges: { mental: -3 } },
+        { probability: 0.4, text: 'Il remet ses écouteurs et repart, en montant le volume à hauteur de vous.', statChanges: { mental: -3 } },
       ]},
       { text: 'Lui demander de l\'eau', risk: 'safe', emoji: '💧', outcomes: [
         { probability: 0.8, text: 'Il vous passe sa gourde. "Tiens, garde-la." Gourde acquise !', statChanges: { thirst: 15, mental: 5 } },
@@ -647,11 +647,11 @@ export const BEG_EVENTS: GameEvent[] = [
     description: 'Le restaurant gastronomique vient de sortir ses poubelles. Ça sent le gourmet.',
     choices: [
       { text: 'Fouiller les poubelles', risk: 'normal', emoji: '🗑️', outcomes: [
-        { probability: 0.6, text: 'Des restes de foie gras, du pain frais, un fond de sauce. Festin 5 étoiles !', statChanges: { hunger: 25, mental: 5, dignity: -8 } },
+        { probability: 0.6, text: 'Des restes de foie gras, du pain frais, un fond de sauce dans une barquette encore tiède.', statChanges: { hunger: 25, mental: 5, dignity: -8 } },
         { probability: 0.4, text: 'Le chef sort fumer. "Hé ! Dégage de mes poubelles !" Vous filez.', statChanges: { dignity: -10, mental: -5 } },
       ]},
       { text: 'Attendre que le chef rentre et fouiller après', risk: 'safe', emoji: '⏰', outcomes: [
-        { probability: 0.7, text: 'Patience récompensée ! Vous mangez comme un roi. En cachette.', statChanges: { hunger: 20, dignity: -5 } },
+        { probability: 0.7, text: 'Patience récompensée : vous mangez accroupi entre deux poubelles, mieux que toute la semaine.', statChanges: { hunger: 20, dignity: -5 } },
         { probability: 0.3, text: 'Les poubelles sont vides. Quelqu\'un est passé avant vous.', statChanges: { mental: -5 } },
       ]},
     ],
@@ -666,7 +666,7 @@ export const BEG_EVENTS: GameEvent[] = [
         { probability: 0.5, text: 'Tout le monde est sur son téléphone. Personne ne vous voit.', statChanges: { dignity: -5, mental: -3 } },
       ]},
       { text: 'Récupérer les pop-corn restants dans la salle', risk: 'risky', emoji: '🍿', outcomes: [
-        { probability: 0.4, text: 'Vous vous faufilez ! Pop-corn, nachos, un fond de soda. Ciné-repas !', statChanges: { hunger: 15, thirst: 8, mental: 5 } },
+        { probability: 0.4, text: 'Vous vous faufilez : du pop-corn au fond des seaux, des nachos, et un soda que quelqu\'un a oublié plein.', statChanges: { hunger: 15, thirst: 8, mental: 5 } },
         { probability: 0.6, text: 'L\'ouvreuse vous attrape. "Dehors !" Expulsé.', statChanges: { dignity: -10, mental: -3 } },
       ]},
     ],
@@ -677,11 +677,11 @@ export const BEG_EVENTS: GameEvent[] = [
     description: 'C\'est dimanche. Les fidèles sortent de la messe, l\'âme charitable.',
     choices: [
       { text: 'Demander l\'aumône', risk: 'safe', emoji: '⛪', outcomes: [
-        { probability: 0.7, text: 'La charité chrétienne fonctionne ! 6€ et un sandwich.', statChanges: { hunger: 12, mental: 5, dignity: 3 }, moneyChange: 6 },
+        { probability: 0.7, text: 'La quête vous revient avec 6€ dedans et un sandwich posé par-dessus.', statChanges: { hunger: 12, mental: 5, dignity: 3 }, moneyChange: 6 },
         { probability: 0.3, text: '"Dieu vous aide, mon fils." Pas d\'argent mais une bénédiction.', statChanges: { mental: 3 } },
       ]},
       { text: 'Entrer pour le repas paroissial', risk: 'normal', emoji: '🍽️', outcomes: [
-        { probability: 0.5, text: 'Repas complet ! Soupe, pain, fromage, café. Et de la compagnie.', statChanges: { hunger: 30, thirst: 15, mental: 10, dignity: 5 } },
+        { probability: 0.5, text: 'Repas complet : soupe, pain, fromage, café, et un voisin de table qui parle tout seul mais partage son sucre.', statChanges: { hunger: 30, thirst: 15, mental: 10, dignity: 5 } },
         { probability: 0.5, text: '"Le repas est réservé aux inscrits." Mais on vous donne du pain.', statChanges: { hunger: 10, mental: 3 } },
       ]},
     ],
@@ -692,7 +692,7 @@ export const BEG_EVENTS: GameEvent[] = [
     description: 'La mairie est ouverte. Des gens font la queue pour des papiers.',
     choices: [
       { text: 'Demander des informations sur les aides sociales', risk: 'safe', emoji: '🏛️', outcomes: [
-        { probability: 0.6, text: 'L\'agent d\'accueil est compréhensif. Il vous donne une liste de foyers et d\'aides. Précieux.', statChanges: { mental: 10, dignity: 5 }, addFlag: 'aide-mairie' },
+        { probability: 0.6, text: 'L\'agent d\'accueil est compréhensif. Il vous donne une liste de foyers et d\'aides, et entoure deux adresses au stylo.', statChanges: { mental: 10, dignity: 5 }, addFlag: 'aide-mairie' },
         { probability: 0.4, text: '"Prenez un numéro." Après 2h d\'attente, le guichet ferme.', statChanges: { mental: -5, sleep: -5 } },
       ]},
       { text: 'Utiliser les toilettes et l\'eau chaude', risk: 'safe', emoji: '🚻', outcomes: [
@@ -709,7 +709,7 @@ export const BEG_EVENTS: GameEvent[] = [
       { text: 'Proposer de porter les valises', risk: 'normal', emoji: '🧳', outcomes: [
         { probability: 0.5, text: 'Une dame âgée accepte ! 5€ et un merci sincère.', statChanges: { dignity: 5, mental: 5, sleep: -3 }, moneyChange: 5 },
         { probability: 0.3, text: '"Non merci." Refus poli mais ferme.', statChanges: { mental: -2 } },
-        { probability: 0.2, text: 'Un voyageur vous accuse de vol ! Malentendu. Stressant.', statChanges: { dignity: -10, mental: -8 } },
+        { probability: 0.2, text: 'Un voyageur vous accuse de vol, fouille sa poche intérieure, retrouve son portefeuille, et ne s\'excuse pas.', statChanges: { dignity: -10, mental: -8 } },
       ]},
       { text: 'Mendier près du distributeur de billets', risk: 'safe', emoji: '🎫', outcomes: [
         { probability: 0.5, text: 'Les voyageurs lâchent leur monnaie. 3€ en 30 minutes.', statChanges: { dignity: -5 }, moneyChange: 3 },
@@ -728,7 +728,7 @@ export const BEG_EVENTS: GameEvent[] = [
         { probability: 0.3, text: 'Un homme vous donne 2€. "Tiens, achète-toi un café."', statChanges: { mental: 5, dignity: 3 }, moneyChange: 2 },
       ]},
       { text: 'Demander poliment aux gens qui retirent', risk: 'normal', emoji: '🙏', outcomes: [
-        { probability: 0.4, text: '"Tenez." 5€ d\'un coup ! Généreux.', statChanges: { mental: 8, dignity: -3 }, moneyChange: 5 },
+        { probability: 0.4, text: '"Tenez." 5€ d\'un coup, pliés en deux, glissés sans qu\'il ralentisse le pas.', statChanges: { mental: 8, dignity: -3 }, moneyChange: 5 },
         { probability: 0.6, text: 'Les gens accélèrent le pas. Vous êtes un épouvantail.', statChanges: { dignity: -8, mental: -5 } },
       ]},
     ],
@@ -739,7 +739,7 @@ export const BEG_EVENTS: GameEvent[] = [
     description: 'Le fleuriste jette ses fleurs fanées. Elles sont encore belles.',
     choices: [
       { text: 'Demander les fleurs invendues', risk: 'safe', emoji: '💐', outcomes: [
-        { probability: 0.7, text: '"Prenez, elles vont à la poubelle." Vous avez un bouquet ! Revendable.', statChanges: { mental: 8, dignity: 5 } },
+        { probability: 0.7, text: '"Prenez, elles vont à la poubelle." Un bouquet entier, un peu fatigué du côté gauche.', statChanges: { mental: 8, dignity: 5 } },
         { probability: 0.3, text: '"Non, elles sont pour le compost." Écolo strict.', statChanges: { mental: -2 } },
       ]},
       { text: 'Revendre les fleurs aux passants', risk: 'normal', emoji: '🌹', outcomes: [
@@ -755,12 +755,12 @@ export const BEG_EVENTS: GameEvent[] = [
     choices: [
       { text: 'Faire la manche avec un panneau', risk: 'safe', emoji: '📝', outcomes: [
         { probability: 0.5, text: 'Votre panneau "J\'ai faim" touche les coeurs. 5€ en 1h.', statChanges: { dignity: -5, mental: 3 }, moneyChange: 5 },
-        { probability: 0.3, text: 'Un passant vous donne un sandwich. Mieux que de l\'argent.', statChanges: { hunger: 15, mental: 5 } },
-        { probability: 0.2, text: 'La RATP vous demande de partir. Spot interdit.', statChanges: { dignity: -5, mental: -3 } },
+        { probability: 0.3, text: 'Un passant vous donne un sandwich encore emballé, avec le ticket de caisse dedans.', statChanges: { hunger: 15, mental: 5 } },
+        { probability: 0.2, text: 'Un agent vous demande de partir, poliment, en désignant un panneau que vous n\'aviez pas vu.', statChanges: { dignity: -5, mental: -3 } },
       ]},
       { text: 'Ouvrir les portes aux gens chargés', risk: 'safe', emoji: '🚪', outcomes: [
         { probability: 0.7, text: 'Service apprécié ! Quelques pièces en remerciement. 2€.', statChanges: { dignity: 5, mental: 5 }, moneyChange: 2 },
-        { probability: 0.3, text: 'Les gens passent sans un regard. Automates humains.', statChanges: { mental: -3 } },
+        { probability: 0.3, text: 'Les gens passent sans un regard, chacun réglé sur son propre couloir invisible.', statChanges: { mental: -3 } },
       ]},
     ],
   },
@@ -785,11 +785,11 @@ export const BEG_EVENTS: GameEvent[] = [
     description: 'Une station de lavage automatique. Des gens attendent que leur voiture soit propre.',
     choices: [
       { text: 'Proposer un lavage à la main', risk: 'normal', emoji: '🧽', outcomes: [
-        { probability: 0.5, text: 'Un homme accepte ! 1h de travail, 8€. Honnête.', statChanges: { dignity: 5, mental: 5, sleep: -5 }, moneyChange: 8 },
+        { probability: 0.5, text: 'Un homme accepte : une heure de travail, 8€, comptés devant vous avant que vous commenciez.', statChanges: { dignity: 5, mental: 5, sleep: -5 }, moneyChange: 8 },
         { probability: 0.5, text: '"J\'ai la machine pour ça." Logique.', statChanges: { mental: -2 } },
       ]},
       { text: 'Récupérer la monnaie oubliée dans les machines', risk: 'safe', emoji: '🪙', outcomes: [
-        { probability: 0.4, text: '2€ oubliés dans une machine ! Petit bonus.', statChanges: { mental: 3 }, moneyChange: 2 },
+        { probability: 0.4, text: '2€ oubliés dans le bac de rendu d\'une machine, encore tièdes du distributeur.', statChanges: { mental: 3 }, moneyChange: 2 },
         { probability: 0.6, text: 'Rien. Les machines sont vides.', statChanges: { mental: -1 } },
       ]},
     ],
@@ -813,15 +813,15 @@ export const BEG_EVENTS: GameEvent[] = [
   {
     id: 'beg-concert-sortie', title: 'La Sortie de Concert', type: 'social',
     image: '/assets/beg-concert-sortie-VPCD4nBdsydTGMi5TPfd8i.webp',
-    description: 'Un concert vient de se terminer. Les spectateurs sortent, euphoriques.',
+    description: 'Un concert vient de se terminer. Les spectateurs sortent par vagues, encore à moitié sourds.',
     choices: [
       { text: 'Mendier dans l\'euphorie générale', risk: 'safe', emoji: '🎸', outcomes: [
-        { probability: 0.6, text: 'Les gens sont de bonne humeur ! 7€ récoltés facilement.', statChanges: { dignity: -3, mental: 5 }, moneyChange: 7 },
+        { probability: 0.6, text: 'Les gens sortent du concert en chantant faux et donnent sans compter : 7€.', statChanges: { dignity: -3, mental: 5 }, moneyChange: 7 },
         { probability: 0.4, text: 'Tout le monde est sur son téléphone à poster des stories.', statChanges: { dignity: -3, mental: -2 } },
       ]},
       { text: 'Chanter les chansons du concert', risk: 'normal', emoji: '🎤', outcomes: [
-        { probability: 0.5, text: 'Votre reprise est applaudie ! 5€ et des rires.', statChanges: { mental: 10, dignity: 5 }, moneyChange: 5, respectChange: 2 },
-        { probability: 0.5, text: 'Faux comme une casserole. Les gens fuient.', statChanges: { dignity: -8, mental: -3 } },
+        { probability: 0.5, text: 'Votre reprise est applaudie, et quelqu\'un reprend le refrain avec vous, plus fort que vous.', statChanges: { mental: 10, dignity: 5 }, moneyChange: 5, respectChange: 2 },
+        { probability: 0.5, text: 'Faux comme une casserole. Un chien du quartier se met à hurler avec vous.', statChanges: { dignity: -8, mental: -3 } },
       ]},
     ],
   },
@@ -832,12 +832,12 @@ export const BEG_EVENTS: GameEvent[] = [
     choices: [
       { text: 'Mendier auprès des supporters', risk: 'normal', emoji: '⚽', outcomes: [
         { probability: 0.4, text: 'L\'équipe locale a gagné ! Les supporters sont généreux. 8€ !', statChanges: { mental: 5 }, moneyChange: 8 },
-        { probability: 0.3, text: 'L\'équipe a perdu. Les supporters sont furieux. Mauvais timing.', statChanges: { mental: -5, dignity: -5 } },
-        { probability: 0.3, text: 'Un supporter vous offre une bière. Pas nutritif mais convivial.', statChanges: { thirst: 10, mental: 8, dignity: -3 } },
+        { probability: 0.3, text: 'L\'équipe a perdu. Les supporters sortent en silence, et le premier qui parle se fait rembarrer.', statChanges: { mental: -5, dignity: -5 } },
+        { probability: 0.3, text: 'Un supporter vous offre une bière et vous explique le match pendant vingt minutes, geste par geste.', statChanges: { thirst: 10, mental: 8, dignity: -3 } },
       ]},
       { text: 'Vendre des écharpes trouvées', risk: 'risky', emoji: '🧣', outcomes: [
-        { probability: 0.3, text: 'Vous vendez 2 écharpes à 3€ chacune. Business !', statChanges: { dignity: -3, mental: 5 }, moneyChange: 6 },
-        { probability: 0.7, text: 'Un supporter reconnaît SON écharpe. Tension.', statChanges: { dignity: -10, mental: -8, health: -3 } },
+        { probability: 0.3, text: 'Vous vendez 2 écharpes à 3€ chacune, dont une à quelqu\'un qui en portait déjà une.', statChanges: { dignity: -3, mental: 5 }, moneyChange: 6 },
+        { probability: 0.7, text: 'Un supporter reconnaît SON écharpe et pose une main sur votre épaule, sans serrer, pour l\'instant.', statChanges: { dignity: -10, mental: -8, health: -3 } },
       ]},
     ],
   },
@@ -851,11 +851,11 @@ export const STEAL_EVENTS: GameEvent[] = [
     description: 'Un primeur a le dos tourné. Ses fruits sont à portée de main. Personne ne regarde... ou presque.',
     choices: [
       { text: 'Chiper deux pommes vite fait', risk: 'normal', emoji: '🍎', outcomes: [
-        { probability: 0.6, text: 'Mission accomplie ! Deux belles pommes dans la poche. Discret comme un chat.', statChanges: { hunger: 18, dignity: -6 } },
+        { probability: 0.6, text: 'Mission accomplie : deux belles pommes dans la poche, et le primeur qui hurle toujours ses promos.', statChanges: { hunger: 18, dignity: -6 } },
         { probability: 0.4, text: '"HÉ ! Le voleur !" Le primeur vous attrape par le col et vous secoue.', statChanges: { health: -8, dignity: -14, mental: -6 }, respectChange: -2 },
       ]},
       { text: 'Rafler toute la caisse de fruits', risk: 'risky', emoji: '🧺', outcomes: [
-        { probability: 0.3, text: 'Jackpot ! Vous filez avec une caisse entière. Festin pour des jours.', statChanges: { hunger: 35, mental: 8, dignity: -10 }, itemGain: { id: 'caisse-fruits', name: 'Caisse de fruits', emoji: '🧺', type: 'food', value: 12, effect: { hunger: 20 } } },
+        { probability: 0.3, text: 'Jackpot : vous filez avec une caisse entière, qui pèse le double de ce que vous pensiez.', statChanges: { hunger: 35, mental: 8, dignity: -10 }, itemGain: { id: 'caisse-fruits', name: 'Caisse de fruits', emoji: '🧺', type: 'food', value: 12, effect: { hunger: 20 } } },
         { probability: 0.7, text: 'Trop gourmand. Le marché entier vous tombe dessus. On vous reprend tout et un peu plus.', statChanges: { health: -15, dignity: -18, mental: -10 }, moneyChange: -3, respectChange: -3 },
       ]},
     ],
@@ -895,11 +895,11 @@ export const STEAL_EVENTS: GameEvent[] = [
     description: 'Un vélo électrique, antivol bon marché à peine fermé. Il vaut une petite fortune à la revente.',
     choices: [
       { text: 'Forcer l\'antivol et filer', risk: 'risky', emoji: '🚲', outcomes: [
-        { probability: 0.4, text: 'Clic ! L\'antivol cède. Revendu à un receleur : 20€. Belle prise.', moneyChange: 20, statChanges: { dignity: -12, mental: 5 }, respectChange: 2 },
+        { probability: 0.4, text: 'Clic, l\'antivol cède. Le receleur donne 20€ sans regarder le vélo, ce qui veut dire qu\'il en vaut plus.', moneyChange: 20, statChanges: { dignity: -12, mental: 5 }, respectChange: 2 },
         { probability: 0.6, text: 'Le propriétaire surgit du café d\'à côté. La poursuite tourne mal pour vous.', statChanges: { health: -20, dignity: -15, mental: -8 }, respectChange: -3 },
       ]},
       { text: 'Voler juste la sacoche', risk: 'normal', emoji: '👜', outcomes: [
-        { probability: 0.55, text: 'La sacoche contient un casse-croûte et 4€ de monnaie. Pas mal.', moneyChange: 4, statChanges: { hunger: 12, dignity: -6 } },
+        { probability: 0.55, text: 'La sacoche contient un casse-croûte, 4€ de monnaie et une photo d\'identité que vous remettez dedans.', moneyChange: 4, statChanges: { hunger: 12, dignity: -6 } },
         { probability: 0.45, text: 'Un passant crie pour alerter. Vous lâchez tout et détalez.', statChanges: { mental: -6, dignity: -10 }, respectChange: -1 },
       ]},
     ],
@@ -930,7 +930,7 @@ export const STEAL_EVENTS: GameEvent[] = [
       ]},
       { text: 'Prendre les chaussettes et les sous-vêtements', risk: 'safe', emoji: '🧦', outcomes: [
         { probability: 0.8, text: 'Pas glorieux, mais des chaussettes sèches changent une vie dans la rue.', statChanges: { dignity: -4, mental: 4, health: 3 } },
-        { probability: 0.2, text: 'Un chien de garde aboie. Vous filez avec une seule chaussette. Mieux que rien.', statChanges: { dignity: -6, mental: -2 } },
+        { probability: 0.2, text: 'Un chien de garde aboie. Vous filez avec une seule chaussette, la gauche, encore humide.', statChanges: { dignity: -6, mental: -2 } },
       ]},
     ],
   },
@@ -945,10 +945,10 @@ export const REST_EVENTS: GameEvent[] = [
     choices: [
       { text: 'S\'installer pour la nuit', risk: 'safe', emoji: '🌉', outcomes: [
         { probability: 0.7, text: 'Nuit paisible bercée par le clapotis. Vous dormez comme un bébé.', statChanges: { sleep: 20, mental: 5 } },
-        { probability: 0.3, text: 'L\'eau monte pendant la nuit. Réveil les pieds mouillés.', statChanges: { sleep: 8, health: -3 } },
+        { probability: 0.3, text: 'L\'eau monte pendant la nuit et vous réveille en atteignant les chevilles.', statChanges: { sleep: 8, health: -3 } },
       ]},
       { text: 'Explorer sous le pont', risk: 'normal', emoji: '🔦', outcomes: [
-        { probability: 0.5, text: 'Vous trouvez une couverture oubliée par un autre SDF. Aubaine !', statChanges: { sleep: 15, mental: 3 } },
+        { probability: 0.5, text: 'Vous trouvez une couverture laissée par quelqu\'un d\'autre, pliée en carré, comme rendue exprès.', statChanges: { sleep: 15, mental: 3 } },
         { probability: 0.5, text: 'Des rats. Beaucoup de rats. Vous changez de spot.', statChanges: { mental: -5, sleep: 5 } },
       ]},
     ],
@@ -959,12 +959,12 @@ export const REST_EVENTS: GameEvent[] = [
     description: 'Le lavomatic est ouvert toute la nuit. Chaud, éclairé, avec des chaises.',
     choices: [
       { text: 'Dormir sur les chaises', risk: 'safe', emoji: '🧺', outcomes: [
-        { probability: 0.6, text: 'Le ronronnement des machines vous berce. Nuit correcte.', statChanges: { sleep: 18, mental: 3 } },
+        { probability: 0.6, text: 'Le ronronnement des machines vous berce, et le cycle d\'essorage vous réveille toutes les heures.', statChanges: { sleep: 18, mental: 3 } },
         { probability: 0.4, text: 'Le gérant passe à 3h. "C\'est pas un hôtel !" Dehors.', statChanges: { sleep: 8, dignity: -5 } },
       ]},
       { text: 'Laver vos vêtements (si vous avez de l\'argent)', risk: 'safe', emoji: '👕', outcomes: [
-        { probability: 0.7, text: 'Vêtements propres ! Vous vous sentez comme neuf. Dignité restaurée.', statChanges: { dignity: 15, mental: 8, sleep: 5 } },
-        { probability: 0.3, text: 'La machine avale votre pièce sans démarrer. Arnaque mécanique.', statChanges: { mental: -5 } },
+        { probability: 0.7, text: 'Vêtements propres, encore chauds du sèche-linge. Vous les remettez avant qu\'ils refroidissent.', statChanges: { dignity: 15, mental: 8, sleep: 5 } },
+        { probability: 0.3, text: 'La machine avale votre pièce, clignote deux fois, et se rendort.', statChanges: { mental: -5 } },
       ]},
     ],
   },
@@ -976,11 +976,11 @@ export const REST_EVENTS: GameEvent[] = [
       { text: 'Se cacher entre les voitures', risk: 'normal', emoji: '🅿️', outcomes: [
         { probability: 0.5, text: 'Nuit tranquille. Le béton n\'est pas confortable mais c\'est sec.', statChanges: { sleep: 15 } },
         { probability: 0.3, text: 'Un vigile fait sa ronde. Vous devez bouger toutes les heures.', statChanges: { sleep: 8, mental: -3 } },
-        { probability: 0.2, text: 'Une alarme de voiture se déclenche ! Panique et fuite.', statChanges: { sleep: -5, mental: -8 } },
+        { probability: 0.2, text: 'Une alarme de voiture se déclenche et se coupe toute seule dix secondes après votre départ.', statChanges: { sleep: -5, mental: -8 } },
       ]},
       { text: 'Dormir dans la cage d\'escalier', risk: 'safe', emoji: '🚪', outcomes: [
         { probability: 0.7, text: 'Spot discret. Vous dormez sans être dérangé.', statChanges: { sleep: 18 } },
-        { probability: 0.3, text: 'Un résident vous découvre au matin. Gênant.', statChanges: { sleep: 12, dignity: -5 } },
+        { probability: 0.3, text: 'Un résident vous découvre au matin, en pyjama, sa poubelle à la main, aussi surpris que vous.', statChanges: { sleep: 12, dignity: -5 } },
       ]},
     ],
   },
@@ -990,12 +990,12 @@ export const REST_EVENTS: GameEvent[] = [
     description: 'Vous avez assez de cartons pour vous bâtir un vrai petit palace.',
     choices: [
       { text: 'Construire un abri élaboré', risk: 'normal', emoji: '🏗️', outcomes: [
-        { probability: 0.6, text: 'Chef-d\'oeuvre architectural ! Chaud, sec, presque confortable.', statChanges: { sleep: 25, dignity: 5, mental: 5 } },
+        { probability: 0.6, text: 'Chef-d\'œuvre architectural : quatre épaisseurs, un angle contre le mur, et le vent qui passe à côté.', statChanges: { sleep: 25, dignity: 5, mental: 5 } },
         { probability: 0.4, text: 'Le vent emporte votre construction. Retour à la case départ.', statChanges: { sleep: 5, mental: -5 } },
       ]},
       { text: 'Juste s\'enrouler dans un carton', risk: 'safe', emoji: '📦', outcomes: [
         { probability: 0.7, text: 'Pas le grand luxe, mais ça fait le job.', statChanges: { sleep: 15 } },
-        { probability: 0.3, text: 'Le carton est mouillé. Nuit froide et humide.', statChanges: { sleep: 5, health: -5 } },
+        { probability: 0.3, text: 'Le carton est mouillé : il colle au dos et refroidit plus vite que l\'air.', statChanges: { sleep: 5, health: -5 } },
       ]},
     ],
   },
@@ -1005,11 +1005,11 @@ export const REST_EVENTS: GameEvent[] = [
     description: 'Le banc devant l\'église est large et abrité par un auvent.',
     choices: [
       { text: 'S\'allonger sur le banc', risk: 'safe', emoji: '⛪', outcomes: [
-        { probability: 0.7, text: 'Le prêtre sort et vous couvre d\'une couverture. Humanité.', statChanges: { sleep: 20, mental: 10, dignity: 5 } },
+        { probability: 0.7, text: 'Le prêtre sort, vous couvre d\'une couverture, et rentre sans avoir dit un mot.', statChanges: { sleep: 20, mental: 10, dignity: 5 } },
         { probability: 0.3, text: 'Le banc est dur comme la pierre. Dos en compote au réveil.', statChanges: { sleep: 10, health: -3 } },
       ]},
       { text: 'Entrer dans l\'église si elle est ouverte', risk: 'safe', emoji: '🕯️', outcomes: [
-        { probability: 0.5, text: 'L\'église est ouverte ! Vous dormez sur un banc intérieur. Chaleur divine.', statChanges: { sleep: 25, mental: 8 } },
+        { probability: 0.5, text: 'L\'église est ouverte. Vous dormez sur un banc du fond, sous un radiateur qui claque toutes les heures.', statChanges: { sleep: 25, mental: 8 } },
         { probability: 0.5, text: 'Fermée à clé. Le banc extérieur fera l\'affaire.', statChanges: { sleep: 12 } },
       ]},
     ],
@@ -1017,7 +1017,7 @@ export const REST_EVENTS: GameEvent[] = [
   {
     id: 'rest-toit-immeuble', title: 'Le Toit de l\'Immeuble', type: 'narrative',
     image: '/assets/rest-toit-immeuble-6ryUDQFMVD6QoZDFqJj4s7.webp',
-    description: 'Vous avez trouvé l\'accès au toit. Vue sur les étoiles.',
+    description: 'Vous avez trouvé l\'accès au toit. On voit trois étoiles et le halo orange de toute la ville.',
     choices: [
       { text: 'Dormir à la belle étoile', risk: 'normal', emoji: '⭐', outcomes: [
         { probability: 0.5, text: 'Nuit magique sous les étoiles. Le vent est doux.', statChanges: { sleep: 20, mental: 10 } },
@@ -1026,18 +1026,18 @@ export const REST_EVENTS: GameEvent[] = [
       ]},
       { text: 'Installer un campement', risk: 'safe', emoji: '🏕️', outcomes: [
         { probability: 0.7, text: 'Avec des bâches et du carton, vous créez un nid douillet.', statChanges: { sleep: 22, mental: 5 } },
-        { probability: 0.3, text: 'Le vent emporte tout. Nuit à la dure.', statChanges: { sleep: 10 } },
+        { probability: 0.3, text: 'Le vent emporte tout, y compris le carton que vous teniez à deux mains.', statChanges: { sleep: 10 } },
       ]},
     ],
   },
   {
     id: 'rest-abribus', title: 'L\'Abribus', type: 'narrative',
     image: '/assets/rest-abribus-T6i3s6bQ4qyZfBauUNWeu6.webp',
-    description: 'L\'abribus est vide. Le plexiglas protège du vent. Presque confortable.',
+    description: 'L\'abribus est vide. Le plexiglas coupe le vent, le banc a trois places et deux accoudoirs.',
     choices: [
       { text: 'Dormir assis sur le banc', risk: 'safe', emoji: '🚌', outcomes: [
         { probability: 0.6, text: 'Nuit correcte. Le premier bus vous réveille à 5h30.', statChanges: { sleep: 15 } },
-        { probability: 0.4, text: 'Un ivrogne s\'installe à côté. Il ronfle. Fort.', statChanges: { sleep: 8, mental: -3 } },
+        { probability: 0.4, text: 'Un ivrogne s\'installe à côté et ronfle assez fort pour couvrir les annonces de la gare.', statChanges: { sleep: 8, mental: -3 } },
       ]},
       { text: 'S\'allonger par terre dans l\'abribus', risk: 'normal', emoji: '😴', outcomes: [
         { probability: 0.5, text: 'Plus confortable qu\'on ne croit. Nuit passable.', statChanges: { sleep: 18, dignity: -5 } },
@@ -1048,12 +1048,12 @@ export const REST_EVENTS: GameEvent[] = [
   {
     id: 'rest-cave-abandonnee', title: 'La Cave Abandonnée', type: 'narrative',
     image: '/assets/rest-cave-abandonnee-PoPAKkfwWsspJhMjvZym9q.webp',
-    description: 'Une cave d\'immeuble dont la porte ne ferme plus. Sombre mais sec.',
+    description: 'Une cave d\'immeuble dont la porte ne ferme plus. Il fait noir, il fait sec, ça sent la lessive.',
     choices: [
       { text: 'S\'installer dans la cave', risk: 'normal', emoji: '🏚️', outcomes: [
         { probability: 0.5, text: 'Nuit au sec et au chaud. Les murs épais isolent bien.', statChanges: { sleep: 22, health: 3 } },
         { probability: 0.3, text: 'Des bruits suspects. Vous ne dormez que d\'un oeil.', statChanges: { sleep: 10, mental: -5 } },
-        { probability: 0.2, text: 'Un autre SDF est déjà là. Cohabitation tendue.', statChanges: { sleep: 8, mental: -3 } },
+        { probability: 0.2, text: 'Quelqu\'un est déjà là. Il ne dit rien, déplace son sac de dix centimètres, et c\'est tout ce que vous aurez.', statChanges: { sleep: 8, mental: -3 } },
       ]},
       { text: 'Explorer la cave d\'abord', risk: 'normal', emoji: '🔦', outcomes: [
         { probability: 0.4, text: 'Vous trouvez des conserves oubliées ! Et un matelas.', statChanges: { sleep: 20, hunger: 10 } },
@@ -1067,7 +1067,7 @@ export const REST_EVENTS: GameEvent[] = [
     description: 'Deux arbres parfaitement espacés. Avec une couverture, vous pouvez faire un hamac.',
     choices: [
       { text: 'Installer le hamac', risk: 'normal', emoji: '🌴', outcomes: [
-        { probability: 0.5, text: 'Le hamac tient ! Nuit bercée par le vent. Paradis.', statChanges: { sleep: 25, mental: 8 } },
+        { probability: 0.5, text: 'Le hamac tient. Vous vous balancez toute la nuit sans jamais choisir dans quel sens.', statChanges: { sleep: 25, mental: 8 } },
         { probability: 0.5, text: 'Le noeud lâche à 3h du matin. Chute. Aïe.', statChanges: { sleep: 8, health: -5, mental: -3 } },
       ]},
       { text: 'Dormir au pied des arbres', risk: 'safe', emoji: '🌳', outcomes: [
@@ -1112,7 +1112,7 @@ export const REST_EVENTS: GameEvent[] = [
     description: 'Un escalier mène à un grenier dont la porte est entrouverte.',
     choices: [
       { text: 'Monter explorer', risk: 'normal', emoji: '🪜', outcomes: [
-        { probability: 0.5, text: 'Un grenier plein de vieux meubles ! Un matelas, des couvertures. Palace !', statChanges: { sleep: 28, mental: 10 } },
+        { probability: 0.5, text: 'Un grenier plein de vieux meubles, un matelas posé sur deux palettes, des couvertures qui grattent.', statChanges: { sleep: 28, mental: 10 } },
         { probability: 0.3, text: 'Le plancher craque dangereusement. Vous redescendez vite.', statChanges: { mental: -5, sleep: 5 } },
         { probability: 0.2, text: 'Le propriétaire vous entend ! "Qui est là ?!" Fuite.', statChanges: { mental: -8, dignity: -5 } },
       ]},
@@ -1149,7 +1149,7 @@ export const REST_EVENTS: GameEvent[] = [
       ]},
       { text: 'Rester sur le quai', risk: 'safe', emoji: '🚉', outcomes: [
         { probability: 0.7, text: 'Le quai est abrité. Nuit passable.', statChanges: { sleep: 12 } },
-        { probability: 0.3, text: 'Le vent s\'engouffre. Nuit froide.', statChanges: { sleep: 8, health: -3 } },
+        { probability: 0.3, text: 'Le vent trouve l\'ouverture et souffle dessus toute la nuit, sans jamais se lasser.', statChanges: { sleep: 8, health: -3 } },
       ]},
     ],
   },
