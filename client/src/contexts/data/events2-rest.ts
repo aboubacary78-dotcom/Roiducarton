@@ -78,7 +78,7 @@ export const REST_EVENTS_2: GameEvent[] = [
       ]},
       { text: 'Demander le modèle d\'expo déclassé', risk: 'risky', emoji: '💬', outcomes: [
         { probability: 0.4, text: 'Le vendeur, un ancien de la rue lui aussi, vous donne un surmatelas « taché invendable ». La tache est une légende. Le confort est réel.', statChanges: { sleep: 10, mental: 10 }, respectChange: 1 },
-        { probability: 0.6, text: '« Monsieur, ici on VEND du sommeil. » Vous, vous en cherchez juste. Incompatibilité commerciale. Sortie digne.', statChanges: { mental: -3 } },
+        { probability: 0.6, text: '« Monsieur, ici on VEND du sommeil. » Vous, vous en cherchez juste. Vous sortez avant qu\'il appelle quelqu\'un.', statChanges: { mental: -3 } },
       ]},
     ],
   },
@@ -92,7 +92,7 @@ export const REST_EVENTS_2: GameEvent[] = [
         { probability: 0.2, text: 'Un autre connaisseur arrive avec les mêmes intentions. Négociation d\'experts : il prend le carton du lave-linge, vous gardez le frigo. La hiérarchie est respectée.', statChanges: { sleep: 14, mental: 4 }, respectChange: 2 },
       ]},
       { text: 'Le revendre à un étudiant qui déménage', risk: 'normal', emoji: '💶', outcomes: [
-        { probability: 0.6, text: 'L\'étudiant paie cash pour « le carton parfait ». Vous dormez à la dure mais avec des pièces qui tintent. Chacun ses trésors.', moneyChange: 5, statChanges: { sleep: 4, mental: 3 } },
+        { probability: 0.6, text: 'L\'étudiant paie cash pour « le carton parfait ». Vous dormez à la dure, avec des pièces qui tintent à chaque fois que vous vous retournez.', moneyChange: 5, statChanges: { sleep: 4, mental: 3 } },
         { probability: 0.4, text: 'Il paie en pièces rouges et en gratitude. Compter les centimes prend plus de temps que la vente. La nuit est courte et le carton est parti.', moneyChange: 2, statChanges: { sleep: 4, mental: -2 } },
       ]},
     ],
@@ -194,7 +194,7 @@ export const REST_EVENTS_2: GameEvent[] = [
         { probability: 0.4, text: 'Vous rêvez que les champignons parlent. Ils donnent d\'excellents conseils de placement immobilier. Au réveil, vous avez tout oublié sauf « creuse ».', statChanges: { sleep: 18, mental: 7 } },
       ]},
       { text: 'Cueillir de quoi dîner d\'abord', risk: 'risky', emoji: '🍽️', outcomes: [
-        { probability: 0.5, text: 'Poêlée improvisée sur boîte de conserve : un dîner de bistrot dans une cave. Puis douze heures de sommeil terreux. La belle vie souterraine.', statChanges: { hunger: 18, sleep: 15 } },
+        { probability: 0.5, text: 'Poêlée improvisée sur boîte de conserve : un dîner de bistrot dans une cave. Puis douze heures de sommeil, et de la terre dans les cheveux.', statChanges: { hunger: 18, sleep: 15 } },
         { probability: 0.5, text: 'Ceux-là n\'étaient PAS des champignons de Paris. La nuit est peuplée de couleurs inédites et de conversations avec le plafond. Mais QUELLES couleurs.', statChanges: { health: -8, mental: 8, sleep: 10 } },
       ]},
     ],
@@ -205,7 +205,7 @@ export const REST_EVENTS_2: GameEvent[] = [
     description: 'La piscine extérieure est bâchée pour l\'hiver. Entre la bâche tendue et les transats empilés : une poche d\'air tiède, à l\'abri du monde.',
     choices: [
       { text: 'Se faufiler dessous', risk: 'risky', emoji: '🏊', outcomes: [
-        { probability: 0.5, text: 'Un hamac géant qui sent le chlore et l\'été mort. Vous dormez suspendu entre deux saisons. Poétique et étanche.', statChanges: { sleep: 18, mental: 5 } },
+        { probability: 0.5, text: 'Un hamac géant qui sent le chlore et l\'été mort. Vous dormez suspendu, et la bâche ne prend pas l\'eau.', statChanges: { sleep: 18, mental: 5 } },
         { probability: 0.5, text: 'La bâche cède à 3h. Baignade de novembre, tout habillé, dans le petit bain. Le maître-nageur aurait au moins ri.', statChanges: { health: -8, sleep: -4, dignity: -5, mental: -4 } },
       ]},
       { text: 'Bâtir une cabane de transats', risk: 'normal', emoji: '🪑', outcomes: [
@@ -421,10 +421,10 @@ export const REST_EVENTS_2: GameEvent[] = [
   {
     id: 'rest-amphi-fac', title: 'L\'Amphi de la Fac', type: 'narrative',
     image: '/assets/rest-amphi-fac.webp',
-    description: 'L\'amphithéâtre B reste ouvert pour les « révisions libres ». Au dernier rang, dans la pénombre, des générations d\'étudiants ont dormi avant vous. Tradition sacrée.',
+    description: 'L\'amphithéâtre B reste ouvert pour les « révisions libres ». Au dernier rang, dans la pénombre, des générations d\'étudiants ont dormi avant vous, et le velours s\'en souvient.',
     choices: [
       { text: 'Dormir au dernier rang', risk: 'safe', emoji: '🎓', outcomes: [
-        { probability: 0.7, text: 'Les sièges rabattables ont l\'inclinaison exacte de la sieste académique. Vous dormez au milieu d\'étudiants qui dorment sur leurs cours. Fraternité silencieuse.', statChanges: { sleep: 15, mental: 5 } },
+        { probability: 0.7, text: 'Les sièges rabattables ont l\'inclinaison exacte de la sieste académique. Vous dormez au milieu d\'étudiants qui dorment sur leurs cours, et personne ne réveille personne.', statChanges: { sleep: 15, mental: 5 } },
         { probability: 0.3, text: 'Un cours de philo de 8h commence autour de vous. Thème : « l\'habiter ». Vous levez la main sans réfléchir. Votre témoignage improvisé arrache des applaudissements. Le prof vous paie le café.', statChanges: { sleep: 8, mental: 10, dignity: 6, thirst: 6 } },
       ]},
       { text: 'Squatter le local des assos étudiantes', risk: 'normal', emoji: '🛋️', outcomes: [
@@ -543,7 +543,7 @@ export const REST_EVENTS_2: GameEvent[] = [
         { probability: 0.4, text: 'La propriétaire part au marché à 6h SANS soulever la housse. Vous vous réveillez en mouvement, place du marché. Elle crie, vous criez, puis elle vous paie un café « pour l\'histoire à raconter ».', statChanges: { sleep: 10, thirst: 6, mental: 4, dignity: -4 } },
       ]},
       { text: 'Dormir sur le banc du box', risk: 'safe', emoji: '🪑', outcomes: [
-        { probability: 1, text: 'Le banc du box, sous le néon doux, à l\'abri du vent. Les vélos ne ronflent pas. Colocation idéale.', statChanges: { sleep: 12 } },
+        { probability: 1, text: 'Le banc du box, sous le néon doux, à l\'abri du vent. Les vélos ne ronflent pas, et le badge de la porte fait clic toutes les deux heures.', statChanges: { sleep: 12 } },
       ]},
     ],
   },

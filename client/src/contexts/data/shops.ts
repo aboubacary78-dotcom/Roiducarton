@@ -16,7 +16,7 @@ export const SHOPS: Shop[] = [
   },
   {
     id: 'epicerie', name: 'Épicerie de Nuit', emoji: '🏪',
-    description: 'Ouverte 24h/24. Prix majorés, mais pratique.',
+    description: 'Ouverte 24h/24, avec la majoration de nuit affichée nulle part.',
     locations: ['centre-ville', 'gare'],
     items: [
       { id: 'bouteille-eau', name: "Bouteille d'eau", emoji: '💧', price: 1, description: "De l'eau. Juste de l'eau. C'est déjà bien.", category: 'drink', effect: { thirst: 25 } },
@@ -45,7 +45,7 @@ export const SHOPS: Shop[] = [
     items: [
       { id: 'manteau-occasion', name: "Manteau d'occasion", emoji: '🧥', price: 5, description: 'Chaud et presque propre.', category: 'clothing', effect: { health: 5, dignity: 10, sleep: 5 }, giveItem: { id: 'manteau-occasion', name: "Manteau d'occasion", emoji: '🧥', type: 'armor', value: 8, defenseBonus: 2 } },
       { id: 'chaussures-usees', name: 'Chaussures usées', emoji: '👟', price: 3, description: 'Trouées mais fonctionnelles.', category: 'clothing', effect: { dignity: 5, health: 3 } },
-      { id: 'bonnet-laine', name: 'Bonnet en laine', emoji: '🧢', price: 2, description: 'Tricoté main. Couleur douteuse.', category: 'clothing', effect: { dignity: 3, mental: 3, sleep: 3 } },
+      { id: 'bonnet-laine', name: 'Bonnet en laine', emoji: '🧢', price: 2, description: 'Tricoté main, dans une couleur que personne n\'a choisie exprès.', category: 'clothing', effect: { dignity: 3, mental: 3, sleep: 3 } },
       { id: 'sac-dos-troue', name: 'Sac à dos troué', emoji: '🎒', price: 4, description: 'Augmente la capacité de transport. Enfin, un peu.', category: 'tool', giveItem: { id: 'sac-dos-troue', name: 'Sac à dos troué', emoji: '🎒', type: 'tool', value: 6 } },
     ],
   },
@@ -90,7 +90,7 @@ export const SHOPS: Shop[] = [
   },
   {
     id: 'laverie', name: 'Laverie Automatique', emoji: '🧺',
-    description: 'Lavez vos vêtements. Retrouvez votre dignité.',
+    description: 'Lavez vos vêtements. Trente minutes, et vous ne sentez plus la rue.',
     locations: ['centre-ville', 'gare'],
     items: [
       { id: 'lavage-vetements', name: 'Lavage de vêtements', emoji: '👕', price: 3, description: 'Propre pendant au moins 2 jours.', category: 'special', effect: { dignity: 20, mental: 5 } },

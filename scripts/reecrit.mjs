@@ -32,13 +32,22 @@ const ecrire = (f, s) => cache.set(f, s);
 
 let ok = 0;
 const soucis = [];
+const ajouts = [];
 
 for (const { fichier, fr, frNew, enNew } of lot) {
   // --- 1. le texte source ---------------------------------------------------
   const src = lire(fichier);
-  const cible = enSimple(fr);
-  const n = src.split(cible).length - 1;
-  if (n !== 1) { soucis.push(`${n} occurrence(s) dans ${fichier} : « ${fr.slice(0, 60)}… »`); continue; }
+  // Les sources mélangent les deux quotes : un texte contenant une apostrophe
+  // est souvent écrit entre guillemets doubles pour éviter les échappements.
+  // On essaie donc les deux encodages avant de renoncer.
+  const candidats = [[enSimple(fr), enSimple(frNew)], [enDouble(fr), enDouble(frNew)]];
+  const choisi = candidats.find(([c]) => src.split(c).length - 1 === 1);
+  if (!choisi) {
+    const n = candidats.map(([c]) => src.split(c).length - 1).reduce((a, b) => a + b, 0);
+    soucis.push(`${n} occurrence(s) dans ${fichier} : « ${fr.slice(0, 60)}… »`);
+    continue;
+  }
+  const [cible, remplacement] = choisi;
   // Le texte fourni doit couvrir le littéral JUSQU'À SA FIN. Sinon on remplace
   // un préfixe et on laisse la chute derrière : « … sans jamais choisir dans
   // quel sens. Paradis. » On perd alors précisément ce qu'on venait retirer.
@@ -47,7 +56,7 @@ for (const { fichier, fr, frNew, enNew } of lot) {
     soucis.push(`texte tronqué dans ${fichier} (il reste « ${src.slice(src.indexOf(cible) + cible.length).split(/['"]/)[0].slice(0, 40)} ») : « ${fr.slice(0, 50)}… »`);
     continue;
   }
-  ecrire(fichier, src.replace(cible, enSimple(frNew)));
+  ecrire(fichier, src.replace(cible, remplacement));
 
   // --- 2. le dictionnaire anglais ------------------------------------------
   let trouve = false;
@@ -72,12 +81,28 @@ for (const { fichier, fr, frNew, enNew } of lot) {
     }
     break;
   }
-  if (!trouve) soucis.push(`⚠ pas de traduction existante pour « ${fr.slice(0, 50)}… » (nouveau texte non traduit)`);
+  // Beaucoup de fichiers n'ont jamais été traduits (voir audit-traduction.mjs).
+  // Quand la clé n'existe pas et qu'on fournit un anglais, on l'AJOUTE plutôt
+  // que de se contenter d'un avertissement : sinon chaque réécriture creuse un
+  // peu plus le trou de la version anglaise.
+  if (!trouve) {
+    if (enNew) ajouts.push([frNew, enNew]);
+    else soucis.push(`⚠ pas de traduction pour « ${fr.slice(0, 50)}… » et aucun anglais fourni`);
+  }
   ok++;
+}
+
+// Les traductions neuves rejoignent le second dictionnaire, en fin de table.
+if (ajouts.length) {
+  const f = EN_FILES[1];
+  const dico = lire(f);
+  const i = dico.rstrip ? 0 : dico.lastIndexOf('};');
+  const lignes = ajouts.map(([fr, en]) => `  "${enDouble(fr)}": "${enDouble(en)}",\n`).join('');
+  ecrire(f, dico.slice(0, i) + lignes + dico.slice(i));
 }
 
 for (const [f, s] of cache) writeFileSync(f, s);
 
-console.log(`${ok}/${lot.length} passages réécrits.`);
+console.log(`${ok}/${lot.length} passages réécrits${ajouts.length ? `, ${ajouts.length} traduction(s) créée(s)` : ''}.`);
 for (const s of soucis) console.log('  ' + s);
 process.exit(soucis.some(s => !s.startsWith('⚠')) ? 1 : 0);

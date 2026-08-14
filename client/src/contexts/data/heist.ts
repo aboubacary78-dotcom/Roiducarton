@@ -60,7 +60,7 @@ export const HEIST_TARGETS: HeistTarget[] = [
   {
     id: 'heist-glacier-parc', location: 'parc', difficulty: 'risque', emoji: '🍦',
     label: 'la caisse du glacier', labelEn: 'the ice cream man\'s till',
-    desc: 'Le glacier tourne le dos à sa caisse à chaque cornet. Trois secondes par cornet.',
+    desc: 'Le glacier tourne le dos à sa caisse à chaque cornet, et il y a la queue.',
     descEn: 'The ice cream man turns his back on the till with every cone. Three seconds per cone.',
     catcher: 'commercant', moneyMin: 6, moneyMax: 12,
     item: { id: 'sorbet-artisanal', name: 'Sorbet artisanal', emoji: '🍦', type: 'food', value: 4, effect: { hunger: 8, mental: 8, thirst: 6 } },
@@ -101,7 +101,7 @@ export const HEIST_TARGETS: HeistTarget[] = [
   {
     id: 'heist-etal-marche', location: 'marche', difficulty: 'petit', emoji: '🍎',
     label: 'l\'étal du primeur', labelEn: 'the greengrocer\'s stall',
-    desc: 'Le primeur hurle ses promos, dos aux cagettes. Un classique du métier.',
+    desc: 'Le primeur hurle ses promos, dos aux cagettes, la voix couverte par sa propre sono.',
     descEn: 'The greengrocer bellows his deals, back to the crates. A classic of the trade.',
     catcher: 'commercant', moneyMin: 2, moneyMax: 5,
   },

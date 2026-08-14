@@ -43,7 +43,7 @@ export const TRAVEL_EVENTS_2: GameEvent[] = [
     description: 'L\'abribus du boulevard est un musée des choses oubliées : un parapluie, un sac de sport, et un livre ouvert face contre banc, comme si son lecteur allait revenir.',
     choices: [
       { text: 'Inventorier les trouvailles', risk: 'normal', emoji: '🧳', outcomes: [
-        { probability: 0.5, text: 'Le sac de sport contient des affaires de piscine et un gel douche entamé. Le parapluie ferme mal mais ouvre bien. Butin de voyageur.', statChanges: { dignity: 4, mental: 4 }, itemGain: { id: 'parapluie-abribus', name: 'Parapluie de l\'abribus', emoji: '☂️', type: 'tool', value: 3 } },
+        { probability: 0.5, text: 'Le sac de sport contient des affaires de piscine et un gel douche entamé. Le parapluie ferme mal mais ouvre bien.', statChanges: { dignity: 4, mental: 4 }, itemGain: { id: 'parapluie-abribus', name: 'Parapluie de l\'abribus', emoji: '☂️', type: 'tool', value: 3 } },
         { probability: 0.3, text: 'Le propriétaire du sac revient en courant, essoufflé. Vous le lui tendez, intact. Il fouille, vérifie, puis a honte de lui : il vous paie « la consigne ».', moneyChange: 4, respectChange: 1, statChanges: { mental: 4 } },
         { probability: 0.2, text: 'Le livre est un roman à l\'eau de rose, corné à la page 147. Vous le finissez sur place. Ils se marient. Vous pleurez un peu, à l\'abri des regards.', statChanges: { mental: 9 } },
       ]},

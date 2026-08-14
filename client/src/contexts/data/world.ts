@@ -63,11 +63,11 @@ export const TRAITS: Trait[] = [
 ];
 
 export const LOCATIONS: Record<string, { name: string; nameEn: string; emoji: string; danger: number; resources: number; description: string; descriptionEn: string }> = {
-  'parc': { name: 'Parc Municipal', nameEn: 'City Park', emoji: '🌳', danger: 20, resources: 40, description: 'Nature, pigeons, bancs. Le paradis des siestes.', descriptionEn: 'Nature, pigeons, benches. A napper\'s paradise.' },
-  'centre-ville': { name: 'Centre-Ville', nameEn: 'Downtown', emoji: '🏙️', danger: 30, resources: 60, description: 'Passants, commerces, police. Beaucoup de monde.', descriptionEn: 'Passers-by, shops, police. A lot of people.' },
-  'zone-industrielle': { name: 'Zone Industrielle', nameEn: 'Industrial Zone', emoji: '🏭', danger: 60, resources: 80, description: 'Rats, rouille et trésors cachés. Apportez vos gants.', descriptionEn: 'Rats, rust and hidden treasure. Bring gloves.' },
-  'gare': { name: 'Gare', nameEn: 'Train Station', emoji: '🚂', danger: 40, resources: 50, description: 'Voyageurs, abri, sécurité. Un toit temporaire.', descriptionEn: 'Travelers, shelter, security. A temporary roof.' },
-  'marche': { name: 'Marché', nameEn: 'Market', emoji: '🛒', danger: 25, resources: 70, description: 'Nourriture, commerçants. Attention aux vigiles.', descriptionEn: 'Food, vendors. Watch out for guards.' },
+  'parc': { name: 'Parc Municipal', nameEn: 'City Park', emoji: '🌳', danger: 20, resources: 40, description: 'Des bancs, des pigeons, et de l\'herbe où personne ne vient vous déloger avant midi.', descriptionEn: 'Nature, pigeons, benches. A napper\'s paradise.' },
+  'centre-ville': { name: 'Centre-Ville', nameEn: 'Downtown', emoji: '🏙️', danger: 30, resources: 60, description: 'Du monde du matin au soir, des vitrines, et une patrouille qui repasse toutes les heures.', descriptionEn: 'Passers-by, shops, police. A lot of people.' },
+  'zone-industrielle': { name: 'Zone Industrielle', nameEn: 'Industrial Zone', emoji: '🏭', danger: 60, resources: 80, description: 'De la rouille, des rats, et ce que les entreprises jettent sans regarder.', descriptionEn: 'Rats, rust and hidden treasure. Bring gloves.' },
+  'gare': { name: 'Gare', nameEn: 'Train Station', emoji: '🚂', danger: 40, resources: 50, description: 'Un toit, du chauffage jusqu\'à minuit, et des vigiles qui connaissent les visages.', descriptionEn: 'Travelers, shelter, security. A temporary roof.' },
+  'marche': { name: 'Marché', nameEn: 'Market', emoji: '🛒', danger: 25, resources: 70, description: 'De la nourriture partout, des commerçants pressés, et des cagettes pleines à la fermeture.', descriptionEn: 'Food, vendors. Watch out for guards.' },
 };
 
 // Kits de départ de L'Héritage : achetés au Cimetière avec le Karma de Rue,
