@@ -40,17 +40,3 @@ export function dignityTierIndex(value: number): number {
   const i = DIGNITY_TIERS.findIndex(t => value >= t.min);
   return i === -1 ? DIGNITY_TIERS.length - 1 : i;
 }
-
-/*
- * CE QUE CHAQUE ACTION COÛTE, EN GROS.
- *
- * Le coût exact dépend du déroulement du mini-jeu ; ces valeurs sont le coût
- * PLANCHER, celui qu'on paie même quand tout se passe bien. Elles ne servent
- * qu'à prévenir : « ça PEUT vous faire descendre », jamais « ça VA ». Une
- * annonce qui promet plus qu'elle ne sait ment au joueur, et ça se remarque.
- */
-export const ACTION_DIGNITY_COST: Record<string, number> = {
-  beg: 3,      // La Manche : −3 au mieux, davantage si on insiste.
-  salvage: 4,  // La Récup' : −4 en remontant proprement, jusqu'à −9 en s'entêtant.
-  steal: 6,    // Le vol : −6 au mieux, bien plus si on se fait prendre.
-};

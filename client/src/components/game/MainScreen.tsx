@@ -3,8 +3,6 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import StatBars from './StatBars';
 import CoachTip from './CoachTip';
-import { ACTION_DIGNITY_COST } from '@/contexts/data/dignity';
-import { STAT_META } from '@/contexts/types';
 import { loadCommande, commandeDef, markClaimed, daysLeft } from '@/lib/commande';
 import { addKarma } from '@/lib/necrology';
 import { pushToast } from '@/lib/toast';
@@ -114,17 +112,6 @@ export default function MainScreen() {
   // lit son écran, pas au moment où il faut les montrer.
   useEffect(() => { prechargerActions(char.location); }, [char.location]);
 
-  /*
-   * LE PRIX D'UNE ACTION, ET RIEN D'AUTRE.
-   *
-   * Il a existé ici un avertissement de palier — « quitte "Ça commence à se
-   * voir" ? » — affiché quand l'action allait faire descendre d'un cran. Il
-   * demandait de connaître les paliers pour vouloir dire quelque chose, et
-   * dans le seul cas où il apparaissait il remplaçait le chiffre. Le nombre
-   * suffit : il se compare tout seul à la jauge affichée juste au-dessus.
-   */
-  const prixFierte = (actionId: string) =>
-    `−${ACTION_DIGNITY_COST[actionId]} ${STAT_META.dignity.emoji}`;
 
   /*
    * LA COMMANDE DE LA SEMAINE.
@@ -451,7 +438,6 @@ export default function MainScreen() {
           <ActionTile emoji="🔍" title={tr('Explorer', 'Explore')} desc={tr('Tenter une rencontre', 'Look for an encounter')} accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
           <ActionTile
             emoji="🙏" title={tr('Mendier', 'Beg')} desc={tr('Récolter des pièces', 'Collect coins')} accent="#B8860B"
-            cost={prixFierte('beg')}
             disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })}
           />
           <ActionTile emoji="😴" title={tr('Dormir', 'Sleep')} desc={tr('Récupérer du sommeil', 'Recover sleep')} accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
@@ -480,7 +466,7 @@ export default function MainScreen() {
           <span className="text-lg">♻️</span>
           <span className="text-xs font-medium text-[#3D3020]">{tr('La Récup\'', 'Salvage')}</span>
           <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono bg-[#7C8B5A]/12 text-[#5E7A3A]">
-            {tr('matériaux', 'materials')} · {prixFierte('salvage')}
+            {tr('matériaux', 'materials')}
           </span>
         </motion.button>
 
@@ -497,7 +483,7 @@ export default function MainScreen() {
           <span className="text-lg">🥷</span>
           <span className="text-xs font-medium text-[#3D3020]">{tr('Voler', 'Steal')}</span>
           <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono bg-[#D94F4F]/10 text-[#D94F4F]">
-            {tr('risqué', 'risky')} · {prixFierte('steal')}
+            {tr('risqué', 'risky')}
           </span>
         </motion.button>
 
@@ -526,10 +512,8 @@ export default function MainScreen() {
   );
 }
 
-function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small, cost }: {
+function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small }: {
   emoji: string; title: string; desc?: string; accent?: string; disabled: boolean; onClick: () => void; danger?: boolean; small?: boolean;
-  /** Ce que l'action coûte en fierté, annoncé AVANT de la choisir. */
-  cost?: string;
 }) {
   return (
     <motion.button
@@ -556,9 +540,6 @@ function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, sma
       </span>
       {desc && !small && (
         <span className="text-[10px] text-[#A08B70] text-center leading-tight">{desc}</span>
-      )}
-      {cost && !small && (
-        <span className="text-[9px] text-[#A08B70] font-mono leading-none">{cost}</span>
       )}
     </motion.button>
   );
