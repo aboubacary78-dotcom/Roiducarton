@@ -49,7 +49,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
       ]},
       { text: 'Attendre les invendus du soir', risk: 'normal', emoji: '⏳', outcomes: [
         { probability: 0.6, text: 'Un carton entier abandonné : vaisselle, lampe, roman de gare. Noël en avance, version poussière.', statChanges: { mental: 6 }, itemGain: { id: 'lampe-chevet', name: 'Lampe de chevet orpheline', emoji: '🛋️', type: 'junk', value: 5 } },
-        { probability: 0.4, text: 'Un autre connaisseur est passé avant vous. Il a même pris les cintres. Respect et rage.', statChanges: { mental: -4 } },
+        { probability: 0.4, text: 'Un autre connaisseur est passé avant vous. Il a même pris les cintres, et replié le carton derrière lui.', statChanges: { mental: -4 } },
       ]},
     ],
   },
@@ -88,7 +88,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     description: 'Un livreur à vélo tourne en rond depuis vingt minutes. Sa sacoche fume doucement. Le GPS a gagné, lui a perdu.',
     choices: [
       { text: 'Le guider dans le quartier', risk: 'safe', emoji: '🧭', outcomes: [
-        { probability: 0.7, text: 'Trop tard, commande annulée. Il vous tend la pizza tiède : « c\'est toi le client maintenant. » Promotion éclair.', statChanges: { hunger: 22, mental: 6 } },
+        { probability: 0.7, text: 'Trop tard, commande annulée. Il vous tend la pizza tiède : « c\'est toi le client maintenant », et remonte sur son scooter.', statChanges: { hunger: 22, mental: 6 } },
         { probability: 0.3, text: 'Il arrive à temps grâce à vous et revient partager son pourboire. Un homme d\'honneur, à vélo.', moneyChange: 3, respectChange: 1, statChanges: { mental: 4 } },
       ]},
       { text: 'Racheter la commande en retard', risk: 'normal', emoji: '💶', outcomes: [
@@ -176,7 +176,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
   {
     id: 'exp-magicien-rate', title: 'Le Magicien Raté', type: 'social',
     image: '/assets/exp-magicien-rate.webp',
-    description: 'Un magicien de rue vient de rater son grand final : sa colombe s\'est enfuie avec l\'alliance d\'une spectatrice. Panique élégante.',
+    description: 'Un magicien de rue vient de rater son grand final : sa colombe s\'est enfuie avec l\'alliance d\'une spectatrice, et il continue de sourire au public.',
     choices: [
       { text: 'Traquer la colombe', risk: 'normal', emoji: '🕊️', outcomes: [
         { probability: 0.6, text: 'Vous la coincez sous votre veste au troisième essai. Le couple vous récompense, le magicien vous embauche presque.', moneyChange: 8, respectChange: 3 },
@@ -191,7 +191,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
   {
     id: 'exp-demenageurs', title: 'Le Piano du Sixième', type: 'social',
     image: '/assets/exp-demenageurs.webp',
-    description: 'Deux déménageurs contemplent un piano droit au pied d\'un immeuble sans ascenseur. Sixième étage. Silence religieux.',
+    description: 'Deux déménageurs contemplent un piano droit au pied d\'un immeuble sans ascenseur. Sixième étage. Aucun des deux ne parle en premier.',
     choices: [
       { text: 'Proposer vos bras', risk: 'normal', emoji: '💪', outcomes: [
         { probability: 0.6, text: 'Six étages, quarante marches de blasphèmes, un billet à l\'arrivée. Votre dos déposera plainte plus tard.', moneyChange: 10, respectChange: 2, statChanges: { health: -6 } },
@@ -257,7 +257,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
         { probability: 0.5, text: 'La régisseuse vous démasque à la troisième chouquette. Expulsion publique, mais elle vous laisse le croissant entamé.', statChanges: { dignity: -6, mental: -4, hunger: 6 } },
       ]},
       { text: 'Proposer d\'être figurant', risk: 'normal', emoji: '🎭', outcomes: [
-        { probability: 0.6, text: 'Ils cherchaient justement « quelqu\'un de vrai ». Vous traversez le champ douze fois. Payé, nourri, presque célèbre.', moneyChange: 8, statChanges: { dignity: 6, mental: 8 } },
+        { probability: 0.6, text: 'Ils cherchaient justement « quelqu\'un de vrai ». Vous traversez le champ douze fois, payé à la traversée, nourri entre deux prises.', moneyChange: 8, statChanges: { dignity: 6, mental: 8 } },
         { probability: 0.4, text: '« On a déjà nos SDF, merci. » Ils ont des SDF de casting. Maquillés pour faire vrai. Le cinéma est un monde étrange.', statChanges: { mental: -6, dignity: -3 } },
       ]},
     ],
@@ -297,7 +297,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     description: 'Un égoutier en pause remonte de sa bouche d\'égout, s\'assoit sur le rebord et vous tend un gobelet de thermos, comme si c\'était prévu.',
     choices: [
       { text: 'Partager le café et la causerie', risk: 'safe', emoji: '☕', outcomes: [
-        { probability: 0.7, text: 'Il connaît la ville par en dessous. Il vous indique une grille d\'aération tiède « où même les rats sont polis ». Une adresse en or.', statChanges: { thirst: 8, mental: 8, sleep: 5 }, addFlag: 'grille-egoutier' },
+        { probability: 0.7, text: 'Il connaît la ville par en dessous. Il vous indique une grille d\'aération tiède « où même les rats sont polis », et vous fait répéter la rue deux fois.', statChanges: { thirst: 8, mental: 8, sleep: 5 }, addFlag: 'grille-egoutier' },
         { probability: 0.3, text: 'Son café a un léger goût de tuyau. Sa philosophie aussi. Les deux réchauffent quand même.', statChanges: { thirst: 5, health: -2, mental: 4 } },
       ]},
       { text: 'Demander ce qu\'on trouve en bas', risk: 'normal', emoji: '🐊', outcomes: [
@@ -312,7 +312,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     description: 'La dernière cabine téléphonique du quartier se met à sonner pile quand vous passez devant. Personne d\'autre dans la rue.',
     choices: [
       { text: 'Décrocher', risk: 'normal', emoji: '📞', outcomes: [
-        { probability: 0.5, text: '« Papi ? » Une petite voix. Vous expliquez gentiment. Elle raconte sa journée quand même. Meilleure conversation du mois.', statChanges: { mental: 10 } },
+        { probability: 0.5, text: '« Papi ? » Une petite voix. Vous expliquez gentiment. Elle raconte sa journée quand même, jusqu\'à ce que quelqu\'un lui reprenne le téléphone.', statChanges: { mental: 10 } },
         { probability: 0.3, text: 'Un démarchage pour des panneaux solaires. Même ici. Même vous. Vous négociez par principe, pour rien.', statChanges: { mental: 3 } },
         { probability: 0.2, text: 'Une voix : « la consigne de la gare, casier 12. » Puis bip. Vous n\'irez jamais. Ou si ?', statChanges: { mental: 5, sleep: -2 } },
       ]},
@@ -344,10 +344,10 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     choices: [
       { text: 'Se faire lire l\'avenir', risk: 'normal', emoji: '🔮', outcomes: [
         { probability: 0.6, text: '« Je vois... un toit. Pas tout de suite, mais je le vois. » Elle vous offre le thé. Un toit. Vous y pensez toute la journée.', statChanges: { mental: 10, thirst: 6 }, addFlag: 'prophetie-toit' },
-        { probability: 0.4, text: 'Elle pâlit en regardant les cartes, les range, et vous donne un billet : « revenez jamais. » Inquiétant, mais rentable.', moneyChange: 5, statChanges: { mental: -5, sleep: -3 } },
+        { probability: 0.4, text: 'Elle pâlit en regardant les cartes, les range, et vous donne un billet : « revenez jamais. » Elle ne dit pas ce qu\'elle a vu.', moneyChange: 5, statChanges: { mental: -5, sleep: -3 } },
       ]},
       { text: 'Lui proposer de rabattre des clients', risk: 'normal', emoji: '📣', outcomes: [
-        { probability: 0.6, text: 'Votre bagou attire trois curieux dans l\'après-midi. Commission honnête et thé à volonté. Le marketing mystique paie.', moneyChange: 6, statChanges: { thirst: 8, mental: 4 } },
+        { probability: 0.6, text: 'Votre bagou attire trois curieux dans l\'après-midi. Commission honnête, thé à volonté, et une chaise pliante rien que pour vous.', moneyChange: 6, statChanges: { thirst: 8, mental: 4 } },
         { probability: 0.4, text: 'Vous promettez trop : un client furieux réclame son « grand amour » sous 48h. Madame Esperanza vous congédie diplomatiquement.', statChanges: { mental: -3 }, respectChange: -1 },
       ]},
     ],
@@ -358,7 +358,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     description: 'Un atelier associatif répare des vélos dans une arrière-cour. Ça sent la graisse, le métal et le café. Quelqu\'un jure contre un dérailleur.',
     choices: [
       { text: 'Donner un coup de main', risk: 'safe', emoji: '🔧', outcomes: [
-        { probability: 0.7, text: 'Vous tenez, vous vissez, vous apprenez. On vous paie en café, en sandwich et en dignité de mains sales. Le bon deal.', statChanges: { hunger: 12, thirst: 8, mental: 8, dignity: 5 } },
+        { probability: 0.7, text: 'Vous tenez, vous vissez, vous apprenez. On vous paie en café, en sandwich, et on vous demande si vous revenez demain.', statChanges: { hunger: 12, thirst: 8, mental: 8, dignity: 5 } },
         { probability: 0.3, text: 'Le dérailleur gagne contre tout le monde. Défaite collective, mais fraternelle. On vous garde une place pour la prochaine.', statChanges: { mental: 6 }, respectChange: 2 },
       ]},
       { text: 'Négocier une roue pour votre caddie', risk: 'normal', emoji: '🛞', outcomes: [
@@ -392,7 +392,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
         { probability: 0.3, text: 'Une bourrasque vous emballe tous les deux dans l\'affiche. Vous voilà collés au lion du cirque Zavatta. On vous décolle en riant.', statChanges: { mental: 4, dignity: -4 } },
       ]},
       { text: 'Récupérer les vieilles affiches arrachées', risk: 'safe', emoji: '📜', outcomes: [
-        { probability: 1, text: 'Le papier d\'affiche, épais et enduit : isolant de première classe pour la nuit. Les pros le savent.', statChanges: { mental: 3, sleep: 5 }, itemGain: { id: 'affiches-epaisses', name: 'Liasse d\'affiches (isolant)', emoji: '📜', type: 'junk', value: 3 } },
+        { probability: 1, text: 'Le papier d\'affiche, épais et enduit : deux couches sous le dos valent une couverture.', statChanges: { mental: 3, sleep: 5 }, itemGain: { id: 'affiches-epaisses', name: 'Liasse d\'affiches (isolant)', emoji: '📜', type: 'junk', value: 3 } },
       ]},
     ],
   },
@@ -417,7 +417,7 @@ export const EXPLORE_EVENTS_2: GameEvent[] = [
     description: 'Un trousseau de clés gît sur le trottoir : sept clés, une patte de lapin usée, et une étiquette « si perdu, récompense ». Sans adresse.',
     choices: [
       { text: 'Le déposer au commissariat', risk: 'normal', emoji: '👮', outcomes: [
-        { probability: 0.6, text: 'L\'agent note tout, vous remercie, et le propriétaire vous retrouve le soir même : la récompense existe vraiment. Miracle administratif.', moneyChange: 10, respectChange: 3, statChanges: { mental: 6 } },
+        { probability: 0.6, text: 'L\'agent note tout, vous remercie, et le propriétaire vous retrouve le soir même : la récompense existe vraiment, en billets.', moneyChange: 10, respectChange: 3, statChanges: { mental: 6 } },
         { probability: 0.4, text: 'On vous fait attendre une heure, puis on vous demande VOS papiers. Vous ressortez sans clés, sans récompense, avec un doute.', statChanges: { mental: -4, dignity: -3 } },
       ]},
       { text: 'Garder la patte de lapin', risk: 'normal', emoji: '🐰', outcomes: [
