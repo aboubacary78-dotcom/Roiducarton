@@ -20,6 +20,8 @@ for (const f of readdirSync(DATA).filter(x => x.endsWith('.ts'))) {
   for (const m of src.matchAll(/(?:^|[\s:{,(])(text|desc|hint|description|name|label)\s*:\s*'((?:\\.|[^'\\]){20,400})'/gms)) {
     const t = m[2].replace(/\\'/g, "'");
     if (!/[àâçéèêëîïôùûü]/.test(t) && /\b(the|you|your)\b/i.test(t)) continue;  // déjà de l'anglais
+    // Champ frère `…En` : l'anglais est écrit en clair, pas dans le dictionnaire.
+    if (new RegExp(`${m[1]}En\\s*:`).test(src.slice(m.index, m.index + m[0].length + 260))) continue;
     n++;
     if (dico.includes(`"${dbl(t)}":`)) ok++;
   }
