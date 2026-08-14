@@ -88,6 +88,13 @@ export default function InventoryScreen() {
                       );
                     })}
                   </div>
+                  {/* Un objet passif n'a pas de bouton : cette ligne est le seul
+                      endroit où le joueur apprend ce qu'il lui apporte. */}
+                  {item.passive && (
+                    <p className="text-[10px] text-[#3d8b4f] leading-snug mt-1">
+                      ✦ {en ? (item.passiveEn ?? item.passive) : item.passive}
+                    </p>
+                  )}
                 </div>
                 <div className="shrink-0 flex flex-col gap-1.5">
                   {hasEffect && (
@@ -135,10 +142,10 @@ export default function InventoryScreen() {
         </div>
         <p className="text-[11px] text-[#8B6B4A] -mt-1.5 leading-snug">
           {isBricoleur
-            ? tr('Vos mains d\'or transforment le bazar : recettes avancées débloquées, un objet de moins par recette.',
-                 'Your golden hands turn junk into gear: advanced recipes unlocked, one fewer item per recipe.')
-            : tr('Assemblez des objets « bazar » pour bricoler quelque chose d\'utile.',
-                 'Combine "junk" items to tinker something useful.')}
+            ? tr('Vos mains d\'or : un objet de moins par recette, et ce que vous fabriquez tient deux fois plus longtemps.',
+                 'Your golden hands: one fewer item per recipe, and what you build lasts twice as long.')
+            : tr('L\'échoppe vend de quoi remplir vos jauges. L\'établi fabrique ce qu\'elle ne vend pas : des nuits qui ne coûtent rien.',
+                 'The shop sells things to refill your gauges. The workbench builds what it doesn\'t sell: nights that cost you nothing.')}
         </p>
 
         {materials === 0 ? (

@@ -35,11 +35,11 @@ import {
   SURSAUT_EVENT, BEG_EVENTS, STEAL_EVENTS,
 } from './data/events';
 import {
-  makeCombatState, generateHand, getCard, unarmedDamage, bestWeapon, bestWeaponBonus, firstJunk,
+  makeCombatState, generateHand, getCard, unarmedDamage, bestWeapon, bestWeaponBonus, firstJunk, bestArmor, soakDamage,
   combatDeathMessage, SIGNS, SPECIAL_DEFS,
 } from './data/combat';
 import { getHeistTarget, HEIST_TARGETS } from './data/heist';
-import { RECIPES, recipeCost, pickMaterials } from './data/crafting';
+import { RECIPES, recipeCost, pickMaterials, usureNuit } from './data/crafting';
 import { encounterFlag } from './data/npc';
 
 // Façade stable : ré-exporte types & données pour les composants existants.
@@ -888,6 +888,38 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
+      // ---- Matériel de l'établi : il agit tout seul, et il s'use ----
+      // On n'AJOUTE pas de jauge, on ANNULE une perte : le matelas rend la
+      // nuit qu'on aurait perdue, il ne fabrique pas du sommeil qu'on n'avait
+      // pas. Sans ce calcul, s'endormir à zéro en aurait fait gagner quinze.
+      const usesEtabli: string[] = [];
+      if (cold && ch.inventory.some(i => i.id === 'craft-rechaud')) {
+        const perdu = Math.min(Math.abs(weatherPenalty.health || 0), Math.max(0, ch.stats.health - s.health));
+        if (perdu > 0) {
+          s.health += perdu;
+          notes.push('🔥 Le réchaud a tenu toute la nuit : le froid ne vous a rien pris.');
+          notesEn.push('🔥 The stove burned all night: the cold took nothing from you.');
+          usesEtabli.push('craft-rechaud');
+        }
+      }
+      if (ch.inventory.some(i => i.id === 'craft-matelas')) {
+        const perdu = Math.max(0, ch.stats.sleep - s.sleep);
+        if (perdu > 0) {
+          s.sleep += perdu;
+          notes.push('🛏️ Le matelas de carton vous a rendu votre nuit entière.');
+          notesEn.push('🛏️ The cardboard mattress gave you your whole night back.');
+          usesEtabli.push('craft-matelas');
+        }
+      }
+      for (const id of usesEtabli) {
+        if (Math.random() >= usureNuit(ch)) continue;
+        const casse = inventory.find(i => i.id === id);
+        if (!casse) continue;
+        inventory = removeOne(inventory, id);
+        notes.push(`💔 ${casse.name} n'a pas tenu une nuit de plus. Il faudra en refaire un.`);
+        notesEn.push(`💔 The ${tc(casse.name)} didn't survive another night. You'll have to build a new one.`);
+      }
+
       // ---- Contrat du matin : verdict de la journée écoulée ----
       let respectBonus = 0;
       const cDef = state.contract ? getContract(state.contract.id) : undefined;
@@ -1204,7 +1236,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         // Une arme lourde fait tourner l'échange : c'est lui qui encaisse.
         const weapon = bestWeapon(c);
         const heavy = weapon?.combatStyle === 'heavy';
-        const pDmg = heavy ? 0 : 2, eDmg = heavy ? 5 : 3;
+        const pDmg = heavy ? 0 : soakDamage(c, 2), eDmg = heavy ? 5 : 3;
         const hp = Math.max(0, c.stats.health - pDmg);
         const eHp = Math.max(0, combat.enemyHealth - eDmg);
         if (heavy) logs.push(L(`🏏 Accrochage, ${weapon!.name} fait la différence : c'est lui qui encaisse ! (−${eDmg} pour lui)`, `🏏 Clash, ${tc(weapon!.name)} makes the difference: the foe takes the hit! (−${eDmg} foe)`));
@@ -1245,7 +1277,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           screen: 'main',
         };
       }
-      const dmg = Math.max(2, Math.round(combat.enemyAttack * (0.5 + Math.random() * 0.4)));
+      const dmg = soakDamage(c, Math.max(2, Math.round(combat.enemyAttack * (0.5 + Math.random() * 0.4))));
       const hp = Math.max(0, c.stats.health - dmg);
       if (hp <= 0) return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(combat.enemyName) };
       logs.push(L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`));
@@ -1270,8 +1302,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // Dégâts par touche : basés sur l'attaque de l'ennemi, réduits par un
       // éventuel malus (Insulte) et par la résistance, aggravés par Os en Mousse.
       const effAtk = Math.max(3, combat.enemyAttack - combat.enemyAtkDebuff);
-      const perHit = Math.max(2, Math.round(effAtk * 0.5 * (hasOsMousse ? 1.5 : 1) * (hasFroid ? 0.8 : 1)));
+      const brut = Math.max(2, Math.round(effAtk * 0.5 * (hasOsMousse ? 1.5 : 1) * (hasFroid ? 0.8 : 1)));
+      // L'armure portée amortit chaque touche (voir soakDamage).
+      const perHit = soakDamage(c, brut);
       const totalDmg = action.hits * perHit;
+      const armure = bestArmor(c);
+      const amorti = armure && action.hits > 0 && perHit < brut
+        ? L(` ${armure.emoji} ${armure.name} encaisse une partie.`, ` ${armure.emoji} ${tc(armure.name)} takes part of it.`)
+        : '';
       const newHp = Math.max(0, c.stats.health - totalDmg);
       if (newHp <= 0) {
         return {
@@ -1298,7 +1336,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           combatLog: logs,
         };
       }
-      logs.push(L(`💥 ${action.hits} touche(s) encaissée(s), ${totalDmg} dégâts. Retour au face-à-face.`, `💥 Took ${action.hits} hit(s), ${totalDmg} damage. Back to the standoff.`));
+      logs.push(L(`💥 ${action.hits} touche(s) encaissée(s), ${totalDmg} dégâts.${amorti} Retour au face-à-face.`, `💥 Took ${action.hits} hit(s), ${totalDmg} damage.${amorti} Back to the standoff.`));
       const enemyLike = { name: combat.enemyName, emoji: combat.enemyEmoji, attack: combat.enemyAttack, health: combat.enemyMaxHealth };
       return {
         ...state,
@@ -1336,7 +1374,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           };
         }
         // Fuite ratée : l'ennemi place un coup, on repart en esquive.
-        const dmg = Math.max(2, Math.round(combat.enemyAttack * rnd(0.5, 0.4)));
+        const dmg = soakDamage(c, Math.max(2, Math.round(combat.enemyAttack * rnd(0.5, 0.4))));
         const hp = Math.max(0, c.stats.health - dmg);
         if (hp <= 0) return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(combat.enemyName) };
         logs.push(L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`));

@@ -94,6 +94,40 @@ export function bestWeaponBonus(c: Character): number {
   const w = bestWeapon(c);
   return w ? (w.attackBonus ?? 4) : 0;
 }
+
+/*
+ * LA DÉFENSE, ENFIN.
+ *
+ * Vingt-cinq objets du jeu annoncent « 🛡️ +N déf. » à l'inventaire et à
+ * l'échoppe — le gilet de chantier à douze euros en promet cinq. Aucune ligne
+ * de combat ne lisait ce nombre : les dégâts encaissés ne dépendaient que de
+ * l'attaque de l'adversaire. Le joueur payait une promesse.
+ *
+ * On garde la règle des armes : SEULE la meilleure pièce compte, pour qu'un
+ * sac de cinq manteaux ne rende pas invincible. La réduction est douce et
+ * n'atteint jamais zéro — une armure rend les coups supportables, elle
+ * n'annule pas la bagarre.
+ *   +1 → −8 %   +3 → −20 %   +5 → −29 %
+ */
+export function bestArmor(c: Character): InventoryItem | undefined {
+  let best: InventoryItem | undefined;
+  for (const i of c.inventory) {
+    if (!i.defenseBonus) continue;
+    if (!best || i.defenseBonus > (best.defenseBonus ?? 0)) best = i;
+  }
+  return best;
+}
+
+export function bestArmorBonus(c: Character): number {
+  return bestArmor(c)?.defenseBonus ?? 0;
+}
+
+/** Dégâts réellement encaissés, une fois l'armure prise en compte. */
+export function soakDamage(c: Character, dmg: number): number {
+  const def = bestArmorBonus(c);
+  if (def <= 0) return dmg;
+  return Math.max(1, Math.round(dmg * (12 / (12 + def))));
+}
 function hasHealingItem(c: Character): boolean {
   return c.inventory.some(i => (i.effect?.health ?? 0) > 0);
 }
@@ -210,7 +244,10 @@ export function makeCombatState(enemy: Enemy, character: Character): CombatState
     phase: 'sign',
     pattern: getPattern(enemy),
     hand: [],
-    atkBuff: 0,
+    // L'arme de fortune ne ressemble pas à une arme : personne ne voit venir
+    // un tuyau scotché. Le premier coup du combat part avec l'effet de
+    // surprise, une fois, et l'avantage s'éteint après (atkBuff est consommé).
+    atkBuff: character.inventory.some(i => i.id === 'craft-arme') ? 3 : 0,
     enemyStunned: false,
     enemyAtkDebuff: 0,
     ...rollSignRound(enemy, character, false),

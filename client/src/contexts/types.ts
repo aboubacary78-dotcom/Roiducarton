@@ -101,6 +101,11 @@ export interface InventoryItem {
   // 'heavy'   = armes contondantes (même un raté fait mal, critiques moindres).
   // Absent = équilibré (mains nues / arme passe-partout).
   combatStyle?: 'precise' | 'heavy';
+  // Effet permanent tant que l'objet est dans le sac, décrit en clair pour
+  // l'inventaire. Les objets passifs n'ont pas de bouton « Utiliser » : c'est
+  // cette ligne, et elle seule, qui dit au joueur ce qu'ils lui apportent.
+  passive?: string;
+  passiveEn?: string;
 }
 
 // ============ ÉVÉNEMENTS ============
