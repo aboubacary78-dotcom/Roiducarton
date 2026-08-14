@@ -54,15 +54,3 @@ export const ACTION_DIGNITY_COST: Record<string, number> = {
   salvage: 4,  // La Récup' : −4 en remontant proprement, jusqu'à −9 en s'entêtant.
   steal: 6,    // Le vol : −6 au mieux, bien plus si on se fait prendre.
 };
-
-/**
- * Cette action risque-t-elle de faire descendre d'un palier ? Renvoie le
- * palier qu'on quitterait, ou `null` s'il n'y a rien à craindre.
- */
-export function tierAtRisk(dignity: number, actionId: string): DignityTier | null {
-  const cost = ACTION_DIGNITY_COST[actionId];
-  if (cost === undefined) return null;
-  const now = dignityTierIndex(dignity);
-  const after = dignityTierIndex(Math.max(0, dignity - cost));
-  return after > now ? DIGNITY_TIERS[now] : null;
-}

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import StatBars from './StatBars';
 import CoachTip from './CoachTip';
-import { tierAtRisk } from '@/contexts/data/dignity';
+import { ACTION_DIGNITY_COST } from '@/contexts/data/dignity';
 import { STAT_META } from '@/contexts/types';
 import { loadCommande, commandeDef, markClaimed, daysLeft } from '@/lib/commande';
 import { addKarma } from '@/lib/necrology';
@@ -18,7 +18,6 @@ import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
 import { noteTap } from '@/lib/tapOrigin';
 import { prechargerActions } from '@/lib/precharge';
-import { ACTION_DIGNITY_COST } from '@/contexts/data/dignity';
 
 // Couleur du voile de lumière selon l'avancement de la journée : or du matin,
 // plein jour transparent, orange du soir, bleu de nuit. Interpolation linéaire
@@ -115,9 +114,17 @@ export default function MainScreen() {
   // lit son écran, pas au moment où il faut les montrer.
   useEffect(() => { prechargerActions(char.location); }, [char.location]);
 
-  const risqueMendier = tierAtRisk(char.stats.dignity, 'beg');
-  const risqueRecup = tierAtRisk(char.stats.dignity, 'salvage');
-  const risqueVoler = tierAtRisk(char.stats.dignity, 'steal');
+  /*
+   * LE PRIX D'UNE ACTION, ET RIEN D'AUTRE.
+   *
+   * Il a existé ici un avertissement de palier — « quitte "Ça commence à se
+   * voir" ? » — affiché quand l'action allait faire descendre d'un cran. Il
+   * demandait de connaître les paliers pour vouloir dire quelque chose, et
+   * dans le seul cas où il apparaissait il remplaçait le chiffre. Le nombre
+   * suffit : il se compare tout seul à la jauge affichée juste au-dessus.
+   */
+  const prixFierte = (actionId: string) =>
+    `−${ACTION_DIGNITY_COST[actionId]} ${STAT_META.dignity.emoji}`;
 
   /*
    * LA COMMANDE DE LA SEMAINE.
@@ -444,8 +451,7 @@ export default function MainScreen() {
           <ActionTile emoji="🔍" title={tr('Explorer', 'Explore')} desc={tr('Tenter une rencontre', 'Look for an encounter')} accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
           <ActionTile
             emoji="🙏" title={tr('Mendier', 'Beg')} desc={tr('Récolter des pièces', 'Collect coins')} accent="#B8860B"
-            cost={`−${ACTION_DIGNITY_COST.beg} ${STAT_META.dignity.emoji}`}
-            warn={risqueMendier ? tr(`peut vous faire quitter « ${risqueMendier.fr} »`, `may cost you "${risqueMendier.en}"`) : null}
+            cost={prixFierte('beg')}
             disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })}
           />
           <ActionTile emoji="😴" title={tr('Dormir', 'Sleep')} desc={tr('Récupérer du sommeil', 'Recover sleep')} accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
@@ -473,10 +479,8 @@ export default function MainScreen() {
         >
           <span className="text-lg">♻️</span>
           <span className="text-xs font-medium text-[#3D3020]">{tr('La Récup\'', 'Salvage')}</span>
-          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${risqueRecup ? 'bg-[#B8703A]/12 text-[#B8703A]' : 'bg-[#7C8B5A]/12 text-[#5E7A3A]'}`}>
-            {risqueRecup
-              ? tr(`quitte « ${risqueRecup.fr} » ?`, `costs "${risqueRecup.en}"?`)
-              : `${tr('matériaux', 'materials')} · −${ACTION_DIGNITY_COST.salvage} ${STAT_META.dignity.emoji}`}
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono bg-[#7C8B5A]/12 text-[#5E7A3A]">
+            {tr('matériaux', 'materials')} · {prixFierte('salvage')}
           </span>
         </motion.button>
 
@@ -492,10 +496,8 @@ export default function MainScreen() {
         >
           <span className="text-lg">🥷</span>
           <span className="text-xs font-medium text-[#3D3020]">{tr('Voler', 'Steal')}</span>
-          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-mono ${risqueVoler ? 'bg-[#B8703A]/12 text-[#B8703A]' : 'bg-[#D94F4F]/10 text-[#D94F4F]'}`}>
-            {risqueVoler
-              ? tr(`quitte « ${risqueVoler.fr} » ?`, `costs "${risqueVoler.en}"?`)
-              : `${tr('risqué', 'risky')} · −${ACTION_DIGNITY_COST.steal} ${STAT_META.dignity.emoji}`}
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono bg-[#D94F4F]/10 text-[#D94F4F]">
+            {tr('risqué', 'risky')} · {prixFierte('steal')}
           </span>
         </motion.button>
 
@@ -524,10 +526,8 @@ export default function MainScreen() {
   );
 }
 
-function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small, warn, cost }: {
+function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small, cost }: {
   emoji: string; title: string; desc?: string; accent?: string; disabled: boolean; onClick: () => void; danger?: boolean; small?: boolean;
-  /** Palier de Dignité que cette action risque de faire quitter. */
-  warn?: string | null;
   /** Ce que l'action coûte en fierté, annoncé AVANT de la choisir. */
   cost?: string;
 }) {
@@ -554,16 +554,10 @@ function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, sma
       <span className={`${small ? 'text-[10px]' : 'text-sm'} font-semibold text-[#3D3020] text-center leading-tight`}>
         {title}
       </span>
-      {desc && !small && !warn && (
+      {desc && !small && (
         <span className="text-[10px] text-[#A08B70] text-center leading-tight">{desc}</span>
       )}
-      {warn && !small && (
-        <span className="text-[10px] text-[#B8703A] text-center leading-tight font-medium">{warn}</span>
-      )}
-      {/* Le prix de l'action, visible avant de la choisir. L'avertissement de
-          palier le remplace quand il y en a un : il dit la même chose en plus
-          grave, les afficher tous les deux ne ferait que du bruit. */}
-      {cost && !warn && !small && (
+      {cost && !small && (
         <span className="text-[9px] text-[#A08B70] font-mono leading-none">{cost}</span>
       )}
     </motion.button>
