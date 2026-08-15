@@ -1,3 +1,4 @@
+import { useVerrouScroll } from '@/lib/verrouScroll';
 import { useGame, STAT_META, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
@@ -46,6 +47,10 @@ export default function EventResultOverlay() {
     else playFail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result?.text]);
+
+  // Le décor derrière ce voile ne doit plus défiler : on lisait son résultat
+  // pendant que le contrat, la météo et les jauges glissaient au moindre doigt.
+  useVerrouScroll(!!result);
 
   if (!result) return null;
 

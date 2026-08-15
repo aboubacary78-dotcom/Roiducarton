@@ -795,10 +795,6 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
         </AnimatePresence>
       </div>
 
-      <p className="text-[10px] text-[#8B6B4A]">
-        {tr('Tenez votre personnage et promenez-le. (ZQSD / flèches au clavier)',
-            'Hold your character and move them around. (WASD / arrows on keyboard)')}
-      </p>
     </motion.div>
   );
 }

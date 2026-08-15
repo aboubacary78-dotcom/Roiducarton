@@ -1,3 +1,4 @@
+import { useVerrouScroll } from '@/lib/verrouScroll';
 import { useGame, generateOrigin } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
@@ -40,6 +41,7 @@ export default function OriginStoryOverlay() {
   // Froissement de vieux papier quand le récit se déplie (hook AVANT tout
   // retour anticipé : l'ordre des hooks doit rester stable).
   useEffect(() => { if (visible) playPaper(); }, [visible]);
+  useVerrouScroll(visible);
   if (!char || !visible) return null;
 
   const story = generateOrigin(char);

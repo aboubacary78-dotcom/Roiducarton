@@ -1,3 +1,4 @@
+import { useVerrouScroll } from '@/lib/verrouScroll';
 import { bagCapacity } from '@/contexts/GameContext';
 import { useGame, type StreetNpc } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,6 +19,8 @@ export default function StreetEncounter({ npc, onClose }: { npc: StreetNpc; onCl
   const hasFood = char.inventory.some((it) => it.type === 'food');
   const offer = npc.offer;
   const canTrade = offer && char.money >= offer.price && char.inventory.length < bagCapacity(char);
+  // Ce voile n'est monté que lorsqu'il est visible : le verrou est inconditionnel.
+  useVerrouScroll(true);
 
   function share() {
     if (!hasFood) return;

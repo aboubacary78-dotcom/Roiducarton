@@ -1,3 +1,4 @@
+import { useVerrouScroll } from '@/lib/verrouScroll';
 import { useGame, STAT_META, WEATHER_TYPES, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr } from '@/lib/lang';
@@ -11,6 +12,8 @@ export default function DaySummaryOverlay() {
   const { state, dispatch } = useGame();
   const lang = useLang();
   const s = state.daySummary;
+  useVerrouScroll(!!s);
+
   if (!s) return null;
 
   const weather = WEATHER_TYPES[s.weather];

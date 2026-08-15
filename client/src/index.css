@@ -129,10 +129,16 @@
   }
 
   /* Overlay backdrop */
+  /*
+   * Le fond des voiles. Il était à 60 % d'opacité et 4 px de flou : l'écran
+   * principal restait lisible derrière, et le regard partait dessus au lieu de
+   * lire ce qu'on venait de déclencher. On monte l'opacité et le flou jusqu'à
+   * ce que le décor devienne une texture, pas une information.
+   */
   .overlay-backdrop {
-    background: rgba(42, 31, 26, 0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(30, 22, 18, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   /* Stat bar base */
