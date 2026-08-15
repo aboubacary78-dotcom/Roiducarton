@@ -86,9 +86,19 @@ function withFirstDayNet(c: Character, stats: Stats): Stats {
 /*
  * MOURIR AU COMBAT EST UNE MORT COMME LES AUTRES.
  *
- * Les six morts « de jauge » — faim, soif, froid, garde à vue, raclée — font
- * trois choses : elles passent `alive` à faux, enregistrent le score, et
- * effacent la sauvegarde. Les quatre morts EN COMBAT n'en faisaient aucune.
+ * Le réducteur compte onze endroits où l'on peut mourir : SEPT où une jauge
+ * tombe à zéro (la nuit qui passe, la manche, la fouille, la garde à vue, la
+ * raclée, une issue d'événement…) et QUATRE en combat.
+ *
+ * À ne pas confondre avec les CAUSES de mort, qui sont dix et qui, elles, ont
+ * un nom, une une de journal et une entrée au registre. La garde à vue est un
+ * endroit où l'on meurt, pas une façon de mourir : on y perd huit points de
+ * moral, et si c'était les derniers, le journal titre « Il avait tout, sauf le
+ * moral ». Le commissariat, l'amende et la cellule disparaissent du récit.
+ *
+ * Les sept morts de jauge faisaient trois choses : passer `alive` à faux,
+ * enregistrer le score, effacer la sauvegarde. Les quatre morts EN COMBAT n'en
+ * faisaient aucune.
  *
  * Conséquences, toutes constatées : le personnage restait `alive: true` sur
  * l'écran de fin ; sa partie n'entrait jamais au tableau des scores ; et
