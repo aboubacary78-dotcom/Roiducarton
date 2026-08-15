@@ -111,12 +111,17 @@ images corrigées avant d'aller plus loin.
 
 ## Ordre conseillé
 
-Le pack 12 est fait, et le pack 10 est absorbé par le 14.
+Le pack 12 est fait, le pack 14 aussi (vingt-huit morts comiques livrées et
+intégrées), et le pack 10 est absorbé par le 14.
 
-Le **pack 14** d'abord : ce sont les images les plus visibles du jeu, et les
-actuelles sont hors sujet. Le **pack 15** juste après, en commençant par ses
-quarante images à texte anglais — c'est le défaut le plus large et le seul qui
-soit mesuré. Le **pack 13** ensuite : six cartes très fréquentes,
+Le **pack 16** est le plus court et le plus vite rentable : cinq images qui
+complètent la collection des morts. Vingt-huit adversaires ont leur mort
+illustrée, cinq retombent sur une image générique — dont le Roi Déchu, qui est
+la fin la plus rare du jeu et mériterait la plus belle image.
+
+Le **pack 15** vient après, en commençant par ses quarante images à texte
+anglais : c'est le défaut le plus large et le seul qui soit mesuré. Puis le
+**pack 13** : six cartes très fréquentes,
 aujourd'hui illustrées par des scènes voisines qui font l'affaire sans être
 justes. Le **pack 11** en dernier, parce qu'il est long — mais c'est lui qui
 change le plus l'allure du jeu : La Récup' est le seul écran où il reste des
