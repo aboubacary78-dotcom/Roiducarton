@@ -17,7 +17,7 @@ writeFileSync(shim, 'export const Capacitor = { isNativePlatform: () => false, g
 const entry = join(dir, 'entry.ts');
 writeFileSync(entry, [
   "export { gameReducer } from '@/contexts/GameContext';",
-  "export { generateCharacter } from '@/contexts/data/world';",
+  "export { generateCharacter, TRAITS } from '@/contexts/data/world';",
   "export { RECIPES, usureNuit } from '@/contexts/data/crafting';",
   "export { soakDamage, bestArmorBonus, makeCombatState } from '@/contexts/data/combat';",
   "export { ENEMIES } from '@/contexts/data/enemies';",
@@ -42,7 +42,7 @@ await build({
   external: ['react', 'react-dom', 'framer-motion', 'wouter', '@capacitor/*'],
 });
 
-const { gameReducer, generateCharacter, RECIPES, soakDamage, bestArmorBonus, makeCombatState, ENEMIES } = await import(out);
+const { gameReducer, generateCharacter, TRAITS, RECIPES, soakDamage, bestArmorBonus, makeCombatState, ENEMIES } = await import(out);
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
@@ -50,7 +50,16 @@ const verifier = (nom, ok, detail) => {
   if (!ok) echecs++;
 };
 const objet = (extra) => ({ id: 'x', name: 'Truc', emoji: '🔩', type: 'junk', value: 2, ...extra });
-const perso = (extra = {}) => ({ ...generateCharacter('Testeur'), day: 4, inventory: [], ...extra });
+/*
+ * Traits FIXES et sans effet sur le sommeil.
+ *
+ * `generateCharacter` en tire deux au hasard parmi vingt, dont Insomniaque
+ * (+8 de sommeil chaque nuit) et Sommeil de Plomb (+6). Le test du matelas
+ * tombait donc environ une fois sur cinq, sans que le jeu ait changé : c'était
+ * le test qui mentait, pas le réducteur.
+ */
+const TRAITS_NEUTRES = ['optimiste', 'poissard'].map(id => TRAITS.find(t => t.id === id));
+const perso = (extra = {}) => ({ ...generateCharacter('Testeur'), traits: TRAITS_NEUTRES, day: 4, inventory: [], ...extra });
 
 // ---- 1. La défense existe ------------------------------------------------
 const nu = perso();

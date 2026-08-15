@@ -141,7 +141,7 @@ export default function MainScreen() {
   const contractDef = state.contract ? getContract(state.contract.id) : undefined;
   const contractDone = !!state.contract?.done || (contractDef?.check ? contractDef.check(char) : false);
   const weather = WEATHER_TYPES[state.weather];
-  const nextWeatherType = getNextWeather(state.weather);
+  const nextWeatherType = state.nextWeather;
   const nextWeather = WEATHER_TYPES[nextWeatherType];
 
   // PNJ errant du jour (lieux sociaux) : présent tant qu'on ne l'a pas

@@ -40,6 +40,7 @@ import {
 } from './data/combat';
 import { getHeistTarget, HEIST_TARGETS } from './data/heist';
 import { RECIPES, recipeCost, pickMaterials, usureNuit } from './data/crafting';
+import { bagCapacity } from './data/world';
 import { encounterFlag } from './data/npc';
 
 // Façade stable : ré-exporte types & données pour les composants existants.
@@ -270,21 +271,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const gifts: string[] = [];
       // Le Sceptre du Roi ne se transmet jamais, même par un legs enregistré
       // avant cette règle : la couronne s'arrache, elle ne s'hérite pas.
-      if (legacy && legacy.item?.id !== 'sceptre-roi' && inventory.length < 20) {
+      if (legacy && legacy.item?.id !== 'sceptre-roi' && inventory.length < bagCapacity({ inventory })) {
         inventory.push(legacy.item);
         gifts.push(L(`${legacy.item.name}, l'héritage de ${legacy.from}`, `the ${tc(legacy.item.name)}, ${legacy.from}'s legacy`));
       }
       // Ce que le carton du matin a laissé pendant qu'aucune partie ne tournait.
       for (const id of cartons) {
         const def = SALVAGE_JUNK.find(i => i.id === id) || trouvailleById(id);
-        if (!def || inventory.length >= 20) continue;
+        if (!def || inventory.length >= bagCapacity({ inventory })) continue;
         inventory.push({ ...def });
         gifts.push(L(def.name, tc(def.name)));
       }
       for (const kit of kits) {
         const def = HERITAGE_KITS.find(k => k.id === kit);
         if (!def) continue;
-        def.items.forEach(it => { if (inventory.length < 20) inventory.push({ ...it }); });
+        def.items.forEach(it => { if (inventory.length < bagCapacity({ inventory })) inventory.push({ ...it }); });
         money += def.money;
         gifts.push(L(def.name, def.nameEn));
       }
@@ -310,7 +311,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'CONTINUE_SAVE': {
       const saved = loadGame();
       if (saved && saved.character) {
-        return { ...state, ...saved, weather: (saved as Partial<GameState>).weather || getInitialWeather(), contract: { id: randomFromArray(CONTRACTS).id, done: false } };
+        {
+          const meteo = (saved as Partial<GameState>).weather || getInitialWeather();
+          return {
+            ...state, ...saved, weather: meteo,
+            nextWeather: (saved as Partial<GameState>).nextWeather || getNextWeather(meteo, (saved as Partial<GameState>).character?.day ?? 1),
+            contract: { id: randomFromArray(CONTRACTS).id, done: false },
+          };
+        }
       }
       return state;
     }
@@ -446,7 +454,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const kept = Math.min(SALVAGE_TUNING.maxKept + action.extraKept, Math.max(0, wanted));
       const inventory = [...c.inventory];
       let added = 0;
-      for (let i = 0; i < kept && inventory.length < 20; i++) {
+      for (let i = 0; i < kept && inventory.length < bagCapacity({ inventory }); i++) {
         inventory.push({ ...randomFromArray(SALVAGE_JUNK) });
         added++;
       }
@@ -456,7 +464,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       for (const id of action.trouvailles) {
         const item = trouvailleById(id);
         if (!item) continue;
-        if (inventory.length >= 20) {
+        if (inventory.length >= bagCapacity({ inventory })) {
           const junkIdx = inventory.findIndex(i => i.type === 'junk');
           if (junkIdx === -1) break;
           inventory.splice(junkIdx, 1);
@@ -646,7 +654,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // Le sac déborde à 20 objets partout ailleurs (fouille, combat, cadeaux) :
       // le vol était le seul chemin qui l'ignorait, ce qui en faisait aussi le
       // seul entrepôt à revendre sans limite.
-      const sacPlein = c.inventory.length >= 20;
+      const sacPlein = c.inventory.length >= bagCapacity(c);
       const convoite = target.item && (jackpot || Math.random() < 0.5) ? target.item : undefined;
       const gotItem = convoite && !sacPlein ? convoite : undefined;
       const statDelta: Partial<Stats> = jackpot ? { dignity: -4, mental: 2 } : hot ? { dignity: -5, mental: 5 } : { dignity: -6, mental: 2 };
@@ -691,7 +699,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'CLAIM_CARTON': {
       if (!state.character) return state;
       const c = state.character;
-      if (c.inventory.length >= 20) return state;
+      if (c.inventory.length >= bagCapacity(c)) return state;
       return { ...state, character: { ...c, inventory: [...c.inventory, { ...action.item }] } };
     }
 
@@ -726,14 +734,47 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'TRAVEL': {
       if (!state.character) return state;
-      const travelEvent = generateTravelEvent(state.character.location, action.location, state.character);
-      // Sens de l'Orientation : connaître les raccourcis rend le trajet moins
-      // pénible, petit regain de moral à chaque voyage.
-      const hasOrientation = state.character.traits.some(t => t.id === 'orientation');
+      const c = state.character;
+      if (action.location === c.location) return state;
+
+      /*
+       * TRAVERSER LA VILLE SE PAIE EN JAMBES, PAS EN ACTIONS.
+       *
+       * Le voyage ne coûtait rien du tout, et le trait Sens de l'Orientation
+       * ajoutait DEUX POINTS DE MORAL à chaque trajet. Alterner deux quartiers
+       * remplissait donc la jauge mentale gratuitement, sans entamer les trois
+       * actions du jour : une trentaine d'allers-retours suffisaient à monter
+       * de zéro à cent.
+       *
+       * On ne met pas de péage — un plafond retire une option sans créer de
+       * décision. On rend simplement le trajet FATIGANT : marcher d'un bout à
+       * l'autre de la ville creuse et fatigue, ce qui est vrai. Et c'est
+       * exactement là qu'Orientation retrouve son sens : connaître les
+       * raccourcis n'offre plus du moral tombé du ciel, ça ANNULE cette
+       * fatigue. La récompense devient une compensation, et la boucle
+       * infinie disparaît d'elle-même.
+       */
+      const hasOrientation = c.traits.some(t => t.id === 'orientation');
       const movedStats = hasOrientation
-        ? clampStats({ ...state.character.stats, mental: state.character.stats.mental + 2 })
-        : state.character.stats;
-      const newChar = { ...state.character, location: action.location, stats: movedStats };
+        ? c.stats
+        : clampStats({ ...c.stats, hunger: c.stats.hunger - 3, sleep: c.stats.sleep - 3 });
+
+      /*
+       * LA ROUTE SE CONNAÎT. Chaque trajet tirait un événement, environ une
+       * fois sur deux : une loterie relançable à volonté, hors de l'économie
+       * des actions. Un quartier déjà rejoint aujourd'hui ne donne plus rien —
+       * vous avez déjà vu ce qu'il y avait à voir sur ce chemin.
+       */
+      const dejaVus = c.travelsToday ?? [];
+      const premiereFois = !dejaVus.includes(action.location);
+      const travelEvent = premiereFois
+        ? generateTravelEvent(c.location, action.location, c)
+        : null;
+
+      const newChar = {
+        ...c, location: action.location, stats: movedStats,
+        travelsToday: premiereFois ? [...dejaVus, action.location] : dejaVus,
+      };
       if (travelEvent) {
         return { ...state, character: { ...newChar, recentEvents: rememberEvent(newChar.recentEvents, travelEvent.id) }, screen: 'event', currentEvent: travelEvent };
       }
@@ -782,7 +823,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const newRespect = state.character.respect + (outcome.respectChange || 0);
 
       let newInventory = [...state.character.inventory];
-      if (outcome.itemGain && newInventory.length < 20) {
+      if (outcome.itemGain && newInventory.length < bagCapacity({ inventory: newInventory })) {
         newInventory.push(outcome.itemGain);
       }
       if (outcome.itemLoss) {
@@ -837,7 +878,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // Commande de la semaine : les jours se cumulent d'un personnage à
       // l'autre, c'est le seul compteur du jeu que la mort n'efface pas.
       commandeProgress('jours', 1);
-      const nextWeather = getNextWeather(state.weather);
+      // La météo annoncée hier est celle d'aujourd'hui : on la consomme, on
+      // n'en retire pas une autre. Les sauvegardes d'avant cette règle n'en
+      // ont pas, d'où le repli.
+      const nextWeather = state.nextWeather ?? getNextWeather(state.weather, ch.day);
+      const meteoApres = getNextWeather(nextWeather, ch.day + 1);
       const weatherData = WEATHER_TYPES[state.weather];
       const weatherPenalty = weatherData.dailyPenalty;
       const traits = new Set(ch.traits.map(t => t.id));
@@ -869,7 +914,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         s.health += Math.abs(weatherPenalty.health || 0);
         notes.push('❄️ Le froid ne vous atteint pas.'); notesEn.push('❄️ The cold doesn\'t touch you.');
       }
-      if (traits.has('collectionneur') && ch.inventory.length >= 18) { // Bonus moral si sac plein
+      // Une collection, ce sont des objets DIFFÉRENTS : dix-huit smartphones
+      // identiques, c'est un stock, et ça transformait l'accumulation de
+      // doublons en source permanente de moral.
+      if (traits.has('collectionneur') && new Set(ch.inventory.map(i => i.id)).size >= 14) { // Bonus moral si la collection est riche
         s.mental += 6; notes.push('📦 Votre collection vous réconforte.'); notesEn.push('📦 Your hoard comforts you.');
       }
       if (traits.has('phobie-rats') && ch.location === 'zone-industrielle') { // Panique en zone industrielle
@@ -880,7 +928,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
       if (traits.has('ami-pigeons')) {                                 // Les oiseaux apportent des choses
         const roll = Math.random();
-        if (roll < 0.35 && inventory.length < 20) {
+        if (roll < 0.35 && inventory.length < bagCapacity({ inventory })) {
           const gift = STARTING_ITEMS[randomFromArray(['cable-usb', 'crayon', 'graines', 'harmonica-casse'])];
           if (gift) { inventory = [...inventory, { ...gift }]; notes.push(`🐦 Un pigeon vous dépose : ${gift.name}.`); notesEn.push(`🐦 A pigeon drops off: ${tc(gift.name)}.`); }
         } else if (roll < 0.6) {
@@ -936,6 +984,19 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           notesEn.push(`${cDef.emoji} Contract missed: ${cDef.labelEn}. Tomorrow, maybe.`);
         }
       }
+      // ---- La neige s'annonce la veille ----
+      // Elle est rare et coûte cher : sans préavis, elle serait une punition
+      // tirée au sort. Avec un soir d'avance, elle devient une décision — on
+      // court acheter un manteau, on bricole un réchaud, on choisit son abri.
+      if (meteoApres === 'snow' && nextWeather !== 'snow') {
+        notes.push('❄️ Le ciel a viré au blanc sale. Demain, il neigera : trouvez de quoi tenir.');
+        notesEn.push('❄️ The sky has turned dirty white. Tomorrow it will snow: find something to get through it.');
+      }
+      if (nextWeather === 'snow') {
+        notes.push('❄️ Il neige. La ville est belle et vous n\'êtes pas à l\'abri.');
+        notesEn.push('❄️ It\'s snowing. The city looks lovely and you are outside.');
+      }
+
       // Le contrat du nouveau jour, annoncé dans le bilan de la nuit.
       const nextContract = { id: randomFromArray(CONTRACTS).id, done: false };
       const nextDef = getContract(nextContract.id)!;
@@ -993,10 +1054,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       return {
         ...state,
-        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus, shopClosures },
+        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus, shopClosures, travelsToday: [], fountainDay: undefined, fountainToday: 0 },
         dayActions: 0,
         screen: isAlive ? 'main' : 'game-over',
         weather: nextWeather,
+        nextWeather: meteoApres,
         contract: isAlive ? nextContract : null,
         daySummary: isAlive
           ? { day: ch.day + 1, weather: nextWeather, deltas, moneyChange: bonusMoney, notes, notesEn }
@@ -1115,7 +1177,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // Cartes d'une riposte, bonus de traits compris.
       const drawCount = (base: number, cap: number) => {
         let d = base;
-        if (c.traits.some(t => t.id === 'collectionneur') && c.inventory.length >= 18) d += 1;
+        if (c.traits.some(t => t.id === 'collectionneur') && new Set(c.inventory.map(i => i.id)).size >= 14) d += 1;
         if (c.traits.some(t => t.id === 'optimiste') && c.stats.mental < 30) d += 1;
         return Math.min(cap, d);
       };
@@ -1140,7 +1202,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         const lootMoney = combat.loot?.money || 0;
         const lootRespect = combat.loot?.respect || 0;
         // L'ennemi lâche parfois un objet à son image (sandwich, couteau…).
-        const drop = combat.loot?.item && cUpd.inventory.length < 20 ? combat.loot.item : undefined;
+        const drop = combat.loot?.item && cUpd.inventory.length < bagCapacity(cUpd) ? combat.loot.item : undefined;
         const en = tc(combat.enemyName);
         logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
         if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
@@ -1325,7 +1387,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         // Contre-tempo : le rattrapage récompense le skill sans annuler la
         // défaite au signe (1 carte de base contre 2 pour une manche gagnée).
         let draw = 1;
-        if (c.traits.some(t => t.id === 'collectionneur') && c.inventory.length >= 18) draw += 1;
+        if (c.traits.some(t => t.id === 'collectionneur') && new Set(c.inventory.map(i => i.id)).size >= 14) draw += 1;
         if (c.traits.some(t => t.id === 'optimiste') && c.stats.mental < 30) draw += 1;
         draw = Math.min(2, draw);
         logs.push(L(`✨ Esquive parfaite ! Contre-tempo : vous volez une riposte (${draw} carte${draw > 1 ? 's' : ''}).`, `✨ Flawless dodge! Counter-tempo: you steal a riposte (${draw} card${draw > 1 ? 's' : ''}).`));
@@ -1449,7 +1511,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         const lootMoney = combat.loot?.money || 0;
         const lootRespect = combat.loot?.respect || 0;
         // L'ennemi lâche parfois un objet à son image (sandwich, couteau…).
-        const drop = combat.loot?.item && inventory.length < 20 ? combat.loot.item : undefined;
+        const drop = combat.loot?.item && inventory.length < bagCapacity({ inventory }) ? combat.loot.item : undefined;
         const en = tc(combat.enemyName);
         logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
         if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
@@ -1545,11 +1607,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'BUY_ITEM': {
-      if (!state.character) return state;
+      // L'action porte l'article déjà résolu par l'écran. Si elle arrive sans —
+      // écran refondu, action rejouée, test — on ignore plutôt que de planter :
+      // un réducteur qui lève une exception fait perdre la partie en cours.
+      if (!state.character || !action.shopItem) return state;
       const shopItem = action.shopItem;
       const actualPrice = action.actualPrice;
       if (state.character.money < actualPrice) return state;
-      if (shopItem.giveItem && state.character.inventory.length >= 20) return state;
+      if (shopItem.giveItem && state.character.inventory.length >= bagCapacity(state.character)) return state;
 
       let newStats = { ...state.character.stats };
       if (shopItem.effect) {
@@ -1565,10 +1630,35 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
 
       const newMoney = state.character.money - actualPrice;
-      // Compte les gorg\u00e9es de fontaine (eau gratuite) pour l'anti-exploit.
-      const fountainBump = shopItem.id === 'eau-fontaine'
-        ? { fountainUses: (state.character.fountainUses || 0) + 1 }
+      /*
+       * BOIRE AU ROBINET PUBLIC, ÇA SE PAIE AUTREMENT.
+       *
+       * L'eau de la fontaine est gratuite, instantanée, et ne coûte pas
+       * d'action : la soif cessait d'être une contrainte dès qu'on pouvait
+       * atteindre le parc. Le seul frein existant était une pub récompensée
+       * toutes les trois gorgées — un frein COMMERCIAL, pas une règle du jeu :
+       * le joueur qui refuse les pubs se cogne à un mur que rien ne lui
+       * explique.
+       *
+       * On garde donc l'eau gratuite — mourir de soif à côté d'une fontaine
+       * serait absurde — et on met le prix sur la seule jauge que ce jeu prend
+       * au sérieux. La première gorgée du jour ne coûte rien. À partir de la
+       * deuxième, on se penche sur un robinet public devant tout le monde, et
+       * ça se voit.
+       */
+      const estFontaine = shopItem.id === 'eau-fontaine';
+      const memeJour = state.character.fountainDay === state.character.day;
+      const gorgeesDuJour = memeJour ? (state.character.fountainToday || 0) : 0;
+      const fountainBump = estFontaine
+        ? {
+            fountainUses: (state.character.fountainUses || 0) + 1,
+            fountainDay: state.character.day,
+            fountainToday: gorgeesDuJour + 1,
+          }
         : {};
+      if (estFontaine && gorgeesDuJour >= 1) {
+        newStats = clampStats({ ...newStats, dignity: newStats.dignity - 2 });
+      }
 
       // Pas d'overlay bloquant \u00e0 l'achat : la boutique donne un retour INLINE
       // (argent anim\u00e9, -X\u20ac qui s'envole, badge \u00d7N, toast d'effet). On veut
@@ -1612,7 +1702,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         stats = applyStatDelta(stats, { mental: 6, dignity: 2 });
       } else if (action.kind === 'trade') {
         // Troc : on achète l'objet proposé par le PNJ.
-        if (!action.offer || money < action.offer.price || inventory.length >= 20) return state;
+        if (!action.offer || money < action.offer.price || inventory.length >= bagCapacity({ inventory })) return state;
         money -= action.offer.price;
         inventory = [...inventory, { ...action.offer.item }];
       }
@@ -1641,7 +1731,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // On ajoute les dons dans la limite du sac (20).
       const newInventory = [...c.inventory];
       for (const gift of SOLIDARITY_GIFT) {
-        if (newInventory.length >= 20) break;
+        if (newInventory.length >= bagCapacity({ inventory: newInventory })) break;
         newInventory.push({ ...gift });
       }
       return {
@@ -1666,7 +1756,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const newMoney = state.character.money + (outcome.moneyChange || 0);
       const newRespect = state.character.respect + (outcome.respectChange || 0);
       let newInventory = [...state.character.inventory];
-      if (outcome.itemGain && newInventory.length < 20) {
+      if (outcome.itemGain && newInventory.length < bagCapacity({ inventory: newInventory })) {
         newInventory.push(outcome.itemGain);
       }
 
@@ -1690,7 +1780,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // dans un état survivable et on relance la journée. Utilisable
       // une seule fois par partie (flag 'revived'). Le legs éventuellement
       // choisi sur l'écran de fin est annulé : le défunt n'est plus défunt.
+      /*
+       * La condition existait, mais uniquement dans l'écran de fin
+       * (`canRevive`). Le réducteur, lui, ressuscitait n'importe qui, vivant ou
+       * non, depuis n'importe quel écran, autant de fois que demandé. Une règle
+       * qui ne vit que dans l'interface n'est pas une règle : c'est une
+       * habitude, et la première refonte d'écran l'emporte.
+       */
       if (!state.character) return state;
+      if (state.character.alive) return state;
+      if (state.screen !== 'game-over') return state;
+      if (state.character.activeFlags.includes('revived')) return state;
       clearLegacy();
       const revivedStats: Stats = {
         ...state.character.stats,
@@ -1738,6 +1838,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
+const initialWeather = getInitialWeather();
+
 const initialState: GameState = {
   screen: 'title',
   character: null,
@@ -1751,7 +1853,8 @@ const initialState: GameState = {
   dayActions: 0,
   maxDayActions: 3,
   highScores: loadHighScores(),
-  weather: getInitialWeather(),
+  weather: initialWeather,
+  nextWeather: getNextWeather(initialWeather, 1),
   deathCause: null,
 };
 

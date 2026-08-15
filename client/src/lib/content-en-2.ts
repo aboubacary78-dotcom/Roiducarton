@@ -1642,4 +1642,5 @@ export const CONTENT_EN_2: Record<string, string> = {
   "Un poissonnier crie ses prix.": "A fishmonger is shouting his prices.",
   "L'odeur de poulet rôti vous fait saliver.": "The smell of roast chicken sets your mouth watering.",
   "Les commerçants rangent. Bientôt les restes.": "The traders are packing up. Leftovers soon.",
+  "Quatre places de plus dans le sac. Les trous, on fait avec.": "Four more slots in the bag. You live with the holes.",
 };

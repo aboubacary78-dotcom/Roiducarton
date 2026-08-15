@@ -46,7 +46,7 @@ export const SHOPS: Shop[] = [
       { id: 'manteau-occasion', name: "Manteau d'occasion", emoji: '🧥', price: 5, description: 'Chaud et presque propre.', category: 'clothing', effect: { health: 5, dignity: 10, sleep: 5 }, giveItem: { id: 'manteau-occasion', name: "Manteau d'occasion", emoji: '🧥', type: 'armor', value: 8, defenseBonus: 2 } },
       { id: 'chaussures-usees', name: 'Chaussures usées', emoji: '👟', price: 3, description: 'Trouées mais fonctionnelles.', category: 'clothing', effect: { dignity: 5, health: 3 } },
       { id: 'bonnet-laine', name: 'Bonnet en laine', emoji: '🧢', price: 2, description: 'Tricoté main, dans une couleur que personne n\'a choisie exprès.', category: 'clothing', effect: { dignity: 3, mental: 3, sleep: 3 } },
-      { id: 'sac-dos-troue', name: 'Sac à dos troué', emoji: '🎒', price: 4, description: 'Augmente la capacité de transport. Enfin, un peu.', category: 'tool', giveItem: { id: 'sac-dos-troue', name: 'Sac à dos troué', emoji: '🎒', type: 'tool', value: 6 } },
+      { id: 'sac-dos-troue', name: 'Sac à dos troué', emoji: '🎒', price: 4, description: 'Quatre places de plus dans le sac. Les trous, on fait avec.', category: 'tool', giveItem: { id: 'sac-dos-troue', name: 'Sac à dos troué', emoji: '🎒', type: 'tool', value: 6 } },
     ],
   },
   {

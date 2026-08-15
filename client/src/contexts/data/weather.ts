@@ -92,8 +92,31 @@ const WEATHER_TRANSITIONS: Record<WeatherType, { type: WeatherType; weight: numb
   snow:     [{ type: 'snow', weight: 30 }, { type: 'fog', weight: 25 }, { type: 'cloudy', weight: 30 }, { type: 'rainy', weight: 15 }],
 };
 
-export function getNextWeather(current: WeatherType): WeatherType {
-  const transitions = WEATHER_TRANSITIONS[current];
+/*
+ * LA NEIGE ÉTAIT DU CONTENU MORT.
+ *
+ * Elle avait sa fiche, ses pénalités, son image, et un trait entier — Résistant
+ * au Froid — construit pour elle. Mais la table ci-dessus ne contient aucune
+ * flèche VERS `snow` : seule la ligne `snow` en parle, et rien ne peut y
+ * entrer. Cent chaînes de 365 jours simulées donnent zéro jour de neige. Le
+ * manteau d'hiver, le briquet, le réchaud de l'établi et le trait de résistance
+ * répondaient donc à une menace que personne ne pouvait rencontrer.
+ *
+ * On l'ouvre par temps déjà maussade — nuageux, pluie, brouillard — et
+ * seulement à partir du sixième jour : la neige doit tomber sur un joueur
+ * installé, qui a de quoi s'y préparer, pas sur celui du premier matin.
+ */
+const PREMIER_JOUR_DE_NEIGE = 6;
+const OUVERTURE_NEIGE: Partial<Record<WeatherType, number>> = {
+  cloudy: 8,
+  rainy: 6,
+  fog: 10,
+};
+
+export function getNextWeather(current: WeatherType, day = 1): WeatherType {
+  const transitions = [...WEATHER_TRANSITIONS[current]];
+  const poidsNeige = OUVERTURE_NEIGE[current];
+  if (poidsNeige && day >= PREMIER_JOUR_DE_NEIGE) transitions.push({ type: 'snow', weight: poidsNeige });
   const totalWeight = transitions.reduce((sum, t) => sum + t.weight, 0);
   let rand = Math.random() * totalWeight;
   for (const t of transitions) {

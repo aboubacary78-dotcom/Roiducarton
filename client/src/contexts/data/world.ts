@@ -116,6 +116,32 @@ export const STARTING_ITEMS: Record<string, InventoryItem> = {
   'harmonica-casse': { id: 'harmonica-casse', name: 'Harmonica cassé', emoji: '🎵', type: 'special', value: 5, effect: { mental: 12 } },
 };
 
+/*
+ * LA CONTENANCE DU SAC.
+ *
+ * Vingt objets, sauf si l'on porte un sac à dos. Le « Sac à dos troué » est
+ * vendu 4 € avec la promesse « augmente la capacité de transport » — et
+ * jusqu'ici aucune ligne de code ne lisait sa présence : le plafond restait
+ * vingt, sac ou pas. On payait une promesse, exactement comme pour le bonus
+ * de défense que personne ne lisait non plus.
+ *
+ * Une seule fonction porte la règle, pour qu'aucun chemin de gain ne puisse
+ * de nouveau l'ignorer.
+ */
+export const CAPACITE_BASE = 20;
+export const SACS_A_DOS: Record<string, number> = {
+  'sac-dos-troue': 4,   // celui de l'échoppe, 4 €
+  'sac-dos': 5,         // celui qu'on trouve à la déchetterie
+};
+
+export function bagCapacity(c: { inventory: InventoryItem[] }): number {
+  let bonus = 0;
+  for (const id of Object.keys(SACS_A_DOS)) {
+    if (c.inventory.some(i => i.id === id)) bonus = Math.max(bonus, SACS_A_DOS[id]);
+  }
+  return CAPACITE_BASE + bonus;
+}
+
 export function generateCharacter(): Character {
   const unlockedJobs = loadHeritage().jobs;
   const job = randomFromArray(JOBS.filter(j => !j.locked || unlockedJobs.includes(j.id)));

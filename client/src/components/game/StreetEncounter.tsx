@@ -1,3 +1,4 @@
+import { bagCapacity } from '@/contexts/GameContext';
 import { useGame, type StreetNpc } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -16,7 +17,7 @@ export default function StreetEncounter({ npc, onClose }: { npc: StreetNpc; onCl
   const char = state.character!;
   const hasFood = char.inventory.some((it) => it.type === 'food');
   const offer = npc.offer;
-  const canTrade = offer && char.money >= offer.price && char.inventory.length < 20;
+  const canTrade = offer && char.money >= offer.price && char.inventory.length < bagCapacity(char);
 
   function share() {
     if (!hasFood) return;

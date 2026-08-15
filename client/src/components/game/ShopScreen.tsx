@@ -1,3 +1,4 @@
+import { bagCapacity } from '@/contexts/GameContext';
 import { useState, useEffect } from 'react';
 import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay, SOLIDARITY_FLAG, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META, shopkeeperFor, HAGGLED_FLAG, HAGGLE_TUNING, haggleReopen } from '@/contexts/GameContext';
 import { showRewarded } from '@/lib/ads';
@@ -116,7 +117,7 @@ export default function ShopScreen() {
 
     const actualPrice = marketPrice(item, selectedShop!.id, char.respect, char.day).final;
     if (char.money < actualPrice) return;
-    if (item.giveItem && char.inventory.length >= 20) return;
+    if (item.giveItem && char.inventory.length >= bagCapacity(char)) return;
 
     setBuyAnimation(item.id);
     setTimeout(() => setBuyAnimation(null), 350);
@@ -296,7 +297,7 @@ export default function ShopScreen() {
             const { base, final: actualPrice, braderie: itemBraderie } = marketPrice(item, selectedShop.id, char.respect, char.day);
             const hasDiscount = actualPrice < base;
             const canAfford = char.money >= actualPrice;
-            const inventoryFull = !!(item.giveItem && char.inventory.length >= 20);
+            const inventoryFull = !!(item.giveItem && char.inventory.length >= bagCapacity(char));
             const isBuying = buyAnimation === item.id;
             const count = bought[item.id] || 0;
             const shortfall = actualPrice - char.money;

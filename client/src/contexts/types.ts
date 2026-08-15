@@ -72,6 +72,12 @@ export interface Character {
   // Nombre de gorgées prises à la fontaine du parc (eau gratuite) : toutes les
   // 3 gorgées, la fontaine fait des siennes (pub récompensée). Anti-exploit.
   fountainUses?: number;
+  // Quartiers déjà rejoints AUJOURD'HUI : la route ne se redécouvre pas deux
+  // fois dans la même journée (voir TRAVEL). Remis à zéro chaque nuit.
+  travelsToday?: string[];
+  // Gorgées de fontaine prises aujourd'hui, et le jour où on les compte.
+  fountainToday?: number;
+  fountainDay?: number;
   // Sacré Roi du Carton (a battu le Roi en place). À sa mort, ce personnage
   // devient le boss des parties suivantes (voir la couronne, lib/necrology).
   crowned?: boolean;
@@ -399,6 +405,16 @@ export interface GameState {
   maxDayActions: number;
   highScores: { name: string; days: number; score: number }[];
   weather: WeatherType;
+  /*
+   * La météo de DEMAIN, tirée une seule fois et conservée.
+   *
+   * L'écran principal l'affichait en appelant `getNextWeather` à chaque rendu :
+   * un tirage neuf, sans rapport avec celui que la nuit ferait réellement. La
+   * prévision changeait donc en cours d'écran et se trompait toujours. On la
+   * décide au moment où le jour bascule, on la montre, et c'est elle qui
+   * arrive.
+   */
+  nextWeather: WeatherType;
   // Cause de mort contextuelle (ex. l'ennemi qui vous a achevé), sinon null
   // et l'écran de fin la déduit de vos jauges.
   deathCause: string | null;
