@@ -648,8 +648,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             character: { ...c, stats: newStats, money: c.money - amende, respect: c.respect - 3, alive: isAlive },
             dayActions: state.maxDayActions,
             eventResult: {
-              text: L(`🚔 Un policier vous cueille la main sur ${target.label}. Garde à vue ! Vous perdez le reste de la journée${amende > 0 ? ` et ${amende}€ d'amende` : ', insolvable, il vous laisse filer avec un avertissement'}.`, `🚔 A cop nabs you with your hand on ${target.labelEn}. Held in custody! You lose the rest of the day${amende > 0 ? ` and a €${amende} fine` : ', broke, so he lets you off with a warning'}.`),
+              // Le bandeau juste dessous annonce la journée perdue : le texte
+              // n'a plus à la répéter, il raconte la scène.
+              text: L(
+                `🚔 Un policier vous cueille la main sur ${target.label}. Banc en bois, fouille, sermon, empreintes${amende > 0 ? `, et ${amende}€ d'amende qu'on prend dans votre poche devant vous` : '. Insolvable, on vous rend vos lacets et un avertissement'}.`,
+                `🚔 A cop nabs you with your hand on ${target.labelEn}. Wooden bench, search, lecture, fingerprints${amende > 0 ? `, and a €${amende} fine taken from your pocket in front of you` : '. Broke, so they hand back your laces and a warning'}.`,
+              ),
               statChanges: statDelta, moneyChange: -amende, respectChange: -3, image: '/assets/result-steal-police.webp',
+              // Ce que la cellule emporte vraiment : le reste de la journée.
+              journeeFinie: Math.max(0, state.maxDayActions - state.dayActions),
             },
             screen: isAlive ? 'main' : 'game-over',
           };

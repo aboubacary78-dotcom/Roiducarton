@@ -191,6 +191,39 @@ export default function EventResultOverlay() {
           {/* Result text */}
           <p className="text-sm text-[#3D3020] leading-relaxed mb-4 text-center">{tc(result.text)}</p>
 
+          {/*
+           * LA JOURNÉE COUPÉE NET.
+           *
+           * La garde à vue emporte le reste de la journée — souvent deux
+           * actions sur trois, la perte la plus lourde du jeu. Elle le disait
+           * au milieu de sa phrase, puis s'affichait comme n'importe quel
+           * résultat mineur : trois pastilles grises alignées. On la sort du
+           * lot, en rouge, avec le compte exact de ce qui est parti.
+           */}
+          {!!result.journeeFinie && (
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', delay: 0.2, damping: 18 }}
+              className="mb-4 rounded-xl px-3 py-2.5 text-center"
+              style={{ background: 'rgba(217,79,79,0.12)', border: '1px solid rgba(217,79,79,0.35)' }}
+            >
+              <p className="text-[10px] tracking-widest uppercase font-mono text-[#B84A3A]">
+                🚔 {tr('Journée terminée', 'Day over')}
+              </p>
+              <p className="text-sm font-semibold text-[#B84A3A] leading-snug mt-0.5">
+                {tr(
+                  `${result.journeeFinie} action${result.journeeFinie > 1 ? 's' : ''} perdue${result.journeeFinie > 1 ? 's' : ''} au poste`,
+                  `${result.journeeFinie} action${result.journeeFinie > 1 ? 's' : ''} lost at the station`,
+                )}
+              </p>
+              <p className="text-[11px] text-[#8B6B4A] leading-snug mt-1">
+                {tr('On vous relâche à la nuit tombée. Il ne reste plus qu\'à dormir.',
+                    'They let you out after dark. Nothing left to do but sleep.')}
+              </p>
+            </motion.div>
+          )}
+
           {/* Stat changes */}
           {hasChanges && (
             <div className="border-t border-[#E8D5C0] pt-3 mb-4">

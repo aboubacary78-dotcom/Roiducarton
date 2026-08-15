@@ -393,7 +393,16 @@ export interface GameState {
   characterChoices: Character[];
   currentEvent: GameEvent | null;
   currentCombat: CombatState | null;
-  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; faceKept?: boolean; image?: string; fallbackImage?: string } | null;
+  /*
+   * `journeeFinie` : le nombre d'actions que ce résultat vient d'emporter.
+   *
+   * La garde à vue coupe la journée net. Elle le disait dans sa phrase, au
+   * milieu du reste, et s'affichait ensuite comme n'importe quel résultat
+   * mineur : trois pastilles grises. La perte la plus lourde du jeu — deux
+   * actions sur trois, parfois — passait inaperçue. Ce champ permet à la
+   * fenêtre de résultat de la traiter à part.
+   */
+  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; faceKept?: boolean; image?: string; fallbackImage?: string; journeeFinie?: number } | null;
   // Bilan de la nuit affiché après « Jour suivant » : nouveau jour, météo,
   // pertes/gains de jauges de la nuit, et éventuels effets de traits.
   daySummary: { day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number; notes: string[]; notesEn: string[] } | null;

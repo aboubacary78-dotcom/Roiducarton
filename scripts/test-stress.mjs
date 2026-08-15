@@ -131,5 +131,21 @@ let avant6 = 0;
 for (let i = 0; i < 20000; i++) if (getNextWeather('cloudy', 5) === 'snow') avant6++;
 verifier('jamais avant le jour 6', avant6 === 0, `${avant6} sur 20000`);
 
+// ---- 7. La garde à vue annonce ce qu'elle emporte -------------------------
+// Elle coupe la journée net — souvent deux actions sur trois — et le disait
+// au milieu d'une phrase, avant de s'afficher comme un résultat mineur.
+const voleur = perso({ money: 20, stats: { health: 70, mental: 70, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
+let annonces = 0, gardes = 0;
+for (let i = 0; i < 400; i++) {
+  const r = gameReducer(
+    { ...etat(voleur), screen: 'steal-game', dayActions: 1 },
+    { type: 'RESOLVE_STEAL', tier: 'fail', targetId: 'heist-superette-centre' },
+  );
+  const t = r.eventResult?.text || '';
+  if (/policier|A cop/i.test(t)) { gardes++; if (r.eventResult.journeeFinie === 2) annonces++; }
+}
+verifier('la garde à vue déclare les actions qu\'elle emporte',
+  gardes > 0 && annonces === gardes, `${annonces}/${gardes} gardes à vue annoncent « 2 actions perdues »`);
+
 rmSync(out, { force: true });
 process.exit(echecs ? 1 : 0);
