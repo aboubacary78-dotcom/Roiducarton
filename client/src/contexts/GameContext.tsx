@@ -83,6 +83,36 @@ function withFirstDayNet(c: Character, stats: Stats): Stats {
   return { ...stats, health: Math.max(1, stats.health), mental: Math.max(1, stats.mental) };
 }
 
+/*
+ * MOURIR AU COMBAT EST UNE MORT COMME LES AUTRES.
+ *
+ * Les six morts « de jauge » — faim, soif, froid, garde à vue, raclée — font
+ * trois choses : elles passent `alive` à faux, enregistrent le score, et
+ * effacent la sauvegarde. Les quatre morts EN COMBAT n'en faisaient aucune.
+ *
+ * Conséquences, toutes constatées : le personnage restait `alive: true` sur
+ * l'écran de fin ; sa partie n'entrait jamais au tableau des scores ; et
+ * surtout la sauvegarde du dernier écran principal restait en place. Rouvrir
+ * l'application proposait donc « Continuer » et ramenait le mort à la vie —
+ * avec son jour, son sac, et ses drapeaux d'intrigue. Le joueur suivant
+ * héritait des suites narratives d'un personnage qu'il n'avait jamais été.
+ *
+ * Cette fonction est le seul endroit qui décrit ce que mourir veut dire.
+ */
+function stateApresMort(state: GameState, cause: string, logs?: string[]): GameState {
+  const c = state.character!;
+  saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, 'poissard')));
+  clearSave();
+  return {
+    ...state,
+    character: { ...c, stats: { ...c.stats, health: 0 }, alive: false },
+    screen: 'game-over',
+    currentCombat: null,
+    combatLog: logs ?? state.combatLog,
+    deathCause: cause,
+  };
+}
+
 // ============ HELPERS DE JAUGES (cœur du reducer) ============
 
 // Applique un delta de stats puis borne le résultat (motif répété du reducer).
@@ -1306,7 +1336,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         const cUpd = { ...c, stats: clampStats({ ...c.stats, health: hp }) };
         if (eHp <= 0) return victoryState(cUpd);
         if (hp <= 0) {
-          return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L('💀 Vous vous écroulez dans l\'accrochage...', '💀 You collapse in the scuffle...')], deathCause: combatDeathMessage(combat.enemyName) };
+          return stateApresMort(state, combatDeathMessage(combat.enemyName), [...logs, L('💀 Vous vous écroulez dans l\'accrochage...', '💀 You collapse in the scuffle...')]);
         }
         return {
           ...state,
@@ -1341,7 +1371,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
       const dmg = soakDamage(c, Math.max(2, Math.round(combat.enemyAttack * (0.5 + Math.random() * 0.4))));
       const hp = Math.max(0, c.stats.health - dmg);
-      if (hp <= 0) return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(combat.enemyName) };
+      if (hp <= 0) return stateApresMort(state, combatDeathMessage(combat.enemyName), [...logs, L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')]);
       logs.push(L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`));
       const enemyLike = { name: combat.enemyName, emoji: combat.enemyEmoji, attack: combat.enemyAttack, health: combat.enemyMaxHealth };
       return {
@@ -1374,11 +1404,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         : '';
       const newHp = Math.max(0, c.stats.health - totalDmg);
       if (newHp <= 0) {
-        return {
-          ...state, screen: 'game-over', currentCombat: null,
-          combatLog: [...state.combatLog, L(`💥 ${action.hits} coup(s) encaissé(s)... ${totalDmg} dégâts.`, `💥 Took ${action.hits} hit(s)... ${totalDmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')],
-          deathCause: combatDeathMessage(combat.enemyName),
-        };
+        return stateApresMort(state, combatDeathMessage(combat.enemyName),
+          [...state.combatLog, L(`💥 ${action.hits} coup(s) encaissé(s)... ${totalDmg} dégâts.`, `💥 Took ${action.hits} hit(s)... ${totalDmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')]);
       }
       const newStats = clampStats({ ...c.stats, health: newHp });
       const cUpd = { ...c, stats: newStats };
@@ -1438,7 +1465,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         // Fuite ratée : l'ennemi place un coup, on repart en esquive.
         const dmg = soakDamage(c, Math.max(2, Math.round(combat.enemyAttack * rnd(0.5, 0.4))));
         const hp = Math.max(0, c.stats.health - dmg);
-        if (hp <= 0) return { ...state, screen: 'game-over', currentCombat: null, combatLog: [...logs, L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')], deathCause: combatDeathMessage(combat.enemyName) };
+        if (hp <= 0) return stateApresMort(state, combatDeathMessage(combat.enemyName), [...logs, L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`), L('💀 Vous succombez à vos blessures...', '💀 You succumb to your wounds...')]);
         logs.push(L(`❌ Fuite ratée ! ${combat.enemyName} vous rattrape ! ${dmg} dégâts.`, `❌ Escape failed! ${tc(combat.enemyName)} catches you! ${dmg} damage.`));
         return {
           ...state,
