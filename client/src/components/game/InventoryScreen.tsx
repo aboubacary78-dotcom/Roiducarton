@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import SafeImg from './SafeImg';
-import { playCraft, playCoin, playSuccess } from '@/lib/sound';
+import { playCraft, playMoneyIn, playGaugeFilled } from '@/lib/sound';
 
 const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: string; bg: string }> = {
   food: { label: 'Nourriture', labelEn: 'Food', color: '#4A9B5F', bg: '#4A9B5F15' },
@@ -99,7 +99,7 @@ export default function InventoryScreen() {
                 <div className="shrink-0 flex flex-col gap-1.5">
                   {hasEffect && (
                     <button
-                      onClick={() => { playSuccess(); dispatch({ type: 'USE_ITEM', itemId: item.id }); }}
+                      onClick={() => { playGaugeFilled(); dispatch({ type: 'USE_ITEM', itemId: item.id }); }}
                       className="px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg"
                       style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)', boxShadow: '0 2px 6px rgba(74, 155, 95, 0.25)' }}
                     >
@@ -107,7 +107,7 @@ export default function InventoryScreen() {
                     </button>
                   )}
                   <button
-                    onClick={() => { playCoin(); dispatch({ type: 'SELL_ITEM', itemId: item.id }); }}
+                    onClick={() => { playMoneyIn(getSellPrice(item)); dispatch({ type: 'SELL_ITEM', itemId: item.id }); }}
                     className="px-2.5 py-1.5 text-xs font-semibold rounded-lg text-[#8B6B4A]"
                     style={{ background: '#F5EDE4', border: '1px solid #E8D5C0' }}
                   >

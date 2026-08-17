@@ -5,7 +5,7 @@ import {
 import type { SalvageFind } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { playHit, playCrit, playHurt, playStep, playFind, playCollapse } from '@/lib/sound';
+import { playCollapse, playCrit, playDig, playFind, playHurt, playPickUp, playStep } from '@/lib/sound';
 import { haptic } from '@/lib/haptics';
 import { isFirstEverRun } from '@/lib/coach';
 import { loadGraves } from '@/lib/necrology';
@@ -230,9 +230,9 @@ function SalvageInner() {
     const f = cell.find;
     setPop({ f, key: Date.now() });
     if (f.kind === 'consigne') {
-      centimesRef.current += f.value; setCentimes(centimesRef.current); playCrit(); haptic('medium');
+      centimesRef.current += f.value; setCentimes(centimesRef.current); playPickUp(); haptic('medium');
     } else if (f.kind === 'bazar') {
-      bazarRef.current += 1; setBazar(bazarRef.current); playCrit(); haptic('medium');
+      bazarRef.current += 1; setBazar(bazarRef.current); playPickUp(); haptic('medium');
     } else if (f.kind === 'trouvaille') {
       trouvaillesRef.current = [...trouvaillesRef.current, f.id];
       setTrouvailles(trouvaillesRef.current); playFind(); haptic('heavy');
@@ -251,7 +251,7 @@ function SalvageInner() {
     const l = LAYERS[Math.min(d, LAYERS.length - 1)];
     const fresh = makeLayer(d, mods);
     cellsRef.current = fresh; setCells(fresh);
-    playHit();
+    playDig();
     addRisk(Math.round(l.entryRisk * mods.entryMul));
   }
 

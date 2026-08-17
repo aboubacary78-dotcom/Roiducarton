@@ -1,9 +1,16 @@
 /*
- * Effets sonores du jeu, entièrement générés par code (Web Audio API).
- * Aucun fichier audio à télécharger : les sons sont synthétisés à la volée,
- * donc ça fonctionne hors-ligne et sans dépendance externe.
+ * Effets sonores du jeu : quarante-neuf bruitages de foley, plus un repli
+ * synthétisé pour chacun.
  *
- * Un réglage "muet" est mémorisé dans le localStorage (voir l'écran Options).
+ * Les fichiers sont la voix du jeu — du carton, du papier, des pièces dans un
+ * gobelet — mais rien n'en dépend : si un fichier manque ou refuse de se
+ * décoder, l'appelant retombe sur sa version fabriquée en Web Audio. Un pack
+ * son livré à moitié s'active donc son par son, et le jeu ne devient jamais
+ * muet.
+ *
+ * L'inventaire complet, avec l'intention de chaque son, est en bas de fichier.
+ *
+ * Un réglage « muet » est mémorisé dans le localStorage (voir l'écran Options).
  */
 
 import { loadAudio, isKnownMissing, playBuffer } from './audioFiles';
@@ -47,9 +54,14 @@ export function getAudio(): AudioContext | null {
  * d'ennemi ou un bruitage de rencontre a toujours une animation devant lui.
  */
 const GESTURES = [
-  'geste-clic', 'geste-pas', 'geste-coup', 'geste-coup-fort', 'geste-encaisse',
-  'geste-souffle', 'geste-reussite', 'geste-echec', 'geste-gong',
-  'geste-bricole', 'geste-succes', 'geste-papier', 'geste-troc',
+  'geste-clic-1', 'geste-clic-2', 'geste-clic-3',
+  'geste-onglet-1', 'geste-onglet-2', 'geste-onglet-3',
+  'geste-carte-1', 'geste-carte-2', 'geste-carte-3',
+  'geste-pas-1', 'geste-pas-2', 'geste-pas-3',
+  'geste-coup-1', 'geste-coup-2', 'geste-coup-3',
+  'perte-rate-1', 'perte-rate-2', 'perte-rate-3',
+  'geste-retour', 'geste-reglage', 'geste-coup-fort', 'geste-encaisse',
+  'geste-gong', 'geste-bricole', 'geste-succes', 'geste-troc',
 ];
 let gesturesAsked = false;
 function preloadGestures(): void {
@@ -431,77 +443,210 @@ export function vibrate(pattern: number | number[]): void {
     hapticPattern(pattern);
   }
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LES SONS DU JEU
+ *
+ * Quarante-neuf bruitages de foley, rangés en neuf familles. Chaque famille
+ * suit une règle qui la rend reconnaissable sans qu'on y pense :
+ *
+ *   ① L'ARGENT  — ce qui entre et ce qui sort s'opposent à l'oreille.
+ *   ② L'EFFORT  — que du frottement, jamais de percussion.
+ *   ③ LE CORPS  — la seule famille percussive, donc lisible d'emblée.
+ *   ④ LES AUTRES— rares, donc marquants.
+ *   ⑤ LA PERTE  — plus c'est irréversible, plus le son est mou.
+ *   ⑥ L'IDENTITÉ, ⑦ LE RYTHME DU JOUR, ⑧ L'INTERFACE, ⑨ LES JAUGES.
+ *
+ * Chaque son garde un repli synthétisé : si le fichier manque, on entend
+ * quelque chose de sensé plutôt que rien.
+ * ═══════════════════════════════════════════════════════════════════════════ */
 
-/** playCoin : le vrai bruitage s'il est là, la synthèse sinon. */
+/*
+ * LES VARIANTES.
+ *
+ * Huit sons sont entendus des dizaines de fois par partie. Joués à l'identique
+ * ils deviennent un métronome, et c'est ce métronome qui fait couper le son.
+ * Chacun existe donc en trois prises, tirées au hasard — mais jamais deux fois
+ * la même d'affilée, sinon la répétition qu'on cherchait à casser réapparaît
+ * une fois sur trois.
+ */
+const dernierePrise = new Map<string, number>();
+
+function withVariants(base: string, nb: number, gain: number, fallback: () => void): () => void {
+  return () => {
+    if (muted) return;
+    const avant = dernierePrise.get(base);
+    let n = 1 + Math.floor(Math.random() * nb);
+    if (n === avant) n = 1 + (n % nb);
+    dernierePrise.set(base, n);
+
+    const url = `/audio/${base}-${n}.mp3`;
+    if (isKnownMissing(url)) { fallback(); return; }
+    loadAudio(url).then(buf => { if (buf) playBuffer(buf, gain); else fallback(); });
+  };
+}
+
+// ─── ① L'ARGENT ─────────────────────────────────────────────────────────────
+
+/** 1 à 3 € : deux pièces au fond d'un gobelet. */
+const playCoinSmall = withVariants('argent-piece-entree', 3, 0.85, playCoinSynth);
+/** 4 à 15 € : une poignée versée d'un coup. */
+const playCoinHandful = withFile('argent-poignee-entree', 0.85, playCoinSynth);
+/** Plus de 15 € : des billets comptés au pouce. Un billet ne tinte jamais. */
+const playCoinNotes = withFile('argent-liasse', 0.85, playCoinSynth);
+
+/**
+ * L'ARGENT QUI ENTRE. Le son dit combien, avant même que le chiffre s'affiche.
+ *
+ * Le jeu n'avait qu'un seul son de pièce pour toute somme, et il servait
+ * aussi aux paiements : vendre son manteau et l'acheter s'entendaient pareil.
+ */
+export function playMoneyIn(montant = 1): void {
+  if (montant > 15) playCoinNotes();
+  else if (montant >= 4) playCoinHandful();
+  else playCoinSmall();
+}
+
+/** L'ARGENT QUI SORT. Des pièces raclées sur un comptoir : timbre descendant. */
+export const playMoneyOut = withFile('argent-sortie', 0.85, playCoinSynth);
+
+/** La pièce attrapée au mini-jeu de la manche. */
 export const playCoin = withFile('moment-piece', 0.85, playCoinSynth);
 
-/** playNextDay : le vrai bruitage s'il est là, la synthèse sinon. */
-export const playNextDay = withFile('moment-jour-nouveau', 0.8, playNextDaySynth);
+// ─── ② L'EFFORT ─────────────────────────────────────────────────────────────
 
-/** playWin : le vrai bruitage s'il est là, la synthèse sinon. */
-export const playWin = withFile('moment-victoire', 0.85, playWinSynth);
+/** Creuser d'un cran dans la benne. Du frottement — surtout pas un coup. */
+export const playDig = withVariants('geste-fouille', 3, 0.8, playHitSynth);
+/** Ramasser le butin : un objet décollé du carton. */
+export const playPickUp = withFile('geste-ramasse', 0.8, playHitSynth);
+/** Fabriquer à l'établi. */
+export const playCraft = withFile('geste-bricole', 0.85, playCraftSynth);
+/** Une trouvaille. Terne, pas cristallin : c'est de la récup', pas un trésor. */
+export const playFind = withFile('moment-trouvaille', 0.85, playUnlockSynth);
+/** Un objet bricolé qui cède dans la nuit. */
+export const playWear = withFile('geste-usure', 0.8, playFailSynth);
+/** Ouvrir le sac. */
+export const playBag = withFile('geste-sac', 0.75, playClickSynth);
+/** Le carton du matin qu'on décolle. Le silence final fait partie du son. */
+export const playMorningBox = withFile('moment-carton-matin', 0.85, playPaperSynth);
+/** Changer de quartier. Six pas, pas plus : le trajet coûte cher. */
+export const playTravel = withFile('moment-trajet', 0.8, playStepSynth);
 
-/** playKO : le vrai bruitage s'il est là, la synthèse sinon. */
+// ─── ③ LE CORPS ─────────────────────────────────────────────────────────────
+
+/** Coup donné. */
+export const playHit = withVariants('geste-coup', 3, 0.85, playHitSynth);
+/** Coup critique. */
+export const playCrit = withFile('geste-coup-fort', 0.9, playCritSynth);
+/** Coup reçu — le son vient d'autour, pas de devant. */
+export const playHurt = withFile('geste-encaisse', 0.9, playHurtSynth);
+/** Un pas. */
+export const playStep = withVariants('geste-pas', 3, 0.8, playStepSynth);
+/** Mise hors combat. */
 export const playKO = withFile('moment-ko', 0.9, playKOSynth);
 
-/** playKingArrival : le vrai bruitage s'il est là, la synthèse sinon. */
-export const playKingArrival = withFile('moment-sacre', 0.9, playKingArrivalSynth);
+// ─── ④ LES AUTRES ───────────────────────────────────────────────────────────
 
-/** playSpotted : le vrai bruitage s'il est là, la synthèse sinon. */
+/** Partager à manger : le geste le plus digne du jeu. Le son est généreux. */
+export const playGive = withFile('social-partage', 0.85, playShareSynth);
+/** Serrer la main, conclure un troc. */
+export const playHandshake = withFile('moment-poignee-main', 0.85, playShareSynth);
+/** On vous éconduit, ou vous passez votre chemin. */
+export const playTurnedAway = withFile('social-econduit', 0.85, playFailSynth);
+/** Troquer un objet. */
+export const playShare = withFile('geste-troc', 0.85, playShareSynth);
+
+// ─── ⑤ LA PERTE ─────────────────────────────────────────────────────────────
+// Une échelle à cinq degrés. Elle tient à une seule idée : plus la perte est
+// irréversible, plus le son est MOU. L'échec léger claque, l'échec grave
+// s'affaisse.
+
+/** Degré 1 — le raté sans conséquence. Entendu cent fois : ne fait jamais sursauter. */
+export const playMiss = withVariants('perte-rate', 3, 0.75, playFailSynth);
+/** Degré 2 — repéré. Le moment où quelqu'un a levé la tête. */
 export const playSpotted = withFile('moment-attrape', 0.9, playSpottedSynth);
+/** Degré 3 — l'écroulement. Le petit rebond final fait toute la blague. */
+export const playCollapse = withFile('moment-craquement', 0.9, playFailSynth);
+/** Degré 4 — l'humiliation. Aucun impact, que de l'arrachement. */
+export const playDignityLoss = withFile('perte-dignite', 0.9, playFailSynth);
+/** Degré 5 — un palier de Dignité franchi. La signature de la chute. */
+export const playDignityTier = withFile('perte-palier', 0.95, playFailSynth);
 
-// ---- Les moments qui n'avaient pas encore de son à eux ----------------------
-// Chacun garde un repli parmi les sons existants : si le fichier manque, on
-// entend quelque chose de sensé plutôt que rien.
+// ─── ⑥ L'IDENTITÉ ───────────────────────────────────────────────────────────
 
-/** Écran de mort : une résonance longue, puis une pièce qui roule. */
-export const playDeath = withFile('moment-mort', 0.95, () => playFail());
-/** « Le Sursaut » : le souvenir qui remonte, une fois par partie. */
-export const playMemory = withFile('moment-souvenir', 0.85, () => playUnlock());
-/** La Récup' : on déterre une vraie trouvaille. */
-export const playFind = withFile('moment-trouvaille', 0.85, () => playUnlock());
-/** La Récup' : le tas se réveille et on perd tout. */
-export const playCollapse = withFile('moment-craquement', 0.9, () => playFail());
-/** Le Culot : le marchandage aboutit, on serre la main. */
-export const playHandshake = withFile('moment-poignee-main', 0.85, () => playSuccess());
-/** Le Culot : le commerçant se braque et baisse le rideau. */
-export const playShutter = withFile('moment-porte-claque', 0.9, () => playFail());
+/** Choisir son personnage : le geste de l'état civil, sec et définitif. */
+export const playPickCharacter = withFile('moment-choix-perso', 0.85, playPaperSynth);
+/** Relancer le trio de personnages. */
+export const playReroll = withFile('moment-relance', 0.8, playPaperSynth);
+/** Choisir ce qu'on lègue au suivant. */
+export const playBequeath = withFile('moment-legs', 0.85, playPaperSynth);
+/** Ouvrir le Registre ou le Cimetière. */
+export const playLedger = withFile('moment-registre', 0.85, playPaperSynth);
+/** Une fin de mort découverte : le son de la collection qui avance. */
+export const playNewEnding = withFile('moment-fin-inedite', 0.9, playUnlockSynth);
+/** La mort. Un son trop petit pour l'événement — c'est là qu'est la comédie. */
+export const playDeath = withFile('moment-mort', 0.95, playFailSynth);
+/** Sacré Roi du Carton. */
+export const playKingArrival = withFile('moment-sacre', 0.9, playKingArrivalSynth);
+/** Une page de texte s'ouvre. Doit passer inaperçu. */
+export const playPage = withFile('moment-page', 0.75, playPaperSynth);
 
-/** playClick : le geste enregistré s'il est là, la synthèse sinon. */
-export const playClick = withFile('geste-clic', 0.7, playClickSynth);
+// ─── ⑦ LE RYTHME DU JOUR ────────────────────────────────────────────────────
 
-/** playStep : le geste enregistré s'il est là, la synthèse sinon. */
-export const playStep = withFile('geste-pas', 0.8, playStepSynth);
-
-/** playHit : le geste enregistré s'il est là, la synthèse sinon. */
-export const playHit = withFile('geste-coup', 0.85, playHitSynth);
-
-/** playCrit : le geste enregistré s'il est là, la synthèse sinon. */
-export const playCrit = withFile('geste-coup-fort', 0.9, playCritSynth);
-
-/** playHurt : le geste enregistré s'il est là, la synthèse sinon. */
-export const playHurt = withFile('geste-encaisse', 0.9, playHurtSynth);
-
-/** playWhoosh : le geste enregistré s'il est là, la synthèse sinon. */
-export const playWhoosh = withFile('geste-souffle', 0.8, playWhooshSynth);
-
-/** playSuccess : le geste enregistré s'il est là, la synthèse sinon. */
-export const playSuccess = withFile('geste-reussite', 0.85, playSuccessSynth);
-
-/** playFail : le geste enregistré s'il est là, la synthèse sinon. */
-export const playFail = withFile('geste-echec', 0.85, playFailSynth);
-
-/** playFightStart : le geste enregistré s'il est là, la synthèse sinon. */
+/** Le réveil, à l'ouverture du bilan de nuit. */
+export const playWakeUp = withFile('moment-reveil', 0.8, playPaperSynth);
+/** Le jour nouveau : le seul son du jeu qui a le droit d'être large. */
+export const playNextDay = withFile('moment-jour-nouveau', 0.8, playNextDaySynth);
+/** Victoire en combat. */
+export const playWin = withFile('moment-victoire', 0.85, playWinSynth);
+/** Début de combat : un métal creux et fêlé, jamais un gong de studio. */
 export const playFightStart = withFile('geste-gong', 0.9, playFightStartSynth);
+/** Un souvenir, un fantôme du cimetière. */
+export const playMemory = withFile('moment-souvenir', 0.85, playUnlockSynth);
+/** Un événement tourne bien. Le pendant de playMiss : même petitesse, sens inverse. */
+export const playGoodOutcome = withFile('moment-resultat-bon', 0.85, playSuccessSynth);
 
-/** playCraft : le geste enregistré s'il est là, la synthèse sinon. */
-export const playCraft = withFile('geste-bricole', 0.85, playCraftSynth);
+// ─── ⑧ L'INTERFACE ──────────────────────────────────────────────────────────
+// Elle doit disparaître : que du carton manipulé. Et surtout pas le même clic
+// pour toucher « Voler » et pour changer d'onglet.
 
-/** playUnlock : le geste enregistré s'il est là, la synthèse sinon. */
+/** Toucher une action : le son le plus entendu du jeu. */
+export const playClick = withVariants('geste-clic', 3, 0.7, playClickSynth);
+/** Retour, fermer. Plus grave que le clic d'action. */
+export const playBack = withFile('geste-retour', 0.7, playClickSynth);
+/** Changer d'onglet, sélectionner sur la carte. */
+export const playTab = withVariants('geste-onglet', 3, 0.65, playClickSynth);
+/** Basculer un réglage. */
+export const playToggle = withFile('geste-reglage', 0.7, playClickSynth);
+/** Changement d'écran. Remplace le « woosh », qui disparaît du jeu. */
+export const playCard = withVariants('geste-carte', 3, 0.7, playWhooshSynth);
+/** Succès débloqué. Un coup, net, et c'est tout. */
 export const playUnlock = withFile('geste-succes', 0.85, playUnlockSynth);
 
-/** playPaper : le geste enregistré s'il est là, la synthèse sinon. */
-export const playPaper = withFile('geste-papier', 0.8, playPaperSynth);
+// ─── ⑨ LES JAUGES ───────────────────────────────────────────────────────────
+// Le jeu demande de surveiller six jauges et n'en signalait aucune à l'oreille.
 
-/** playShare : le geste enregistré s'il est là, la synthèse sinon. */
-export const playShare = withFile('geste-troc', 0.85, playShareSynth);
+/**
+ * Une jauge passe sous 25.
+ *
+ * Ne se rejoue pas tant qu'on n'est pas remonté au-dessus : sinon c'est une
+ * alarme qui sonne à chaque action, et le joueur coupe le son. La mémoire est
+ * portée par jauge, et remise à zéro dès que la valeur repasse le seuil.
+ */
+const SEUIL_ALERTE = 25;
+const jaugesEnAlerte = new Set<string>();
+const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
+
+export function playGaugeLow(jauge: string, valeur: number): void {
+  if (valeur >= SEUIL_ALERTE) { jaugesEnAlerte.delete(jauge); return; }
+  if (jaugesEnAlerte.has(jauge)) return;
+  jaugesEnAlerte.add(jauge);
+  playGaugeLowFile();
+}
+
+/** Repartir de zéro : un nouveau personnage n'hérite pas des alertes du défunt. */
+export function resetGaugeAlerts(): void {
+  jaugesEnAlerte.clear();
+}
+
+/** Manger, boire, se soigner. */
+export const playGaugeFilled = withFile('jauge-remplie', 0.85, playSuccessSynth);

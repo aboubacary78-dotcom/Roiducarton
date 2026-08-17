@@ -26,7 +26,7 @@ import {
   moves, openingPrice, priceFor, startingPatience, tradeCandidate,
   type ArgumentId, type Shopkeeper,
 } from '@/contexts/GameContext';
-import { playClick, playCoin, playHandshake, playShutter } from '@/lib/sound';
+import { playClick, playGoodOutcome, playHandshake, playTurnedAway } from '@/lib/sound';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
 import { setAmbience, type AmbienceId } from '@/lib/ambience';
@@ -85,7 +85,7 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
     if (left <= 0) {
       setPhase('broken');
       setLine(keeper.snap);
-      playShutter();
+      playTurnedAway();
       return false;
     }
     return true;
@@ -129,7 +129,7 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
       setInsists(0);          // un argument neuf lui redonne de quoi réfléchir
       setLine(arg.line);
       setFlash('good');
-      playCoin();
+      playGoodOutcome();
       spendPatience(HAGGLE_TUNING.argCost * costMultiplier(cut, maxCut));
     } else {
       setLine(refusalFor(id, keeper));

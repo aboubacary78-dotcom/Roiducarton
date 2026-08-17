@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import PlayerFace from './PlayerFace';
 import { useLang, tr, tc } from '@/lib/lang';
+import { playPickCharacter, playReroll } from '@/lib/sound';
 import { showRewarded, isAdsRemoved } from '@/lib/ads';
 
 function CharacterCard({ char, index, onSelect }: { char: Character; index: number; onSelect: () => void }) {
@@ -75,6 +76,7 @@ export default function CharacterSelect() {
   async function handleReroll() {
     if (loadingAd) return;
     if (freeReroll) {
+      playReroll();
       setRerolls((n) => n + 1);
       dispatch({ type: 'GENERATE_CHARACTERS' });
       return;
@@ -83,6 +85,7 @@ export default function CharacterSelect() {
     const ok = await showRewarded({ exempt: true });
     setLoadingAd(false);
     if (ok) {
+      playReroll();
       setRerolls((n) => n + 1);
       dispatch({ type: 'GENERATE_CHARACTERS' });
     }
@@ -109,7 +112,7 @@ export default function CharacterSelect() {
             key={i}
             char={char}
             index={i}
-            onSelect={() => dispatch({ type: 'SELECT_CHARACTER', index: i })}
+            onSelect={() => { playPickCharacter(); dispatch({ type: 'SELECT_CHARACTER', index: i }); }}
           />
         ))}
       </div>

@@ -10,7 +10,7 @@ import {
 } from '@/lib/daily';
 import { addKarma } from '@/lib/necrology';
 import { showRewarded } from '@/lib/ads';
-import { playCoin, playPaper } from '@/lib/sound';
+import { playBack, playFind, playMoneyIn, playMorningBox, playPage } from '@/lib/sound';
 import { haptic } from '@/lib/haptics';
 import SafeImg from './SafeImg';
 
@@ -32,6 +32,16 @@ import SafeImg from './SafeImg';
  *   perte et on supprime la falaise du « c'est cassé, tant pis ». Et une série
  *   perdue n'est jamais affichée à zéro : elle disparaît, simplement.
  */
+/*
+ * Le son dit ce qu'on a trouvé, avant que le texte l'annonce : du Karma
+ * s'entend comme une poignée de pièces, une trouvaille comme une trouvaille,
+ * et une bricole n'a droit qu'au son le plus modeste des trois.
+ */
+function sonnerCadeau(g: CartonGift): void {
+  if (g.kind === 'karma') playMoneyIn(g.karma ?? 4);
+  else playFind();
+}
+
 export default function CartonMatinOverlay() {
   const { state, dispatch } = useGame();
   useLang();
@@ -50,11 +60,12 @@ export default function CartonMatinOverlay() {
     setSaves(d.saves);
     const st = dailyStatus();
     if (st.kind === 'claimed') return;
+    playMorningBox();
     if (st.kind === 'rescuable') { setPhase('rescue'); return; }
     setPhase('offer');
   }, []);
 
-  useEffect(() => { if (phase === 'offer' || phase === 'rescue') playPaper(); }, [phase]);
+  useEffect(() => { if (phase === 'offer' || phase === 'rescue') playPage(); }, [phase]);
 
   function remettre(g: CartonGift) {
     if (g.kind === 'karma') { addKarma(g.karma ?? 0); return null; }
@@ -74,7 +85,7 @@ export default function CartonMatinOverlay() {
     setStreak(d.streak);
     const m = milestoneFor(d.streak);
     if (m) { addKarma(m.karma); setMilestone(m); }
-    playCoin();
+    sonnerCadeau(g);
     haptic(g.kind === 'trouvaille' ? 'heavy' : 'medium');
     setPhase('opened');
   }
@@ -97,7 +108,7 @@ export default function CartonMatinOverlay() {
     const g = rollCarton(d.streak);
     setGift(g);
     setItemName(remettre(g));
-    playCoin();
+    sonnerCadeau(g);
     haptic('medium');
     setPhase('opened');
   }
@@ -232,7 +243,7 @@ export default function CartonMatinOverlay() {
               )}
 
               <button
-                onClick={() => setPhase('closed')}
+                onClick={() => { playBack(); setPhase('closed'); }}
                 className="w-full mt-2 py-3 text-sm font-bold text-white rounded-xl"
                 style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)' }}
               >

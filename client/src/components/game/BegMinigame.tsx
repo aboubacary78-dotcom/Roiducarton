@@ -5,7 +5,7 @@ import {
 import type { PasserBy } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { playHit, playCrit, playHurt, playStep } from '@/lib/sound';
+import { playCoin, playHurt, playMiss, playStep } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
@@ -193,7 +193,7 @@ function BegMinigameInner() {
               w.gain += w.def.give;
               coinsRef.current += w.def.give;
               setCoins(coinsRef.current);
-              playCrit();
+              playCoin();
               say(tr(`${w.def.tell} +${w.def.give}`, `${w.def.tell} +${w.def.give}`), 'good');
             }
           } else {
@@ -274,7 +274,7 @@ function BegMinigameInner() {
     // On perd le regard si le doigt décroche de la personne.
     if (!w || w.done || Math.hypot(posX(w) * W - p.x, w.lane * H - p.y) > T.grabR + 18 + mods.extraGrab) {
       heldRef.current = null; setHeld(null);
-      if (w && !w.done && w.gaze > 0 && w.gaze < 1) playHit();
+      if (w && !w.done && w.gaze > 0 && w.gaze < 1) playMiss();
     }
   }
 

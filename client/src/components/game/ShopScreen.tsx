@@ -4,7 +4,7 @@ import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay
 import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
-import { playCoin, playShare, playClick } from '@/lib/sound';
+import { playClick, playMoneyOut, playShare } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { pushToast } from '@/lib/toast';
@@ -128,7 +128,7 @@ export default function ShopScreen() {
       setDeltas((d) => [...d, { id, amt: actualPrice }]);
       setTimeout(() => setDeltas((d) => d.filter((x) => x.id !== id)), 1000);
     }
-    playCoin();
+    playMoneyOut();
     buyToast(item);
     dispatch({ type: 'BUY_ITEM', shopItem: item, actualPrice });
   };
@@ -474,7 +474,7 @@ export default function ShopScreen() {
                 }
                 setBought(b => ({ ...b, [item.id]: (b[item.id] || 0) + 1 }));
                 setSpent(s => s + res.price!);
-                playCoin();
+                playMoneyOut();
                 buyToast(item);
                 if (res.cut > 0.005) {
                   pushToast(`${tr('Négocié', 'Haggled')} −${Math.round(res.cut * 100)} % · ${haggling.asking}€ → ${res.price}€`,

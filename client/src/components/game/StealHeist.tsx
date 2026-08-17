@@ -1,7 +1,7 @@
 import { useGame, LOCATIONS, heistTargetsFor, HEIST_TUNING, type HeistTarget } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { playHit, playCrit, playHurt, playStep, playSpotted } from '@/lib/sound';
+import { playCrit, playHit, playHurt, playPickUp, playSpotted, playStep } from '@/lib/sound';
 import { useLang, tr } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
@@ -380,7 +380,7 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
 
     let got = hasLootRef.current;
     if (!got && nx === layout.loot.x && ny === layout.loot.y) {
-      got = true; hasLootRef.current = true; setHasLoot(true); playHit();
+      got = true; hasLootRef.current = true; setHasLoot(true); playPickUp();
       raiseAlert(20); // l'étal remarque le trou : le retour est plus chaud que l'aller
     }
     if (guardsRef.current.some((g) => g.x === nx && g.y === ny)) { finish('fail'); return; }

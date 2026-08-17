@@ -2,6 +2,12 @@ import { useGame, getLegend } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useLang, tr } from '@/lib/lang';
+/*
+ * Le Registre joue son classeur À SON OUVERTURE, dans son propre composant.
+ * Le rejouer ici doublait le son : deux mécanismes métalliques coup sur coup.
+ * Le bouton ne fait donc que sa transition d'écran.
+ */
+import { playCard, playTab } from '@/lib/sound';
 import { DEATH_DEFS, loadDeathBook, loadKarma, loadGraves, loadCrown } from '@/lib/necrology';
 import { getEquipped } from '@/lib/profile';
 import CardboardAvatar from './CardboardAvatar';
@@ -101,7 +107,7 @@ export default function TitleScreen() {
             transition={{ delay: 0.5 }}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => dispatch({ type: 'CONTINUE_SAVE' })}
+            onClick={() => { playCard(); dispatch({ type: 'CONTINUE_SAVE' }); }}
             className="w-full py-3.5 text-sm font-semibold text-white rounded-xl"
             style={{
               background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)',
@@ -118,7 +124,7 @@ export default function TitleScreen() {
           transition={{ delay: hasSave ? 0.6 : 0.5 }}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => dispatch({ type: 'START_GAME' })}
+          onClick={() => { playCard(); dispatch({ type: 'START_GAME' }); }}
           className="btn-primary w-full py-3.5 text-sm"
         >
           {tr('Nouvelle Partie', 'New Game')}
@@ -133,7 +139,7 @@ export default function TitleScreen() {
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'registre' })}
+            onClick={() => { playCard(); dispatch({ type: 'SET_SCREEN', screen: 'registre' }); }}
             className="action-btn flex-1 py-3 text-sm text-[#6B5740] font-medium flex flex-col items-center leading-tight"
           >
             <span>📕 {tr('Registre', 'Registry')}</span>
@@ -142,7 +148,7 @@ export default function TitleScreen() {
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'cimetiere' })}
+            onClick={() => { playCard(); dispatch({ type: 'SET_SCREEN', screen: 'cimetiere' }); }}
             className="action-btn flex-1 py-3 text-sm text-[#6B5740] font-medium flex flex-col items-center leading-tight"
           >
             <span>⚰️ {tr('Cimetière', 'Cemetery')}</span>
@@ -156,7 +162,7 @@ export default function TitleScreen() {
           transition={{ delay: hasSave ? 0.8 : 0.7 }}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'settings' })}
+          onClick={() => { playTab(); dispatch({ type: 'SET_SCREEN', screen: 'settings' }); }}
           className="action-btn w-full py-3 text-sm text-[#6B5740] font-medium"
         >
           ⚙️ {tr('Options', 'Settings')}

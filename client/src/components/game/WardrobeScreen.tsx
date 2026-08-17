@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import CardboardAvatar from './CardboardAvatar';
 import { faceCondition } from './PlayerFace';
-import { playClick } from '@/lib/sound';
+import { playClick, playTab } from '@/lib/sound';
 import {
   ACCESSORIES,
   ACHIEVEMENTS,
@@ -93,7 +93,7 @@ export default function WardrobeScreen() {
         {(['accessoires', 'succes'] as const).map((t) => (
           <button
             key={t}
-            onClick={() => { playClick(); setTab(t); }}
+            onClick={() => { playTab(); setTab(t); }}
             className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all ${
               tab === t ? 'btn-primary' : 'action-btn text-[#6B5740]'
             }`}

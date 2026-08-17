@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { useVerrouScroll } from '@/lib/verrouScroll';
 import { useGame, STAT_META, WEATHER_TYPES, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr } from '@/lib/lang';
+import { playWakeUp, playWear, playBack } from '@/lib/sound';
 
 /*
  * Bilan de la nuit, affiché après « Jour suivant » : nouveau jour, météo,
@@ -13,6 +15,23 @@ export default function DaySummaryOverlay() {
   const lang = useLang();
   const s = state.daySummary;
   useVerrouScroll(!!s);
+
+  /*
+   * Le réveil sonne à l'APPARITION du bilan, pas au montage du composant : cet
+   * overlay est monté en permanence et ne rend `null` que faute de bilan à
+   * montrer. Accroché au montage, le son partait une fois au lancement du jeu,
+   * dans le vide.
+   *
+   * Un objet bricolé qui a cédé pendant la nuit a son propre son — du carton
+   * mouillé qui se déchire. Le réducteur le signale par une note en 💔.
+   */
+  const jour = s?.day;
+  useEffect(() => {
+    if (!s) return;
+    playWakeUp();
+    if (s.notes.some(n => n.startsWith('💔'))) setTimeout(() => playWear(), 700);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jour]);
 
   if (!s) return null;
 
@@ -27,7 +46,7 @@ export default function DaySummaryOverlay() {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 overlay-backdrop"
-        onClick={() => dispatch({ type: 'DISMISS_DAY_SUMMARY' })}
+        onClick={() => { playBack(); dispatch({ type: 'DISMISS_DAY_SUMMARY' }); }}
       >
         <motion.div
           initial={{ scale: 0.9, y: 16, rotate: 0.5 }}
@@ -98,7 +117,7 @@ export default function DaySummaryOverlay() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => dispatch({ type: 'DISMISS_DAY_SUMMARY' })}
+            onClick={() => { playBack(); dispatch({ type: 'DISMISS_DAY_SUMMARY' }); }}
             className="btn-primary w-full py-3 text-sm"
           >
             {tr('Nouvelle journée', 'New day')}

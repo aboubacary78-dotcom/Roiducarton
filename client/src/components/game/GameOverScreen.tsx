@@ -10,7 +10,7 @@ import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown, loadDeathBoo
 import { STREET_TITLES } from '@/contexts/data/progression';
 import { getEquipped } from '@/lib/profile';
 import { pushToast } from '@/lib/toast';
-import { playDeath, playCoin } from '@/lib/sound';
+import { playBack, playBequeath, playDeath, playFind, playNewEnding, resetGaugeAlerts } from '@/lib/sound';
 import { haptic } from '@/lib/haptics';
 import { rememberSuccessor } from '@/lib/notifications';
 import { worthSharing, shareRewardAvailable, markShareRewarded, shareFrontPage } from '@/lib/partage';
@@ -266,7 +266,7 @@ export default function GameOverScreen() {
 
   function ouvrirPoche() {
     if (pochesOuvertes >= poches.length) return;
-    playCoin();
+    playFind();
     haptic(poches[pochesOuvertes].id === 'bonus' ? 'heavy' : 'medium');
     setPochesOuvertes(n => n + 1);
   }
@@ -301,7 +301,8 @@ export default function GameOverScreen() {
       return;
     }
     if (!char) return;
-    if (legacyId === item.id) { setLegacyId(null); clearLegacy(); return; }
+    if (legacyId === item.id) { playBack(); setLegacyId(null); clearLegacy(); return; }
+    playBequeath();
     setLegacyId(item.id);
     setLegacy(item, char.name);
   }
@@ -345,6 +346,17 @@ export default function GameOverScreen() {
     const enemy = id.replace('mort-ennemi-', '');
     return { emoji: '⚔️', title: tr(`Vaincu par ${tc(enemy)}`, `Slain by ${tc(enemy)}`) };
   });
+
+  /*
+   * Une fin inédite se tamponne : c'est le son de la collection qui avance,
+   * et le seul moment franchement bon d'un écran de mort. Il attend que la
+   * dernière poche soit ouverte — avant, l'encadré n'est pas encore à l'écran.
+   */
+  useEffect(() => {
+    if (newCards.length > 0 && finsRevelees) playNewEnding();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newCards.length, finsRevelees]);
+
 
   return (
     <motion.div
@@ -513,7 +525,7 @@ export default function GameOverScreen() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => dispatch({ type: 'RESTART' })}
+            onClick={() => { resetGaugeAlerts(); dispatch({ type: 'RESTART' }); }}
             className="w-full mt-3 py-3.5 text-[15px] font-bold text-white rounded-xl"
             style={{
               background: 'linear-gradient(135deg, #D4874D, #9B5B3A)',
@@ -733,7 +745,7 @@ export default function GameOverScreen() {
         transition={{ delay: 0.85 }}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
-        onClick={() => dispatch({ type: 'RESTART' })}
+        onClick={() => { resetGaugeAlerts(); dispatch({ type: 'RESTART' }); }}
         className={successor
           ? 'w-full max-w-sm py-2.5 text-[12px] font-semibold text-[#E8A87C] rounded-xl border border-[#4A3048]'
           : 'w-full max-w-sm py-3.5 text-sm font-semibold text-white rounded-xl'}

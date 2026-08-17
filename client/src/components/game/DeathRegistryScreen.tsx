@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import SafeImg from './SafeImg';
 import { useGame, knownEnemyNames } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
+import { playLedger, playBack } from '@/lib/sound';
 import { DEATH_DEFS, loadDeathBook, loadKarma } from '@/lib/necrology';
 
 /*
@@ -26,6 +28,8 @@ import { DEATH_DEFS, loadDeathBook, loadKarma } from '@/lib/necrology';
  *    a le sien.
  */
 export default function DeathRegistryScreen() {
+  // Le Registre s'ouvre : un classeur à levier, mécanisme métallique.
+  useEffect(() => { playLedger(); }, []);
   const { state, dispatch } = useGame();
   useLang();
   const book = loadDeathBook();
@@ -60,7 +64,7 @@ export default function DeathRegistryScreen() {
       {/* En-tête */}
       <SafeImg src="/assets/registre-hub.webp" className="w-full h-24 object-cover rounded-xl" />
       <div className="flex items-center gap-3">
-        <button onClick={back} className="w-10 h-10 flex items-center justify-center text-lg rounded-xl border border-[#4A3048] text-[#E8A87C]" aria-label={tr('Retour', 'Back')}>
+        <button onClick={() => { playBack(); back(); }} className="w-10 h-10 flex items-center justify-center text-lg rounded-xl border border-[#4A3048] text-[#E8A87C]" aria-label={tr('Retour', 'Back')}>
           ←
         </button>
         <div className="flex-1">

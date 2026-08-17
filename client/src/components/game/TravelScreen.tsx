@@ -1,7 +1,7 @@
 import { useGame, LOCATIONS, getShopsForLocation } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { playClick, playWhoosh } from '@/lib/sound';
+import { playClick, playTravel } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 
 /*
@@ -254,7 +254,7 @@ export default function TravelScreen() {
         ) : (
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={() => { playWhoosh(); dispatch({ type: 'TRAVEL', location: selected }); }}
+            onClick={() => { playTravel(); dispatch({ type: 'TRAVEL', location: selected }); }}
             className="btn-primary w-full py-3 text-sm"
           >
             🚶 {tr('Voyager vers', 'Travel to')} {tr(loc.name, loc.nameEn)}

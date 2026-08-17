@@ -10,7 +10,7 @@ import CardboardAvatar from './CardboardAvatar';
 import PlayerFace, { faceCondition } from './PlayerFace';
 import StreetEncounter from './StreetEncounter';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
-import { playClick, playNextDay, playCoin } from '@/lib/sound';
+import { playBag, playClick, playNextDay, playUnlock } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
@@ -130,7 +130,7 @@ export default function MainScreen() {
     if (!commandeFaite || commande.claimed) return;
     addKarma(commandeD.karma);
     markClaimed();
-    playCoin();
+    playUnlock();
     pushToast(
       tr(`Commande honorée : +${commandeD.karma} karma.`, `Order filled: +${commandeD.karma} karma.`),
       { emoji: commandeD.emoji, tone: 'good' },
@@ -491,7 +491,7 @@ export default function MainScreen() {
         <div id="tuto-secondary" className="flex gap-2">
           <ActionTile emoji="🛒" title={tr('Achats', 'Shop')} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'shop' })} small />
           <ActionTile emoji="🗺️" title={tr('Voyager', 'Travel')} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'travel' })} small />
-          <ActionTile emoji="🎒" title={`${tr('Sac', 'Bag')} (${char.inventory.length})`} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'inventory' })} small />
+          <ActionTile emoji="🎒" title={`${tr('Sac', 'Bag')} (${char.inventory.length})`} disabled={false} onClick={() => { playBag(); dispatch({ type: 'SET_SCREEN', screen: 'inventory' }); }} small />
         </div>
       </motion.div>
 

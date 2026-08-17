@@ -1,7 +1,7 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { isMuted, setMuted } from '@/lib/sound';
+import { isMuted, playToggle, setMuted } from '@/lib/sound';
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
@@ -23,7 +23,7 @@ import { pushToast } from '@/lib/toast';
 // lien s'ouvre correctement dans l'application native, où `target="_blank"`
 // passe la main au navigateur du système.
 const PRIVACY_URL = '/confidentialite.html';
-const APP_VERSION = '3.14.0';
+const APP_VERSION = '3.15.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -124,7 +124,7 @@ export default function SettingsScreen() {
         className="craft-card p-4"
       >
         <button
-          onClick={() => { const v = !muted; setMuted(v); setMutedState(v); }}
+          onClick={() => { const v = !muted; setMuted(v); setMutedState(v); if (!v) playToggle(); }}
           className="w-full flex items-center justify-between"
         >
           <span className="text-base font-semibold text-[#2A1F1A]">{muted ? '🔇' : '🔊'} {tr('Son', 'Sound')}</span>
@@ -138,7 +138,7 @@ export default function SettingsScreen() {
         {/* Réglage SÉPARÉ : couper le son ne doit pas couper le retour
             tactile, c'est justement là qu'il devient le seul canal. */}
         <button
-          onClick={() => { const v = !vibre; setHapticsEnabled(v); setVibre(v); if (v) haptic('medium'); }}
+          onClick={() => { const v = !vibre; setHapticsEnabled(v); setVibre(v); playToggle(); if (v) haptic('medium'); }}
           className="w-full flex items-center justify-between mt-3 pt-3 border-t border-[#E8D5C0]"
         >
           <span className="text-base font-semibold text-[#2A1F1A]">📳 {tr('Vibrations', 'Vibration')}</span>

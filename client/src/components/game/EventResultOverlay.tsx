@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showRewarded, canOfferRewarded } from '@/lib/ads';
 import { DIGNITY_TIERS, dignityTierIndex } from '@/contexts/data/dignity';
-import { playSuccess, playFail, playWin, playKO } from '@/lib/sound';
+import { playGoodOutcome, playMiss, playWin, playKO } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, moodFor } from './SceneIllustration';
@@ -43,8 +43,8 @@ export default function EventResultOverlay() {
     const isVictory = /^Victoire|^Victory/.test(result.text);
     // Victoire en combat : le K.O. tombe d'abord, la fanfare enchaîne.
     if (isVictory) { playKO(); setTimeout(() => playWin(), 620); }
-    else if (positive) playSuccess();
-    else playFail();
+    else if (positive) playGoodOutcome();
+    else playMiss();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result?.text]);
 

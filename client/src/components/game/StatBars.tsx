@@ -1,8 +1,9 @@
 import { STAT_META, type Stats } from '@/contexts/GameContext';
-import { dignityTier } from '@/contexts/data/dignity';
+import { dignityTier, dignityTierIndex } from '@/contexts/data/dignity';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useLang, tr } from '@/lib/lang';
+import { playDignityLoss, playDignityTier, playGaugeLow } from '@/lib/sound';
 
 /*
  * LES JAUGES.
@@ -69,6 +70,52 @@ function useDeltas(stats: Stats) {
   return deltas;
 }
 
+/*
+ * LES JAUGES QUI S'ALLUMENT EN ROUGE, À L'OREILLE.
+ *
+ * Le jeu demande de surveiller six jauges et n'en signalait aucune autrement
+ * qu'en couleur — c'est-à-dire seulement au joueur qui regarde au bon moment.
+ *
+ * L'élastique tendu ne sonne qu'au FRANCHISSEMENT, jamais tant qu'on reste
+ * dans le rouge : une alerte qui se rejoue à chaque action est une alarme, et
+ * une alarme se coupe. C'est `playGaugeLow` qui tient cette mémoire, jauge par
+ * jauge, et qui la relâche dès qu'on est remonté au-dessus du seuil.
+ *
+ * Le passage d'un palier de Dignité a son son à lui, plus grave : c'est la
+ * seule chute dont on ne remonte pas en mangeant un sandwich.
+ */
+/** Une perte de Dignité en dessous de ce seuil passe pour du bruit de fond. */
+const HUMILIATION = 5;
+
+function useAlertesSonores(stats: Stats) {
+  const palierPrecedent = useRef<number | null>(null);
+  const digniteAvant = useRef<number | null>(null);
+
+  useEffect(() => {
+    for (const { key } of BODY) playGaugeLow(key, stats[key]);
+    playGaugeLow('dignity', stats.dignity);
+
+    /*
+     * L'HUMILIATION. Aucun impact, que de l'arrachement — l'adhésif qu'on
+     * décolle du carton mouillé en emportant la couche du dessus.
+     *
+     * Elle ne sonne qu'à partir d'une perte franche : le jeu grignote la
+     * Dignité de 3 ou 4 points à longueur de journée, et sonner à chaque fois
+     * banaliserait exactement ce qu'on cherche à rendre lourd.
+     */
+    const avant = digniteAvant.current;
+    digniteAvant.current = stats.dignity;
+    if (avant !== null && avant - stats.dignity >= HUMILIATION) playDignityLoss();
+
+    // dignityTierIndex : 0 = le plus digne. Un palier FRANCHI VERS LE BAS fait
+    // donc monter l'indice. On ne sonne que celui-là : remonter d'un palier est
+    // une bonne nouvelle, et elle est déjà portée par le texte qui s'affiche.
+    const palier = dignityTierIndex(stats.dignity);
+    if (palierPrecedent.current !== null && palier > palierPrecedent.current) playDignityTier();
+    palierPrecedent.current = palier;
+  }, [stats]);
+}
+
 function Delta({ d }: { d?: { id: number; v: number } }) {
   return (
     <AnimatePresence>
@@ -92,6 +139,7 @@ function Delta({ d }: { d?: { id: number; v: number } }) {
 export default function StatBars({ stats, compact = false }: { stats: Stats; compact?: boolean }) {
   useLang();
   const deltas = useDeltas(stats);
+  useAlertesSonores(stats);
   const [expanded, setExpanded] = useState(false);
   const tier = dignityTier(stats.dignity);
   const dignityDanger = stats.dignity <= DANGER;

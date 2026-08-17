@@ -4,7 +4,7 @@ import { useGame, type StreetNpc } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
 import { pushToast } from '@/lib/toast';
-import { playShare, playCoin } from '@/lib/sound';
+import { playGive, playShare } from '@/lib/sound';
 import CardboardAvatar from './CardboardAvatar';
 
 /*
@@ -24,14 +24,14 @@ export default function StreetEncounter({ npc, onClose }: { npc: StreetNpc; onCl
 
   function share() {
     if (!hasFood) return;
-    playShare();
+    playGive();
     dispatch({ type: 'RESOLVE_ENCOUNTER', kind: 'share' });
     pushToast(tr(`Vous partagez avec ${npc.name}. Un peu d'humanité, ça se rend.`, `You share with ${npc.name}. A bit of humanity goes around.`), { emoji: '🤝', tone: 'good' });
     onClose();
   }
   function trade() {
     if (!offer || !canTrade) return;
-    playCoin();
+    playShare();
     dispatch({ type: 'RESOLVE_ENCOUNTER', kind: 'trade', offer });
     pushToast(`${offer.item.emoji} ${tr('Troc conclu', 'Deal done')} : ${tc(offer.item.name)}`, { emoji: '🔄', tone: 'good' });
     onClose();

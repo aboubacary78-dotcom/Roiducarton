@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useLang, tr, tc } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
 import { pushToast } from '@/lib/toast';
-import { playCoin, playFail } from '@/lib/sound';
+import { playMiss, playMoneyOut } from '@/lib/sound';
 import {
   loadGraves, loadKarma, loadHeritage,
   spendKarma, unlockJob, addKit, setGoldenEpitaph,
@@ -54,12 +54,12 @@ export default function CimetiereScreen() {
 
   function buy(cost: number, apply: () => void, label: string) {
     if (!spendKarma(cost)) {
-      playFail();
+      playMiss();
       pushToast(tr('Pas assez de Karma de Rue.', 'Not enough Street Karma.'), { emoji: '👑', tone: 'bad' });
       return;
     }
     apply();
-    playCoin();
+    playMoneyOut();
     pushToast(label, { emoji: '⚰️', tone: 'good' });
     refresh(n => n + 1);
   }

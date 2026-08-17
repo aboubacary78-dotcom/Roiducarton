@@ -2,7 +2,7 @@ import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon,
 import type { Character, CombatState, CombatCard, SignId, DodgeProj } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { playHurt, playWhoosh, playEnemyCry, playFightStart, playKingArrival, playHit, playCrit } from '@/lib/sound';
+import { playHurt, playCard, playEnemyCry, playFightStart, playKingArrival, playHit, playCrit } from '@/lib/sound';
 import { setAmbience } from '@/lib/ambience';
 import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -406,7 +406,7 @@ function SignPhase({ combat, character, onPick, onFlee }: {
   const pick = (s: SignId | 'special') => {
     if (choice) return;
     setChoice(s);
-    playWhoosh();
+    playCard();
     setTimeout(() => onPick(s), 1350);
   };
 
@@ -807,7 +807,7 @@ function CardHand({ combat, character, onPlay }: { combat: CombatState; characte
   const [played, setPlayed] = useState(false);
   const cards = combat.hand.map((id) => getCard(id)).filter(Boolean) as CombatCard[];
 
-  const play = (id: string) => { if (played) return; setPlayed(true); playWhoosh(); setTimeout(() => onPlay(id), 220); };
+  const play = (id: string) => { if (played) return; setPlayed(true); playCard(); setTimeout(() => onPlay(id), 220); };
 
   return (
     <motion.div
