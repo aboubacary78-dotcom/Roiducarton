@@ -25,7 +25,7 @@ import { useGame } from '@/contexts/GameContext';
 import { useLang, tr } from '@/lib/lang';
 import { CATALOGUE_SONS, compterFichiers, type SonDuCatalogue } from '@/lib/catalogueSons';
 import { playFile } from '@/lib/audioFiles';
-import { isMuted, setMuted, playBack, playTab } from '@/lib/sound';
+import { isMuted, playBack, playTab, playUnlock, setMuted } from '@/lib/sound';
 import { pushToast } from '@/lib/toast';
 import { haptic } from '@/lib/haptics';
 
@@ -85,6 +85,7 @@ export default function AudioTestScreen() {
   }
 
   function noter(fichier: string, verdict: 'bon' | 'revoir') {
+    playTab();
     setAvis(cur => {
       const next = { ...cur };
       if (next[fichier] === verdict) delete next[fichier];
@@ -97,6 +98,7 @@ export default function AudioTestScreen() {
 
   /** Le verdict, en texte brut, prêt à coller dans un message. */
   function copierVerdict() {
+    playUnlock();
     const lignes: string[] = [
       tr('Avis audio — Le Roi du Carton', 'Audio feedback — King of Cardboard'),
       tr(`${juges} son(s) jugé(s) sur ${CATALOGUE_SONS.reduce((t, f) => t + f.sons.length, 0)}.`,

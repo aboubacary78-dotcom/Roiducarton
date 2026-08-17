@@ -1,7 +1,7 @@
 import { useGame, LOCATIONS, heistTargetsFor, HEIST_TUNING, type HeistTarget } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { playCrit, playHit, playHurt, playPickUp, playSpotted, playStep } from '@/lib/sound';
+import { playCard, playCrit, playHit, playHurt, playPickUp, playSpotted, playStep, playTurnedAway } from '@/lib/sound';
 import { useLang, tr } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
@@ -203,7 +203,7 @@ function HeistCasing({ onPick }: { onPick: (t: HeistTarget) => void }) {
               initial={{ y: 14, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: i * 0.08 }}
-              onClick={() => { if (!verrouille) onPick(t); }}
+              onClick={() => { if (!verrouille) { playCard(); onPick(t); } }}
               disabled={verrouille}
               aria-disabled={verrouille}
               className={`craft-card p-3 text-left flex flex-col gap-1.5 ${verrouille ? 'opacity-55' : ''}`}
@@ -242,6 +242,7 @@ function HeistCasing({ onPick }: { onPick: (t: HeistTarget) => void }) {
       {/* Se dégonfler : rebrousser chemin sans rien tenter. */}
       <button
         onClick={() => {
+          playTurnedAway();
           pushToast(
             tr('Vous réalisez que vous n\'avez pas le cran ce soir. Vous rebroussez chemin.', 'You realize you don\'t have the guts tonight. You turn back.'),
             { emoji: '😰' },

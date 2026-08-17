@@ -3,7 +3,7 @@ import { dignityTier, dignityTierIndex } from '@/contexts/data/dignity';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useLang, tr } from '@/lib/lang';
-import { playDignityLoss, playDignityTier, playGaugeLow } from '@/lib/sound';
+import { playDignityLoss, playDignityTier, playGaugeLow, playTab } from '@/lib/sound';
 
 /*
  * LES JAUGES.
@@ -149,7 +149,7 @@ export default function StatBars({ stats, compact = false }: { stats: Stats; com
     return (
       <button
         type="button"
-        onClick={() => setExpanded(false)}
+        onClick={() => { playTab(); setExpanded(false); }}
         className="w-full grid grid-cols-2 gap-x-3 gap-y-2 text-left"
         aria-label={tr('Replier les jauges', 'Collapse gauges')}
       >
@@ -184,7 +184,7 @@ export default function StatBars({ stats, compact = false }: { stats: Stats; com
   return (
     <button
       type="button"
-      onClick={() => setExpanded(true)}
+      onClick={() => { playTab(); setExpanded(true); }}
       className={`w-full flex flex-col text-left ${compact ? 'gap-1.5' : 'gap-2'}`}
       aria-label={tr('Voir le détail des jauges', 'Show gauge detail')}
     >

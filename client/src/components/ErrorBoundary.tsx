@@ -33,7 +33,15 @@ class ErrorBoundary extends Component<Props, State> {
               </pre>
             </div>
 
+            {/*
+              Le seul bouton du jeu qui n'a pas de son, et c'est voulu : il
+              détruit la page dans la milliseconde qui suit, un bruitage n'aurait
+              pas le temps d'être entendu. Cet écran doit surtout rester debout
+              quand tout le reste est cassé — il ne dépend donc d'aucun module
+              du jeu, moteur audio compris.
+            */}
             <button
+              data-sans-son
               onClick={() => window.location.reload()}
               className="btn-primary px-4 py-2 text-sm"
             >

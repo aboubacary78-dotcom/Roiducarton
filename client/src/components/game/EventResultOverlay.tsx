@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showRewarded, canOfferRewarded } from '@/lib/ads';
 import { DIGNITY_TIERS, dignityTierIndex } from '@/contexts/data/dignity';
-import { playBack, playGoodOutcome, playKO, playMiss, playWin } from '@/lib/sound';
+import { playBack, playGoodOutcome, playKO, playMiss, playMoneyOut, playWin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, moodFor } from './SceneIllustration';
@@ -298,7 +298,7 @@ export default function EventResultOverlay() {
               transition={{ delay: 0.36 }}
               whileTap={{ scale: 0.98 }}
               disabled={keeping}
-              onClick={handleKeepFace}
+              onClick={() => { playBack(); handleKeepFace(); }}
               className="w-full py-3 text-sm font-semibold text-white rounded-xl mb-2 disabled:opacity-60"
               style={{
                 background: 'linear-gradient(135deg, #B8703A, #94552A)',
@@ -326,7 +326,7 @@ export default function EventResultOverlay() {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               disabled={doubling}
-              onClick={handleDouble}
+              onClick={() => { playMoneyOut(); handleDouble(); }}
               className="w-full py-3 text-sm font-semibold text-white rounded-xl mb-2 disabled:opacity-60"
               style={{
                 background: 'linear-gradient(135deg, #B8860B, #9B7209)',

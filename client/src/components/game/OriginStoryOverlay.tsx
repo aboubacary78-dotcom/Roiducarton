@@ -2,7 +2,7 @@ import { useVerrouScroll } from '@/lib/verrouScroll';
 import { useGame, generateOrigin } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
-import { playPage } from '@/lib/sound';
+import { playCard, playPage } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import SceneIllustration from './SceneIllustration';
 import SafeImg from './SafeImg';
@@ -101,7 +101,7 @@ export default function OriginStoryOverlay() {
             transition={{ delay: 0.25 }}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => dispatch({ type: 'DISMISS_ORIGIN' })}
+            onClick={() => { playCard(); dispatch({ type: 'DISMISS_ORIGIN' }); }}
             className="btn-primary w-full py-3 text-sm"
           >
             {tr('Commencer à survivre', 'Start surviving')}

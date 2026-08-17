@@ -272,6 +272,7 @@ export default function GameOverScreen() {
   }
 
   async function handleRevive() {
+    playCard();
     if (reviving) return;
     setReviving(true);
     // Exempté du plafond de sollicitations : c'est le meilleur emplacement du
@@ -401,7 +402,7 @@ export default function GameOverScreen() {
                 {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Se relever (regarder une pub)', '🎬 Get back up (watch an ad)')}
               </motion.button>
               <button
-                onClick={() => setPeakOffer(false)}
+                onClick={() => { playBack(); setPeakOffer(false); }}
                 className="w-full mt-2.5 py-2.5 text-[12px] font-semibold text-[#8B6B4A]"
               >
                 {tr('Non, c\'est fini', 'No, it\'s over')}
@@ -477,7 +478,7 @@ export default function GameOverScreen() {
           transition={{ delay: 0.2 }}
           whileTap={{ scale: 0.98 }}
           disabled={partage !== 'idle'}
-          onClick={partagerLaUne}
+          onClick={() => { playNewEnding(); partagerLaUne(); }}
           className="w-full max-w-sm py-2.5 text-[12px] font-semibold rounded-xl border disabled:opacity-60"
           style={{ borderColor: '#4A3048', color: '#E8A87C' }}
         >
@@ -745,7 +746,7 @@ export default function GameOverScreen() {
         transition={{ delay: 0.85 }}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
-        onClick={() => { resetGaugeAlerts(); dispatch({ type: 'RESTART' }); }}
+        onClick={() => { playCard(); resetGaugeAlerts(); dispatch({ type: 'RESTART' }); }}
         className={successor
           ? 'w-full max-w-sm py-2.5 text-[12px] font-semibold text-[#E8A87C] rounded-xl border border-[#4A3048]'
           : 'w-full max-w-sm py-3.5 text-sm font-semibold text-white rounded-xl'}

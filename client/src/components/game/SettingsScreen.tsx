@@ -1,7 +1,7 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { isMuted, playBack, playDignityTier, playTab, playToggle, setMuted } from '@/lib/sound';
+import { isMuted, playBack, playDignityTier, playMoneyOut, playPage, playTab, playToggle, setMuted } from '@/lib/sound';
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
@@ -23,7 +23,7 @@ import { pushToast } from '@/lib/toast';
 // lien s'ouvre correctement dans l'application native, où `target="_blank"`
 // passe la main au navigateur du système.
 const PRIVACY_URL = '/confidentialite.html';
-const APP_VERSION = '3.17.0';
+const APP_VERSION = '3.18.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -69,7 +69,7 @@ export default function SettingsScreen() {
           {(['fr', 'en'] as const).map((l) => (
             <button
               key={l}
-              onClick={() => setLang(l)}
+              onClick={() => { playToggle(); setLang(l); }}
               className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                 lang === l ? 'btn-primary' : 'action-btn text-[#6B5740]'
               }`}
@@ -166,6 +166,7 @@ export default function SettingsScreen() {
             demandée qu'au moment où le joueur les active lui-même. */}
         <button
           onClick={async () => {
+            playToggle();
             if (rappels) { setNotificationsEnabled(false); setRappels(false); return; }
             const ok = await requestPermission();
             if (!ok) return;
@@ -216,7 +217,7 @@ export default function SettingsScreen() {
               )}
             </p>
             <button
-              onClick={handleBuyNoAds}
+              onClick={() => { playMoneyOut(); handleBuyNoAds(); }}
               disabled={buying}
               className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
               style={{ background: 'linear-gradient(135deg, #7B68EE, #5A4ABB)', boxShadow: '0 4px 12px rgba(123,104,238,0.25)' }}
@@ -240,6 +241,7 @@ export default function SettingsScreen() {
           onClick={() => {
             // On remet aussi les conseils contextuels à zéro : « revoir le
             // tutoriel » doit rendre tout ce qui explique le jeu.
+            playPage();
             try { localStorage.removeItem(TUTORIAL_KEY); } catch { /* silent */ }
             resetCoaches();
             dispatch({ type: 'SET_SCREEN', screen: state.character ? 'main' : 'title' });
@@ -256,6 +258,7 @@ export default function SettingsScreen() {
         {Capacitor.isNativePlatform() && (
           <button
             onClick={async () => {
+              playToggle();
               setConsentBusy(true);
               const ok = await reopenConsentForm();
               setConsentBusy(false);
@@ -300,7 +303,7 @@ export default function SettingsScreen() {
               {tr('Confirmer', 'Confirm')}
             </button>
             <button
-              onClick={() => setConfirmReset(false)}
+              onClick={() => { playBack(); setConfirmReset(false); }}
               className="flex-1 action-btn p-3 text-sm text-[#3D3020]"
             >
               {tr('Annuler', 'Cancel')}

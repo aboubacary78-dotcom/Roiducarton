@@ -4,7 +4,7 @@ import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay
 import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
-import { playBack, playClick, playMoneyOut, playShare } from '@/lib/sound';
+import { playBack, playCard, playClick, playMoneyOut, playShare, playUnlock } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { pushToast } from '@/lib/toast';
@@ -275,7 +275,7 @@ export default function ShopScreen() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              onClick={handleShopEvent}
+              onClick={() => { playCard(); handleShopEvent(); }}
               className="w-full craft-card p-3 text-left border-[#D4874D]/30 bg-[#D4874D]/5 shrink-0"
             >
               <div className="flex items-center gap-2">
@@ -439,7 +439,7 @@ export default function ShopScreen() {
         {/* La sortie vers la rue est en haut de l'écran (voir l'en-tête) ;
             ici, on ne propose que de retourner choisir une autre boutique. */}
         <button
-          onClick={() => setSelectedShop(null)}
+          onClick={() => { playBack(); setSelectedShop(null); }}
           className="action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5 shrink-0"
         >
           ← {tr('Autres boutiques', 'Other shops')}
@@ -608,7 +608,7 @@ export default function ShopScreen() {
                     </div>
                   </div>
                   <button
-                    onClick={() => reopenWithAd(shop)}
+                    onClick={() => { playUnlock(); reopenWithAd(shop); }}
                     disabled={reopeningId === shop.id}
                     className="w-full py-2 text-xs font-semibold text-white rounded-lg disabled:opacity-60"
                     style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)' }}
@@ -629,7 +629,7 @@ export default function ShopScreen() {
                 transition={{ delay: i * 0.06 }}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedShop(shop)}
+                onClick={() => { playCard(); setSelectedShop(shop); }}
                 className={`craft-card p-3.5 text-left flex items-center gap-3 ${!canAffordSomething ? 'opacity-50' : ''}`}
               >
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E8D5C0] to-[#D4B896] flex items-center justify-center text-2xl shadow-sm shrink-0">

@@ -7,7 +7,7 @@ import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
 import { stampTap, liftHover } from '@/lib/anim';
 import { playEventSfx } from '@/lib/eventSfx';
-import { playBack, playMemory } from '@/lib/sound';
+import { playBack, playClick, playMemory, playUnlock } from '@/lib/sound';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.webp';
 
@@ -166,7 +166,7 @@ export default function EventScreen() {
                 transition={{ delay: 0.2 + i * 0.1 }}
                 whileHover={locked ? {} : liftHover}
                 whileTap={locked ? {} : stampTap}
-                onClick={locked ? undefined : () => dispatch({ type: 'CHOOSE_EVENT', choiceIndex: i, boosted })}
+                onClick={locked ? undefined : () => { playClick(); dispatch({ type: 'CHOOSE_EVENT', choiceIndex: i, boosted }); }}
                 disabled={locked}
                 className={`action-btn p-3 text-left flex items-start gap-2.5 ${boosted && !locked ? 'border-[#B8860B]/60' : ''} ${
                   locked ? 'opacity-50 pointer-events-none' : ''
@@ -192,7 +192,7 @@ export default function EventScreen() {
           </div>
         ) : canOfferRewarded() ? (
           <button
-            onClick={activateBoost}
+            onClick={() => { playUnlock(); activateBoost(); }}
             disabled={loadingBoost}
             className="mt-3 w-full py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg, #B8860B, #9B7209)' }}

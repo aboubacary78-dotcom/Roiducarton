@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr } from '@/lib/lang';
+import { playBack } from '@/lib/sound';
 import { nextCoach, markCoachSeen, allCoachesSeen, type CoachContext } from '@/lib/coach';
 
 /*
@@ -47,7 +48,7 @@ export default function CoachTip({ ctx }: { ctx: CoachContext }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={{ type: 'spring', damping: 24 }}
-          onClick={fermer}
+          onClick={() => { playBack(); fermer(); }}
           className="fixed left-3 right-3 bottom-3 z-40 flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left shadow-[0_6px_20px_rgba(42,31,26,0.22)]"
           style={{ background: '#2A1F1A', border: '1px solid #4A3A2A' }}
         >

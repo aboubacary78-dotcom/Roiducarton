@@ -14,7 +14,7 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
       transition={{ duration: 0.4, delay: index * 0.15 }}
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.98 }}
-      onClick={onSelect}
+      onClick={() => { playPickCharacter(); onSelect(); }}
       className="craft-card p-4 cursor-pointer"
     >
       {/* Character header */}
@@ -112,7 +112,7 @@ export default function CharacterSelect() {
             key={i}
             char={char}
             index={i}
-            onSelect={() => { playPickCharacter(); dispatch({ type: 'SELECT_CHARACTER', index: i }); }}
+            onSelect={() => dispatch({ type: 'SELECT_CHARACTER', index: i })}
           />
         ))}
       </div>

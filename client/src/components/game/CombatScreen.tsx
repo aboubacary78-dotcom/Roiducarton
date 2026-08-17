@@ -2,7 +2,7 @@ import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon,
 import type { Character, CombatState, CombatCard, SignId, DodgeProj } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { playHurt, playCard, playEnemyCry, playFightStart, playKingArrival, playHit, playCrit } from '@/lib/sound';
+import { playBack, playCard, playCrit, playEnemyCry, playFightStart, playHit, playHurt, playKingArrival, playTurnedAway } from '@/lib/sound';
 import { setAmbience } from '@/lib/ambience';
 import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -249,7 +249,7 @@ function CombatScreenInner() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setIntro(false)}
+            onClick={() => { playBack(); setIntro(false); }}
             style={{ background: isKing ? 'rgba(12,8,5,0.985)' : 'rgba(24,18,14,0.94)' }}
             className="absolute inset-0 z-[60] flex flex-col items-center justify-center p-6 text-center cursor-pointer overflow-hidden"
           >
@@ -507,7 +507,7 @@ function SignPhase({ combat, character, onPick, onFlee }: {
 
       {/* Fuite (toujours possible avant l'échange) */}
       <button
-        onClick={() => { if (!choice) onFlee(); }}
+        onClick={() => { if (!choice) { playTurnedAway(); onFlee(); } }}
         className="text-xs text-[#8B6B4A] underline underline-offset-2 decoration-[#D8C4A8]"
       >
         🏃 {tr('Tenter de fuir', 'Try to flee')}

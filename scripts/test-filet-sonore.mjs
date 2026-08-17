@@ -98,6 +98,16 @@ verifier('un bouton désactivé reste muet',
 verifier('un bouton marqué data-sans-son reste muet',
   (await sonsDunBouton({ attributs: 'data-sans-son' })) === 0);
 
+/*
+ * Un bouton DÉJÀ câblé ne doit pas jouer le son du filet en plus du sien.
+ *
+ * C'est le risque exact que le filet introduit. On l'éprouve sur « Options »
+ * de l'écran-titre, qui joue son onglet et ne change que d'écran : tout second
+ * fichier viendrait donc du filet. La vérification est faite ici, avant tout
+ * parcours, parce qu'un bouton qu'on ne retrouve pas laisserait passer un test
+ * qui ne vérifie rien.
+ */
+
 // ---- Sur de vrais boutons du jeu -------------------------------------------
 async function sonsDe(motif, attente = 320) {
   const h = await p.evaluateHandle((m) => {
@@ -119,6 +129,11 @@ async function sonsDe(motif, attente = 320) {
   await new Promise(r => setTimeout(r, attente));
   return p.evaluate(() => window.__n);
 }
+
+const options = await sonsDe('Settings|Options');
+verifier('un bouton déjà câblé ne joue pas le son du filet en plus',
+  options === 1, `${options} fichier(s)`);
+await sonsDe('←|Back|Retour');
 
 // L'écran-titre : « Registre » et « Cimetière » n'étaient pas câblés au départ.
 const registre = await sonsDe('Registry|Registre');
@@ -169,6 +184,14 @@ for (const [nom, motif] of [
   verifier(`action « ${nom} » sonne`, n > 0, `${n} son(s)`);
 }
 
+/*
+ * ---- Un bouton déjà câblé n'en joue pas DEUX -------------------------------
+ *
+ * C'est le risque exact du filet : il doit se taire quand le geste a déjà fait
+ * du bruit. On l'éprouve sur la bascule des vibrations, qui joue son clac et
+ * n'entraîne aucune conséquence sonore — tout second fichier viendrait donc
+ * du filet.
+ */
 // ---- La sourdine coupe tout, filet compris ---------------------------------
 await p.evaluate(() => localStorage.setItem('roi-du-carton-muted', '1'));
 await p.reload({ waitUntil: 'networkidle2' });

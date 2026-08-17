@@ -26,7 +26,7 @@ import {
   moves, openingPrice, priceFor, startingPatience, tradeCandidate,
   type ArgumentId, type Shopkeeper,
 } from '@/contexts/GameContext';
-import { playClick, playGoodOutcome, playHandshake, playTurnedAway } from '@/lib/sound';
+import { playBack, playClick, playGoodOutcome, playHandshake, playTurnedAway } from '@/lib/sound';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
 import { setAmbience, type AmbienceId } from '@/lib/ambience';
@@ -172,7 +172,7 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 backdrop-blur-[2px]"
-      onClick={() => { if (phase !== 'talk') finish(); }}
+      onClick={() => { if (phase !== 'talk') { playBack(); finish(); } }}
       role="dialog" aria-label={tr('Marchandage', 'Haggling')}
     >
       {/* Le « ? » rouvre les règles : Le Culot est le mini-jeu le plus espacé
@@ -295,7 +295,7 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
             </button>
           </>
         ) : (
-          <button onClick={finish} className="btn-primary w-full py-3 text-sm">
+          <button onClick={() => { playBack(); finish(); }} className="btn-primary w-full py-3 text-sm">
             {phase === 'deal'
               ? `🤝 ${tr('Payer', 'Pay')} ${price} €`
               : tr('Sortir de la boutique', 'Leave the shop')}
