@@ -198,6 +198,7 @@ export default function AudioTestScreen() {
               >
                 <p className="text-xs text-[#6B5740] leading-relaxed italic">{tr(famille.regleFr, famille.regleEn)}</p>
                 <button
+                  data-sans-son
                   onClick={() => jouerFamille(famille.sons)}
                   className="self-start text-xs font-semibold text-[#9B5B3A] underline underline-offset-2"
                 >
@@ -210,6 +211,7 @@ export default function AudioTestScreen() {
                     <div key={son.fichier} className="flex flex-col gap-2 rounded-xl bg-[#FBF6EE] p-3 border border-[#E8D5C0]">
                       <div className="flex items-start gap-3">
                         <button
+                          data-sans-son
                           onClick={() => jouer(son, son.prises ? 1 : undefined)}
                           className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white text-base"
                           style={{
@@ -241,6 +243,7 @@ export default function AudioTestScreen() {
                           {Array.from({ length: son.prises }, (_, i) => i + 1).map(n => (
                             <button
                               key={n}
+                              data-sans-son
                               onClick={() => jouer(son, n)}
                               className={`w-8 h-8 rounded-lg text-xs font-semibold border ${
                                 enCours === `${son.fichier}-${n}`

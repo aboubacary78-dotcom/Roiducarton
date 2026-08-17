@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import SafeImg from './SafeImg';
-import { playCraft, playMoneyIn, playGaugeFilled } from '@/lib/sound';
+import { playBack, playCraft, playGaugeFilled, playMoneyIn } from '@/lib/sound';
 
 const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: string; bg: string }> = {
   food: { label: 'Nourriture', labelEn: 'Food', color: '#4A9B5F', bg: '#4A9B5F15' },
@@ -195,7 +195,7 @@ export default function InventoryScreen() {
       </motion.div>
 
       <button
-        onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
+        onClick={() => { playBack(); dispatch({ type: 'SET_SCREEN', screen: 'main' }); }}
         className="mt-auto action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
       >
         ← {tr('Retour', 'Back')}

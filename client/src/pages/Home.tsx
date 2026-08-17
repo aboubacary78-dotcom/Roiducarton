@@ -6,6 +6,7 @@
 import { useGame } from '@/contexts/GameContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
+import { installerClicParDefaut } from '@/lib/sound';
 import { screenIn } from '@/lib/anim';
 import { tapOrigin } from '@/lib/tapOrigin';
 import { setAmbience, setWeatherLayer, weatherLayerFor, type AmbienceId } from '@/lib/ambience';
@@ -64,6 +65,13 @@ function renderScreen(screen: string) {
 }
 
 export default function Home() {
+  /*
+   * Le filet sonore, posé une fois pour toute la session : aucun appui de
+   * bouton ne peut rester muet, même sur un écran ajouté plus tard. Les sons
+   * posés explicitement gagnent toujours — celui-ci ne comble que les trous.
+   */
+  useEffect(() => { installerClicParDefaut(); }, []);
+
 
   /*
    * L'heure de cette session est notée à l'ouverture, et tout le calendrier de

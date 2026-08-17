@@ -57,8 +57,17 @@ for (const f of fichiers) {
     const suite = src.slice(m.index, m.index + 400);
     gestesTotal++;
     if (SON.test(suite)) { gestesSonores++; continue; }
-    // Le geste délègue-t-il à une fonction qui, elle, fait du bruit ?
+    /*
+     * Le geste délègue-t-il à une fonction qui, elle, fait du bruit ?
+     *
+     * Deux écritures à couvrir, et la seconde manquait : `onClick={() => dig()}`
+     * était bien suivie, mais `onClick={share}` — une référence nue, sans
+     * parenthèses — ne l'était pas. Cinq boutons de StreetEncounter étaient
+     * comptés muets alors qu'ils sonnaient, ce qui fausse le pilotage.
+     */
+    const nue = suite.match(/onClick\s*=\s*\{\s*([a-z]\w*)\s*\}/);
     const appelees = [...suite.matchAll(/\b([a-z]\w{2,})\s*\(/g)].map(x => x[1])
+      .concat(nue ? [nue[1]] : [])
       .filter(n => !['dispatch', 'setTimeout', 'tr', 'tc', 'require', 'Number', 'String'].includes(n));
     if (appelees.some(n => SON.test(corpsDe(n)))) { gestesSonores++; continue; }
     // De quoi s'agit-il ? On récupère le libellé le plus proche.

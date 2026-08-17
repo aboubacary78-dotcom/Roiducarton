@@ -4,7 +4,7 @@ import { useGame, type StreetNpc } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
 import { pushToast } from '@/lib/toast';
-import { playGive, playShare } from '@/lib/sound';
+import { playGive, playShare, playTurnedAway } from '@/lib/sound';
 import CardboardAvatar from './CardboardAvatar';
 
 /*
@@ -37,6 +37,7 @@ export default function StreetEncounter({ npc, onClose }: { npc: StreetNpc; onCl
     onClose();
   }
   function pass() {
+    playTurnedAway();
     dispatch({ type: 'RESOLVE_ENCOUNTER', kind: 'pass' });
     onClose();
   }

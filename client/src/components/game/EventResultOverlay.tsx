@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showRewarded, canOfferRewarded } from '@/lib/ads';
 import { DIGNITY_TIERS, dignityTierIndex } from '@/contexts/data/dignity';
-import { playGoodOutcome, playMiss, playWin, playKO } from '@/lib/sound';
+import { playBack, playGoodOutcome, playKO, playMiss, playWin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, moodFor } from './SceneIllustration';
@@ -129,7 +129,7 @@ export default function EventResultOverlay() {
          * retrouve maintenant là où était le bouton qu'on venait de toucher.
          */
         className="fixed inset-0 z-50 flex items-end justify-center p-4 overlay-backdrop"
-        onClick={() => dispatch({ type: 'DISMISS_RESULT' })}
+        onClick={() => { playBack(); dispatch({ type: 'DISMISS_RESULT' }); }}
       >
         <motion.div
           initial={{ scale: 0.9, y: 15 }}
@@ -354,7 +354,7 @@ export default function EventResultOverlay() {
             transition={{ delay: 0.4 }}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => dispatch({ type: 'DISMISS_RESULT' })}
+            onClick={() => { playBack(); dispatch({ type: 'DISMISS_RESULT' }); }}
             className="btn-primary w-full py-3 text-sm"
           >
             {tr('Continuer', 'Continue')}

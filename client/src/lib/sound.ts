@@ -350,9 +350,25 @@ function synthEnemyCry(pattern: string, emoji?: string, name?: string): void {
  * `withFile` enveloppe donc une fonction existante sans la modifier : le repli
  * reste exactement le son que le jeu produisait avant, ligne pour ligne.
  */
+/*
+ * QUAND UN SON A-T-IL ÉTÉ JOUÉ POUR LA DERNIÈRE FOIS ?
+ *
+ * Sert au filet de sécurité posé sur les boutons (voir `installerClicParDefaut`)
+ * : si un gestionnaire a déjà fait du bruit, le clic par défaut se tait pour ne
+ * pas doubler le son.
+ */
+let marqueDernierSon = 0;
+export function sonJoueRecemment(fenetreMs = 60): boolean {
+  return typeof performance !== 'undefined' && performance.now() - marqueDernierSon < fenetreMs;
+}
+function noterSon(): void {
+  if (typeof performance !== 'undefined') marqueDernierSon = performance.now();
+}
+
 function withFile(file: string, gain: number, fallback: () => void): () => void {
   return () => {
     if (muted) return;
+    noterSon();
     const url = `/audio/${file}.mp3`;
     if (isKnownMissing(url)) { fallback(); return; }
     loadAudio(url).then(buf => { if (buf) playBuffer(buf, gain); else fallback(); });
@@ -474,6 +490,7 @@ const dernierePrise = new Map<string, number>();
 function withVariants(base: string, nb: number, gain: number, fallback: () => void): () => void {
   return () => {
     if (muted) return;
+    noterSon();
     const avant = dernierePrise.get(base);
     let n = 1 + Math.floor(Math.random() * nb);
     if (n === avant) n = 1 + (n % nb);
@@ -650,3 +667,33 @@ export function resetGaugeAlerts(): void {
 
 /** Manger, boire, se soigner. */
 export const playGaugeFilled = withFile('jauge-remplie', 0.85, playSuccessSynth);
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LE FILET : AUCUN APPUI NE DOIT ÊTRE MUET.
+ *
+ * Le jeu compte plus de cent vingt boutons. Les brancher un par un laisse
+ * forcément des trous — l'audit en comptait 77 sans son — et chaque bouton
+ * ajouté plus tard rouvre le problème.
+ *
+ * On écoute donc les clics au niveau du document, APRÈS les gestionnaires de
+ * React : si le geste a déjà fait du bruit, on ne fait rien ; sinon on joue le
+ * clic. Le son juste, posé explicitement, gagne toujours ; le filet ne sert
+ * qu'à ce qu'il n'y ait jamais de silence.
+ *
+ * Trois exceptions, marquées dans le HTML par `data-sans-son` : les boutons
+ * dont le silence est voulu, ceux qui sont désactivés, et ceux qui coupent le
+ * son — claquer au moment où l'on demande le silence serait une farce.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+export function installerClicParDefaut(): void {
+  if (typeof document === 'undefined') return;
+  document.addEventListener('click', (e) => {
+    if (muted) return;
+    const cible = (e.target as HTMLElement | null)?.closest?.('button, [role="button"]') as HTMLElement | null;
+    if (!cible) return;
+    if (cible.hasAttribute('disabled') || cible.getAttribute('aria-disabled') === 'true') return;
+    if (cible.closest('[data-sans-son]')) return;
+    if (sonJoueRecemment()) return;
+    playClick();
+  });
+}

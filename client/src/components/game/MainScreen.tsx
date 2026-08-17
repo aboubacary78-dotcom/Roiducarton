@@ -10,7 +10,7 @@ import CardboardAvatar from './CardboardAvatar';
 import PlayerFace, { faceCondition } from './PlayerFace';
 import StreetEncounter from './StreetEncounter';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
-import { playBag, playClick, playNextDay, playUnlock } from '@/lib/sound';
+import { playBag, playCard, playClick, playFightStart, playNextDay, playTab, playUnlock } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
@@ -195,7 +195,7 @@ export default function MainScreen() {
               <div className="text-[10px] text-[#7B68EE] font-medium">⭐ {char.respect}</div>
             </div>
             <button
-              onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'settings' })}
+              onClick={() => { playTab(); dispatch({ type: 'SET_SCREEN', screen: 'settings' }); }}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-sm text-[#8B6B4A] hover:bg-[#F5EDE4] transition-colors"
               aria-label="Options"
             >
@@ -374,7 +374,7 @@ export default function MainScreen() {
           animate={{ x: 0, opacity: 1 }}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setEncounterOpen(true)}
+          onClick={() => { playCard(); setEncounterOpen(true); }}
           className="craft-card p-2.5 flex items-center gap-2.5 text-left"
         >
           <div className="w-9 h-9 rounded-lg overflow-hidden border border-[#E8D5C0] shrink-0">
@@ -435,18 +435,19 @@ export default function MainScreen() {
 
         {/* Main actions grid */}
         <div id="tuto-actions" className="grid grid-cols-2 gap-2">
-          <ActionTile emoji="🔍" title={tr('Explorer', 'Explore')} desc={tr('Tenter une rencontre', 'Look for an encounter')} accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'EXPLORE' })} />
+          <ActionTile emoji="🔍" title={tr('Explorer', 'Explore')} desc={tr('Tenter une rencontre', 'Look for an encounter')} accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'EXPLORE' }); }} />
           <ActionTile
             emoji="🙏" title={tr('Mendier', 'Beg')} desc={tr('Récolter des pièces', 'Collect coins')} accent="#B8860B"
-            disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'BEG' })}
+            disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'BEG' }); }}
           />
-          <ActionTile emoji="😴" title={tr('Dormir', 'Sleep')} desc={tr('Récupérer du sommeil', 'Recover sleep')} accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => dispatch({ type: 'REST' })} />
+          <ActionTile emoji="😴" title={tr('Dormir', 'Sleep')} desc={tr('Récupérer du sommeil', 'Recover sleep')} accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'REST' }); }} />
           <ActionTile
             emoji="🥊" title={tr('Bagarre', 'Fight')} desc={tr('Provoquer un combat', 'Pick a fight')} accent="#D94F4F" disabled={actionsLeft <= 0} danger
             onClick={() => {
               // Adversaire tiré dans le CATALOGUE du quartier (et, rarement,
               // le Roi Déchu si vous avez survécu assez longtemps).
               const enemy = pickFightEnemy(char.location, char.day, char.respect);
+              playFightStart();
               dispatch({ type: 'START_COMBAT', enemy });
             }}
           />
@@ -489,8 +490,8 @@ export default function MainScreen() {
 
         {/* Secondary actions */}
         <div id="tuto-secondary" className="flex gap-2">
-          <ActionTile emoji="🛒" title={tr('Achats', 'Shop')} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'shop' })} small />
-          <ActionTile emoji="🗺️" title={tr('Voyager', 'Travel')} disabled={false} onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'travel' })} small />
+          <ActionTile emoji="🛒" title={tr('Achats', 'Shop')} disabled={false} onClick={() => { playCard(); dispatch({ type: 'SET_SCREEN', screen: 'shop' }); }} small />
+          <ActionTile emoji="🗺️" title={tr('Voyager', 'Travel')} disabled={false} onClick={() => { playCard(); dispatch({ type: 'SET_SCREEN', screen: 'travel' }); }} small />
           <ActionTile emoji="🎒" title={`${tr('Sac', 'Bag')} (${char.inventory.length})`} disabled={false} onClick={() => { playBag(); dispatch({ type: 'SET_SCREEN', screen: 'inventory' }); }} small />
         </div>
       </motion.div>

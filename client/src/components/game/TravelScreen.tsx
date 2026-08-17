@@ -1,7 +1,7 @@
 import { useGame, LOCATIONS, getShopsForLocation } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { playClick, playTravel } from '@/lib/sound';
+import { playBack, playClick, playTravel } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 
 /*
@@ -263,7 +263,7 @@ export default function TravelScreen() {
       </motion.div>
 
       <button
-        onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
+        onClick={() => { playBack(); dispatch({ type: 'SET_SCREEN', screen: 'main' }); }}
         className="mt-auto action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
       >
         ← {tr('Retour', 'Back')}

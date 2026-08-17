@@ -1,7 +1,7 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { isMuted, playTab, playToggle, setMuted } from '@/lib/sound';
+import { isMuted, playBack, playDignityTier, playTab, playToggle, setMuted } from '@/lib/sound';
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
@@ -23,7 +23,7 @@ import { pushToast } from '@/lib/toast';
 // lien s'ouvre correctement dans l'application native, où `target="_blank"`
 // passe la main au navigateur du système.
 const PRIVACY_URL = '/confidentialite.html';
-const APP_VERSION = '3.16.0';
+const APP_VERSION = '3.17.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -49,7 +49,7 @@ export default function SettingsScreen() {
       {/* En-tête */}
       <div className="flex items-center gap-3">
         <button
-          onClick={() => dispatch({ type: 'SET_SCREEN', screen: state.character ? 'main' : 'title' })}
+          onClick={() => { playBack(); dispatch({ type: 'SET_SCREEN', screen: state.character ? 'main' : 'title' }); }}
           className="action-btn w-10 h-10 flex items-center justify-center text-lg"
           aria-label="Retour"
         >
@@ -293,7 +293,7 @@ export default function SettingsScreen() {
         ) : (
           <div className="flex gap-2">
             <button
-              onClick={() => { dispatch({ type: 'RESET_SCORES' }); setConfirmReset(false); }}
+              onClick={() => { playDignityTier(); dispatch({ type: 'RESET_SCORES' }); setConfirmReset(false); }}
               className="flex-1 p-3 text-sm font-semibold text-white rounded-xl"
               style={{ background: 'linear-gradient(135deg, #D94F4F, #B83A3A)' }}
             >

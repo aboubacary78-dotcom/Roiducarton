@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useLang, tr, tc } from '@/lib/lang';
 import CardboardAvatar from './CardboardAvatar';
 import { pushToast } from '@/lib/toast';
-import { playMiss, playMoneyOut } from '@/lib/sound';
+import { playBack, playMiss, playMoneyOut } from '@/lib/sound';
 import {
   loadGraves, loadKarma, loadHeritage,
   spendKarma, unlockJob, addKit, setGoldenEpitaph,
@@ -74,7 +74,7 @@ export default function CimetiereScreen() {
       {/* En-tête */}
       <SafeImg src="/assets/cimetiere-hub.webp" className="w-full h-24 object-cover rounded-xl" />
       <div className="flex items-center gap-3">
-        <button onClick={back} className="w-10 h-10 flex items-center justify-center text-lg rounded-xl border border-[#3A4838] text-[#C8D4B8]" aria-label={tr('Retour', 'Back')}>
+        <button onClick={() => { playBack(); back(); }} className="w-10 h-10 flex items-center justify-center text-lg rounded-xl border border-[#3A4838] text-[#C8D4B8]" aria-label={tr('Retour', 'Back')}>
           ←
         </button>
         <div className="flex-1">

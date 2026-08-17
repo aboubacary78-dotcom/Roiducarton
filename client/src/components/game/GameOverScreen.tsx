@@ -10,7 +10,7 @@ import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown, loadDeathBoo
 import { STREET_TITLES } from '@/contexts/data/progression';
 import { getEquipped } from '@/lib/profile';
 import { pushToast } from '@/lib/toast';
-import { playBack, playBequeath, playDeath, playFind, playNewEnding, resetGaugeAlerts } from '@/lib/sound';
+import { playBack, playBequeath, playCard, playDeath, playFind, playNewEnding, resetGaugeAlerts } from '@/lib/sound';
 import { haptic } from '@/lib/haptics';
 import { rememberSuccessor } from '@/lib/notifications';
 import { worthSharing, shareRewardAvailable, markShareRewarded, shareFrontPage } from '@/lib/partage';
@@ -525,7 +525,7 @@ export default function GameOverScreen() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => { resetGaugeAlerts(); dispatch({ type: 'RESTART' }); }}
+            onClick={() => { playCard(); resetGaugeAlerts(); dispatch({ type: 'RESTART' }); }}
             className="w-full mt-3 py-3.5 text-[15px] font-bold text-white rounded-xl"
             style={{
               background: 'linear-gradient(135deg, #D4874D, #9B5B3A)',
@@ -632,7 +632,7 @@ export default function GameOverScreen() {
         )}
 
         <button
-          onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'registre' })}
+          onClick={() => { playCard(); dispatch({ type: 'SET_SCREEN', screen: 'registre' }); }}
           className="w-full mt-2 py-2 text-[11px] font-semibold text-[#E8A87C] rounded-lg border border-[#4A3048] hover:bg-white/5"
         >
           📕 {tr('Consulter le Registre des Morts', 'Open the Book of the Dead')}

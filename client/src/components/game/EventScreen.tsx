@@ -7,7 +7,7 @@ import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
 import { stampTap, liftHover } from '@/lib/anim';
 import { playEventSfx } from '@/lib/eventSfx';
-import { playMemory } from '@/lib/sound';
+import { playBack, playMemory } from '@/lib/sound';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.webp';
 
@@ -204,7 +204,7 @@ export default function EventScreen() {
 
       {/* Back */}
       <button
-        onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
+        onClick={() => { playBack(); dispatch({ type: 'SET_SCREEN', screen: 'main' }); }}
         className="action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
       >
         ← {tr('Retour', 'Back')}

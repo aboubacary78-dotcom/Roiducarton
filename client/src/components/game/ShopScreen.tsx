@@ -4,7 +4,7 @@ import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay
 import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
-import { playClick, playMoneyOut, playShare } from '@/lib/sound';
+import { playBack, playClick, playMoneyOut, playShare } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { pushToast } from '@/lib/toast';
@@ -216,7 +216,7 @@ export default function ShopScreen() {
             {/* La porte de sortie, en haut à droite comme dans un vrai magasin :
                 elle rend la rue en un seul geste, sans repasser par la liste. */}
             <button
-              onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
+              onClick={() => { playBack(); dispatch({ type: 'SET_SCREEN', screen: 'main' }); }}
               className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-[#2A1F1A] shadow-md active:scale-95 transition-transform"
               style={{ background: 'rgba(247,238,226,0.94)', border: '1.5px solid #3A2A1E' }}
             >
@@ -657,7 +657,7 @@ export default function ShopScreen() {
       )}
 
       <button
-        onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
+        onClick={() => { playBack(); dispatch({ type: 'SET_SCREEN', screen: 'main' }); }}
         className="mt-auto action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
       >
         ← {tr('Retour', 'Back')}

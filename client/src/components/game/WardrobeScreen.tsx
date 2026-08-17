@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import CardboardAvatar from './CardboardAvatar';
 import { faceCondition } from './PlayerFace';
-import { playClick, playTab } from '@/lib/sound';
+import { playBack, playClick, playTab } from '@/lib/sound';
 import {
   ACCESSORIES,
   ACHIEVEMENTS,
@@ -47,7 +47,7 @@ export default function WardrobeScreen() {
       {/* En-tête */}
       <div className="flex items-center gap-3">
         <button
-          onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'main' })}
+          onClick={() => { playBack(); dispatch({ type: 'SET_SCREEN', screen: 'main' }); }}
           className="action-btn w-10 h-10 flex items-center justify-center text-lg"
           aria-label="Retour"
         >
