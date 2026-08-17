@@ -1,7 +1,7 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { isMuted, playToggle, setMuted } from '@/lib/sound';
+import { isMuted, playTab, playToggle, setMuted } from '@/lib/sound';
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
@@ -23,7 +23,7 @@ import { pushToast } from '@/lib/toast';
 // lien s'ouvre correctement dans l'application native, où `target="_blank"`
 // passe la main au navigateur du système.
 const PRIVACY_URL = '/confidentialite.html';
-const APP_VERSION = '3.15.0';
+const APP_VERSION = '3.16.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -146,6 +146,19 @@ export default function SettingsScreen() {
             className={`text-xs font-semibold px-3 py-1.5 rounded-full ${vibre ? 'bg-[#4A9B5F]/15 text-[#3d8b4f]' : 'bg-[#E8D5C0] text-[#8B6B4A]'}`}
           >
             {vibre ? tr('Activé', 'On') : tr('Coupé', 'Off')}
+          </span>
+        </button>
+
+        {/* Le banc d'essai. Il vit sous le réglage du son parce que c'est là
+            qu'on le cherche, et parce qu'un testeur qui vient de couper le son
+            doit voir tout de suite qu'il existe un endroit pour l'écouter. */}
+        <button
+          onClick={() => { playTab(); dispatch({ type: 'SET_SCREEN', screen: 'audio-test' }); }}
+          className="w-full flex items-center justify-between mt-3 pt-3 border-t border-[#E8D5C0]"
+        >
+          <span className="text-base font-semibold text-[#2A1F1A]">🎚️ {tr('Banc d\u2019essai audio', 'Audio test bench')}</span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#D4874D]/15 text-[#9B5B3A]">
+            {tr('Donner mon avis', 'Give feedback')}
           </span>
         </button>
 

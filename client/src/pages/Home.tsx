@@ -27,6 +27,7 @@ import SalvageMinigame from '@/components/game/SalvageMinigame';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import WeatherOverlay from '@/components/game/WeatherOverlay';
 import WardrobeScreen from '@/components/game/WardrobeScreen';
+import AudioTestScreen from '@/components/game/AudioTestScreen';
 import AchievementToast from '@/components/game/AchievementToast';
 import Toaster from '@/components/game/Toaster';
 import DaySummaryOverlay from '@/components/game/DaySummaryOverlay';
@@ -54,6 +55,7 @@ function renderScreen(screen: string) {
     case 'salvage-game': return <SalvageMinigame />;
     case 'settings': return <SettingsScreen />;
     case 'wardrobe': return <WardrobeScreen />;
+    case 'audio-test': return <AudioTestScreen />;
     case 'game-over': return <GameOverScreen />;
     case 'registre': return <DeathRegistryScreen />;
     case 'cimetiere': return <CimetiereScreen />;
@@ -154,7 +156,7 @@ export default function Home() {
         {state.screen === 'main' && <TutorialOverlay />}
 
         {/* Overlay météo : actif sur tous les écrans de jeu sauf titre et sélection */}
-        {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game', 'salvage-game', 'wardrobe'].includes(state.screen) && (
+        {state.character && !['title', 'character-select', 'game-over', 'settings', 'shop', 'inventory', 'travel', 'steal-game', 'beg-game', 'salvage-game', 'wardrobe', 'audio-test'].includes(state.screen) && (
           <WeatherOverlay />
         )}
 
