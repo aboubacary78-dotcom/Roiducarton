@@ -1,200 +1,215 @@
-# Troisième lot — les musiques
-## Une mort, six mini-jeux
+# Troisième lot — les musiques à thème
+## Une mort, six mini-jeux, un seul thème
 
 ---
 
-## Pourquoi refaire les six lits de mini-jeu
+## Le thème existe déjà
 
-Ils existent déjà. Je les ai mesurés avant de proposer de les remplacer, et
-voici ce que ça donne :
+Il n'est pas dans un fichier : il est **écrit en code**, dans le générateur de
+l'écran-titre. C'est la seule musique que tu as voulu garder, et elle définit
+déjà tout le reste :
 
 | | |
 |---|---|
-| Durée | **36,0 s** — les six, à la décimale près |
-| Poids | **422 ko** — les six, à l'octet près |
-| Profil spectral | écart de **0,13 à 0,79 dB** entre voisins, sur huit bandes |
-| Corrélation croisée | **≈ 0** — ce sont bien six enregistrements différents |
+| Tonalité | **la mineur** |
+| Mesure | **3/4 — une valse**, ≈ 143 à la noire |
+| Progression | `Am · Am · Dm · E7 · Am · F · E7 · Am` |
+| Motif mélodique | **la – do – mi**, la triade mineure qui monte |
+| Couleur | accordéon pincé, basse ronde, oum-pah-pah, chaleur de vinyle par-dessous |
 
-La dernière ligne compte : ce n'est **pas** un copier-coller, je l'ai vérifié.
-Ce sont six tirages du même style, avec la même densité, le même équilibre
-grave-aigu, la même durée.
+Ce motif de trois notes — **la, do, mi** — est la signature du jeu. Le
+commentaire dans le code dit ce qu'elle raconte : *« il était une fois un type
+sur un carton »*.
 
-D'où la conséquence, qui est le vrai problème : **la bagarre, le casse, la
-manche, la récup' et le marchandage se ressemblent à l'oreille.** Cinq
-mécaniques qui n'ont rien à voir partagent le même fond. Le joueur ne sait
-jamais, au son, dans quel mini-jeu il est.
+## Ce que ça change pour ce lot
 
-Six musiques distinctes règlent ça — pas six musiques « meilleures ».
+Une bande-son, ce n'est pas sept jolis morceaux : c'est **un thème et ses
+métamorphoses**. Le joueur doit reconnaître, sans savoir pourquoi, que la
+musique de la bagarre et celle de la mort sont la même histoire.
+
+Les sept morceaux ci-dessous sont donc **sept états du même thème**. Même
+tonalité, même motif, même petit orchestre — ce qui change, c'est le tempo, la
+mesure, l'instrument qui porte la mélodie, et ce qu'on choisit de retirer.
 
 ---
 
-## L'outil : Stable Audio, pas ElevenLabs
+## Comment obtenir ça d'un générateur — la partie honnête
 
-Ce lot n'a rien à voir avec le premier. Les 49 bruitages étaient des one-shots
-de moins d'une seconde — le terrain d'ElevenLabs Sound Effects. Ici, ce sont
-**sept boucles musicales de 45 à 60 secondes**, et il faut un modèle qui sache
-boucler.
+Aucun modèle texte-vers-musique ne saura reproduire un motif précis parce qu'on
+le lui décrit. Ce qu'il sait faire, en revanche, et plutôt bien :
 
-**Stable Audio** ([stableaudio.com](https://stableaudio.com)) : il génère
-jusqu'à 3 minutes et propose une option de boucle sans couture. C'est le bon
-outil pour ce lot.
+- tenir une **tonalité** et une **mesure** si on les nomme ;
+- suivre une **progression d'accords** écrite en toutes lettres ;
+- respecter une **instrumentation** courte et précise.
+
+D'où la méthode qui marche vraiment :
+
+**1. Génère `musique-mort` en premier.** C'est l'énoncé le plus nu du thème :
+un accordéon seul. Écoute-en dix, garde celle qui te semble être *la* musique
+du jeu.
+
+**2. Sers-t'en comme référence.** Stable Audio accepte un fichier d'entrée
+(audio-to-audio) : les six autres partent de celle-là. C'est ce qui les rendra
+parentes, bien mieux que n'importe quelle description.
+
+**3. Juge par familles, pas morceau par morceau.** Écoute les sept d'affilée.
+La question n'est pas « est-ce beau » mais « est-ce le même monde ».
+
+**Outil : Stable Audio** — il boucle nativement et va jusqu'à trois minutes.
+ElevenLabs Sound Effects, qui servait au premier lot, ne fait pas de musique.
 
 ### Réglages, valables pour les sept
 
 | | |
 |---|---|
-| Durée | **60 s** (les fichiers actuels font 36 s : trop court, on entend la reprise) |
-| Boucle | **activer « seamless loop »** — c'est non négociable |
-| Format | **stéréo, 44,1 kHz** — ce sont des musiques, elles ont droit à la largeur |
-| Débit final | **96 kbit/s** |
-| Niveau | normaliser à **−20 LUFS** |
-
-Le jeu les joue déjà à 34 % du volume, sous les bruitages : elles sont un
-**lit**, pas une bande-son. Une musique qui attire l'attention pendant un
-mini-jeu a raté sa cible.
-
-### Ce qu'il faut ajouter à chaque description
-
-> Lo-fi, small room recording, no vocals, no drum machine, no synthesizer pads,
-> seamless loop, sparse arrangement, leaves room for sound effects on top.
+| Durée | **60 s**, bouclable sans couture |
+| Format | stéréo, 44,1 kHz, MP3 96 kbit/s |
+| Niveau | −20 LUFS |
+| À ajouter à chaque description | `lo-fi, recorded in a small room, vinyl warmth, no vocals, no drum machine, seamless loop` |
 
 ---
 
-# ⓪ LA MORT
+# ⓪ LA MORT — `musique-mort.mp3`
 
-Le seul morceau qu'on écoute vraiment : on reste sur cet écran le temps de lire
-le bilan, parfois deux minutes.
+**Le thème, nu, et qui ne se résout pas.**
 
-| Fichier | Durée | Prompt à coller |
-|---|---|---|
-| `musique-mort.mp3` | 60 s | `Slow melancholic solo accordion, one sustained unresolved melody, no percussion, no bass, French street music, sparse and patient, recorded in a small dry room, lo-fi, seamless loop` |
+C'est le morceau qu'on écoute vraiment : on reste sur cet écran le temps de lire
+le bilan. C'est aussi celui qui doit t'apprendre le thème, pour que tu le
+reconnaisses partout ailleurs.
 
-**Un accordéon seul, jamais un orchestre.** Le jeu se moque des grands
-sentiments : c'est une comédie noire, pas un mélodrame. Et la mélodie **ne doit
-pas se résoudre** — on ne referme pas une vie ratée sur un bel accord.
+> `Solo accordion waltz in A minor, 3/4 time, very slow, around 70 BPM, chord progression Am Dm E7 Am F E7, one simple melody rising A C E, no percussion, no bass, sparse and patient, ends unresolved on the dominant, lo-fi, recorded in a small room, vinyl warmth, seamless loop`
 
-Elle entre en fondu de quatre secondes, derrière la résonance du carton qui
-s'affaisse. Le créneau est déjà branché côté code : dès que le fichier arrive,
-elle joue.
+**Un accordéon seul, jamais un orchestre.** Le jeu est une comédie noire, pas
+un mélodrame — et un orchestre sur la mort d'un SDF serait de mauvais goût.
+
+**La dernière mesure ne revient pas au la mineur.** Elle reste sur le E7, en
+suspens. On ne referme pas une vie ratée sur un bel accord.
 
 ---
 
 # ① LA BAGARRE — `mg-bagarre.mp3`
 
-Le seul mini-jeu où **vous frappez**. C'est le seul qui a droit à une pulsation.
+**Le thème à toute vitesse, et en 2/4.**
 
-| Durée | Prompt à coller |
-|---|---|
-| 60 s | `Slow tribal groove played on cardboard boxes and a cardboard tube as bass drum, around 100 BPM, no melody, no cymbals, dry and close, lo-fi, seamless loop` |
+La valse devient une bagarre : même mélodie, mesure cassée, tempo doublé. C'est
+la métamorphose la plus violente du lot, et la plus reconnaissable.
 
-**Une pulsation, aucune mélodie.** La mélodie occuperait la place des coups.
-Et la percussion est en carton — dans ce jeu, même la bagarre se joue avec ce
-qu'on a trouvé.
+> `Fast klezmer clarinet in A minor, 2/4 time, 150 BPM, frantic melody based on rising A C E, upright bass walking underneath, percussion played on cardboard boxes and a cardboard tube, no cymbals, comic and breathless, lo-fi, small room, seamless loop`
+
+**La clarinette klezmer, pas la trompette héroïque.** Une bagarre entre deux
+types au bout du rouleau est ridicule avant d'être épique — la musique doit le
+savoir.
 
 ---
 
 # ② L'ESQUIVE — `mg-esquive.mp3`
 
-Le pendant exact du précédent : ici **vous ne frappez pas**, vous encaissez ou
-vous évitez. Même monde sonore, **pulsation retirée**.
+**Le thème dont on a retiré la mélodie.**
 
-| Durée | Prompt à coller |
-|---|---|
-| 60 s | `Held low drone on a bowed double bass, one note, no rhythm, faint irregular creaks of cardboard underneath, tense and static, lo-fi, seamless loop` |
+Ici on ne frappe pas, on encaisse. Il reste la basse du thème, tenue, et le
+souvenir de ce qui devrait se poser dessus.
 
-**Aucun rythme.** Le rythme, c'est vous qui le donnez en esquivant. Un fond
-qui pulse pendant une phase d'esquive vous fait esquiver à contretemps.
+> `Bowed double bass holding the bass notes of an A minor waltz progression, one note per bar, extremely slow, no melody, no percussion, faint cardboard creaks between notes, tense and suspended, lo-fi, small room, seamless loop`
+
+**Aucun rythme, et c'est essentiel.** Le rythme, c'est toi qui le donnes en
+esquivant. Un fond qui pulse pendant une phase d'esquive te fait esquiver à
+contretemps.
 
 ---
 
 # ③ LE CASSE — `mg-casse.mp3`
 
-Le mini-jeu de l'infiltration. La jauge d'alerte y monte par paliers, et le
-second lot lui donne ses trois crans sonores. **Le lit doit leur laisser toute
-la place.**
+**Le motif, note à note, sur la pointe des pieds.**
 
-| Durée | Prompt à coller |
-|---|---|
-| 60 s | `Almost silent ambience, one very low sustained note fading in and out slowly, a distant electrical hum, long gaps of near silence, extremely sparse, lo-fi, seamless loop` |
+Trois notes — la, do, mi — jouées une par une, avec du silence entre chacune.
+Le thème avance à pas de loup.
 
-**C'est le plus vide des six, et c'est voulu.** Dans une infiltration, le
-silence est la matière : plus le fond est nu, plus le moindre craquement de
-l'alerte fait sursauter.
+> `Muted pizzicato double bass playing three separate notes A C E with long silences between them, very slow, one note every two seconds, a toy piano echoing the same notes far away, almost silent, extremely sparse, lo-fi, small room, seamless loop`
+
+**Le plus vide des sept, et c'est voulu.** La jauge d'alerte du casse reçoit
+ses trois crans sonores au second lot : plus le fond est nu, plus le moindre
+craquement fait sursauter.
 
 ---
 
 # ④ LA MANCHE — `mg-manche.mp3`
 
-Le seul mini-jeu **social** : on tient le regard des passants. C'est aussi le
-seul endroit où la musique peut être **diégétique** — quelqu'un d'autre joue,
-un peu plus loin dans la rue.
+**Le thème en majeur — la seule éclaircie du jeu.**
 
-| Durée | Prompt à coller |
-|---|---|
-| 60 s | `Distant street busker playing a simple harmonica melody, heard from across a square with faint reverb of open air, imperfect and human, occasional pause for breath, lo-fi, seamless loop` |
+Le même air, en la **majeur**. C'est la seule scène où quelqu'un vous regarde
+en face, et la seule musique qui espère.
 
-**Elle vient d'ailleurs.** Les cinq autres lits sont dans votre tête ; celui-ci
-est dans la rue. Les respirations et les hésitations du musicien ne sont pas des
-défauts — c'est ce qui la rend vraie.
+> `Warm harmonica melody in A major, 3/4 waltz time, 100 BPM, simple tune rising A C# E, played by a street busker heard from across a square, slight open-air reverb, imperfect timing, pauses to breathe, gentle guitar strumming underneath, lo-fi, seamless loop`
+
+**Elle vient d'ailleurs.** Les six autres sont dans ta tête ; celle-là est
+vraiment dans la rue, quelqu'un d'autre en joue. Les respirations et les
+hésitations du musicien ne sont pas des défauts — c'est ce qui la rend vraie.
 
 ---
 
 # ⑤ LA RÉCUP' — `mg-recup.mp3`
 
-Creuser dans une benne. Un travail : **répétitif, patient, mécanique**.
+**Les trois premières notes, indéfiniment.**
 
-| Durée | Prompt à coller |
-|---|---|
-| 60 s | `Repetitive mechanical loop of a hand-cranked music box playing three notes over and over, slightly out of tune, metallic and patient, faint rustling underneath, lo-fi, seamless loop` |
+Creuser dans une benne, c'est refaire le même geste. La musique refait la même
+mesure.
 
-**Trois notes, indéfiniment.** C'est la musique du geste qu'on refait. Une
-boîte à musique désaccordée dit à la fois l'enfance et l'objet abandonné —
-exactement ce qu'on déterre dans une benne.
+> `Hand-cranked music box playing only three notes A C E over and over, slightly out of tune, mechanical and patient, 80 BPM, a faint accordion holding one long chord far underneath, metallic and repetitive, lo-fi, small room, seamless loop`
+
+**Le thème réduit à son os.** Une boîte à musique désaccordée dit à la fois
+l'enfance et l'objet abandonné — exactement ce qu'on déterre d'une benne.
 
 ---
 
 # ⑥ LE MARCHANDAGE — `mg-marchandage.mp3`
 
-Une négociation, c'est **un aller-retour**. La musique doit en avoir la forme.
+**Le thème coupé en deux, qui se répond.**
 
-| Durée | Prompt à coller |
-|---|---|
-| 60 s | `Playful walking bassline on pizzicato double bass, call and response between two low notes, light and conversational, no drums, no melody on top, lo-fi, seamless loop` |
+Une négociation, c'est un aller-retour. La basse pose la question — la, do, mi
+— et la clarinette répond à l'envers : mi, do, la.
 
-**Question, réponse, question, réponse.** C'est le seul lit qui ait de
-l'humour, parce que c'est la seule scène où l'on discute d'égal à égal.
+> `Playful call and response in A minor, pizzicato double bass asking a three-note phrase A C E, clarinet answering the same phrase reversed E C A, light and conversational, 110 BPM, no drums, jaunty and a bit cheeky, lo-fi, small room, seamless loop`
+
+**Le seul morceau du lot qui ait de l'humour**, parce que c'est la seule scène
+où l'on discute d'égal à égal.
 
 ---
 
-## Ce qui distingue les six, en une ligne chacun
+## Le tableau qui résume tout
 
-| Mini-jeu | Ce qu'on fait | Ce qu'on entend |
+| Morceau | Ce qu'on fait | Ce qu'on fait au thème |
 |---|---|---|
-| Bagarre | on frappe | une pulsation en carton |
-| Esquive | on encaisse | un bourdon tendu, sans rythme |
-| Casse | on se cache | presque rien |
-| Manche | on demande | un musicien, plus loin dans la rue |
-| Récup' | on creuse | trois notes qui reviennent |
-| Marchandage | on discute | une basse qui se répond |
-
-Si un testeur, les yeux fermés, ne peut pas dire dans lequel il est, le lot a
-raté sa cible. **C'est le seul contrôle qui compte** — bien plus que la beauté
-de chaque morceau pris à part.
+| **Mort** | on encaisse la fin | il est joué nu, et ne se résout pas |
+| **Bagarre** | on frappe | doublé de tempo, cassé en 2/4 |
+| **Esquive** | on évite | la mélodie retirée, la basse seule |
+| **Casse** | on se cache | trois notes, une par une, dans le silence |
+| **Manche** | on demande | passé en **majeur** |
+| **Récup'** | on creuse | réduit à ses trois premières notes |
+| **Marchandage** | on discute | coupé en question et réponse |
 
 ## Contrôle avant livraison
 
-1. **La boucle.** Laisser tourner trois minutes. Aucun raccord ne doit
+1. **Le test de la parenté.** Écoute les sept d'affilée. Si un morceau ne
+   semble pas appartenir à la même bande-son, il est à refaire — même s'il est
+   beau.
+2. **Le test des yeux fermés.** Un testeur doit pouvoir dire dans quel
+   mini-jeu il est, sans regarder.
+3. **La boucle.** Laisse tourner trois minutes. Aucun raccord ne doit
    s'entendre.
-2. **Le test des yeux fermés**, ci-dessus, sur les six d'affilée.
-3. **Sur haut-parleur de téléphone**, comme le reste — et à 34 % du volume,
-   puisque c'est ainsi que le jeu les joue.
-4. **Rien qui pique.** Ces musiques tournent en boucle pendant qu'on se
+4. **Sur haut-parleur de téléphone**, et à faible volume : le jeu les joue
+   sous les bruitages.
+5. **Rien qui pique.** Ces morceaux tournent en boucle pendant qu'on se
    concentre. Une fréquence agressive qu'on ne remarque pas au premier passage
    devient insupportable au dixième.
 
-## Licence
+## Deux choses à régler quand les fichiers seront là
 
-Même point de vigilance que le premier lot : vérifier que l'offre souscrite
-couvre l'**usage commercial**. Les 65 bruitages actuels viennent d'un compte
-gratuit en licence non commerciale et devront être régénérés avant publication.
-Autant ne pas refaire la même chose ici.
+**Le volume.** Le jeu joue les lits de mini-jeu à 34 % et la mort à 30 %.
+C'était calibré pour des ambiances de fond ; une vraie mélodie s'entend
+autrement. Il faudra sans doute remonter — je le ferai à l'oreille, une fois
+les morceaux livrés.
+
+**La licence.** Vérifier que l'offre souscrite couvre l'**usage commercial**.
+Les 65 bruitages actuels viennent d'un compte gratuit en licence non
+commerciale et devront être régénérés avant publication : autant ne pas refaire
+la même erreur sur les musiques.
