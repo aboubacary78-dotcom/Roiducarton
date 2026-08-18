@@ -35,13 +35,21 @@ export type AmbienceId = 'title' | 'parc' | 'centre-ville' | 'zone-industrielle'
   // Lits de mini-jeu (pack son 2). Ils n'ont pas de repli synthétisé : avant
   // eux, ces écrans étaient simplement silencieux, et c'est donc là qu'on
   // retombe si le fichier manque.
-  | 'mg-bagarre' | 'mg-esquive' | 'mg-casse' | 'mg-manche' | 'mg-recup' | 'mg-marchandage';
+  | 'mg-bagarre' | 'mg-esquive' | 'mg-casse' | 'mg-manche' | 'mg-recup' | 'mg-marchandage'
+  /*
+   * La musique de mort. Comme les lits de mini-jeu, elle n'a pas de repli
+   * synthétisé : tant que le fichier n'est pas livré, l'écran de fin reste
+   * silencieux comme avant, et la musique s'active toute seule le jour où le
+   * fichier arrive.
+   */
+  | 'mort';
 
 type Stopper = () => void;
 
 const MASTER_GAIN = 0.55;   // les ambiances restent un lit sous les effets
 const MINIGAME_GAIN = 0.34; // un lit de mini-jeu passe encore plus bas : la
                             // tension doit venir des effets, pas du fond
+const MORT_GAIN = 0.30;     // la musique de mort accompagne, elle ne commente pas
 
 let desired: AmbienceId | null = null;
 let running: { id: AmbienceId; stop: Stopper } | null = null;
@@ -123,6 +131,23 @@ function sync(): void {
       if (desired !== want || isMuted() || fileLoop || running) return;
       if (!buf) return;
       const loop = startLoop(buf, MINIGAME_GAIN, 1.8);
+      if (loop) fileLoop = { id: want, loop };
+    });
+    syncWeather();
+    return;
+  }
+
+  /*
+   * La musique de mort. Elle entre LENTEMENT — quatre secondes de fondu — parce
+   * qu'elle arrive derrière la résonance du carton qui s'affaisse : surgir
+   * couperait le seul silence que le jeu s'accorde. Elle reste basse, sous les
+   * sons du bilan qu'on va lire par-dessus.
+   */
+  if (want === 'mort') {
+    loadAudio('/audio/musique-mort.mp3').then(buf => {
+      if (desired !== want || isMuted() || fileLoop || running) return;
+      if (!buf) return;
+      const loop = startLoop(buf, MORT_GAIN, 4);
       if (loop) fileLoop = { id: want, loop };
     });
     syncWeather();

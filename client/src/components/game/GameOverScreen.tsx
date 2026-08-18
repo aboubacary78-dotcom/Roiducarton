@@ -264,6 +264,23 @@ export default function GameOverScreen() {
   const indexFins = poches.findIndex(p => p.id === 'fins');
   const finsRevelees = indexFins === -1 || pochesOuvertes > indexFins;
 
+  /*
+   * Une fin inédite se tamponne : c'est le son de la collection qui avance, et
+   * le seul moment franchement bon d'un écran de mort. Il attend que la
+   * dernière poche soit ouverte — avant, l'encadré n'est pas à l'écran.
+   *
+   * Ce hook DOIT rester au-dessus du `if (!char) return null` qui suit. Placé
+   * dessous, il disparaissait du rendu dès que le personnage passait à null —
+   * c'est-à-dire au moment précis où l'on repart pour une nouvelle vie — et
+   * React refusait de rendre un composant qui compte soudain un hook de moins
+   * (erreur #300). Le jeu plantait après le choix du personnage suivant.
+   */
+  const finsInedites = harvest?.newIds?.length ?? 0;
+  useEffect(() => {
+    if (finsInedites > 0 && finsRevelees) playNewEnding();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finsInedites, finsRevelees]);
+
   function ouvrirPoche() {
     if (pochesOuvertes >= poches.length) return;
     playFind();
@@ -347,16 +364,6 @@ export default function GameOverScreen() {
     const enemy = id.replace('mort-ennemi-', '');
     return { emoji: '⚔️', title: tr(`Vaincu par ${tc(enemy)}`, `Slain by ${tc(enemy)}`) };
   });
-
-  /*
-   * Une fin inédite se tamponne : c'est le son de la collection qui avance,
-   * et le seul moment franchement bon d'un écran de mort. Il attend que la
-   * dernière poche soit ouverte — avant, l'encadré n'est pas encore à l'écran.
-   */
-  useEffect(() => {
-    if (newCards.length > 0 && finsRevelees) playNewEnding();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newCards.length, finsRevelees]);
 
 
   return (

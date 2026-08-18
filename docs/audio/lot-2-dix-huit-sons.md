@@ -1,5 +1,5 @@
 # Second lot audio — Le Roi du Carton
-## 18 sons, et pourquoi ceux-là
+## Une musique, 18 sons, et pourquoi ceux-là
 
 ---
 
@@ -36,6 +36,31 @@ Suffixe de style à coller à la fin de **chaque** description :
 
 > Close-miked handmade foley, dry room, no reverb, no music, no digital
 > processing, cardboard and paper materials, lo-fi domestic recording.
+
+---
+
+# ⓪ LA MUSIQUE DE MORT (1)
+
+L'écran de fin n'a jamais eu de musique. Ce n'était pas un choix : la
+résonance du carton qui s'affaisse tenait la place, et rien ne venait après.
+
+Elle entre **en fondu de quatre secondes**, derrière cette résonance : surgir
+couperait le seul silence que le jeu s'accorde. Elle boucle, elle reste basse —
+on lit le bilan par-dessus.
+
+| Fichier | Durée | Prompt à coller | Intention |
+|---|---|---|---|
+| `musique-mort.mp3` | 45–60 s, **bouclable** | `Slow melancholic solo accordion, single sustained melody, no percussion, no bass, French street music feel, sparse and unresolved, recorded in a small dry room, lo-fi, seamless loop` | La mort. **Un accordéon seul, jamais un orchestre** : le jeu se moque des grands sentiments. La mélodie ne doit pas se résoudre — on ne referme pas une vie ratée sur un bel accord |
+
+Deux consignes qui comptent plus que le reste :
+
+- **Elle doit boucler sans couture.** On reste sur cet écran le temps de lire,
+  parfois deux minutes. Un raccord audible ruinerait le moment.
+- **Pas de montée, pas de fin.** Ce n'est pas une musique de générique : c'est
+  un fond. Si elle attire l'attention, elle a raté.
+
+Le format diffère du reste du lot : **stéréo, 96 kbit/s**. C'est le seul
+fichier musical, il a le droit d'être large — les bruitages, eux, restent mono.
 
 ---
 
@@ -116,7 +141,7 @@ chacun**, nommées `-1`, `-2`, `-3` :
 
 `tension-compte` · `combat-esquive` · `ui-toast-bon`
 
-**Total livrable : 18 sons + 6 fichiers de variante = 24 fichiers.**
+**Total livrable : 1 musique + 18 sons + 6 fichiers de variante = 25 fichiers.**
 
 ---
 

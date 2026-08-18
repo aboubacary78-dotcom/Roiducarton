@@ -105,13 +105,14 @@ export default function Home() {
   useEffect(() => {
     const s = state.screen;
     if (s === 'title' || s === 'character-select') setAmbience('title');
-    // Les mini-jeux ont désormais leur propre lit (pack son 2). L'écran de fin
-    // reste silencieux : la résonance de mort s'y suffit.
+    // Les mini-jeux ont leur propre lit (pack son 2).
     else if (s === 'combat') setAmbience('mg-bagarre');
     else if (s === 'steal-game') setAmbience('mg-casse');
     else if (s === 'beg-game') setAmbience('mg-manche');
     else if (s === 'salvage-game') setAmbience('mg-recup');
-    else if (s === 'game-over') setAmbience(null);
+    // L'écran de fin n'était pas silencieux par choix esthétique mais faute de
+    // musique : elle arrive maintenant, en fondu long derrière la résonance.
+    else if (s === 'game-over') setAmbience('mort');
     else if (location) setAmbience(location as AmbienceId);
     else setAmbience(null);
   }, [state.screen, location]);
