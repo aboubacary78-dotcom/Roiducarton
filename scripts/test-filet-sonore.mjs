@@ -162,7 +162,14 @@ const surLePrincipal = () => p.evaluate(() =>
 
 async function revenirAuPrincipal() {
   for (let i = 0; i < 8 && !(await surLePrincipal()); i++) {
-    const ferme = await sonsDe('Continue|Continuer|Suivant|Next|Retour|Back|←|Fermer|Close|Passer', 420);
+    /*
+     * « Regarder » et « Merci » ferment le carton du matin. Sans eux, ce test
+     * échouait une fois sur trois environ : le cadeau quotidien tombe au
+     * hasard, se pose par-dessus l'écran principal, et les tuiles d'action
+     * n'étaient plus atteignables. C'était le test qui était capricieux, pas
+     * le jeu.
+     */
+    const ferme = await sonsDe('Continue|Continuer|Suivant|Next|Retour|Back|←|Fermer|Close|Passer|Regarder|Take a look|Merci|Thanks|Nouvelle journée|New day', 420);
     if (ferme === -1) {
       // Rien à fermer : peut-être un événement qui attend un choix.
       const choix = await sonsDe('.', 420);
@@ -172,6 +179,27 @@ async function revenirAuPrincipal() {
   return surLePrincipal();
 }
 
+/*
+ * COMBIEN D'ACTIONS RESTE-T-IL AUJOURD'HUI ?
+ *
+ * Le retour à l'écran principal traverse parfois un événement, et le seul
+ * moyen d'en sortir est d'en choisir une issue — ce qui consomme une action.
+ * Trois traversées et la journée est finie : les tuiles passent en désactivé,
+ * le filet les ignore à juste titre, et le test annonçait « 0 son » comme si
+ * le jeu s'était tu. C'était la journée qui était finie, pas le son qui
+ * manquait. On passe donc la nuit avant de reprendre les mesures.
+ */
+const actionsRestantes = () => p.evaluate(() => {
+  const m = document.body.innerText.match(/(\d+)\s+actions?/i);
+  return m ? Number(m[1]) : -1;
+});
+
+async function journeeNeuve() {
+  if ((await actionsRestantes()) !== 0) return;
+  await sonsDe('Next Day|Jour Suivant', 900);
+  await revenirAuPrincipal();
+}
+
 for (const [nom, motif] of [
   ['Explorer', 'Explore|Explorer'],
   ['Mendier', 'Beg|Mendier'],
@@ -179,6 +207,7 @@ for (const [nom, motif] of [
   ['La Récup’', 'Salvage|Récup'],
 ]) {
   if (!(await revenirAuPrincipal())) { console.log(`  (écran principal hors d'atteinte) ${nom}`); break; }
+  await journeeNeuve();
   const n = await sonsDe(motif);
   if (n === -1) { console.log(`  (absent) ${nom}`); continue; }
   verifier(`action « ${nom} » sonne`, n > 0, `${n} son(s)`);

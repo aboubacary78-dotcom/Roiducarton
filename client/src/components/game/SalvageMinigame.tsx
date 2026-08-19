@@ -5,7 +5,8 @@ import {
 import type { SalvageFind } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { playCollapse, playCrit, playDig, playFind, playHurt, playPickUp, playStep } from '@/lib/sound';
+import { playCollapse, playCrit, playDig, playFind, playHurt, playPickUp, playStep, playUnlock } from '@/lib/sound';
+import { canOfferRewarded, showRewarded } from '@/lib/ads';
 import { haptic } from '@/lib/haptics';
 import { isFirstEverRun } from '@/lib/coach';
 import { loadGraves } from '@/lib/necrology';
@@ -121,6 +122,21 @@ function SalvageInner() {
   const [pop, setPop] = useState<{ f: SalvageFind; key: number } | null>(null);
   // Tant que le doigt n'a rien frotté, on montre le geste au lieu de l'écrire.
   const [touched, setTouched] = useState(false);
+  /*
+   * LE TAS QUI SE CALME — vidéo récompensée de la Récup'.
+   *
+   * Elle se propose au dernier cran avant l'écroulement, jamais après. À cet
+   * instant le joueur a encore ses trouvailles dans les mains : on protège
+   * toujours plus fort ce qu'on tient déjà que ce qu'on espère. Une fois le
+   * tas écroulé, la même offre devient une consolation, et une consolation ne
+   * se vend pas.
+   *
+   * Une seule fois par fouille. Deux sauvetages et le mini-jeu n'a plus de
+   * tension ; un mini-jeu sans tension ne se rejoue pas, et c'est le nombre de
+   * parties qui fait le revenu, pas le nombre d'offres.
+   */
+  const [tasCalme, setTasCalme] = useState(false);
+  const [calmant, setCalmant] = useState(false);
 
   const cellsRef = useRef(cells);
   const riskRef = useRef(0);
@@ -201,6 +217,26 @@ function SalvageInner() {
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /** Le seuil d'offre, et le niveau où le tas retombe. En % de la jauge. */
+  const SEUIL_SECOURS = 82;
+  const REPLI_SECOURS = 50;
+
+  async function calmerLeTas() {
+    if (calmant || tasCalme) return;
+    setCalmant(true);
+    // Le doigt quitte le tas le temps de la vidéo : sans ça, la boucle
+    // continuerait de monter le risque pendant qu'on regarde la publicité.
+    rubbingRef.current = false;
+    const vue = await showRewarded();
+    if (vue) {
+      setTasCalme(true);
+      riskRef.current = T.riskMax * (REPLI_SECOURS / 100);
+      setRisk(riskRef.current);
+      playUnlock();
+    }
+    setCalmant(false);
+  }
 
   function addRisk(n: number) {
     riskRef.current = Math.min(T.riskMax, riskRef.current + n);
@@ -291,6 +327,28 @@ function SalvageInner() {
             transition={{ duration: 0.2 }}
           />
         </div>
+
+        {/* Le dernier cran avant l'écroulement. Le bouton dit ce qu'on garde,
+            pas ce qu'on gagne : « continuer » ne pèse rien face à « garder mes
+            trois trouvailles ». */}
+        {!ended && !tasCalme && riskPct >= SEUIL_SECOURS && canOfferRewarded() && (
+          <motion.button
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={calmant}
+            onClick={calmerLeTas}
+            className="w-full mt-1.5 py-2 text-[12px] font-bold text-white rounded-lg disabled:opacity-60"
+            style={{ background: 'linear-gradient(135deg, #B84A3A, #8E362A)', boxShadow: '0 3px 12px rgba(184,74,58,0.3)' }}
+          >
+            {calmant ? tr('⏳ Chargement…', '⏳ Loading…') : `🎬 ${
+              trouvailles.length > 0
+                ? tr(`Garder mes ${trouvailles.length} trouvaille${trouvailles.length > 1 ? 's' : ''}`,
+                     `Keep my ${trouvailles.length} find${trouvailles.length > 1 ? 's' : ''}`)
+                : tr('Faire retomber le tas', 'Settle the pile')
+            }`}
+          </motion.button>
+        )}
       </div>
 
       {/* Où l'on en est, et ce qu'il faut faire MAINTENANT. Une seule ligne,

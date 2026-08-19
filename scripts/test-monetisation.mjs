@@ -29,7 +29,7 @@ const shim = join(dir, 'cap.js');
 writeFileSync(shim, 'export const Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };\nexport const registerPlugin = () => ({});\n');
 const entry = join(dir, 'entry.ts');
 writeFileSync(entry, [
-  "export { gameReducer } from '@/contexts/GameContext';",
+  "export { gameReducer, CONTRACTS, getContract } from '@/contexts/GameContext';",
   "export { verdictInterstitiel, reinitialiserInterstitiel, partieTerminee, showInterstitial, setAdsRemoved } from '@/lib/ads';",
 ].join('\n'));
 
@@ -53,7 +53,7 @@ await build({
 });
 
 const {
-  gameReducer, verdictInterstitiel, reinitialiserInterstitiel,
+  gameReducer, CONTRACTS, getContract, verdictInterstitiel, reinitialiserInterstitiel,
   partieTerminee, showInterstitial, setAdsRemoved,
 } = await import(out);
 
@@ -166,7 +166,72 @@ const sansBilan = { character: { stats: { ...JAUGES } }, daySummary: null };
 verifier('sans bilan, l’action ne fait rien',
   gameReducer(sansBilan, { type: 'RECOVER_NIGHT' }) === sansBilan);
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. Le contrat raté de peu
+// ═══════════════════════════════════════════════════════════════════════════
+console.log('\nLe contrat — la récompense du contrat, et pas un centime de plus\n');
+
+/*
+ * Le « presque » se mesure : sans `progress`, un contrat ne peut pas être raté
+ * de peu, il est raté tout court. « Gagner un combat » est le seul de ce
+ * genre-là, et il n'en a donc pas.
+ */
+const sansProgres = CONTRACTS.filter(c => !c.progress).map(c => c.id);
+verifier('les contrats à seuil savent dire à quelle distance on s’est arrêté',
+  sansProgres.length === 1 && sansProgres[0] === 'contrat-combatif', sansProgres.join(', ') || 'aucun');
+
+const bilanContrat = (id, valeur, cible, rattrape) => ({
+  character: { stats: { ...JAUGES }, money: 10, respect: 0, inventory: [] },
+  daySummary: {
+    day: 4, weather: 'rainy', deltas: {}, moneyChange: 0, notes: [], notesEn: [],
+    contratRate: { id, valeur, cible }, contratRattrape: rattrape,
+  },
+});
+
+let av = bilanContrat('contrat-pecule', 10, 12);
+let ap = gameReducer(av, { type: 'RATTRAPER_CONTRAT' });
+verifier('le contrat rattrapé paie son respect', ap.character.respect === 2, `${ap.character.respect}`);
+verifier('et rien d’autre', ap.character.money === 10, `${ap.character.money} €`);
+verifier('une seconde vidéo ne le repaie pas',
+  gameReducer(ap, { type: 'RATTRAPER_CONTRAT' }) === ap);
+
+ap = gameReducer(bilanContrat('contrat-fourmi', 4, 5), { type: 'RATTRAPER_CONTRAT' });
+verifier('un contrat qui paie en argent paie en argent', ap.character.money === 13, `${ap.character.money} €`);
+
+ap = gameReducer(bilanContrat('contrat-forme', 28, 31), { type: 'RATTRAPER_CONTRAT' });
+verifier('un contrat qui paie en mental paie en mental',
+  ap.character.stats.mental === JAUGES.mental + 6, `${ap.character.stats.mental}`);
+
+const inconnu = bilanContrat('contrat-qui-n-existe-pas', 1, 2);
+verifier('un contrat inconnu ne paie rien',
+  gameReducer(inconnu, { type: 'RATTRAPER_CONTRAT' }) === inconnu);
+
+verifier('la récompense annoncée est celle du contrat',
+  getContract('contrat-pecule').reward.respect === 2);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. L'objet que le sac a refusé
+// ═══════════════════════════════════════════════════════════════════════════
+console.log('\nLe sac plein — l’objet nommé, et lui seul\n');
+
+const chaise = { id: 'chaise', name: 'Chaise', emoji: '🪑', type: 'junk', value: 3 };
+const avecRefus = (refusedItem, itemKept) => ({
+  character: { stats: { ...JAUGES }, money: 0, respect: 0, inventory: [{ id: 'x' }] },
+  eventResult: { text: 'vol', refusedItem, itemKept },
+});
+
+let sac = gameReducer(avecRefus(chaise), { type: 'GARDER_OBJET' });
+verifier('l’objet laissé sur place rentre dans le sac',
+  sac.character.inventory.length === 2 && sac.character.inventory[1].id === 'chaise');
+verifier('l’offre est marquée consommée', sac.eventResult.itemKept === true);
+verifier('une seconde vidéo ne le donne pas deux fois',
+  gameReducer(sac, { type: 'GARDER_OBJET' }) === sac);
+
+const sansRefus = avecRefus(undefined);
+verifier('sans objet refusé, l’action ne fait rien',
+  gameReducer(sansRefus, { type: 'GARDER_OBJET' }) === sansRefus);
+
 console.log(echecs
   ? `\n${echecs} vérification(s) en échec.`
-  : '\nLes règles tiennent : trois refus avant le plein écran, une moitié rendue une seule fois.');
+  : '\nLes règles tiennent : rien ne se donne deux fois, et rien ne paie plus que le jeu.');
 process.exit(echecs ? 1 : 0);

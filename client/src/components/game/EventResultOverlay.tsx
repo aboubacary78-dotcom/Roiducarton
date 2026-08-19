@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showRewarded, canOfferRewarded } from '@/lib/ads';
 import { DIGNITY_TIERS, dignityTierIndex } from '@/contexts/data/dignity';
-import { playBack, playGoodOutcome, playKO, playMiss, playMoneyOut, playWin } from '@/lib/sound';
+import { playBack, playGoodOutcome, playKO, playMiss, playMoneyOut, playPickUp, playWin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, moodFor } from './SceneIllustration';
@@ -28,6 +28,7 @@ export default function EventResultOverlay() {
   const result = state.eventResult;
   const [doubling, setDoubling] = useState(false);
   const [keeping, setKeeping] = useState(false);
+  const [ramassant, setRamassant] = useState(false);
   // Chaîne de replis pour l'image : variante réussite/échec → image de la
   // rencontre → scène dessinée. errorCount compte les échecs de chargement.
   const [errorCount, setErrorCount] = useState(0);
@@ -93,6 +94,28 @@ export default function EventResultOverlay() {
       dispatch({ type: 'KEEP_FACE' });
     }
     setKeeping(false);
+  }
+
+  /*
+   * UNE POCHE DE PLUS.
+   *
+   * Le sac vient de refuser un objet qui a un nom et une image, et le texte
+   * dit qu'on le laisse sur place. C'est la dotation à l'état pur : un objet
+   * qu'on a tenu une seconde se défend deux fois plus fort qu'un objet qu'on
+   * n'a jamais eu. On vend donc cet objet-là, jamais « de la place ».
+   */
+  const objetRefuse = !result.itemKept ? result.refusedItem : undefined;
+  const canGarderObjet = !!objetRefuse && canOfferRewarded();
+
+  async function handleGarderObjet() {
+    if (ramassant) return;
+    setRamassant(true);
+    const rewarded = await showRewarded();
+    if (rewarded) {
+      dispatch({ type: 'GARDER_OBJET' });
+      playPickUp();
+    }
+    setRamassant(false);
   }
 
   const hasChanges = result.statChanges || result.moneyChange || result.respectChange;
@@ -286,6 +309,35 @@ export default function EventResultOverlay() {
                 {tr('Cette rencontre pourrait avoir une suite...', 'This encounter might have a sequel...')}
               </p>
             </motion.div>
+          )}
+
+          {/* L'objet laissé sur place. Il passe en premier : c'est la seule
+              perte de l'écran qui ait une image et un nom propre. */}
+          {canGarderObjet && objetRefuse && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.34 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={ramassant}
+              onClick={() => { playBack(); handleGarderObjet(); }}
+              className="w-full py-3 text-sm font-semibold text-white rounded-xl mb-2 disabled:opacity-60"
+              style={{
+                background: 'linear-gradient(135deg, #5C8A6B, #43684F)',
+                boxShadow: '0 4px 16px rgba(92, 138, 107, 0.3)',
+              }}
+            >
+              {ramassant
+                ? tr('⏳ Chargement…', '⏳ Loading…')
+                : `🎬 ${tr(`Garder ${objetRefuse.name} ${objetRefuse.emoji}`, `Keep ${tc(objetRefuse.name)} ${objetRefuse.emoji}`)}`}
+            </motion.button>
+          )}
+
+          {result.itemKept && result.refusedItem && (
+            <p className="text-[11px] text-[#43684F] text-center mb-2 font-medium">
+              🎒 {tr(`${result.refusedItem.name} finit par rentrer dans le sac.`,
+                     `${tc(result.refusedItem.name)} squeezes into the bag after all.`)}
+            </p>
           )}
 
           {/* Garder son allure : racheter le palier de Dignité qu'on vient de

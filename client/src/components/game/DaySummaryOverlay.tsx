@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useVerrouScroll } from '@/lib/verrouScroll';
-import { useGame, STAT_META, WEATHER_TYPES, type Stats } from '@/contexts/GameContext';
+import { useGame, STAT_META, WEATHER_TYPES, getContract, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr } from '@/lib/lang';
 import { canOfferRewarded, showRewarded } from '@/lib/ads';
-import { playWakeUp, playWear, playBack, playGaugeFilled } from '@/lib/sound';
+import { playWakeUp, playWear, playBack, playGaugeFilled, playUnlock } from '@/lib/sound';
 
 /** Sous ce niveau une jauge est en danger — le même seuil que l'alerte sonore. */
 const SEUIL_ALERTE = 25;
@@ -66,8 +66,30 @@ export default function DaySummaryOverlay() {
    */
   const jaugesEnDanger = (Object.keys(s.deltas) as (keyof Stats)[])
     .filter(k => (s.deltas[k] ?? 0) < 0 && (state.character?.stats[k] ?? 100) < SEUIL_ALERTE);
-  const peutRattraper = !s.recovered && jaugesEnDanger.length > 0 && canOfferRewarded();
   const rendu = s.recovered ? (Object.keys(s.recovered) as (keyof Stats)[]) : [];
+
+  /*
+   * LE CONTRAT RATÉ DE PEU.
+   *
+   * Le réducteur ne renseigne `contratRate` que sur un échec à moins de 20 %
+   * du but. La récompense est celle du contrat, à l'unité près : si la vidéo
+   * payait mieux que le contrat lui-même, plus personne ne remplirait de
+   * contrat.
+   */
+  const contratDef = s.contratRate ? getContract(s.contratRate.id) : undefined;
+  const peutRattraperContrat = !!contratDef && !s.contratRattrape && canOfferRewarded();
+
+  /*
+   * UNE SEULE OFFRE PAR BILAN.
+   *
+   * Deux boutons de publicité côte à côte sur le même écran ne doublent pas
+   * les impressions : ils apprennent au joueur que cet écran est un panneau
+   * d'affichage, et il cesse de le lire. Le contrat passe devant quand les
+   * deux sont possibles — il est plus rare, et rater de deux euros pique plus
+   * qu'une jauge basse de plus.
+   */
+  const peutRattraper = !peutRattraperContrat && !s.recovered
+    && jaugesEnDanger.length > 0 && canOfferRewarded();
 
   async function rattraperLaNuit() {
     if (enCours) return;
@@ -76,6 +98,17 @@ export default function DaySummaryOverlay() {
     if (vue) {
       dispatch({ type: 'RECOVER_NIGHT' });
       playGaugeFilled();
+    }
+    setEnCours(false);
+  }
+
+  async function rattraperLeContrat() {
+    if (enCours) return;
+    setEnCours(true);
+    const vue = await showRewarded();
+    if (vue) {
+      dispatch({ type: 'RATTRAPER_CONTRAT' });
+      playUnlock();
     }
     setEnCours(false);
   }
@@ -151,6 +184,41 @@ export default function DaySummaryOverlay() {
                 </motion.p>
               ))}
             </div>
+          )}
+
+          {/* Le contrat raté de peu. Le libellé montre l'écart, parce que c'est
+              lui qui pique : « 10 € sur 12 » se supporte moins bien que
+              « contrat manqué ». */}
+          {peutRattraperContrat && contratDef && s.contratRate && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.34 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={enCours}
+              onClick={() => { playBack(); rattraperLeContrat(); }}
+              className="w-full py-3 text-sm font-semibold text-white rounded-xl mb-2 disabled:opacity-60"
+              style={{
+                background: 'linear-gradient(135deg, #B8860B, #9B7209)',
+                boxShadow: '0 4px 16px rgba(184, 134, 11, 0.3)',
+              }}
+            >
+              {enCours ? tr('⏳ Chargement…', '⏳ Loading…') : (
+                <>
+                  🎬 {tr('Rattraper le contrat', 'Save the contract')}
+                  <span className="block text-[10px] font-normal opacity-80 mt-0.5">
+                    {contratDef.emoji} {s.contratRate.valeur}/{s.contratRate.cible} ·{' '}
+                    {tr(contratDef.rewardLabel, contratDef.rewardLabelEn)}
+                  </span>
+                </>
+              )}
+            </motion.button>
+          )}
+
+          {s.contratRattrape && contratDef && (
+            <p className="text-[11px] text-[#8B6B4A] text-center mb-2 font-medium">
+              {contratDef.emoji} {tr('Contrat validé de justesse.', 'Contract scraped through.')}
+            </p>
           )}
 
           {/* Rattraper la nuit. Le libellé nomme ce qui est en train de se

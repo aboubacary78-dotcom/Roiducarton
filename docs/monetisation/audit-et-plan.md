@@ -283,7 +283,7 @@ installations.
 
 # Journal d'implémentation
 
-## Fait — points 2, 3, 4 et 5
+## Fait — points 2, 3, 4, 5 et 6
 
 **Point 2 — l'interstitiel discipliné.** La règle vit désormais dans une
 fonction seule, `verdictInterstitiel()` (`lib/ads.ts`), qui ne modifie rien :
@@ -331,9 +331,47 @@ quotidien tombait, le meilleur placement du jeu se jouait derrière une image
 d'oiseaux — et avec le compte à rebours, il aurait expiré sans que personne le
 voie. L'offre passe au-dessus ; le carton attend dix secondes.
 
-`scripts/test-monetisation.mjs` éprouve les deux : les trois refus de
-l'interstitiel (dont le plancher à 89,999 s puis 90,000 s) et les cinq règles
-de la nuit rendue.
+**Point 6 — les quatre placements de volume.**
+
+*Le sac plein.* Un vol réussi dont le butin ne rentre pas écrivait déjà « il
+était là, mais votre sac est plein à craquer : vous le laissez sur place ».
+L'objet a un nom, une image, et il vient de vous échapper — on vend donc **cet
+objet-là**, pas « deux places de plus », qui ne veut rien dire. Le sac dépasse
+alors sa capacité d'un cran, et c'est assumé : tous les autres chemins
+vérifient la place avant d'ajouter, si bien qu'il ne rentrera plus rien tant
+que le joueur n'aura pas vendu ou consommé quelque chose. La contrepartie est
+un objet, jamais une capacité durable.
+
+*La Récup'.* L'offre apparaît au dernier cran avant l'écroulement — à 82 % de
+la jauge — et jamais après. À cet instant le joueur a encore ses trouvailles
+dans les mains, et le bouton les compte : « Garder mes 3 trouvailles ». Le tas
+retombe à 50 %. Une seule fois par fouille.
+
+*Le casse.* Au palier **Alerte**, celui d'avant le bouclage. La jauge est à
+cliquets — le mini-jeu a dit au joueur qu'elle ne redescendrait jamais — et
+rendre réversible ce qu'on a présenté comme irréversible est le seul cas où
+une publicité ressemble à un cadeau. Les renforts appelés par le palier effacé
+repartent avec lui : sans ça, le joueur aurait payé pour un chiffre qui baisse
+pendant que quatre chasseurs continuent de le traquer. Le monde se fige
+pendant la vidéo. Une seule fois par casse, non négociable.
+
+*Le contrat.* Les contrats à seuil savent désormais dire **à quelle distance
+du but on s'est arrêté**. L'offre n'apparaît qu'au-dessus de 80 % — 10 € sur
+12, 4 objets sur 5 — et la récompense est exactement celle du contrat, à
+l'unité près : une vidéo qui paierait mieux que le contrat ferait cesser de
+remplir des contrats. « Gagner un combat » n'a pas de mesure de distance et
+n'est donc jamais proposé : on ne rate pas un combat de peu.
+
+*Une seule offre par bilan de nuit.* Le contrat et la nuit rendue tombent au
+même endroit. Deux boutons de publicité côte à côte ne doublent pas les
+impressions — ils apprennent au joueur que cet écran est un panneau
+d'affichage, et il cesse de le lire. Le contrat passe devant : il est plus
+rare, et rater de deux euros pique davantage qu'une jauge basse de plus.
+
+`scripts/test-monetisation.mjs` éprouve l'ensemble : les trois refus de
+l'interstitiel (dont le plancher à 89,999 s puis 90,000 s), les cinq règles de
+la nuit rendue, la récompense du contrat rattrapé, et l'objet repêché — avec,
+à chaque fois, la vérification qu'une seconde vidéo ne donne rien de plus.
 
 ## Ce qui reste
 
@@ -344,8 +382,12 @@ la console AdMob, publier la page de confidentialité à une URL publique
 absolue, et ajouter `NSUserTrackingUsageDescription` quand le projet iOS sera
 généré.
 
-Le point 6 — sac plein, Récup', casse et contrat — vient ensuite.
+Reste, sur le sauvetage de série : afficher la valeur chiffrée de la série
+(« le palier de 7 jours débloque 25 karma, tu y es presque ») et la reproposer
+une fois à la session suivante.
 
-Reste aussi, sur le sauvetage de série : afficher la valeur chiffrée de la
-série (« le palier de 7 jours débloque 25 karma, tu y es presque ») et la
-reproposer une fois à la session suivante.
+Et une chose qui ne se code pas : **mesurer**. Six placements nouveaux ou
+retouchés attendent des chiffres réels — taux d'opt-in par emplacement, et
+surtout rétention J7 avant/après. Tout ce document repose sur des mécaniques
+connues, pas sur les joueurs de ce jeu-ci ; le premier mois de données vaudra
+plus que le reste.

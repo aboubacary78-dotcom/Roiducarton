@@ -381,6 +381,14 @@ export interface Contract {
   check?: (c: Character) => boolean;
   // …ou accompli en cours de journée (ex. gagner un combat → done).
   needsFlag?: boolean;
+  /*
+   * À quelle distance du but s'est-on arrêté ?
+   *
+   * `check` ne dit que oui ou non, et rater de deux euros n'est pas rater de
+   * vingt. Les contrats à seuil savent le mesurer ; « gagner un combat » ne le
+   * sait pas, et n'a donc pas de `progress` — on ne rate pas un combat de peu.
+   */
+  progress?: (c: Character) => { valeur: number; cible: number };
   reward: { stats?: Partial<Stats>; money?: number; respect?: number };
 }
 
@@ -402,7 +410,14 @@ export interface GameState {
    * actions sur trois, parfois — passait inaperçue. Ce champ permet à la
    * fenêtre de résultat de la traiter à part.
    */
-  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; faceKept?: boolean; image?: string; fallbackImage?: string; journeeFinie?: number } | null;
+  /*
+   * `refusedItem` : l'objet qu'on a dû laisser sur place parce que le sac
+   * débordait. Il est nommé, il était à portée, et il vient de disparaître —
+   * c'est ce qui permet de proposer de le garder au lieu de proposer « une
+   * place de plus », qui ne veut rien dire. `itemKept` retombe une fois
+   * l'offre honorée, pour qu'elle ne se rejoue pas.
+   */
+  eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; faceKept?: boolean; image?: string; fallbackImage?: string; journeeFinie?: number; refusedItem?: InventoryItem; itemKept?: boolean } | null;
   // Bilan de la nuit affiché après « Jour suivant » : nouveau jour, météo,
   // pertes/gains de jauges de la nuit, et éventuels effets de traits.
   /*
@@ -412,7 +427,16 @@ export interface GameState {
    * qu'une fois par jour et disparaissant à sa fermeture, le plafond d'une
    * offre par journée n'a besoin d'aucun compteur — il est structurel.
    */
-  daySummary: { day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number; notes: string[]; notesEn: string[]; recovered?: Partial<Stats> } | null;
+  /*
+   * `contratRate` n'est renseigné que sur un échec DE PEU — moins de 20 % du
+   * but manquant. Rater de loin fait hausser les épaules ; rater de peu ne se
+   * supporte pas, et c'est la seule des deux situations qui vaut une offre.
+   */
+  daySummary: {
+    day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number;
+    notes: string[]; notesEn: string[]; recovered?: Partial<Stats>;
+    contratRate?: { id: string; valeur: number; cible: number }; contratRattrape?: boolean;
+  } | null;
   // Contrat du matin : micro-objectif du jour (jugé à la nuit). `done` sert
   // aux contrats accomplis en cours de journée (ex. gagner un combat).
   contract: { id: string; done: boolean } | null;

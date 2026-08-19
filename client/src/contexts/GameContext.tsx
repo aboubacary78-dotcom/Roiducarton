@@ -139,6 +139,14 @@ function removeOne(inv: InventoryItem[], id: string): InventoryItem[] {
   return i < 0 ? inv : [...inv.slice(0, i), ...inv.slice(i + 1)];
 }
 
+/*
+ * Le « presque ». Un contrat atteint à 80 % ou plus est raté de peu ; en
+ * dessous, il est raté tout court. C'est le seul seuil du jeu dont la valeur
+ * commande une offre publicitaire : la placer trop bas la rendrait banale, et
+ * une offre banale ne se regarde plus.
+ */
+const SEUIL_PRESQUE = 0.8;
+
 function clampStats(stats: Stats): Stats {
   return {
     health: Math.max(0, Math.min(100, stats.health)),
@@ -251,6 +259,10 @@ type GameAction =
   | { type: 'DOUBLE_REWARD' }
   // Rend la moitié de ce que la nuit a pris, au moment où le bilan l'affiche.
   | { type: 'RECOVER_NIGHT' }
+  // Rattrape l'objet que le sac plein vient de faire abandonner.
+  | { type: 'GARDER_OBJET' }
+  // Fait compter comme rempli un contrat raté de peu.
+  | { type: 'RATTRAPER_CONTRAT' }
   // Rachète la dignité tout juste perdue, juste assez pour ne pas quitter son
   // palier : une pub restaure une perte bien mieux qu'elle n'offre un gain.
   | { type: 'KEEP_FACE' }
@@ -728,7 +740,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           // Le voyage étant gratuit, un quota par quartier ne coûterait rien.
           bigScoreDay: target.difficulty === 'grand' ? c.day : c.bigScoreDay,
         },
-        eventResult: { text, statChanges: statDelta, moneyChange: moneyDelta, respectChange: respectDelta, image: '/assets/result-steal-success.webp' },
+        eventResult: {
+          text, statChanges: statDelta, moneyChange: moneyDelta, respectChange: respectDelta,
+          image: '/assets/result-steal-success.webp',
+          // L'objet laissé sur place parce que le sac débordait : il est nommé
+          // dans le texte, il vient de vous échapper, et il peut encore être
+          // rattrapé (voir GARDER_OBJET).
+          refusedItem: convoite && !gotItem ? convoite : undefined,
+        },
         screen: 'main',
       };
     }
@@ -815,6 +834,61 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         character: { ...c, stats: clampStats(stats) },
         daySummary: { ...bilan, recovered: rendu },
+      };
+    }
+
+    /*
+     * UNE POCHE DE PLUS — rattraper l'objet que le sac a refusé.
+     *
+     * Le refus est visuel et immédiat : l'objet a un nom, une image, il était
+     * dans la main, et le texte vient d'écrire qu'on le laisse sur place. On
+     * ne vend donc pas « deux places de plus », qui est une abstraction, mais
+     * cet objet-là.
+     *
+     * Le sac dépasse d'un cran sa capacité, et c'est assumé : tous les autres
+     * chemins vérifient la place AVANT d'ajouter, si bien qu'il ne rentrera
+     * plus rien tant que le joueur n'aura pas vendu ou consommé quelque chose.
+     * La contrepartie est un objet, jamais une capacité durable.
+     */
+    /*
+     * RATTRAPER LE CONTRAT.
+     *
+     * Effet du quasi-gain : un joueur qui rate de loin hausse les épaules, un
+     * joueur qui rate de deux euros ne le supporte pas. Le bilan ne propose
+     * donc l'offre que sur un échec à moins de 20 % du but (voir NEXT_DAY et
+     * `SEUIL_PRESQUE`), et la récompense est exactement celle du contrat —
+     * rien de plus, sinon la publicité paierait mieux que le jeu.
+     */
+    case 'RATTRAPER_CONTRAT': {
+      const bilan = state.daySummary;
+      if (!state.character || !bilan?.contratRate || bilan.contratRattrape) return state;
+      const def = getContract(bilan.contratRate.id);
+      if (!def) return state;
+      const c = state.character;
+      const stats = { ...c.stats };
+      if (def.reward.stats) {
+        (Object.entries(def.reward.stats) as [keyof Stats, number][])
+          .forEach(([k, v]) => { if (v) stats[k] += v; });
+      }
+      return {
+        ...state,
+        character: {
+          ...c,
+          stats: clampStats(stats),
+          money: c.money + (def.reward.money || 0),
+          respect: c.respect + (def.reward.respect || 0),
+        },
+        daySummary: { ...bilan, contratRattrape: true },
+      };
+    }
+
+    case 'GARDER_OBJET': {
+      const res = state.eventResult;
+      if (!state.character || !res?.refusedItem || res.itemKept) return state;
+      return {
+        ...state,
+        character: { ...state.character, inventory: [...state.character.inventory, { ...res.refusedItem }] },
+        eventResult: { ...res, itemKept: true },
       };
     }
 
@@ -1056,6 +1130,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       // ---- Contrat du matin : verdict de la journée écoulée ----
       let respectBonus = 0;
+      let contratRate: { id: string; valeur: number; cible: number } | undefined;
       const cDef = state.contract ? getContract(state.contract.id) : undefined;
       if (cDef) {
         const success = cDef.needsFlag ? state.contract!.done : !!cDef.check?.(ch);
@@ -1068,6 +1143,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         } else {
           notes.push(`${cDef.emoji} Contrat manqué : ${cDef.label}. Demain, peut-être.`);
           notesEn.push(`${cDef.emoji} Contract missed: ${cDef.labelEn}. Tomorrow, maybe.`);
+          /*
+           * Raté de peu ? On le retient pour le bilan. Le seuil des 80 % n'est
+           * pas de la générosité : proposer l'offre sur un échec large ne
+           * convertirait pas et userait l'inventaire pour rien.
+           */
+          const p = cDef.progress?.(ch);
+          if (p && p.cible > 0 && p.valeur >= p.cible * SEUIL_PRESQUE) {
+            contratRate = { id: cDef.id, valeur: p.valeur, cible: p.cible };
+          }
         }
       }
       // ---- La neige s'annonce la veille ----
@@ -1147,7 +1231,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         nextWeather: meteoApres,
         contract: isAlive ? nextContract : null,
         daySummary: isAlive
-          ? { day: ch.day + 1, weather: nextWeather, deltas, moneyChange: bonusMoney, notes, notesEn }
+          ? { day: ch.day + 1, weather: nextWeather, deltas, moneyChange: bonusMoney, notes, notesEn, contratRate }
           : null,
       };
     }

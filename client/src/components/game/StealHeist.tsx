@@ -1,7 +1,8 @@
 import { useGame, LOCATIONS, heistTargetsFor, HEIST_TUNING, type HeistTarget } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { playCard, playCrit, playHit, playHurt, playPickUp, playSpotted, playStep, playTurnedAway } from '@/lib/sound';
+import { playCard, playCrit, playHit, playHurt, playPickUp, playSpotted, playStep, playTurnedAway, playUnlock } from '@/lib/sound';
+import { canOfferRewarded, showRewarded } from '@/lib/ads';
 import { useLang, tr } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
@@ -300,6 +301,24 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
   const tierRef = useRef<Tier>(0);
   const pendingRef = useRef<Pending[]>([]);
   const spawnedRef = useRef({ chaser: false, camper: false });
+  /*
+   * EFFACER UN PALIER — vidéo récompensée du casse.
+   *
+   * La jauge est à cliquets : elle ne redescend jamais sous le palier atteint,
+   * et le joueur le sait — c'est écrit dans les règles du mini-jeu. Rendre
+   * réversible ce qu'on a présenté comme irréversible est le seul cas où une
+   * publicité ressemble à un cadeau plutôt qu'à un péage.
+   *
+   * UNE SEULE FOIS PAR CASSE, et ce n'est pas négociable : deux effacements et
+   * la tension qui fait le mini-jeu disparaît. Un mini-jeu sans tension ne se
+   * rejoue pas, et un mini-jeu qu'on ne rejoue pas ne rapporte plus rien.
+   *
+   * Le monde se fige pendant la vidéo : se faire prendre par une ronde qui a
+   * continué derrière l'écran de publicité serait la pire seconde du jeu.
+   */
+  const geleRef = useRef(false);
+  const [palierEfface, setPalierEfface] = useState(false);
+  const [effacant, setEffacant] = useState(false);
   const tickCount = useRef(0);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   // Le glissé déclenche aussi un clic fantôme sur la case de départ : on le
@@ -368,8 +387,37 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
     }
   }, [queueSpawn, tuning]);
 
+  async function effacerUnPalier() {
+    if (effacant || palierEfface || statusRef.current !== 'playing') return;
+    setEffacant(true);
+    geleRef.current = true;
+    const vue = await showRewarded();
+    if (vue) {
+      setPalierEfface(true);
+      const cible = Math.max(0, tierRef.current - 1) as Tier;
+      tierRef.current = cible;
+      setTier(cible);
+      alertRef.current = TIER_FLOORS[cible];
+      setAlert(TIER_FLOORS[cible]);
+      /*
+       * Les renforts appelés par le palier qu'on efface repartent, et le jeu
+       * oublie les avoir appelés. Sans ça, « effacer un palier » ne serait
+       * qu'un chiffre qui baisse pendant que quatre chasseurs continuent de
+       * traquer : le joueur aurait payé pour une décoration.
+       */
+      spawnedRef.current = { chaser: false, camper: false };
+      pendingRef.current = [];
+      setPending([]);
+      guardsRef.current = guardsRef.current.filter(g => g.kind === 'patrol');
+      setGuards(guardsRef.current);
+      playUnlock();
+    }
+    geleRef.current = false;
+    setEffacant(false);
+  }
+
   const move = useCallback((dx: number, dy: number) => {
-    if (statusRef.current !== 'playing') return;
+    if (statusRef.current !== 'playing' || geleRef.current) return;
     const p = playerRef.current;
     const nx = p.x + dx, ny = p.y + dy;
     if (nx < 0 || ny < 0 || nx >= GRID_W || ny >= GRID_H) return;
@@ -402,7 +450,7 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
   useEffect(() => {
     const effTick = Math.max(240, Math.round(tickMs * (tier >= 1 ? 0.8 : 1)));
     const id = setInterval(() => {
-      if (statusRef.current !== 'playing') return;
+      if (statusRef.current !== 'playing' || geleRef.current) return;
       tickCount.current += 1;
       const p = playerRef.current;
 
@@ -560,6 +608,24 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
             transition={{ duration: 0.25 }}
           />
         </div>
+
+        {/* L'avant-dernier palier : le bouclage est le cran suivant, et la
+            jauge ne redescend pas toute seule. Le bouton dit ce qu'il rend —
+            un palier — parce que c'est exactement le mot que le mini-jeu a
+            employé pour dire qu'on ne le récupérerait jamais. */}
+        {status === 'playing' && !palierEfface && tier === 2 && canOfferRewarded() && (
+          <motion.button
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={effacant}
+            onClick={effacerUnPalier}
+            className="w-full mt-0.5 py-2 text-[12px] font-bold text-white rounded-lg disabled:opacity-60"
+            style={{ background: 'linear-gradient(135deg, #6B7FA8, #4C5F84)', boxShadow: '0 3px 12px rgba(76,95,132,0.3)' }}
+          >
+            {effacant ? tr('⏳ Chargement…', '⏳ Loading…') : `🎬 ${tr('Effacer un palier d\'alerte', 'Clear one alert tier')}`}
+          </motion.button>
+        )}
       </div>
 
       {/* Grille, posée sur le quartier où l'on est en train de voler. Le décor

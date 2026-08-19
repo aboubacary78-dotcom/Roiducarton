@@ -23,19 +23,22 @@ export const CONTRACTS: Contract[] = [
     id: 'contrat-pecule', emoji: '💶',
     label: 'Finir la journée avec au moins 12€', labelEn: 'End the day with at least €12',
     rewardLabel: '+2 respect', rewardLabelEn: '+2 respect',
-    check: c => c.money >= 12, reward: { respect: 2 },
+    check: c => c.money >= 12, progress: c => ({ valeur: c.money, cible: 12 }), reward: { respect: 2 },
   },
   {
     id: 'contrat-forme', emoji: '💪',
     label: 'Finir la journée avec toutes les jauges au-dessus de 30', labelEn: 'End the day with every gauge above 30',
     rewardLabel: '+6 mental', rewardLabelEn: '+6 mind',
-    check: c => (Object.values(c.stats) as number[]).every(v => v > 30), reward: { stats: { mental: 6 } },
+    check: c => (Object.values(c.stats) as number[]).every(v => v > 30),
+    // La jauge la plus basse décide : c'est elle qui a fait rater le contrat.
+    progress: c => ({ valeur: Math.min(...(Object.values(c.stats) as number[])), cible: 31 }),
+    reward: { stats: { mental: 6 } },
   },
   {
     id: 'contrat-digne', emoji: '👑',
     label: 'Finir la journée avec 50 de dignité ou plus', labelEn: 'End the day with 50+ dignity',
     rewardLabel: '+2 respect', rewardLabelEn: '+2 respect',
-    check: c => c.stats.dignity >= 50, reward: { respect: 2 },
+    check: c => c.stats.dignity >= 50, progress: c => ({ valeur: c.stats.dignity, cible: 50 }), reward: { respect: 2 },
   },
   {
     id: 'contrat-combatif', emoji: '🥊',
@@ -47,7 +50,7 @@ export const CONTRACTS: Contract[] = [
     id: 'contrat-fourmi', emoji: '🎒',
     label: 'Finir la journée avec 5 objets ou plus dans le sac', labelEn: 'End the day with 5+ items in your bag',
     rewardLabel: '+3€', rewardLabelEn: '+€3',
-    check: c => c.inventory.length >= 5, reward: { money: 3 },
+    check: c => c.inventory.length >= 5, progress: c => ({ valeur: c.inventory.length, cible: 5 }), reward: { money: 3 },
   },
 ];
 
