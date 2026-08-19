@@ -246,8 +246,93 @@ export async function hideBanner(): Promise<void> {
  * Idéal entre deux parties (ex : sur l'écran de Game Over).
  * Résout toujours, même en cas d'erreur, pour ne jamais bloquer le jeu.
  */
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LA DISCIPLINE DE L'INTERSTITIEL
+ *
+ * C'est le placement le plus rentable du jeu et le plus dangereux, pour la
+ * même raison : il part à la fin d'une partie, et une partie dure quatre
+ * minutes. Quatre cents parties simulées donnent une survie médiane de cinq
+ * jours ; dans une session d'un quart d'heure, le joueur meurt trois à cinq
+ * fois. Sans garde-fou, il encaisse trois à cinq pleins écrans qu'il n'a pas
+ * demandés, et l'association qui s'installe est « mourir = pub ».
+ *
+ * Or on meurt tout le temps : c'est le principe du jeu.
+ *
+ * Trois règles, dans l'ordre où elles s'appliquent.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Délai minimum entre deux interstitiels. Supprime les doublons rapprochés. */
+const DELAI_INTERSTITIEL_MS = 90_000;
+
+/**
+ * Parties à laisser passer chez un joueur qui découvre le jeu.
+ *
+ * Le premier jour décide du septième. Un nouveau venu qui prend un plein écran
+ * à sa première mort n'a encore rien investi : il n'a aucune raison de rester.
+ */
+const PARTIES_DE_GRACE = 3;
+const CLE_PARTIES = 'roi-du-carton-parties-finies';
+
+let dernierInterstitiel = 0;
+let premiereMortDeLaSession = true;
+
+/** Combien de parties ce joueur a-t-il terminées, toutes sessions confondues ? */
+function partiesFinies(): number {
+  try { return Number(localStorage.getItem(CLE_PARTIES) || '0'); } catch { return 0; }
+}
+function noterPartieFinie(): void {
+  try { localStorage.setItem(CLE_PARTIES, String(partiesFinies() + 1)); } catch { /* silent */ }
+}
+
+/**
+ * Une partie vient de se terminer. À appeler à CHAQUE mort, même quand aucune
+ * publicité ne part : c'est ce compteur qui fait sortir le joueur de la
+ * période de grâce.
+ */
+export function partieTerminee(): void {
+  noterPartieFinie();
+}
+
+/**
+ * L'interstitiel peut-il partir maintenant, et pourquoi ?
+ *
+ * La règle est ici, en un seul endroit, et elle ne modifie rien — c'est ce qui
+ * la rend vérifiable : un test peut l'interroger sans réseau publicitaire et
+ * sans provoquer d'effet de bord.
+ */
+export function verdictInterstitiel(maintenant = Date.now()): { montrer: boolean; raison: string } {
+  if (adsRemoved) return { montrer: false, raison: 'sans-pub acheté' };
+  if (partiesFinies() <= PARTIES_DE_GRACE) {
+    return { montrer: false, raison: `période de grâce (${partiesFinies()}/${PARTIES_DE_GRACE} parties)` };
+  }
+  if (premiereMortDeLaSession) return { montrer: false, raison: 'première mort de la session' };
+  const attente = maintenant - dernierInterstitiel;
+  if (attente < DELAI_INTERSTITIEL_MS) {
+    return { montrer: false, raison: `trop tôt (${Math.round(attente / 1000)} s sur ${DELAI_INTERSTITIEL_MS / 1000})` };
+  }
+  return { montrer: true, raison: 'ok' };
+}
+
+/** Remet les compteurs de session à zéro. Sert aux tests. */
+export function reinitialiserInterstitiel(): void {
+  dernierInterstitiel = 0;
+  premiereMortDeLaSession = true;
+}
+
 export async function showInterstitial(): Promise<void> {
-  if (adsRemoved || !isNative()) return;
+  const verdict = verdictInterstitiel();
+
+  /*
+   * Le drapeau de première mort tombe même quand rien ne part : c'est la
+   * PREMIÈRE mort qu'on offre, pas la première publicité réussie. Sinon un
+   * joueur en période de grâce garderait son laissez-passer indéfiniment et
+   * prendrait son premier plein écran bien plus tard que prévu.
+   */
+  premiereMortDeLaSession = false;
+
+  if (!verdict.montrer || !isNative()) return;
+  dernierInterstitiel = Date.now();
+
   try {
     const { AdMob } = await import('@capacitor-community/admob');
     await AdMob.prepareInterstitial({

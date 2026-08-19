@@ -249,6 +249,8 @@ type GameAction =
   | { type: 'RESOLVE_SALVAGE'; centimes: number; bazar: number; trouvailles: string[]; depth: number; busted: boolean; hurts: string[]; extraKept: number }
   | { type: 'REST' }
   | { type: 'DOUBLE_REWARD' }
+  // Rend la moitié de ce que la nuit a pris, au moment où le bilan l'affiche.
+  | { type: 'RECOVER_NIGHT' }
   // Rachète la dignité tout juste perdue, juste assez pour ne pas quitter son
   // palier : une pub restaure une perte bien mieux qu'elle n'offre un gain.
   | { type: 'KEEP_FACE' }
@@ -776,6 +778,43 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         character: { ...state.character, money: state.character.money + gain },
         eventResult: { ...state.eventResult, doubled: true },
+      };
+    }
+
+    /*
+     * UNE HEURE DE PLUS AU CHAUD — la nuit rendue à moitié.
+     *
+     * Le bilan vient d'afficher, en chiffres, ce que la nuit a coûté. C'est le
+     * seul instant du jeu où la perte est à l'écran, chiffrée, et pas encore
+     * digérée : une vidéo récompensée se vend mieux contre une perte fraîche
+     * que contre un gain hypothétique.
+     *
+     * On rend la MOITIÉ de chaque jauge perdue, arrondie au supérieur, et rien
+     * d'autre : ni argent, ni objet, ni action. Le bilan n'existe que si le
+     * personnage a survécu à la nuit (voir NEXT_DAY), donc cette offre ne
+     * ressuscite jamais personne — elle adoucit une nuit traversée.
+     */
+    case 'RECOVER_NIGHT': {
+      const bilan = state.daySummary;
+      if (!state.character || !bilan || bilan.recovered) return state;
+      const c = state.character;
+      const rendu: Partial<Stats> = {};
+      const stats = { ...c.stats };
+      (Object.keys(bilan.deltas) as (keyof Stats)[]).forEach((k) => {
+        const perdu = bilan.deltas[k] ?? 0;
+        if (perdu >= 0) return;
+        const gain = Math.min(Math.ceil(-perdu / 2), 100 - stats[k]);
+        if (gain <= 0) return;
+        stats[k] += gain;
+        rendu[k] = gain;
+      });
+      // Une nuit dont il ne reste rien à rendre (jauges déjà pleines) ne
+      // consomme pas l'offre : le joueur n'a pas regardé une pub pour rien.
+      if (!Object.keys(rendu).length) return state;
+      return {
+        ...state,
+        character: { ...c, stats: clampStats(stats) },
+        daySummary: { ...bilan, recovered: rendu },
       };
     }
 

@@ -1,9 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useVerrouScroll } from '@/lib/verrouScroll';
 import { useGame, STAT_META, WEATHER_TYPES, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr } from '@/lib/lang';
-import { playWakeUp, playWear, playBack } from '@/lib/sound';
+import { canOfferRewarded, showRewarded } from '@/lib/ads';
+import { playWakeUp, playWear, playBack, playGaugeFilled } from '@/lib/sound';
+
+/** Sous ce niveau une jauge est en danger — le même seuil que l'alerte sonore. */
+const SEUIL_ALERTE = 25;
 
 /*
  * Bilan de la nuit, affiché après « Jour suivant » : nouveau jour, météo,
@@ -33,11 +37,48 @@ export default function DaySummaryOverlay() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jour]);
 
+  /*
+   * Ce `useState` reste AU-DESSUS du `return null` : un hook posé sous un
+   * retour anticipé disparaît du rendu dès que la condition bascule, et React
+   * refuse de rendre un composant qui compte soudain un hook de moins. Ce
+   * défaut exact a déjà planté l'écran de mort en production (erreur #300).
+   */
+  const [enCours, setEnCours] = useState(false);
+
   if (!s) return null;
 
   const weather = WEATHER_TYPES[s.weather];
   const entries = Object.entries(s.deltas) as [keyof Stats, number][];
   const notes = lang === 'en' ? s.notesEn : s.notes;
+
+  /*
+   * UNE HEURE DE PLUS AU CHAUD — vidéo récompensée du bilan de nuit.
+   *
+   * L'offre ne se montre PAS toutes les nuits, et c'est délibéré. Elle attend
+   * que la nuit vienne de pousser une jauge sous le seuil d'alerte : la perte
+   * est alors chiffrée à l'écran, fraîche, et elle menace vraiment. Une nuit
+   * ordinaire n'est qu'une ligne de comptes ; celle-là fait peur.
+   *
+   * Ce filtre est aussi ce qui protège le placement de lui-même. Le bilan
+   * revient chaque jour ; proposé chaque jour, il mangerait à lui seul le
+   * budget de trois sollicitations par session et étoufferait la seconde
+   * chance à la mort, qui vaut bien plus.
+   */
+  const jaugesEnDanger = (Object.keys(s.deltas) as (keyof Stats)[])
+    .filter(k => (s.deltas[k] ?? 0) < 0 && (state.character?.stats[k] ?? 100) < SEUIL_ALERTE);
+  const peutRattraper = !s.recovered && jaugesEnDanger.length > 0 && canOfferRewarded();
+  const rendu = s.recovered ? (Object.keys(s.recovered) as (keyof Stats)[]) : [];
+
+  async function rattraperLaNuit() {
+    if (enCours) return;
+    setEnCours(true);
+    const vue = await showRewarded();
+    if (vue) {
+      dispatch({ type: 'RECOVER_NIGHT' });
+      playGaugeFilled();
+    }
+    setEnCours(false);
+  }
 
   return (
     <AnimatePresence>
@@ -110,6 +151,42 @@ export default function DaySummaryOverlay() {
                 </motion.p>
               ))}
             </div>
+          )}
+
+          {/* Rattraper la nuit. Le libellé nomme ce qui est en train de se
+              perdre, pas ce qu'on gagnerait : « Sommeil au plus bas » convertit,
+              « bonus » ne convertit pas. */}
+          {peutRattraper && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.34 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={enCours}
+              onClick={() => { playBack(); rattraperLaNuit(); }}
+              className="w-full py-3 text-sm font-semibold text-white rounded-xl mb-2 disabled:opacity-60"
+              style={{
+                background: 'linear-gradient(135deg, #6B7FA8, #4C5F84)',
+                boxShadow: '0 4px 16px rgba(107, 127, 168, 0.3)',
+              }}
+            >
+              {enCours ? tr('⏳ Chargement…', '⏳ Loading…') : (
+                <>
+                  🎬 {tr('Dormir une heure de plus', 'Sleep one more hour')}
+                  <span className="block text-[10px] font-normal opacity-80 mt-0.5">
+                    {tr('Au plus bas :', 'In the red:')}{' '}
+                    {jaugesEnDanger.map(k => `${STAT_META[k].emoji} ${tr(STAT_META[k].label, STAT_META[k].labelEn)}`).join(' · ')}
+                  </span>
+                </>
+              )}
+            </motion.button>
+          )}
+
+          {rendu.length > 0 && (
+            <p className="text-[11px] text-[#4C5F84] text-center mb-2 font-medium">
+              😴 {tr('La nuit vous a rendu', 'The night gave back')}{' '}
+              {rendu.map(k => `+${s.recovered![k]} ${STAT_META[k].emoji}`).join(' ')}
+            </p>
           )}
 
           <motion.button

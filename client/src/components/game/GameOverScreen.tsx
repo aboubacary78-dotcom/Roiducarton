@@ -2,7 +2,7 @@ import { useGame, computeScore, hasTrait, loadHighScores, knownEnemyNames } from
 import type { InventoryItem } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { showInterstitial, showRewarded } from '@/lib/ads';
+import { partieTerminee, showInterstitial, showRewarded } from '@/lib/ads';
 import PlayerFace from './PlayerFace';
 import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -204,7 +204,12 @@ export default function GameOverScreen() {
   useEffect(() => { if (successor) rememberSuccessor(successor.name); }, [successor]);
 
   // Pub interstitielle à l'arrivée sur l'écran de fin (entre deux parties).
-  useEffect(() => { showInterstitial(); }, []);
+  /*
+   * Une partie de plus au compteur. Il sert à la période de grâce des trois
+   * premières parties : c'est le nombre de parties FINIES qui compte, pas le
+   * nombre de publicités vues.
+   */
+  useEffect(() => { partieTerminee(); }, []);
   // La résonance de fin : une seule fois, à l'ouverture de l'écran.
   useEffect(() => { playDeath(); }, []);
 
@@ -533,7 +538,15 @@ export default function GameOverScreen() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => { playCard(); resetGaugeAlerts(); dispatch({ type: 'RESTART' }); }}
+            onClick={() => {
+              playCard();
+              resetGaugeAlerts();
+              // L'interstitiel se pose ici, sur une transition VOULUE, et non
+              // par-dessus le bilan qu'on est en train de lire : un plein écran
+              // qui coupe une lecture se fait fermer en deux secondes.
+              showInterstitial();
+              dispatch({ type: 'RESTART' });
+            }}
             className="w-full mt-3 py-3.5 text-[15px] font-bold text-white rounded-xl"
             style={{
               background: 'linear-gradient(135deg, #D4874D, #9B5B3A)',
@@ -753,7 +766,15 @@ export default function GameOverScreen() {
         transition={{ delay: 0.85 }}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
-        onClick={() => { playCard(); resetGaugeAlerts(); dispatch({ type: 'RESTART' }); }}
+        onClick={() => {
+              playCard();
+              resetGaugeAlerts();
+              // L'interstitiel se pose ici, sur une transition VOULUE, et non
+              // par-dessus le bilan qu'on est en train de lire : un plein écran
+              // qui coupe une lecture se fait fermer en deux secondes.
+              showInterstitial();
+              dispatch({ type: 'RESTART' });
+            }}
         className={successor
           ? 'w-full max-w-sm py-2.5 text-[12px] font-semibold text-[#E8A87C] rounded-xl border border-[#4A3048]'
           : 'w-full max-w-sm py-3.5 text-sm font-semibold text-white rounded-xl'}

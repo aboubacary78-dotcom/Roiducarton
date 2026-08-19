@@ -190,18 +190,35 @@ quelques semaines.
 
 ---
 
-### 3. Le bilan de nuit — « La météo de demain »
+### 3. Le bilan de nuit — « Une heure de plus au chaud »
+
+> **Correction sur ce point.** Il s'appelait « La météo de demain » et reposait
+> sur l'idée qu'il suffisait de retirer un voile. Le voile n'existe pas :
+> l'écran principal affiche déjà la météo du lendemain, en haut à droite, sous
+> le mot « demain », gratuitement — `MainScreen.tsx:316`. Faire payer une
+> information visible deux secondes plus tard ne convertit pas ; ça se
+> remarque, et ça se raconte. Le moment était bon, la récompense ne l'était
+> pas. Le déclencheur est donc conservé mot pour mot, la contrepartie change.
 
 | | |
 |---|---|
 | **Type** | Vidéo récompensée |
 | **Déclencheur neuro** | Sur le bilan de nuit, **juste après** l'annonce des dégâts subis. Le joueur vient de constater ce que la nuit lui a coûté : c'est le moment exact où il veut reprendre le contrôle. |
-| **Récompense** | La météo du lendemain, révélée. |
-| **Plafond** | 1 par jour de jeu. |
-| **Pourquoi ça marche** | **C'est le placement le moins cher du catalogue.** Le jeu connaît déjà `nextWeather` — tu ne donnes rien, tu retires juste un voile. Curiosité pure, zéro impact sur l'équilibrage, et une valeur perçue élevée parce que le froid est la première cause de mort. |
+| **Récompense** | **La moitié de ce que la nuit a pris**, jauge par jauge, arrondie au supérieur. Ni argent, ni objet, ni action. |
+| **Plafond** | 1 par jour de jeu, **et seulement les nuits qui font mal** : l'offre n'apparaît que si la nuit vient de pousser une jauge sous 25. |
+| **Pourquoi ça marche** | Aversion à la perte sur des chiffres **déjà à l'écran**. Le bilan vient d'écrire « −22 soif, −18 faim » : il n'y a rien à imaginer, rien à projeter. La perte est fraîche, précise, et elle menace — c'est le cadrage qui convertit le mieux du répertoire. |
 
-**C'est le placement que je pousserais en premier après l'interstitiel.** Coût
-de développement quasi nul, aucun risque de déséquilibre, opt-in élevé.
+**Le filtre des 25 n'est pas un scrupule, c'est ce qui rend le placement
+rentable.** Le bilan revient chaque jour de jeu ; proposé chaque jour, il
+mangerait à lui seul le budget de trois sollicitations par session et
+étoufferait la seconde chance à la mort, qui vaut bien plus cher. Réservé aux
+nuits dangereuses, il apparaît une fois tous les deux ou trois jours et tombe
+au seul moment où le joueur a peur.
+
+**Le coût pour l'équilibrage est borné et mesuré** : la moitié d'une seule
+nuit, une fois par jour, jamais au-delà de 100, et jamais sur un personnage
+mort — le bilan n'existe pas quand la nuit a tué. Vérifié dans
+`scripts/test-monetisation.mjs`.
 
 ---
 
@@ -236,7 +253,7 @@ de développement quasi nul, aucun risque de déséquilibre, opt-in élevé.
 | **1** | Vrais identifiants AdMob + URL de confidentialité + ATT iOS | 1 jour | **passe de 0 € à des revenus** |
 | **2** | Discipliner l'interstitiel (plancher 90 s, grâce J1, sur RESTART) | 1 jour | protège le J7, améliore l'eCPM |
 | **3** | Bannière sur les 5 écrans de lecture | 1 jour | +15 à 25 % d'ARPDAU |
-| **4** | Météo de demain | 1 jour | placement le moins cher, opt-in élevé |
+| **4** | Bilan de nuit — une heure de plus au chaud | 1 jour | perte fraîche et chiffrée, le meilleur cadrage disponible |
 | **5** | Optimiser la résurrection (ordre, compte à rebours, ce qu'on perd) | 2 jours | opt-in 25 % → 45 % sur le meilleur emplacement |
 | **6** | Sac plein, Récup', casse, contrat | 3-4 jours | volume additionnel |
 
@@ -262,11 +279,43 @@ installations.
 
 ---
 
-## Ce que je peux implémenter tout de suite
+---
 
-Les points 2 et 3 (interstitiel discipliné, bannière) et le point 4 (météo)
-sont du code que je peux écrire et vérifier aujourd'hui. Le point 1 dépend de
-toi : il faut créer les blocs dans la console AdMob et publier la page de
-confidentialité.
+# Journal d'implémentation
 
-Dis-moi par où on commence.
+## Fait — points 2, 3 et 4
+
+**Point 2 — l'interstitiel discipliné.** La règle vit désormais dans une
+fonction seule, `verdictInterstitiel()` (`lib/ads.ts`), qui ne modifie rien :
+elle répond, avec sa raison. C'est ce qui la rend vérifiable sans réseau
+publicitaire. Trois refus, dans l'ordre : le joueur qui n'a pas fini quatre
+parties (période de grâce, compteur en stockage local, donc il survit aux
+sessions) ; la première mort de chaque session ; et tout ce qui suit un plein
+écran de moins de 90 secondes. L'interstitiel a aussi changé de place : il
+partait à l'affichage de l'écran de mort, il part maintenant sur le bouton
+**RECOMMENCER**. Le joueur qui repart a déjà décidé de rester ; celui qui lit
+sa nécrologie n'a rien décidé du tout.
+
+**Point 3 — la bannière.** Elle ne s'affichait nulle part. Elle est branchée
+sur les quatre écrans où l'on lit au lieu de jouer — registre, cimetière,
+boutique, écran de fin — et masquée partout ailleurs (`pages/Home.tsx`). Aucun
+écran de jeu, aucun mini-jeu.
+
+**Point 4 — une heure de plus au chaud.** Décrit plus haut, avec la correction
+qui l'a fait changer de récompense.
+
+`scripts/test-monetisation.mjs` éprouve les deux : les trois refus de
+l'interstitiel (dont le plancher à 89,999 s puis 90,000 s) et les cinq règles
+de la nuit rendue.
+
+## Ce qui reste
+
+**Le point 1 dépend de toi, et il commande tout le reste.** Tant que
+`USE_TEST_ADS` vaut `true` et que les identifiants sont ceux de la démo
+Google, tout ce qui précède rapporte zéro euro. Il faut créer les blocs dans
+la console AdMob, publier la page de confidentialité à une URL publique
+absolue, et ajouter `NSUserTrackingUsageDescription` quand le projet iOS sera
+généré.
+
+Les points 5 et 6 — optimiser la résurrection, puis sac plein, Récup', casse
+et contrat — viennent ensuite.

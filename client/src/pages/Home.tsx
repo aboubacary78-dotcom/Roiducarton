@@ -7,6 +7,7 @@ import { useGame } from '@/contexts/GameContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { installerClicParDefaut } from '@/lib/sound';
+import { hideBanner, showBanner } from '@/lib/ads';
 import { screenIn } from '@/lib/anim';
 import { tapOrigin } from '@/lib/tapOrigin';
 import { setAmbience, setWeatherLayer, weatherLayerFor, type AmbienceId } from '@/lib/ambience';
@@ -114,6 +115,24 @@ export default function Home() {
     else if (location) setAmbience(location as AmbienceId);
     else setAmbience(null);
   }, [state.screen, location]);
+
+  /*
+   * LA BANNIÈRE, ET SEULEMENT LÀ OÙ ELLE NE GÊNE RIEN.
+   *
+   * Elle ne s'affiche que sur les écrans de LECTURE : le Registre, le
+   * Cimetière, la boutique, l'écran de fin. Ce sont les seuls endroits où le
+   * joueur ne fait rien d'autre que lire, et où trente pixels en bas ne
+   * coûtent aucun geste.
+   *
+   * Jamais en jeu, jamais sur un mini-jeu : le pouce y travaille, et une
+   * bannière sous le pouce ne produit pas de la frustration mais des clics
+   * accidentels — que les régies sanctionnent, et qui font désinstaller.
+   */
+  useEffect(() => {
+    const ECRANS_DE_LECTURE = ['registre', 'cimetiere', 'shop', 'game-over'];
+    if (ECRANS_DE_LECTURE.includes(state.screen)) showBanner();
+    else hideBanner();
+  }, [state.screen]);
 
   // La météo se pose PAR-DESSUS le quartier : il peut pleuvoir au parc comme
   // à la gare. Un ciel dégagé ou nuageux ne fait pas de bruit, d'où le null.

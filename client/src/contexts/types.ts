@@ -405,7 +405,14 @@ export interface GameState {
   eventResult: { text: string; statChanges?: Partial<Stats>; moneyChange?: number; respectChange?: number; doubled?: boolean; faceKept?: boolean; image?: string; fallbackImage?: string; journeeFinie?: number } | null;
   // Bilan de la nuit affiché après « Jour suivant » : nouveau jour, météo,
   // pertes/gains de jauges de la nuit, et éventuels effets de traits.
-  daySummary: { day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number; notes: string[]; notesEn: string[] } | null;
+  /*
+   * `recovered` porte ce que l'offre « une heure de plus au chaud » a rendu,
+   * jauge par jauge. Il sert de drapeau ET de contenu : sa présence interdit
+   * une seconde offre, ses valeurs s'affichent au joueur. Le bilan n'existant
+   * qu'une fois par jour et disparaissant à sa fermeture, le plafond d'une
+   * offre par journée n'a besoin d'aucun compteur — il est structurel.
+   */
+  daySummary: { day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number; notes: string[]; notesEn: string[]; recovered?: Partial<Stats> } | null;
   // Contrat du matin : micro-objectif du jour (jugé à la nuit). `done` sert
   // aux contrats accomplis en cours de journée (ex. gagner un combat).
   contract: { id: string; done: boolean } | null;
