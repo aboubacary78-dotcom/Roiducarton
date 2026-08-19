@@ -99,9 +99,18 @@ for (let i = 0; i < 6; i++) {
 }
 verifier('le personnage meurt', atteinte);
 
-// On refuse la seconde chance : c'est le chemin vers l'écran de fin.
-await clic("No, it's over|Non, c'est fini|No thanks|Non merci|Let go|Laisser");
+/*
+ * On refuse la seconde chance : c'est le chemin vers l'écran de fin. Le refus
+ * demande deux gestes depuis que l'offre au pic a été durcie — un appui
+ * réflexe ne referme plus rien. Le second bouton nomme le personnage, d'où le
+ * motif large.
+ */
+await clic("No, it's over|Non, c'est fini");
+await pause(400);
+await clic("Let .* go|Laisser .* partir");
 await pause(1500);
+verifier("l'offre de résurrection est bien refermée",
+  !(await p.evaluate(() => /Not just yet|Pas tout de suite/i.test(document.body.innerText))));
 const surLaFin = await p.evaluate(() => /OBITUARY|NÉCROLOGIE|GAZETTE/i.test(document.body.innerText));
 verifier("l'écran de fin s'affiche", surLaFin);
 verifier("l'écran de fin ne s'effondre pas", !(await effondre()));

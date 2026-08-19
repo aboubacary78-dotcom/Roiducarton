@@ -283,7 +283,7 @@ installations.
 
 # Journal d'implémentation
 
-## Fait — points 2, 3 et 4
+## Fait — points 2, 3, 4 et 5
 
 **Point 2 — l'interstitiel discipliné.** La règle vit désormais dans une
 fonction seule, `verdictInterstitiel()` (`lib/ads.ts`), qui ne modifie rien :
@@ -304,6 +304,33 @@ boutique, écran de fin — et masquée partout ailleurs (`pages/Home.tsx`). Auc
 **Point 4 — une heure de plus au chaud.** Décrit plus haut, avec la correction
 qui l'a fait changer de récompense.
 
+**Point 5 — la résurrection.** Trois choses, plus une quatrième qu'on n'avait
+pas vue.
+
+*Ce qu'on perd est désormais chiffré.* L'offre disait « une âme charitable
+peut passer » et rien d'autre. Elle affiche maintenant, sous le nom du
+personnage, ce que la mort emporte : les jours tenus, l'argent, les objets du
+sac, le respect. Rien d'inventé — le Karma, le Registre et la série
+quotidienne survivent au personnage, ils ne figurent donc pas dans la liste.
+Un joueur qui prend l'écran en défaut sur ce point ne croit plus rien de ce
+qu'il lit ensuite.
+
+*Dix secondes, avec une barre qui se vide.* Une offre sans horloge se remet à
+plus tard, et « plus tard » sur un écran de mort veut dire jamais. Le compte à
+rebours se met en pause pendant le chargement de la vidéo — sans quoi l'offre
+s'évanouirait sous les doigts de celui qui vient de l'accepter — et à zéro il
+ne ferme rien : le bouton reste plus bas pour qui change d'avis.
+
+*Le refus demande un geste de plus.* Un seul appui supplémentaire, et le second
+bouton dit exactement ce qu'il fait : « Laisser Yvette partir ». Un refus
+réflexe et un refus décidé ne se valent pas.
+
+*Et le défaut qu'on n'avait pas vu :* **le carton du matin s'affichait
+par-dessus l'offre** (z-75 contre z-70). Sur toute partie où le cadeau
+quotidien tombait, le meilleur placement du jeu se jouait derrière une image
+d'oiseaux — et avec le compte à rebours, il aurait expiré sans que personne le
+voie. L'offre passe au-dessus ; le carton attend dix secondes.
+
 `scripts/test-monetisation.mjs` éprouve les deux : les trois refus de
 l'interstitiel (dont le plancher à 89,999 s puis 90,000 s) et les cinq règles
 de la nuit rendue.
@@ -317,5 +344,8 @@ la console AdMob, publier la page de confidentialité à une URL publique
 absolue, et ajouter `NSUserTrackingUsageDescription` quand le projet iOS sera
 généré.
 
-Les points 5 et 6 — optimiser la résurrection, puis sac plein, Récup', casse
-et contrat — viennent ensuite.
+Le point 6 — sac plein, Récup', casse et contrat — vient ensuite.
+
+Reste aussi, sur le sauvetage de série : afficher la valeur chiffrée de la
+série (« le palier de 7 jours débloque 25 karma, tu y es presque ») et la
+reproposer une fois à la session suivante.

@@ -229,6 +229,36 @@ export default function GameOverScreen() {
   const [peakOffer, setPeakOffer] = useState(true);
 
   /*
+   * DIX SECONDES, ET UNE BARRE QUI SE VIDE.
+   *
+   * Une offre sans horloge est une offre qu'on remet à plus tard, et « plus
+   * tard », sur un écran de mort, veut dire jamais. Le compte à rebours ne
+   * ferme aucune porte — le bouton reste plus bas pour qui change d'avis —
+   * mais il transforme une décision reportable en décision présente.
+   *
+   * Il s'arrête pendant le chargement de la vidéo : sinon l'offre s'évanouit
+   * sous les doigts de celui qui vient de l'accepter.
+   */
+  const DUREE_OFFRE = 10;
+  const [secondes, setSecondes] = useState(DUREE_OFFRE);
+  useEffect(() => {
+    if (!canRevive || !peakOffer || reviving) return;
+    if (secondes <= 0) { setPeakOffer(false); return; }
+    const t = setTimeout(() => setSecondes(s => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [canRevive, peakOffer, reviving, secondes]);
+
+  /*
+   * LE REFUS DEMANDE UN GESTE DE PLUS.
+   *
+   * Pas un piège : un seul appui supplémentaire, et le second bouton dit
+   * exactement ce qu'il fait — laisser partir quelqu'un qui a un nom. Un refus
+   * réflexe et un refus décidé ne se valent pas, et seul le second mérite
+   * d'être exaucé du premier coup.
+   */
+  const [refusAmorce, setRefusAmorce] = useState(false);
+
+  /*
    * On fouille les poches une par une plutôt que d'annoncer un total. Même
    * montant, révélation fractionnée : chaque poche est une décharge séparée,
    * et le joueur reste sur l'écran au lieu de lire un nombre et de partir.
@@ -346,6 +376,24 @@ export default function GameOverScreen() {
   }
   const deathCause = state.deathCause || inferCause();
 
+  /*
+   * CE QUI PART AVEC LUI.
+   *
+   * On ne liste que ce que la mort emporte réellement. Le Karma de Rue, le
+   * Registre et la série quotidienne survivent au personnage : les faire
+   * figurer ici serait un mensonge, et un joueur qui s'en aperçoit ne croit
+   * plus rien de ce que l'écran lui dit. Restent les jours, l'argent, le sac
+   * et le respect — et on tait les lignes à zéro, qui affaibliraient les
+   * autres.
+   */
+  const nbObjets = char.inventory.length;
+  const cequonPerd = [
+    { cle: 'jours', emoji: '🗓️', valeur: tr(`${char.day} jour${char.day > 1 ? 's' : ''}`, `${char.day} day${char.day > 1 ? 's' : ''}`), garder: true },
+    { cle: 'argent', emoji: '💰', valeur: `${char.money} €`, garder: char.money > 0 },
+    { cle: 'objets', emoji: '🎒', valeur: tr(`${nbObjets} objet${nbObjets > 1 ? 's' : ''}`, `${nbObjets} item${nbObjets > 1 ? 's' : ''}`), garder: nbObjets > 0 },
+    { cle: 'respect', emoji: '⭐', valeur: `${char.respect}`, garder: char.respect > 0 },
+  ].filter(p => p.garder);
+
   const score = computeScore(char.day, char.respect, char.money, hasTrait(char, 'poissard'));
   const highScores = loadHighScores();
 
@@ -385,7 +433,13 @@ export default function GameOverScreen() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[70] flex items-center justify-center p-5"
+            /*
+             * z-80, au-dessus du carton du matin (z-75), et ce n'est pas un
+             * détail : le cadeau quotidien s'affichait par-dessus cette offre
+             * et la faisait expirer sans que personne l'ait vue. Le carton
+             * peut attendre dix secondes — l'offre, non.
+             */
+            className="fixed inset-0 z-[80] flex items-center justify-center p-5"
             style={{ background: 'rgba(12,8,14,0.975)', backdropFilter: 'blur(3px)' }}
           >
             <motion.div
@@ -398,12 +452,30 @@ export default function GameOverScreen() {
               <h2 className="text-xl font-bold text-[#F0D9C4] leading-tight mb-1.5">
                 {tr('Pas tout de suite.', 'Not just yet.')}
               </h2>
-              <p className="text-[13px] text-[#A08060] leading-snug mb-5">
+              <p className="text-[13px] text-[#A08060] leading-snug mb-4">
                 {tr(
                   `${char.name} est encore là, de justesse. Une âme charitable peut passer — mais une seule fois par partie.`,
                   `${char.name} is still here, barely. A kind soul may come by — but only once per game.`,
                 )}
               </p>
+
+              {/* Ce qui part avec lui. Une perte se refuse mal quand elle est
+                  chiffrée ; « recommencer » ne dit rien, « 7 jours, 34 € et
+                  5 objets » dit tout. */}
+              <div className="mb-4">
+                {/* On nomme la personne plutôt que d'écrire « lui » : le jeu
+                    tire des personnages des deux genres, et un pronom faux se
+                    remarque tout de suite. */}
+                <p className="text-[9px] tracking-[0.25em] uppercase text-[#6B5140] mb-1.5">{tr(`Ce qui part avec ${char.name}`, `What goes with ${char.name}`)}</p>
+                <div className="flex flex-wrap gap-1.5 justify-center">
+                  {cequonPerd.map(p => (
+                    <span key={p.cle} className="text-[11px] font-mono font-semibold px-2 py-1 rounded-full bg-[#D94F4F]/12 text-[#E0917F]">
+                      {p.emoji} {p.valeur}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 disabled={reviving}
@@ -413,11 +485,30 @@ export default function GameOverScreen() {
               >
                 {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Se relever (regarder une pub)', '🎬 Get back up (watch an ad)')}
               </motion.button>
+
+              {/* La barre du temps qui reste. Elle se vide, elle n'accuse
+                  personne : à zéro l'offre se referme sans rien fermer, le
+                  bouton du bas reste là pour qui change d'avis. */}
+              {!reviving && (
+                <div className="h-[3px] w-full mt-2 rounded-full overflow-hidden bg-[#3A2A2A]">
+                  <div
+                    className="h-full bg-[#4A9B5F] transition-[width] duration-1000 ease-linear"
+                    style={{ width: `${(secondes / DUREE_OFFRE) * 100}%` }}
+                  />
+                </div>
+              )}
+
               <button
-                onClick={() => { playBack(); setPeakOffer(false); }}
+                onClick={() => {
+                  playBack();
+                  if (!refusAmorce) { setRefusAmorce(true); return; }
+                  setPeakOffer(false);
+                }}
                 className="w-full mt-2.5 py-2.5 text-[12px] font-semibold text-[#8B6B4A]"
               >
-                {tr('Non, c\'est fini', 'No, it\'s over')}
+                {refusAmorce
+                  ? tr(`Laisser ${char.name} partir`, `Let ${char.name} go`)
+                  : tr('Non, c\'est fini', 'No, it\'s over')}
               </button>
             </motion.div>
           </motion.div>
