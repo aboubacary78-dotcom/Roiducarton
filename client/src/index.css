@@ -171,6 +171,23 @@
   }
 }
 
+/*
+ * LA PLACE DU CONSEIL DU MOMENT.
+ *
+ * Le conseil est une barre `fixed` en bas de l'écran. Mesuré : une fois la
+ * page défilée jusqu'en bas, il se posait pile sur « Jour Suivant » — les deux
+ * occupaient 780-828 px, et `elementFromPoint` au centre du bouton renvoyait
+ * le texte du conseil. Un doigt sur « Jour Suivant » refermait donc le conseil
+ * au lieu de finir la journée, et il fallait taper deux fois.
+ *
+ * Une barre flottante doit réserver sa place dans le flux. `CoachTip` pose
+ * cette classe sur le corps du document tant qu'il est affiché, et la retire
+ * en partant : rien n'est décalé quand il n'y a pas de conseil.
+ */
+body.conseil-affiche {
+  padding-bottom: 68px;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 4px;

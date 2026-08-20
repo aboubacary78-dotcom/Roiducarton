@@ -377,8 +377,22 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return state;
     }
 
+    /*
+     * UN APPUI, UNE ACTION — le garde-fou des cinq tuiles.
+     *
+     * `state.screen !== 'main'` n'est pas une précaution de style. Mesuré :
+     * deux appuis sur « Explorer » dans le même tick JavaScript consommaient
+     * DEUX actions de la journée sur trois, pour un seul événement affiché.
+     * Le budget d'actions ne suffisait pas à s'en protéger — après le premier
+     * envoi il en restait deux, donc le second passait.
+     *
+     * Ces cinq actions quittent toutes l'écran principal. En exiger le départ
+     * les rend idempotentes le temps d'une image, et ferme au passage un
+     * chemin qui n'aurait jamais dû exister : fouiller une benne depuis la
+     * boutique.
+     */
     case 'EXPLORE': {
-      if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      if (!state.character || state.dayActions >= state.maxDayActions || state.screen !== 'main') return state;
       // Au bord du gouffre, le Sursaut passe avant tout (une fois par run).
       if (dueSursaut(state.character)) {
         return { ...state, screen: 'event', currentEvent: SURSAUT_EVENT, dayActions: state.dayActions + 1 };
@@ -396,7 +410,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'BEG': {
-      if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      if (!state.character || state.dayActions >= state.maxDayActions || state.screen !== 'main') return state;
       // Le mini-jeu "attraper les pièces" reste la voie principale (~3 fois
       // sur 4) ; l'événement narratif de mendicité est l'exception qui garde
       // le contenu écrit vivant.
@@ -494,7 +508,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'SALVAGE': {
-      if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      if (!state.character || state.dayActions >= state.maxDayActions || state.screen !== 'main') return state;
       return { ...state, screen: 'salvage-game', dayActions: state.dayActions + 1 };
     }
 
@@ -594,7 +608,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'STEAL': {
-      if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      if (!state.character || state.dayActions >= state.maxDayActions || state.screen !== 'main') return state;
       // Chaque tentative incrémente le compteur (durcit le mini-jeu).
       const stealChar = { ...state.character, stealCount: (state.character.stealCount ?? 0) + 1 };
       // 1 fois sur 3 : un vol « à texte » (choix + risque) au lieu du mini-jeu,
@@ -753,7 +767,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'REST': {
-      if (!state.character || state.dayActions >= state.maxDayActions) return state;
+      if (!state.character || state.dayActions >= state.maxDayActions || state.screen !== 'main') return state;
       if (dueSursaut(state.character)) {
         return { ...state, screen: 'event', currentEvent: SURSAUT_EVENT, dayActions: state.dayActions + 1 };
       }
@@ -1033,7 +1047,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, daySummary: null };
 
     case 'NEXT_DAY': {
-      if (!state.character) return state;
+      /*
+       * DEUX APPUIS DANS LA MÊME IMAGE NE FONT PASSER QU'UNE NUIT.
+       *
+       * Mesuré, pas supposé : deux `click()` sur « Jour Suivant » dans le même
+       * tick JavaScript faisaient passer du jour 1 au jour 3. React groupe les
+       * deux envois avant de rendre quoi que ce soit, si bien que le second
+       * arrivait sur un état où rien ne l'empêchait — et le joueur encaissait
+       * DEUX nuits de dégradation en n'en voyant qu'une. Sur des jauges déjà
+       * basses, cela suffit à tuer.
+       *
+       * Le bilan de la nuit qui vient de passer est la preuve qu'une nuit est
+       * déjà en cours de lecture : tant qu'il n'est pas refermé, la suivante
+       * n'a pas lieu. Et si la nuit a tué, l'écran a changé.
+       */
+      if (!state.character || state.daySummary || state.screen !== 'main') return state;
       const ch = state.character;
       // Commande de la semaine : les jours se cumulent d'un personnage à
       // l'autre, c'est le seul compteur du jeu que la mort n'efface pas.

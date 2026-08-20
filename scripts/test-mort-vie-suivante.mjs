@@ -86,11 +86,23 @@ await pause(500);
 
 // ---- On passe les nuits jusqu'à l'offre de résurrection --------------------
 let atteinte = false;
+/*
+ * Le bilan de la nuit se referme par « Nouvelle journée », et par rien
+ * d'autre. Ce motif manquait, et le test avançait quand même — parce qu'une
+ * seconde nuit partait sur un bilan resté ouvert. Ce défaut-là est corrigé
+ * (voir le garde-fou de NEXT_DAY) : la boucle doit désormais refermer ce
+ * qu'elle ouvre, comme un joueur.
+ */
 for (let i = 0; i < 6; i++) {
   await clic('Next Day|Jour Suivant');
   await pause(1400);
+  await clic('New day|Nouvelle journée');
+  await pause(500);
   await clic('got it|Compris|Continue|Continuer');
   await pause(600);
+  // Le carton du matin peut s'intercaler : il se referme en deux gestes.
+  await clic('Regarder|Take a look'); await pause(400);
+  await clic('Merci|Thanks'); await pause(400);
   if (await effondre()) break;
   if (await p.evaluate(() => /Not just yet|Pas encore|kind soul|âme charitable/i.test(document.body.innerText))) {
     atteinte = true;

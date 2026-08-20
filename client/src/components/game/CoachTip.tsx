@@ -34,6 +34,19 @@ export default function CoachTip({ ctx }: { ctx: CoachContext }) {
   }, [ctx.char.activeFlags?.length, ctx.char.day, ctx.actionsLeft, ctx.char.money, ctx.char.inventory.length, ctx.weather,
       ctx.char.stats.dignity, ctx.char.stats.health, ctx.char.stats.mental]);
 
+  /*
+   * Le conseil flotte au-dessus de la page : il doit rendre sa place au flux,
+   * sinon il se pose sur le dernier élément de l'écran — et le dernier élément
+   * de l'écran principal est « Jour Suivant ». Mesuré avant correction : les
+   * deux occupaient exactement la même bande, et un doigt sur le bouton
+   * refermait le conseil au lieu de finir la journée.
+   */
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.body.classList.toggle('conseil-affiche', !!shown);
+    return () => document.body.classList.remove('conseil-affiche');
+  }, [shown]);
+
   function fermer() {
     if (shown) markCoachSeen(shown.id);
     setShown(null);
