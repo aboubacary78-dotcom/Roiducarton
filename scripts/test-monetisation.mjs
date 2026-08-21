@@ -29,7 +29,7 @@ const shim = join(dir, 'cap.js');
 writeFileSync(shim, 'export const Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };\nexport const registerPlugin = () => ({});\n');
 const entry = join(dir, 'entry.ts');
 writeFileSync(entry, [
-  "export { gameReducer, CONTRACTS, getContract } from '@/contexts/GameContext';",
+  "export { gameReducer, CONTRACTS, getContract, paquetDuPremierMatin } from '@/contexts/GameContext';",
   "export { verdictInterstitiel, reinitialiserInterstitiel, partieTerminee, showInterstitial, setAdsRemoved } from '@/lib/ads';",
 ].join('\n'));
 
@@ -53,7 +53,7 @@ await build({
 });
 
 const {
-  gameReducer, CONTRACTS, getContract, verdictInterstitiel, reinitialiserInterstitiel,
+  gameReducer, CONTRACTS, getContract, paquetDuPremierMatin, verdictInterstitiel, reinitialiserInterstitiel,
   partieTerminee, showInterstitial, setAdsRemoved,
 } = await import(out);
 
@@ -208,6 +208,20 @@ verifier('un contrat inconnu ne paie rien',
 
 verifier('la récompense annoncée est celle du contrat',
   getContract('contrat-pecule').reward.respect === 2);
+
+/*
+ * Le premier matin d'une première partie n'a pas encore de bouton « Bagarre » —
+ * il revient après la première action. Un contrat qui demanderait un combat à
+ * cet instant tomberait une fois sur cinq, et donnerait un objectif sans en
+ * donner le moyen.
+ */
+const premierMatin = paquetDuPremierMatin(true).map(c => c.id);
+verifier('le premier matin ne tire jamais un contrat de combat',
+  !premierMatin.includes('contrat-combatif'), premierMatin.join(', '));
+verifier('il reste de quoi tirer', premierMatin.length === CONTRACTS.length - 1,
+  `${premierMatin.length} sur ${CONTRACTS.length}`);
+verifier('les parties suivantes gardent le paquet entier',
+  paquetDuPremierMatin(false).length === CONTRACTS.length);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 4. L'objet que le sac a refusé

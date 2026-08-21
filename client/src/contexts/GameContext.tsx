@@ -21,7 +21,7 @@ import { generateCharacterTrio, hasTrait, computeScore, genderFromName, HERITAGE
 import { SALVAGE_JUNK, SALVAGE_TUNING, salvagePayout, trouvailleById, piegeHurts, salvageResultImage } from './data/salvage';
 import { enemyByName, BEG_TUNING } from './data/passersby';
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
-import { CONTRACTS, getContract, streetTitleFor, STREET_TITLES } from './data/progression';
+import { CONTRACTS, getContract, paquetDuPremierMatin, streetTitleFor, STREET_TITLES } from './data/progression';
 import { ENEMIES, rollSignRound } from './data/enemies';
 import { SHOPS, shopClosure, rollShopClosure, getSellPrice, SOLIDARITY_GIFT, SOLIDARITY_FLAG } from './data/shops';
 import { HAGGLE_TUNING, HAGGLED_FLAG, shopkeeperFor } from './data/haggle';
@@ -319,7 +319,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       clearLegacy();
       const kits = takePendingKits();
       const cartons = takePendingGifts();
-      const firstContract = { id: randomFromArray(CONTRACTS).id, done: false };
+      // Le contrat du premier matin ne demande jamais un combat à qui n'a pas
+      // encore de bouton pour se battre (voir `paquetDuPremierMatin`).
+      const debutant = isFirstEverRun(loadHighScores().length, loadGraves().length);
+      const firstContract = { id: randomFromArray(paquetDuPremierMatin(debutant)).id, done: false };
       let inventory = [...char.inventory];
       let money = char.money;
       const gifts: string[] = [];

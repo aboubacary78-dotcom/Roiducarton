@@ -31,6 +31,8 @@ export interface CoachContext {
   char: Character;
   actionsLeft: number;
   weather: string;
+  /** Toute première partie : c'est elle qui porte la narration du jour un. */
+  premierRun: boolean;
 }
 
 const bas = (s: Stats) => Math.min(s.health, s.mental, s.hunger, s.thirst, s.sleep);
@@ -47,11 +49,38 @@ export const COACHES: Coach[] = [
     en: 'Three actions a day, no more. Choose.',
     when: ({ char, actionsLeft }) => char.day === 1 && actionsLeft === 3,
   },
+  /*
+   * LA RÉVÉLATION — deuxième temps du premier jour.
+   *
+   * Elle tombe au retour de la première action, à l'instant où Bagarre et Vol
+   * apparaissent dans la grille (voir `arsenalVisible`). Ce n'est pas un
+   * déblocage de niveau : c'est le personnage qui cesse de subir le quartier
+   * et commence à y voir des prises.
+   */
+  {
+    id: 'arsenal', emoji: '👁️', targetId: 'tuto-actions',
+    fr: 'Fin du tour d\'observation. Vous voyez les poches qui dépassent, et les mâchoires qui cherchent un poing.',
+    en: 'Observation over. You see the pockets that stick out, and the jaws asking for a fist.',
+    when: ({ char, actionsLeft, premierRun }) => premierRun && char.day === 1 && actionsLeft < 3,
+  },
   {
     id: 'jauge-basse', emoji: '❤️', targetId: 'tuto-stats',
     fr: 'Une jauge dans le rouge. Si la santé ou le mental tombe à zéro, c\'est fini.',
     en: 'A gauge in the red. If health or mind hits zero, it\'s over.',
     when: ({ char }) => bas(char.stats) <= 30,
+  },
+  /*
+   * LE RÉVEIL — quatrième et dernier temps.
+   *
+   * La nuit vient de prendre quinze points de sommeil sans rien demander. On
+   * ne l'explique qu'APRÈS coup, une fois la perte au compteur : dire la
+   * veille « pensez à dormir » n'apprend rien à personne.
+   */
+  {
+    id: 'sommeil', emoji: '😴', targetId: 'tuto-actions',
+    fr: 'Le carton ondulé n\'est pas un matelas, quelle surprise. Dormir ne répare rien, ça permet juste de tenir debout.',
+    en: 'Corrugated cardboard is not a mattress, what a shock. Sleeping mends nothing — it just keeps you upright.',
+    when: ({ char }) => char.day >= 2 && char.stats.sleep <= 70,
   },
   {
     id: 'dignite', emoji: '👑', targetId: 'tuto-stats',
@@ -71,11 +100,18 @@ export const COACHES: Coach[] = [
     en: 'The weather is turning. The night will cost more — get ready first.',
     when: ({ weather }) => weather === 'storm' || weather === 'snow' || weather === 'heatwave',
   },
+  /*
+   * Ce conseil se tait le premier soir : le crépuscule du jour un a déjà sa
+   * phrase, posée au-dessus du bouton (voir `CREPUSCULE`). Deux textes qui
+   * disent la même chose au même moment, c'est un texte de trop — et la
+   * première nuit ne peut de toute façon pas tuer (voir `withFirstDayNet`),
+   * donc le conseil ne perd rien à attendre le lendemain, où il servira.
+   */
   {
     id: 'nuit', emoji: '🌙', targetId: 'tuto-nextday',
     fr: 'Plus d\'action. La nuit consomme vos jauges : mangez et buvez avant de dormir.',
     en: 'No actions left. The night drains your gauges: eat and drink before sleeping.',
-    when: ({ actionsLeft }) => actionsLeft <= 0,
+    when: ({ actionsLeft, char, premierRun }) => actionsLeft <= 0 && !(premierRun && char.day === 1),
   },
   {
     id: 'sac', emoji: '🎒', targetId: 'tuto-secondary',
@@ -133,3 +169,47 @@ export function allCoachesSeen(): boolean {
 export function isFirstEverRun(scoreCount: number, graveCount: number): boolean {
   return scoreCount === 0 && graveCount === 0;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LA NARRATION DU PREMIER JOUR
+ *
+ * Neuf actions d'un coup au premier écran, dont deux qu'un débutant ne peut
+ * pas évaluer et qui sont précisément celles qui le tuent. On en retire donc
+ * deux — Bagarre et Vol — le temps d'une action.
+ *
+ * Mais une option qui manque sans raison est un bug, pas une intention. Les
+ * quatre textes ci-dessous sont là pour ça : ils donnent au masquage une cause
+ * qui appartient au personnage, pas au tutoriel. Il ne « débloque » rien, il
+ * se met à voir.
+ *
+ * Deux règles d'écriture, tenues sur les quatre :
+ *   · on vouvoie, comme partout ailleurs dans le jeu ;
+ *   · aucun texte ne nomme le lieu. Le quartier de départ est tiré au sort —
+ *     gare, marché, parc, centre-ville — et une phrase qui parle de la gare
+ *     est fausse trois fois sur quatre.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Bagarre et Vol sont-ils à l'écran ?
+ *
+ * Uniquement masqués à la toute première partie, uniquement le premier jour,
+ * et uniquement tant qu'aucune action n'a été faite. Trois conditions : c'est
+ * le seul moment où le joueur n'a encore rien vu du jeu.
+ */
+export function arsenalVisible(
+  { premierRun, jour, actionsFaites }: { premierRun: boolean; jour: number; actionsFaites: number },
+): boolean {
+  return !premierRun || jour > 1 || actionsFaites > 0;
+}
+
+/** Premier temps : sous la scène, avant la première action. */
+export const ARRIVEE = {
+  fr: 'Personne ne vous attend nulle part, et ça laisse la journée entière. Regardez comment le quartier tourne avant de faire un faux pas.',
+  en: 'Nobody is expecting you anywhere, which frees up the whole day. Watch how the neighbourhood turns before you put a foot wrong.',
+};
+
+/** Troisième temps : au-dessus de « Jour Suivant », le premier soir. */
+export const CREPUSCULE = {
+  fr: 'Le béton refroidit plus vite que vous. Il n\'y a plus rien à faire aujourd\'hui qu\'attendre demain.',
+  en: 'The concrete cools faster than you do. There is nothing left to do today but wait for tomorrow.',
+};

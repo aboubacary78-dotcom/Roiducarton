@@ -3699,6 +3699,9 @@ var CONTRACTS = [
 function getContract(id) {
   return CONTRACTS.find((c) => c.id === id);
 }
+function paquetDuPremierMatin(debutant) {
+  return debutant ? CONTRACTS.filter((c) => !c.needsFlag) : CONTRACTS;
+}
 
 // client/src/contexts/data/shops.ts
 var SHOPS = [
@@ -10156,7 +10159,8 @@ function gameReducer(state, action) {
       clearLegacy();
       const kits = takePendingKits();
       const cartons = takePendingGifts();
-      const firstContract = { id: randomFromArray(CONTRACTS).id, done: false };
+      const debutant = isFirstEverRun(loadHighScores().length, loadGraves().length);
+      const firstContract = { id: randomFromArray(paquetDuPremierMatin(debutant)).id, done: false };
       let inventory = [...char.inventory];
       let money2 = char.money;
       const gifts = [];
@@ -11624,7 +11628,7 @@ var initialState = {
 };
 var GameContext = createContext(void 0);
 
-// ../../../tmp/monet-ki4zrh/cap.js
+// ../../../tmp/monet-cerXjN/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/ads.ts
@@ -11734,6 +11738,7 @@ export {
   CONTRACTS,
   gameReducer,
   getContract,
+  paquetDuPremierMatin,
   partieTerminee,
   reinitialiserInterstitiel,
   setAdsRemoved,

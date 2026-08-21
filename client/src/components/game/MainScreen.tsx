@@ -14,6 +14,9 @@ import { playBag, playCard, playClick, playFightStart, playNextDay, playTab, pla
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
+import { isFirstEverRun, arsenalVisible, ARRIVEE, CREPUSCULE } from '@/lib/coach';
+import { loadHighScores } from '@/contexts/GameContext';
+import { loadGraves } from '@/lib/necrology';
 import { noteTap } from '@/lib/tapOrigin';
 import { prechargerActions } from '@/lib/precharge';
 
@@ -144,6 +147,17 @@ export default function MainScreen() {
   const nextWeatherType = state.nextWeather;
   const nextWeather = WEATHER_TYPES[nextWeatherType];
 
+  /*
+   * LE PREMIER JOUR D'UNE PREMIÈRE PARTIE — voir `lib/coach`.
+   *
+   * Lu une seule fois, au montage : `loadHighScores` et `loadGraves` relisent
+   * le stockage local à chaque appel, et cet écran se rend souvent.
+   */
+  const [premierRun] = useState(() => isFirstEverRun(loadHighScores().length, loadGraves().length));
+  const arsenal = arsenalVisible({ premierRun, jour: char.day, actionsFaites: state.dayActions });
+  const arrivee = premierRun && char.day === 1 && state.dayActions === 0;
+  const crepuscule = premierRun && char.day === 1 && actionsLeft <= 0;
+
   // PNJ errant du jour (lieux sociaux) : présent tant qu'on ne l'a pas
   // rencontré. Déterministe par jour/lieu, donc il « bouge » d'un jour à l'autre.
   const [encounterOpen, setEncounterOpen] = useState(false);
@@ -154,7 +168,7 @@ export default function MainScreen() {
   return (
     <div className="min-h-screen bg-texture p-4 flex flex-col gap-3">
       {/* Le conseil du moment : une phrase, au moment où elle sert. */}
-      <CoachTip ctx={{ char, actionsLeft, weather: state.weather }} />
+      <CoachTip ctx={{ char, actionsLeft, weather: state.weather, premierRun }} />
 
       {/* Top Bar */}
       <motion.div
@@ -363,7 +377,10 @@ export default function MainScreen() {
         </motion.span>
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
         <p className="absolute bottom-0 left-0 right-0 px-3 pb-2 text-[11px] text-white/95 italic leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-          "{tc(getAmbientText(char.location, char.day))}"
+          {/* Premier temps : la ligne d'ambiance cède la place au constat
+              d'arrivée, qui dit pourquoi on regarde avant d'agir. Elle revient
+              dès la première action faite. */}
+          {arrivee ? tr(ARRIVEE.fr, ARRIVEE.en) : `"${tc(getAmbientText(char.location, char.day))}"`}
         </p>
       </motion.div>
 
@@ -440,17 +457,25 @@ export default function MainScreen() {
             emoji="🙏" title={tr('Mendier', 'Beg')} desc={tr('Récolter des pièces', 'Collect coins')} accent="#B8860B"
             disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'BEG' }); }}
           />
-          <ActionTile emoji="😴" title={tr('Dormir', 'Sleep')} desc={tr('Récupérer du sommeil', 'Recover sleep')} accent="#7B68EE" disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'REST' }); }} />
+          {/* Sans la Bagarre, la grille tomberait à trois tuiles et laisserait
+              un trou : Dormir prend alors les deux colonnes. */}
           <ActionTile
-            emoji="🥊" title={tr('Bagarre', 'Fight')} desc={tr('Provoquer un combat', 'Pick a fight')} accent="#D94F4F" disabled={actionsLeft <= 0} danger
-            onClick={() => {
-              // Adversaire tiré dans le CATALOGUE du quartier (et, rarement,
-              // le Roi Déchu si vous avez survécu assez longtemps).
-              const enemy = pickFightEnemy(char.location, char.day, char.respect);
-              playFightStart();
-              dispatch({ type: 'START_COMBAT', enemy });
-            }}
+            emoji="😴" title={tr('Dormir', 'Sleep')} desc={tr('Récupérer du sommeil', 'Recover sleep')} accent="#7B68EE"
+            disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'REST' }); }}
+            className={arsenal ? '' : 'col-span-2'}
           />
+          {arsenal && (
+            <ActionTile
+              emoji="🥊" title={tr('Bagarre', 'Fight')} desc={tr('Provoquer un combat', 'Pick a fight')} accent="#D94F4F" disabled={actionsLeft <= 0} danger
+              onClick={() => {
+                // Adversaire tiré dans le CATALOGUE du quartier (et, rarement,
+                // le Roi Déchu si vous avez survécu assez longtemps).
+                const enemy = pickFightEnemy(char.location, char.day, char.respect);
+                playFightStart();
+                dispatch({ type: 'START_COMBAT', enemy });
+              }}
+            />
+          )}
         </div>
 
         {/* La Récup' : la source de matière première de l'atelier. Elle paie
@@ -471,7 +496,10 @@ export default function MainScreen() {
           </span>
         </motion.button>
 
-        {/* Action risquée : Voler */}
+        {/* Action risquée : Voler. Absente du tout premier écran, comme la
+            Bagarre — ce sont les deux actions qu'un débutant ne peut pas
+            évaluer, et ce sont celles qui le tuent. */}
+        {arsenal && (
         <motion.button
           whileHover={actionsLeft <= 0 ? {} : liftHover}
           whileTap={actionsLeft <= 0 ? {} : stampTap}
@@ -487,6 +515,7 @@ export default function MainScreen() {
             {tr('risqué', 'risky')}
           </span>
         </motion.button>
+        )}
 
         {/* Secondary actions */}
         <div id="tuto-secondary" className="flex gap-2">
@@ -495,6 +524,20 @@ export default function MainScreen() {
           <ActionTile emoji="🎒" title={`${tr('Sac', 'Bag')} (${char.inventory.length})`} disabled={false} onClick={() => { playBag(); dispatch({ type: 'SET_SCREEN', screen: 'inventory' }); }} small />
         </div>
       </motion.div>
+
+      {/* Troisième temps : le premier soir, le bouton ne reste pas seul. La
+          nuit n'est pas un écran de chargement, c'est une épreuve qu'on subit
+          sans rien pouvoir faire — autant le dire avant, pas après. */}
+      {crepuscule && (
+        <motion.p
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="text-[12px] text-[#8B6B4A] italic leading-snug text-center px-2 -mb-1"
+        >
+          {tr(CREPUSCULE.fr, CREPUSCULE.en)}
+        </motion.p>
+      )}
 
       {/* Next Day */}
       <motion.button
@@ -513,8 +556,8 @@ export default function MainScreen() {
   );
 }
 
-function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small }: {
-  emoji: string; title: string; desc?: string; accent?: string; disabled: boolean; onClick: () => void; danger?: boolean; small?: boolean;
+function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, small, className = '' }: {
+  emoji: string; title: string; desc?: string; accent?: string; disabled: boolean; onClick: () => void; danger?: boolean; small?: boolean; className?: string;
 }) {
   return (
     <motion.button
@@ -524,7 +567,7 @@ function ActionTile({ emoji, title, desc, accent, disabled, onClick, danger, sma
       disabled={disabled}
       className={`action-btn ${small ? 'p-2.5 flex-1' : 'p-3'} flex flex-col items-center justify-center gap-1 ${
         disabled ? 'opacity-35 pointer-events-none' : ''
-      } ${danger && !disabled ? 'border-[#D94F4F]/30' : ''}`}
+      } ${danger && !disabled ? 'border-[#D94F4F]/30' : ''} ${className}`}
     >
       {accent && !small ? (
         <span
