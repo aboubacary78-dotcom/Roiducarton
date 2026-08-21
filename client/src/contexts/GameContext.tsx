@@ -22,6 +22,8 @@ import { SALVAGE_JUNK, SALVAGE_TUNING, salvagePayout, trouvailleById, piegeHurts
 import { enemyByName, BEG_TUNING } from './data/passersby';
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
 import { CONTRACTS, getContract, paquetDuPremierMatin, streetTitleFor, STREET_TITLES } from './data/progression';
+import { traitPretable } from './data/world';
+import type { StreetNpc } from './data/npc';
 import { ENEMIES, rollSignRound } from './data/enemies';
 import { SHOPS, shopClosure, rollShopClosure, getSellPrice, SOLIDARITY_GIFT, SOLIDARITY_FLAG } from './data/shops';
 import { HAGGLE_TUNING, HAGGLED_FLAG, shopkeeperFor } from './data/haggle';
@@ -293,7 +295,8 @@ type GameAction =
   | { type: 'REOPEN_SHOP'; shopId: string }
   | { type: 'CLAIM_SOLIDARITY' }
   | { type: 'DISMISS_ORIGIN' }
-  | { type: 'RESOLVE_ENCOUNTER'; kind: 'share' | 'trade' | 'pass'; offer?: { item: InventoryItem; price: number } }
+  // `npc` n'est lu que sur un partage : c'est lui qui décide du compagnon.
+  | { type: 'RESOLVE_ENCOUNTER'; kind: 'share' | 'trade' | 'pass'; offer?: { item: InventoryItem; price: number }; npc?: StreetNpc }
   | { type: 'TRIGGER_SHOP_EVENT'; event: ShopEvent };
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -1888,6 +1891,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       let stats = { ...c.stats };
       let money = c.money;
       let inventory = [...c.inventory];
+      let compagnon = c.compagnon;
 
       if (action.kind === 'share') {
         // Partager à manger : on sacrifie un aliment (le moins précieux).
@@ -1898,6 +1902,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         if (foodIdx === undefined) return state; // rien à partager
         inventory = [...inventory.slice(0, foodIdx), ...inventory.slice(foodIdx + 1)];
         stats = applyStatDelta(stats, { mental: 6, dignity: 2 });
+        /*
+         * Et on repart à deux. Le repas partagé achète une journée de
+         * compagnie, et avec elle le savoir-faire de l'autre — un seul de ses
+         * traits, et seulement ceux qui servent vraiment (voir
+         * `traitPretable`). Un seul compagnon à la fois : le dernier repas
+         * partagé remplace le précédent.
+         */
+        const pret = action.npc ? traitPretable(action.npc.traits) : null;
+        if (pret) {
+          compagnon = {
+            nom: action.npc!.name, seed: action.npc!.seed, gender: action.npc!.gender,
+            traitId: pret.id, jour: c.day,
+          };
+        }
       } else if (action.kind === 'trade') {
         // Troc : on achète l'objet proposé par le PNJ.
         if (!action.offer || money < action.offer.price || inventory.length >= bagCapacity({ inventory })) return state;
@@ -1915,6 +1933,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           money,
           inventory,
           respect: c.respect + respectGain,
+          compagnon,
           activeFlags: [...c.activeFlags, flag],
         },
       };

@@ -213,8 +213,60 @@ export function generateCharacterTrio(): Character[] {
 }
 
 // Un personnage possède-t-il un trait donné ? (raccourci très fréquent)
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LE COMPAGNON DE JOURNÉE
+ *
+ * Partager son repas avec quelqu'un rencontré dans la rue lui fait faire la
+ * route avec vous jusqu'au soir, et vous PRÊTE l'un de ses deux traits.
+ *
+ * Aucun effet nouveau n'a été inventé pour ça : les PNJ tirent déjà leurs
+ * traits dans cette table, et ces traits sont déjà branchés partout — la
+ * fouille, le combat, la manche, le voyage. Le compagnon ne fait qu'ouvrir au
+ * joueur une porte qui existait déjà.
+ *
+ * DEUX FILTRES, ET ILS COMPTENT.
+ *
+ * `positive` d'abord. Le Poissard double le score : prêté le jour de la mort,
+ * il vaudrait double sans rien coûter. Les Os en Mousse et la Phobie des Rats
+ * ne feraient qu'abîmer celui qui vient de donner à manger. Un trait qu'on
+ * emprunte doit aider, sinon le partage devient un piège.
+ *
+ * « Qui fait quelque chose » ensuite. La moitié des traits positifs ne sont
+ * qu'un bonus de jauge appliqué à la création du personnage — les prêter ne
+ * ferait rigoureusement rien, et le joueur croirait avoir gagné quelque chose.
+ * Ne restent que ceux qu'un `hasTrait` va vraiment interroger pendant la
+ * journée. `test-compagnon.mjs` relit le code source pour le vérifier : si un
+ * trait de cette liste perd son branchement, le test tombe.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+export const TRAITS_PRETABLES = [
+  'bricoleur',        // bricole une arme au combat
+  'charismatique',    // les passants donnent plus
+  'orientation',      // voyager remonte le moral
+  'nez-sensible',     // les projectiles sont annoncés
+  'ami-pigeons',      // les oiseaux rapportent des objets
+  'resistant-froid',  // la nuit dehors coûte moins cher
+  'agile',            // on s'échappe mieux
+] as const;
+
+/** Le trait qu'un PNJ peut prêter, ou `null` s'il n'a rien à offrir. */
+export function traitPretable(traits: readonly Trait[]): Trait | null {
+  return traits.find(t => (TRAITS_PRETABLES as readonly string[]).includes(t.id)) ?? null;
+}
+
+/*
+ * Le compagnon compte comme un trait de plus, mais seulement aujourd'hui.
+ *
+ * Le jour est inscrit au moment du partage : la nuit passée, `c.day` avance et
+ * la comparaison tombe d'elle-même. Rien à nettoyer, rien à oublier de
+ * nettoyer.
+ *
+ * Ce que le compagnon prête, c'est le COMPORTEMENT du trait, jamais son bonus
+ * de jauge : celui-ci n'est appliqué qu'à la création d'un personnage
+ * (`generateCharacter`), et le prêt ne passe pas par là.
+ */
 export function hasTrait(c: Character, id: string): boolean {
-  return c.traits.some(t => t.id === id);
+  if (c.traits.some(t => t.id === id)) return true;
+  return c.compagnon?.traitId === id && c.compagnon.jour === c.day;
 }
 
 // Formule de score UNIQUE (écran de fin + meilleurs scores + reducer).

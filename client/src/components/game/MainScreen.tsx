@@ -1,4 +1,4 @@
-import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, pickFightEnemy, STREET_TITLES } from '@/contexts/GameContext';
+import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, pickFightEnemy, STREET_TITLES, TRAITS } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import StatBars from './StatBars';
@@ -155,6 +155,14 @@ export default function MainScreen() {
    */
   const [premierRun] = useState(() => isFirstEverRun(loadHighScores().length, loadGraves().length));
   const arsenal = arsenalVisible({ premierRun, jour: char.day, actionsFaites: state.dayActions });
+  /*
+   * Le compagnon de journée : celui avec qui on a partagé son repas ce matin.
+   * Il prête un de ses traits jusqu'au soir (voir `hasTrait`), et le jour
+   * inscrit dans la fiche le fait disparaître de lui-même à la nuit.
+   */
+  const compagnon = char.compagnon?.jour === char.day
+    ? TRAITS.find(t => t.id === char.compagnon!.traitId)
+    : undefined;
   const arrivee = premierRun && char.day === 1 && state.dayActions === 0;
   const crepuscule = premierRun && char.day === 1 && actionsLeft <= 0;
 
@@ -188,11 +196,25 @@ export default function MainScreen() {
               <PlayerFace char={char} size={40} />
               <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#B8860B] text-white text-[9px] flex items-center justify-center shadow">✎</span>
             </button>
+            {/* Le compagnon du jour, à côté du visage du joueur. Un effet actif
+                qu'on ne voit pas n'existe pas : tant qu'il est là, il est là. */}
+            {compagnon && (
+              <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#4A9B5F]/40 shrink-0 -ml-1.5">
+                <CardboardAvatar seed={char.compagnon!.seed} gender={char.compagnon!.gender} size={32} />
+              </div>
+            )}
             <div>
               <h2 className="text-base font-semibold text-[#2A1F1A]">{char.name}</h2>
               <p className="text-xs text-[#8B6B4A]">
                 {loc.emoji} {tr(loc.name, loc.nameEn || loc.name)} · {tr('Jour', 'Day')} {char.day}{streetTitle ? ` · ${streetTitle.emoji} ${tr(streetTitle.fr, streetTitle.en)}` : ''}
               </p>
+              {/* Ce que le compagnon prête, en toutes lettres. L'avatar dit
+                  qu'il est là ; cette ligne dit à quoi il sert. */}
+              {compagnon && (
+                <p className="text-[10px] text-[#3d8b4f] font-medium leading-tight">
+                  🤝 {char.compagnon!.nom} · {compagnon.emoji} {tc(compagnon.name)}
+                </p>
+              )}
               {nextTitle && (
                 <p className="text-[10px] text-[#B8860B] font-medium leading-tight">
                   {nextTitle.emoji} {tr(

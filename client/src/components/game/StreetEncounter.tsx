@@ -1,5 +1,5 @@
 import { useVerrouScroll } from '@/lib/verrouScroll';
-import { bagCapacity } from '@/contexts/GameContext';
+import { bagCapacity, traitPretable } from '@/contexts/GameContext';
 import { useGame, type StreetNpc } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -22,11 +22,27 @@ export default function StreetEncounter({ npc, onClose }: { npc: StreetNpc; onCl
   // Ce voile n'est monté que lorsqu'il est visible : le verrou est inconditionnel.
   useVerrouScroll(true);
 
+  /*
+   * Ce que le partage rapporte VRAIMENT, annoncé avant le geste.
+   *
+   * Donner son repas fait faire la route à deux jusqu'au soir, et prête un des
+   * savoir-faire de l'autre. Une contrepartie qu'on découvre après coup n'en
+   * est pas une : elle est écrite sur le bouton.
+   */
+  const pret = traitPretable(npc.traits);
+
   function share() {
     if (!hasFood) return;
     playGive();
-    dispatch({ type: 'RESOLVE_ENCOUNTER', kind: 'share' });
-    pushToast(tr(`Vous partagez avec ${npc.name}. Un peu d'humanité, ça se rend.`, `You share with ${npc.name}. A bit of humanity goes around.`), { emoji: '🤝', tone: 'good' });
+    dispatch({ type: 'RESOLVE_ENCOUNTER', kind: 'share', npc });
+    pushToast(
+      pret
+        ? tr(`${npc.name} fait la route avec vous aujourd'hui. ${pret.emoji} ${pret.name} vous est prêté.`,
+             `${npc.name} walks with you today. ${pret.emoji} ${tc(pret.name)} is yours until tonight.`)
+        : tr(`Vous partagez avec ${npc.name}. Un peu d'humanité, ça se rend.`,
+             `You share with ${npc.name}. A bit of humanity goes around.`),
+      { emoji: '🤝', tone: 'good' },
+    );
     onClose();
   }
   function trade() {
@@ -101,6 +117,11 @@ export default function StreetEncounter({ npc, onClose }: { npc: StreetNpc; onCl
               style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)' }}
             >
               🤝 {hasFood ? tr('Partager à manger', 'Share some food') : tr('Partager (aucun aliment)', 'Share (no food)')}
+              {hasFood && pret && (
+                <span className="block text-[10px] font-normal opacity-90 mt-0.5">
+                  {tr(`${npc.name} vous suit aujourd'hui`, `${npc.name} follows you today`)} · {pret.emoji} {tc(pret.name)}
+                </span>
+              )}
             </button>
             {offer && (
               <button

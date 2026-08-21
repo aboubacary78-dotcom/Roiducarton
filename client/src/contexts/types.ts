@@ -87,6 +87,13 @@ export interface Character {
   recentEvents?: string[];
   // Boutiques en panne/fermées pendant la partie (voir ShopClosure).
   shopClosures?: ShopClosure[];
+  /*
+   * Celui ou celle avec qui on a partagé son repas aujourd'hui, et le trait
+   * qu'il prête jusqu'au soir (voir `hasTrait` et `traitPretable`). Le jour
+   * est inscrit dedans : il n'y a rien à effacer au réveil, la comparaison
+   * cesse simplement d'être vraie.
+   */
+  compagnon?: { nom: string; seed: string; gender: 'm' | 'f'; traitId: string; jour: number };
   // Graine unique servant à générer le visage du personnage (voir CardboardAvatar).
   seed: string;
   // Genre déduit du prénom, pour que le visage corresponde (pas de barbe sur une femme, etc.).

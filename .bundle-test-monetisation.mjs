@@ -3256,8 +3256,28 @@ function generateCharacterTrio() {
   }
   return trio;
 }
+var TRAITS_PRETABLES = [
+  "bricoleur",
+  // bricole une arme au combat
+  "charismatique",
+  // les passants donnent plus
+  "orientation",
+  // voyager remonte le moral
+  "nez-sensible",
+  // les projectiles sont annoncés
+  "ami-pigeons",
+  // les oiseaux rapportent des objets
+  "resistant-froid",
+  // la nuit dehors coûte moins cher
+  "agile"
+  // on s'échappe mieux
+];
+function traitPretable(traits) {
+  return traits.find((t) => TRAITS_PRETABLES.includes(t.id)) ?? null;
+}
 function hasTrait(c, id) {
-  return c.traits.some((t) => t.id === id);
+  if (c.traits.some((t) => t.id === id)) return true;
+  return c.compagnon?.traitId === id && c.compagnon.jour === c.day;
 }
 function computeScore(day2, respect, money2, poissard = false) {
   return (day2 * 10 + respect * 5 + money2 * 2) * (poissard ? 2 : 1);
@@ -11489,11 +11509,22 @@ function gameReducer(state, action) {
       let stats = { ...c.stats };
       let money2 = c.money;
       let inventory = [...c.inventory];
+      let compagnon = c.compagnon;
       if (action.kind === "share") {
         const foodIdx = inventory.map((it, i) => ({ it, i })).filter((x) => x.it.type === "food").sort((a, b) => (a.it.value || 0) - (b.it.value || 0))[0]?.i;
         if (foodIdx === void 0) return state;
         inventory = [...inventory.slice(0, foodIdx), ...inventory.slice(foodIdx + 1)];
         stats = applyStatDelta(stats, { mental: 6, dignity: 2 });
+        const pret = action.npc ? traitPretable(action.npc.traits) : null;
+        if (pret) {
+          compagnon = {
+            nom: action.npc.name,
+            seed: action.npc.seed,
+            gender: action.npc.gender,
+            traitId: pret.id,
+            jour: c.day
+          };
+        }
       } else if (action.kind === "trade") {
         if (!action.offer || money2 < action.offer.price || inventory.length >= bagCapacity({ inventory })) return state;
         money2 -= action.offer.price;
@@ -11508,6 +11539,7 @@ function gameReducer(state, action) {
           money: money2,
           inventory,
           respect: c.respect + respectGain,
+          compagnon,
           activeFlags: [...c.activeFlags, flag2]
         }
       };
@@ -11628,7 +11660,7 @@ var initialState = {
 };
 var GameContext = createContext(void 0);
 
-// ../../../tmp/monet-cerXjN/cap.js
+// ../../../tmp/monet-tmW4yj/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/ads.ts
