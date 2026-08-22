@@ -306,13 +306,19 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, screen: 'character-select', characterChoices: generateCharacterTrio(), deathCause: null };
 
     case 'GENERATE_CHARACTERS':
-      return { ...state, characterChoices: generateCharacterTrio() };
+      // Les prénoms du tirage précédent sont écartés : une relance qui rejoue
+      // un nom qu'on vient de refuser donne l'impression d'un jeu à court de
+      // personnages, même quand tout le reste a changé.
+      return { ...state, characterChoices: generateCharacterTrio(state.characterChoices.map(c => c.name)) };
 
     case 'PREPARE_SUCCESSOR':
       // Une seule fois par mort : le successeur annoncé doit rester le même
       // tant que le joueur est sur l'écran de fin.
       if (state.characterChoices.length > 0) return state;
-      return { ...state, characterChoices: generateCharacterTrio() };
+      // Et le successeur ne reprend pas le prénom de celui qu'on vient
+      // d'enterrer : l'écran de fin l'annonce par son nom, et « Marcel est
+      // mort, Marcel vous attend » se lit comme un bug.
+      return { ...state, characterChoices: generateCharacterTrio(state.character ? [state.character.name] : []) };
 
     case 'SELECT_CHARACTER': {
       const char = state.characterChoices[action.index];

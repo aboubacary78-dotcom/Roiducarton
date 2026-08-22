@@ -3200,14 +3200,17 @@ function bagCapacity(c) {
   }
   return CAPACITE_BASE + bonus;
 }
-function generateCharacter() {
+function generateCharacter(evite) {
   const unlockedJobs = loadHeritage().jobs;
-  const job = randomFromArray(JOBS.filter((j) => !j.locked || unlockedJobs.includes(j.id)));
+  const jobsOuverts = JOBS.filter((j) => !j.locked || unlockedJobs.includes(j.id));
+  const jobsLibres = jobsOuverts.filter((j) => !evite?.metiers?.includes(j.id));
+  const job = randomFromArray(jobsLibres.length > 0 ? jobsLibres : jobsOuverts);
   const availableTraits = [...TRAITS];
   const trait1Index = Math.floor(Math.random() * availableTraits.length);
   const trait1 = availableTraits.splice(trait1Index, 1)[0];
   const trait2 = randomFromArray(availableTraits);
-  const name = randomFromArray(NAMES);
+  const nomsLibres = NAMES.filter((n) => !evite?.prenoms?.includes(n));
+  const name = randomFromArray(nomsLibres.length > 0 ? nomsLibres : NAMES);
   const baseStats = { health: 70, mental: 60, hunger: 50, thirst: 50, sleep: 60, dignity: 40 };
   Object.entries(job.bonusStats).forEach(([key, val]) => {
     if (val) baseStats[key] = Math.min(100, baseStats[key] + val);
@@ -3238,20 +3241,14 @@ function generateCharacter() {
     gender: genderFromName(name)
   };
 }
-function generateCharacterTrio() {
+function generateCharacterTrio(evites = []) {
   const trio = [];
-  const used = /* @__PURE__ */ new Set();
+  const prenoms = [...evites];
+  const metiers = [];
   for (let i = 0; i < 3; i++) {
-    let c = generateCharacter();
-    for (let attempt = 0; attempt < 30 && used.has(c.name); attempt++) c = generateCharacter();
-    if (used.has(c.name)) {
-      const free = NAMES.filter((n) => !used.has(n));
-      if (free.length > 0) {
-        const name = randomFromArray(free);
-        c = { ...c, name, gender: genderFromName(name) };
-      }
-    }
-    used.add(c.name);
+    const c = generateCharacter({ prenoms, metiers });
+    prenoms.push(c.name);
+    metiers.push(c.job.id);
     trio.push(c);
   }
   return trio;
@@ -10169,10 +10166,10 @@ function gameReducer(state, action) {
       clearSave();
       return { ...state, screen: "character-select", characterChoices: generateCharacterTrio(), deathCause: null };
     case "GENERATE_CHARACTERS":
-      return { ...state, characterChoices: generateCharacterTrio() };
+      return { ...state, characterChoices: generateCharacterTrio(state.characterChoices.map((c) => c.name)) };
     case "PREPARE_SUCCESSOR":
       if (state.characterChoices.length > 0) return state;
-      return { ...state, characterChoices: generateCharacterTrio() };
+      return { ...state, characterChoices: generateCharacterTrio(state.character ? [state.character.name] : []) };
     case "SELECT_CHARACTER": {
       const char = state.characterChoices[action.index];
       const legacy = peekLegacy();
@@ -11660,7 +11657,7 @@ var initialState = {
 };
 var GameContext = createContext(void 0);
 
-// ../../../tmp/monet-tmW4yj/cap.js
+// ../../../tmp/monet-7eH0HC/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/ads.ts

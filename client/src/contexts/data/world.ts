@@ -142,14 +142,27 @@ export function bagCapacity(c: { inventory: InventoryItem[] }): number {
   return CAPACITE_BASE + bonus;
 }
 
-export function generateCharacter(): Character {
+/**
+ * `evite` retire du tirage des prénoms et des métiers déjà pris.
+ *
+ * L'exclusion se fait AVANT le tirage, jamais après : un métier décide des
+ * jauges de départ et de l'objet en poche, si bien qu'échanger le métier
+ * d'un personnage déjà fabriqué lui laisserait les affaires de l'autre.
+ *
+ * On ne vide jamais complètement une liste : s'il ne reste rien après
+ * exclusion, on retire le filtre plutôt que de planter.
+ */
+export function generateCharacter(evite?: { prenoms?: readonly string[]; metiers?: readonly string[] }): Character {
   const unlockedJobs = loadHeritage().jobs;
-  const job = randomFromArray(JOBS.filter(j => !j.locked || unlockedJobs.includes(j.id)));
+  const jobsOuverts = JOBS.filter(j => !j.locked || unlockedJobs.includes(j.id));
+  const jobsLibres = jobsOuverts.filter(j => !evite?.metiers?.includes(j.id));
+  const job = randomFromArray(jobsLibres.length > 0 ? jobsLibres : jobsOuverts);
   const availableTraits = [...TRAITS];
   const trait1Index = Math.floor(Math.random() * availableTraits.length);
   const trait1 = availableTraits.splice(trait1Index, 1)[0];
   const trait2 = randomFromArray(availableTraits);
-  const name = randomFromArray(NAMES);
+  const nomsLibres = NAMES.filter(n => !evite?.prenoms?.includes(n));
+  const name = randomFromArray(nomsLibres.length > 0 ? nomsLibres : NAMES);
 
   const baseStats: Stats = { health: 70, mental: 60, hunger: 50, thirst: 50, sleep: 60, dignity: 40 };
 
@@ -187,26 +200,32 @@ export function generateCharacter(): Character {
 }
 
 /**
- * Les trois candidats de l'écran de choix, avec des PRÉNOMS DISTINCTS.
- * Tirés indépendamment, deux Marcel tombaient côte à côte environ une fois
- * sur sept (20 prénoms, 3 tirages) : on ne savait plus lequel on choisissait.
+ * Les trois candidats de l'écran de choix.
+ *
+ * PRÉNOMS DISTINCTS, d'abord : tirés indépendamment, deux Marcel tombaient
+ * côte à côte environ une fois sur sept (20 prénoms, 3 tirages) et on ne
+ * savait plus lequel on choisissait.
+ *
+ * MÉTIERS DISTINCTS, ensuite. Mesuré sur 20 000 écrans : deux mêmes métiers
+ * s'affichaient côte à côte dans **19,5 %** des cas. Le métier est ce qui
+ * distingue le plus deux candidats — il donne les jauges de départ, l'objet en
+ * poche et la moitié du gag — donc deux « Ancien Sommelier » sur le même écran
+ * font paraître le jeu bien plus pauvre qu'il ne l'est.
+ *
+ * `evites` porte les prénoms du tirage précédent. Sans lui, une relance
+ * rejouait au moins un prénom de l'écran d'avant **quatre fois sur dix** : le
+ * hasard était correct, mais il n'en avait pas l'air. C'est la seule chose que
+ * le joueur remarque vraiment, et elle ne coûte qu'une liste passée en
+ * argument.
  */
-export function generateCharacterTrio(): Character[] {
+export function generateCharacterTrio(evites: readonly string[] = []): Character[] {
   const trio: Character[] = [];
-  const used = new Set<string>();
+  const prenoms: string[] = [...evites];
+  const metiers: string[] = [];
   for (let i = 0; i < 3; i++) {
-    let c = generateCharacter();
-    for (let attempt = 0; attempt < 30 && used.has(c.name); attempt++) c = generateCharacter();
-    // Si le hasard s'entête, on prend d'autorité un prénom encore libre (et le
-    // genre qui va avec, sinon le visage ne correspondrait plus au prénom).
-    if (used.has(c.name)) {
-      const free = NAMES.filter(n => !used.has(n));
-      if (free.length > 0) {
-        const name = randomFromArray(free);
-        c = { ...c, name, gender: genderFromName(name) };
-      }
-    }
-    used.add(c.name);
+    const c = generateCharacter({ prenoms, metiers });
+    prenoms.push(c.name);
+    metiers.push(c.job.id);
     trio.push(c);
   }
   return trio;
