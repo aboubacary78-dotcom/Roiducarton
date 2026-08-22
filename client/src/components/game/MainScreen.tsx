@@ -1,4 +1,4 @@
-import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, pickFightEnemy, STREET_TITLES, TRAITS } from '@/contexts/GameContext';
+import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, pickFightEnemy, STREET_TITLES, TRAITS, voleurTrouvable, ennemiVoleur } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import StatBars from './StatBars';
@@ -163,6 +163,12 @@ export default function MainScreen() {
   const compagnon = char.compagnon?.jour === char.day
     ? TRAITS.find(t => t.id === char.compagnon!.traitId)
     : undefined;
+  /*
+   * Celui qui est parti avec quelque chose traîne encore ici, deux jours
+   * durant. Le retrouver coûte une action, comme n'importe quelle bagarre :
+   * la vengeance n'a pas de tarif de faveur.
+   */
+  const voleur = voleurTrouvable(char) ? char.vole! : undefined;
   const arrivee = premierRun && char.day === 1 && state.dayActions === 0;
   const crepuscule = premierRun && char.day === 1 && actionsLeft <= 0;
 
@@ -517,6 +523,33 @@ export default function MainScreen() {
             {tr('matériaux', 'materials')}
           </span>
         </motion.button>
+
+        {/* Le voleur de la veille, s'il traîne encore dans ce quartier. */}
+        {voleur && (
+          <motion.button
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={actionsLeft <= 0 ? {} : liftHover}
+            whileTap={actionsLeft <= 0 ? {} : stampTap}
+            disabled={actionsLeft <= 0}
+            onClick={(e) => {
+              noteTap(e);
+              playFightStart();
+              dispatch({ type: 'START_COMBAT', enemy: ennemiVoleur(voleur), contreVoleur: true });
+            }}
+            className={`action-btn p-2.5 flex items-center justify-center gap-2 border-[#B84A3A]/40 ${
+              actionsLeft <= 0 ? 'opacity-35 pointer-events-none' : ''
+            }`}
+          >
+            <span className="text-lg">💢</span>
+            <span className="text-xs font-medium text-[#3D3020]">
+              {tr(`Retrouver ${voleur.nom}`, `Track down ${voleur.nom}`)}
+            </span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono bg-[#B84A3A]/12 text-[#B84A3A]">
+              {voleur.objet ? `${voleur.objet.emoji} ${tr('reprendre', 'take it back')}` : `${voleur.argent}€`}
+            </span>
+          </motion.button>
+        )}
 
         {/* Action risquée : Voler. Absente du tout premier écran, comme la
             Bagarre — ce sont les deux actions qu'un débutant ne peut pas

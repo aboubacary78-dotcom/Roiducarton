@@ -10937,6 +10937,28 @@ function gameReducer(state, action) {
           notesEn.push(`\u{1F6AB} ${sh.emoji} ${tc(sh.name)} is closed (${days}d): ${nc.reasonEn}`);
         }
       }
+      let vole = ch.vole;
+      if (ch.compagnon?.louche && ch.compagnon.jour === ch.day) {
+        const cible = inventory.map((it, i) => ({ it, i })).sort((a, b) => (b.it.value || 0) - (a.it.value || 0))[0];
+        const argent = cible ? 0 : Math.min(ch.money, 3 + Math.floor(Math.random() * 5));
+        if (cible || argent > 0) {
+          if (cible) inventory = [...inventory.slice(0, cible.i), ...inventory.slice(cible.i + 1)];
+          else bonusMoney -= argent;
+          vole = {
+            nom: ch.compagnon.nom,
+            seed: ch.compagnon.seed,
+            gender: ch.compagnon.gender,
+            quartier: ch.location,
+            jour: ch.day + 1,
+            objet: cible ? { ...cible.it } : void 0,
+            argent: cible ? void 0 : argent
+          };
+          const quoi = cible ? `${cible.it.emoji} ${cible.it.name}` : `${argent}\u20AC`;
+          const quoiEn = cible ? `${cible.it.emoji} ${tc(cible.it.name)}` : `\u20AC${argent}`;
+          notes.push(`\u{1F6AC} ${ch.compagnon.nom} est parti avant le jour, avec ${quoi}. Il tra\xEEne encore dans le quartier.`);
+          notesEn.push(`\u{1F6AC} ${ch.compagnon.nom} left before dawn, with ${quoiEn}. Still around the neighbourhood.`);
+        }
+      }
       const decayedStats = withFirstDayNet(ch, clampStats(s));
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
       if (!isAlive) {
@@ -10951,7 +10973,7 @@ function gameReducer(state, action) {
       });
       return {
         ...state,
-        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus, shopClosures, travelsToday: [], fountainDay: void 0, fountainToday: 0 },
+        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus, shopClosures, travelsToday: [], fountainDay: void 0, fountainToday: 0, vole },
         dayActions: 0,
         screen: isAlive ? "main" : "game-over",
         weather: nextWeather,
@@ -11036,6 +11058,13 @@ function gameReducer(state, action) {
       return {
         ...state,
         screen: "combat",
+        /*
+         * Aller chercher son voleur ne se tente qu'une fois : la trace
+         * s'efface au moment où le combat commence, pas à la victoire. Gagner
+         * rend ce qu'il avait pris — c'est le butin de l'ennemi, le code de
+         * victoire s'en charge déjà. Perdre, c'est perdre pour de bon.
+         */
+        character: action.contreVoleur ? { ...state.character, vole: void 0 } : state.character,
         currentCombat: makeCombatState(action.enemy, state.character),
         combatLog: [L(`${action.enemy.emoji} ${action.enemy.name} appara\xEEt ! ${action.enemy.description}`, `${action.enemy.emoji} ${tc(action.enemy.name)} appears! ${tc(action.enemy.description)}`)]
       };
@@ -11519,7 +11548,9 @@ function gameReducer(state, action) {
             seed: action.npc.seed,
             gender: action.npc.gender,
             traitId: pret.id,
-            jour: c.day
+            jour: c.day,
+            // Celui-ci s'en ira au matin (voir NEXT_DAY). Sa phrase le disait.
+            louche: action.npc.louche
           };
         }
       } else if (action.kind === "trade") {
@@ -11657,7 +11688,7 @@ var initialState = {
 };
 var GameContext = createContext(void 0);
 
-// ../../../tmp/monet-7eH0HC/cap.js
+// ../../../tmp/monet-5ubPCk/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/ads.ts

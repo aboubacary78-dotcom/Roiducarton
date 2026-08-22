@@ -285,7 +285,7 @@ type GameAction =
   | { type: 'REVIVE' }
   | { type: 'RESET_SCORES' }
   | { type: 'CONTINUE_SAVE' }
-  | { type: 'START_COMBAT'; enemy: Enemy }
+  | { type: 'START_COMBAT'; enemy: Enemy; contreVoleur?: boolean }
   | { type: 'PLAY_SIGN'; sign: SignId | 'special' }
   | { type: 'FLEE_ATTEMPT' }
   | { type: 'DODGE_RESULT'; hits: number }
@@ -1246,6 +1246,40 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
       }
 
+      /*
+       * CELUI QUI PART AVANT LE RÉVEIL.
+       *
+       * Un compagnon sur quatre regardait vos poches, et sa phrase le disait
+       * (voir SITUATIONS_LOUCHES). Il a tenu sa part du marché toute la
+       * journée — le trait prêté a bien servi — puis il s'en va avec ce qui
+       * valait le plus cher dans le sac, ou à défaut quelques pièces.
+       *
+       * Le vol est BORNÉ et il laisse une trace : on retient qui, où et quoi,
+       * pour pouvoir aller le chercher le lendemain. Une perte sans recours
+       * n'apprend rien ; celle-ci ouvre une porte.
+       */
+      let vole = ch.vole;
+      if (ch.compagnon?.louche && ch.compagnon.jour === ch.day) {
+        const cible = inventory
+          .map((it, i) => ({ it, i }))
+          .sort((a, b) => (b.it.value || 0) - (a.it.value || 0))[0];
+        const argent = cible ? 0 : Math.min(ch.money, 3 + Math.floor(Math.random() * 5));
+        if (cible || argent > 0) {
+          if (cible) inventory = [...inventory.slice(0, cible.i), ...inventory.slice(cible.i + 1)];
+          else bonusMoney -= argent;
+          vole = {
+            nom: ch.compagnon.nom, seed: ch.compagnon.seed, gender: ch.compagnon.gender,
+            quartier: ch.location, jour: ch.day + 1,
+            objet: cible ? { ...cible.it } : undefined,
+            argent: cible ? undefined : argent,
+          };
+          const quoi = cible ? `${cible.it.emoji} ${cible.it.name}` : `${argent}€`;
+          const quoiEn = cible ? `${cible.it.emoji} ${tc(cible.it.name)}` : `€${argent}`;
+          notes.push(`🚬 ${ch.compagnon.nom} est parti avant le jour, avec ${quoi}. Il traîne encore dans le quartier.`);
+          notesEn.push(`🚬 ${ch.compagnon.nom} left before dawn, with ${quoiEn}. Still around the neighbourhood.`);
+        }
+      }
+
       const decayedStats = withFirstDayNet(ch, clampStats(s));
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
 
@@ -1264,7 +1298,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
       return {
         ...state,
-        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus, shopClosures, travelsToday: [], fountainDay: undefined, fountainToday: 0 },
+        character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus, shopClosures, travelsToday: [], fountainDay: undefined, fountainToday: 0, vole },
         dayActions: 0,
         screen: isAlive ? 'main' : 'game-over',
         weather: nextWeather,
@@ -1362,6 +1396,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         screen: 'combat',
+        /*
+         * Aller chercher son voleur ne se tente qu'une fois : la trace
+         * s'efface au moment où le combat commence, pas à la victoire. Gagner
+         * rend ce qu'il avait pris — c'est le butin de l'ennemi, le code de
+         * victoire s'en charge déjà. Perdre, c'est perdre pour de bon.
+         */
+        character: action.contreVoleur ? { ...state.character, vole: undefined } : state.character,
         currentCombat: makeCombatState(action.enemy, state.character),
         combatLog: [L(`${action.enemy.emoji} ${action.enemy.name} apparaît ! ${action.enemy.description}`, `${action.enemy.emoji} ${tc(action.enemy.name)} appears! ${tc(action.enemy.description)}`)],
       };
@@ -1920,6 +1961,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           compagnon = {
             nom: action.npc!.name, seed: action.npc!.seed, gender: action.npc!.gender,
             traitId: pret.id, jour: c.day,
+            // Celui-ci s'en ira au matin (voir NEXT_DAY). Sa phrase le disait.
+            louche: action.npc!.louche,
           };
         }
       } else if (action.kind === 'trade') {

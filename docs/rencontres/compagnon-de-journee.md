@@ -99,11 +99,63 @@ Le visage du compagnon s'ancre à côté de celui du joueur, en haut de l'écran
 avec le nom et le trait prêté en toutes lettres. **Un effet actif qu'on ne voit
 pas n'existe pas.**
 
+---
+
+# Celui qui regarde vos poches
+
+**Un compagnon sur quatre s'en va avant le jour**, avec ce qu'il a pu prendre.
+Mesuré : 24,9 % des rencontres, sur 8 855.
+
+Il n'a pas triché pour autant : il a tenu sa part toute la journée, le trait
+prêté a servi. Il part simplement avec le plus cher du sac — ou, si le sac est
+vide, avec trois à sept euros de la poche.
+
+## L'indice est toujours donné
+
+C'est ce qui sépare un piège d'une punition. Un compagnon louche a **forcément**
+une phrase de sa propre banque, et un compagnon honnête n'en a **jamais**.
+Vérifié sur les 8 855 rencontres : zéro manquant, zéro fausse alerte.
+
+Ces phrases ne disent jamais « attention ». Elles décrivent un geste :
+
+> *« Il regarde votre sac plus souvent que votre visage. »*
+> *« Elle vous appelle "mon amie" avant même de savoir votre nom. »*
+> *« Il se tient toujours du côté de votre poche. »*
+> *« Elle a trois montres au poignet et l'heure d'aucune. »*
+
+Assez proches des autres pour qu'on s'y laisse prendre une fois. Assez marquées
+pour qu'on ne s'y laisse plus prendre deux. C'est exactement ce qu'on apprend
+dans la rue : lire les gens.
+
+## Et on peut aller le chercher
+
+Une perte sans recours n'enseigne rien. Le vol laisse donc une trace — qui, où,
+quoi — et **le voleur traîne encore dans le quartier où vous l'avez nourri**,
+deux jours durant. Au-delà, il a revendu et disparu.
+
+Le retrouver ouvre le seul combat du jeu contre quelqu'un qui dort dehors comme
+vous. Il tape moins fort qu'un voyou — il n'est pas mieux nourri — mais il
+tient, parce qu'il sait ce qu'il risque. **Son butin est exactement ce qu'il
+avait pris** : le code de victoire du combat rend le butin, il n'y a rien de
+particulier à écrire pour récupérer son bien.
+
+La trace s'efface au moment où le combat **commence**, pas à la victoire. On ne
+retente pas sa chance jusqu'à gagner.
+
 ## Ce qui protège tout ça
 
-`scripts/test-compagnon.mjs`, dix-huit vérifications. La plus importante ne
-teste pas le réducteur : elle **relit tout le code source** à la recherche des
-appels `hasTrait`, et vérifie que chacun des sept traits prêtables est
-réellement interrogé quelque part. Si l'un d'eux perd son branchement un jour,
-le test tombe — sans quoi le joueur donnerait son repas contre une ligne de
-texte, et rien ne le lui dirait.
+`scripts/test-compagnon.mjs`, trente vérifications. La plus importante ne teste
+pas le réducteur : elle **relit tout le code source** à la recherche des appels
+`hasTrait`, et vérifie que chacun des sept traits prêtables est réellement
+interrogé quelque part. Si l'un d'eux perd son branchement un jour, le test
+tombe — sans quoi le joueur donnerait son repas contre une ligne de texte, et
+rien ne le lui dirait.
+
+La deuxième plus importante balaie 8 855 rencontres pour vérifier que **l'indice
+du louche est toujours donné et jamais donné à tort**. Le jour où cette
+propriété casse, le piège devient une punition arbitraire.
+
+`scripts/test-compagnon-ecran.mjs` fait le reste dans un vrai navigateur :
+le bouton qui annonce la contrepartie avant le geste, le visage ancré en haut
+de l'écran avec le trait en toutes lettres, le concurrent qu'on retrouve dans
+son quartier — et pas dans un autre.

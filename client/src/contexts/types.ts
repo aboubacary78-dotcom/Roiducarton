@@ -93,7 +93,13 @@ export interface Character {
    * est inscrit dedans : il n'y a rien à effacer au réveil, la comparaison
    * cesse simplement d'être vraie.
    */
-  compagnon?: { nom: string; seed: string; gender: 'm' | 'f'; traitId: string; jour: number };
+  compagnon?: { nom: string; seed: string; gender: 'm' | 'f'; traitId: string; jour: number; louche?: boolean };
+  /*
+   * Celui qui est parti au petit matin avec quelque chose. On retient qui,
+   * où et quoi : il traîne encore dans ce quartier le lendemain, et on peut
+   * aller le chercher (voir `voleurTrouvable`).
+   */
+  vole?: { nom: string; seed: string; gender: 'm' | 'f'; quartier: string; jour: number; objet?: InventoryItem; argent?: number };
   // Graine unique servant à générer le visage du personnage (voir CardboardAvatar).
   seed: string;
   // Genre déduit du prénom, pour que le visage corresponde (pas de barbe sur une femme, etc.).

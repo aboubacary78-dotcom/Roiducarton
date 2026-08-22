@@ -37,6 +37,30 @@ const SITUATIONS: { fr: string; en: string }[] = [
   { fr: '{S} lit un journal d\'il y a trois semaines.', en: '{S} reads a three-week-old newspaper.' },
 ];
 
+/*
+ * CEUX QUI REGARDENT VOS POCHES.
+ *
+ * Un compagnon sur quatre s'en va au petit matin avec ce qu'il a pu prendre.
+ * Ce n'est pas un piège tant qu'on peut le voir venir : ces huit phrases sont
+ * l'indice, et le seul. Elles ne disent jamais « attention », elles décrivent
+ * un geste — un regard qui tombe sur le sac, une main qui traîne, une amitié
+ * trop rapide. Le joueur apprend à les reconnaître, ce qui est exactement ce
+ * qu'on apprend dans la rue.
+ *
+ * Elles sont assez proches des autres pour qu'on s'y laisse prendre une fois,
+ * et assez marquées pour qu'on ne s'y laisse plus prendre deux.
+ */
+const SITUATIONS_LOUCHES: { fr: string; en: string }[] = [
+  { fr: '{S} regarde votre sac plus souvent que votre visage.', en: '{S} looks at your bag more often than your face.' },
+  { fr: '{S} vous appelle « mon ami » avant même de savoir votre nom.', en: '{S} calls you "my friend" before knowing your name.' },
+  { fr: '{S} range quelque chose sous sa veste en vous voyant arriver.', en: '{S} tucks something under their coat as you walk up.' },
+  { fr: '{S} demande où vous dormez, l\'air de rien.', en: '{S} asks where you sleep, casually.' },
+  { fr: '{S} a trois montres au poignet et l\'heure d\'aucune.', en: '{S} wears three watches and knows the time on none.' },
+  { fr: '{S} rit un peu trop fort à ce que vous n\'avez pas dit.', en: '{S} laughs a bit too loudly at what you didn\'t say.' },
+  { fr: '{S} se tient toujours du côté de votre poche.', en: '{S} keeps standing on the side your pocket is on.' },
+  { fr: '{S} jure qu\'{S2} ne boit plus, en rangeant une bouteille.', en: '{S} swears they\'ve quit drinking, while pocketing a bottle.' },
+];
+
 // Objets que le PNJ peut proposer au troc (contre quelques euros).
 const OFFER_ITEMS: InventoryItem[] = [
   { id: 'troc-conserve', name: 'Conserve cabossée', emoji: '🥫', type: 'food', value: 3, effect: { hunger: 18 } },
@@ -58,6 +82,13 @@ export interface StreetNpc {
   story: OriginStory;
   // Proposition de troc éventuelle (le PNJ a besoin d'un peu d'argent).
   offer?: { item: InventoryItem; price: number };
+  /*
+   * Celui-là s'en ira au petit matin avec ce qu'il aura pu prendre. Son
+   * `situation` est le seul indice, et il est toujours donné (voir
+   * SITUATIONS_LOUCHES). Tiré par la même graine que le reste : même jour,
+   * même quartier, même joueur donnent toujours la même personne.
+   */
+  louche?: boolean;
 }
 
 // PRNG déterministe (LCG) à partir d'une graine numérique.
@@ -94,7 +125,10 @@ export function npcAt(day: number, location: string, playerSeed: string): Street
   const traits: [Trait, Trait] = [TRAITS[i1], TRAITS[i2]];
   const seed = `npc-${day}-${location}-${name}-${job.id}`;
   const S = { fr: gender === 'f' ? 'Elle' : 'Il', en: gender === 'f' ? 'She' : 'He' };
-  const sit = SITUATIONS[Math.floor(rng() * SITUATIONS.length)];
+  // Un sur quatre regarde vos poches, et sa phrase le dit à qui sait lire.
+  const louche = rng() < 0.25;
+  const banque = louche ? SITUATIONS_LOUCHES : SITUATIONS;
+  const sit = banque[Math.floor(rng() * banque.length)];
 
   // Character minimal pour réutiliser le générateur de chute.
   const asChar = { name, job, traits, seed, gender } as unknown as Character;
@@ -103,9 +137,10 @@ export function npcAt(day: number, location: string, playerSeed: string): Street
   const npc: StreetNpc = {
     id: seed,
     name, job, traits, gender, seed,
-    situationFr: sit.fr.replace('{S}', S.fr),
-    situationEn: sit.en.replace('{S}', S.en),
+    situationFr: sit.fr.replace(/\{S\}/g, S.fr).replace('{S2}', gender === 'f' ? 'elle' : 'il'),
+    situationEn: sit.en.replace(/\{S\}/g, S.en),
     story,
+    louche,
   };
 
   // ~40 % du temps, le PNJ propose un troc.
@@ -116,6 +151,53 @@ export function npcAt(day: number, location: string, playerSeed: string): Street
   }
 
   return npc;
+}
+
+/*
+ * RETROUVER CELUI QUI VOUS A PRIS QUELQUE CHOSE.
+ *
+ * Il traîne dans le quartier où vous l'avez nourri, et pas ailleurs. Deux
+ * jours, pas plus : au-delà il a revendu et disparu, comme tout le monde ici.
+ * Une perte doit pouvoir se rattraper, sinon elle n'enseigne rien ; mais si
+ * elle se rattrape toujours, elle ne coûte rien.
+ */
+export const JOURS_POUR_RETROUVER = 2;
+
+export function voleurTrouvable(
+  c: { location: string; day: number; vole?: { quartier: string; jour: number } },
+): boolean {
+  if (!c.vole) return false;
+  return c.vole.quartier === c.location && c.day - c.vole.jour < JOURS_POUR_RETROUVER;
+}
+
+/*
+ * L'ADVERSAIRE QU'IL DEVIENT.
+ *
+ * Ni un rat ni un vigile : quelqu'un qui dort dehors comme vous, et qui se
+ * bat pour la même chose. Il tape un peu moins fort qu'un voyou — il n'est pas
+ * plus nourri que vous — mais il tient, parce qu'il sait ce qu'il risque.
+ *
+ * Son butin est exactement ce qu'il avait pris. Le code de victoire du combat
+ * rend le butin ; il n'y a donc rien de spécial à écrire pour récupérer son
+ * bien.
+ */
+export function ennemiVoleur(vole: {
+  nom: string; gender: 'm' | 'f'; objet?: InventoryItem; argent?: number;
+}) {
+  return {
+    name: vole.nom,
+    emoji: '💢',
+    health: 34,
+    attack: 11,
+    description: vole.gender === 'f'
+      ? 'Elle a mangé votre pain et emporté le reste. Elle ne vous a pas oublié non plus.'
+      : 'Il a mangé votre pain et emporté le reste. Il ne vous a pas oublié non plus.',
+    loot: {
+      respect: 4,
+      money: vole.argent,
+      item: vole.objet ? { ...vole.objet } : undefined,
+    },
+  };
 }
 
 // Drapeau de résolution : une rencontre par (jour, lieu).
