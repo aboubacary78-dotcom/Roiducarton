@@ -24,6 +24,7 @@ const entry = join(dir, 'entry.ts');
 writeFileSync(entry, [
   "export { gameReducer, TRAITS, TRAITS_PRETABLES, traitPretable, hasTrait } from '@/contexts/GameContext';",
   "export { npcAt, voleurTrouvable, ennemiVoleur, JOURS_POUR_RETROUVER } from '@/contexts/GameContext';",
+  "export { ENEMIES } from '@/contexts/GameContext';",
 ].join('\n'));
 
 const out = join(process.cwd(), '.bundle-test-compagnon.mjs');
@@ -47,7 +48,7 @@ await build({
 
 const {
   gameReducer, TRAITS, TRAITS_PRETABLES, traitPretable, hasTrait,
-  npcAt, voleurTrouvable, ennemiVoleur, JOURS_POUR_RETROUVER,
+  npcAt, voleurTrouvable, ennemiVoleur, JOURS_POUR_RETROUVER, ENEMIES,
 } = await import(out);
 
 let echecs = 0;
@@ -269,6 +270,41 @@ verifier('son butin est exactement ce qu’il avait pris',
   adversaire.loot.item?.id === 'manteau', JSON.stringify(adversaire.loot));
 verifier('c’est un humain, pas un rat — motif d’esquive « rival »',
   adversaire.emoji === '💢' && adversaire.name === 'Gaston');
+
+/*
+ * SA PLACE DANS LE CATALOGUE, PAS SES CHIFFRES.
+ *
+ * On ne fige pas 42 et 14 : rééquilibrer le jeu ne doit pas casser un test,
+ * seulement le déplacer. Ce qui doit rester vrai, c'est le RANG — il a mangé
+ * vos affaires, il tient mieux que la moyenne, et ce combat se choisit au lieu
+ * de se subir. Il doit donc taper plus fort que le « Concurrent Agressif »
+ * qu'on croise au hasard, sans dépasser le Voyou du Coin, la brute du quartier.
+ *
+ * La première version valait 34/11 : plus molle que le Commerçant Furieux, et
+ * même plus molle que l'ennemi générique qui porte son nom.
+ */
+const menace = e => e.health * e.attack;
+const concurrent = ENEMIES.find(e => e.name === 'Concurrent Agressif');
+const voyou = ENEMIES.find(e => e.name === 'Voyou du Coin');
+verifier('il tape plus fort que le concurrent qu’on croise au hasard',
+  menace(adversaire) > menace(concurrent),
+  `${menace(adversaire)} contre ${menace(concurrent)}`);
+verifier('mais il ne dépasse pas la brute du quartier',
+  menace(adversaire) <= menace(voyou),
+  `${menace(adversaire)} contre ${menace(voyou)}`);
+
+/*
+ * Les rosters des trois quartiers sociaux — les seuls où on le retrouve —
+ * comptent les adversaires humains les plus durs du jeu. Un combat qu'on
+ * choisit ne doit pas être plus facile que la moyenne de ce qu'on y subit
+ * sans l'avoir demandé.
+ */
+const humainsDesQuartiersSociaux = ['Voyou du Coin', 'Vigile Zélé', 'Concurrent Agressif',
+  'Commerçant Furieux', 'Ivrogne Agressif', 'Agent de Sécurité', 'Pickpocket']
+  .map(n => ENEMIES.find(e => e.name === n)).filter(Boolean);
+const moyenne = humainsDesQuartiersSociaux.reduce((s, e) => s + menace(e), 0) / humainsDesQuartiersSociaux.length;
+verifier('et il dépasse la moyenne des humains qu’on y croise',
+  menace(adversaire) > moyenne, `${menace(adversaire)} contre ${Math.round(moyenne)} de moyenne`);
 
 /*
  * La trace s'efface quand le combat COMMENCE, pas à la victoire : on ne

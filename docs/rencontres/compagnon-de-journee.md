@@ -134,10 +134,49 @@ quoi — et **le voleur traîne encore dans le quartier où vous l'avez nourri**
 deux jours durant. Au-delà, il a revendu et disparu.
 
 Le retrouver ouvre le seul combat du jeu contre quelqu'un qui dort dehors comme
-vous. Il tape moins fort qu'un voyou — il n'est pas mieux nourri — mais il
-tient, parce qu'il sait ce qu'il risque. **Son butin est exactement ce qu'il
-avait pris** : le code de victoire du combat rend le butin, il n'y a rien de
-particulier à écrire pour récupérer son bien.
+vous. **Son butin est exactement ce qu'il avait pris** : le code de victoire du
+combat rend le butin, il n'y a rien de particulier à écrire pour récupérer son
+bien.
+
+### Ce qu'il vaut, et pourquoi
+
+La première version lui donnait 34 PV et 11 d'attaque, « par cohérence de
+catalogue ». Elle était molle, et deux faits le montraient.
+
+Le catalogue contenait **déjà un « Concurrent Agressif » à 38/13** : le voleur
+était plus faible que l'ennemi générique qui porte son nom.
+
+Et il ne se retrouve que dans les trois quartiers sociaux — centre-ville, gare,
+marché — dont les rosters comptent les humains les plus durs du jeu, de moyenne
+405. À 374, il passait en dessous.
+
+Mesuré sur **400 combats simulés par jour de partie** (joueur volontairement
+médiocre : signes au hasard, deux touches encaissées à chaque esquive, première
+carte jouée systématiquement — les taux absolus sont donc pessimistes, c'est le
+classement qui compte) :
+
+| Adversaire | Jour 2 | Jour 6 | Jour 12 |
+|---|---:|---:|---:|
+| Pickpocket | 96 % | 87 % | 71 % |
+| Commerçant Furieux | 78 % | 61 % | 46 % |
+| **Le voleur, ancienne version (34/11)** | **75 %** | **65 %** | **47 %** |
+| Concurrent Agressif | 62 % | 45 % | 34 % |
+| **Le voleur, désormais (42/14)** | **61 %** | **42 %** | **24 %** |
+| Voyou du Coin | 54 % | 35 % | 30 % |
+
+Il se gagnait plus facilement que le Commerçant Furieux, qu'on croise en
+appuyant sur « Bagarre » sans raison. Or ce combat-ci se **choisit**, il a un
+motif, et il rend quelque chose.
+
+**42 PV, 14 d'attaque.** Juste au-dessus du Concurrent Agressif, sous le Voyou
+du Coin : le plus dur des humains ordinaires, la brute du quartier exceptée. Et
+la fiction le dit — il a mangé à vos frais et dormi avec vos affaires, c'est
+très précisément la personne la mieux nourrie que vous croiserez dehors.
+
+Le test ne fige pas 42 et 14, il tient le **rang** : plus fort que le
+Concurrent Agressif, pas plus que le Voyou, et au-dessus de la moyenne des
+humains de ces quartiers. Rééquilibrer le catalogue déplacera le seuil sans
+casser le test.
 
 La trace s'efface au moment où le combat **commence**, pas à la victoire. On ne
 retente pas sa chance jusqu'à gagner.

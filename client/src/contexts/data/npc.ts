@@ -173,25 +173,43 @@ export function voleurTrouvable(
 /*
  * L'ADVERSAIRE QU'IL DEVIENT.
  *
- * Ni un rat ni un vigile : quelqu'un qui dort dehors comme vous, et qui se
- * bat pour la même chose. Il tape un peu moins fort qu'un voyou — il n'est pas
- * plus nourri que vous — mais il tient, parce qu'il sait ce qu'il risque.
+ * Ni un rat ni un vigile : quelqu'un qui dort dehors comme vous. Mais il a
+ * mangé votre repas et dormi avec vos affaires — c'est, très précisément, la
+ * personne la mieux nourrie que vous croiserez dans la rue. Ses chiffres le
+ * disent.
+ *
+ * QUARANTE-DEUX POINTS DE VIE, QUATORZE D'ATTAQUE. La première version en
+ * donnait 34 et 11, et elle était molle : mesurée sur 400 combats simulés par
+ * jour de partie, elle se gagnait à 75 % au jour 2, soit moins dur que le
+ * Commerçant Furieux qu'on croise en appuyant sur « Bagarre » sans raison. Or
+ * ce combat-ci se choisit, il a un motif et il rend quelque chose.
+ *
+ * Le catalogue contenait même déjà un « Concurrent Agressif » à 38/13 : le
+ * voleur était plus faible que l'ennemi générique qui porte son nom.
+ *
+ * Il se place désormais juste au-dessus de ce Concurrent et sous le Voyou du
+ * Coin — le plus dur des humains ordinaires, la brute du quartier exceptée.
+ * `test-compagnon.mjs` tient cette fourchette, pas les chiffres eux-mêmes :
+ * rééquilibrer le catalogue ne doit pas casser le test, seulement le déplacer.
  *
  * Son butin est exactement ce qu'il avait pris. Le code de victoire du combat
  * rend le butin ; il n'y a donc rien de spécial à écrire pour récupérer son
  * bien.
  */
+export const VOLEUR_PV = 42;
+export const VOLEUR_ATTAQUE = 14;
+
 export function ennemiVoleur(vole: {
   nom: string; gender: 'm' | 'f'; objet?: InventoryItem; argent?: number;
 }) {
   return {
     name: vole.nom,
     emoji: '💢',
-    health: 34,
-    attack: 11,
+    health: VOLEUR_PV,
+    attack: VOLEUR_ATTAQUE,
     description: vole.gender === 'f'
-      ? 'Elle a mangé votre pain et emporté le reste. Elle ne vous a pas oublié non plus.'
-      : 'Il a mangé votre pain et emporté le reste. Il ne vous a pas oublié non plus.',
+      ? 'Elle a mangé à vos frais et dormi avec vos affaires. Ça se voit : elle tient debout mieux que vous.'
+      : 'Il a mangé à vos frais et dormi avec vos affaires. Ça se voit : il tient debout mieux que vous.',
     loot: {
       respect: 4,
       money: vole.argent,
