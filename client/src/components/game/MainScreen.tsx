@@ -404,37 +404,70 @@ export default function MainScreen() {
           {actionsLeft === 0 ? '🌙' : '☀️'}
         </motion.span>
         <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-        <p className="absolute bottom-0 left-0 right-0 px-3 pb-2 text-[11px] text-white/95 italic leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+
+        {/*
+         * QUELQU'UN DANS LA SCÈNE, PAS UNE CARTE DE PLUS.
+         *
+         * La rencontre était une `craft-card` beige posée entre le contrat, la
+         * météo et les jauges — la cinquième carte identique d'une pile de
+         * cartes identiques. Testée en vrai : personne ne la voyait. Le défaut
+         * n'était pas la mécanique, c'était qu'un événement rare portait
+         * exactement le même habit que le mobilier permanent.
+         *
+         * Le décor du quartier est le seul élément de l'écran qui ne ressemble
+         * à rien d'autre. On y fait donc entrer la personne : elle se tient
+         * dans la rue, elle respire, et elle occupe le coin de l'image que la
+         * ligne d'ambiance laisse libre.
+         */}
+        {showNpc && streetNpc && (
+          <motion.button
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, type: 'spring', damping: 18 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={(e) => { e.stopPropagation(); playCard(); setEncounterOpen(true); }}
+            className="absolute left-2 bottom-6 flex items-end gap-1.5 text-left"
+            aria-label={tr(`Aller voir ${streetNpc.name}`, `Go see ${streetNpc.name}`)}
+          >
+            {/* Le halo n'est pas décoratif : c'est lui qui dit « ici, il se
+                passe quelque chose » avant même qu'on ait lu le nom. */}
+            <motion.span
+              className="absolute -inset-2 rounded-full pointer-events-none"
+              style={{ background: 'radial-gradient(circle, rgba(255,214,140,0.45) 0%, transparent 68%)' }}
+              animate={{ opacity: [0.45, 0.9, 0.45] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.span
+              className="relative w-14 h-14 rounded-xl overflow-hidden block shrink-0"
+              style={{ border: '2px solid #F2C14E', boxShadow: '0 3px 10px rgba(0,0,0,0.45)' }}
+              animate={{ y: [0, -2.5, 0] }}
+              transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <CardboardAvatar seed={streetNpc.seed} gender={streetNpc.gender} size={56} />
+            </motion.span>
+            <span className="relative mb-0.5 px-2 py-1 rounded-lg text-[11px] font-semibold text-[#2A1F1A] whitespace-nowrap"
+              style={{ background: 'rgba(245,238,220,0.94)', boxShadow: '0 2px 8px rgba(0,0,0,0.35)' }}>
+              👋 {streetNpc.name}
+            </span>
+          </motion.button>
+        )}
+
+        <p className={`absolute bottom-0 right-0 px-3 pb-2 text-[11px] text-white/95 italic leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] ${showNpc ? 'left-20 text-right' : 'left-0'}`}>
           {/* Premier temps : la ligne d'ambiance cède la place au constat
               d'arrivée, qui dit pourquoi on regarde avant d'agir. Elle revient
-              dès la première action faite. */}
-          {arrivee ? tr(ARRIVEE.fr, ARRIVEE.en) : `"${tc(getAmbientText(char.location, char.day))}"`}
+              dès la première action faite.
+
+              Et quand quelqu'un est là, c'est CE qu'il fait qu'on lit : une
+              odeur de café intéresse moins qu'une personne qui vous regarde —
+              et c'est cette phrase-là qui dit s'il faut s'en méfier. */}
+          {arrivee ? tr(ARRIVEE.fr, ARRIVEE.en)
+            : showNpc && streetNpc ? tr(streetNpc.situationFr, streetNpc.situationEn)
+            : `"${tc(getAmbientText(char.location, char.day))}"`}
         </p>
       </motion.div>
 
-      {/* PNJ errant : une autre âme de la rue traîne dans le coin */}
-      {showNpc && streetNpc && (
-        <motion.button
-          initial={{ x: -12, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => { playCard(); setEncounterOpen(true); }}
-          className="craft-card p-2.5 flex items-center gap-2.5 text-left"
-        >
-          <div className="w-9 h-9 rounded-lg overflow-hidden border border-[#E8D5C0] shrink-0">
-            <CardboardAvatar seed={streetNpc.seed} gender={streetNpc.gender} size={36} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-[#2A1F1A] leading-tight">
-              👋 {tr(`${streetNpc.name} traîne dans le coin`, `${streetNpc.name} is hanging around`)}
-            </p>
-            <p className="text-[10px] text-[#8B6B4A] leading-snug line-clamp-1">{tr(streetNpc.situationFr, streetNpc.situationEn)}</p>
-          </div>
-          <span className="text-[10px] font-semibold text-[#C4723A] shrink-0">{tr('Aller voir', 'Go see')} →</span>
-        </motion.button>
-      )}
-
+      {/* La rencontre se joue maintenant DANS la scène, plus haut : la carte
+          beige qui vivait ici se noyait au milieu de ses semblables. */}
       {encounterOpen && streetNpc && (
         <StreetEncounter npc={streetNpc} onClose={() => setEncounterOpen(false)} />
       )}

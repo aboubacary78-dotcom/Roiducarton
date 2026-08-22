@@ -76,13 +76,18 @@ async function seRendre(lieu, jour) {
   await clic('Merci|Thanks'); await pause(500);
 }
 
-const RENCONTRE = 'hanging around|traîne|est là|rôde|attend';
+/*
+ * La rencontre se reconnaît à son intention, pas à sa phrase : elle vit
+ * désormais dans la scène, et son libellé visible n'est plus qu'un prénom.
+ * `aria-label` porte le sens — c'est aussi ce que lit un lecteur d'écran.
+ */
+const RENCONTRE = 'Aller voir|Go see';
 let trouve = null;
 for (const lieu of ['gare', 'marche', 'centre-ville']) {
   for (let jour = 2; jour <= 10 && !trouve; jour++) {
     await seRendre(lieu, jour);
     if (await p.evaluate((m) => [...document.querySelectorAll('button')]
-      .some(x => new RegExp(m, 'i').test(x.textContent || '') && x.offsetWidth), RENCONTRE)) {
+      .some(x => new RegExp(m, 'i').test(x.getAttribute('aria-label') || '') && x.offsetWidth), RENCONTRE)) {
       trouve = { lieu, jour };
     }
   }
@@ -92,8 +97,9 @@ verifier('quelqu\'un traîne dans un quartier social', !!trouve,
   trouve ? `${trouve.lieu}, jour ${trouve.jour}` : 'aucune rencontre en 27 essais');
 if (!trouve) { await b.close(); process.exit(1); }
 
+await p.screenshot({ path: `${SCRATCH}/npc-sur-ecran.png` });
 await p.evaluate((m) => {
-  const e = [...document.querySelectorAll('button')].find(x => new RegExp(m, 'i').test(x.textContent || ''));
+  const e = [...document.querySelectorAll('button')].find(x => new RegExp(m, 'i').test(x.getAttribute('aria-label') || ''));
   e?.click();
 }, RENCONTRE);
 await pause(1200);

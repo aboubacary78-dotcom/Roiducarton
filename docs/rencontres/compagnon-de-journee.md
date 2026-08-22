@@ -99,6 +99,33 @@ Le visage du compagnon s'ancre à côté de celui du joueur, en haut de l'écran
 avec le nom et le trait prêté en toutes lettres. **Un effet actif qu'on ne voit
 pas n'existe pas.**
 
+## La rencontre entre dans la scène
+
+Premier retour de test : *« la mécanique est bien, mais l'UX n'a pas changé,
+du coup ce n'est pas trouvable. »* C'était exact, et la capture d'écran le
+montrait sans discussion.
+
+La rencontre était une `craft-card` beige posée entre le contrat, la météo et
+les jauges — **la cinquième carte identique d'une pile de cartes identiques**.
+Le défaut n'était pas la mécanique : un événement rare portait exactement le
+même habit que le mobilier permanent, et l'œil glissait dessus.
+
+Le décor du quartier est le seul élément de l'écran qui ne ressemble à rien
+d'autre. La personne y est donc entrée : **elle se tient dans la rue**, dans le
+coin de l'image, un halo doré qui bat lentement, son prénom sur une étiquette,
+et une respiration de trois secondes. La carte beige a disparu — l'écran compte
+un bloc de moins, pas un de plus.
+
+Et **sa phrase remplace la ligne d'ambiance** tant qu'il est là. Une odeur de
+café intéresse moins qu'une personne qui vous regarde — et c'est précisément
+cette phrase qui dit s'il faut s'en méfier (voir plus bas). L'indice du louche
+est ainsi lisible **sans même ouvrir la carte**.
+
+Le test cherche désormais la rencontre par son `aria-label` plutôt que par son
+libellé : le nom visible n'est plus qu'un prénom, et c'est l'intention — « aller
+voir Lucien » — qui doit rester stable. C'est aussi ce que lit un lecteur
+d'écran.
+
 ---
 
 # Celui qui regarde vos poches

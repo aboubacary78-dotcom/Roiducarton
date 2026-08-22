@@ -10051,7 +10051,280 @@ function pickMaterials(c, count) {
   return c.inventory.map((it, i) => ({ it, i })).filter((x) => x.it.type === "junk").sort((a, b) => a.it.value - b.it.value).slice(0, count).map((x) => x.i);
 }
 
+// client/src/contexts/data/backstory.ts
+var JOB_DOWNFALLS = {
+  comptable: [
+    { fr: "{name} a pass\xE9 vingt ans \xE0 \xE9quilibrer les comptes des autres. Le jour o\xF9 {il|elle} a regard\xE9 les siens, il n'y avait plus rien \xE0 \xE9quilibrer.", en: "{name} spent twenty years balancing other people's books. The day he looked at his own, there was nothing left to balance." },
+    { fr: "{name} a rep\xE9r\xE9 une erreur de deux centimes dans un bilan et a exig\xE9 de la corriger. La v\xE9rification a dur\xE9 six mois et lui a co\xFBt\xE9 sa place.", en: "{name} spotted a two-cent error in a report and insisted on fixing it. The audit took six months and cost him his job." },
+    { fr: "{name} tenait les comptes d'une entreprise qui, elle, ne tenait plus rien. Elle a ferm\xE9 un vendredi soir, sans pr\xE9venir son comptable.", en: "{name} kept the books for a company that could no longer keep anything. It shut down one Friday night, without telling its accountant." }
+  ],
+  ouvrier: [
+    { fr: "{name} a donn\xE9 trente ans \xE0 la m\xEAme usine. Elle est partie \xE0 l'\xE9tranger un lundi matin, sans laisser d'adresse.", en: "{name} gave thirty years to the same factory. It moved abroad one Monday morning without leaving a forwarding address." },
+    { fr: "{name} a r\xE9par\xE9 {lui-m\xEAme|elle-m\xEAme} la machine cens\xE9e {le|la} remplacer. Elle marche toujours ; {lui|elle}, beaucoup moins.", en: "{name} personally repaired the machine that was meant to replace him. It still runs; he doesn't, so much." },
+    { fr: "{name} a manqu\xE9 trois jours pour un dos bloqu\xE9. \xC0 son retour, son badge n'ouvrait plus aucune porte.", en: "{name} missed three days with a locked back. When he came back, his badge no longer opened any door." }
+  ],
+  professeur: [
+    { fr: "{name} a corrig\xE9 les fautes de sa propre lettre de licenciement avant de la rendre. On ne la lui a pas reprise.", en: "{name} corrected the mistakes in his own dismissal letter before handing it back. Nobody asked for it again." },
+    { fr: "{name} a fait cours \xE0 une salle vide pendant tout un trimestre. Personne n'a os\xE9 lui dire que l'\xE9cole avait ferm\xE9.", en: "{name} taught an empty classroom for a whole term. No one dared tell him the school had closed." },
+    { fr: "{name} a donn\xE9 ses derniers billets \xE0 un \xE9l\xE8ve dans le besoin. {Il|Elle} a oubli\xE9 d'en garder pour {lui-m\xEAme|elle-m\xEAme}.", en: "{name} gave his last few bills to a student in need. He forgot to keep any for himself." }
+  ],
+  sommelier: [
+    { fr: "{name} a servi du vinaigre \xE0 la place du grand cru, au d\xEEner le plus important de sa carri\xE8re. {Il|Elle} jure encore que les deux avaient le m\xEAme nez.", en: "{name} served vinegar instead of the fine vintage at the most important dinner of his career. He still swears the two smelled the same." },
+    { fr: "{name} a go\xFBt\xE9 toute la cave, bouteille apr\xE8s bouteille, pour \xEAtre bien s\xFBr{|e}. {Il|Elle} en \xE9tait s\xFBr{|e}, et sans emploi.", en: "{name} tasted the whole cellar, bottle by bottle, just to be sure. He was sure, and out of a job." },
+    { fr: "{name} a recrach\xE9 le vin d'un critique en pleine d\xE9gustation. Le critique n'a pas trouv\xE9 \xE7a dr\xF4le du tout.", en: "{name} spat out a critic's wine mid-tasting. The critic did not find it funny at all." }
+  ],
+  cascadeur: [
+    { fr: "{name} a surv\xE9cu \xE0 mille cascades impossibles. {Il|Elle} s'est bris\xE9 le poignet en glissant sur un savon dans sa salle de bain.", en: "{name} survived a thousand impossible stunts. He broke his wrist slipping on a bar of soap in his own bathroom." },
+    { fr: "{name} a doubl\xE9 une star sur un pont en flammes. La production a fait faillite le lendemain, et {lui|elle} avec.", en: "{name} doubled a star on a burning bridge. The production went bankrupt the next day, and he went with it." },
+    { fr: "{name} a refus\xE9 une doublure pour un dernier saut de trop. Son dos, lui, a refus\xE9 de continuer.", en: "{name} turned down a stand-in for one last jump too many. His back, in turn, refused to go on." }
+  ],
+  informaticien: [
+    { fr: "{name} a supprim\xE9 le mauvais dossier. C'\xE9tait celui de toute l'entreprise, sauvegardes comprises.", en: "{name} deleted the wrong folder. It was the whole company's, backups included." },
+    { fr: "{name} a oubli\xE9 le seul mot de passe qui comptait vraiment. {Il|Elle} le cherche encore.", en: "{name} forgot the one password that actually mattered. He is still looking for it." },
+    { fr: "{name} a d\xE9branch\xE9 le mauvais c\xE2ble pour aller plus vite. Tout un \xE9tage s'est \xE9teint d'un coup.", en: "{name} unplugged the wrong cable to save time. A whole floor went dark at once." }
+  ],
+  cuisinier: [
+    { fr: "{name} a servi son plat signature \xE0 un critique allergique \xE0 peu pr\xE8s \xE0 tout. Le restaurant n'a pas surv\xE9cu \xE0 l'article.", en: "{name} served his signature dish to a critic allergic to nearly everything. The restaurant did not survive the review." },
+    { fr: "{name} a transform\xE9 un rat en plat du jour cinq \xE9toiles. Un inspecteur l'a vu{|e} attraper le rat.", en: "{name} turned a rat into a five-star special. An inspector saw him catch the rat." },
+    { fr: "{name} a go\xFBt\xE9 sa propre sauce jusqu'\xE0 la derni\xE8re goutte. Il ne restait plus rien \xE0 servir aux clients.", en: "{name} tasted his own sauce down to the last drop. There was nothing left to serve the customers." }
+  ],
+  infirmier: [
+    { fr: "{name} a soign\xE9 toute la ville, sauf {lui-m\xEAme|elle-m\xEAme}. {Il|Elle} l'a compris trop tard, devant sa porte, les cl\xE9s rest\xE9es \xE0 l'int\xE9rieur.", en: "{name} cared for the whole town, except himself. He realized too late, at his own door, keys still inside." },
+    { fr: "{name} a donn\xE9 son dernier billet \xE0 un patient pour un taxi. {Il|Elle} a fait tout le chemin du retour \xE0 pied.", en: "{name} gave his last bill to a patient for a cab. He walked the whole way home himself." },
+    { fr: "{name} a couvert les gardes de tout le monde pendant des ann\xE9es. Le jour o\xF9 {il|elle} est tomb{\xE9|\xE9e} malade, il n'y avait personne pour {lui|elle}.", en: "{name} covered everyone's shifts for years. The day he fell ill, there was no one for him." }
+  ],
+  artiste: [
+    { fr: "{name} a tout vendu pour financer une toile enti\xE8rement blanche. Personne ne l'a comprise, {lui|elle} non plus.", en: "{name} sold everything to fund an entirely blank canvas. Nobody understood it, himself included." },
+    { fr: "{name} a peint la fresque de sa vie sur un mur. Le mur a \xE9t\xE9 d\xE9moli le lendemain pour un parking.", en: "{name} painted the fresco of his life on a wall. The wall was torn down the next day for a parking lot." },
+    { fr: "{name} a refus\xE9 de vendre une seule de ses \u0153uvres, par principe. Le principe ne payait pas le loyer.", en: "{name} refused to sell a single one of his works, on principle. The principle did not cover the rent." }
+  ],
+  militaire: [
+    { fr: "{name} a surv\xE9cu \xE0 tout, sauf \xE0 la paperasse de sa retraite. Le dossier s'est perdu entre deux bureaux, et {lui|elle} aussi.", en: "{name} survived everything but his own retirement paperwork. The file got lost between two offices, and so did he." },
+    { fr: "{name} a mont\xE9 la garde si longtemps qu'{il|elle} en a oubli\xE9 la raison. Quand {il|elle} a demand\xE9, plus personne ne s'en souvenait.", en: "{name} stood guard so long he forgot the reason. When he asked, no one else remembered either." },
+    { fr: "{name} a suivi les ordres jusqu'au tout dernier. Le dernier ordre \xE9tait de rentrer chez {lui|elle}, mais {il|elle} n'en avait plus.", en: "{name} followed orders down to the very last. The last order was to go home, but he no longer had one." }
+  ],
+  bibliothecaire: [
+    { fr: "{name} connaissait chaque livre par c\u0153ur. La biblioth\xE8que a ferm\xE9 faute de lecteurs, et {il|elle} en \xE9tait le {dernier|derni\xE8re}.", en: "{name} knew every book by heart. The library closed for lack of readers, and he was the last one." },
+    { fr: "{name} a gard\xE9 un livre en retard pendant quarante ans. L'amende a fini par valoir son appartement.", en: "{name} kept a book overdue for forty years. The fine eventually came to the price of his flat." },
+    { fr: "{name} a rang\xE9 le dernier rayon avant de partir, comme chaque soir. On avait oubli\xE9 de lui dire qu'{il|elle} \xE9tait licenci{\xE9|\xE9e}.", en: "{name} shelved the last row before leaving, like every night. They had forgotten to tell him he was let go." }
+  ],
+  vendeur: [
+    { fr: "{name} pouvait vendre n'importe quoi \xE0 n'importe qui. {Il|Elle} s'est vendu \xE0 {lui-m\xEAme|elle-m\xEAme} une voiture qu'{il|elle} n'avait pas, et l'a pay\xE9e.", en: "{name} could sell anything to anyone. He sold himself a car he didn't own, and paid for it." },
+    { fr: "{name} a promis \xAB satisfait ou rembours\xE9 \xBB \xE0 toute la ville. Toute la ville est revenue le m\xEAme jour.", en: '{name} promised the whole town "satisfied or refunded." The whole town came back the same day.' },
+    { fr: "{name} a conclu la meilleure affaire de sa vie. C'est l'acheteur, malheureusement, qui la raconte encore.", en: "{name} closed the best deal of his life. Sadly, it's the buyer who still tells the story." }
+  ],
+  jardinier: [
+    { fr: "{name} a fait pousser un potager superbe sur le toit de l'immeuble. Le toit n'\xE9tait pas pr\xE9vu pour, l'immeuble non plus.", en: "{name} grew a gorgeous garden on the building's roof. The roof wasn't built for it, and neither was the building." },
+    { fr: "{name} a parl\xE9 \xE0 ses plantes pendant vingt ans. Le jour o\xF9 elles ont sembl\xE9 r\xE9pondre, on est venu {le|la} chercher.", en: "{name} talked to his plants for twenty years. The day they seemed to answer, someone came to take him away." },
+    { fr: "{name} a tout mis\xE9 sur une r\xE9colte parfaite. Une gel\xE9e d'avril a tout emport\xE9 en une seule nuit.", en: "{name} bet everything on a perfect harvest. An April frost took it all in a single night." }
+  ],
+  avocat: [
+    { fr: "{name} a gagn\xE9 tous ses proc\xE8s, sauf le sien. {Il|Elle} s'\xE9tait chois{i|ie} comme adversaire, par exc\xE8s de confiance.", en: "{name} won every case but his own. He'd chosen himself as the opponent, out of overconfidence." },
+    { fr: "{name} a d\xE9fendu un pigeon devant le tribunal, par principe. Le principe lui a co\xFBt\xE9 le cabinet.", en: "{name} defended a pigeon in court, on principle. The principle cost him the firm." },
+    { fr: "{name} a plaid\xE9 si bien qu'{il|elle} en a oubli\xE9 de se faire payer. Ses clients, eux, n'ont rien oubli\xE9.", en: "{name} argued so well he forgot to get paid. His clients, however, forgot nothing." }
+  ],
+  musicien: [
+    { fr: "{name} a attendu le grand concert pendant trente ans. Le soir venu, son harmonica s'est bris\xE9 sur la premi\xE8re note, et {il|elle} n'a jamais rejou\xE9 depuis.", en: "{name} waited thirty years for the big concert. When the night came, his harmonica snapped on the first note, and he never played again." },
+    { fr: "{name} a tout mis\xE9 sur un seul disque. Il est sorti le jour d'un tube que tout le monde a retenu, sauf le sien.", en: "{name} bet everything on a single record. It came out the day of a hit everyone remembers, except his." },
+    { fr: "{name} a jou\xE9 dans le m\xE9tro jusqu'au dernier train, chaque soir. Un jour, le dernier train n'a plus voulu de {lui|elle}.", en: "{name} played in the metro until the last train, every night. One day, the last train had no more room for him." }
+  ],
+  boxeur: [
+    { fr: "{name} n'a jamais touch\xE9 le tapis sur un ring. {Il|Elle} l'a touch\xE9 en glissant sur sa ceinture de champion, pos\xE9e par terre.", en: "{name} never hit the canvas in the ring. He hit it slipping on his champion's belt, left on the floor." },
+    { fr: "{name} a encaiss\xE9 mille coups sans broncher. Le seul qui l'a {mis|mise} \xE0 terre, c'\xE9tait un huissier, tr\xE8s poli.", en: "{name} took a thousand punches without flinching. The only one who put him down was a bailiff, very polite." },
+    { fr: "{name} a livr\xE9 un dernier combat de trop. Ses poings s'en souviennent, sa t\xEAte un peu moins.", en: "{name} fought one last bout too many. His fists remember it, his head a little less." }
+  ],
+  poete: [
+    { fr: "{name} a \xE9crit le plus beau vers de sa vie au dos d'un ticket. {Il|Elle} l'a rendu \xE0 la caissi\xE8re par erreur, et le vers est parti avec la monnaie.", en: "{name} wrote the finest line of his life on the back of a receipt. He handed it to the cashier by mistake, and the line left with the change." },
+    { fr: "{name} a refus\xE9 de vendre son \xE2me pour un vrai m\xE9tier. Son \xE2me est intacte ; le reste, beaucoup moins.", en: "{name} refused to sell his soul for a real job. His soul is intact; the rest, far less so." },
+    { fr: "{name} a attendu que le monde comprenne enfin sa po\xE9sie. Le monde \xE9tait occup\xE9 ailleurs.", en: "{name} waited for the world to finally understand his poetry. The world was busy elsewhere." }
+  ],
+  _default: [
+    { fr: "{name} avait une petite vie bien rang\xE9e. Une erreur, un coup de malchance, et elle s'est retrouv\xE9e rang\xE9e dehors.", en: "{name} had a tidy little life. One mistake, one stroke of bad luck, and it got tidied out onto the street." }
+  ]
+};
+var TRAIT_OPENERS = {
+  "estomac-acier": { fr: "L'estomac blind\xE9,", en: "With a cast-iron stomach," },
+  optimiste: { fr: "Incorrigible optimiste,", en: "An incurable optimist," },
+  poissard: { fr: "{Poissard|Poissarde} depuis toujours,", en: "Cursed with bad luck from birth," },
+  "ami-pigeons": { fr: "Plus proche des pigeons que des gens,", en: "Closer to pigeons than to people," },
+  "sommeil-plomb": { fr: "{Dormeur|Dormeuse} de plomb,", en: "A dead-to-the-world sleeper," },
+  "nez-sensible": { fr: "Le nez qui flaire tout,", en: "With a nose for trouble," },
+  insomniaque: { fr: "Insomniaque de longue date,", en: "A lifelong insomniac," },
+  paranoiaque: { fr: "M\xE9fiant{|e} de tout et de tous,", en: "Suspicious of everyone," },
+  "main-verte": { fr: "La main verte jusqu'au bout,", en: "Green-thumbed to a fault," },
+  charismatique: { fr: "{Charmeur|Charmeuse} inv\xE9t\xE9r\xE9{|e},", en: "A born charmer," },
+  "os-mousse": { fr: "Les os en mousse,", en: "With bones made of foam," },
+  metabolisme: { fr: "Affam\xE9{|e} en permanence,", en: "Forever hungry," },
+  collectionneur: { fr: "Incapable de rien jeter,", en: "Unable to throw anything away," },
+  "phobie-rats": { fr: "Terroris\xE9{|e} par les rats,", en: "Terrified of rats," },
+  haleine: { fr: "L'haleine redoutable,", en: "With breath that could stop a clock," },
+  agile: { fr: "Agile comme un chat,", en: "Quick on his feet," },
+  "resistant-froid": { fr: "Insensible au froid,", en: "Immune to the cold," },
+  bricoleur: { fr: "{Bricoleur|Bricoleuse} dans l'\xE2me,", en: "A tinkerer to the core," },
+  orientation: { fr: "Jamais perdu{|e} nulle part,", en: "Never once lost," },
+  "ventre-pattes": { fr: "Pr\xEAt{|e} \xE0 manger n'importe quoi,", en: "Willing to eat anything," }
+};
+function seedNum(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = h * 31 + s.charCodeAt(i) >>> 0;
+  return h;
+}
+function genderize(s, feminine) {
+  return s.replace(/\{([^{}|]*)\|([^{}|]*)\}/g, (_m, masc, fem) => feminine ? fem : masc);
+}
+function generateOrigin(char) {
+  const downfalls = JOB_DOWNFALLS[char.job.id] || JOB_DOWNFALLS._default;
+  const h = seedNum(char.seed || char.name || "sdf");
+  const fall = downfalls[h % downfalls.length];
+  const openers = char.traits.map((t) => TRAIT_OPENERS[t.id]).filter(Boolean);
+  const opener = openers.length ? openers[Math.floor(h / 7) % openers.length] : null;
+  const feminine = char.gender === "f";
+  const nameFill = (s) => s.replace(/\{name\}/g, char.name);
+  return {
+    titleFr: `La Chute de ${char.name}`,
+    titleEn: `The Fall of ${char.name}`,
+    textFr: nameFill(genderize((opener ? opener.fr + " " : "") + fall.fr, feminine)),
+    textEn: nameFill((opener ? opener.en + " " : "") + fall.en)
+  };
+}
+
 // client/src/contexts/data/npc.ts
+var SOCIAL_LOCATIONS = ["centre-ville", "gare", "marche"];
+function isSocialLocation(location) {
+  return SOCIAL_LOCATIONS.includes(location);
+}
+var NPC_NAMES = [
+  "Marcel",
+  "G\xE9rard",
+  "Lucienne",
+  "Albert",
+  "Yvette",
+  "Ren\xE9",
+  "Josette",
+  "Fernand",
+  "Ginette",
+  "Maurice",
+  "Colette",
+  "Raymond",
+  "Simone",
+  "Bernadette",
+  "Roger",
+  "Monique",
+  "Thierry",
+  "Huguette",
+  "Patrick",
+  "Odette",
+  "Robert",
+  "Paulette",
+  "Lucien",
+  "Suzanne",
+  "Andr\xE9",
+  "Denise",
+  "Gaston",
+  "Micheline",
+  "Henri",
+  "Jacqueline"
+];
+var SITUATIONS = [
+  { fr: "{S} grelotte sous une fine couverture.", en: "{S} shivers under a thin blanket." },
+  { fr: "{S} fixe le vide, un gobelet vide \xE0 la main.", en: "{S} stares into space, an empty cup in hand." },
+  { fr: "{S} fredonne une vieille chanson, fausse mais sinc\xE8re.", en: "{S} hums an old song, off-key but heartfelt." },
+  { fr: "{S} compte ses pi\xE8ces pour la dixi\xE8me fois.", en: "{S} counts their coins for the tenth time." },
+  { fr: "{S} offre un sourire \xE0 qui veut bien s'arr\xEAter.", en: "{S} offers a smile to anyone who'll stop." },
+  { fr: "{S} a l'air d'attendre quelqu'un qui ne viendra pas.", en: "{S} seems to wait for someone who won't come." },
+  { fr: "{S} partage son bout de pain avec un pigeon.", en: "{S} shares a crust of bread with a pigeon." },
+  { fr: "{S} lit un journal d'il y a trois semaines.", en: "{S} reads a three-week-old newspaper." }
+];
+var SITUATIONS_LOUCHES = [
+  { fr: "{S} regarde votre sac plus souvent que votre visage.", en: "{S} looks at your bag more often than your face." },
+  { fr: "{S} vous appelle \xAB mon ami \xBB avant m\xEAme de savoir votre nom.", en: '{S} calls you "my friend" before knowing your name.' },
+  { fr: "{S} range quelque chose sous sa veste en vous voyant arriver.", en: "{S} tucks something under their coat as you walk up." },
+  { fr: "{S} demande o\xF9 vous dormez, l'air de rien.", en: "{S} asks where you sleep, casually." },
+  { fr: "{S} a trois montres au poignet et l'heure d'aucune.", en: "{S} wears three watches and knows the time on none." },
+  { fr: "{S} rit un peu trop fort \xE0 ce que vous n'avez pas dit.", en: "{S} laughs a bit too loudly at what you didn't say." },
+  { fr: "{S} se tient toujours du c\xF4t\xE9 de votre poche.", en: "{S} keeps standing on the side your pocket is on." },
+  { fr: "{S} jure qu'{S2} ne boit plus, en rangeant une bouteille.", en: "{S} swears they've quit drinking, while pocketing a bottle." }
+];
+var OFFER_ITEMS = [
+  { id: "troc-conserve", name: "Conserve caboss\xE9e", emoji: "\u{1F96B}", type: "food", value: 3, effect: { hunger: 18 } },
+  { id: "troc-couverture", name: "Bout de couverture", emoji: "\u{1F9E3}", type: "armor", value: 4, defenseBonus: 1 },
+  { id: "troc-lampe", name: "Lampe de poche", emoji: "\u{1F526}", type: "tool", value: 5, effect: { mental: 5 } },
+  { id: "troc-radio", name: "Petite radio", emoji: "\u{1F4FB}", type: "special", value: 6, effect: { mental: 10 } },
+  { id: "troc-gants", name: "Gants d\xE9pareill\xE9s", emoji: "\u{1F9E4}", type: "armor", value: 3, defenseBonus: 1 }
+];
+function makeRng(seed) {
+  let s = seed >>> 0 || 1;
+  return () => {
+    s = Math.imul(s, 1664525) + 1013904223 >>> 0;
+    return s / 4294967296;
+  };
+}
+function hashStr(s) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h ^ s.charCodeAt(i)) >>> 0;
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+function npcAt(day2, location, playerSeed) {
+  if (!isSocialLocation(location)) return null;
+  const rng = makeRng(hashStr(`${day2}|${location}|${playerSeed}`));
+  if (rng() > 0.55) return null;
+  const name = NPC_NAMES[Math.floor(rng() * NPC_NAMES.length)];
+  const gender = genderFromName(name);
+  const job = JOBS[Math.floor(rng() * JOBS.length)];
+  const i1 = Math.floor(rng() * TRAITS.length);
+  let i2 = Math.floor(rng() * TRAITS.length);
+  if (i2 === i1) i2 = (i2 + 1) % TRAITS.length;
+  const traits = [TRAITS[i1], TRAITS[i2]];
+  const seed = `npc-${day2}-${location}-${name}-${job.id}`;
+  const S = { fr: gender === "f" ? "Elle" : "Il", en: gender === "f" ? "She" : "He" };
+  const louche = rng() < 0.25;
+  const banque = louche ? SITUATIONS_LOUCHES : SITUATIONS;
+  const sit = banque[Math.floor(rng() * banque.length)];
+  const asChar = { name, job, traits, seed, gender };
+  const story = generateOrigin(asChar);
+  const npc = {
+    id: seed,
+    name,
+    job,
+    traits,
+    gender,
+    seed,
+    situationFr: sit.fr.replace(/\{S\}/g, S.fr).replace("{S2}", gender === "f" ? "elle" : "il"),
+    situationEn: sit.en.replace(/\{S\}/g, S.en),
+    story,
+    louche
+  };
+  if (rng() < 0.4) {
+    const item = OFFER_ITEMS[Math.floor(rng() * OFFER_ITEMS.length)];
+    const price = 2 + Math.floor(rng() * 4);
+    npc.offer = { item: { ...item }, price };
+  }
+  return npc;
+}
+var JOURS_POUR_RETROUVER = 2;
+function voleurTrouvable(c) {
+  if (!c.vole) return false;
+  return c.vole.quartier === c.location && c.day - c.vole.jour < JOURS_POUR_RETROUVER;
+}
+var VOLEUR_PV = 42;
+var VOLEUR_ATTAQUE = 14;
+function ennemiVoleur(vole) {
+  return {
+    name: vole.nom,
+    emoji: "\u{1F4A2}",
+    health: VOLEUR_PV,
+    attack: VOLEUR_ATTAQUE,
+    description: vole.gender === "f" ? "Elle a mang\xE9 \xE0 vos frais et dormi avec vos affaires. \xC7a se voit : elle tient debout mieux que vous." : "Il a mang\xE9 \xE0 vos frais et dormi avec vos affaires. \xC7a se voit : il tient debout mieux que vous.",
+    loot: {
+      respect: 4,
+      money: vole.argent,
+      item: vole.objet ? { ...vole.objet } : void 0
+    }
+  };
+}
 function encounterFlag(day2, location) {
   return `rencontre-${day2}-${location}`;
 }
@@ -11687,121 +11960,15 @@ var initialState = {
   deathCause: null
 };
 var GameContext = createContext(void 0);
-
-// ../../../tmp/monet-S2FLUP/cap.js
-var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
-
-// client/src/lib/ads.ts
-var NOADS_KEY = "roi-du-carton-noads";
-var adsRemoved = (() => {
-  try {
-    return localStorage.getItem(NOADS_KEY) === "1";
-  } catch {
-    return false;
-  }
-})();
-function setAdsRemoved(v) {
-  adsRemoved = v;
-  try {
-    localStorage.setItem(NOADS_KEY, v ? "1" : "0");
-  } catch {
-  }
-}
-var AD_UNITS = {
-  android: {
-    banner: "ca-app-pub-3940256099942544/6300978111",
-    interstitial: "ca-app-pub-3940256099942544/1033173712",
-    rewarded: "ca-app-pub-3940256099942544/5224354917"
-  },
-  ios: {
-    banner: "ca-app-pub-3940256099942544/2934735716",
-    interstitial: "ca-app-pub-3940256099942544/4411468910",
-    rewarded: "ca-app-pub-3940256099942544/1712485313"
-  }
-};
-var USE_TEST_ADS = true;
-function platform() {
-  const p = Capacitor.getPlatform();
-  if (p === "android") return "android";
-  if (p === "ios") return "ios";
-  return "web";
-}
-function isNative() {
-  return Capacitor.isNativePlatform();
-}
-function unit(kind) {
-  const p = platform();
-  if (p === "web") return AD_UNITS.android[kind];
-  return AD_UNITS[p][kind];
-}
-var consentStatus = null;
-function personalizedAdsAllowed() {
-  return consentStatus === "OBTAINED" || consentStatus === "NOT_REQUIRED";
-}
-var DELAI_INTERSTITIEL_MS = 9e4;
-var PARTIES_DE_GRACE = 3;
-var CLE_PARTIES = "roi-du-carton-parties-finies";
-var dernierInterstitiel = 0;
-var premiereMortDeLaSession = true;
-function partiesFinies() {
-  try {
-    return Number(localStorage.getItem(CLE_PARTIES) || "0");
-  } catch {
-    return 0;
-  }
-}
-function noterPartieFinie() {
-  try {
-    localStorage.setItem(CLE_PARTIES, String(partiesFinies() + 1));
-  } catch {
-  }
-}
-function partieTerminee() {
-  noterPartieFinie();
-}
-function verdictInterstitiel(maintenant = Date.now()) {
-  if (adsRemoved) return { montrer: false, raison: "sans-pub achet\xE9" };
-  if (partiesFinies() <= PARTIES_DE_GRACE) {
-    return { montrer: false, raison: `p\xE9riode de gr\xE2ce (${partiesFinies()}/${PARTIES_DE_GRACE} parties)` };
-  }
-  if (premiereMortDeLaSession) return { montrer: false, raison: "premi\xE8re mort de la session" };
-  const attente = maintenant - dernierInterstitiel;
-  if (attente < DELAI_INTERSTITIEL_MS) {
-    return { montrer: false, raison: `trop t\xF4t (${Math.round(attente / 1e3)} s sur ${DELAI_INTERSTITIEL_MS / 1e3})` };
-  }
-  return { montrer: true, raison: "ok" };
-}
-function reinitialiserInterstitiel() {
-  dernierInterstitiel = 0;
-  premiereMortDeLaSession = true;
-}
-async function showInterstitial() {
-  const verdict = verdictInterstitiel();
-  premiereMortDeLaSession = false;
-  if (!verdict.montrer || !isNative()) return;
-  dernierInterstitiel = Date.now();
-  try {
-    const { AdMob } = await import("@capacitor-community/admob");
-    await AdMob.prepareInterstitial({
-      adId: unit("interstitial"),
-      isTesting: USE_TEST_ADS,
-      // Refus, ou consentement inconnu : publicité NON personnalisée.
-      // Sans cette ligne, le formulaire de consentement ne servirait à rien.
-      npa: !personalizedAdsAllowed()
-    });
-    await AdMob.showInterstitial();
-  } catch (e) {
-    console.warn("[ads] showInterstitial:", e);
-  }
-}
 export {
-  CONTRACTS,
+  ENEMIES,
+  JOURS_POUR_RETROUVER,
+  TRAITS,
+  TRAITS_PRETABLES,
+  ennemiVoleur,
   gameReducer,
-  getContract,
-  paquetDuPremierMatin,
-  partieTerminee,
-  reinitialiserInterstitiel,
-  setAdsRemoved,
-  showInterstitial,
-  verdictInterstitiel
+  hasTrait,
+  npcAt,
+  traitPretable,
+  voleurTrouvable
 };
