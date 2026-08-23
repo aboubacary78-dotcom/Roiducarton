@@ -11,11 +11,17 @@ import SceneIllustration, { sceneForLocation } from './SceneIllustration';
  * dessinée qu'elle remplace.
  */
 export default function LocationBackdrop({ location }: { location: string }) {
-  const [imgOk, setImgOk] = useState(true);
+  /*
+   * On retient LE quartier dont le diorama manque, pas « un diorama a manqué ».
+   * Le composant n'est pas remonté quand on voyage : un simple booléen aurait
+   * privé de photo tous les quartiers visités ensuite, alors qu'un seul fichier
+   * fait défaut.
+   */
+  const [manquant, setManquant] = useState<string | null>(null);
   return (
     <div className="w-full h-full relative overflow-hidden">
       <SceneIllustration theme={sceneForLocation(location)} className="w-full h-full" rounded={false} align="bottom" sway />
-      {imgOk && (
+      {manquant !== location && (
         <motion.img
           src={`/assets/scene-${location}.webp`}
           alt=""
@@ -24,7 +30,7 @@ export default function LocationBackdrop({ location }: { location: string }) {
           loading="eager"
           fetchPriority="high"
           decoding="async"
-          onError={() => setImgOk(false)}
+          onError={() => setManquant(location)}
           className="absolute inset-0 w-full h-full object-cover"
           animate={{ scale: [1, 1.07, 1] }}
           transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}

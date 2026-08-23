@@ -5,7 +5,7 @@
  */
 import { useGame } from '@/contexts/GameContext';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { installerClicParDefaut } from '@/lib/sound';
 import { hideBanner, showBanner } from '@/lib/ads';
 import { screenIn } from '@/lib/anim';
@@ -17,27 +17,84 @@ import MainScreen from '@/components/game/MainScreen';
 import EventScreen from '@/components/game/EventScreen';
 import TravelScreen from '@/components/game/TravelScreen';
 import InventoryScreen from '@/components/game/InventoryScreen';
-import GameOverScreen from '@/components/game/GameOverScreen';
-import CombatScreen from '@/components/game/CombatScreen';
 import EventResultOverlay from '@/components/game/EventResultOverlay';
 import OriginStoryOverlay from '@/components/game/OriginStoryOverlay';
-import ShopScreen from '@/components/game/ShopScreen';
-import SettingsScreen from '@/components/game/SettingsScreen';
-import StealHeist from '@/components/game/StealHeist';
-import BegMinigame from '@/components/game/BegMinigame';
-import SalvageMinigame from '@/components/game/SalvageMinigame';
 import TutorialOverlay from '@/components/game/TutorialOverlay';
 import WeatherOverlay from '@/components/game/WeatherOverlay';
-import WardrobeScreen from '@/components/game/WardrobeScreen';
 import AchievementToast from '@/components/game/AchievementToast';
 import Toaster from '@/components/game/Toaster';
 import DaySummaryOverlay from '@/components/game/DaySummaryOverlay';
-import DeathRegistryScreen from '@/components/game/DeathRegistryScreen';
-import CimetiereScreen from '@/components/game/CimetiereScreen';
 import CartonMatinOverlay from '@/components/game/CartonMatinOverlay';
 import { noteSessionHour, rescheduleAll } from '@/lib/notifications';
 import { bumpSession } from '@/components/game/MinigameIntro';
 import { loadDaily } from '@/lib/daily';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * CE QU'ON NE VOIT PAS AU LANCEMENT NE DOIT PAS RETARDER LE LANCEMENT.
+ *
+ * Les mini-jeux, la boutique, l'écran de mort, le registre, le cimetière, la
+ * penderie et les options représentent le plus gros morceau de code de
+ * l'application — et aucun d'eux n'est le premier écran. Ils partaient
+ * pourtant dans le même paquet que l'écran-titre : le joueur téléchargeait la
+ * bagarre, le casse et la fin de partie avant même d'avoir choisi son
+ * personnage.
+ *
+ * Ils sont donc découpés en morceaux séparés, puis RÉCHAUFFÉS dès que le
+ * navigateur souffle (voir `prechargerEcrans`). Le gain est pris au démarrage,
+ * et l'attente qu'un découpage crée d'ordinaire n'arrive jamais : le morceau
+ * est déjà là quand on appuie sur « Bagarre ».
+ * ═══════════════════════════════════════════════════════════════════════════ */
+const charge = {
+  combat: () => import('@/components/game/CombatScreen'),
+  vol: () => import('@/components/game/StealHeist'),
+  manche: () => import('@/components/game/BegMinigame'),
+  recup: () => import('@/components/game/SalvageMinigame'),
+  boutique: () => import('@/components/game/ShopScreen'),
+  fin: () => import('@/components/game/GameOverScreen'),
+  options: () => import('@/components/game/SettingsScreen'),
+  penderie: () => import('@/components/game/WardrobeScreen'),
+  registre: () => import('@/components/game/DeathRegistryScreen'),
+  cimetiere: () => import('@/components/game/CimetiereScreen'),
+};
+
+const CombatScreen = lazy(charge.combat);
+const StealHeist = lazy(charge.vol);
+const BegMinigame = lazy(charge.manche);
+const SalvageMinigame = lazy(charge.recup);
+const ShopScreen = lazy(charge.boutique);
+const GameOverScreen = lazy(charge.fin);
+const SettingsScreen = lazy(charge.options);
+const WardrobeScreen = lazy(charge.penderie);
+const DeathRegistryScreen = lazy(charge.registre);
+const CimetiereScreen = lazy(charge.cimetiere);
+
+/**
+ * Va chercher tous les écrans découpés pendant que le joueur lit l'écran-titre.
+ * `requestIdleCallback` attend un vrai temps mort : le réchauffage ne dispute
+ * jamais la bande passante à l'image du quartier, qui, elle, est à l'écran.
+ */
+function prechargerEcrans(): void {
+  const suite = Object.values(charge);
+  let i = 0;
+  const suivant = () => {
+    if (i >= suite.length) return;
+    suite[i++]().catch(() => { /* le morceau se rechargera à l'usage */ });
+    planifier();
+  };
+  const planifier = () => {
+    const ric = (window as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
+    if (ric) ric(suivant); else setTimeout(suivant, 300);
+  };
+  planifier();
+}
+
+/*
+ * Le temps d'aller chercher un morceau, on garde le fond de carton plutôt
+ * qu'une page blanche. En pratique le réchauffage fait que ce voile n'est
+ * presque jamais vu — il n'existe que pour le cas où l'on appuie plus vite que
+ * le réseau.
+ */
+const VOILE = <div className="min-h-screen bg-texture" aria-busy="true" />;
 
 // Rendu de l'écran courant. Les superpositions (résultat, météo, tutoriel,
 // succès) sont gérées à part pour ne pas être rejouées à chaque transition.
@@ -70,6 +127,10 @@ export default function Home() {
    * posés explicitement gagnent toujours — celui-ci ne comble que les trous.
    */
   useEffect(() => { installerClicParDefaut(); }, []);
+
+  // Les écrans découpés se réchauffent pendant qu'on lit le titre : le
+  // découpage allège le démarrage sans jamais faire attendre à l'usage.
+  useEffect(() => { prechargerEcrans(); }, []);
 
 
   /*
@@ -167,7 +228,7 @@ export default function Home() {
             className="w-full"
             style={{ transformOrigin: tapOrigin() }}
           >
-            {renderScreen(state.screen)}
+            <Suspense fallback={VOILE}>{renderScreen(state.screen)}</Suspense>
           </motion.div>
         </AnimatePresence>
 

@@ -11,5 +11,10 @@
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Un mois pour les sons, et pas un an : les fichiers ne sont pas hachés et la
+# bibliothèque audio est appelée à être remplacée (voir netlify.toml).
+/audio/*
+  Cache-Control: public, max-age=2592000
+
 /index.html
   Cache-Control: public, max-age=0, must-revalidate

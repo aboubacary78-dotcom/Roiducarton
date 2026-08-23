@@ -685,8 +685,15 @@ export const playGaugeFilled = withFile('jauge-remplie', 0.85, playSuccessSynth)
  * dont le silence est voulu, ceux qui sont désactivés, et ceux qui coupent le
  * son — claquer au moment où l'on demande le silence serait une farce.
  * ═══════════════════════════════════════════════════════════════════════════ */
+let clicInstalle = false;
+
 export function installerClicParDefaut(): void {
   if (typeof document === 'undefined') return;
+  // Le filet se pose une fois pour toutes. Sans ce verrou, un remontage de la
+  // page (changement de route, mode strict de React) empilerait un second
+  // écouteur sur le même document et chaque appui claquerait deux fois.
+  if (clicInstalle) return;
+  clicInstalle = true;
   document.addEventListener('click', (e) => {
     if (muted) return;
     const cible = (e.target as HTMLElement | null)?.closest?.('button, [role="button"]') as HTMLElement | null;
