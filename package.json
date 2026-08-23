@@ -11,8 +11,8 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "cap:sync": "pnpm build && cap sync",
-    "cap:add:android": "cap add android",
     "cap:add:ios": "cap add ios",
+    "cap:icones": "python3 scripts/icones-android.py",
     "cap:open:android": "cap open android",
     "cap:open:ios": "cap open ios"
   },

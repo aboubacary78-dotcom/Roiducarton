@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Le beige du carton, et non le blanc du gabarit.
+
+    La couche de premier plan couvre désormais toute la toile (voir
+    scripts/icones-android.py), donc ce fond ne devrait jamais se voir. Il
+    reste le filet : un lanceur qui décale ou réduit le premier plan pour son
+    effet de parallaxe découvrirait du blanc sur les bords d'une icône beige.
+-->
+<resources>
+    <color name="ic_launcher_background">#E1C496</color>
+</resources>

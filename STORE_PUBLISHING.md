@@ -24,23 +24,50 @@ Comptes nécessaires :
 
 ---
 
-## 2. Préparer le projet Capacitor (à faire une seule fois)
+## 2. Préparer le projet Capacitor
 
-Depuis la racine du projet :
+### Android : c'est déjà fait, et c'est dans le dépôt ✅
+
+Le dossier `android/` est **suivi par git**. Il n'est plus à générer, et il ne
+faut plus le régénérer : `cap add android` écraserait des réglages qu'il ne
+sait pas reproduire.
+
+Ce qui y a été posé à la main, et qu'un dossier régénéré n'aurait pas :
+
+| Réglage | Où | Pourquoi |
+|---|---|---|
+| App ID AdMob | `AndroidManifest.xml` | **Sans lui, l'application se ferme au lancement** : le SDK de Google lève une exception fatale s'il ne le trouve pas. |
+| API 35 | `variables.gradle` | Le Play Store refuse tout envoi visant moins que l'API 35. Le gabarit de Capacitor 6 en vise 34 — donc rejet au téléversement. |
+| Version tirée de `package.json` | `app/build.gradle` | Le gabarit fige « 1.0 / versionCode 1 ». On aurait publié la 3.31 sous l'étiquette 1.0, et la mise à jour suivante aurait été refusée. |
+| Palette du jeu | `res/values/colors.xml` | Sans elle, Android emprunte l'indigo et le rose de Capacitor pour la barre d'état et les poignées de sélection. |
+| Icônes et écrans de démarrage | `res/mipmap-*`, `res/drawable-*` | Sinon le jeu s'installe sous le logo de Capacitor. |
+
+Ce qui est réellement jetable — le site copié (94 Mo), les sorties de
+compilation, `local.properties` — est exclu par `android/.gitignore`.
+
+Pour vérifier que tout cela tient toujours, sans avoir à compiler :
 
 ```bash
-# 1. Installer les dépendances
-pnpm install
+python3 scripts/verifie-android.py
+```
 
-# 2. Construire le site web (génère dist/public)
-pnpm build
+Et pour refabriquer les icônes après un changement de `resources/icon.png` ou
+`resources/splash.png` :
 
-# 3. Ajouter les plateformes natives (crée les dossiers android/ et ios/)
-pnpm cap:add:android      # nécessite Android Studio
+```bash
+pnpm cap:icones
+```
+
+### iOS : reste à générer sur un Mac
+
+```bash
 pnpm cap:add:ios          # nécessite un Mac + Xcode
 ```
 
-À chaque fois que tu modifies le jeu, refais :
+⚠️ Les mêmes réglages manuels seront à refaire côté iOS — voir §3.3, et pense
+à commiter `ios/` une fois généré, pour la même raison qu'Android.
+
+### À chaque modification du jeu
 
 ```bash
 pnpm build       # reconstruit le web
@@ -72,13 +99,20 @@ Ouvre **`client/src/lib/ads.ts`** et :
 
 ### 3.3 Déclarer ton App ID AdMob côté natif
 
-**Android** — dans `android/app/src/main/AndroidManifest.xml`, à l'intérieur de `<application>` :
+**Android** — la ligne est **déjà en place** dans
+`android/app/src/main/AndroidManifest.xml`, avec l'App ID de démonstration de
+Google. Il n'y a qu'à en remplacer la valeur :
 
 ```xml
 <meta-data
     android:name="com.google.android.gms.ads.APPLICATION_ID"
     android:value="ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY"/>
 ```
+
+⚠️ Cette valeur et `USE_TEST_ADS` changent **en même temps**. Un App ID réel
+avec des blocs de test ne rapporte rien ; des blocs réels sur lesquels on
+clique en développement peuvent faire fermer le compte AdMob.
+`scripts/verifie-android.py` vérifie que les deux sont dans le même mode.
 
 **iOS** — dans `ios/App/App/Info.plist` :
 
@@ -218,14 +252,21 @@ Dans Xcode :
 
 ## 6. Checklist avant soumission
 
-- [ ] Icône et écran de démarrage (splash) personnalisés
-- [ ] Vrais ID AdMob en place, `USE_TEST_ADS = false`
-- [ ] App ID AdMob déclaré dans les fichiers natifs
+- [x] Icône et écran de démarrage personnalisés — Android (`pnpm cap:icones`)
+- [x] App ID AdMob déclaré côté natif — Android
+- [x] Niveau d'API exigé par le Play Store — Android (API 35)
+- [x] Numéro de version natif tiré de `package.json` — Android
+- [ ] Vrais ID AdMob en place, `USE_TEST_ADS = false` (les deux ensemble)
 - [ ] Politique de confidentialité en ligne (obligatoire avec des pubs) — mets
-      son URL dans `PRIVACY_URL` (`client/src/components/game/SettingsScreen.tsx`)
+      son URL **absolue** dans `PRIVACY_URL`
+      (`client/src/components/game/SettingsScreen.tsx`). Une URL relative
+      comme `/confidentialite.html` ne mène nulle part depuis l'application
+      empaquetée.
+- [ ] Licence commerciale de la bibliothèque audio (405 fichiers)
+- [ ] Achat « Sans pub » réellement branché (voir §4)
 - [ ] Captures d'écran pour chaque taille demandée
-- [ ] Numéro de version incrémenté (`package.json` + projets natifs)
-- [ ] Testé sur un vrai appareil
+- [ ] Compilé et testé sur un vrai appareil
+- [ ] iOS : plateforme générée sur un Mac, puis les mêmes réglages qu'Android
 
 ---
 
@@ -234,8 +275,14 @@ Dans Xcode :
 ```bash
 pnpm build              # construit le jeu web
 pnpm cap:sync           # synchronise web → natif
-pnpm cap:add:android    # ajoute la plateforme Android
-pnpm cap:add:ios        # ajoute la plateforme iOS
+pnpm cap:icones         # refabrique icônes et écrans de démarrage Android
 pnpm cap:open:android   # ouvre Android Studio
+pnpm cap:add:ios        # ajoute la plateforme iOS (Mac uniquement)
 pnpm cap:open:ios       # ouvre Xcode
+
+python3 scripts/verifie-android.py   # contrôle le projet natif sans compiler
 ```
+
+⚠️ `pnpm cap:add:android` a disparu de cette liste **volontairement** : le
+dossier `android/` est dans le dépôt, et le régénérer effacerait les réglages
+listés au §2.

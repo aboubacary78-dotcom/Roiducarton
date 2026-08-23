@@ -1,0 +1,23 @@
+ext {
+    minSdkVersion = 22
+    /*
+     * ANDROID 15 (API 35), ET PAS 34 COMME LE GABARIT.
+     * Le Play Store refuse depuis le 31 août 2025 tout envoi qui ne vise pas
+     * au moins l'API 35 : le projet généré par Capacitor 6 aurait été rejeté
+     * au téléversement. La prochaine marche est l'API 36 — à passer quand le
+     * greffon Android sera monté d'un cran (voir android/gradle.properties).
+     */
+    compileSdkVersion = 35
+    targetSdkVersion = 35
+    androidxActivityVersion = '1.8.0'
+    androidxAppCompatVersion = '1.6.1'
+    androidxCoordinatorLayoutVersion = '1.2.0'
+    androidxCoreVersion = '1.12.0'
+    androidxFragmentVersion = '1.6.2'
+    coreSplashScreenVersion = '1.0.1'
+    androidxWebkitVersion = '1.9.0'
+    junitVersion = '4.13.2'
+    androidxJunitVersion = '1.1.5'
+    androidxEspressoCoreVersion = '3.5.1'
+    cordovaAndroidVersion = '10.1.1'
+}

@@ -1,0 +1,69 @@
+apply plugin: 'com.android.application'
+
+/*
+ * UNE SEULE SOURCE POUR LE NUMÉRO DE VERSION : package.json.
+ *
+ * Le gabarit de Capacitor fige « 1.0 / versionCode 1 ». Le jeu en est à sa
+ * trente-et-unième version : on aurait publié la 3.31 sous l'étiquette 1.0,
+ * et le Play Store aurait refusé la mise à jour suivante pour cause de
+ * versionCode non incrémenté.
+ *
+ * Le versionCode se déduit du numéro sémantique — 3.31.0 → 33100 — donc il
+ * monte tout seul et ne peut pas reculer. Il n'y a rien à penser au moment de
+ * publier : on relance `pnpm build && pnpm cap:sync`, et l'étiquette suit.
+ */
+def pkg = new groovy.json.JsonSlurper().parse(file('../../package.json'))
+def (vMajeur, vMineur, vCorrectif) = pkg.version.tokenize('.').collect { it.toInteger() }
+
+android {
+    namespace "com.roiducarton.game"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.roiducarton.game"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode vMajeur * 10000 + vMineur * 100 + vCorrectif
+        versionName pkg.version
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

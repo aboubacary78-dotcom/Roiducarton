@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    LA PALETTE DU JEU, PAS CELLE DU GABARIT.
+
+    `styles.xml` renvoie à colorPrimary / colorPrimaryDark / colorAccent sans
+    les définir : ces trois couleurs venaient jusqu'ici de la bibliothèque
+    capacitor-android, qui livre l'indigo et le rose vif de Material par
+    défaut. Elles ne sont pas décoratives — Android les emploie pour la barre
+    d'état, les poignées de sélection de texte et les effets d'appui. Un jeu
+    de carton beige se serait donc ouvert sous une barre indigo, avec des
+    poignées roses.
+
+    Les valeurs reprennent les variables de client/src/index.css : le brun du
+    carton, sa version foncée, et l'or qui sert d'accent dans tout le jeu.
+-->
+<resources>
+    <color name="colorPrimary">#C4723A</color>
+    <color name="colorPrimaryDark">#9B5B3A</color>
+    <color name="colorAccent">#B8860B</color>
+</resources>
