@@ -8869,7 +8869,7 @@ var initialState = {
 };
 var GameContext = createContext(void 0);
 
-// ../../../tmp/monet-ANcB7E/cap.js
+// ../../../tmp/monet-Q58VVz/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/ads.ts
@@ -8890,9 +8890,9 @@ function setAdsRemoved(v) {
 }
 var AD_UNITS = {
   android: {
-    banner: "ca-app-pub-3940256099942544/6300978111",
-    interstitial: "ca-app-pub-3940256099942544/1033173712",
-    rewarded: "ca-app-pub-3940256099942544/5224354917"
+    banner: "ca-app-pub-6336322065829631/1688618582",
+    interstitial: "ca-app-pub-6336322065829631/5639366683",
+    rewarded: "ca-app-pub-6336322065829631/8014353783"
   },
   ios: {
     banner: "ca-app-pub-3940256099942544/2934735716",

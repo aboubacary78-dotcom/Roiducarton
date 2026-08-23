@@ -31,16 +31,18 @@
             par Capacitor ne le pose pas : il manquait donc à chaque
             régénération du dossier android/.
 
-            La valeur ci-dessous est l'App ID de DÉMONSTRATION publié par
-            Google. Il va de pair avec USE_TEST_ADS = true dans
-            client/src/lib/ads.ts : les deux se remplacent EN MÊME TEMPS par
-            les vrais identifiants au moment de la publication. Laisser l'un
-            en test et l'autre en réel ne rapporte rien et peut faire fermer
-            le compte AdMob.
+            C'est le vrai App ID du compte AdMob du jeu. Il doit rester du
+            même éditeur (ca-app-pub-6336322065829631) que les blocs déclarés
+            dans client/src/lib/ads.ts : un App ID d'un compte et des blocs
+            d'un autre, et plus rien ne se diffuse, sans erreur visible.
+            scripts/verifie-android.py le vérifie.
+
+            Ce n'est pas un secret : cette valeur part dans chaque APK et s'en
+            extrait en une commande.
         -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-6336322065829631~8445598624" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

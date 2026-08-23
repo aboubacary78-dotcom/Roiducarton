@@ -55,15 +55,27 @@ export async function purchaseRemoveAds(): Promise<boolean> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Configuration des blocs d'annonces
-// Les ID ci-dessous sont les ID de TEST officiels de Google.
-// Remplace-les par les tiens pour la production.
+// CONFIGURATION DES BLOCS D'ANNONCES
+//
+// ANDROID : les vrais blocs du compte AdMob du jeu. L'App ID qui va avec
+// (…~8445598624) est déclaré dans android/app/src/main/AndroidManifest.xml —
+// les deux appartiennent au même éditeur, ca-app-pub-6336322065829631, et
+// c'est ce que vérifie scripts/verifie-android.py.
+//
+// Ces identifiants ne sont PAS des secrets : ils partent dans chaque APK
+// distribué et s'en extraient en une commande. Google les écrit lui-même en
+// clair dans ses exemples. Rien à cacher ici.
+//
+// iOS : encore les blocs de démonstration de Google, faute d'application iOS.
+// Elle demande un Mac ; le jour où elle existera, il faudra créer une SECONDE
+// application dans AdMob (les blocs ne se partagent pas entre plates-formes)
+// et remplacer les six lignes ci-dessous.
 // ─────────────────────────────────────────────────────────────────────────
 const AD_UNITS = {
   android: {
-    banner: 'ca-app-pub-3940256099942544/6300978111',
-    interstitial: 'ca-app-pub-3940256099942544/1033173712',
-    rewarded: 'ca-app-pub-3940256099942544/5224354917',
+    banner: 'ca-app-pub-6336322065829631/1688618582',
+    interstitial: 'ca-app-pub-6336322065829631/5639366683',
+    rewarded: 'ca-app-pub-6336322065829631/8014353783',
   },
   ios: {
     banner: 'ca-app-pub-3940256099942544/2934735716',
@@ -72,7 +84,25 @@ const AD_UNITS = {
   },
 };
 
-/** Passe à false quand tu publies avec tes vrais ID AdMob. */
+/*
+ * LE MODE TEST RESTE ALLUMÉ, AVEC LES VRAIS BLOCS. CE N'EST PAS UN OUBLI.
+ *
+ * On pourrait croire qu'installer ses vrais identifiants veut dire couper le
+ * mode test. C'est le contraire : la bonne façon de se relire, c'est de
+ * demander des annonces de DÉMONSTRATION à TRAVERS ses vrais blocs. On vérifie
+ * ainsi le vrai chemin — le bon compte, le bon bloc, le bon format — sans
+ * jamais faire d'impression réelle.
+ *
+ * Le danger est là et il est sérieux : voir une vraie annonce dans sa propre
+ * application, c'est finir par cliquer dessus, et Google ferme les comptes
+ * pour ça. Ce n'est pas un avertissement de principe, c'est le motif de
+ * fermeture le plus courant chez les nouveaux éditeurs.
+ *
+ * À passer à `false` AU MOMENT de fabriquer le paquet qu'on téléverse, et pas
+ * avant. De toute façon rien ne serait diffusé d'ici là : AdMob n'ouvre les
+ * annonces réelles qu'après avoir examiné l'application, ce qui suppose
+ * qu'elle soit d'abord sur le Play Store.
+ */
 const USE_TEST_ADS = true;
 
 function platform(): 'android' | 'ios' | 'web' {

@@ -97,13 +97,39 @@ verifier('aucune ressource citée sans être définie', not manquantes,
 manifeste = (APP / 'AndroidManifest.xml').read_text(encoding='utf-8')
 verifier("l'App ID AdMob est déclaré (sans lui, fermeture au lancement)",
          'com.google.android.gms.ads.APPLICATION_ID' in manifeste)
-# Le côté natif et le côté web doivent basculer ENSEMBLE : un App ID réel avec
-# des blocs de test ne rapporte rien, et l'inverse peut faire fermer le compte.
-natif_en_test = 'ca-app-pub-3940256099942544~3347511713' in manifeste
-web_en_test = 'USE_TEST_ADS = true' in (RACINE / 'client/src/lib/ads.ts').read_text(encoding='utf-8')
-verifier("l'App ID natif et les blocs web sont dans le même mode",
-         natif_en_test == web_en_test,
-         f"natif {'test' if natif_en_test else 'réel'}, web {'test' if web_en_test else 'réel'}")
+"""
+L'APP ID ET LES BLOCS DOIVENT VENIR DU MÊME COMPTE.
+
+Le contrôle précédent exigeait que le natif et le web soient « dans le même
+mode », test ou réel. C'était une erreur d'analyse : l'état normal du
+développement, c'est justement d'avoir ses VRAIS blocs et le mode test
+allumé — on éprouve le vrai chemin sans jamais produire d'impression réelle.
+
+La règle qui compte vraiment est ailleurs. Un App ID d'un compte avec des
+blocs d'un autre ne diffuse rien, et ne dit rien : pas d'erreur, pas de log,
+juste un écran vide. Le préfixe éditeur (ca-app-pub-XXXX) doit donc être le
+même des deux côtés.
+"""
+ads = (RACINE / 'client/src/lib/ads.ts').read_text(encoding='utf-8')
+editeur_natif = re.search(r'android:value="(ca-app-pub-\d+)~', manifeste)
+bloc_android = re.search(r'android:\s*\{(.*?)\}', ads, re.S)
+editeurs_web = set(re.findall(r'(ca-app-pub-\d+)/', bloc_android.group(1) if bloc_android else ''))
+verifier("l'App ID natif et les blocs Android sont du même éditeur",
+         bool(editeur_natif) and editeurs_web == {editeur_natif.group(1)},
+         f"natif {editeur_natif.group(1) if editeur_natif else '?'}, "
+         f"blocs {', '.join(sorted(editeurs_web)) or '?'}")
+
+# Le mode test n'est pas un défaut : c'est l'état attendu tant qu'on n'a pas
+# fabriqué le paquet à téléverser. On le RAPPELLE, on ne le sanctionne pas.
+DEMO = 'ca-app-pub-3940256099942544'
+verifier('les blocs Android ne sont plus ceux de démonstration',
+         DEMO not in (bloc_android.group(1) if bloc_android else DEMO))
+if 'USE_TEST_ADS = true' in ads:
+    print('    rappel : USE_TEST_ADS = true — annonces de démonstration servies à '
+          'travers les vrais blocs.\n'
+          "             À passer à false au moment de fabriquer l'AAB, pas avant : "
+          'cliquer\n'
+          "             sur ses propres vraies annonces fait fermer le compte AdMob.")
 
 variables = (ANDROID / 'variables.gradle').read_text(encoding='utf-8')
 cible = int(re.search(r'targetSdkVersion\s*=\s*(\d+)', variables).group(1))

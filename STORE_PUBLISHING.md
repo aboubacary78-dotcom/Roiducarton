@@ -80,39 +80,78 @@ pnpm cap:sync    # copie le web dans les projets natifs
 
 ### 3.1 Créer tes blocs d'annonces
 
-1. Sur https://admob.google.com, crée **deux applications** : une Android, une iOS.
-2. Pour chaque app, crée 3 **blocs d'annonces** :
-   - Bannière
-   - Interstitiel (plein écran)
-   - Avec récompense (vidéo récompensée — utilisé pour la « Seconde chance »)
-3. AdMob te donne, pour chaque app, un **App ID** (format `ca-app-pub-XXXX~YYYY`)
-   et, pour chaque bloc, un **Ad Unit ID** (format `ca-app-pub-XXXX/ZZZZ`).
+Il faut **une application AdMob par plate-forme** — les blocs ne se partagent
+pas entre Android et iOS.
+
+**Android : fait** (« Le Roi du Carton », compte `ca-app-pub-6336322065829631`),
+avec ses trois blocs : bannière, interstitiel, avec récompense.
+
+**iOS : à faire** le jour où la plate-forme existera, en répétant :
+
+1. Sur https://admob.google.com, ajouter l'application.
+   « L'application est-elle disponible sur une plate-forme de téléchargement ? »
+   → **Non** tant qu'elle n'est pas publiée ; le rattachement au store se fait
+   après, et l'App ID ne change pas.
+2. Créer les 3 blocs : **Bannière**, **Interstitiel**, **Avec récompense**.
+   - Sur « Avec récompense », le montant et l'élément de récompense n'ont
+     aucune importance : le jeu ne les lit pas, il vérifie seulement que la
+     vidéo a été regardée puis applique sa propre récompense.
+   - ⚠️ Laisser **« Enchères partenaires » décochée**. Ce réglage est
+     **irréversible** et réserve le bloc à une plate-forme de médiation tierce.
+3. AdMob donne un **App ID** (`ca-app-pub-XXXX` **~** `YYYY`, tilde) et un
+   **Ad Unit ID** par bloc (`ca-app-pub-XXXX` **/** `ZZZZ`, slash). Le tilde
+   contre le slash est le seul piège de forme, et l'inversion est muette.
 
 ### 3.2 Mettre tes vrais ID dans le code
 
-Ouvre **`client/src/lib/ads.ts`** et :
-- Remplace les ID de test dans `AD_UNITS` par tes vrais Ad Unit IDs (Android + iOS).
-- Passe `USE_TEST_ADS` à `false`.
+**Android : c'est fait.** Compte `ca-app-pub-6336322065829631`, App ID
+`~8445598624`, et les trois blocs (bannière, interstitiel, avec récompense)
+sont dans `AD_UNITS.android` (`client/src/lib/ads.ts`).
 
-> ⚠️ Tant que `USE_TEST_ADS = true`, seules des pubs de démonstration s'affichent.
-> Ne clique JAMAIS sur tes propres pubs en production : Google peut bannir ton compte.
+**iOS : à faire le jour où la plateforme existera.** Les blocs y sont encore
+ceux de démonstration. Il faudra créer une **seconde application** dans
+AdMob — les blocs ne se partagent pas entre plates-formes.
+
+> Ces identifiants ne sont pas des secrets : ils partent dans chaque APK
+> distribué et s'en extraient en une commande. Google les écrit lui-même en
+> clair dans ses exemples.
+
+#### `USE_TEST_ADS` reste à `true`, et c'est voulu
+
+On pourrait croire qu'installer ses vrais identifiants veut dire couper le
+mode test. C'est le contraire : la bonne façon de se relire, c'est de demander
+des annonces de **démonstration** à travers ses **vrais blocs**. On éprouve le
+vrai chemin — le bon compte, le bon bloc, le bon format — sans jamais produire
+d'impression réelle.
+
+> ⚠️ Voir une vraie annonce dans sa propre application, c'est finir par
+> cliquer dessus. C'est le motif de fermeture de compte le plus courant chez
+> les nouveaux éditeurs.
+
+À passer à `false` **au moment de fabriquer l'AAB qu'on téléverse**, pas
+avant. De toute façon rien ne serait diffusé d'ici là : AdMob n'ouvre les
+annonces réelles qu'après avoir examiné l'application, ce qui suppose qu'elle
+soit d'abord sur le Play Store.
 
 ### 3.3 Déclarer ton App ID AdMob côté natif
 
-**Android** — la ligne est **déjà en place** dans
-`android/app/src/main/AndroidManifest.xml`, avec l'App ID de démonstration de
-Google. Il n'y a qu'à en remplacer la valeur :
+**Android : fait.** La ligne est en place dans
+`android/app/src/main/AndroidManifest.xml`, avec le vrai App ID :
 
 ```xml
 <meta-data
     android:name="com.google.android.gms.ads.APPLICATION_ID"
-    android:value="ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY"/>
+    android:value="ca-app-pub-6336322065829631~8445598624"/>
 ```
 
-⚠️ Cette valeur et `USE_TEST_ADS` changent **en même temps**. Un App ID réel
-avec des blocs de test ne rapporte rien ; des blocs réels sur lesquels on
-clique en développement peuvent faire fermer le compte AdMob.
-`scripts/verifie-android.py` vérifie que les deux sont dans le même mode.
+Rappel de ce qui est en jeu ici : **sans cette ligne, l'application se ferme au
+lancement**. Le SDK Google Mobile Ads la vérifie au démarrage et lève une
+exception fatale s'il ne la trouve pas.
+
+⚠️ L'App ID et les blocs de `ads.ts` doivent venir du **même éditeur**
+(`ca-app-pub-6336322065829631`). Mélanger les comptes ne produit aucune erreur
+visible : simplement, plus rien ne se diffuse.
+`scripts/verifie-android.py` compare les deux préfixes.
 
 **iOS** — dans `ios/App/App/Info.plist` :
 
@@ -168,7 +207,17 @@ formulaire depuis un pays non concerné. À retirer avant publication.
 | Récompensée | Bouton « Seconde chance » pour ressusciter (1×/partie) | `GameOverScreen.tsx` → action `REVIVE` |
 | Récompensée | Bouton « Doubler mes gains » quand on gagne de l'argent | `EventResultOverlay.tsx` → action `DOUBLE_REWARD` |
 | Récompensée | « Coup de pouce » dans un événement : garantit la meilleure issue du choix | `EventScreen.tsx` (option `boosted` de `CHOOSE_EVENT`) |
-| Bannière | Disponible via `showBanner()` (non activée par défaut) | `client/src/lib/ads.ts` |
+| Bannière | **Active**, mais uniquement sur les écrans de LECTURE : registre, cimetière, boutique, écran de fin | `pages/Home.tsx` |
+
+La bannière ne s'affiche jamais pendant une journée de jeu ni pendant un
+mini-jeu, et c'est délibéré : le pouce y travaille en bas de l'écran, et une
+bannière sous le pouce ne produit pas de l'agacement mais des **clics
+accidentels** — que les régies sanctionnent et qui font désinstaller.
+
+⚠️ Un point à éprouver sur appareil : à la mort, le joueur reçoit
+l'interstitiel plein écran **puis** arrive sur l'écran de fin qui porte la
+bannière. Deux publicités dans le même moment. Si c'est trop lourd à l'usage,
+retirer `'game-over'` de `ECRANS_DE_LECTURE` dans `pages/Home.tsx` suffit.
 
 ### Achat « Sans pub » (in-app)
 
@@ -256,7 +305,9 @@ Dans Xcode :
 - [x] App ID AdMob déclaré côté natif — Android
 - [x] Niveau d'API exigé par le Play Store — Android (API 35)
 - [x] Numéro de version natif tiré de `package.json` — Android
-- [ ] Vrais ID AdMob en place, `USE_TEST_ADS = false` (les deux ensemble)
+- [x] Vrais blocs AdMob Android en place (compte `ca-app-pub-6336322065829631`)
+- [ ] `USE_TEST_ADS = false` — **au moment de fabriquer l'AAB, pas avant**
+- [ ] Messages de consentement RGPD publiés dans la console AdMob (§3.4)
 - [ ] Politique de confidentialité en ligne (obligatoire avec des pubs) — mets
       son URL **absolue** dans `PRIVACY_URL`
       (`client/src/components/game/SettingsScreen.tsx`). Une URL relative
