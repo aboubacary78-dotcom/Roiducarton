@@ -308,11 +308,10 @@ Dans Xcode :
 - [x] Vrais blocs AdMob Android en place (compte `ca-app-pub-6336322065829631`)
 - [ ] `USE_TEST_ADS = false` — **au moment de fabriquer l'AAB, pas avant**
 - [ ] Messages de consentement RGPD publiés dans la console AdMob (§3.4)
-- [ ] Politique de confidentialité en ligne (obligatoire avec des pubs) — mets
-      son URL **absolue** dans `PRIVACY_URL`
-      (`client/src/components/game/SettingsScreen.tsx`). Une URL relative
-      comme `/confidentialite.html` ne mène nulle part depuis l'application
-      empaquetée.
+- [x] Politique de confidentialité en ligne, à une URL **absolue** —
+      https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html
+      (dans `PRIVACY_URL`, `client/src/components/game/SettingsScreen.tsx`).
+      La même adresse sert au message de consentement AdMob et à la fiche Play.
 - [ ] Licence commerciale de la bibliothèque audio (405 fichiers)
 - [ ] Achat « Sans pub » réellement branché (voir §4)
 - [ ] Captures d'écran pour chaque taille demandée

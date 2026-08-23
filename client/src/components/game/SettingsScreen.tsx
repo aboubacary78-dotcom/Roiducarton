@@ -12,17 +12,25 @@ import { resetCoaches } from '@/lib/coach';
 import { useLang, setLang, tr } from '@/lib/lang';
 import { pushToast } from '@/lib/toast';
 
-// ⚠️ Remplace cette URL par ta vraie page de politique de confidentialité
-// avant publication (obligatoire avec des publicités sur les stores).
-// La page est livrée avec le site (client/public/confidentialite.html), donc
-// ce chemin fonctionne partout où le jeu est hébergé, sans domaine en dur.
-//
-// ⚠ Les stores réclament en plus une URL ABSOLUE et publique, consultable sans
-// installer l'application. Dès que le domaine définitif est connu, remplacer
-// cette valeur par l'adresse complète : c'est aussi ce qui garantit que le
-// lien s'ouvre correctement dans l'application native, où `target="_blank"`
-// passe la main au navigateur du système.
-const PRIVACY_URL = '/confidentialite.html';
+/*
+ * L'ADRESSE EST ABSOLUE, ET ELLE DOIT LE RESTER.
+ *
+ * C'était un chemin relatif — `/confidentialite.html` — au motif qu'il suit
+ * l'hébergement sans domaine en dur. Élégant sur le web, inutilisable ailleurs :
+ *
+ *   · Dans l'application empaquetée, le lien porte `target="_blank"` et passe
+ *     donc la main au navigateur du système, qui ne connaît pas le `localhost`
+ *     interne de la vue web. Le lien tombait dans le vide.
+ *   · Google Play ET le message de consentement AdMob exigent une adresse
+ *     qu'ils puissent visiter EUX-MÊMES, sans installer le jeu. Un chemin
+ *     relatif n'en est pas une.
+ *
+ * La même adresse sert donc aux trois : la fiche du store, le formulaire de
+ * consentement, et ce bouton. À changer ici si le domaine change un jour —
+ * et à changer aussi dans la console AdMob et la fiche Play, qui en gardent
+ * chacune une copie.
+ */
+const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
 const APP_VERSION = '3.31.0';
 
 export default function SettingsScreen() {
