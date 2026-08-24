@@ -332,6 +332,33 @@ Ces réglages sont cachés exprès, c'est normal de ne pas les connaître :
    développeurs**
 5. Active **Débogage USB**
 
+### Sur un Samsung (One UI), deux différences
+
+**Le numéro de version est un cran plus bas.** C'est
+**Paramètres → À propos du téléphone → Informations sur le logiciel →
+Numéro de version**. Ce sous-menu manque sur tous les tutos génériques.
+
+**Les options de développement ne sont pas dans « Système ».** Elles
+apparaissent directement **tout en bas de la liste principale** des
+Paramètres.
+
+### ⚠️ « Débogage USB — Bloqué(e) par le bloqueur automatique »
+
+Sur Samsung, l'interrupteur peut être **grisé**, avec cette mention. Ce n'est
+pas le projet : c'est **Auto Blocker**, une sécurité Samsung qui interdit à un
+ordinateur branché en USB d'envoyer des commandes au téléphone.
+
+**Paramètres → Sécurité et confidentialité → Bloqueur automatique**, puis
+désactive-le. S'il propose une liste plutôt qu'un simple interrupteur, cherche
+l'option qui parle de **commandes USB** : elle seule suffit.
+
+L'interrupteur du débogage redevient alors actif.
+
+> **Remets Auto Blocker en marche** une fois les tests finis. Il protège
+> contre les commandes envoyées par un ordinateur inconnu — le risque des
+> bornes de recharge publiques. Tu n'as besoin de le couper que pendant le
+> développement.
+
 ## Brancher et lancer
 
 1. Branche le téléphone au PC en USB.
