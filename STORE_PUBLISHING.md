@@ -312,7 +312,16 @@ Dans Xcode :
       https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html
       (dans `PRIVACY_URL`, `client/src/components/game/SettingsScreen.tsx`).
       La même adresse sert au message de consentement AdMob et à la fiche Play.
-- [ ] Licence commerciale de la bibliothèque audio (405 fichiers)
+- [ ] Licence audio — **à confirmer par l'auteur, pas un blocage établi**.
+      `docs/audio/livraison-manus.md` affirme que les bruitages viennent d'un
+      compte ElevenLabs *Free*, donc en usage non commercial. Cette note vient
+      du prestataire qui a livré le lot, et l'auteur du jeu la considère comme
+      erronée. La restriction du palier gratuit existe bel et bien chez
+      ElevenLabs ; c'est la **provenance** des fichiers qui est en cause, et
+      elle ne se vérifie que depuis le compte qui les a produits.
+      Si régénération il faut : les consignes de fabrication de 382 des 405
+      fichiers sont conservées dans `docs/prompts-son/`, et les noms de
+      fichiers ne changeraient pas — donc aucune ligne de code à toucher.
 - [ ] Achat « Sans pub » réellement branché (voir §4)
 - [ ] Captures d'écran pour chaque taille demandée
 - [ ] Compilé et testé sur un vrai appareil
