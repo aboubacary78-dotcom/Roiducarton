@@ -228,6 +228,17 @@ npx cap sync android
 Cette ligne **copie le site construit dans le dossier Android**. Sans elle,
 l'application serait vide. Tu dois voir `Sync finished`.
 
+**Une dernière question s'affiche après :**
+
+```
+? Share anonymous usage data? » (Y/n)
+```
+
+Capacitor demande s'il peut collecter des statistiques d'usage anonymes. Ça
+ne change **rien** au projet, ni à la compilation, ni au jeu. Réponds ce que
+tu veux — `n` si tu préfères ne rien partager. Ça se change plus tard avec
+`npx cap telemetry`.
+
 ## Vérifier que la configuration est intacte
 
 ```powershell
