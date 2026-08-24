@@ -159,6 +159,44 @@ glisse dans la boîte Android.
 pnpm install
 ```
 
+### ⚠️ Si tu vois « l'exécution de scripts est désactivée sur ce système »
+
+```
+pnpm : Impossible de charger le fichier C:\Program Files\nodejs\pnpm.ps1,
+car l'exécution de scripts est désactivée sur ce système.
+    + FullyQualifiedErrorId : UnauthorizedAccess
+```
+
+C'est le blocage Windows le plus courant, et il n'a rien à voir avec le
+projet : **Windows interdit d'origine l'exécution de tout script PowerShell**,
+et `pnpm` en est un. N'importe quel outil de développement s'y heurte sur une
+machine neuve.
+
+Dans la même fenêtre, sans droits administrateur :
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+Réponds **`O`** à la confirmation, puis relance `pnpm install`.
+
+Ce que ça change exactement, parce qu'il vaut mieux le savoir que taper à
+l'aveugle :
+
+| | |
+|---|---|
+| `-Scope CurrentUser` | ton compte seulement, pas tout le PC |
+| `RemoteSigned` | les scripts **déjà sur la machine** s'exécutent ; ceux **téléchargés d'Internet** restent bloqués s'ils ne sont pas signés |
+
+C'est le réglage que Microsoft recommande pour développer, et il reste plus
+strict que `Unrestricted`.
+
+> **Pour ne rien modifier du tout :** taper `pnpm.cmd install` au lieu de
+> `pnpm install` contourne le script PowerShell. Mais il faut alors penser au
+> `.cmd` à chaque commande, `pnpm build` compris.
+
+### La question de corepack
+
 **Une question va probablement s'afficher :**
 
 ```
