@@ -62,8 +62,12 @@ Une fenêtre bleu foncé s'ouvre. Tape :
 node -v
 ```
 
-Tu dois voir quelque chose comme `v22.x.x`. **Le numéro doit commencer par
-22.** S'il n'y a rien, ou une erreur, ferme PowerShell et rouvre-le — les
+Tu dois voir un numéro, par exemple `v24.19.0`. **N'importe quelle version
+donnée par le bouton LTS convient** — le projet demande 22.12 au minimum, et
+le bouton LTS ne descend jamais en dessous. Ne cherche pas à obtenir un
+numéro précis.
+
+S'il n'y a rien, ou une erreur, ferme PowerShell et rouvre-le : les
 programmes fraîchement installés n'apparaissent qu'au démarrage suivant.
 
 ## Activer pnpm
