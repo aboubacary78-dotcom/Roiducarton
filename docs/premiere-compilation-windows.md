@@ -127,8 +127,11 @@ git checkout claude/game-improvement-review-qpa9u1
 Ce que font ces quatre lignes, dans l'ordre :
 
 1. se placer dans ton dossier **Documents** ;
-2. **télécharger** tout le projet depuis GitHub (compte quelques minutes,
-   il y a 78 Mo d'images et 14 Mo de sons) ;
+2. **télécharger** tout le projet depuis GitHub. ⚠️ **Compte 1,2 Go**, et
+   quelques minutes. Le projet ne pèse que 103 Mo une fois posé sur le
+   disque : le reste, c'est l'**historique**, c'est-à-dire toutes les
+   versions successives de chaque image et de chaque son depuis le début.
+   Git les rapporte toutes. Ce n'est pas une anomalie ;
 3. **entrer** dans le dossier fraîchement créé ;
 4. se placer sur la **branche de travail** — celle où se trouve tout ce qu'on
    a fait ensemble. Sans cette ligne, tu aurais une version plus ancienne,
