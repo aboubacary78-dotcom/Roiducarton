@@ -23,6 +23,42 @@ let muted = (() => {
 })();
 
 let ctx: AudioContext | null = null;
+
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * QUAND ON QUITTE LE JEU, LE JEU SE TAIT.
+ *
+ * Constaté sur téléphone : en passant l'application en arrière-plan, la boucle
+ * d'ambiance du quartier continuait de tourner. Le navigateur ne coupe rien
+ * tout seul, et la vue web d'une application native encore moins — elle reste
+ * vivante tant que le système ne la tue pas. On se retrouvait donc avec le
+ * marché ou la gare qui bruissaient par-dessus la musique de quelqu'un.
+ *
+ * Tout le son du jeu passe par CE contexte-ci : ambiances, boucles météo,
+ * bruitages, gestes, tout. Le suspendre les arrête donc d'un bloc, sans avoir
+ * à tenir la liste de ce qui joue — et le reprendre les relance là où ils en
+ * étaient, ce qui est exactement le comportement attendu quand on revient.
+ *
+ * `pageEnVeille` sert de verrou : `audio()` réveille le contexte à chaque
+ * appel, et sans lui le moindre son programmé par une minuterie relancerait
+ * tout depuis l'arrière-plan.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+let pageEnVeille = false;
+
+// Le garde porte sur `addEventListener`, pas sur `document` : les tests hors
+// navigateur fournissent un document minimal, qui existe sans savoir écouter.
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+  document.addEventListener('visibilitychange', () => {
+    pageEnVeille = document.visibilityState === 'hidden';
+    if (!ctx) return;
+    try {
+      if (pageEnVeille) ctx.suspend().catch(() => { /* silent */ });
+      else if (!muted) ctx.resume().catch(() => { /* silent */ });
+    } catch { /* silent */ }
+  });
+}
+
 function audio(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   try {
@@ -31,7 +67,8 @@ function audio(): AudioContext | null {
       if (!AC) return null;
       ctx = new AC();
     }
-    if (ctx.state === 'suspended') ctx.resume();
+    // On ne réveille jamais le son d'une application qu'on a quittée.
+    if (ctx.state === 'suspended' && !pageEnVeille) ctx.resume();
     return ctx;
   } catch {
     return null;
