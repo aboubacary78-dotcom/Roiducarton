@@ -284,6 +284,35 @@ attente du guide. Laisse tourner, va faire autre chose.
 > et n'affiche aucun bouton pour lancer. C'est bien le dossier **`android`**
 > qu'il attend.
 
+### ⚠️ « Please Select Gradle JVM to Import Project »
+
+Une fenêtre apparaît presque à coup sûr sur un Android Studio récent :
+
+```
+The project's Gradle version Gradle 8.2.1 is incompatible with the
+Gradle JVM version 25. To fix this, select a JVM version that is at
+least 8 and at most 19.
+                                    [Use JVM 17]  [Open JVM settings]
+```
+
+**Clique « Use JVM 17 ».** C'est la bonne réponse, et Android Studio la
+propose lui-même.
+
+Android Studio est livré avec un Java tout neuf (25), mais Gradle 8.2.1 — la
+version que Capacitor 6 emploie — ne sait travailler qu'avec Java 8 à 19.
+Java 17 est la seule valeur qui satisfait les deux bouts de la chaîne :
+
+| Contrainte | Exige |
+|---|---|
+| Gradle 8.2.1 | Java ≤ 19 |
+| Greffon Android 8.2.1 | Java ≥ 17 |
+| **→ Java 17** | les deux |
+
+C'est aussi la version standard pour compiler sous Android, et elle est déjà
+incluse dans Android Studio : rien à télécharger.
+
+### La longue attente
+
 En bas de la fenêtre, une barre annonce **« Gradle sync in progress »**.
 Compte 5 à 20 minutes la première fois. **Attends qu'elle disparaisse**
 avant de toucher à quoi que ce soit.
