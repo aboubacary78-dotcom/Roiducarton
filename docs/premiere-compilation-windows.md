@@ -159,8 +159,22 @@ glisse dans la boîte Android.
 pnpm install
 ```
 
-La première fois, compte 2 à 5 minutes. Beaucoup de texte défile — c'est
-normal, ce sont les bibliothèques qui se téléchargent.
+**Une question va probablement s'afficher :**
+
+```
+! Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-10.4.1.tgz
+? Do you want to continue? [Y/n]
+```
+
+Tape **`Y`** puis `Entrée`. C'est corepack qui va chercher la version exacte
+de pnpm que le projet demande (elle est inscrite dans `package.json`, pour que
+tout le monde construise avec la même). Ça n'arrive qu'une fois.
+
+Ensuite, compte 2 à 5 minutes. Beaucoup de texte défile — ce sont les
+bibliothèques qui se téléchargent.
+
+> **Des lignes jaunes `WARN` sont normales** et ne demandent aucune action.
+> Seul du rouge portant `ERR_` mérite qu'on s'arrête.
 
 ```powershell
 pnpm build
