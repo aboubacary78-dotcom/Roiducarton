@@ -14,6 +14,26 @@
  *     boutons non. Sinon on ne joue plus, on subit.
  */
 import puppeteer from 'puppeteer-core';
+import { readdirSync, readFileSync } from 'node:fs';
+
+/*
+ * Le catalogue des descriptions, lu à la source.
+ *
+ * C'est la seule preuve solide qu'un texte a bougé : une description brouillée
+ * ne figure dans aucun fichier de données. Chercher des suites de consonnes
+ * « impossibles », comme le faisait la version précédente de ce test, ne prouve
+ * rien — un mélange de lettres tombe très souvent sur une suite parfaitement
+ * prononçable, et le test passait alors à côté d'un brouillage pourtant
+ * parfaitement visible à l'écran.
+ */
+const DOSSIER = 'client/src/contexts/data';
+const CATALOGUE = new Set();
+for (const f of readdirSync(DOSSIER).filter((n) => n.endsWith('.ts'))) {
+  const src = readFileSync(`${DOSSIER}/${f}`, 'utf8');
+  for (const m of src.matchAll(/description:\s*'((?:[^'\\]|\\.)*)'/g)) {
+    CATALOGUE.add(m[1].replace(/\\'/g, "'").replace(/\\\\/g, '\\'));
+  }
+}
 
 const b = await puppeteer.launch({
   executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
@@ -41,6 +61,9 @@ const verifier = (nom, ok, detail) => {
 await p.goto('http://localhost:8099/', { waitUntil: 'networkidle2' });
 await p.evaluate(() => {
   localStorage.clear();
+  // En français : le catalogue lu ci-dessus contient les textes source, pas
+  // leurs traductions.
+  localStorage.setItem('roi-du-carton-lang', 'fr');
   localStorage.setItem('roi-du-carton-scores', JSON.stringify([{ name: 'Feu Robert', days: 3, score: 40 }]));
 });
 await pause(400);
@@ -78,25 +101,23 @@ async function rencontre(mental) {
   });
 }
 
+const propre = (t) => (t || '').replace(/\s+/g, ' ').trim();
+
 // ── Lucide : rien ne bouge ─────────────────────────────────────────────────
+// À mental élevé, la description doit se retrouver TELLE QUELLE dans les
+// données. C'est la moitié du test qu'on oublie facilement : sans elle, un
+// brouillage permanent passerait pour un succès.
 const clair = await rencontre(90);
 verifier('une rencontre s\'ouvre', !!clair && clair.desc.length > 20, clair?.desc.slice(0, 50));
+verifier('à mental haut, le texte est celui du catalogue, au caractère près',
+  !!clair && CATALOGUE.has(propre(clair.desc)), clair?.desc.slice(0, 60));
 
 // ── La tête qui part : le récit se mélange ─────────────────────────────────
 const trouble = await rencontre(12);
-verifier('à mental bas, le récit se brouille',
-  !!trouble && /[a-zà-ÿ]{6,}/.test(trouble.desc), trouble?.desc.slice(0, 60));
-
-// Un mot au moins doit avoir bougé sur un texte assez long — on le vérifie en
-// comparant le MÊME texte rendu par la fonction, plus haut dans la page.
-const compare = await p.evaluate(() => {
-  const t = document.querySelector('.craft-card p')?.textContent || '';
-  // Un mot brouillé n'est dans aucun dictionnaire : on cherche des suites de
-  // consonnes impossibles en français, signature du mélange.
-  return /[bcdfgjklmpqstvxz]{3,}/i.test(t);
-});
-verifier('des suites de lettres impossibles apparaissent', compare,
-  compare ? '' : 'aucun mot ne semble mélangé');
+verifier('à mental bas, une rencontre s\'ouvre encore',
+  !!trouble && trouble.desc.length > 20, trouble?.desc.slice(0, 60));
+verifier('à mental bas, le texte ne correspond plus à aucune description connue',
+  !!trouble && !CATALOGUE.has(propre(trouble.desc)), trouble?.desc.slice(0, 70));
 
 // ── Les chiffres et les choix restent lisibles ─────────────────────────────
 if (trouble) {

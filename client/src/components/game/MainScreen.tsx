@@ -375,6 +375,14 @@ export default function MainScreen() {
           animate={{ opacity: 1, y: 0 }}
           className="craft-card p-3 border-[#B84A3A]/50 flex flex-col gap-2"
         >
+          {/* Le MÊME visage que le jour de l'emprunt, trois jours plus tard :
+              c'est la répétition du portrait qui fait le rendez-vous, pas le
+              texte. Sans elle, l'échéance n'est qu'une ligne de plus. */}
+          <SafeImg
+            src="/assets/npc-preteur-echeance.webp"
+            alt=""
+            className="w-full h-24 object-cover rounded-lg"
+          />
           <div className="flex items-center gap-2">
             <span className="text-lg">💸</span>
             <span className="text-xs font-semibold text-[#3D3020] flex-1">
