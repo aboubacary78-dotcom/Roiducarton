@@ -29,7 +29,7 @@
  * coupe/relance proprement (voir onMuteChange dans sound.ts).
  */
 import { getAudio, isMuted, onMuteChange } from './sound';
-import { loadAudio, startLoop, type Loop } from './audioFiles';
+import { loadAudio, playBuffer as playBufferUneFois, startLoop, type Loop } from './audioFiles';
 
 export type AmbienceId = 'title' | 'parc' | 'centre-ville' | 'zone-industrielle' | 'gare' | 'marche'
   // Lits de mini-jeu (pack son 2). Ils n'ont pas de repli synthétisé : avant
@@ -107,22 +107,109 @@ function syncWeather(): void {
 
 const WEATHER_GAIN = 0.42;  // la couche météo reste sous le lit du quartier
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LA SIGNATURE DU QUARTIER, ET SES RESPIRATIONS
+ *
+ * Les cinq lits `amb-<lieu>` tiennent le fond correctement, mais ils se
+ * ressemblent : on ne reconnaît pas la gare du marché en fermant les yeux. Le
+ * caractère demande des ÉVÉNEMENTS — le tapotement des pigeons, la brosse du
+ * train, la cagette qu'on frappe — et un lit continu n'en contient pas.
+ *
+ * On ne remplace donc pas les lits : on pose une SECONDE COUCHE par-dessus,
+ * plus creuse et plus rare. Rien de livré n'est jeté, elle se règle seule, et
+ * elle se coupe indépendamment le jour où elle fatiguerait.
+ *
+ * Par-dessus encore, des respirations : un pigeon qui décolle, un klaxon, un
+ * rat. Elles ne bouclent pas — elles tombent au hasard, largement espacées.
+ * C'est ce qui fait la différence entre un décor et un endroit : dans un
+ * endroit, il arrive des choses qu'on n'a pas demandées.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+const SIGNATURE_GAIN = 0.38;   // sous le lit du quartier, jamais devant
+const VIE_GAIN = 0.42;
+/** Écart entre deux respirations. Large : une brève est une ponctuation, une
+ *  fréquente est un tic. */
+const VIE_MIN_MS = 22000;
+const VIE_MAX_MS = 48000;
+
+/** Les respirations de chaque quartier (préfixes de fichiers `vie-*`). */
+const VIE: Record<string, readonly string[]> = {
+  'parc': ['vie-parc-envol', 'vie-parc-banc'],
+  'centre-ville': ['vie-cv-klaxon', 'vie-cv-vitrine'],
+  'gare': ['vie-gare-annonce', 'vie-gare-valise'],
+  'marche': ['vie-marche-cagette', 'vie-marche-kraft'],
+  'zone-industrielle': ['vie-zi-tole', 'vie-zi-rat'],
+};
+
+let signatureLoop: { id: string; loop: Loop } | null = null;
+let vieTimer: ReturnType<typeof setTimeout> | null = null;
+
+function syncSignature(): void {
+  // Un quartier, et rien d'autre : pas de signature sur un mini-jeu, l'écran
+  // de fin ou le titre.
+  const lieu = desired && VIE[desired] ? desired : null;
+  const want = isMuted() ? null : lieu;
+
+  if (signatureLoop && signatureLoop.id === want) { planifierVie(want); return; }
+  if (signatureLoop) { signatureLoop.loop.stop(1.6); signatureLoop = null; }
+  planifierVie(want);
+  if (!want) return;
+
+  const ac = getAudio();
+  if (!ac || ac.state !== 'running') { armGesture(); return; }
+  const id = want;
+  loadAudio(`/audio/amb-sig-${id}.mp3`).then(buf => {
+    // Le quartier a pu changer pendant le décodage.
+    if (!buf || desired !== id || isMuted()) return;
+    if (signatureLoop) signatureLoop.loop.stop(0.4);
+    const loop = startLoop(buf, SIGNATURE_GAIN, 3);
+    if (loop) signatureLoop = { id, loop };
+  });
+}
+
+function planifierVie(lieu: string | null): void {
+  if (vieTimer) { clearTimeout(vieTimer); vieTimer = null; }
+  if (!lieu || isMuted()) return;
+  const delai = VIE_MIN_MS + Math.random() * (VIE_MAX_MS - VIE_MIN_MS);
+  vieTimer = setTimeout(() => {
+    vieTimer = null;
+    // Le quartier a pu changer, ou la sourdine tomber, pendant l'attente.
+    if (desired !== lieu || isMuted()) return;
+    const choix = VIE[lieu];
+    const nom = choix[Math.floor(Math.random() * choix.length)];
+    loadAudio(`/audio/${nom}.mp3`).then(buf => {
+      if (buf && desired === lieu && !isMuted()) playBufferUneFois(buf, VIE_GAIN);
+    });
+    planifierVie(lieu);
+  }, delai);
+}
+
+/**
+ * Les deux couches qui se posent sur le quartier vont toujours ensemble : la
+ * météo et la signature du lieu. Les appeler séparément, c'était l'oubli
+ * assuré sur l'un des sept chemins de sortie de `sync()`.
+ */
+function syncCouches(): void {
+  syncWeather();
+  syncSignature();
+}
+
 function sync(): void {
   const ac = getAudio();
   const want = isMuted() ? null : desired;
 
   // Rien à faire si on joue déjà ce qu'il faut.
-  if (running && running.id === want) { syncWeather(); return; }
-  if (fileLoop && fileLoop.id === want) { syncWeather(); return; }
+  if (running && running.id === want) { syncCouches(); return; }
+  if (fileLoop && fileLoop.id === want) { syncCouches(); return; }
 
   if (running) { running.stop(); running = null; }
   if (fileLoop) { fileLoop.loop.stop(1.0); fileLoop = null; }
-  if (!want) { syncWeather(); return; }
+  if (!want) { syncCouches(); return; }
   if (!ac) return;
   if (ac.state !== 'running') { armGesture(); return; }
 
   // Le thème du titre reste synthétisé : il plaît tel quel.
-  if (want === 'title') { running = { id: want, stop: BUILDERS[want]!(ac) }; syncWeather(); return; }
+  if (want === 'title') { running = { id: want, stop: BUILDERS[want]!(ac) }; syncCouches(); return; }
 
   // Les lits de mini-jeu : le fichier ou rien. Ils sont plus discrets que les
   // quartiers — on joue par-dessus, la tension vient des effets.
@@ -133,7 +220,7 @@ function sync(): void {
       const loop = startLoop(buf, MINIGAME_GAIN, 1.8);
       if (loop) fileLoop = { id: want, loop };
     });
-    syncWeather();
+    syncCouches();
     return;
   }
 
@@ -150,7 +237,7 @@ function sync(): void {
       const loop = startLoop(buf, MORT_GAIN, 4);
       if (loop) fileLoop = { id: want, loop };
     });
-    syncWeather();
+    syncCouches();
     return;
   }
 
@@ -160,13 +247,13 @@ function sync(): void {
     if (running || fileLoop) return;                  // quelqu'un a déjà démarré
     if (buf) {
       const loop = startLoop(buf, MASTER_GAIN, 1.6);
-      if (loop) { fileLoop = { id: want, loop }; syncWeather(); return; }
+      if (loop) { fileLoop = { id: want, loop }; syncCouches(); return; }
     }
     const ac2 = getAudio();
     if (!ac2 || ac2.state !== 'running') return;
     const build = BUILDERS[want];
     if (build) running = { id: want, stop: build(ac2) };
-    syncWeather();
+    syncCouches();
   });
 }
 
@@ -192,7 +279,7 @@ function armGesture(): void {
   EVENTS.forEach((e) => window.addEventListener(e, kick, { capture: true }));
 }
 
-onMuteChange(() => { sync(); syncWeather(); });
+onMuteChange(() => { sync(); syncCouches(); syncSignature(); });
 
 /* ------------------------------------------------------------------ */
 /* Boîte à outils commune                                              */

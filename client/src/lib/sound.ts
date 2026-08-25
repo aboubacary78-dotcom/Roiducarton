@@ -806,6 +806,41 @@ export const playTensionRisque = withFile('tension-risque', 0.55, () => { /* mue
  */
 export const playTensionTic = withFile('tension-compte', 0.6, () => { /* muet avant livraison */ });
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LE MÊME GESTE NE SONNE PAS PAREIL SELON L'ENDROIT
+ *
+ * Mendier au parc, c'est deux pièces remuées lentement devant des promeneurs ;
+ * mendier en ville, c'est secouer vite et entendre les pas continuer sans
+ * ralentir. Le geste est le même, la situation ne l'est pas — et c'est
+ * exactement ce qu'un jeu sur la rue doit faire entendre.
+ *
+ * Quinze combinaisons sont enregistrées, pas les trente possibles : on a écrit
+ * celles qui racontent quelque chose. Quand il n'y en a pas pour le couple
+ * (geste, quartier), il ne se passe rien de plus — le son générique de
+ * l'action a déjà été joué, et cette couche-ci ne fait que l'habiller.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Abrégés des quartiers, tels qu'ils apparaissent dans les noms de fichiers. */
+const CODE_LIEU: Record<string, string> = {
+  'parc': 'parc',
+  'centre-ville': 'cv',
+  'gare': 'gare',
+  'marche': 'marche',
+  'zone-industrielle': 'zi',
+};
+
+export type GesteDeLieu = 'dormir' | 'mendier' | 'voler' | 'fouiller' | 'recup' | 'marchander';
+
+export function playActionLieu(geste: GesteDeLieu, lieu: string | undefined): void {
+  if (muted || !lieu) return;
+  const code = CODE_LIEU[lieu];
+  if (!code) return;
+  const url = `/audio/act-${geste}-${code}.mp3`;
+  // Silencieux si la combinaison n'a pas été écrite : c'est le cas normal.
+  if (isKnownMissing(url)) return;
+  loadAudio(url).then(buf => { if (buf) playBuffer(buf, 0.8); });
+}
+
 /* ─── LA RONDE ───────────────────────────────────────────────────────────
  * Trois signaux livrés en plus de la commande, et le jeu avait exactement
  * trois moments pour eux : la ronde qu'on sent venir, celle qui passe, et
@@ -881,7 +916,19 @@ export function installerClicParDefaut(): void {
     if (muted) return;
     const cible = (e.target as HTMLElement | null)?.closest?.('button, [role="button"]') as HTMLElement | null;
     if (!cible) return;
-    if (cible.hasAttribute('disabled') || cible.getAttribute('aria-disabled') === 'true') return;
+    /*
+     * UN BOUTON DÉSACTIVÉ NE SE TAIT PLUS : IL REFUSE.
+     *
+     * Le filet passait son chemin, et l'appui restait sans réponse — ce qui se
+     * lit comme une interface qui n'a pas entendu, pas comme une action
+     * interdite. Le joueur réappuie, plus fort, puis croit à un bug. Le loquet
+     * qui résiste dit « non » en un dixième de seconde, et il le dit sans
+     * ouvrir de fenêtre par-dessus le jeu.
+     */
+    if (cible.hasAttribute('disabled') || cible.getAttribute('aria-disabled') === 'true') {
+      playVerrou();
+      return;
+    }
     if (cible.closest('[data-sans-son]')) return;
     if (sonJoueRecemment()) return;
     playClick();

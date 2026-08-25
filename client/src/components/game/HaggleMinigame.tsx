@@ -26,7 +26,7 @@ import {
   moves, openingPrice, priceFor, startingPatience, tradeCandidate,
   type ArgumentId, type Shopkeeper,
 } from '@/contexts/GameContext';
-import { playBack, playClick, playGoodOutcome, playHandshake, playTurnedAway } from '@/lib/sound';
+import { playBack, playClick, playGoodOutcome, playHandshake, playObjetCasse, playTurnedAway } from '@/lib/sound';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
 import { setAmbience, type AmbienceId } from '@/lib/ambience';
@@ -84,6 +84,8 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
     setPatience(Math.max(0, left));
     if (left <= 0) {
       setPhase('broken');
+      // Le marché est rompu, sec. C'est fini, pas triste.
+      playObjetCasse();
       setLine(keeper.snap);
       playTurnedAway();
       return false;

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { showRewarded, canOfferRewarded } from '@/lib/ads';
 import { DIGNITY_TIERS, dignityTierIndex } from '@/contexts/data/dignity';
-import { playBack, playGoodOutcome, playKO, playMiss, playMoneyOut, playPickUp, playWin } from '@/lib/sound';
+import { playBack, playGoodOutcome, playKO, playMiss, playMoneyOut, playObjetPlein, playPickUp, playWin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, moodFor } from './SceneIllustration';
@@ -105,6 +105,13 @@ export default function EventResultOverlay() {
    * n'a jamais eu. On vend donc cet objet-là, jamais « de la place ».
    */
   const objetRefuse = !result.itemKept ? result.refusedItem : undefined;
+  /*
+   * Le sac qui craque s'entend. Le refus était écrit dans un paragraphe que
+   * personne ne lit en entier : une couture qui force et une fermeture qui
+   * renonce disent la même chose en un demi-tour de main, et donnent envie
+   * d'aller voir le bouton juste en dessous.
+   */
+  useEffect(() => { if (objetRefuse) playObjetPlein(); }, [objetRefuse?.id]);
   const canGarderObjet = !!objetRefuse && canOfferRewarded();
 
   async function handleGarderObjet() {

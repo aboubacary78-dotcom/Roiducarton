@@ -10,7 +10,7 @@ import CardboardAvatar from './CardboardAvatar';
 import PlayerFace, { faceCondition } from './PlayerFace';
 import StreetEncounter from './StreetEncounter';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
-import { playBag, playCard, playClick, playFightStart, playNextDay, playTab, playUnlock } from '@/lib/sound';
+import { playActionLieu, playBag, playCard, playClick, playFightStart, playNextDay, playTab, playUnlock } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
@@ -91,6 +91,9 @@ export default function MainScreen() {
   const { state, dispatch } = useGame();
   useLang();
   const char = state.character!;
+  // Le quartier habille les gestes : mendier au parc ne sonne pas comme
+  // mendier en ville (voir playActionLieu).
+  const lieuActuel = char.location;
   const loc = LOCATIONS[char.location];
   // État général (0 = à l'agonie, 1 = en pleine forme) : moyenne des jauges
   // vitales, hors dignité (plus sociale). Nourrit le visage et le liseré de
@@ -513,16 +516,16 @@ export default function MainScreen() {
 
         {/* Main actions grid */}
         <div id="tuto-actions" className="grid grid-cols-2 gap-2">
-          <ActionTile emoji="🔍" title={tr('Explorer', 'Explore')} desc={tr('Tenter une rencontre', 'Look for an encounter')} accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'EXPLORE' }); }} />
+          <ActionTile emoji="🔍" title={tr('Explorer', 'Explore')} desc={tr('Tenter une rencontre', 'Look for an encounter')} accent="#4A8FBF" disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'EXPLORE' }); playActionLieu('fouiller', lieuActuel); }} />
           <ActionTile
             emoji="🙏" title={tr('Mendier', 'Beg')} desc={tr('Récolter des pièces', 'Collect coins')} accent="#B8860B"
-            disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'BEG' }); }}
+            disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'BEG' }); playActionLieu('mendier', lieuActuel); }}
           />
           {/* Sans la Bagarre, la grille tomberait à trois tuiles et laisserait
               un trou : Dormir prend alors les deux colonnes. */}
           <ActionTile
             emoji="😴" title={tr('Dormir', 'Sleep')} desc={tr('Récupérer du sommeil', 'Recover sleep')} accent="#7B68EE"
-            disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'REST' }); }}
+            disabled={actionsLeft <= 0} onClick={() => { playClick(); dispatch({ type: 'REST' }); playActionLieu('dormir', lieuActuel); }}
             className={arsenal ? '' : 'col-span-2'}
           />
           {arsenal && (
@@ -544,7 +547,7 @@ export default function MainScreen() {
         <motion.button
           whileHover={actionsLeft <= 0 ? {} : liftHover}
           whileTap={actionsLeft <= 0 ? {} : stampTap}
-          onClick={actionsLeft <= 0 ? undefined : (e) => { noteTap(e); playClick(); dispatch({ type: 'SALVAGE' }); }}
+          onClick={actionsLeft <= 0 ? undefined : (e) => { noteTap(e); playClick(); dispatch({ type: 'SALVAGE' }); playActionLieu('recup', lieuActuel); }}
           disabled={actionsLeft <= 0}
           className={`action-btn p-2.5 flex items-center justify-center gap-2 border-[#7C8B5A]/30 ${
             actionsLeft <= 0 ? 'opacity-35 pointer-events-none' : ''
@@ -591,7 +594,7 @@ export default function MainScreen() {
         <motion.button
           whileHover={actionsLeft <= 0 ? {} : liftHover}
           whileTap={actionsLeft <= 0 ? {} : stampTap}
-          onClick={actionsLeft <= 0 ? undefined : (e) => { noteTap(e); playClick(); dispatch({ type: 'STEAL' }); }}
+          onClick={actionsLeft <= 0 ? undefined : (e) => { noteTap(e); playClick(); dispatch({ type: 'STEAL' }); playActionLieu('voler', lieuActuel); }}
           disabled={actionsLeft <= 0}
           className={`action-btn p-2.5 flex items-center justify-center gap-2 border-[#D94F4F]/30 ${
             actionsLeft <= 0 ? 'opacity-35 pointer-events-none' : ''

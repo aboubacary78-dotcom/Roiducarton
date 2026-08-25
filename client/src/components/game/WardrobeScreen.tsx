@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import CardboardAvatar from './CardboardAvatar';
 import { faceCondition } from './PlayerFace';
-import { playBack, playClick, playTab } from '@/lib/sound';
+import { playBack, playClick, playObjetEquipe, playTab } from '@/lib/sound';
 import {
   ACCESSORIES,
   ACHIEVEMENTS,
@@ -33,8 +33,14 @@ export default function WardrobeScreen() {
   const unlockedCount = profile.unlocked.length;
 
   const equip = (slot: AccessorySlot, id: string) => {
-    playClick();
     const wasEquipped = profile.equipped[slot] === id;
+    /*
+     * S'habiller a son son : tissu qu'on enfile et boucle qu'on serre d'un
+     * cran. Le clic générique convenait pour ouvrir un onglet, pas pour le
+     * seul geste du jeu où l'on prend soin de soi. Retirer garde le clic —
+     * on ne fait pas une cérémonie d'un accessoire qu'on enlève.
+     */
+    if (wasEquipped) playClick(); else playObjetEquipe();
     setProfile({ ...toggleEquip(slot, id) });
     pushToast(
       wasEquipped ? tr('Accessoire retiré', 'Accessory removed') : tr('Accessoire équipé !', 'Accessory equipped!'),

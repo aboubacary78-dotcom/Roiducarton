@@ -4,7 +4,7 @@ import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay
 import { showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
-import { playBack, playCard, playClick, playMoneyOut, playShare, playUnlock } from '@/lib/sound';
+import { playActionLieu, playBack, playCard, playClick, playMoneyOut, playShare, playUnlock } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { pushToast } from '@/lib/toast';
@@ -454,6 +454,10 @@ export default function ShopScreen() {
               onClose={(res) => {
                 const { item } = haggling;
                 setHaggling(null);
+                // Le marchandage du marché a son propre son : le raclement de
+                // gorge avant les pièces comptées dit le rapport de force
+                // mieux qu'une ligne de texte.
+                playActionLieu('marchander', state.character?.location);
                 // Ce qu'on a engagé se paie dans tous les cas : dignité, fatigue,
                 // objet troqué, et la porte close si on a tiré sur la corde.
                 dispatch({

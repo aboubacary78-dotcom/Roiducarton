@@ -6,6 +6,7 @@
  * (« Bravo ! », « +3€ », « Équipé ! »…) même quand aucun écran ne change.
  */
 import { useSyncExternalStore } from 'react';
+import { playToastBon, playToastMauvais } from './sound';
 
 export type ToastTone = 'good' | 'bad' | 'info';
 export interface Toast {
@@ -27,7 +28,22 @@ function emit() {
 
 export function pushToast(text: string, opts?: { emoji?: string; tone?: ToastTone; duration?: number }): void {
   const id = ++counter;
-  const toast: Toast = { id, text, emoji: opts?.emoji, tone: opts?.tone ?? 'info' };
+  const tone = opts?.tone ?? 'info';
+  const toast: Toast = { id, text, emoji: opts?.emoji, tone };
+  /*
+   * LE TOAST S'ANNONCE.
+   *
+   * Il apparaît en haut de l'écran et disparaît en deux secondes, pendant que
+   * le pouce du joueur travaille en bas : la moitié des toasts n'était jamais
+   * lue. Deux tapotements sur du carton — sec pour une bonne nouvelle, mou
+   * pour une mauvaise — suffisent à faire lever les yeux à temps.
+   *
+   * Volontairement DEUX FOIS PLUS DISCRET que le clic d'action : ces sons
+   * accompagnent une information, ils ne récompensent pas un geste. Le ton
+   * « info » reste muet — il ne s'y passe rien qu'on doive interrompre.
+   */
+  if (tone === 'good') playToastBon();
+  else if (tone === 'bad') playToastMauvais();
   toasts.push(toast);
   // Au plus 3 toasts empilés.
   if (toasts.length > 3) toasts.shift();

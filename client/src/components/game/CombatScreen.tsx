@@ -2,7 +2,7 @@ import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon,
 import type { Character, CombatState, CombatCard, SignId, DodgeProj } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { playBack, playCard, playCrit, playEnemyCry, playFightStart, playHit, playHurt, playKingArrival, playTurnedAway } from '@/lib/sound';
+import { playBack, playCard, playCombatCharge, playCombatEsquive, playCombatEsquiveParfaite, playCrit, playEnemyCry, playFightStart, playHit, playHurt, playKingArrival, playTurnedAway } from '@/lib/sound';
 import { setAmbience } from '@/lib/ambience';
 import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -589,6 +589,8 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
   const hitsRef = useRef(0);
   const iframeRef = useRef(0);
   const projId = useRef(0);
+  // Prochain instant où un frôlement peut se faire entendre.
+  const froleRef = useRef(0);
   const [, force] = useState(0);
   const [flash, setFlash] = useState(false);
   const [timeLeft, setTimeLeft] = useState(1);
@@ -604,6 +606,16 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
       () => ++projId.current,
       telegraph ? now + 420 : 0,
     );
+    /*
+     * L'ADVERSAIRE PREND SON ÉLAN, ET ON L'ENTEND.
+     *
+     * La volée arrivait en silence : on la voyait ou on la prenait. Le son
+     * part À L'APPARITION de la vague, donc avant qu'elle traverse — c'est ce
+     * qui en fait une information et non un commentaire. Le nez sensible et le
+     * paranoïaque ont en plus leurs 420 ms d'avance visuelle ; les autres ont
+     * au moins l'oreille.
+     */
+    playCombatCharge();
     projRef.current.push(...wave);
   }, [pattern, speedMul, telegraph]);
 
@@ -635,12 +647,38 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
         () => {
           hitsRef.current += 1; iframeRef.current = now + IFRAME;
           setFlash(true); setTimeout(() => setFlash(false), 160); playHurt();
+          // Un coup encaissé annule le frôlement : on ne frôle pas ce qui touche.
+          froleRef.current = now + 500;
         },
       );
+
+      /*
+       * LE FRÔLEMENT — la récompense de l'esquive serrée.
+       *
+       * Passer à un cheveu d'un projectile ne produisait rien : esquiver de
+       * justesse et esquiver largement se ressemblaient. Le souffle du tissu
+       * qui passe transforme la seconde en exploit, sans rien changer aux
+       * règles. Espacé d'un demi-tour de main pour qu'une volée dense ne le
+       * transforme pas en crécelle.
+       */
+      if (now > froleRef.current) {
+        const p = posRef.current;
+        const frole = projRef.current.some(q => {
+          const d = Math.hypot(q.x - p.x, q.y - p.y);
+          return d > R && d < R * 2.1;
+        });
+        if (frole) { froleRef.current = now + 450; playCombatEsquive(); }
+      }
       force((n) => n + 1);
 
       if (elapsed >= DURATION) {
-        if (!doneRef.current) { doneRef.current = true; setTimeout(() => onDone(hitsRef.current), 250); }
+        if (!doneRef.current) {
+          doneRef.current = true;
+          // Zéro coup encaissé. Le silence de l'impact était déjà la
+          // récompense ; encore fallait-il que quelque chose la nomme.
+          if (hitsRef.current === 0) playCombatEsquiveParfaite();
+          setTimeout(() => onDone(hitsRef.current), 250);
+        }
         return;
       }
       raf = requestAnimationFrame(loop);

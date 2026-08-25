@@ -1,7 +1,7 @@
 import { useGame, LOCATIONS, heistTargetsFor, HEIST_TUNING, type HeistTarget } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { playCard, playCrit, playHit, playHurt, playPickUp, playStep, playTensionPalier, playTurnedAway, playUnlock } from '@/lib/sound';
+import { playCard, playCrit, playHit, playHurt, playPickUp, playSpotted, playStep, playTensionPalier, playTurnedAway, playUnlock } from '@/lib/sound';
 import { canOfferRewarded, showRewarded } from '@/lib/ads';
 import { useLang, tr } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
@@ -332,7 +332,13 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
     statusRef.current = result === 'fail' ? 'caught' : 'escaped';
     setStatus(statusRef.current);
     setEndTier(result);
-    if (result === 'fail') playHurt();
+    /*
+     * Se faire prendre a son son, et ce n'est pas un coup encaissé : c'est la
+     * main sur l'épaule. `moment-attrape` servait jusqu'ici aux paliers
+     * d'alerte, où il faisait doublon ; il retrouve ici le seul instant qu'il
+     * décrit vraiment.
+     */
+    if (result === 'fail') { playSpotted(); playHurt(); }
     else if (result === 'jackpot' || result === 'hot') playCrit();
     else playHit();
     setTimeout(() => dispatch({ type: 'RESOLVE_STEAL', tier: result, targetId: target.id }), 1200);
