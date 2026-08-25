@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { playCard, playCrit, playHit, playHurt, playPickUp, playSpotted, playStep, playTensionPalier, playTurnedAway, playUnlock } from '@/lib/sound';
 import { canOfferRewarded, showRewarded } from '@/lib/ads';
 import { useLang, tr } from '@/lib/lang';
+import { piquer } from '@/contexts/data/piques';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
@@ -338,7 +339,21 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
      * d'alerte, où il faisait doublon ; il retrouve ici le seul instant qu'il
      * décrit vraiment.
      */
-    if (result === 'fail') { playSpotted(); playHurt(); }
+    if (result === 'fail') {
+      playSpotted(); playHurt();
+      /*
+       * Et la rue en pense quelque chose. Se faire cueillir est le seul échec
+       * du jeu que le joueur a intégralement choisi : il a vu les gardes, il a
+       * tenté quand même. C'est le seul endroit où la moquerie porte sur
+       * l'exécution sans être injuste — et la seule façon de rendre un échec
+       * racontable plutôt que rageant.
+       *
+       * Décalée derrière l'écran de fin de casse, pour ne pas se superposer à
+       * l'animation qui dit déjà qu'on est pris.
+       */
+      const pique = piquer('vol-rate');
+      if (pique) setTimeout(() => pushToast(tr(pique.fr, pique.en), { emoji: '🚨', tone: 'bad', duration: 3400 }), 700);
+    }
     else if (result === 'jackpot' || result === 'hot') playCrit();
     else playHit();
     setTimeout(() => dispatch({ type: 'RESOLVE_STEAL', tier: result, targetId: target.id }), 1200);

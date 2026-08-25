@@ -11,6 +11,7 @@ import { STREET_TITLES } from '@/contexts/data/progression';
 import { getEquipped } from '@/lib/profile';
 import { pushToast } from '@/lib/toast';
 import { playBack, playBequeath, playCard, playDeath, playFind, playNewEnding, resetGaugeAlerts } from '@/lib/sound';
+import { reinitialiserPiques } from '@/contexts/data/piques';
 import { haptic } from '@/lib/haptics';
 import { rememberSuccessor } from '@/lib/notifications';
 import { worthSharing, shareRewardAvailable, markShareRewarded, shareFrontPage } from '@/lib/partage';
@@ -672,6 +673,7 @@ export default function GameOverScreen() {
             onClick={() => {
               playCard();
               resetGaugeAlerts();
+              reinitialiserPiques();
               // L'interstitiel se pose ici, sur une transition VOULUE, et non
               // par-dessus le bilan qu'on est en train de lire : un plein écran
               // qui coupe une lecture se fait fermer en deux secondes.
@@ -900,6 +902,7 @@ export default function GameOverScreen() {
         onClick={() => {
               playCard();
               resetGaugeAlerts();
+              reinitialiserPiques();
               // L'interstitiel se pose ici, sur une transition VOULUE, et non
               // par-dessus le bilan qu'on est en train de lire : un plein écran
               // qui coupe une lecture se fait fermer en deux secondes.

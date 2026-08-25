@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr } from '@/lib/lang';
 import { canOfferRewarded, showRewarded } from '@/lib/ads';
 import { playWakeUp, playWear, playBack, playGaugeFilled, playUnlock } from '@/lib/sound';
+import { piquer } from '@/contexts/data/piques';
+import { pushToast } from '@/lib/toast';
 
 /** Sous ce niveau une jauge est en danger — le même seuil que l'alerte sonore. */
 const SEUIL_ALERTE = 25;
@@ -34,6 +36,20 @@ export default function DaySummaryOverlay() {
     if (!s) return;
     playWakeUp();
     if (s.notes.some(n => n.startsWith('💔'))) setTimeout(() => playWear(), 700);
+    /*
+     * LE COMMENTAIRE DU MATIN.
+     *
+     * C'est l'écran le plus vu du jeu : une fois par nuit, toutes les parties.
+     * D'où le débit bridé de `piquer` — trente secondes minimum entre deux
+     * piques, toutes catégories confondues — et six phrases qui se contentent
+     * d'un détail exact plutôt que de pousser la blague. Une vanne qu'on relit
+     * chaque matin doit pouvoir se relire cent fois.
+     *
+     * Posée après le réveil, jamais dessus : le bilan a déjà ses chiffres à
+     * lire, et deux informations qui arrivent ensemble n'en font qu'une.
+     */
+    const p = piquer('reveil');
+    if (p) setTimeout(() => pushToast(tr(p.fr, p.en), { emoji: '🌅', duration: 3400 }), 1400);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jour]);
 

@@ -11,6 +11,8 @@ import { haptic } from '@/lib/haptics';
 import { isFirstEverRun } from '@/lib/coach';
 import { loadGraves } from '@/lib/necrology';
 import { useLang, tr, tc } from '@/lib/lang';
+import { piquer } from '@/contexts/data/piques';
+import { pushToast } from '@/lib/toast';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
 import LocationBackdrop from './LocationBackdrop';
@@ -184,6 +186,19 @@ function SalvageInner() {
     setEnded({ how, reason, missed: how === 'bust' ? bestMissed() : undefined });
     // Le tas qui se réveille a son propre son : c'est le moment où tout se perd.
     if (how === 'bust') { playCollapse(); haptic('heavy'); } else { playCrit(); haptic('medium'); }
+    /*
+     * RESSORTIR DU CONTAINER LES MAINS VIDES.
+     *
+     * On ne pique QUE quand le joueur remonte de lui-même sans rien : le tas
+     * qui s'écroule a déjà son écran, son son et sa phrase — « ce qu'il y
+     * avait juste à côté » — et une vanne par-dessus ferait trois choses en
+     * même temps. Remonter bredouille, à l'inverse, ne dit rien du tout.
+     */
+    if (how === 'out' && centimesRef.current < 10 && bazarRef.current === 0
+        && trouvaillesRef.current.length === 0) {
+      const p = piquer('gain-miserable');
+      if (p) setTimeout(() => pushToast(tr(p.fr, p.en), { emoji: '♻️', tone: 'bad', duration: 3400 }), 900);
+    }
     setTimeout(() => dispatch({
       type: 'RESOLVE_SALVAGE',
       // L'Agile ressort avec ce qu'il avait dans les mains, même quand tout

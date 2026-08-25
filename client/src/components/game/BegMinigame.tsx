@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playCoin, playHurt, playMiss, playPassantAgace, playPassantRefus, playPoliceApproche, playPoliceIntervention, playPolicePresence, playStep, playTensionTic } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
+import { piquer } from '@/contexts/data/piques';
+import { pushToast } from '@/lib/toast';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
 import CardboardAvatar from './CardboardAvatar';
@@ -134,6 +136,19 @@ function BegMinigameInner() {
     setEnded(reason);
     if (reason === 'cop') playPoliceIntervention();
     else if (reason !== 'time') playHurt();
+    /*
+     * VINGT-QUATRE SECONDES DE MANCHE POUR UNE PIÈCE.
+     *
+     * Le pire moment du mini-jeu, et donc le meilleur endroit pour une vanne :
+     * elle transforme une frustration en anecdote, ce qu'aucun chiffre ne sait
+     * faire. Seulement quand la ronde n'a rien confisqué et qu'aucune bagarre
+     * n'a éclaté — sinon la mauvaise récolte a une cause, et se moquer d'une
+     * cause connue tombe à plat.
+     */
+    if (reason === 'time' && coinsRef.current <= 1) {
+      const p = piquer('gain-miserable');
+      if (p) setTimeout(() => pushToast(tr(p.fr, p.en), { emoji: '🪙', tone: 'bad', duration: 3400 }), 900);
+    }
     setTimeout(() => dispatch({
       type: 'RESOLVE_BEG',
       coins: Math.round(coinsRef.current),

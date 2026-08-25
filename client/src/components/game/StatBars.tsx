@@ -3,6 +3,8 @@ import { dignityTier, dignityTierIndex } from '@/contexts/data/dignity';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useLang, tr } from '@/lib/lang';
+import { piquer } from '@/contexts/data/piques';
+import { pushToast } from '@/lib/toast';
 import { playDignityLoss, playDignityTier, playGaugeLow, playTab } from '@/lib/sound';
 
 /*
@@ -87,13 +89,38 @@ function useDeltas(stats: Stats) {
 /** Une perte de Dignité en dessous de ce seuil passe pour du bruit de fond. */
 const HUMILIATION = 5;
 
+/*
+ * LE SEUIL OÙ LE JEU SE PERMET UN COMMENTAIRE.
+ *
+ * Plus bas que le seuil de danger (25) : à 25 on prévient, à 10 on est en
+ * train d'y passer, et c'est seulement là qu'une remarque cynique est drôle
+ * plutôt que désinvolte. Le même seuil que celui du rappel sonore, exprès.
+ */
+const AGONIE = 10;
+
 function useAlertesSonores(stats: Stats) {
   const palierPrecedent = useRef<number | null>(null);
   const digniteAvant = useRef<number | null>(null);
+  const enAgonie = useRef(false);
 
   useEffect(() => {
     for (const { key } of BODY) playGaugeLow(key, stats[key]);
     playGaugeLow('dignity', stats.dignity);
+
+    /*
+     * LA RUE COMMENTE.
+     *
+     * Au FRANCHISSEMENT seulement, comme l'alerte sonore : une pique qui se
+     * rejoue tant qu'on reste dans le rouge devient un tic, et un tic ne se
+     * lit plus. `piquer` bride en plus le débit toutes catégories confondues,
+     * pour qu'une mauvaise passe ne fasse pas ricaner le jeu en boucle.
+     */
+    const mourant = BODY.some(({ key }) => stats[key] <= AGONIE);
+    if (mourant && !enAgonie.current) {
+      const p = piquer('sante-critique');
+      if (p) pushToast(tr(p.fr, p.en), { emoji: '💀', tone: 'bad', duration: 3200 });
+    }
+    enAgonie.current = mourant;
 
     /*
      * L'HUMILIATION. Aucun impact, que de l'arrachement — l'adhésif qu'on
@@ -111,7 +138,14 @@ function useAlertesSonores(stats: Stats) {
     // donc monter l'indice. On ne sonne que celui-là : remonter d'un palier est
     // une bonne nouvelle, et elle est déjà portée par le texte qui s'affiche.
     const palier = dignityTierIndex(stats.dignity);
-    if (palierPrecedent.current !== null && palier > palierPrecedent.current) playDignityTier();
+    if (palierPrecedent.current !== null && palier > palierPrecedent.current) {
+      playDignityTier();
+      // Le palier franchi vers le bas est le moment le plus lourd du jeu, et
+      // celui où la comédie noire travaille le plus : elle empêche la scène
+      // de virer au misérabilisme sans en retirer une once.
+      const p = piquer('dignite-zero');
+      if (p) pushToast(tr(p.fr, p.en), { emoji: '👑', tone: 'bad', duration: 3600 });
+    }
     palierPrecedent.current = palier;
   }, [stats]);
 }
