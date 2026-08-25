@@ -398,6 +398,85 @@ précisément ce qui manque — c'est une information, pas un échec.
 
 ---
 
+# Remettre une NOUVELLE version sur ton téléphone
+
+Tout ce qui précède, c'est l'installation : elle ne se fait qu'une fois. Pour
+récupérer les changements, il n'y a plus que **quatre lignes**, et deux d'entre
+elles sont des vérifications.
+
+Ouvre PowerShell **dans le dossier du projet** (clic droit dans le dossier →
+« Ouvrir dans le terminal »), et tape ceci ligne par ligne.
+
+### 1. Vérifier que tu n'as rien modifié par accident
+
+```powershell
+git status
+```
+
+Si ça répond **`nothing to commit, working tree clean`**, parfait, continue.
+
+Si ça liste des fichiers en rouge, c'est qu'Android Studio a touché quelque
+chose. Range-les avant de continuer — cette commande met tes modifications de
+côté sans les perdre :
+
+```powershell
+git stash
+```
+
+### 2. Récupérer la nouvelle version
+
+```powershell
+git pull origin claude/game-improvement-review-qpa9u1
+```
+
+Tu verras défiler la liste des fichiers modifiés. C'est normal, c'est bon signe.
+
+### 3. Refabriquer le jeu et le recopier dans le projet Android
+
+```powershell
+pnpm build
+npx cap sync android
+```
+
+`pnpm build` refabrique le jeu, `cap sync` le recopie dans le dossier Android.
+Les deux prennent quelques secondes.
+
+⚠️ **Ne saute jamais `cap sync`.** Sans lui, Android Studio recompile
+l'ANCIENNE version : tu vas croire que rien n'a changé, alors que tout est
+prêt à côté. C'est l'erreur numéro un, et elle ne produit aucun message.
+
+### 4. Envoyer sur le téléphone
+
+Branche le S21 en USB, puis dans **Android Studio** : le bouton **▶ Run**
+(triangle vert, en haut). Il détecte le téléphone, compile et installe.
+
+Tu n'as **pas** besoin de désinstaller l'ancienne version : elle est remplacée,
+et ta partie en cours est conservée.
+
+## Faut-il refaire `pnpm install` ?
+
+**Seulement si les dépendances ont changé** — c'est-à-dire si le fichier
+`package.json` a bougé ailleurs que sur son numéro de version. Dans le doute,
+le faire ne casse rien, ça prend juste deux minutes de plus :
+
+```powershell
+pnpm install
+```
+
+Si tu vois une erreur du genre `Cannot find module`, c'est exactement ça qu'il
+fallait faire.
+
+## Ça ne marche pas ?
+
+| Ce que tu vois | Ce que ça veut dire |
+|---|---|
+| `Your local changes would be overwritten` | Tu as modifié des fichiers. Fais `git stash` puis recommence le `git pull`. |
+| Le jeu tourne mais **rien n'a changé** | `cap sync` a été oublié, ou Android Studio a réinstallé un ancien build. Refais l'étape 3, puis **Build → Clean Project** avant de relancer. |
+| `Cannot find module` | Fais `pnpm install`, puis reprends à l'étape 3. |
+| Android Studio ne voit plus le téléphone | Débranche/rebranche, et vérifie que l'écran du S21 est déverrouillé. |
+
+---
+
 # Ce qui vient après
 
 Une fois que le jeu tourne sur ton téléphone, il restera :
