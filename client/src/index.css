@@ -20,6 +20,52 @@
   --color-accent-blue: #4A8FBF;
   --color-accent-purple: #7B68EE;
   --color-accent-gold: #B8860B;
+
+  /* ═════════════════════════════════════════════════════════════════════════
+   * LA PALETTE DIÉGÉTIQUE — SIX OBJETS POSÉS SUR LE CARTON
+   *
+   * Mesuré sur les 400 déclarations de couleur du projet : le kraft occupe la
+   * plage 24°–33° de la roue chromatique, et les DEUX teintes que le jeu
+   * utilisait le plus pour attirer l'œil campaient dedans — l'or à 43°, le
+   * jaune à 42°. Elles ne pouvaient rien signaler : elles étaient de la même
+   * famille que le décor. Les deux seules qui s'en détachaient, le vert (136°)
+   * et le bleu (205°), étaient les MOINS saturées du jeu — 35 % et 48 %, quand
+   * le carton lui-même monte à 61 %.
+   *
+   * D'où la grisaille dont parlent les testeurs : ce n'était pas un manque de
+   * couleur, c'était un manque d'écart.
+   *
+   * On ne peut pas répondre par des couleurs d'interface — un bouton vert
+   * brillant casserait le carton en une seconde. Chaque couleur vient donc
+   * d'un OBJET que quelqu'un a posé sur le décor, et cet objet a une physique
+   * qui décide de son rôle. Ce n'est pas une convention, c'est une mesure :
+   *
+   *   L'ENCRE VA SUR LE PAPIER, LE PAPIER VA SOUS L'ENCRE.
+   *
+   * Marqueur, scotch et tampon contrastent à 5–6:1 posés sur le fond du jeu
+   * mais refusent le texte sombre (2,4 à 3,2:1) : ce sont des MARQUES, elles
+   * portent du blanc. Post-it et ruban sont invisibles comme marques (1,25 et
+   * 2,02:1) et excellents sous une écriture noire (11,95 et 7,39:1) : ce sont
+   * des SURFACES. Ce qui se colle par-dessus n'écrit jamais ; ce qui s'écrit
+   * dessus ne se colle jamais.
+   *
+   * Et aucune ne porte l'information seule : chaque objet a sa forme propre —
+   * le trait qui bave, le bord déchiré, la rayure — qui reste lisible en plein
+   * soleil, pour un daltonien, et sur une capture en noir et blanc.
+   * ═════════════════════════════════════════════════════════════════════════ */
+
+  /** Marqueur indélébile. Danger, santé critique. En TRAIT, jamais en aplat. */
+  --carton-marqueur: #B3241C;
+  /** Scotch d'électricien. Action principale. 208° = l'exact opposé du kraft. */
+  --carton-scotch: #1B6CA8;
+  /** Tampon encreur. Ce qui est définitivement acquis. */
+  --carton-tampon: #2E7D46;
+  /** Post-it fluo. FOND seulement — 1,25:1 sur papier, 11,95:1 sous du noir. */
+  --carton-postit: #F2E14C;
+  /** Gaffer mat. Bloqué : c'est l'absence de couleur qui signale. */
+  --carton-gaffer: #6E6A63;
+  /** Ruban de chantier. Le temps qui s'épuise — TOUJOURS rayé, jamais uni. */
+  --carton-ruban: #E8A317;
 }
 
 @layer base {
@@ -90,24 +136,112 @@
     box-shadow: 0 8px 32px rgba(42, 31, 26, 0.12), 0 2px 8px rgba(42, 31, 26, 0.06);
   }
 
-  /* Primary action button */
+  /*
+   * LE BOUTON D'ACTION EST UN MORCEAU DE SCOTCH D'ÉLECTRICIEN.
+   *
+   * Il était du dégradé kraft — c'est-à-dire la couleur exacte du décor sur
+   * lequel il est posé. Le bleu à 206° est l'opposé du kraft sur la roue : la
+   * seule teinte que ce monde ne peut pas absorber, et la seule qu'on trouve
+   * physiquement dans une rue sous forme d'adhésif.
+   *
+   * `clip-path` et pas `border-radius` : un adhésif se coupe aux doigts, il ne
+   * s'arrondit pas. Les bords de travers sont l'objet, pas une décoration —
+   * c'est ce qui l'empêche de redevenir un bouton d'interface.
+   *
+   * `drop-shadow` et pas `box-shadow` : `clip-path` découpe l'ombre portée
+   * avec le reste, et le bouton se retrouvait posé à plat sur le carton.
+   *
+   * UN SEUL PAR ÉCRAN. Le dépôt le respecte déjà — une seule occurrence par
+   * composant — et c'est ce qui donne sa valeur au bleu : deux morceaux de
+   * scotch en même temps, et il n'y a plus d'action principale.
+   */
   .btn-primary {
-    background: linear-gradient(135deg, var(--color-brand), var(--color-brand-dark));
+    background: var(--carton-scotch);
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.20), transparent 45%, rgba(0,0,0,0.16));
     color: white;
     font-weight: 600;
-    border-radius: 0.75rem;
-    box-shadow: 0 2px 8px rgba(196, 114, 58, 0.25);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border-radius: 0;
+    clip-path: polygon(0 7%, 2% 0, 98% 4%, 100% 93%, 97% 100%, 3% 96%);
+    filter: drop-shadow(0 2px 5px rgba(27, 60, 90, 0.35));
+    transition: transform 0.15s ease, filter 0.15s ease;
   }
 
   .btn-primary:hover {
-    box-shadow: 0 4px 12px rgba(196, 114, 58, 0.35);
+    filter: drop-shadow(0 4px 9px rgba(27, 60, 90, 0.45));
     transform: translateY(-1px);
   }
 
   .btn-primary:active {
     transform: translateY(0);
-    box-shadow: 0 1px 4px rgba(196, 114, 58, 0.2);
+    filter: drop-shadow(0 1px 3px rgba(27, 60, 90, 0.3));
+  }
+
+  /*
+   * BLOQUÉ : ON SCOTCHE PAR-DESSUS AU LIEU DE GRISER.
+   *
+   * Un bouton grisé disparaît de l'écran, et avec lui l'information « vous
+   * auriez pu faire ça ». Une bande de gaffer arrachée laisse voir ce qu'elle
+   * recouvre : le choix reste lisible, il est juste hors d'atteinte. C'est le
+   * seul état de la palette qui ait le droit d'être terne — ici, l'absence de
+   * couleur EST le signal.
+   */
+  .btn-primary:disabled,
+  .btn-primary[disabled] {
+    background: var(--carton-gaffer);
+    background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 3px);
+    clip-path: polygon(2% 6%, 98% 0, 100% 88%, 96% 100%, 4% 94%, 0 12%);
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+    transform: none;
+  }
+
+  /*
+   * LE TRAIT DE MARQUEUR — danger, santé critique.
+   *
+   * En trait, jamais en aplat : un marqueur ne recouvre pas une surface, il la
+   * raye. Le halo diffus imite l'encre qui part dans les fibres du carton, et
+   * le bord droit dentelé empêche la jauge de redevenir une barre de
+   * progression. Pas de filtre SVG ici malgré le rendu plus riche : cette
+   * jauge s'anime à chaque image, et un `feDisplacementMap` par image se paie
+   * cash sur un téléphone.
+   */
+  .trait-marqueur {
+    background: var(--carton-marqueur) !important;
+    box-shadow: 0 0 4px rgba(179, 36, 28, 0.55);
+    clip-path: polygon(0 4%, 100% 0, 98% 48%, 100% 100%, 0 96%);
+  }
+
+  /*
+   * LE RUBAN DE CHANTIER — le temps qui s'épuise.
+   *
+   * C'est la seule entrée de la palette où LA RAYURE porte le signal, pas la
+   * teinte : seul, ce jaune est un cousin du kraft (40° contre 28°) et ne
+   * contraste qu'à 2:1 sur le fond du jeu. Rayé de noir, il devient le motif
+   * le plus reconnaissable de l'écran sans rien devoir à sa couleur — ce qui
+   * le rend lisible en plein soleil et pour un daltonien.
+   */
+  .ruban-chantier {
+    background: repeating-linear-gradient(
+      -56deg,
+      var(--carton-ruban) 0 9px,
+      #2B211A 9px 18px
+    ) !important;
+  }
+
+  /*
+   * LE POST-IT — la trouvaille qu'on ne doit pas manquer.
+   *
+   * Fond, jamais texte : 1,25:1 posé sur le papier du jeu, 11,95:1 sous une
+   * écriture noire — le meilleur score de toute la palette, et le pire. Le
+   * coin qui rebique et la rotation font le reste ; sans eux, ce serait un
+   * bandeau d'alerte jaune, c'est-à-dire exactement ce qu'on évite.
+   */
+  .postit {
+    background: var(--carton-postit);
+    color: #2B211A;
+    border-radius: 0;
+    transform: rotate(-1.4deg);
+    box-shadow: 2px 3px 9px rgba(0, 0, 0, 0.22);
+    background-image: linear-gradient(158deg, rgba(255,255,255,0.42), transparent 40%);
   }
 
   /* Action button (secondary) */

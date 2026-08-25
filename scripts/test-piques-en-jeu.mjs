@@ -63,7 +63,9 @@ async function guetterToasts(ms) {
   const vus = new Set();
   const fin = Date.now() + ms;
   while (Date.now() < fin) {
-    const t = await p.evaluate(() => [...document.querySelectorAll('.fixed.top-3 span')]
+    // `[data-toasts]` et pas une classe de position : la pile a déjà déménagé
+    // une fois, et le test s'était retrouvé à guetter un endroit vide.
+    const t = await p.evaluate(() => [...document.querySelectorAll('[data-toasts] span')]
       .map(e => e.textContent.trim()).filter(Boolean));
     t.forEach(x => vus.add(x));
     await pause(120);

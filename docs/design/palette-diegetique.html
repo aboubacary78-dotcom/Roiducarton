@@ -1,0 +1,474 @@
+<title>Palette Diégétique Carton</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;900&family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap">
+
+<style>
+/* ── Jetons : le monde du jeu, pas une charte générique ──────────────────── */
+:root{
+  --kraft:#C49A69;
+  --kraft-deep:#9A7145;
+  --kraft-shade:rgba(90,58,28,.14);
+  --paper:#F6EFE2;
+  --paper-edge:#E2D4BC;
+  --ink:#2B211A;
+  --ink-soft:#6B5741;
+  --ink-faint:#93805F;
+  --rule:rgba(43,33,26,.16);
+  --glue:rgba(255,255,255,.5);
+
+  /* Les six objets. Ce sont des couleurs de matière, pas de charte. */
+  --marqueur:#B3241C;
+  --scotch:#1B6CA8;
+  --tampon:#2E7D46;
+  --postit:#F2E14C;
+  --gaffer:#6E6A63;
+  --ruban:#E8A317;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --kraft:#312419;
+    --kraft-deep:#1D150E;
+    --kraft-shade:rgba(0,0,0,.42);
+    --paper:#EFE6D6;
+    --paper-edge:#C9B694;
+    --ink:#241C16;
+    --ink-soft:#5D4B38;
+    --ink-faint:#8B7657;
+    --rule:rgba(43,33,26,.18);
+    --glue:rgba(255,255,255,.42);
+  }
+}
+:root[data-theme="dark"]{
+  --kraft:#312419;
+  --kraft-deep:#1D150E;
+  --kraft-shade:rgba(0,0,0,.42);
+  --paper:#EFE6D6;
+  --paper-edge:#C9B694;
+  --ink:#241C16;
+  --ink-soft:#5D4B38;
+  --ink-faint:#8B7657;
+  --rule:rgba(43,33,26,.18);
+  --glue:rgba(255,255,255,.42);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--kraft);
+  background-image:
+    repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 1px,transparent 1px 5px),
+    radial-gradient(120% 80% at 50% 0%,rgba(255,240,215,.12),transparent 60%);
+  color:var(--ink);
+  font-family:Archivo,system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.6;
+  padding:clamp(18px,4vw,56px) clamp(14px,4vw,32px) 80px;
+}
+.wrap{max-width:940px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(22px,3.4vw,40px)}
+
+/* ── Feuille collée sur le carton ───────────────────────────────────────── */
+.feuille{
+  background:var(--paper);
+  border:1px solid var(--paper-edge);
+  padding:clamp(20px,3.6vw,38px);
+  box-shadow:0 1px 0 var(--glue) inset, 0 10px 26px var(--kraft-shade);
+  position:relative;
+}
+/* Deux bouts de scotch qui la tiennent. */
+.feuille::before,.feuille::after{
+  content:"";position:absolute;top:-11px;width:74px;height:23px;
+  background:rgba(236,228,206,.6);
+  border-left:1px solid rgba(255,255,255,.5);border-right:1px solid rgba(120,100,70,.25);
+  box-shadow:0 1px 3px var(--kraft-shade);
+}
+.feuille::before{left:26px;transform:rotate(-3.5deg)}
+.feuille::after{right:26px;transform:rotate(2.5deg)}
+
+h1,h2,h3{font-family:"Big Shoulders Display",Impact,sans-serif;margin:0;text-wrap:balance;letter-spacing:.01em}
+h1{font-weight:900;font-size:clamp(2.5rem,8.5vw,4.6rem);line-height:.9;text-transform:uppercase}
+h2{font-weight:800;font-size:clamp(1.7rem,4.4vw,2.5rem);line-height:1;text-transform:uppercase}
+h3{font-weight:700;font-size:1.22rem;line-height:1.15}
+p{margin:0;max-width:64ch}
+.eyebrow{
+  font-family:"JetBrains Mono",monospace;font-size:.68rem;font-weight:700;
+  letter-spacing:.19em;text-transform:uppercase;color:var(--ink-faint);
+}
+.lede{font-size:1.06rem;color:var(--ink-soft)}
+.mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+
+/* ── En-tête ────────────────────────────────────────────────────────────── */
+header{display:flex;flex-direction:column;gap:14px}
+.sous-titre{font-size:1.1rem;color:var(--ink-soft);max-width:56ch}
+
+/* ── Le diagnostic : la roue chromatique, en barres ─────────────────────── */
+.diag{display:grid;gap:12px}
+.arc{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}
+.arcligne{display:grid;grid-template-columns:118px 1fr auto;gap:12px;align-items:center}
+.arcnom{font-size:.84rem;color:var(--ink-soft)}
+.piste{
+  position:relative;height:22px;border:1px solid var(--rule);
+  background:linear-gradient(90deg,#C4723A,#D9C24E,#5FA85C,#3E9EC4,#7B68EE,#C64A6B,#C4723A);
+  opacity:.5;
+}
+.pin{position:absolute;top:-5px;bottom:-5px;width:3px;background:var(--ink);border-radius:1px}
+.pin::after{
+  content:attr(data-t);position:absolute;top:-17px;left:50%;transform:translateX(-50%);
+  font-family:"JetBrains Mono",monospace;font-size:.6rem;color:var(--ink-soft);
+}
+.verdict{
+  border-left:4px solid var(--marqueur);padding:10px 0 10px 16px;
+  font-size:1.02rem;color:var(--ink);max-width:62ch;
+}
+.verdict b{font-weight:600}
+
+/* ── Spécimens ──────────────────────────────────────────────────────────── */
+.specimens{display:flex;flex-direction:column;gap:clamp(16px,2.4vw,26px)}
+.spec{
+  display:grid;grid-template-columns:180px minmax(0,1fr);gap:clamp(16px,3vw,30px);
+  align-items:start;padding-bottom:clamp(16px,2.4vw,26px);border-bottom:1px solid var(--rule);
+}
+.spec:last-child{border-bottom:0;padding-bottom:0}
+@media (max-width:640px){.spec{grid-template-columns:1fr;gap:14px}}
+
+.echantillon{height:96px;display:grid;place-items:center;position:relative}
+
+/* L'objet 1 — trait de marqueur qui bave */
+.o-marqueur{
+  width:150px;height:34px;background:var(--marqueur);
+  border-radius:60% 40% 55% 45%/58% 62% 38% 42%;
+  transform:rotate(-2.2deg);filter:url(#bave);
+  box-shadow:0 0 10px rgba(179,36,28,.28);
+}
+/* L'objet 2 — bande de scotch d'électricien */
+.o-scotch{
+  width:168px;height:30px;background:var(--scotch);transform:rotate(-4deg);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.22),transparent 42%,rgba(0,0,0,.18));
+  box-shadow:0 2px 5px rgba(0,0,0,.24);
+  clip-path:polygon(0 8%,4% 0,97% 4%,100% 92%,95% 100%,3% 96%);
+}
+/* L'objet 3 — tampon encreur, encre irrégulière */
+.o-tampon{
+  font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1.5rem;
+  letter-spacing:.06em;color:var(--tampon);border:3px solid var(--tampon);
+  padding:5px 16px;transform:rotate(-6deg);opacity:.88;filter:url(#usure);
+}
+/* L'objet 4 — post-it fluo, coin qui rebique */
+.o-postit{
+  width:106px;height:106px;background:var(--postit);transform:rotate(3deg);
+  box-shadow:2px 4px 10px rgba(0,0,0,.22);position:relative;
+  background-image:linear-gradient(160deg,rgba(255,255,255,.4),transparent 38%);
+}
+.o-postit::after{
+  content:"";position:absolute;right:0;bottom:0;border-width:0 0 20px 20px;border-style:solid;
+  border-color:transparent transparent var(--paper) transparent;
+  filter:drop-shadow(-2px -2px 2px rgba(0,0,0,.2));
+}
+/* L'objet 5 — gaffer mat, arraché */
+.o-gaffer{
+  width:160px;height:38px;background:var(--gaffer);transform:rotate(1.6deg);
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px);
+  clip-path:polygon(2% 6%,98% 0,100% 88%,96% 100%,4% 94%,0 12%);
+  box-shadow:0 2px 4px rgba(0,0,0,.3);
+}
+/* L'objet 6 — ruban de chantier rayé */
+.o-ruban{
+  width:170px;height:32px;transform:rotate(-2.5deg);
+  background:repeating-linear-gradient(-56deg,var(--ruban) 0 14px,#2B211A 14px 28px);
+  box-shadow:0 2px 5px rgba(0,0,0,.25);
+}
+
+.fiche{display:flex;flex-direction:column;gap:9px}
+.etat{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.hex{
+  font-family:"JetBrains Mono",monospace;font-size:.78rem;font-weight:700;
+  border:1px solid var(--rule);padding:2px 7px;color:var(--ink-soft);
+}
+.objet{font-size:.95rem;color:var(--ink-soft)}
+.objet b{color:var(--ink);font-weight:600}
+.regle{
+  font-size:.93rem;background:rgba(43,33,26,.045);
+  border-left:3px solid currentColor;padding:9px 13px;
+}
+.regle span{color:var(--ink)}
+
+/* ── Tableau de contrastes ──────────────────────────────────────────────── */
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.9rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule)}
+th{
+  font-family:"JetBrains Mono",monospace;font-size:.64rem;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);
+}
+td.n{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums;text-align:right}
+.ok{color:#1F6B3A;font-weight:600}
+.no{color:#A32118;font-weight:600}
+.pastille{display:inline-block;width:11px;height:11px;margin-right:8px;vertical-align:-1px}
+
+/* ── Démo : avant / après ───────────────────────────────────────────────── */
+.avantapres{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2.4vw,22px)}
+@media (max-width:560px){.avantapres{grid-template-columns:1fr}}
+.demo{background:#FBF6F0;border:1px solid var(--paper-edge);padding:16px;display:flex;flex-direction:column;gap:11px}
+.demo .titre{font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:#A08B70}
+.btn{
+  border:0;padding:11px 14px;font-family:Archivo,sans-serif;font-weight:600;font-size:.92rem;
+  color:#fff;text-align:center;cursor:default;
+}
+.btn.ancien{background:#4A8FBF;border-radius:10px}
+.btn.neuf{
+  background:var(--scotch);
+  clip-path:polygon(0 6%,3% 0,98% 3%,100% 94%,96% 100%,2% 97%);
+  box-shadow:0 2px 5px rgba(0,0,0,.24);
+}
+.jauge{height:12px;background:#E9E0D4;border:1px solid rgba(58,42,30,.2);position:relative}
+.jauge i{position:absolute;inset:0 62% 0 0}
+.jauge.ancien i{background:#D94F4F}
+.jauge.neuf i{background:var(--marqueur);filter:url(#bave)}
+.legende{font-size:.8rem;color:#8B6B4A}
+
+footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60ch;margin:0 auto}
+
+@media (prefers-reduced-motion:no-preference){
+  .feuille{animation:pose .5s cubic-bezier(.2,.7,.3,1) both}
+  .feuille:nth-of-type(2){animation-delay:.06s}
+  .feuille:nth-of-type(3){animation-delay:.12s}
+  @keyframes pose{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+}
+</style>
+
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <filter id="bave">
+    <feTurbulence type="fractalNoise" baseFrequency="0.045 0.12" numOctaves="3" seed="7" result="b"/>
+    <feDisplacementMap in="SourceGraphic" in2="b" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="usure">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="g"/>
+    <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.4 1.05" result="m"/>
+    <feComposite in="SourceGraphic" in2="m" operator="in"/>
+  </filter>
+</svg>
+
+<div class="wrap">
+
+  <header class="feuille">
+    <p class="eyebrow">Le Roi du Carton · direction artistique</p>
+    <h1>Palette<br>diégétique</h1>
+    <p class="sous-titre">Six couleurs vives qui ne cassent pas le carton, parce qu'aucune ne vient
+    d'une interface : elles viennent toutes d'un objet que quelqu'un a posé sur le décor.</p>
+  </header>
+
+  <section class="feuille diag">
+    <p class="eyebrow">Diagnostic</p>
+    <h2>Le jeu n'a pas trop peu de couleur.<br>Elle est au mauvais endroit.</h2>
+    <p class="lede">Mesuré sur les 400 déclarations de couleur du projet : le kraft occupe la plage
+    24°–33° de la roue chromatique. Les deux teintes que le jeu utilise le plus pour attirer l'œil
+    campent dans cette même plage.</p>
+
+    <div class="arc" role="img" aria-label="Position des accents actuels sur la roue chromatique. L'or à 43 degrés et le jaune à 42 degrés tombent dans la plage du kraft, 24 à 33 degrés. Le vert à 136 et le bleu à 205 en sortent.">
+      <div class="arcligne">
+        <span class="arcnom">Le décor kraft</span>
+        <div class="piste"><span class="pin" style="left:6.7%" data-t="24°"></span><span class="pin" style="left:9.2%" data-t="33°"></span></div>
+        <span class="mono" style="font-size:.72rem">24–33°</span>
+      </div>
+      <div class="arcligne">
+        <span class="arcnom">Or · 47 usages</span>
+        <div class="piste"><span class="pin" style="left:11.9%" data-t="43°"></span></div>
+        <span class="mono no" style="font-size:.72rem">se noie</span>
+      </div>
+      <div class="arcligne">
+        <span class="arcnom">Jaune · 47 usages</span>
+        <div class="piste"><span class="pin" style="left:11.7%" data-t="42°"></span></div>
+        <span class="mono no" style="font-size:.72rem">se noie</span>
+      </div>
+      <div class="arcligne">
+        <span class="arcnom">Vert · 58 usages</span>
+        <div class="piste"><span class="pin" style="left:37.8%" data-t="136°"></span></div>
+        <span class="mono" style="font-size:.72rem">35 % sat.</span>
+      </div>
+      <div class="arcligne">
+        <span class="arcnom">Bleu · 21 usages</span>
+        <div class="piste"><span class="pin" style="left:56.9%" data-t="205°"></span></div>
+        <span class="mono" style="font-size:.72rem">48 % sat.</span>
+      </div>
+    </div>
+
+    <p class="verdict">Les deux couleurs les plus employées pour signaler quelque chose sont
+    <b>des cousines du carton</b>. Les deux seules qui s'en détachent vraiment sont
+    <b>les moins saturées de tout le jeu</b> — moins que le décor lui-même, qui plafonne à 61 %.
+    D'où l'impression de grisaille : ce n'est pas un manque de couleur, c'est un manque d'écart.</p>
+
+    <p class="lede">Le kraft est centré sur <span class="mono">28°</span>. Son opposé exact sur la roue
+    tombe sur <span class="mono">208°</span> — le bleu. C'est, physiquement, la couleur qui peut le
+    moins se fondre dans ce décor. Et c'est la couleur du scotch d'électricien.</p>
+  </section>
+
+  <section class="feuille">
+    <p class="eyebrow">La règle qui tient tout</p>
+    <h2>L'encre va sur le papier.<br>Le papier va sous l'encre.</h2>
+    <p class="lede">Chaque objet a une physique, et cette physique décide de son rôle en CSS — ce
+    n'est pas une convention, c'est une mesure. Un marqueur, un scotch, un tampon sont
+    <b>des marques</b> : très lisibles posés sur le décor, illisibles s'ils portent du texte sombre.
+    Un post-it et un ruban de chantier sont <b>des surfaces</b> : invisibles comme marques,
+    parfaits sous une écriture noire. Ce qui se colle par-dessus n'écrit jamais ;
+    ce qui s'écrit dessus ne se colle jamais.</p>
+  </section>
+
+  <section class="feuille specimens">
+    <p class="eyebrow">Les six objets</p>
+
+    <div class="spec" style="color:var(--marqueur)">
+      <div class="echantillon"><div class="o-marqueur"></div></div>
+      <div class="fiche">
+        <div class="etat"><h3>Danger · santé critique</h3><span class="hex">#B3241C</span></div>
+        <p class="objet"><b>Un coup de marqueur indélébile</b>, tracé trop appuyé, qui bave dans les
+        fibres du carton. Celui avec lequel on barre une date sur une caisse.</p>
+        <p class="regle"><span>Uniquement en <b>trait</b> : remplissage de jauge, soulignement, croix
+        sur un objet cassé. Jamais un aplat plein écran — un marqueur ne recouvre pas une surface,
+        il la raye. Le tracé garde ses bords irréguliers (filtre de turbulence), c'est ce qui le
+        distingue d'une barre de progression.</span></p>
+      </div>
+    </div>
+
+    <div class="spec" style="color:var(--scotch)">
+      <div class="echantillon"><div class="o-scotch"></div></div>
+      <div class="fiche">
+        <div class="etat"><h3>Action principale</h3><span class="hex">#1B6CA8</span></div>
+        <p class="objet"><b>Du scotch d'électricien</b>, bleu franc, posé de travers et coupé aux
+        doigts. La seule couleur du lot que le carton ne peut pas absorber.</p>
+        <p class="regle"><span>Un seul bouton bleu à l'écran, toujours. C'est la couleur la plus
+        éloignée du décor : deux morceaux de scotch en même temps et il n'y a plus d'action
+        principale. Bord coupé au <code>clip-path</code>, jamais de <code>border-radius</code> —
+        un adhésif se déchire, il ne s'arrondit pas. Texte blanc dessus (5,6:1), jamais sombre.</span></p>
+      </div>
+    </div>
+
+    <div class="spec" style="color:var(--tampon)">
+      <div class="echantillon"><div class="o-tampon">PAYÉ</div></div>
+      <div class="fiche">
+        <div class="etat"><h3>Succès · validé</h3><span class="hex">#2E7D46</span></div>
+        <p class="objet"><b>Un tampon encreur</b> mal encré, appuyé de travers, qui laisse des trous
+        dans les pleins. Celui de la consigne, du dépôt, du reçu.</p>
+        <p class="regle"><span>Il <b>arrive</b>, il ne s'affiche pas : petite rotation, apparition
+        d'un coup, opacité 0,85–0,9 avec une texture d'usure. Réservé à ce qui est
+        <b>définitivement acquis</b> — dette éteinte, succès débloqué, contrat rempli. Un gain
+        ordinaire ne mérite pas un tampon.</span></p>
+      </div>
+    </div>
+
+    <div class="spec" style="color:#8A7A12">
+      <div class="echantillon"><div class="o-postit"></div></div>
+      <div class="fiche">
+        <div class="etat"><h3>Trouvaille rare · à ne pas manquer</h3><span class="hex">#F2E14C</span></div>
+        <p class="objet"><b>Un post-it fluo</b> froissé, collé au coin qui rebique. Le seul objet du
+        lot qui soit lumineux plutôt que coloré.</p>
+        <p class="regle"><span><b>Fond uniquement, jamais du texte.</b> Sur papier il ne contraste
+        qu'à 1,25:1 — invisible ; sous une écriture noire, il monte à 11,95:1, le meilleur score de
+        toute la palette. Un post-it par écran au maximum, et il porte toujours un mot écrit à la
+        main. Interdit sur une jauge : ça deviendrait un avertissement.</span></p>
+      </div>
+    </div>
+
+    <div class="spec" style="color:#5A564F">
+      <div class="echantillon"><div class="o-gaffer"></div></div>
+      <div class="fiche">
+        <div class="etat"><h3>Bloqué · verrouillé</h3><span class="hex">#6E6A63</span></div>
+        <p class="objet"><b>Du gaffer gris</b>, mat, arraché à la main. On ne masque pas un bouton
+        indisponible : on scotche par-dessus.</p>
+        <p class="regle"><span>C'est <b>l'absence de couleur qui signale</b>, et c'est le seul état
+        qui ait le droit d'être terne. La bande recouvre partiellement l'élément au lieu de le
+        griser — le joueur doit voir ce qu'il ne peut pas faire, sinon le choix disparaît. Ne porte
+        jamais de texte (2,98:1) : le libellé reste visible à côté.</span></p>
+      </div>
+    </div>
+
+    <div class="spec" style="color:#8A6210">
+      <div class="echantillon"><div class="o-ruban"></div></div>
+      <div class="fiche">
+        <div class="etat"><h3>Compte à rebours · prudence</h3><span class="hex">#E8A317</span></div>
+        <p class="objet"><b>Du ruban de chantier</b> jaune et noir. La seule entrée de la palette où
+        <b>la rayure porte le signal</b>, pas la teinte.</p>
+        <p class="regle"><span>Toujours <b>rayé</b>, jamais uni : seul, ce jaune est un cousin du
+        kraft (40°) et ne contraste qu'à 2:1. Rayé, il devient le motif le plus reconnaissable de
+        l'écran. Réservé au temps qui s'épuise — minuteur de la manche, jauge du tas, échéance du
+        jour. En bordure fine ou en liseré, jamais en aplat.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="feuille">
+    <p class="eyebrow">Accessibilité</p>
+    <h2>Ce que chaque couleur a le droit de faire</h2>
+    <p class="lede">Contrastes calculés, pas estimés. Un jeu mobile se joue dehors, en plein soleil,
+    par des gens dont 8 % des hommes confondent le rouge et le vert.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Objet</th><th>Sur le papier</th><th>Texte noir dessus</th>
+            <th>Texte blanc dessus</th><th>Rôle autorisé</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="pastille" style="background:var(--marqueur)"></span>Marqueur</td>
+            <td class="n ok">6,13:1</td><td class="n no">2,43:1</td><td class="n ok">6,59:1</td>
+            <td>Marque · texte blanc</td></tr>
+          <tr><td><span class="pastille" style="background:var(--scotch)"></span>Scotch</td>
+            <td class="n ok">5,20:1</td><td class="n no">2,87:1</td><td class="n ok">5,59:1</td>
+            <td>Marque · texte blanc</td></tr>
+          <tr><td><span class="pastille" style="background:var(--tampon)"></span>Tampon</td>
+            <td class="n ok">4,72:1</td><td class="n no">3,16:1</td><td class="n ok">5,07:1</td>
+            <td>Marque · texte blanc</td></tr>
+          <tr><td><span class="pastille" style="background:var(--postit)"></span>Post-it</td>
+            <td class="n no">1,25:1</td><td class="n ok">11,95:1</td><td class="n no">1,34:1</td>
+            <td>Surface · texte noir</td></tr>
+          <tr><td><span class="pastille" style="background:var(--gaffer)"></span>Gaffer</td>
+            <td class="n ok">5,00:1</td><td class="n no">2,98:1</td><td class="n ok">5,38:1</td>
+            <td>Marque · sans texte</td></tr>
+          <tr><td><span class="pastille" style="background:var(--ruban)"></span>Ruban</td>
+            <td class="n no">2,02:1</td><td class="n ok">7,39:1</td><td class="n no">2,17:1</td>
+            <td>Surface rayée · texte noir</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="verdict" style="border-color:var(--tampon);margin-top:18px">
+      <b>Aucune couleur ne porte l'information toute seule.</b> Chaque objet a une forme qui lui est
+      propre — le trait qui bave, le bord déchiré, la rotation du tampon, la rayure diagonale — et
+      c'est cette forme qui reste lisible en plein soleil, pour un daltonien, et sur la capture
+      d'écran en noir et blanc que quelqu'un partagera.</p>
+  </section>
+
+  <section class="feuille">
+    <p class="eyebrow">Effet</p>
+    <h2>Le même écran, avant et après</h2>
+    <div class="avantapres">
+      <div class="demo">
+        <span class="titre">Aujourd'hui</span>
+        <div class="jauge ancien"><i></i></div>
+        <button class="btn ancien" type="button" tabindex="-1">Explorer</button>
+        <span class="legende">Un bleu d'interface à 48 % de saturation et un rouge d'interface, tous
+        deux posés sur du carton. L'œil ne sait pas où aller.</span>
+      </div>
+      <div class="demo">
+        <span class="titre">Avec la palette</span>
+        <div class="jauge neuf"><i></i></div>
+        <button class="btn neuf" type="button" tabindex="-1">Explorer</button>
+        <span class="legende">Un morceau de scotch et un trait de marqueur. Plus saturé, mieux
+        contrasté, et toujours dans le monde du jeu.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="feuille">
+    <p class="eyebrow">Ce qui ne change pas</p>
+    <h2>Le kraft reste la seule couleur de la Dignité</h2>
+    <p class="lede">La jauge de Dignité garde l'or du carton, et c'est le seul endroit où une teinte
+    proche du décor est un choix plutôt qu'un défaut : elle mesure à quel point on se fond dans la
+    rue. Quand elle tombe, la couleur du personnage rejoint celle du trottoir. Aucun des six objets
+    ne doit l'approcher — personne ne colle de scotch sur sa propre fierté.</p>
+  </section>
+
+  <footer>Contrastes calculés selon WCAG 2.1 sur le fond papier du jeu (#FBF6F0).
+  Teintes et saturations mesurées sur les 400 déclarations de couleur du dépôt.</footer>
+</div>

@@ -110,7 +110,7 @@ export default function TitleScreen() {
             onClick={() => { playCard(); dispatch({ type: 'CONTINUE_SAVE' }); }}
             className="w-full py-3.5 text-sm font-semibold text-white rounded-xl"
             style={{
-              background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)',
+              background: 'linear-gradient(135deg, #2E7D46, #246237)',
               boxShadow: '0 4px 16px rgba(74, 155, 95, 0.3)',
             }}
           >

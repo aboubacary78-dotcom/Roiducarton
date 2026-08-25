@@ -31,7 +31,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.41.1';
+const APP_VERSION = '3.42.0';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
@@ -293,7 +293,7 @@ export default function SettingsScreen() {
             <button
               onClick={() => { playDignityTier(); dispatch({ type: 'RESET_SCORES' }); setConfirmReset(false); }}
               className="flex-1 p-3 text-sm font-semibold text-white rounded-xl"
-              style={{ background: 'linear-gradient(135deg, #D94F4F, #B83A3A)' }}
+              style={{ background: 'linear-gradient(135deg, #B3241C, #8E1C15)' }}
             >
               {tr('Confirmer', 'Confirm')}
             </button>

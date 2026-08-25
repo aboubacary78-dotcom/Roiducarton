@@ -14,7 +14,27 @@ const TONE_STYLE: Record<string, { bg: string; color: string; border: string }> 
 export default function Toaster() {
   const toasts = useToasts();
   return (
-    <div className="fixed top-3 left-0 right-0 z-[60] flex flex-col items-center gap-2 px-4 pointer-events-none safe-area">
+    /*
+     * LES TOASTS PASSENT SOUS LE POST-IT DES SUCCÈS.
+     *
+     * Les deux étaient posés en `top-3` avec le même z-index : ils se
+     * recouvraient exactement, et le bandeau le plus rare du jeu — un succès
+     * débloqué — disparaissait derrière un retour éphémère. Ça se produit sur
+     * un chemin parfaitement ordinaire : le changement de jour débloque un
+     * accessoire ET déclenche une pique du matin.
+     *
+     * Le succès garde le haut, parce qu'il est rare et qu'il célèbre ; les
+     * toasts descendent d'une hauteur de post-it. Quand il n'y a pas de succès
+     * à l'écran, ils sont simplement un peu plus bas qu'avant, ce qui ne coûte
+     * rien.
+     */
+    <div
+      /* Prise stable pour les tests : ils cherchaient la pile par sa classe de
+         position, et la déplacer d'un cran les a tous rendus aveugles. Une
+         position est un choix de mise en page, pas un contrat. */
+      data-toasts
+      className="fixed top-24 left-0 right-0 z-[59] flex flex-col items-center gap-2 px-4 pointer-events-none safe-area"
+    >
       <AnimatePresence>
         {toasts.map((t) => {
           const s = TONE_STYLE[t.tone] || TONE_STYLE.info;

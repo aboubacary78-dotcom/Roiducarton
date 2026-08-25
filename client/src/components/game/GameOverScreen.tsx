@@ -521,7 +521,7 @@ export default function GameOverScreen() {
                 disabled={reviving}
                 onClick={handleRevive}
                 className="w-full py-3.5 text-[15px] font-bold text-white rounded-xl disabled:opacity-60"
-                style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)', boxShadow: '0 4px 18px rgba(74,155,95,0.35)' }}
+                style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)', boxShadow: '0 4px 18px rgba(74,155,95,0.35)' }}
               >
                 {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Se relever (regarder une pub)', '🎬 Get back up (watch an ad)')}
               </motion.button>
@@ -883,7 +883,7 @@ export default function GameOverScreen() {
           onClick={handleRevive}
           className="w-full max-w-sm py-3.5 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
           style={{
-            background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)',
+            background: 'linear-gradient(135deg, #2E7D46, #246237)',
             boxShadow: '0 4px 16px rgba(74, 155, 95, 0.3)',
           }}
         >

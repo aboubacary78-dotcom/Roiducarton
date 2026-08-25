@@ -405,7 +405,17 @@ function BegMinigameInner() {
 
         {/* jauge de temps */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-black/35 z-20">
-          <div className="h-full bg-[#F2C14E]" style={{ width: `${timeLeft * 100}%` }} />
+          {/*
+            LE TEMPS QUI RESTE EST UN RUBAN DE CHANTIER.
+
+            C'était un aplat jaune à 42° — la teinte du kraft à quatorze degrés
+            près, et 1,56:1 de contraste sur le fond du jeu. Autant dire une
+            barre invisible pour un joueur qui a le pouce sur les passants. La
+            rayure diagonale, elle, se reconnaît sans qu'on ait à distinguer sa
+            couleur : en plein soleil, pour un daltonien, et sur une capture en
+            noir et blanc.
+          */}
+          <div className="h-full ruban-chantier" style={{ width: `${timeLeft * 100}%` }} />
         </div>
 
         {/* les passants */}

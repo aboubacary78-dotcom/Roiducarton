@@ -77,7 +77,9 @@ await clic('Merci|Thanks'); await pause(800);
 async function situer(patch) {
   await p.evaluate((j) => {
     const s = JSON.parse(localStorage.getItem('roi-du-carton-save'));
-    Object.assign(s.character, j);
+    for (const [k, v] of Object.entries(j)) {
+      if (v === null) delete s.character[k]; else s.character[k] = v;
+    }
     s.character.activeFlags = ['origin-vu'];
     s.dayActions = 0;
     localStorage.setItem('roi-du-carton-save', JSON.stringify(s));
@@ -90,13 +92,23 @@ async function situer(patch) {
 
 const BASSES = { health: 70, mental: 8, hunger: 70, thirst: 70, sleep: 70, dignity: 70 };
 
+/*
+ * DE QUOI NE PAS INTÉRESSER LE PRÊTEUR.
+ *
+ * Il aborde qui a moins de trois euros en poche, et sa proposition est une
+ * rencontre plein écran depuis qu'elle a un visage : elle se posait donc
+ * par-dessus le hub et le test cliquait dans le vide, deux fois sur trois. Ce
+ * test-ci porte sur les voix, pas sur la dette — on écarte la dette du décor.
+ */
+const SOLVABLE = { money: 20, dette: null, detteRefuseeJour: null };
+
 // ── La tête qui lâche a maintenant une voix, et c'est la bonne ─────────────
 for (const [genre, attendu, refuse] of [['m', 'voix-h-tete', 'voix-f-tete'], ['f', 'voix-f-tete', 'voix-h-tete']]) {
   demandes.length = 0;
   // Mental haut d'abord : `playGaugeLow` ne sonne qu'au FRANCHISSEMENT du
   // seuil, donc arriver directement à 8 ne prouverait rien.
-  await situer({ day: 4, gender: genre, stats: { ...BASSES, mental: 80 } });
-  await situer({ day: 4, gender: genre, stats: BASSES });
+  await situer({ day: 4, gender: genre, ...SOLVABLE, stats: { ...BASSES, mental: 80 } });
+  await situer({ day: 4, gender: genre, ...SOLVABLE, stats: BASSES });
   await pause(600);
   const voulues = demandes.filter(d => d.startsWith('voix-'));
   verifier(`mental à 8 : le personnage ${genre === 'm' ? 'masculin' : 'féminin'} respire mal`,
@@ -109,7 +121,7 @@ for (const [genre, attendu, refuse] of [['m', 'voix-h-tete', 'voix-f-tete'], ['f
 // La carte des règles est marquée « vue » à ce lancement-ci, sinon elle
 // s'interpose et le test ne touche jamais la grille.
 demandes.length = 0;
-await situer({ day: 4, gender: 'f', stats: { health: 90, mental: 90, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
+await situer({ day: 4, gender: 'f', ...SOLVABLE, stats: { health: 90, mental: 90, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
 await p.evaluate(() => {
   const n = Number(localStorage.getItem('roi-du-carton-lancements') || 0) || 0;
   localStorage.setItem('roi-du-carton-minigame-intro-v2', JSON.stringify({ recup2: n }));
@@ -190,7 +202,7 @@ await p.evaluate(() => {
 demandes.length = 0;
 let rueOuverte = false;
 for (let essai = 0; essai < 3 && !rueOuverte; essai++) {
-  await situer({ day: 4, gender: 'f', stats: { health: 90, mental: 90, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
+  await situer({ day: 4, gender: 'f', ...SOLVABLE, stats: { health: 90, mental: 90, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
   for (const bouton of ['compris|Got it', 'Continuer|Continue', 'Fermer|Close']) {
     if (await clic(bouton)) await pause(400);
   }

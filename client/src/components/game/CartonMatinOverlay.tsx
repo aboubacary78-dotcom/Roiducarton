@@ -166,7 +166,7 @@ export default function CartonMatinOverlay() {
                   onClick={() => sauver(false)}
                   disabled={busy}
                   className="w-full py-3.5 text-sm font-bold text-white rounded-xl mb-2 disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)' }}
+                  style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)' }}
                 >
                   {tr(`🤝 Quelqu'un l'a ramassé pour vous (${saves} restant${saves > 1 ? 's' : ''})`,
                       `🤝 Someone picked it up for you (${saves} left)`)}
@@ -176,7 +176,7 @@ export default function CartonMatinOverlay() {
                   onClick={() => sauver(true)}
                   disabled={busy}
                   className="w-full py-3.5 text-sm font-bold text-white rounded-xl mb-2 disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)' }}
+                  style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)' }}
                 >
                   {busy ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Le rattraper (regarder une pub)', '🎬 Get it back (watch an ad)')}
                 </button>
@@ -199,7 +199,7 @@ export default function CartonMatinOverlay() {
               <button
                 onClick={ouvrir}
                 className="w-full py-3.5 text-[15px] font-bold text-white rounded-xl"
-                style={{ background: 'linear-gradient(135deg, #D4874D, #9B5B3A)', boxShadow: '0 4px 18px rgba(212,135,77,0.35)' }}
+                style={{ background: 'var(--carton-scotch)', clipPath: 'polygon(0 7%, 2% 0, 98% 4%, 100% 93%, 97% 100%, 3% 96%)', filter: 'drop-shadow(0 3px 8px rgba(27,60,90,0.38))' }}
               >
                 {tr('Regarder', 'Take a look')}
               </button>

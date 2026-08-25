@@ -101,7 +101,7 @@ export default function InventoryScreen() {
                     <button
                       onClick={() => { playGaugeFilled(); dispatch({ type: 'USE_ITEM', itemId: item.id }); }}
                       className="px-2.5 py-1.5 text-xs font-semibold text-white rounded-lg"
-                      style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)', boxShadow: '0 2px 6px rgba(74, 155, 95, 0.25)' }}
+                      style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)', boxShadow: '0 2px 6px rgba(74, 155, 95, 0.25)' }}
                     >
                       {edibleJunk ? tr('Manger ?!', 'Eat?!') : tr('Utiliser', 'Use')}
                     </button>

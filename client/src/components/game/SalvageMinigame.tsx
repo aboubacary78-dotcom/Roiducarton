@@ -352,12 +352,23 @@ function SalvageInner() {
       <div className="w-full max-w-sm shrink-0">
         <div className="flex items-center justify-between text-[10px] font-semibold mb-1">
           <span className="text-[#6B5740]">🐀 {tr('Le tas s\'agite', 'The pile stirs')}</span>
-          <span className="font-mono" style={{ color: riskPct > 70 ? '#B84A3A' : '#6B5740' }}>{Math.round(riskPct)}%</span>
+          <span className="font-mono" style={{ color: riskPct > 70 ? 'var(--carton-marqueur)' : '#6B5740' }}>{Math.round(riskPct)}%</span>
         </div>
         <div className="h-2.5 rounded-full bg-[#E9E0D4] overflow-hidden border border-[#3A2A1E]/20">
           <motion.div
-            className="h-full rounded-full"
-            style={{ background: riskPct > 70 ? 'linear-gradient(90deg,#B84A3A,#D94F4F)' : riskPct > 40 ? 'linear-gradient(90deg,#D9A73E,#E8842C)' : 'linear-gradient(90deg,#7C8B5A,#4A9B5F)' }}
+            className={`h-full rounded-full ${riskPct > 70 ? 'ruban-chantier' : ''}`}
+            /*
+              LE DERNIER TIERS PASSE EN RUBAN DE CHANTIER.
+
+              Les deux premiers crans gardent leurs dégradés : ils informent
+              sans alarmer, et c'est ce qu'on veut tant qu'il reste de la
+              marge. Au-delà de 70 %, la barre change de NATURE et pas
+              seulement de teinte — la rayure apparaît, et c'est elle qui
+              alerte. Un rouge de plus sur du carton n'aurait fait que
+              s'ajouter au décor ; une rayure de chantier n'appartient à rien
+              d'autre sur cet écran.
+            */
+            style={riskPct > 70 ? undefined : { background: riskPct > 40 ? 'linear-gradient(90deg,#D9A73E,#E8842C)' : 'linear-gradient(90deg,#7C8B5A,#4A9B5F)' }}
             animate={{ width: `${riskPct}%` }}
             transition={{ duration: 0.2 }}
           />

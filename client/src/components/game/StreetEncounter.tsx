@@ -114,7 +114,7 @@ export default function StreetEncounter({ npc, onClose }: { npc: StreetNpc; onCl
               onClick={share}
               disabled={!hasFood}
               className="w-full py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)' }}
+              style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)' }}
             >
               🤝 {hasFood ? tr('Partager à manger', 'Share some food') : tr('Partager (aucun aliment)', 'Share (no food)')}
               {hasFood && pret && (

@@ -565,7 +565,7 @@ export default function ShopScreen() {
               onClick={claimSolidarity}
               disabled={claimingSolid}
               className="shrink-0 py-2 px-3 text-xs font-semibold text-white rounded-lg disabled:opacity-60"
-              style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)' }}
+              style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)' }}
             >
               {claimingSolid ? tr('⏳', '⏳') : tr('🎬 Ma part (pub)', '🎬 My share (ad)')}
             </button>
@@ -615,7 +615,7 @@ export default function ShopScreen() {
                     onClick={() => { playUnlock(); reopenWithAd(shop); }}
                     disabled={reopeningId === shop.id}
                     className="w-full py-2 text-xs font-semibold text-white rounded-lg disabled:opacity-60"
-                    style={{ background: 'linear-gradient(135deg, #4A9B5F, #3d8b4f)' }}
+                    style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)' }}
                   >
                     {reopeningId === shop.id
                       ? tr('⏳ Chargement…', '⏳ Loading…')

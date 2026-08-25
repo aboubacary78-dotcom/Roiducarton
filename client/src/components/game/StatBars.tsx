@@ -233,12 +233,25 @@ export default function StatBars({ stats, compact = false }: { stats: Stats; com
                 <span className="text-[9px] leading-none opacity-80">{STAT_META[key].emoji}</span>
                 {/* Le chiffre n'existe que quand il y a un problème. */}
                 {danger && (
-                  <span className="text-[9px] font-mono font-bold text-[#D94F4F] leading-none">{value}</span>
+                  <span className="text-[9px] font-mono font-bold text-[var(--carton-marqueur)] leading-none">{value}</span>
                 )}
               </div>
               <div className="stat-bar-track">
+                {/*
+                  EN DANGER, C'EST UN TRAIT DE MARQUEUR.
+
+                  La jauge passait à une version PLUS SOMBRE de sa propre
+                  teinte — un rouge assombri sur un rouge, un violet assombri
+                  sur un violet. Assombrir une couleur ne la fait pas ressortir
+                  du carton, ça l'y enfonce : c'est exactement le défaut que la
+                  mesure de la palette a mis au jour. Les cinq jauges basculent
+                  donc sur le même trait de marqueur, qui ne ressemble à aucune
+                  d'elles. Laquelle est touchée reste lisible à sa POSITION et
+                  à son emoji, pas à sa couleur — et le corps l'a déjà dit à
+                  voix haute (voir VOIX_DU_CORPS).
+                */}
                 <motion.div
-                  className={`stat-bar-fill ${danger ? 'animate-pulse-danger' : ''}`}
+                  className={`stat-bar-fill ${danger ? 'animate-pulse-danger trait-marqueur' : ''}`}
                   style={{ backgroundColor: danger ? dangerColor : color }}
                   animate={{ width: `${value}%` }}
                   transition={{ type: 'spring', stiffness: 160, damping: 22 }}
