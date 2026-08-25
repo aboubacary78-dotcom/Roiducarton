@@ -6,11 +6,21 @@ import { motion } from 'framer-motion';
  * figée. Le sens de la dérive est déduit du chemin du fichier pour varier
  * d'une image à l'autre sans paramétrage.
  */
-export default function KenBurnsImage({ src, alt = '', onError, className = '' }: {
+export default function KenBurnsImage({ src, alt = '', onError, className = '', position = 'center' }: {
   src: string;
   alt?: string;
   onError?: () => void;
   className?: string;
+  /**
+   * OÙ REGARDER QUAND LE CADRE EST PLUS LARGE QUE L'IMAGE.
+   *
+   * La une du journal est un bandeau : elle découpe une bande centrale dans
+   * une image en 3:2 et jette 40 % de la hauteur. Ça marche pour toutes les
+   * photos de mort, qui ont leur sujet au milieu — et ça détruit celles dont
+   * le sujet est en bas de cadre. Une image peut donc dire où est son sujet
+   * plutôt que d'espérer qu'il tombe au bon endroit.
+   */
+  position?: 'center' | 'top' | 'bottom';
 }) {
   let sum = 0;
   for (let i = 0; i < src.length; i++) sum += src.charCodeAt(i);
@@ -28,7 +38,7 @@ export default function KenBurnsImage({ src, alt = '', onError, className = '' }
       fetchPriority="high"
       decoding="async"
       className={`w-full h-full object-cover ${className}`}
-      style={{ scale: 1.12, willChange: 'transform' }}
+      style={{ scale: 1.12, objectPosition: position, willChange: 'transform' }}
       initial={{ x: `${dx}%`, y: `${dy}%` }}
       animate={{ x: `${-dx}%`, y: `${-dy}%` }}
       transition={{ duration: 16, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}

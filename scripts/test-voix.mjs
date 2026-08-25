@@ -180,10 +180,28 @@ await p.evaluate(() => {
   l.beg2 = n;
   localStorage.setItem('roi-du-carton-minigame-intro-v2', JSON.stringify(l));
 });
+/*
+ * On revient du fond d'un container, et la fouille a pu se terminer n'importe
+ * comment — butin ramené, ou tas écroulé. Selon le cas, le hub s'ouvre sur un
+ * bilan, une carte de résultat ou rien du tout, et un simple clic sur
+ * « Mendier » tombait alors dans le vide une fois sur trois. On insiste
+ * jusqu'à voir la rue, en balayant ce qui peut être posé devant.
+ */
 demandes.length = 0;
-await situer({ day: 4, gender: 'f', stats: { health: 90, mental: 90, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
-await clic('compris|Got it'); await pause(400);
-await clic('Mendier|Beg'); await pause(1300);
+let rueOuverte = false;
+for (let essai = 0; essai < 3 && !rueOuverte; essai++) {
+  await situer({ day: 4, gender: 'f', stats: { health: 90, mental: 90, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
+  for (const bouton of ['compris|Got it', 'Continuer|Continue', 'Fermer|Close']) {
+    if (await clic(bouton)) await pause(400);
+  }
+  await clic('Mendier|Beg'); await pause(1300);
+  rueOuverte = await p.evaluate(() => !!document.querySelector('[aria-label*="Rue"], [aria-label*="Street"]'));
+  if (!rueOuverte) console.log('   …essai', essai + 1, ':', await p.evaluate(() => ({
+    ecran: document.body.innerText.replace(/\s+/g, ' ').slice(0, 110),
+    boutons: [...document.querySelectorAll('button')].filter(b => b.offsetWidth).map(b => b.textContent.trim().slice(0, 22)).slice(0, 10),
+  })));
+}
+demandes.length = 0;
 
 /** Attrape le passant le plus proche du centre et ne le lâche plus. */
 const manche = await p.evaluate(async () => {

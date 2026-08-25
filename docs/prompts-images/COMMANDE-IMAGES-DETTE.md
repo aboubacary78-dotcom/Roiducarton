@@ -1,5 +1,30 @@
 # Commande images — « Le Roi du Carton » — La dette (6 images)
 
+> ## ✅ LIVRÉ ET INSTALLÉ — 25 août 2026
+>
+> Les six images sont dans `client/public/assets/` et s'affichent en jeu.
+> Contrôles : 6/6 présentes, toutes en 1080 × 720 WebP, aucun doublon,
+> de 34 à 58 ko (plafond : 150 ko).
+>
+> **Les deux règles sont tenues.** Le prêteur est bien le même personnage sur
+> ses deux portraits — même bonnet, même moustache, même pièce grise au coude,
+> même reprise rouge au genou, jusqu'au même pigeon. Et aucune des quatre
+> images de dénouement ne montre de sang, de coup ni de visage de douleur : la
+> raclée cache le visage sous un seau et laisse deux passants contourner le
+> corps sans le regarder, ce qui était exactement la demande.
+>
+> **Un défaut de cadrage, corrigé côté code.** La commande demandait de garder
+> les 20 % du haut et du bas dégagés sur `death-dette.webp`, parce que la une
+> du journal n'en montre qu'un bandeau central. Le sujet — une chaussure
+> abandonnée et une pièce par terre — est posé au sol, donc à 68–84 % de la
+> hauteur. Mesuré : la une ne montre que la bande 18 %–82 %. La chaussure était
+> coupée en deux au bord inférieur et la pièce hors champ ; il ne restait qu'un
+> trottoir vide. La photo est désormais cadrée par le bas (`object-position`),
+> et l'image est gardée telle quelle.
+>
+> **Licence :** génération d'images Manus — l'utilisateur possède les sorties
+> et peut en faire un usage commercial.
+
 **Ce document est la commande complète. Tout ce qu'il faut est dedans : aucun
 autre fichier n'est nécessaire.**
 

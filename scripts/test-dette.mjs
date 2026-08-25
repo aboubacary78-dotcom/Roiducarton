@@ -192,6 +192,62 @@ const registre = await p.evaluate(() => {
 verifier('le Registre des Morts enregistre « La Note Réglée »',
   registre.includes('mort-dette'), registre.join(', ') || 'registre vide');
 
+/*
+ * ── LES SIX IMAGES, ET CE QUE LA UNE EN MONTRE VRAIMENT ───────────────────
+ *
+ * Deux choses distinctes, et la seconde est celle qui s'est déjà produite.
+ *
+ * Qu'un fichier manque se voit : le repli prend la main. Qu'une image soit
+ * LÀ mais que le cadre n'en montre rien ne se voit pas du tout — la une
+ * découpe un bandeau dans une image en 3:2 et jette 40 % de la hauteur. La
+ * photo de la mort par dette a son sujet au sol : recadrée au centre, elle
+ * n'affichait qu'un trottoir vide, la chaussure coupée en deux et la pièce
+ * hors champ. Rien n'aurait signalé la perte.
+ */
+const images = await p.evaluate(async (liste) => {
+  const out = {};
+  for (const f of liste) {
+    const r = await fetch(`/assets/${f}.webp`, { method: 'HEAD' });
+    out[f] = r.ok;
+  }
+  return out;
+}, ['npc-preteur', 'npc-preteur-echeance', 'result-dette-payee',
+  'result-dette-saisie', 'result-dette-raclee', 'death-dette']);
+const absentes = Object.keys(images).filter(k => !images[k]);
+verifier('les six images de la dette sont en place',
+  absentes.length === 0, absentes.join(', ') || '6/6');
+
+// Le sujet de `death-dette` est en bas de cadre : la une doit le savoir.
+const cadrage = await p.evaluate(async () => {
+  const LARGE = 306, HAUT = 144, ZOOM = 1.12;   // la une, telle qu'elle est
+  const i = new Image();
+  i.src = '/assets/death-dette.webp';
+  await i.decode().catch(() => {});
+  const ratio = i.naturalWidth / i.naturalHeight;
+  // `object-cover` remplit la largeur : l'image rendue déborde en hauteur.
+  const rendue = LARGE / ratio;
+  const part = HAUT / rendue;                   // part de hauteur visible
+  // Le sur-zoom du travelling resserre encore la fenêtre, des deux côtés.
+  const partZoom = part / ZOOM;
+  return { haut: (1 - partZoom) / 2, bas: (1 + partZoom) / 2 };
+});
+// Sujet (chaussure + pièce) mesuré entre 68 % et 84 % de la hauteur d'image.
+const SUJET_BAS = 0.84;
+verifier('recadrée au centre, la une couperait le sujet de la mort par dette',
+  cadrage.bas < SUJET_BAS,
+  `bande centrale : ${(cadrage.haut * 100).toFixed(0)} % → ${(cadrage.bas * 100).toFixed(0)} %,`
+  + ` le sujet descend à ${SUJET_BAS * 100} %`);
+// Et c'est bien ce que fait la une : on lit le cadrage sur l'image RENDUE,
+// pas dans le code. Une constante qu'on renomme sans rebrancher casserait le
+// cadrage en silence, et le test doit tomber là-dessus.
+const rendu = await p.evaluate(() => {
+  const img = [...document.querySelectorAll('img')].find(i => i.src.includes('death-dette'));
+  if (!img) return null;
+  return getComputedStyle(img).objectPosition;
+});
+verifier('  …c\'est pourquoi la une la cadre par le bas',
+  !!rendu && /bottom|100%/.test(rendu), rendu ?? 'image absente de la une');
+
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 
 await b.close();

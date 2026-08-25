@@ -88,6 +88,26 @@ const SPECIAL_HEADLINES: Record<string, { fr: string; en: string }> = {
   'riche': { fr: 'DE L\'ARGENT PLEIN LES POCHES, ET RIEN À FAIRE', en: 'POCKETS FULL OF MONEY, AND NOTHING IT COULD DO' },
 };
 
+/*
+ * LES PHOTOS DONT LE SUJET EST EN BAS DU CADRE.
+ *
+ * La une découpe un bandeau dans une image en 3:2 : elle n'en montre que la
+ * bande centrale, soit 40 % de la hauteur jetée. Toutes les photos de mort ont
+ * leur sujet au milieu et traversent ce recadrage sans rien perdre.
+ *
+ * `death-dette` non. Son sujet — une chaussure abandonnée et une pièce par
+ * terre, les deux seuls objets qui racontent quelque chose — est posé au sol,
+ * donc dans le bas de l'image. Recadrée au centre, la une ne montrait qu'un
+ * trottoir vide : la chaussure coupée en deux au bord inférieur, la pièce hors
+ * champ. Une photo magnifique qui ne disait plus rien à l'endroit précis où
+ * elle sert.
+ *
+ * La commande demandait pourtant de garder les 20 % du haut et du bas
+ * dégagés ; c'est la photo qui s'en écarte. La corriger ici coûte une ligne et
+ * garde l'image telle qu'elle est — plutôt que de la faire refaire.
+ */
+const CADRAGE_BAS = new Set(['/assets/death-dette.webp']);
+
 const HEADLINES: Record<string, { fr: string; en: string }> = {
   despair: { fr: 'IL AVAIT TOUT, SAUF LE MORAL', en: 'HE HAD EVERYTHING BUT HOPE' },
   hunger: { fr: 'MORT LE VENTRE VIDE DANS UNE VILLE PLEINE', en: 'STARVED IN A CITY FULL OF FOOD' },
@@ -561,6 +581,7 @@ export default function GameOverScreen() {
             <KenBurnsImage
               key={deathCandidates[deathImgTry]}
               src={deathCandidates[deathImgTry]}
+              position={CADRAGE_BAS.has(deathCandidates[deathImgTry]) ? 'bottom' : 'center'}
               onError={() => setDeathImgTry(n => n + 1)}
             />
             <span className="absolute bottom-1 right-2 text-xl drop-shadow">💀</span>
