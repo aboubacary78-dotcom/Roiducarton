@@ -484,4 +484,18 @@ export interface GameState {
   // Cause de mort contextuelle (ex. l'ennemi qui vous a achevé), sinon null
   // et l'écran de fin la déduit de vos jauges.
   deathCause: string | null;
+  /**
+   * LA MORT QUI SE NOMME ELLE-MÊME.
+   *
+   * L'écran de fin devine la catégorie à partir des jauges du cadavre, et il a
+   * raison la plupart du temps : un ventre à zéro raconte la faim. Mais
+   * certaines fins ne se lisent pas dans les chiffres — on meurt sous les
+   * coups du prêteur avec une santé négative, ce qui donne « trop de coups »
+   * et efface exactement ce qui vient de se passer.
+   *
+   * Cette étiquette permet à un cas particulier de dire lui-même de quoi il
+   * s'agit, sans que l'écran de fin ait à connaître la mécanique. Elle décide
+   * l'image, le gros titre et l'entrée du Registre.
+   */
+  deathKind?: string | null;
 }

@@ -5,7 +5,7 @@ import {
 import type { SalvageFind } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { playCollapse, playCrit, playDig, playFind, playHurt, playPickUp, playStep, playTensionRisque, playUnlock } from '@/lib/sound';
+import { playCollapse, playCrit, playDig, playFind, playPickUp, playSaleteRecup, playStep, playTensionRisque, playUnlock } from '@/lib/sound';
 import { canOfferRewarded, showRewarded } from '@/lib/ads';
 import { haptic } from '@/lib/haptics';
 import { isFirstEverRun } from '@/lib/coach';
@@ -285,9 +285,17 @@ function SalvageInner() {
       trouvaillesRef.current = [...trouvaillesRef.current, f.id];
       setTrouvailles(trouvaillesRef.current); playFind(); haptic('heavy');
     } else {
-      // Ce qu'une saleté coûte dépend de qui fouille : l'haleine redoutable
-      // fait fuir les rats, le phobique en fait une attaque de panique.
-      playHurt(); addRisk(piegeCostFor(state.character!, f.id));
+      /*
+       * Ce qu'une saleté coûte dépend de qui fouille : l'haleine redoutable
+       * fait fuir les rats, le phobique en fait une attaque de panique.
+       *
+       * Et maintenant elle SONNE comme elle-même. Les six saletés partageaient
+       * un `playHurt` — un coup encaissé, alors que personne ne vous frappe.
+       * Un rat qui détale, un tesson dans la paume et un yaourt devenu
+       * autonome ne s'entendaient donc pas ; le joueur, qui a le doigt sur la
+       * grille, apprenait ce qu'il avait touché en lisant l'étiquette.
+       */
+      playSaleteRecup(f.id); addRisk(piegeCostFor(state.character!, f.id));
       hurtsRef.current.push(f.id);
     }
   }

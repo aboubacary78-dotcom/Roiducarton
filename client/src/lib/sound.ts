@@ -676,6 +676,80 @@ export const playCard = withVariants('geste-carte', 3, 0.7, playWhooshSynth);
 /** Succès débloqué. Un coup, net, et c'est tout. */
 export const playUnlock = withFile('geste-succes', 0.85, playUnlockSynth);
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * ⑩ LA VOIX — LE SEUL SON QUI SORT D'UN CORPS
+ *
+ * Tout le reste du jeu est du carton manipulé : c'est la règle, et elle tient.
+ * Mais il manquait ce qu'un corps fait entendre malgré lui — la grimace quand
+ * on se coupe, le haut-le-cœur devant ce qu'on vient de sortir du tas, le
+ * souffle qu'on lâche en frappant.
+ *
+ * DEUX PRINCIPES.
+ *
+ *   1. AUCUN MOT, JAMAIS. Ce sont des souffles, des sifflements entre les
+ *      dents, des grognements. Un mot enregistré vieillit en trois écoutes,
+ *      demanderait deux langues, et casserait le carton. Un « tsss » ne se
+ *      traduit pas : c'est précisément pour ça qu'il tient.
+ *
+ *   2. LA VOIX SUIT LE PERSONNAGE. On joue un homme ou une femme, tiré au
+ *      hasard à chaque partie, et entendre le mauvais timbre annule tout le
+ *      travail que le jeu fait pour qu'on s'attache à ce personnage-là. Le
+ *      genre est posé une fois (`reglerVoix`) et vaut jusqu'à la mort.
+ *
+ * Le repli reste muet plutôt que synthétisé : une voix humaine fabriquée à
+ * l'oscillateur ne ressemble à rien d'autre qu'à une erreur, et le geste qui
+ * l'accompagne (coup, écroulement, alerte) a déjà son propre son.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+export type Genre = 'm' | 'f';
+let genreVoix: Genre = 'm';
+
+/** Fixe le timbre du personnage courant. Appelée à chaque changement de vie. */
+export function reglerVoix(g: Genre | undefined): void {
+  if (g === 'm' || g === 'f') genreVoix = g;
+}
+
+const muet = () => { /* pas de repli : une voix synthétisée sonnerait faux */ };
+
+/**
+ * Une réaction du personnage, dans son timbre. `h` et `f` dans les noms de
+ * fichiers : le dossier reste lisible d'un coup d'œil.
+ */
+function voix(quoi: string, nb: number, gain: number, repli: () => void = muet): () => void {
+  const prises: Record<Genre, () => void> = {
+    m: withVariants(`voix-h-${quoi}`, nb, gain, repli),
+    f: withVariants(`voix-f-${quoi}`, nb, gain, repli),
+  };
+  return () => prises[genreVoix]();
+}
+
+/** On se coupe, une guêpe pique, un coup passe. Bref et rentré. */
+export const playVoixDouleur = voix('douleur', 3, 0.8);
+/** Ce qu'on vient de toucher au fond du tas. Le haut-le-cœur, pas le vomi. */
+export const playVoixDegout = voix('degout', 3, 0.8);
+/** L'effort qui sort tout seul en frappant ou en soulevant. */
+export const playVoixEffort = voix('effort', 3, 0.7);
+
+/*
+ * LA VOIX NE SE SUPERPOSE PAS À ELLE-MÊME.
+ *
+ * Un combat enchaîne les coups, et la Récup' peut réveiller deux saletés d'un
+ * même mouvement de doigt. Deux grimaces qui se chevauchent ne font pas un
+ * personnage qui souffre deux fois : elles font une voix cassée, et on entend
+ * l'échantillon au lieu du personnage.
+ */
+const ECART_VOIX_MS = 700;
+let derniereVoix = 0;
+
+export function playVoix(quoi: 'douleur' | 'degout' | 'effort'): void {
+  const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  if (now - derniereVoix < ECART_VOIX_MS) return;
+  derniereVoix = now;
+  if (quoi === 'douleur') playVoixDouleur();
+  else if (quoi === 'degout') playVoixDegout();
+  else playVoixEffort();
+}
+
 // ─── ⑨ LES JAUGES ───────────────────────────────────────────────────────────
 // Le jeu demande de surveiller six jauges et n'en signalait aucune à l'oreille.
 
@@ -702,8 +776,18 @@ const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
  *
  * Le froid va à la santé, faute de jauge de température : claquement de dents
  * et souffle mal assuré, c'est un corps à sa limite quelle que soit la cause.
- * Le mental et la dignité gardent l'alerte neutre — ils ne se soignent pas
- * avec un geste, et leur donner une voix de corps serait un contresens.
+ *
+ * LE MENTAL EN A UNE, MAINTENANT, ET C'EST UN REVIREMENT ASSUMÉ. Il n'en avait
+ * pas, au motif qu'il ne se soigne pas d'un geste : c'était vrai tant qu'il ne
+ * faisait que descendre. Depuis que la tête qui part brouille le texte des
+ * rencontres (lib/charabia), le joueur VOIT quelque chose d'anormal sans
+ * savoir d'où ça vient — et il peut y remédier, en dormant. Un symptôme
+ * visible plus un remède connu, c'est exactement la définition d'une jauge qui
+ * mérite sa voix. Sans elle, le brouillage passe pour un bug d'affichage.
+ *
+ * Ce n'est pas un cri : c'est une respiration qui s'emballe et un acouphène
+ * très bas. La dignité, elle, garde l'alerte neutre — elle ne se répare par
+ * aucun geste, et lui prêter un corps serait un contresens.
  * ═══════════════════════════════════════════════════════════════════════════
  */
 const VOIX_DU_CORPS: Record<string, () => void> = {
@@ -711,6 +795,9 @@ const VOIX_DU_CORPS: Record<string, () => void> = {
   thirst: withFile('corps-soif', 0.85, playFailSynth),
   sleep: withFile('corps-epuise', 0.85, playFailSynth),
   health: withFile('corps-froid', 0.85, playFailSynth),
+  // Repli sur l'alerte neutre, et non sur le silence : tant que les prises ne
+  // sont pas livrées, mieux vaut le signal générique que rien du tout.
+  mental: voix('tete', 2, 0.85, playGaugeLowFile),
 };
 
 /*
@@ -805,6 +892,77 @@ export const playTensionRisque = withFile('tension-risque', 0.55, () => { /* mue
  * dépend du temps qui reste.
  */
 export const playTensionTic = withFile('tension-compte', 0.6, () => { /* muet avant livraison */ });
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * CE QU'ON RÉVEILLE AU FOND DU TAS
+ *
+ * La Récup' cache six saletés, et toutes sonnaient pareil : un `playHurt`,
+ * c'est-à-dire un coup encaissé. Un rat qui détale et un yaourt devenu
+ * autonome ne font pourtant PAS le même bruit, et surtout ils ne font pas le
+ * même effet — l'un fait sursauter, l'autre soulève le cœur. Le joueur a le
+ * doigt sur la grille et l'œil sur la case qu'il vient d'ouvrir : l'oreille
+ * est le canal le plus rapide pour lui dire ce qu'il a touché.
+ *
+ * Chaque saleté est donc un couple : la CHOSE, puis la RÉACTION du personnage
+ * juste derrière. La chose n'est pas genrée — un rat est un rat ; la réaction
+ * l'est toujours, c'est le corps qu'on joue qui répond.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Le rat qui détale sous la tôle. Griffes, puis métal qui tremble. */
+const playRecupRat = withVariants('recup-rat', 3, 0.85, playHurtSynth);
+/** Le nid. Occupé. Un bourdonnement qui monte d'un coup. */
+const playRecupGuepes = withFile('recup-guepes', 0.85, playHurtSynth);
+/** Le tesson : verre qui craque sous la paume. */
+const playRecupVerre = withFile('recup-verre', 0.85, playHurtSynth);
+/** Ce qui est mou, tiède, et qui cède. Le son le plus désagréable du jeu. */
+const playRecupPourri = withVariants('recup-pourri', 3, 0.8, playHurtSynth);
+
+/** Ce que fait chaque saleté : la chose, et ce que le corps répond. */
+const SALETES: Record<string, { chose: () => void; reaction?: 'douleur' | 'degout' }> = {
+  'rat': { chose: playRecupRat },
+  'guepes': { chose: playRecupGuepes, reaction: 'douleur' },
+  'verre-casse': { chose: playRecupVerre, reaction: 'douleur' },
+  'poisson': { chose: playRecupPourri, reaction: 'degout' },
+  'couche': { chose: playRecupPourri, reaction: 'degout' },
+  'yaourt': { chose: playRecupPourri, reaction: 'degout' },
+};
+
+/** La saleté qu'on vient de réveiller, avec la tête que fait le personnage. */
+export function playSaleteRecup(id: string): void {
+  const s = SALETES[id];
+  if (!s) { playHurt(); return; }
+  s.chose();
+  // Le décalage compte : la réaction ARRIVE APRÈS la cause. Jouées ensemble,
+  // les deux se lisent comme un seul bruitage confus, et le rat perd sa gifle.
+  if (s.reaction) setTimeout(() => playVoix(s.reaction!), 180);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LES PASSANTS QU'ON RETIENT TROP LONGTEMPS
+ *
+ * La manche a une seule décision : lâcher, ou insister. Insister rapporte
+ * davantage et coûte de la dignité — et jusqu'ici cette bascule ne s'entendait
+ * pas. L'anneau devenait rouge, c'est tout, et le joueur regardait l'anneau
+ * plutôt que la rue.
+ *
+ * Le passant grogne donc pendant qu'on le retient, de plus en plus mal, puis
+ * se braque. Sa voix est la SIENNE : le genre vient du passant, pas du joueur,
+ * et c'est la seule voix du jeu qui ne suive pas le personnage.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+const AGACE: Record<Genre, () => void> = {
+  m: withVariants('passant-h-agace', 3, 0.7, muet),
+  f: withVariants('passant-f-agace', 3, 0.7, muet),
+};
+const REFUS: Record<Genre, () => void> = {
+  m: withVariants('passant-h-refus', 3, 0.85, playFailSynth),
+  f: withVariants('passant-f-refus', 3, 0.85, playFailSynth),
+};
+
+/** Il commence à trouver le temps long. */
+export function playPassantAgace(g: Genre): void { AGACE[g](); }
+/** Sa patience est finie : « lâchez-moi ». */
+export function playPassantRefus(g: Genre): void { REFUS[g](); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * LE MÊME GESTE NE SONNE PAS PAREIL SELON L'ENDROIT

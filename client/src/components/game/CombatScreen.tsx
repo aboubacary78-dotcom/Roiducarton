@@ -2,7 +2,7 @@ import { useGame, PROJECTILE_PATTERNS, getCard, SIGNS, SPECIAL_DEFS, bestWeapon,
 import type { Character, CombatState, CombatCard, SignId, DodgeProj } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { playBack, playCard, playCombatCharge, playCombatEsquive, playCombatEsquiveParfaite, playCrit, playEnemyCry, playFightStart, playHit, playHurt, playKingArrival, playTurnedAway } from '@/lib/sound';
+import { playBack, playCard, playCombatCharge, playCombatEsquive, playCombatEsquiveParfaite, playCrit, playEnemyCry, playFightStart, playHit, playHurt, playKingArrival, playTurnedAway, playVoix } from '@/lib/sound';
 import { setAmbience } from '@/lib/ambience';
 import { kingIsHeir } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -133,7 +133,28 @@ function CombatScreenInner() {
     // pas la même chose, le seuil suit donc sa carrure.
     const big = dmg >= Math.max(6, (currentCombat?.enemyMaxHealth ?? 30) * 0.2);
     if (big) playCrit(); else playHit();
+    // Le souffle qui sort tout seul, sur le gros coup uniquement. Sur chaque
+    // coup, on entendrait l'échantillon plutôt que le personnage — et un
+    // combat, c'est dix coups à la minute.
+    if (big) playVoix('effort');
   }, [currentCombat?.enemyHealth, currentCombat?.enemyMaxHealth, currentCombat?.enemyName]);
+
+  /*
+   * ET CE QU'ON ENCAISSE.
+   *
+   * Le joueur perdait de la vie sans un bruit dans la phase au tour par tour :
+   * seule la barre bougeait, et elle est en haut de l'écran alors que le pouce
+   * est en bas. `playVoix` tient l'écart minimal entre deux réactions, donc
+   * une volée serrée ne produit pas deux grimaces superposées.
+   */
+  const prevPvJoueur = useRef<number | null>(null);
+  useEffect(() => {
+    const pv = character?.stats.health;
+    if (pv == null) { prevPvJoueur.current = null; return; }
+    const avant = prevPvJoueur.current;
+    prevPvJoueur.current = pv;
+    if (avant != null && pv < avant) playVoix('douleur');
+  }, [character?.stats.health]);
 
   // Toast quand le coup spécial vient d'être chargé (manche gagnée).
   const prevCharged = useRef(false);
@@ -646,7 +667,7 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
         projRef.current, pattern, posRef.current, R, dt, now, () => iframeRef.current,
         () => {
           hitsRef.current += 1; iframeRef.current = now + IFRAME;
-          setFlash(true); setTimeout(() => setFlash(false), 160); playHurt();
+          setFlash(true); setTimeout(() => setFlash(false), 160); playHurt(); playVoix('douleur');
           // Un coup encaissé annule le frôlement : on ne frôle pas ce qui touche.
           froleRef.current = now + 500;
         },

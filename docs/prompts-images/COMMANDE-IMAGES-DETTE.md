@@ -1,4 +1,4 @@
-# Commande images — « Le Roi du Carton » — La dette (5 images)
+# Commande images — « Le Roi du Carton » — La dette (6 images)
 
 **Ce document est la commande complète. Tout ce qu'il faut est dedans : aucun
 autre fichier n'est nécessaire.**
@@ -19,7 +19,8 @@ où il est fauché**. Dix euros tout de suite, quinze à rendre sous trois jours
 Le jour venu, il vous trouve — changer de quartier n'y fait rien.
 
 Trois dénouements : on paie, il saisit un objet, ou **il se paie sur votre
-peau** (et ça peut tuer le personnage).
+peau**. Et ce dernier peut **tuer le personnage** : c'est la sixième image, la
+une du journal du lendemain.
 
 ---
 
@@ -133,15 +134,38 @@ la violence. Deux personnes contournent un corps au sol et continuent leur
 chemin : c'est exactement ce que le jeu raconte depuis le début, et cette
 image en est le point le plus dur.
 
+## 6. `death-dette.webp` — la une du lendemain
+
+> **Prompt.** Morning after. A cardboard cut-out street corner, empty. On the
+> ground, a flattened cardboard sheet where someone slept, one abandoned shoe,
+> and a single small cardboard coin catching the light. **No body, no figure
+> at all.** Grey early-morning light, the fairy lights dead. A miniature
+> cardboard street-sweeper's cart passes in the blurred background, not
+> stopping. Cold, wide, documentary framing.
+
+**L'intention.** C'est **la seule mort du jeu que le joueur ait signée
+lui-même**, trois jours plus tôt, en acceptant dix euros. Le journal titre
+« QUINZE EUROS, ET PERSONNE N'A RIEN VU ».
+
+Les cinq autres morts du jeu arrivent — la faim, le froid, un coup de trop.
+Celle-là, on l'a acceptée. L'image doit donc être **la plus vide des six** :
+pas de corps, pas de coupable, juste l'endroit et une pièce par terre. C'est
+le lendemain matin, et la rue a déjà tourné la page.
+
+⚠️ Cette image s'affiche **dans une une de journal, en grand format paysage**.
+Prévoir de l'air : elle est recadrée en bandeau, donc **rien d'important dans
+les vingt pour cent du haut ni du bas**.
+
 ---
 
 # Livraison attendue
 
-1. **Cinq fichiers WebP**, nommés exactement comme ci-dessus, en 1080 × 720.
+1. **Six fichiers WebP**, nommés exactement comme ci-dessus, en 1080 × 720.
 2. Les deux portraits du prêteur **côte à côte** dans le rapport, pour qu'on
    vérifie d'un coup d'œil que c'est bien le même personnage.
-3. Confirmation qu'**aucune des trois images de dénouement ne montre de sang,
-   de coup porté ni de visage de douleur**.
+3. Confirmation qu'**aucune des quatre images de dénouement ne montre de sang,
+   de coup porté ni de visage de douleur** — et que la sixième ne montre
+   **aucun corps**.
 4. ⚠️ **La licence d'usage commercial** de l'outil employé, nommément. Le jeu
    est monétisé par la publicité : une licence non commerciale rendrait les
    cinq images inutilisables.
@@ -152,8 +176,9 @@ Rien de grave, et c'est voulu :
 
 - les **trois images de dénouement** retombent sur une image existante
   (`result-steal-success.webp` / `result-steal-fail.webp`) ;
+- la **une de la mort** retombe sur le tampon 💀 de l'écran de fin ;
 - les **deux portraits** disparaissent simplement, et la carte du prêteur
   s'affiche sans visage.
 
-On peut donc livrer les cinq d'un coup ou une par une — chacune s'active toute
+On peut donc livrer les six d'un coup ou une par une — chacune s'active toute
 seule à l'arrivée, sans rien changer au code.

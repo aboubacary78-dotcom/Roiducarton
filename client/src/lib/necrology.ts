@@ -58,6 +58,19 @@ export const DEATH_DEFS: DeathDef[] = [
   { id: 'mort-riche', emoji: '💰', title: 'Riche et Mort Quand Même', titleEn: 'Rich and Dead Anyway', epitaph: 'Parti avec plus de 30€ en poche. L\'argent ne fait pas la survie.', epitaphEn: 'Left with over €30 in pocket. Money doesn\'t buy survival.', hint: 'Une fin qui demande d\'avoir au moins 30 € en poche.', hintEn: 'An ending that requires at least \u20ac30 in your pocket.', reach: 1 },
   { id: 'mort-canicule', emoji: '🥵', title: 'Cuit par la Canicule', titleEn: 'Cooked by the Heatwave', epitaph: 'Le bitume était une plancha. Vous étiez dessus.', epitaphEn: 'The asphalt was a griddle. You were on it.', hint: 'Une fin qui ne s\'ouvre qu\'un jour de canicule.', hintEn: 'An ending that only opens on a heatwave day.', reach: 1 },
   { id: 'mort-doyen', emoji: '🧓', title: 'Le Doyen', titleEn: 'The Elder', epitaph: 'Tombé après 10 jours de règne. Les légendes aussi finissent en carton.', epitaphEn: 'Fell after a 10-day reign. Even legends end up as cardboard.', hint: 'Une fin qui demande de tenir au moins dix jours.', hintEn: 'An ending that requires surviving at least ten days.', reach: 2 },
+  /*
+   * LA SEULE FIN QU'ON A SIGNÉE SOI-MÊME.
+   *
+   * Toutes les autres arrivent : la faim, le froid, un coup de trop. Celle-ci,
+   * on l'a acceptée trois jours plus tôt en prenant dix euros — et le jeu l'a
+   * dit à ce moment-là, en toutes lettres. C'est ce qui la rend intéressante à
+   * collectionner et supportable à subir.
+   *
+   * Sans elle, mourir sous les coups du prêteur produisait « Trop de Coups » :
+   * la une parlait de bagarre, le Registre ne gardait rien, et la mécanique la
+   * plus lourde du jeu n'avait pas de trace dans la méta.
+   */
+  { id: 'mort-dette', emoji: '💸', title: 'La Note Réglée', titleEn: 'The Debt Settled', epitaph: 'Il avait emprunté dix euros. Il en devait quinze. Le prêteur s\'est payé sur ce qui restait.', epitaphEn: 'He borrowed ten euros. He owed fifteen. The lender took payment out of what was left.', hint: 'Une fin pour qui emprunte et ne peut pas rendre.', hintEn: 'An ending for those who borrow and cannot pay back.', reach: 1 },
 ];
 
 export interface BookEntry { name: string; day: number; at: number }

@@ -172,6 +172,26 @@ const mort = await p.evaluate(() => {
 verifier('à 12 de santé, la raclée tue', !mort.save || /game.?over|fin|score|repose/i.test(mort.ecran),
   mort.save ? mort.ecran : 'sauvegarde effacée');
 
+/*
+ * ── ET CETTE MORT-LÀ SE NOMME ─────────────────────────────────────────────
+ *
+ * Elle laisse une santé à zéro, exactement comme une bagarre : l'écran de fin
+ * la rangeait donc dans « trop de coups », et la seule mort du jeu que le
+ * joueur ait signée lui-même — trois jours plus tôt, en prenant dix euros —
+ * ne laissait aucune trace, ni dans la une ni dans le Registre.
+ */
+await pause(900);
+const une = await p.evaluate(() => document.body.innerText);
+verifier('la une parle de la dette, pas d\'une bagarre',
+  /QUINZE EUROS|FIFTEEN EUROS/i.test(une),
+  (une.match(/[A-ZÉÈÀÇ' ,]{16,}/) || ['—'])[0].trim().slice(0, 52));
+const registre = await p.evaluate(() => {
+  try { return Object.keys(JSON.parse(localStorage.getItem('roi-du-carton-deathbook') || '{}')); }
+  catch { return []; }
+});
+verifier('le Registre des Morts enregistre « La Note Réglée »',
+  registre.includes('mort-dette'), registre.join(', ') || 'registre vide');
+
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 
 await b.close();

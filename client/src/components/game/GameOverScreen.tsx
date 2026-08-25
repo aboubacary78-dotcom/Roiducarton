@@ -95,6 +95,8 @@ const HEADLINES: Record<string, { fr: string; en: string }> = {
   exhaustion: { fr: 'IL VOULAIT JUSTE DORMIR UN PEU', en: 'HE JUST WANTED SOME SLEEP' },
   cold: { fr: 'LA NUIT LA PLUS FROIDE DE L\'ANNÉE', en: 'THE COLDEST NIGHT OF THE YEAR' },
   injury: { fr: 'TROP DE COUPS, PAS ASSEZ DE PANSEMENTS', en: 'TOO MANY BLOWS, TOO FEW BANDAGES' },
+  // Une une de fait divers : personne n'a rien vu, tout le monde était là.
+  dette: { fr: 'QUINZE EUROS, ET PERSONNE N\'A RIEN VU', en: 'FIFTEEN EUROS, AND NOBODY SAW A THING' },
 };
 
 export default function GameOverScreen() {
@@ -107,7 +109,18 @@ export default function GameOverScreen() {
 
   // Catégorie de mort → image (diorama) personnalisée. Repli sur le 💀 si le
   // fichier n'existe pas encore.
-  const deathCat = state.deathCause ? 'combat'
+  /*
+   * L'ÉTIQUETTE PRIME SUR LA DÉDUCTION.
+   *
+   * La catégorie se devine d'ordinaire dans les jauges du cadavre, et c'est
+   * juste : un ventre à zéro raconte la faim. Mais mourir sous les coups du
+   * prêteur laisse une santé à zéro, exactement comme une bagarre — la une
+   * annonçait donc « trop de coups » et effaçait la seule mort du jeu que le
+   * joueur ait signée lui-même. Quand le reducer sait de quoi on est mort, il
+   * le dit, et on ne redevine rien.
+   */
+  const deathCat = state.deathKind ? state.deathKind
+    : state.deathCause ? 'combat'
     : !char ? 'injury'
     : char.stats.mental <= 0 ? 'despair'
     : char.stats.hunger <= 8 ? 'hunger'
@@ -141,6 +154,10 @@ export default function GameOverScreen() {
    * parlant de coups reçus.
    */
   const specialEnding = !char ? null
+    // Une mort étiquetée par le reducer sait déjà ce qu'elle raconte : la
+    // circonstance ne doit pas venir la recouvrir. Mourir riche sous les coups
+    // du prêteur, c'est encore la dette qui a tué.
+    : state.deathKind ? null
     : char.day >= 10 ? 'doyen'
     : char.day <= 1 ? 'jour-1'
     : state.weather === 'heatwave' ? 'canicule'
@@ -165,7 +182,9 @@ export default function GameOverScreen() {
       ? tr(SPECIAL_HEADLINES[specialEnding].fr, SPECIAL_HEADLINES[specialEnding].en)
       : deathCat === 'combat'
         ? tr('RIXE FATALE DANS LE QUARTIER', 'FATAL BRAWL IN THE NEIGHBORHOOD')
-        : tr(HEADLINES[deathCat].fr, HEADLINES[deathCat].en);
+        // Repli sur « trop de coups » : une étiquette inconnue ne doit pas
+        // faire tomber l'écran de fin, qui est le pire moment pour planter.
+        : tr((HEADLINES[deathCat] ?? HEADLINES.injury).fr, (HEADLINES[deathCat] ?? HEADLINES.injury).en);
 
   // ---- Registre des Morts + Karma + tombe : enregistrés UNE fois par mort ----
   const harvest = useMemo(() => {

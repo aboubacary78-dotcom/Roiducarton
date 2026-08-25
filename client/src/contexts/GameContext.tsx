@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useEffect, useRef, useState, use
 import { syncRecords, recordGameEnd } from '@/lib/profile';
 import { getLang, tc } from '@/lib/lang';
 import { peekLegacy, clearLegacy, takePendingKits, loadGraves } from '@/lib/necrology';
+import { reglerVoix } from '@/lib/sound';
 
 // ============================================================================
 // LE MONOLITHE, DÉCOUPÉ
@@ -307,7 +308,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'START_GAME':
       clearSave();
-      return { ...state, screen: 'character-select', characterChoices: generateCharacterTrio(), deathCause: null };
+      return { ...state, screen: 'character-select', characterChoices: generateCharacterTrio(), deathCause: null, deathKind: null };
 
     case 'GENERATE_CHARACTERS':
       // Les prénoms du tirage précédent sont écartés : une relance qui rejoue
@@ -1016,6 +1017,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         character: { ...c, stats: newStats, alive: vivant, dette: undefined },
+        // La rue saura de quoi il est mort : c'est la seule fin du jeu qu'on
+        // ait signée soi-même, trois jours plus tôt, en prenant les dix euros.
+        deathKind: vivant ? state.deathKind ?? null : 'dette',
         eventResult: {
           text: L(
             `${nom} regarde votre sac vide, puis vous. « Alors c'est comme ça. » Ça va vite. Vous ne vous souvenez pas d'être tombé, seulement du trottoir contre la joue et des gens qui contournent. ${nom} s'en va sans se retourner : la dette est payée, et tout le quartier a vu comment.`,
@@ -2217,6 +2221,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         currentCombat: null,
         combatLog: [],
         deathCause: null,
+        // Une seconde chance efface aussi l'étiquette : on ne meurt pas deux
+        // fois de la même dette, elle a été éteinte au premier coup.
+        deathKind: null,
         eventResult: { text: '🌅 Une âme charitable vous a porté secours. Vous reprenez vos esprits. La rue ne vous a pas encore eu...', image: '/assets/result-seconde-chance.webp' },
         character: {
           ...state.character,
@@ -2267,6 +2274,7 @@ const initialState: GameState = {
   weather: initialWeather,
   nextWeather: getNextWeather(initialWeather, 1),
   deathCause: null,
+  deathKind: null,
 };
 
 // ============ CONTEXT ============
@@ -2298,6 +2306,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
       saveGame(state);
     }
   }, [state]);
+
+  /*
+   * LA VOIX DU PERSONNAGE, POSÉE UNE FOIS PAR VIE.
+   *
+   * Les grimaces, les haut-le-cœur et les souffles d'effort existent en deux
+   * timbres. Le genre est tiré au sort avec le personnage : entendre le
+   * mauvais annulerait tout le travail que le jeu fait pour qu'on s'attache à
+   * celui-là précisément. On le pose ici plutôt qu'au point d'appel — le son
+   * n'a pas à connaître le contexte de jeu, et une reprise de partie
+   * sauvegardée doit retrouver la bonne voix sans qu'on y pense.
+   */
+  useEffect(() => { reglerVoix(state.character?.gender); }, [state.character?.gender]);
 
   // Met à jour les records permanents du profil et débloque les accessoires
   // correspondants (succès). Séparé de la sauvegarde de partie.

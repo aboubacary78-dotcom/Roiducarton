@@ -24,6 +24,16 @@ export interface PasserBy {
   id: string;
   label: string;        // en français, traduit à l'affichage par tc()
   tell: string;         // le détail qu'on lit d'un coup d'œil
+  /**
+   * Le timbre de sa voix quand on le retient trop longtemps.
+   *
+   * Renseigné SEULEMENT quand le libellé le dit déjà — « la dame au cabas »,
+   * « l'homme qui parle seul ». Les autres archétypes sont volontairement
+   * neutres (le costume, l'ouvrier, le vigile) et tirent leur voix de la
+   * graine du passant : ils changent donc de personne d'une fois sur l'autre,
+   * ce qui est exactement ce qu'ils sont.
+   */
+  voix?: 'm' | 'f';
   /** Vitesse de traversée, en secondes d'un bord à l'autre. */
   crossS: number;
   /** Temps de regard à tenir pour qu'il s'arrête, en secondes. */
@@ -46,11 +56,11 @@ export interface PasserBy {
 
 export const PASSERSBY: PasserBy[] = [
   {
-    id: 'cabas', label: 'La dame au cabas', tell: '🛍️',
+    id: 'cabas', voix: 'f', label: 'La dame au cabas', tell: '🛍️',
     crossS: 9, holdS: 1.3, give: 1, patienceS: 2.4, insistGive: 0.5, insistCost: 2,
   },
   {
-    id: 'retraite', label: 'Le retraité du banc', tell: '🗞️',
+    id: 'retraite', voix: 'm', label: 'Le retraité du banc', tell: '🗞️',
     crossS: 12, holdS: 1.6, give: 2, patienceS: 4, insistGive: 0.7, insistCost: 1,
   },
   {
@@ -89,7 +99,7 @@ export const PASSERSBY: PasserBy[] = [
   // holdS énorme, l'anneau ne se remplissait jamais et l'insistance — donc la
   // bagarre — était tout simplement injoignable.
   {
-    id: 'voyou', label: 'Le gars à la casquette', tell: '🧢',
+    id: 'voyou', voix: 'm', label: 'Le gars à la casquette', tell: '🧢',
     crossS: 7, holdS: 0.8, give: 0, patienceS: 1.1, insistGive: 0, insistCost: 4,
     fight: 'Voyou du Coin', fightChance: 0.85,
   },
@@ -99,7 +109,7 @@ export const PASSERSBY: PasserBy[] = [
     fight: 'Concurrent Agressif', fightChance: 0.8,
   },
   {
-    id: 'ivrogne', label: "L'homme qui parle seul", tell: '🍺',
+    id: 'ivrogne', voix: 'm', label: "L'homme qui parle seul", tell: '🍺',
     crossS: 10, holdS: 2.2, give: 1, patienceS: 1.5, insistGive: 0.4, insistCost: 3,
     fight: 'Ivrogne Agressif', fightChance: 0.6,
   },
@@ -127,6 +137,21 @@ export function passersByFor(location: string): PasserBy[] {
 /** Le prochain à traverser, tiré dans la faune du quartier. */
 export function rollPasserBy(location: string): PasserBy {
   return randomFromArray(passersByFor(location));
+}
+
+/**
+ * Le timbre d'un passant donné.
+ *
+ * Les archétypes explicitement genrés gardent leur voix ; les autres la
+ * tirent de leur graine, qui est fixée à leur arrivée dans la rue. Un passant
+ * ne change donc JAMAIS de voix pendant qu'on le retient — ce qui serait le
+ * seul vrai bug possible ici, et le plus difficile à ne pas remarquer.
+ */
+export function voixPassant(p: PasserBy, seed: string): 'm' | 'f' {
+  if (p.voix) return p.voix;
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  return (h & 1) === 0 ? 'm' : 'f';
 }
 
 /** L'adversaire que devient un passant qu'on a poussé à bout. */

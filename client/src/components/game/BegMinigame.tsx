@@ -1,11 +1,11 @@
 import {
   useGame, BEG_SPOTS, randomFromArray,
-  BEG_TUNING, rollPasserByFor, passerByEnemy, gazeSpeed, begMods,
+  BEG_TUNING, rollPasserByFor, passerByEnemy, gazeSpeed, begMods, voixPassant,
 } from '@/contexts/GameContext';
 import type { PasserBy } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { playCoin, playHurt, playMiss, playPoliceApproche, playPoliceIntervention, playPolicePresence, playStep, playTensionTic } from '@/lib/sound';
+import { playCoin, playHurt, playMiss, playPassantAgace, playPassantRefus, playPoliceApproche, playPoliceIntervention, playPolicePresence, playStep, playTensionTic } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
@@ -44,7 +44,18 @@ interface Walker {
   insistS: number;      // secondes d'insistance au-delà de l'anneau plein
   done?: 'gave' | 'left' | 'angry';
   gain: number;         // ce qu'on lui a soutiré
+  dernierRale: number;  // secondes d'insistance au dernier grognement
 }
+
+/*
+ * TOUTES LES COMBIEN IL RÂLE.
+ *
+ * La patience la plus courte du jeu est de 1,1 s et la plus longue de 5 s. Un
+ * grognement toutes les 0,9 s donne donc au moins UN son à tout le monde — y
+ * compris au gars à la casquette qu'on ne retient jamais longtemps — sans
+ * transformer le retraité du banc en boucle de râles.
+ */
+const RALE_TOUS_LES_S = 0.9;
 
 export default function BegMinigame() {
   const [ready, setReady] = useState(() => introSeen('beg2'));
@@ -188,7 +199,7 @@ function BegMinigameInner() {
           // Un pigeon sur l'épaule et certains s'arrêtent d'eux-mêmes : le
           // regard est déjà à moitié accroché avant même qu'on les touche.
           gaze: mods.autoStop > 0 && Math.random() < mods.autoStop ? 0.6 : 0,
-          insistS: 0, gain: 0,
+          insistS: 0, gain: 0, dernierRale: -RALE_TOUS_LES_S,
         }];
         nextSpawn = now + T.spawnMs;
       }
@@ -208,7 +219,17 @@ function BegMinigameInner() {
               coinsRef.current += w.def.give;
               setCoins(coinsRef.current);
               playCoin();
-              say(tr(`${w.def.tell} +${w.def.give}`, `${w.def.tell} +${w.def.give}`), 'good');
+              /*
+               * ON REÇOIT DE LA MONNAIE, PAS UN CABAS.
+               *
+               * Le gain s'annonçait avec le `tell` du passant — « 🛍️ +1 »,
+               * « 👶 +2 ». Ce détail sert à RECONNAÎTRE quelqu'un dans la rue
+               * d'un coup d'œil, et il continue de le faire sur son avatar.
+               * Collé devant un « +1 », il se lit comme ce qu'on vient de
+               * recevoir : le joueur croyait empocher un sac de courses ou un
+               * bébé. Ici, dans le chapeau, il ne tombe que des pièces.
+               */
+              say(`🪙 +${w.def.give}`, 'good');
             }
           } else {
             // Anneau plein et on ne lâche pas : on insiste.
@@ -219,6 +240,12 @@ function BegMinigameInner() {
             dignityRef.current += w.def.insistCost * dt;
             setCoins(coinsRef.current);
             setDignitySpent(dignityRef.current);
+            // Il grogne pendant qu'on le retient. C'est le seul retour qui dise
+            // que la dignité part MAINTENANT, sans quitter la rue des yeux.
+            if (w.insistS - w.dernierRale >= RALE_TOUS_LES_S) {
+              w.dernierRale = w.insistS;
+              playPassantAgace(voixPassant(w.def, w.seed));
+            }
             if (w.insistS >= w.def.patienceS) {
               // La patience est finie. Certains râlent, d'autres cognent.
               w.done = 'angry';
@@ -226,13 +253,17 @@ function BegMinigameInner() {
               const enemy = passerByEnemy(w.def);
               if (enemy && Math.random() < (w.def.fightChance ?? 0)) {
                 fightRef.current = enemy.name;
-                playHurt();
+                // Il se braque D'ABORD, il frappe ensuite (`finish` joue le
+                // coup). Les deux playHurt d'affilée d'avant ne racontaient
+                // rien : c'était le même bruit deux fois.
+                playPassantRefus(voixPassant(w.def, w.seed));
                 finish('fight');
                 return true;
               }
               dignityRef.current += 4;
               setDignitySpent(dignityRef.current);
-              playHurt();
+              // Sa voix, pas un coup encaissé : personne ne vous a touché.
+              playPassantRefus(voixPassant(w.def, w.seed));
               say(tr('« Lâchez-moi ! »', '"Leave me alone!"'), 'bad');
             }
           }
@@ -370,16 +401,32 @@ function BegMinigameInner() {
           const R = size * 0.78;
           const circ = 2 * Math.PI * R;
           return (
-            <motion.div
+            /*
+             * LE PASSANT EST DESSINÉ LÀ OÙ IL EST, PAS À CÔTÉ.
+             *
+             * Le centrage (`translate(-50%,-50%)`) vivait sur le motion.div,
+             * en même temps qu'une animation d'échelle. À l'échelle 1 —
+             * c'est-à-dire tout le temps — framer-motion réécrit la propriété
+             * `transform` en `none` et emporte le centrage avec elle : le
+             * passant s'affichait donc en bas à droite de sa vraie position,
+             * d'une demi-vignette. Le doigt devait viser à côté du dessin.
+             *
+             * Le placement va sur un div ordinaire, l'animation reste sur le
+             * motion.div à l'intérieur. Chacun sa propriété, plus de conflit.
+             */
+            <div
               key={w.id}
-              animate={{ opacity: w.done ? 0 : 1, scale: w.done === 'angry' ? 1.15 : 1 }}
-              transition={{ duration: 0.35 }}
               style={{
                 position: 'absolute',
                 left: `${x * 100}%`, top: `${w.lane * 100}%`,
                 transform: 'translate(-50%,-50%)',
                 zIndex: Math.round(w.lane * 10),
               }}
+            >
+            <motion.div
+              animate={{ opacity: w.done ? 0 : 1, scale: w.done === 'angry' ? 1.15 : 1 }}
+              transition={{ duration: 0.35 }}
+              style={{ position: 'relative' }}
             >
               {/* l'anneau du regard */}
               {(isHeld || w.gaze > 0) && !w.done && (
@@ -414,6 +461,7 @@ function BegMinigameInner() {
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg">💢</span>
               )}
             </motion.div>
+            </div>
           );
         })}
 
