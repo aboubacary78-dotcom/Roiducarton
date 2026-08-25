@@ -7233,8 +7233,69 @@ function pickMaterials(c, count) {
 }
 
 // client/src/contexts/data/npc.ts
+var NPC_NAMES = [
+  "Marcel",
+  "G\xE9rard",
+  "Lucienne",
+  "Albert",
+  "Yvette",
+  "Ren\xE9",
+  "Josette",
+  "Fernand",
+  "Ginette",
+  "Maurice",
+  "Colette",
+  "Raymond",
+  "Simone",
+  "Bernadette",
+  "Roger",
+  "Monique",
+  "Thierry",
+  "Huguette",
+  "Patrick",
+  "Odette",
+  "Robert",
+  "Paulette",
+  "Lucien",
+  "Suzanne",
+  "Andr\xE9",
+  "Denise",
+  "Gaston",
+  "Micheline",
+  "Henri",
+  "Jacqueline"
+];
+function makeRng(seed) {
+  let s = seed >>> 0 || 1;
+  return () => {
+    s = Math.imul(s, 1664525) + 1013904223 >>> 0;
+    return s / 4294967296;
+  };
+}
+function hashStr(s) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h ^ s.charCodeAt(i)) >>> 0;
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
 function encounterFlag(day2, location) {
   return `rencontre-${day2}-${location}`;
+}
+var DETTE_PRET = 10;
+var DETTE_DU = 15;
+var DETTE_DELAI = 3;
+var DETTE_RELANCE = 4;
+function preteurDuJour(day2, location, playerSeed) {
+  const rng = makeRng(hashStr(`preteur|${day2}|${location}|${playerSeed}`));
+  const nom = NPC_NAMES[Math.floor(rng() * NPC_NAMES.length)];
+  return {
+    nom,
+    seed: `preteur-${nom}-${day2}`,
+    gender: genderFromName(nom),
+    quartier: location
+  };
 }
 
 // client/src/contexts/GameContext.tsx
@@ -7850,6 +7911,111 @@ function gameReducer(state, action) {
      * `SEUIL_PRESQUE`), et la récompense est exactement celle du contrat —
      * rien de plus, sinon la publicité paierait mieux que le jeu.
      */
+    /* ═══════════════════════════════════════════════════════════════════
+     * LA DETTE
+     *
+     * Le prêteur arrive au moment de la faiblesse — fauché, passé le premier
+     * jour — et propose dix euros contre quinze sous trois jours. Le joueur
+     * peut refuser : c'est le seul PNJ du jeu qu'on a le droit d'envoyer
+     * promener, et il fallait que ce droit existe pour que l'accepter soit un
+     * choix.
+     *
+     * Le remboursement ne se marchande pas. Ce qui se joue, c'est l'échéance :
+     * trois jours de jeu pendant lesquels chaque euro dépensé se compte.
+     * ═══════════════════════════════════════════════════════════════════════ */
+    case "ACCEPTER_PRET": {
+      const c = state.character;
+      if (!c || c.dette || state.screen !== "main") return state;
+      const preteur = preteurDuJour(c.day, c.location, c.seed);
+      return {
+        ...state,
+        character: {
+          ...c,
+          money: c.money + DETTE_PRET,
+          dette: { ...preteur, montant: DETTE_DU, echeance: c.day + DETTE_DELAI, relances: 0 }
+        }
+      };
+    }
+    case "REFUSER_PRET": {
+      const c = state.character;
+      if (!c || c.dette || state.screen !== "main") return state;
+      return { ...state, character: { ...c, detteRefuseeJour: c.day } };
+    }
+    case "REMBOURSER_DETTE": {
+      const c = state.character;
+      if (!c?.dette || c.money < c.dette.montant || state.screen !== "main") return state;
+      const nom = c.dette.nom;
+      return {
+        ...state,
+        character: { ...c, money: c.money - c.dette.montant, respect: c.respect + 3, dette: void 0 },
+        eventResult: {
+          text: L(
+            `Vous comptez les billets dans la main de ${nom}. ${nom} recompte, hoche la t\xEAte, et s'en va sans un mot de plus. Dans la rue, c'est une poign\xE9e de main.`,
+            `You count the notes into ${nom}'s hand. ${nom} counts again, nods, and leaves without another word. On the street, that counts as a handshake.`
+          ),
+          statChanges: {},
+          moneyChange: -c.dette.montant,
+          respectChange: 3
+        }
+      };
+    }
+    /*
+     * NE PAS POUVOIR PAYER.
+     *
+     * Deux issues, et la première est de loin la plus fréquente : il se sert.
+     * L'objet le plus cher du sac part, et la dette est éteinte — c'est un
+     * remboursement en nature, pas une punition supplémentaire.
+     *
+     * Sac vide, en revanche, il ne reste rien à prendre. La dette n'est PAS
+     * effacée : elle monte, il reviendra, et c'est au joueur d'aller
+     * chercher l'argent. On ne fabrique pas une spirale sans issue — on
+     * remet le problème à demain, ce qui est exactement la vie qu'on raconte.
+     */
+    case "AVOUER_INSOLVABILITE": {
+      const c = state.character;
+      if (!c?.dette || state.screen !== "main") return state;
+      const nom = c.dette.nom;
+      const gage = c.inventory.reduce(
+        (pire, i) => !pire || i.value > pire.value ? i : pire,
+        null
+      );
+      if (gage) {
+        return {
+          ...state,
+          character: {
+            ...c,
+            inventory: c.inventory.filter((i) => i !== gage),
+            stats: { ...c.stats, dignity: Math.max(0, c.stats.dignity - 6) },
+            dette: void 0
+          },
+          eventResult: {
+            text: L(
+              `${nom} ne discute pas. ${nom} ouvre votre sac, en sort ${gage.name} ${gage.emoji}, et le soup\xE8se. \xAB On est quittes. \xBB Vous n'aviez pas votre mot \xE0 dire, et vous le saviez en acceptant.`,
+              `${nom} doesn't argue. ${nom} opens your bag, pulls out ${gage.name} ${gage.emoji}, and weighs it. "We're square." You had no say, and you knew that when you took the money.`
+            ),
+            statChanges: { dignity: -6 },
+            moneyChange: 0
+          }
+        };
+      }
+      const montant = c.dette.montant + DETTE_RELANCE;
+      return {
+        ...state,
+        character: {
+          ...c,
+          stats: { ...c.stats, dignity: Math.max(0, c.stats.dignity - 4) },
+          dette: { ...c.dette, montant, echeance: c.day + 2, relances: c.dette.relances + 1 }
+        },
+        eventResult: {
+          text: L(
+            `${nom} regarde votre sac vide, puis vous. Il n'y a rien \xE0 prendre, et \xE7a n'arrange personne. \xAB ${montant}, dans deux jours. \xBB ${nom} s'en va, et ce n'\xE9tait pas une question.`,
+            `${nom} looks at your empty bag, then at you. There's nothing to take, and that suits nobody. "${montant}, two days." ${nom} walks off, and it wasn't a question.`
+          ),
+          statChanges: { dignity: -4 },
+          moneyChange: 0
+        }
+      };
+    }
     case "RATTRAPER_CONTRAT": {
       const bilan = state.daySummary;
       if (!state.character || !bilan?.contratRate || bilan.contratRattrape) return state;
@@ -8869,7 +9035,7 @@ var initialState = {
 };
 var GameContext = createContext(void 0);
 
-// ../../../tmp/monet-n1Omfh/cap.js
+// ../../../tmp/monet-rJfVDE/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/ads.ts

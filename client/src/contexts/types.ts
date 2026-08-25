@@ -100,6 +100,19 @@ export interface Character {
    * aller le chercher (voir `voleurTrouvable`).
    */
   vole?: { nom: string; seed: string; gender: 'm' | 'f'; quartier: string; jour: number; objet?: InventoryItem; argent?: number };
+  /*
+   * LA DETTE — le seul rendez-vous que le joueur emporte dans sa tête.
+   *
+   * Le jeu n'avait aucune raison de le faire revenir à un jour PRÉCIS : les
+   * suites d'événements arrivent, elles ne s'attendent pas. Une échéance
+   * inscrite dans l'en-tête change ça — on ne ferme pas une application à un
+   * jour d'un remboursement.
+   *
+   * `refusee` retient qu'on a déjà dit non au prêteur : il ne repropose pas
+   * le même jour, sinon le refus n'en serait pas un.
+   */
+  dette?: { nom: string; seed: string; gender: 'm' | 'f'; quartier: string; montant: number; echeance: number; relances: number };
+  detteRefuseeJour?: number;
   // Graine unique servant à générer le visage du personnage (voir CardboardAvatar).
   seed: string;
   // Genre déduit du prénom, pour que le visage corresponde (pas de barbe sur une femme, etc.).

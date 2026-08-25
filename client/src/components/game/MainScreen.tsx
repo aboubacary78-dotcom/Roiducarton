@@ -1,4 +1,22 @@
-import { useGame, streetTitleFor, getContract, LOCATIONS, npcAt, encounterFlag, pickFightEnemy, STREET_TITLES, TRAITS, voleurTrouvable, ennemiVoleur } from '@/contexts/GameContext';
+import {
+  DETTE_DELAI,
+  DETTE_DU,
+  DETTE_PRET,
+  LOCATIONS,
+  STREET_TITLES,
+  TRAITS,
+  detteExigible,
+  encounterFlag,
+  ennemiVoleur,
+  getContract,
+  npcAt,
+  pickFightEnemy,
+  preteurDuJour,
+  preteurPresent,
+  streetTitleFor,
+  useGame,
+  voleurTrouvable,
+} from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import StatBars from './StatBars';
@@ -10,7 +28,7 @@ import CardboardAvatar from './CardboardAvatar';
 import PlayerFace, { faceCondition } from './PlayerFace';
 import StreetEncounter from './StreetEncounter';
 import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
-import { playActionLieu, playBag, playCard, playClick, playFightStart, playNextDay, playTab, playUnlock } from '@/lib/sound';
+import { playActionLieu, playBack, playBag, playCard, playClick, playFightStart, playMoneyIn, playMoneyOut, playNextDay, playTab, playTurnedAway, playUnlock } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
 import { stampTap, liftHover } from '@/lib/anim';
@@ -172,6 +190,15 @@ export default function MainScreen() {
    * la vengeance n'a pas de tarif de faveur.
    */
   const voleur = voleurTrouvable(char) ? char.vole! : undefined;
+  /*
+   * LA DETTE. Le prêteur n'apparaît qu'au moment de la faiblesse, et
+   * l'échéance, elle, vous trouve partout : le jour venu, il n'y a plus de
+   * quartier où ne pas être.
+   */
+  const preteur = preteurPresent(char) ? preteurDuJour(char.day, char.location, char.seed) : undefined;
+  const dette = char.dette;
+  const exigible = detteExigible(char);
+  const joursRestants = dette ? Math.max(0, dette.echeance - char.day) : 0;
   const arrivee = premierRun && char.day === 1 && state.dayActions === 0;
   const crepuscule = premierRun && char.day === 1 && actionsLeft <= 0;
 
@@ -238,6 +265,15 @@ export default function MainScreen() {
             <div className="text-right font-mono flex flex-col items-end gap-0.5">
               <div className="text-sm font-semibold text-[#B8860B]">{char.money}€</div>
               <div className="text-[10px] text-[#7B68EE] font-medium">⭐ {char.respect}</div>
+              {/* L'échéance vit dans l'en-tête, à côté de l'argent : c'est là
+                  qu'on la relit vingt fois par jour sans y penser. */}
+              {dette && (
+                <div className={`text-[10px] font-mono font-semibold ${exigible ? 'text-[#B84A3A]' : 'text-[#8B6B4A]'}`}>
+                  ⏳ {dette.montant}€ · {exigible
+                    ? tr('aujourd\'hui', 'today')
+                    : joursRestants === 1 ? tr('demain', 'tomorrow') : tr(`${joursRestants} j`, `${joursRestants} d`)}
+                </div>
+              )}
             </div>
             <button
               onClick={() => { playTab(); dispatch({ type: 'SET_SCREEN', screen: 'settings' }); }}
@@ -321,6 +357,47 @@ export default function MainScreen() {
           </p>
         </button>
       </motion.div>
+
+      {/*
+        L'ÉCHÉANCE SE LIT SANS DÉFILER.
+        Placée près du voleur, en bas, il fallait faire défiler l'écran pour
+        découvrir qu'on était attendu — c'est-à-dire découvrir trop tard une
+        chose qui devait peser sur toutes les décisions de la journée. Elle
+        monte donc au-dessus de la météo, dans le tiers d'écran qu'on voit en
+        arrivant.
+      */}
+      {/* L'échéance est tombée : il vous a trouvé, et il n'y a pas de
+          bouton pour l'éviter. On paie, ou on lui dit qu'on ne peut pas. */}
+      {exigible && dette && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="craft-card p-3 border-[#B84A3A]/50 flex flex-col gap-2"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-lg">💸</span>
+            <span className="text-xs font-semibold text-[#3D3020] flex-1">
+              {tr(`${dette.nom} vous attend. ${dette.montant}€.`, `${dette.nom} is waiting. ${dette.montant}€.`)}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { playMoneyOut(); dispatch({ type: 'REMBOURSER_DETTE' }); }}
+              disabled={char.money < dette.montant}
+              className="btn-primary flex-1 py-2 text-xs font-semibold disabled:opacity-40"
+            >
+              {tr(`Rembourser ${dette.montant}€`, `Pay ${dette.montant}€`)}
+            </button>
+            <button
+              onClick={() => { playTurnedAway(); dispatch({ type: 'AVOUER_INSOLVABILITE' }); }}
+              className="action-btn flex-1 py-2 text-xs font-medium text-[#6B5740]"
+            >
+              {tr('Je n\'ai pas', 'I don\'t have it')}
+            </button>
+          </div>
+        </motion.div>
+      )}
+
 
       {/* Météo */}
       <motion.div
@@ -559,6 +636,40 @@ export default function MainScreen() {
             {tr('matériaux', 'materials')}
           </span>
         </motion.button>
+
+        {/* Le prêteur, quand les poches sont vides. Refusable — c'est ce qui
+            fait de l'accepter un choix et non un passage obligé. */}
+        {preteur && !dette && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="craft-card p-3 border-[#B8860B]/40 flex flex-col gap-2"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🤲</span>
+              <span className="text-xs text-[#3D3020] flex-1 leading-snug">
+                {tr(
+                  `${preteur.nom} vous a vu compter vos pièces. « ${DETTE_PRET}€ tout de suite. Tu m'en rends ${DETTE_DU} dans ${DETTE_DELAI} jours. »`,
+                  `${preteur.nom} watched you count your coins. "${DETTE_PRET}€ right now. You give me back ${DETTE_DU} in ${DETTE_DELAI} days."`,
+                )}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { playMoneyIn(DETTE_PRET); dispatch({ type: 'ACCEPTER_PRET' }); }}
+                className="btn-primary flex-1 py-2 text-xs font-semibold"
+              >
+                {tr(`Prendre les ${DETTE_PRET}€`, `Take the ${DETTE_PRET}€`)}
+              </button>
+              <button
+                onClick={() => { playBack(); dispatch({ type: 'REFUSER_PRET' }); }}
+                className="action-btn flex-1 py-2 text-xs font-medium text-[#6B5740]"
+              >
+                {tr('Refuser', 'Refuse')}
+              </button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Le voleur de la veille, s'il traîne encore dans ce quartier. */}
         {voleur && (

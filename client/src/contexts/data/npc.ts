@@ -6,7 +6,7 @@
 // Génération DÉTERMINISTE par (jour + lieu + seed du joueur) : le même PNJ est
 // présent toute la journée à un lieu donné, et « bouge » d'un jour à l'autre —
 // sans rien stocker en sauvegarde.
-import type { Character, InventoryItem, Job, Trait } from '../types';
+import type { Character, Enemy, InventoryItem, Job, Trait } from '../types';
 import { JOBS, TRAITS, genderFromName } from './world';
 import { generateOrigin, type OriginStory } from './backstory';
 
@@ -221,4 +221,85 @@ export function ennemiVoleur(vole: {
 // Drapeau de résolution : une rencontre par (jour, lieu).
 export function encounterFlag(day: number, location: string): string {
   return `rencontre-${day}-${location}`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LA DETTE — LE PRÊTEUR ET SON ÉCHÉANCE
+ *
+ * Le jeu n'avait aucune raison de faire revenir le joueur un jour PRÉCIS. Les
+ * suites d'événements arrivent ; elles ne s'attendent pas. Une échéance
+ * inscrite dans l'en-tête change la nature de la partie : on ne ferme pas une
+ * application à un jour d'un remboursement.
+ *
+ * Et surtout, ce n'est pas un bonus qu'on risque de rater — c'est une menace
+ * qu'on doit désamorcer. Ça tient deux fois mieux.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Ce qu'il prête, ce qu'il réclame, et sous combien de jours. */
+export const DETTE_PRET = 10;
+export const DETTE_DU = 15;
+export const DETTE_DELAI = 3;
+/** Ce qu'il ajoute à chaque jour de retard. */
+export const DETTE_RELANCE = 4;
+
+/** En dessous de quoi on est assez fauché pour qu'il vienne vous trouver. */
+const DETTE_SEUIL_MISERE = 3;
+
+/**
+ * Le prêteur se présente-t-il aujourd'hui ?
+ *
+ * Il ne rôde pas au hasard : **il arrive au moment de la faiblesse**. Fauché,
+ * passé le premier jour, sans dette en cours et sans avoir déjà essuyé un
+ * refus le jour même. Un prêteur qui insiste le jour où l'on a dit non serait
+ * un vendeur, pas un prêteur.
+ */
+export function preteurPresent(c: {
+  day: number; money: number; location: string;
+  dette?: unknown; detteRefuseeJour?: number;
+}): boolean {
+  if (c.dette) return false;
+  if (c.day < 2) return false;
+  if (c.money >= DETTE_SEUIL_MISERE) return false;
+  if (c.detteRefuseeJour === c.day) return false;
+  return isSocialLocation(c.location);
+}
+
+/** Qui il est — stable pour un jour et un quartier donnés, comme les autres PNJ. */
+export function preteurDuJour(day: number, location: string, playerSeed: string) {
+  const rng = makeRng(hashStr(`preteur|${day}|${location}|${playerSeed}`));
+  const nom = NPC_NAMES[Math.floor(rng() * NPC_NAMES.length)];
+  return {
+    nom,
+    seed: `preteur-${nom}-${day}`,
+    gender: genderFromName(nom),
+    quartier: location,
+  };
+}
+
+/** L'échéance est-elle tombée ? Il vous trouve partout — c'est le principe. */
+export function detteExigible(c: { day: number; dette?: { echeance: number } }): boolean {
+  return !!c.dette && c.day >= c.dette.echeance;
+}
+
+/**
+ * L'adversaire qu'il devient quand on ne peut pas payer.
+ *
+ * Plus dur que le voleur du compagnon : celui-là n'a pas volé un repas, il a
+ * avancé de l'argent et il est venu le chercher. Mais il reste un homme de la
+ * rue, pas une brute : il encaisse mieux qu'il ne frappe.
+ */
+export const PRETEUR_PV = 46;
+export const PRETEUR_ATTAQUE = 13;
+
+export function ennemiPreteur(dette: { nom: string; gender: 'm' | 'f'; montant: number }): Enemy {
+  return {
+    name: dette.nom,
+    emoji: '💸',
+    health: PRETEUR_PV,
+    attack: PRETEUR_ATTAQUE,
+    description: dette.gender === 'f'
+      ? 'Elle vous a avancé de quoi manger. Elle vient le chercher, et elle a compté les jours.'
+      : 'Il vous a avancé de quoi manger. Il vient le chercher, et il a compté les jours.',
+    loot: { respect: 5, money: 0 },
+  };
 }
