@@ -44,34 +44,93 @@ export type CategoriePique =
   | 'reveil'            // le bilan du matin
   | 'gain-miserable';   // beaucoup d'efforts, un centime
 
-export interface Pique { fr: string; en: string }
+/**
+ * CE QUI VIENT DE SE PASSER.
+ *
+ * Sans ça, une pique est un fortune cookie : elle tombe, elle est bien
+ * tournée, et elle ne parle de rien. Le premier joueur l'a dit sans détour —
+ * « aucune cohérence, on dirait que c'est mis pour être mis ». Il avait
+ * raison, et le défaut était de conception : les phrases étaient tirées AU
+ * HASARD dans un sac de six, quel que soit ce qui venait d'arriver. Une
+ * remarque sur le carton mouillé après une nuit sèche ne rate pas de peu, elle
+ * ne veut rien dire du tout.
+ *
+ * Chaque phrase déclare donc à quelle situation elle répond, et on ne tire que
+ * parmi celles qui collent. S'il n'y en a aucune, LE JEU SE TAIT — c'est la
+ * moitié du travail : une vanne qu'on retient vaut mieux qu'une vanne à côté.
+ */
+export interface Contexte {
+  /**
+   * La jauge qui vient de passer dans le rouge.
+   *
+   * Volontairement une chaîne libre et non une union des cinq jauges du
+   * corps : l'appelant les parcourt via une table typée `keyof Stats`, qui
+   * inclut la dignité, et TypeScript ne sait pas la restreindre à cet
+   * endroit. Une union ici obligerait à une conversion forcée au point
+   * d'appel — c'est-à-dire à éteindre le contrôle plutôt qu'à le satisfaire.
+   * La dignité a de toute façon sa propre catégorie de piques.
+   */
+  jauge?: string;
+  /** Le temps qu'il a fait cette nuit. */
+  meteo?: string;
+  /** Ce que la nuit a coûté en sommeil (négatif = mal dormi). */
+  sommeil?: number;
+  /** Ce que l'effort a rapporté, en centimes ou en pièces. */
+  gain?: number;
+}
+
+export interface Pique {
+  fr: string;
+  en: string;
+  /** Absent = valable en toute circonstance. Sinon, il faut que ça colle. */
+  quand?: (c: Contexte) => boolean;
+}
 
 export const PIQUES: Record<CategoriePique, Pique[]> = {
   /* ── ① SANTÉ CRITIQUE ────────────────────────────────────────────────────
-   * Le corps lâche. Le rire vient du DÉCALAGE DE REGISTRE : on parle d'un
-   * corps qui meurt avec le vocabulaire d'un constat d'huissier ou d'un
-   * pigeon poli. Jamais de lyrisme sur le froid — c'est là que la première
-   * version se plantait.
+   * Chaque phrase nomme LA jauge qui lâche. C'est ce qui manquait le plus :
+   * mourir de soif et s'entendre parler du froid, c'est le jeu qui ne regarde
+   * pas son propre écran. Le rire vient du décalage de registre — un corps qui
+   * meurt décrit avec le vocabulaire d'un huissier ou d'un pigeon poli.
    */
   'sante-critique': [
-    { fr: 'Un pigeon s\'est écarté de votre chemin. Par respect.',
-      en: 'A pigeon stepped out of your way. Out of respect.' },
-    { fr: 'Votre estomac ne réclame plus rien. Il a fait son deuil.',
+    { quand: c => c.jauge === 'hunger',
+      fr: 'Votre estomac ne réclame plus rien. Il a fait son deuil.',
       en: 'Your stomach stopped asking. It\'s in mourning now.' },
-    { fr: 'Vous n\'avez même plus la force de vous évanouir.',
+    { quand: c => c.jauge === 'hunger',
+      fr: 'Un pigeon mange mieux que vous. Il le sait.',
+      en: 'A pigeon is eating better than you. It knows.' },
+    { quand: c => c.jauge === 'thirst',
+      fr: 'Votre langue colle. Économisez vos mots.',
+      en: 'Your tongue is sticking. Save your words.' },
+    { quand: c => c.jauge === 'thirst',
+      fr: 'Trois fontaines dans ce quartier. Toutes en travaux.',
+      en: 'Three fountains in this neighbourhood. All under repair.' },
+    { quand: c => c.jauge === 'sleep',
+      fr: 'Vous avez cligné des yeux pendant huit secondes.',
+      en: 'You just blinked for eight seconds.' },
+    { quand: c => c.jauge === 'sleep',
+      fr: 'Le corps commence à facturer les heures debout.',
+      en: 'The body is starting to invoice the hours on your feet.' },
+    { quand: c => c.jauge === 'health',
+      fr: 'Vous n\'avez même plus la force de vous évanouir.',
       en: 'You don\'t even have the strength to faint.' },
-    { fr: 'Vos dents claquent. C\'est le seul bruit que vous produisez encore.',
-      en: 'Your teeth are chattering. It\'s the only noise you still make.' },
-    { fr: 'Le froid a gagné. Il jouait contre personne.',
-      en: 'The cold won. It wasn\'t playing anyone.' },
-    { fr: 'Techniquement vivant. Le service des impôts n\'est pas prévenu.',
+    { quand: c => c.jauge === 'health',
+      fr: 'Techniquement vivant. Le service des impôts n\'est pas prévenu.',
       en: 'Technically alive. The tax office hasn\'t been told.' },
+    { quand: c => c.jauge === 'mental',
+      fr: 'Vous relisez la même ligne pour la quatrième fois.',
+      en: 'You\'re re-reading the same line for the fourth time.' },
+    { quand: c => c.jauge === 'mental',
+      fr: 'Votre tête part en vacances. Sans vous.',
+      en: 'Your head is going on holiday. Without you.' },
   ],
 
   /* ── ② DIGNITÉ À ZÉRO ────────────────────────────────────────────────────
-   * Le sujet du jeu, et la catégorie qui doit faire le moins rire. Elles
-   * frappent sur un GESTE PRÉCIS — dire merci, baisser les yeux, s'excuser —
-   * parce qu'un geste se reconnaît et qu'un concept ne se reconnaît pas.
+   * Elles se déclenchent au franchissement d'un palier — donc juste après un
+   * geste que le joueur vient de faire. Pas de condition : le palier EST la
+   * situation, et elles frappent toutes sur un geste précis plutôt que sur
+   * l'idée générale d'avoir honte.
    */
   'dignite-zero': [
     { fr: 'Vous avez dit merci. C\'est ça qui fait mal.',
@@ -91,8 +150,8 @@ export const PIQUES: Record<CategoriePique, Pique[]> = {
   /* ── ③ ÉCHEC TOTAL AU VOL ────────────────────────────────────────────────
    * Le seul moment où le jeu a le droit d'être franchement moqueur : le
    * joueur a pris un risque en connaissance de cause. On tape sur
-   * l'exécution, jamais sur l'intention — et c'est la catégorie où les
-   * phrases d'un seul bloc font le plus de dégâts.
+   * l'exécution, jamais sur l'intention. Pas de condition — se faire prendre
+   * est déjà la situation la plus précise du jeu.
    */
   'vol-rate': [
     { fr: 'Discret pendant six secondes. Record personnel.',
@@ -110,45 +169,66 @@ export const PIQUES: Record<CategoriePique, Pique[]> = {
   ],
 
   /* ── ④ RÉVEIL DOULOUREUX ─────────────────────────────────────────────────
-   * Une fois par nuit, cent fois par partie : ce sont les six qui doivent le
-   * mieux vieillir. Aucune ne pousse la blague, toutes tiennent sur un
-   * DÉTAIL VÉRIFIABLE — un chiffre, un balayeur, un chien. Un détail exact ne
-   * s'use pas ; une vanne, si.
+   * C'est ici que l'incohérence se voyait le plus : la remarque tombait tous
+   * les matins, quel qu'ait été la nuit. « Le carton a pris l'eau » après une
+   * nuit sèche, et le joueur comprend en une fois que le jeu ne regarde rien.
+   *
+   * Chacune dépend maintenant de ce que la nuit a VRAIMENT été. Et si la nuit
+   * s'est bien passée, aucune ne colle : le matin se passe en silence, ce qui
+   * rend les autres matins beaucoup plus mordants.
    */
   'reveil': [
-    { fr: 'Le carton a pris l\'eau. Vous aussi.',
+    { quand: c => c.meteo === 'rainy' || c.meteo === 'storm',
+      fr: 'Le carton a pris l\'eau. Vous aussi.',
       en: 'The cardboard took on water. So did you.' },
-    { fr: 'Quatre heures de sommeil. En six fois.',
+    { quand: c => c.meteo === 'rainy' || c.meteo === 'storm',
+      fr: 'Il a plu toute la nuit. Le carton a tenu deux heures.',
+      en: 'It rained all night. The cardboard lasted two hours.' },
+    { quand: c => c.meteo === 'snow' || c.meteo === 'storm',
+      fr: 'Réveillé par le froid. Ponctuel, lui.',
+      en: 'Woken by the cold. Always on time, that one.' },
+    { quand: c => c.meteo === 'snow',
+      fr: 'Il a neigé sur vous. Personne n\'a trouvé ça beau.',
+      en: 'It snowed on you. Nobody found it pretty.' },
+    { quand: c => c.meteo === 'heatwave',
+      fr: 'Trente degrés à six heures du matin. Bonne journée.',
+      en: 'Thirty degrees at six in the morning. Enjoy your day.' },
+    { quand: c => (c.sommeil ?? 0) < -3,
+      fr: 'Quatre heures de sommeil. En six fois.',
       en: 'Four hours of sleep. In six instalments.' },
-    { fr: 'Votre dos a quinze ans de plus que vous.',
-      en: 'Your back is fifteen years older than you.' },
-    { fr: 'Un chien vous a reniflé cette nuit. Il n\'est pas resté.',
-      en: 'A dog sniffed you in the night. It didn\'t stay.' },
-    { fr: 'Réveillé par le balayeur. Il ne s\'est pas excusé.',
-      en: 'Woken by the street sweeper. He didn\'t apologise.' },
-    { fr: 'Vous avez rêvé de draps. Le réveil a réglé ça.',
-      en: 'You dreamt of bed sheets. Waking up settled that.' },
+    { quand: c => (c.sommeil ?? 0) < -3,
+      fr: 'Votre dos a un avis sur cette nuit. Il le donne.',
+      en: 'Your back has an opinion about last night. It\'s sharing it.' },
+    { quand: c => (c.sommeil ?? 0) < -8,
+      fr: 'Vous avez dormi. Le mot est généreux.',
+      en: 'You slept. Generous word for it.' },
   ],
 
   /* ── ⑤ GAINS MISÉRABLES ──────────────────────────────────────────────────
-   * Le pire moment pour le joueur, donc le meilleur pour une vanne : elle
-   * transforme une frustration en anecdote. Toutes chiffrent, ou comparent à
-   * quelque chose de trop petit — c'est la précision qui fait rire, pas
-   * l'idée générale d'être pauvre.
+   * Déjà causales par nature — elles ne sortent que sur une récolte nulle. On
+   * distingue quand même le ZÉRO du PRESQUE RIEN : « encadrez-le » n'a aucun
+   * sens quand on est reparti les mains vides, et c'est le genre de décalage
+   * d'un cran qui fait passer une vanne pour un tirage au sort.
    */
   'gain-miserable': [
-    { fr: 'Un centime. Encadrez-le.',
+    { quand: c => (c.gain ?? 0) > 0,
+      fr: 'Un centime. Encadrez-le.',
       en: 'One cent. Frame it.' },
-    { fr: 'Un centime de l\'heure. Arrondi au supérieur.',
+    { quand: c => (c.gain ?? 0) > 0,
+      fr: 'Un centime de l\'heure. Arrondi au supérieur.',
       en: 'One cent an hour. Rounded up.' },
-    { fr: 'De quoi acheter un quart de baguette. Sans le quart.',
+    { quand: c => (c.gain ?? 0) > 0,
+      fr: 'De quoi acheter un quart de baguette. Sans le quart.',
       en: 'Enough for a quarter of a baguette. Minus the quarter.' },
-    { fr: 'Une ficelle. Vous voilà dans le textile.',
-      en: 'A piece of string. You\'re in textiles now.' },
-    { fr: 'Ce butin tiendrait dans une dent creuse.',
-      en: 'This haul would fit in a hollow tooth.' },
-    { fr: 'Le marché a parlé. Il a dit non.',
-      en: 'The market has spoken. It said no.' },
+    { quand: c => (c.gain ?? 0) <= 0,
+      fr: 'Rien. Pas même une ficelle.',
+      en: 'Nothing. Not even a piece of string.' },
+    { quand: c => (c.gain ?? 0) <= 0,
+      fr: 'Zéro. Le marché a parlé, et il a dit non.',
+      en: 'Zero. The market has spoken, and it said no.' },
+    { quand: c => (c.gain ?? 0) <= 0,
+      fr: 'Vous repartez avec vos mains. C\'est déjà ça.',
+      en: 'You leave with your hands. That\'s something.' },
   ],
 };
 
@@ -165,12 +245,14 @@ export const PIQUES: Record<CategoriePique, Pique[]> = {
  * joueur est en train de perdre.
  *
  * LA MÉMOIRE. Jamais deux fois la même phrase d'affilée dans une catégorie.
- * Six phrases tirées au hasard en redonnent une sur six ; l'effet de
- * répétition arrive bien avant qu'on ait fait le tour.
+ * Elle porte sur le TEXTE et non sur un indice de tableau : depuis que les
+ * phrases sont filtrées par la situation, l'indice 2 ne désigne plus la même
+ * phrase d'un appel à l'autre, et la mémoire empêchait alors une répétition
+ * qui n'existait pas tout en en laissant passer de vraies.
  */
 const ECART_MS = 30000;
 let dernierePique = 0;
-const derniereDeLaCategorie = new Map<CategoriePique, number>();
+const derniereDeLaCategorie = new Map<CategoriePique, string>();
 
 /**
  * La pique du moment, ou `null` s'il est trop tôt pour en placer une.
@@ -178,15 +260,31 @@ const derniereDeLaCategorie = new Map<CategoriePique, number>();
  * Rendre `null` plutôt que de se taire à l'affichage est délibéré : l'appelant
  * décide alors de ne rien montrer du tout, au lieu d'afficher un toast vide.
  */
-export function piquer(cat: CategoriePique, maintenant = Date.now()): Pique | null {
+export function piquer(
+  cat: CategoriePique,
+  ctx: Contexte = {},
+  maintenant = Date.now(),
+): Pique | null {
   if (maintenant - dernierePique < ECART_MS) return null;
-  const banque = PIQUES[cat];
-  if (!banque?.length) return null;
+
+  /*
+   * ON NE TIRE QUE PARMI CELLES QUI COLLENT.
+   *
+   * Et s'il n'y en a aucune, on se tait. C'est le point important : la version
+   * précédente piochait dans le sac entier et sortait donc une remarque sur le
+   * carton mouillé après une nuit sèche. Une vanne à côté ne rate pas de peu,
+   * elle démolit toutes les autres avec elle — le joueur comprend en une fois
+   * que le jeu ne regarde rien, et il ne les lit plus.
+   */
+  const banque = (PIQUES[cat] ?? []).filter(p => !p.quand || p.quand(ctx));
+  if (!banque.length) return null;
 
   const avant = derniereDeLaCategorie.get(cat);
   let i = Math.floor(Math.random() * banque.length);
-  if (i === avant) i = (i + 1) % banque.length;
-  derniereDeLaCategorie.set(cat, i);
+  // Jamais deux fois la même d'affilée — sauf s'il n'en reste qu'une qui
+  // colle, auquel cas se répéter vaut mieux que se taire à contretemps.
+  if (banque.length > 1 && banque[i].fr === avant) i = (i + 1) % banque.length;
+  derniereDeLaCategorie.set(cat, banque[i].fr);
   dernierePique = maintenant;
   return banque[i];
 }

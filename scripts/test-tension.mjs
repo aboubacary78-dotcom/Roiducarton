@@ -68,42 +68,36 @@ async function jauges(patch) {
   await clic('Continue|Reprendre'); await pause(1200);
 }
 
-// ── Le corps dit LAQUELLE ──────────────────────────────────────────────────
-for (const [jauge, attendu] of [
-  ['hunger', 'corps-faim'],
-  ['thirst', 'corps-soif'],
-  ['sleep', 'corps-epuise'],
-  ['health', 'corps-froid'],
-]) {
+/*
+ * ── LE CORPS S'EST TU, ET C'EST VOLONTAIRE ────────────────────────────────
+ *
+ * Ce test vérifiait que chaque jauge appelle SA voix — `corps-faim` pour la
+ * faim, `corps-soif` pour la soif. C'était le bon objectif, et les prises
+ * livrées ne le tiennent pas : testées au casque, elles sont inaudibles, « un
+ * cri bouillie ». Vérifié de mon côté, ce ne sont pas les fichiers qui sont
+ * mal encodés (64 kbit/s, durées courtes, niveau juste) mais les prises
+ * elles-mêmes, et aucun réglage ne rattrape ça.
+ *
+ * Elles retombent donc sur `jauge-rouge`, le signal de foley d'avant, en
+ * attendant des prises qui tiennent la route. On perd de dire LAQUELLE des
+ * jauges lâche — c'est le texte de la pique qui s'en charge maintenant, et
+ * lui le dit en toutes lettres.
+ *
+ * Le test dit donc l'inverse de ce qu'il disait, à dessein : aucune voix de
+ * corps ne doit plus partir, et l'alerte neutre doit bien être là.
+ */
+for (const jauge of ['hunger', 'thirst', 'sleep', 'health', 'mental']) {
   vide();
   await jauges({ health: 80, mental: 80, hunger: 80, thirst: 80, sleep: 80, [jauge]: 12 });
   await pause(900);
-  verifier(`${jauge} sous le seuil appelle ${attendu}`,
-    sons.includes(attendu), sons.filter(s => s.startsWith('corps-')).join(', ') || 'aucun son de corps');
+  verifier(`${jauge} sous le seuil sonne l'alerte neutre`,
+    sons.includes('jauge-rouge'), sons.filter(s => /jauge|corps|voix/.test(s)).join(', ') || 'aucun');
+  verifier(`  …et aucune voix bouillie ne part`,
+    !sons.some(s => s.startsWith('corps-') || /^voix-[hf]-tete/.test(s)),
+    sons.filter(s => s.startsWith('corps-') || s.startsWith('voix-')).join(', ') || '');
 }
 
-/*
- * LE MENTAL A CHANGÉ DE CAMP, ET CE TEST AVEC LUI.
- *
- * Il gardait l'alerte neutre, et ce test le vérifiait : il ne se soignait
- * d'aucun geste, lui donner une voix de corps aurait été un contresens.
- *
- * Ça ne tient plus. Depuis que la tête qui part brouille le texte des
- * rencontres, le joueur VOIT quelque chose d'anormal sans savoir d'où ça
- * vient, et il peut y remédier — en dormant. Symptôme visible plus remède
- * connu : la jauge a mérité sa voix, et sans elle le brouillage passe pour un
- * bug d'affichage.
- *
- * Le test dit donc maintenant le contraire de ce qu'il disait, à dessein.
- */
-vide();
-await jauges({ health: 80, mental: 12, hunger: 80, thirst: 80, sleep: 80 });
-await pause(900);
-verifier('le mental appelle sa propre voix',
-  sons.some(s => /^voix-[hf]-tete/.test(s)),
-  sons.filter(s => /jauge|corps|voix/.test(s)).join(', ') || 'aucun');
-
-// La dignité, elle, garde bien l'alerte neutre : aucun geste ne la répare.
+// La dignité aussi : aucun geste ne la répare, elle n'a jamais eu de voix.
 vide();
 await jauges({ health: 80, mental: 80, hunger: 80, thirst: 80, sleep: 80, dignity: 12 });
 await pause(900);

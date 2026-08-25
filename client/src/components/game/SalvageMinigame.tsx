@@ -196,7 +196,7 @@ function SalvageInner() {
      */
     if (how === 'out' && centimesRef.current < 10 && bazarRef.current === 0
         && trouvaillesRef.current.length === 0) {
-      const p = piquer('gain-miserable');
+      const p = piquer('gain-miserable', { gain: centimesRef.current });
       if (p) setTimeout(() => pushToast(tr(p.fr, p.en), { emoji: '♻️', tone: 'bad', duration: 3400 }), 900);
     }
     setTimeout(() => dispatch({

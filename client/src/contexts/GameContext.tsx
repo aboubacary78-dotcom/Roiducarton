@@ -270,6 +270,7 @@ type GameAction =
   // Fait compter comme rempli un contrat raté de peu.
   | { type: 'RATTRAPER_CONTRAT' }
   | { type: 'OUVRIR_RENDEZ_VOUS_DETTE' }
+  | { type: 'ABORDER_PRETEUR' }
   | { type: 'ACCEPTER_PRET' }
   | { type: 'REFUSER_PRET' }
   | { type: 'REMBOURSER_DETTE' }
@@ -917,19 +918,35 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
      * quelque chose à ouvrir, pour que la condition vive au même endroit que
      * la mécanique — l'écran, lui, n'a pas à savoir ce qu'est une échéance.
      */
+    /*
+     * SEULE L'ÉCHÉANCE S'IMPOSE.
+     *
+     * Les deux rendez-vous s'ouvraient tout seuls en arrivant sur le hub, et
+     * c'était une erreur de ma part sur l'un des deux. Une DETTE À RENDRE n'a
+     * pas à demander la permission : le joueur a signé trois jours plus tôt,
+     * et un rendez-vous qu'on peut ignorer n'est pas un rendez-vous. Mais une
+     * PROPOSITION de prêt qui vous saute au visage sans prévenir donne
+     * exactement l'impression qu'elle a donnée : un événement forcé dont on ne
+     * comprend ni d'où il sort ni pourquoi maintenant.
+     *
+     * L'offre redevient donc une carte sur le hub, qu'on touche si on veut
+     * (voir ABORDER_PRETEUR). On garde le meilleur des deux : le visage a
+     * toujours son plein écran, mais c'est le joueur qui s'approche.
+     */
     case 'OUVRIR_RENDEZ_VOUS_DETTE': {
       const c = state.character;
       if (!c || !c.alive || state.screen !== 'main') return state;
       if (state.currentEvent || state.eventResult || state.daySummary) return state;
+      if (!detteExigible(c) || !c.dette) return state;
+      return { ...state, currentEvent: evenementEcheance(c.dette, c.money), screen: 'event' };
+    }
 
-      if (detteExigible(c) && c.dette) {
-        return { ...state, currentEvent: evenementEcheance(c.dette, c.money), screen: 'event' };
-      }
-      if (preteurPresent(c)) {
-        const preteur = preteurDuJour(c.day, c.location, c.seed);
-        return { ...state, currentEvent: evenementPreteur(preteur), screen: 'event' };
-      }
-      return state;
+    /** Le joueur s'approche de lui. C'est lui qui décide, pas le jeu. */
+    case 'ABORDER_PRETEUR': {
+      const c = state.character;
+      if (!c || state.screen !== 'main' || !preteurPresent(c)) return state;
+      const preteur = preteurDuJour(c.day, c.location, c.seed);
+      return { ...state, currentEvent: evenementPreteur(preteur), screen: 'event' };
     }
 
     case 'ACCEPTER_PRET': {

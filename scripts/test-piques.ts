@@ -18,7 +18,7 @@
  *
  *     npx tsx scripts/test-piques.ts
  */
-import { PIQUES, piquer, reinitialiserPiques, type CategoriePique } from '../client/src/contexts/data/piques';
+import { PIQUES, piquer, reinitialiserPiques, type CategoriePique, type Contexte } from '../client/src/contexts/data/piques';
 
 let echecs = 0;
 const verifier = (nom: string, ok: boolean, detail = '') => {
@@ -32,8 +32,7 @@ const toutes = CATEGORIES.flatMap(c => PIQUES[c]);
 // ── La forme du lot ────────────────────────────────────────────────────────
 verifier('cinq catégories', CATEGORIES.length === 5, CATEGORIES.join(', '));
 const tailles = CATEGORIES.map(c => PIQUES[c].length);
-verifier('six phrases par catégorie', tailles.every(n => n === 6), tailles.join(' / '));
-verifier('trente phrases en tout', toutes.length === 30, String(toutes.length));
+verifier('au moins six phrases par catégorie', tailles.every(n => n >= 6), tailles.join(' / '));
 
 // ── Douze mots maximum, dans les deux langues ──────────────────────────────
 const mots = (s: string) => s.trim().split(/\s+/).length;
@@ -57,7 +56,7 @@ verifier('douze mots maximum, français ET anglais',
  * ET des phrases en deux temps, sans qu'une forme écrase l'autre.
  */
 const enDeuxTemps = toutes.filter(p => /[.!?…]\s+\S/.test(p.fr)).length;
-const dUnBloc = 30 - enDeuxTemps;
+const dUnBloc = toutes.length - enDeuxTemps;
 verifier('les deux formes cohabitent',
   dUnBloc >= 4 && enDeuxTemps >= 15,
   `${dUnBloc} d'un bloc, ${enDeuxTemps} en deux temps`);
@@ -72,11 +71,68 @@ verifier('aucun adoucissant', molles.length === 0,
 const fr = toutes.map(p => p.fr.toLowerCase());
 const en = toutes.map(p => p.en.toLowerCase());
 verifier('aucune phrase en double',
-  new Set(fr).size === 30 && new Set(en).size === 30,
-  `${new Set(fr).size} fr / ${new Set(en).size} en distinctes`);
+  new Set(fr).size === toutes.length && new Set(en).size === toutes.length,
+  `${new Set(fr).size} fr / ${new Set(en).size} en distinctes sur ${toutes.length}`);
 
 // ── Chaque phrase est traduite ─────────────────────────────────────────────
 verifier('tout est traduit', toutes.every(p => p.fr.trim() && p.en.trim()));
+
+/* ── LA COHÉRENCE : UNE PIQUE DOIT PARLER DE CE QUI VIENT D'ARRIVER ───────
+ *
+ * C'est le défaut que le premier joueur a relevé, et il était de conception :
+ * les phrases étaient tirées AU HASARD dans un sac, quelle que soit la
+ * situation. On pouvait mourir de soif et s'entendre parler du froid, ou lire
+ * « le carton a pris l'eau » après une nuit sèche. Une vanne à côté ne rate
+ * pas de peu : elle apprend au joueur que le jeu ne regarde rien, et il cesse
+ * de les lire — toutes les autres tombent avec elle.
+ *
+ * Ces contrôles-ci sont donc les plus importants du fichier.
+ */
+reinitialiserPiques();
+let horloge = 5_000_000;
+const tirer = (cat: CategoriePique, ctx: Contexte) => {
+  horloge += 31_000;
+  return piquer(cat, ctx, horloge);
+};
+
+// ① Chaque jauge critique tire une phrase qui parle D'ELLE.
+const ATTENDU: Record<string, RegExp> = {
+  hunger: /estomac|pigeon mange/i,
+  thirst: /langue|fontaine/i,
+  sleep: /cligné|debout/i,
+  health: /évanouir|impôts/i,
+  mental: /relisez|tête/i,
+};
+const horsSujet: string[] = [];
+for (const jauge of Object.keys(ATTENDU)) {
+  for (let i = 0; i < 30; i++) {
+    const p = tirer('sante-critique', { jauge });
+    if (!p) { horsSujet.push(`${jauge} : rien`); break; }
+    if (!ATTENDU[jauge].test(p.fr)) horsSujet.push(`${jauge} → « ${p.fr} »`);
+  }
+}
+verifier('la jauge qui lâche est toujours celle dont on parle',
+  horsSujet.length === 0, horsSujet.slice(0, 3).join(' | '));
+
+// ② Une nuit sèche et reposante ne mérite aucun commentaire.
+const nuitDouce = tirer('reveil', { meteo: 'clear', sommeil: 4 });
+verifier('après une bonne nuit, le jeu se tait',
+  nuitDouce === null, nuitDouce ? `il a sorti « ${nuitDouce.fr} »` : '');
+
+// ③ Une nuit sous la pluie parle de la pluie.
+const nuitPluie = tirer('reveil', { meteo: 'rainy', sommeil: -6 });
+verifier('après une nuit de pluie, il parle de l\'eau ou du dos',
+  !!nuitPluie && /eau|plu|dos|sommeil|dormi/i.test(nuitPluie.fr),
+  nuitPluie?.fr ?? 'rien');
+
+// ④ Zéro n'est pas « presque rien » : « encadrez-le » n'a aucun sens quand on
+//    est reparti les mains vides.
+const rienDuTout = tirer('gain-miserable', { gain: 0 });
+verifier('les mains vides, on ne parle pas d\'encadrer un centime',
+  !!rienDuTout && !/encadrez|centime de l/i.test(rienDuTout.fr), rienDuTout?.fr ?? 'rien');
+const unCentime = tirer('gain-miserable', { gain: 1 });
+verifier('avec un centime, on en parle',
+  !!unCentime && /centime|baguette/i.test(unCentime.fr), unCentime?.fr ?? 'rien');
 
 /* ── LE DÉBIT ──────────────────────────────────────────────────────────────
  *
@@ -85,11 +141,11 @@ verifier('tout est traduit', toutes.every(p => p.fr.trim() && p.en.trim()));
  */
 reinitialiserPiques();
 let t = 1_000_000;
-const premiere = piquer('reveil', t);
+const premiere = piquer('reveil', { meteo: 'rainy', sommeil: -6 }, t);
 verifier('la première pique passe', premiere !== null);
-verifier('la deuxième, une seconde après, est retenue', piquer('vol-rate', t + 1000) === null);
-verifier('  …et ce, quelle que soit la catégorie', piquer('reveil', t + 29_000) === null);
-verifier('trente secondes plus tard, ça repasse', piquer('reveil', t + 30_000) !== null);
+verifier('la deuxième, une seconde après, est retenue', piquer('vol-rate', {}, t + 1000) === null);
+verifier('  …et ce, quelle que soit la catégorie', piquer('reveil', { meteo: 'rainy' }, t + 29_000) === null);
+verifier('trente secondes plus tard, ça repasse', piquer('reveil', { meteo: 'rainy' }, t + 30_000) !== null);
 
 /* ── LA RÉPÉTITION ─────────────────────────────────────────────────────────
  *
@@ -100,15 +156,16 @@ reinitialiserPiques();
 t = 2_000_000;
 const suite: string[] = [];
 for (let i = 0; i < 200; i++) {
-  const p = piquer('gain-miserable', t);
+  const p = piquer('gain-miserable', { gain: 1 }, t);
   t += 31_000;
   if (p) suite.push(p.fr);
 }
 const colles = suite.filter((s, i) => i > 0 && s === suite[i - 1]);
 verifier(`aucune répétition immédiate sur ${suite.length} tirages`,
   colles.length === 0, colles.slice(0, 2).join(' | '));
-verifier('les six phrases sortent toutes',
-  new Set(suite).size === 6, `${new Set(suite).size} phrases distinctes vues`);
+verifier('toutes les phrases qui collent finissent par sortir',
+  new Set(suite).size === PIQUES['gain-miserable'].filter(p => !p.quand || p.quand({ gain: 1 })).length,
+  `${new Set(suite).size} phrases distinctes vues`);
 
 console.log(echecs
   ? `\n${echecs} vérification(s) en échec.`

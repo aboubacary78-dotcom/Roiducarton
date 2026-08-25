@@ -138,20 +138,21 @@ export default function MainScreen() {
   useEffect(() => { prechargerActions(char.location); }, [char.location]);
 
   /*
-   * LE RENDEZ-VOUS QUI ATTEND, OUVERT EN ARRIVANT.
+   * L'ÉCHÉANCE S'OUVRE TOUTE SEULE. ELLE SEULE.
    *
-   * On arrive sur le hub, et s'il y a quelqu'un pour vous, la rencontre
-   * s'ouvre — comme un événement, parce que c'en est un.
+   * On arrive sur le hub le jour dit, et le prêteur est déjà là — il n'y a pas
+   * de bouton pour l'éviter, c'est tout l'intérêt d'une date qu'on a acceptée
+   * trois jours plus tôt.
+   *
+   * Sa PROPOSITION, elle, ne s'impose plus : elle a sa carte sur le hub, et
+   * c'est le joueur qui s'approche (voir ABORDER_PRETEUR). Les deux
+   * s'ouvraient d'office, et ça donnait exactement l'impression que ça donnait
+   * : un événement forcé dont on ne comprenait ni l'origine ni le moment.
    *
    * C'est le reducer qui décide s'il y a quelque chose à ouvrir : il connaît
-   * l'échéance, l'état des poches et les recouvrements d'écrans, et cet
-   * écran-ci n'a pas à les connaître. Il refuse de lui-même tant qu'un bilan
-   * de nuit ou une carte de résultat est encore devant, ce qui évite de faire
-   * surgir le prêteur par-dessus autre chose.
-   *
-   * Les dépendances sont les seules choses qui peuvent faire apparaître ou
-   * disparaître un rendez-vous : le jour, le quartier, l'argent, la dette. Sur
-   * `state` entier, l'effet se rejouerait à chaque battement du jeu.
+   * l'échéance et les recouvrements d'écrans, et cet écran-ci n'a pas à les
+   * connaître. Il refuse de lui-même tant qu'un bilan de nuit ou une carte de
+   * résultat est encore devant.
    */
   useEffect(() => {
     dispatch({ type: 'OUVRIR_RENDEZ_VOUS_DETTE' });
@@ -224,6 +225,7 @@ export default function MainScreen() {
    * jours plus tard, et un visage ne fait pas ça en vignette.
    */
   const dette = char.dette;
+  const preteur = preteurPresent(char) ? preteurDuJour(char.day, char.location, char.seed) : undefined;
   const exigible = detteExigible(char);
   const joursRestants = dette ? Math.max(0, dette.echeance - char.day) : 0;
   const arrivee = premierRun && char.day === 1 && state.dayActions === 0;
@@ -622,6 +624,46 @@ export default function MainScreen() {
             {tr('matériaux', 'materials')}
           </span>
         </motion.button>
+
+        {/*
+          CELUI QUI VOUS A VU COMPTER VOS PIÈCES.
+
+          Sa proposition s'ouvrait toute seule en plein écran, et ça se lisait
+          comme un événement forcé sorti de nulle part — c'était le retour du
+          premier joueur qui l'a rencontré, et il avait raison. Une dette à
+          rendre n'a pas à demander la permission ; une PROPOSITION, si.
+
+          La carte dit donc d'où il sort avant qu'on le rencontre : il est là
+          parce qu'on est fauché, et il ne s'adresse qu'à ceux qui le sont. On
+          le touche pour aller lui parler — et là seulement, il prend l'écran.
+        */}
+        {preteur && !dette && (
+          <motion.button
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={liftHover}
+            whileTap={stampTap}
+            onClick={(e) => { noteTap(e); playClick(); dispatch({ type: 'ABORDER_PRETEUR' }); }}
+            className="craft-card p-2.5 flex items-center gap-2.5 text-left border-[#B8860B]/40"
+          >
+            <SafeImg
+              src="/assets/npc-preteur.webp"
+              alt=""
+              className="w-12 h-12 object-cover rounded-lg shrink-0"
+            />
+            <span className="flex-1 min-w-0">
+              <span className="block text-xs font-semibold text-[#3D3020] leading-tight">
+                {tr(`${preteur.nom} vous a vu compter vos pièces.`,
+                    `${preteur.nom} watched you count your coins.`)}
+              </span>
+              <span className="block text-[10px] text-[#8B6B4A] leading-tight mt-0.5">
+                {tr('Il a quelque chose à vous proposer. Toucher pour l\'écouter.',
+                    'He has something to offer. Tap to hear him out.')}
+              </span>
+            </span>
+            <span className="text-[#A08B70] shrink-0">→</span>
+          </motion.button>
+        )}
 
         {/* Le voleur de la veille, s'il traîne encore dans ce quartier. */}
         {voleur && (

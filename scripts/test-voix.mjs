@@ -102,20 +102,28 @@ const BASSES = { health: 70, mental: 8, hunger: 70, thirst: 70, sleep: 70, digni
  */
 const SOLVABLE = { money: 20, dette: null, detteRefuseeJour: null };
 
-// ── La tête qui lâche a maintenant une voix, et c'est la bonne ─────────────
-for (const [genre, attendu, refuse] of [['m', 'voix-h-tete', 'voix-f-tete'], ['f', 'voix-f-tete', 'voix-h-tete']]) {
-  demandes.length = 0;
-  // Mental haut d'abord : `playGaugeLow` ne sonne qu'au FRANCHISSEMENT du
-  // seuil, donc arriver directement à 8 ne prouverait rien.
-  await situer({ day: 4, gender: genre, ...SOLVABLE, stats: { ...BASSES, mental: 80 } });
-  await situer({ day: 4, gender: genre, ...SOLVABLE, stats: BASSES });
-  await pause(600);
-  const voulues = demandes.filter(d => d.startsWith('voix-'));
-  verifier(`mental à 8 : le personnage ${genre === 'm' ? 'masculin' : 'féminin'} respire mal`,
-    voulues.some(d => d.startsWith(attendu)), voulues.join(', ') || 'aucune voix demandée');
-  verifier(`  …et jamais avec le timbre de l'autre`,
-    !voulues.some(d => d.startsWith(refuse)), voulues.join(', '));
-}
+/*
+ * ── LA TÊTE QUI LÂCHE S'EST TUE, ET C'EST VOLONTAIRE ──────────────────────
+ *
+ * Cette section vérifiait que le mental appelle `voix-h-tete` ou `voix-f-tete`
+ * selon le personnage. Les prises livrées sont inaudibles au casque — « un cri
+ * bouillie » — et ce ne sont pas les fichiers qui sont en cause (64 kbit/s,
+ * 0,6 s, niveau juste) mais l'enregistrement lui-même.
+ *
+ * Elles sont coupées, avec toutes les voix qui jouent SEULES. Celles qui
+ * jouent DERRIÈRE un bruitage — douleur, dégoût, effort — restent en place :
+ * le masque leur pardonne, et c'est la section de la Récup' ci-dessous qui
+ * prouve maintenant que le timbre suit bien le personnage.
+ */
+await situer({ day: 4, gender: 'm', ...SOLVABLE, stats: { ...BASSES, mental: 80 } });
+demandes.length = 0;
+await situer({ day: 4, gender: 'm', ...SOLVABLE, stats: BASSES });
+await pause(600);
+const auMental = demandes.filter(d => d.startsWith('voix-') || d.startsWith('corps-') || d.startsWith('jauge-'));
+verifier('mental à 8 : l\'alerte neutre part',
+  auMental.includes('jauge-rouge'), auMental.join(', ') || 'aucun son');
+verifier('  …et aucune voix bouillie',
+  !auMental.some(d => /^voix-[hf]-tete|^corps-/.test(d)), auMental.join(', '));
 
 // ── La Récup' : chaque saleté a son bruit à elle ───────────────────────────
 // La carte des règles est marquée « vue » à ce lancement-ci, sinon elle

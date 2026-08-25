@@ -790,14 +790,45 @@ const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
  * aucun geste, et lui prêter un corps serait un contresens.
  * ═══════════════════════════════════════════════════════════════════════════
  */
+/*
+ * ⚠️ COUPÉES POUR L'INSTANT — ET VOICI POURQUOI, PARCE QUE ÇA COMPTE.
+ *
+ * Testées au casque sur téléphone, ces cinq prises-là sont inaudibles : « un
+ * cri bouillie », mot pour mot. Vérifié de mon côté : le débit est bon (64
+ * kbit/s, au-dessus de ce que la commande demandait), les durées sont courtes
+ * (0,4 à 0,8 s), le niveau est juste. Ce ne sont donc pas les fichiers qui
+ * sont mal encodés — ce sont les PRISES qui ne valent rien, et aucun réglage
+ * ne rattrape ça.
+ *
+ * LE MOTIF EST NET, ET IL EXPLIQUE POURQUOI SEULES CELLES-CI DÉRANGENT.
+ *
+ * Les autres voix du même lot — douleur, dégoût, effort, les passants — jouent
+ * DERRIÈRE quelque chose : le rat qui détale, le verre qui craque, la pièce
+ * qui tombe. Elles sont masquées, et le masque leur pardonne tout. Ces cinq-ci
+ * jouent SEULES, dans le silence du hub, comme unique signal. On les entend
+ * donc parfaitement — assez pour entendre qu'elles sont mauvaises.
+ *
+ * Elles retombent sur `jauge-rouge`, le signal de foley qui servait avant que
+ * j'y touche et dont personne ne s'est jamais plaint. On perd de dire LAQUELLE
+ * des jauges lâche ; on gagne de ne plus faire couper le son au joueur.
+ *
+ * ET LA VRAIE LEÇON EST AILLEURS. Tout ce jeu tient sur une règle : la bande-
+ * son est du carton manipulé. Un gargouillis d'estomac, une déglutition à sec,
+ * un bâillement, un claquement de dents sont du FOLEY — on les fabrique avec
+ * une bouteille d'eau et une boîte à chaussures. J'ai demandé des voix, et
+ * j'ai obtenu des voix de synthèse. La faute est dans la commande, pas dans la
+ * livraison : ces quatre signaux n'avaient jamais rien à faire dans une
+ * cabine. Ils repasseront en foley (voir la note de commande à venir).
+ *
+ * Pour les rallumer quand de meilleures prises arriveront : remettre les
+ * `withFile(...)` ci-dessous à la place de `playGaugeLowFile`.
+ */
 const VOIX_DU_CORPS: Record<string, () => void> = {
-  hunger: withFile('corps-faim', 0.85, playFailSynth),
-  thirst: withFile('corps-soif', 0.85, playFailSynth),
-  sleep: withFile('corps-epuise', 0.85, playFailSynth),
-  health: withFile('corps-froid', 0.85, playFailSynth),
-  // Repli sur l'alerte neutre, et non sur le silence : tant que les prises ne
-  // sont pas livrées, mieux vaut le signal générique que rien du tout.
-  mental: voix('tete', 2, 0.85, playGaugeLowFile),
+  hunger: playGaugeLowFile,   // withFile('corps-faim', 0.85, playFailSynth)
+  thirst: playGaugeLowFile,   // withFile('corps-soif', 0.85, playFailSynth)
+  sleep: playGaugeLowFile,    // withFile('corps-epuise', 0.85, playFailSynth)
+  health: playGaugeLowFile,   // withFile('corps-froid', 0.85, playFailSynth)
+  mental: playGaugeLowFile,   // voix('tete', 2, 0.85, playGaugeLowFile)
 };
 
 /*

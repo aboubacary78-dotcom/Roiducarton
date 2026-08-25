@@ -146,7 +146,7 @@ function BegMinigameInner() {
      * cause connue tombe à plat.
      */
     if (reason === 'time' && coinsRef.current <= 1) {
-      const p = piquer('gain-miserable');
+      const p = piquer('gain-miserable', { gain: Math.round(coinsRef.current) });
       if (p) setTimeout(() => pushToast(tr(p.fr, p.en), { emoji: '🪙', tone: 'bad', duration: 3400 }), 900);
     }
     setTimeout(() => dispatch({

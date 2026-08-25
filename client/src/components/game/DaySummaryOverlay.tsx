@@ -48,7 +48,17 @@ export default function DaySummaryOverlay() {
      * Posée après le réveil, jamais dessus : le bilan a déjà ses chiffres à
      * lire, et deux informations qui arrivent ensemble n'en font qu'une.
      */
-    const p = piquer('reveil');
+    /*
+      LA NUIT QU'ON VIENT DE PASSER, PAS UNE NUIT EN GÉNÉRAL.
+
+      La remarque tombait tous les matins, quelle qu'ait été la nuit — « le
+      carton a pris l'eau » après une nuit sèche, et le joueur comprend d'un
+      coup que rien n'est regardé. On passe donc la météo et ce que le sommeil
+      a coûté ; `piquer` ne garde que ce qui colle, et se tait quand rien ne
+      colle. Un matin sans commentaire est le prix à payer pour que les autres
+      matins veuillent dire quelque chose.
+    */
+    const p = piquer('reveil', { meteo: s.weather, sommeil: s.deltas.sleep ?? 0 });
     if (p) setTimeout(() => pushToast(tr(p.fr, p.en), { emoji: '🌅', duration: 3400 }), 1400);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jour]);

@@ -93,23 +93,39 @@ const RICHE = { day: 4, money: 40, location: 'gare', dette: null, detteRefuseeJo
 const FAUCHE = { ...RICHE, money: 1 };
 
 // ── Le prêteur n'arrive qu'au moment de la faiblesse ───────────────────────
+/*
+ * LA CARTE, PAS L'ÉVÉNEMENT.
+ *
+ * La proposition s'ouvrait d'office en plein écran en arrivant sur le hub, et
+ * le premier joueur l'a lu comme ce que c'était : un événement forcé dont on
+ * ne comprenait ni l'origine ni le moment. Une dette À RENDRE peut s'imposer —
+ * on a signé trois jours plus tôt. Une PROPOSITION, non.
+ *
+ * On cherche donc la carte sur le hub (« vous a vu compter vos pièces »), et
+ * c'est en la touchant qu'on ouvre la rencontre.
+ */
+const CARTE = /compter vos pièces|count your coins/i;
+
 await situer(RICHE);
-verifier('avec de l\'argent, personne ne propose rien',
-  !/tout de suite|right now/i.test(await texte()));
+verifier('avec de l\'argent, personne ne propose rien', !CARTE.test(await texte()));
 
 await situer({ ...FAUCHE, day: 1 });
-verifier('le premier jour, personne ne propose rien',
-  !/tout de suite|right now/i.test(await texte()));
+verifier('le premier jour, personne ne propose rien', !CARTE.test(await texte()));
 
 await situer(FAUCHE);
-const offre = /tout de suite|right now/i.test(await texte());
-verifier('fauché et passé le premier jour, le prêteur se présente', offre);
+const offre = CARTE.test(await texte());
+verifier('fauché et passé le premier jour, sa carte apparaît sur le hub', offre);
+verifier('  …et elle n\'ouvre rien toute seule',
+  !/Rencontre|Encounter/.test(await texte()),
+  'le hub reste le hub tant qu\'on ne touche pas la carte');
 
 // ── Le refus est un vrai refus ─────────────────────────────────────────────
 if (offre) {
-  await clic('Refuser|Refuse'); await pause(700);
-  verifier('refuser fait disparaître l\'offre du jour',
-    !/tout de suite|right now/i.test(await texte()));
+  await clic('compter vos pièces|count your coins'); await pause(900);
+  verifier('  …touchée, elle ouvre la rencontre',
+    /Rencontre|Encounter/.test(await texte()));
+  await clic('Refuser|Refuse'); await pause(900);
+  verifier('refuser fait disparaître l\'offre du jour', !CARTE.test(await texte()));
   verifier('et ne crée aucune dette', !(await perso()).dette);
 }
 
@@ -124,6 +140,7 @@ if (offre) {
  */
 await situer({ ...FAUCHE, day: 5 });
 const avant = (await perso()).money;
+await clic('compter vos pièces|count your coins'); await pause(900);
 const aPrisPret = await clic('Prendre les|Take the');
 verifier('le prêteur revient un autre jour après un refus', aPrisPret);
 await pause(900);
@@ -183,10 +200,17 @@ async function rendezVous(patch) {
 }
 
 const OFFRE = await rendezVous({ day: 4, money: 1, location: 'gare', dette: null, detteRefuseeJour: null });
-verifier('l\'offre s\'ouvre comme une rencontre', OFFRE.surEcranRencontre, OFFRE.ecran);
+verifier('l\'offre attend sur le hub sans s\'imposer', !OFFRE.surEcranRencontre, OFFRE.ecran);
+await clic('compter vos pièces|count your coins'); await pause(900);
+const ouverte = await p.evaluate(() => ({
+  rencontre: /Rencontre|Encounter/.test(document.body.innerText),
+  image: [...document.querySelectorAll('img')].map(i => i.src.split('/').pop()).find(s => /npc-preteur/.test(s)) || null,
+  retour: [...document.querySelectorAll('button')].some(b => b.offsetWidth && /^←/.test(b.textContent || '')),
+}));
+verifier('  …touchée, elle prend l\'écran comme une rencontre', ouverte.rencontre);
 verifier('  …avec le visage de celui qui propose',
-  OFFRE.image === 'npc-preteur.webp', OFFRE.image || 'aucune image de prêteur');
-verifier('  …et on peut passer son chemin', OFFRE.retour);
+  ouverte.image === 'npc-preteur.webp', ouverte.image || 'aucune image de prêteur');
+verifier('  …et on peut passer son chemin', ouverte.retour);
 
 const dueDette = { nom: 'Marcel', seed: 'x', gender: 'm', quartier: 'gare', montant: 15, echeance: 9 };
 const ECHEANCE = await rendezVous({ day: 9, money: 2, location: 'parc', inventory: [], dette: dueDette });

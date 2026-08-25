@@ -115,12 +115,21 @@ function useAlertesSonores(stats: Stats) {
      * lit plus. `piquer` bride en plus le débit toutes catégories confondues,
      * pour qu'une mauvaise passe ne fasse pas ricaner le jeu en boucle.
      */
-    const mourant = BODY.some(({ key }) => stats[key] <= AGONIE);
-    if (mourant && !enAgonie.current) {
-      const p = piquer('sante-critique');
-      if (p) pushToast(tr(p.fr, p.en), { emoji: '💀', tone: 'bad', duration: 3200 });
+    /*
+      ON DIT LAQUELLE, ET C'EST TOUT LE SUJET.
+
+      La pique était tirée au hasard dans les six : on pouvait mourir de soif
+      et s'entendre parler du froid. Une remarque qui ne regarde pas l'écran
+      qu'elle commente ne rate pas de peu — elle apprend au joueur que le jeu
+      ne regarde rien, et il cesse de les lire. On passe donc la jauge, et
+      `piquer` ne tire que parmi les phrases qui parlent d'elle.
+    */
+    const touchee = BODY.find(({ key }) => stats[key] <= AGONIE);
+    if (touchee && !enAgonie.current) {
+      const p = piquer('sante-critique', { jauge: touchee.key });
+      if (p) pushToast(tr(p.fr, p.en), { emoji: STAT_META[touchee.key].emoji, tone: 'bad', duration: 3200 });
     }
-    enAgonie.current = mourant;
+    enAgonie.current = !!touchee;
 
     /*
      * L'HUMILIATION. Aucun impact, que de l'arrachement — l'adhésif qu'on
