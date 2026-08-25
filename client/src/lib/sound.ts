@@ -690,17 +690,163 @@ const SEUIL_ALERTE = 25;
 const jaugesEnAlerte = new Set<string>();
 const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
 
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * LE CORPS PARLE, ET IL DIT LAQUELLE.
+ *
+ * Le franchissement sonnait, mais toutes les jauges du même son : le joueur
+ * savait que quelque chose allait mal, jamais quoi. Or son œil est sur le
+ * bouton d'action, pas sur les jauges — l'écran fait dix centimètres et le
+ * pouce en masque le tiers. Un son générique l'oblige à chercher ; un
+ * gargouillis lui dit « mange » sans qu'il ait rien à lire.
+ *
+ * Le froid va à la santé, faute de jauge de température : claquement de dents
+ * et souffle mal assuré, c'est un corps à sa limite quelle que soit la cause.
+ * Le mental et la dignité gardent l'alerte neutre — ils ne se soignent pas
+ * avec un geste, et leur donner une voix de corps serait un contresens.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+const VOIX_DU_CORPS: Record<string, () => void> = {
+  hunger: withFile('corps-faim', 0.85, playFailSynth),
+  thirst: withFile('corps-soif', 0.85, playFailSynth),
+  sleep: withFile('corps-epuise', 0.85, playFailSynth),
+  health: withFile('corps-froid', 0.85, playFailSynth),
+};
+
+/*
+ * ET IL INSISTE QUAND LA FIN APPROCHE.
+ *
+ * Ne sonner qu'au franchissement évitait l'alarme, et c'était juste : une
+ * alerte qui se rejoue à chaque action se fait couper. Mais entre 24 et 1, le
+ * jeu redevenait muet — on mourait donc en silence, et une mort silencieuse
+ * passe pour une injustice alors qu'elle était lisible dans les chiffres.
+ *
+ * Sous 10, le corps se rappelle donc au souvenir toutes les vingt secondes.
+ * Pas plus vite : à ce rythme on ne peut pas confondre ça avec une alarme, et
+ * une partie tient rarement plus de deux ou trois rappels avant qu'on
+ * réagisse — ou qu'on meure en sachant pourquoi.
+ */
+const SEUIL_CRITIQUE = 10;
+const RAPPEL_MS = 20000;
+const dernierRappel = new Map<string, number>();
+
 export function playGaugeLow(jauge: string, valeur: number): void {
-  if (valeur >= SEUIL_ALERTE) { jaugesEnAlerte.delete(jauge); return; }
-  if (jaugesEnAlerte.has(jauge)) return;
-  jaugesEnAlerte.add(jauge);
-  playGaugeLowFile();
+  const voix = VOIX_DU_CORPS[jauge] ?? playGaugeLowFile;
+
+  if (valeur >= SEUIL_ALERTE) {
+    jaugesEnAlerte.delete(jauge);
+    dernierRappel.delete(jauge);
+    return;
+  }
+
+  if (!jaugesEnAlerte.has(jauge)) {
+    jaugesEnAlerte.add(jauge);
+    dernierRappel.set(jauge, Date.now());
+    voix();
+    return;
+  }
+
+  if (valeur > SEUIL_CRITIQUE) return;
+  const depuis = Date.now() - (dernierRappel.get(jauge) ?? 0);
+  if (depuis < RAPPEL_MS) return;
+  dernierRappel.set(jauge, Date.now());
+  voix();
 }
 
 /** Repartir de zéro : un nouveau personnage n'hérite pas des alertes du défunt. */
 export function resetGaugeAlerts(): void {
   jaugesEnAlerte.clear();
+  dernierRappel.clear();
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * ⑩ LA TENSION — CE QUI MONTE PENDANT QU'ON JOUE
+ *
+ * Trois mécaniques centrales montaient en tension SANS UN BRUIT : la jauge
+ * d'alerte du casse, le risque de la Récup', le minuteur de la manche. On
+ * regardait une barre se remplir en silence, et l'échec tombait d'un coup.
+ *
+ * Ces sons-là ne ponctuent pas un geste du joueur : ils annoncent ce que le
+ * jeu s'apprête à lui faire. C'est la moitié de la bande-son qui manquait.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Le casse franchit un palier d'alerte : méfiance, alerte, bouclage.
+ *
+ * Trois sons distincts et non trois fois le même de plus en plus fort — le
+ * joueur doit savoir OÙ il en est sans regarder la barre, et le troisième
+ * porte le rideau métallique au loin qui dit que c'est fini.
+ */
+const PALIERS_ALERTE = [
+  withFile('tension-alerte-1', 0.8, playSpottedSynth),
+  withFile('tension-alerte-2', 0.85, playSpottedSynth),
+  withFile('tension-alerte-3', 0.9, playSpottedSynth),
+];
+
+export function playTensionPalier(palier: number): void {
+  const son = PALIERS_ALERTE[Math.min(Math.max(palier, 1), 3) - 1];
+  son?.();
+}
+
+/**
+ * Le tas de la Récup' qui bouge : un cran de risque de plus.
+ *
+ * Volontairement discret. Ce son se rejoue plusieurs fois par partie et son
+ * rôle est d'inquiéter, jamais de faire sursauter — un joueur qui sursaute
+ * lâche la manette et perd pour la mauvaise raison.
+ */
+export const playTensionRisque = withFile('tension-risque', 0.55, () => { /* muet avant livraison */ });
+
+/**
+ * Un tic du compte à rebours de la manche.
+ *
+ * Le fichier ne contient QU'UN tic : c'est l'appelant qui le répète, de plus
+ * en plus vite. Livrer la séquence entière aurait figé le tempo, alors qu'il
+ * dépend du temps qui reste.
+ */
+export const playTensionTic = withFile('tension-compte', 0.6, () => { /* muet avant livraison */ });
+
+/* ─── LA RONDE ───────────────────────────────────────────────────────────
+ * Trois signaux livrés en plus de la commande, et le jeu avait exactement
+ * trois moments pour eux : la ronde qu'on sent venir, celle qui passe, et
+ * celle qui vous cueille. La manche se jouait jusqu'ici à l'œil seul, et le
+ * policier arrive par le bord de l'écran — c'est-à-dire là où le joueur ne
+ * regarde pas, puisqu'il suit un passant du doigt.
+ */
+
+/** Le nez sensible sent la ronde arriver. Se joue AVANT qu'elle entre. */
+export const playPoliceApproche = withFile('police-approche', 0.7, () => { /* muet avant livraison */ });
+/** La ronde traverse : mains dans les poches. */
+export const playPolicePresence = withFile('police-presence', 0.75, () => { /* muet avant livraison */ });
+/** Elle vous a vu la main tendue. */
+export const playPoliceIntervention = withFile('police-intervention', 0.85, playSpottedSynth);
+
+/* ─── ⑪ LE COMBAT — ce qui se joue AVANT le coup ────────────────────────── */
+
+/** L'ennemi prend son élan. Se joue avant l'attaque, pour qu'on puisse réagir. */
+export const playCombatCharge = withFile('combat-charge', 0.8, () => { /* muet avant livraison */ });
+/** Un coup qui frôle. */
+export const playCombatEsquive = withFile('combat-esquive', 0.7, () => { /* muet avant livraison */ });
+/** Zéro coup encaissé : le silence de l'impact EST la récompense. */
+export const playCombatEsquiveParfaite = withFile('combat-esquive-parfaite', 0.85, () => { /* muet avant livraison */ });
+
+/* ─── ⑫ LES OBJETS ──────────────────────────────────────────────────────── */
+
+/** S'équiper : tissu et boucle de ceinture. */
+export const playObjetEquipe = withFile('objet-equipe', 0.8, playSuccessSynth);
+/** Un objet perdu pour de bon. Sec — c'est fini, pas triste. */
+export const playObjetCasse = withFile('objet-casse', 0.85, playFailSynth);
+/** Le sac est plein, on refuse l'objet. */
+export const playObjetPlein = withFile('objet-plein', 0.75, playFailSynth);
+
+/* ─── ⑬ L'INTERFACE ─────────────────────────────────────────────────────── */
+
+/** Bonne nouvelle. Deux fois plus discret que le clic d'action. */
+export const playToastBon = withFile('ui-toast-bon', 0.5, () => { /* muet avant livraison */ });
+/** Mauvaise nouvelle. Même geste, matière molle. */
+export const playToastMauvais = withFile('ui-toast-mauvais', 0.5, () => { /* muet avant livraison */ });
+/** Action indisponible : le loquet qui refuse. */
+export const playVerrou = withFile('ui-verrou', 0.6, () => { /* muet avant livraison */ });
 
 /** Manger, boire, se soigner. */
 export const playGaugeFilled = withFile('jauge-remplie', 0.85, playSuccessSynth);

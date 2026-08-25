@@ -5,7 +5,7 @@ import {
 import type { PasserBy } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { playCoin, playHurt, playMiss, playStep } from '@/lib/sound';
+import { playCoin, playHurt, playMiss, playPoliceApproche, playPoliceIntervention, playPolicePresence, playStep, playTensionTic } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
@@ -99,6 +99,8 @@ function BegMinigameInner() {
   const [copSoon, setCopSoon] = useState(false);
   const [held, setHeld] = useState<number | null>(null);
   const [ended, setEnded] = useState<null | 'time' | 'cop' | 'fight'>(null);
+  // Dernière seconde annoncée, pour ne pas rejouer le tic à chaque image.
+  const dernierTicRef = useRef<number | null>(null);
   const [toast, setToast] = useState<{ txt: string; tone: 'good' | 'bad'; key: number } | null>(null);
 
   const walkersRef = useRef<Walker[]>([]);
@@ -119,7 +121,8 @@ function BegMinigameInner() {
     if (endedRef.current) return;
     endedRef.current = true;
     setEnded(reason);
-    if (reason !== 'time') playHurt();
+    if (reason === 'cop') playPoliceIntervention();
+    else if (reason !== 'time') playHurt();
     setTimeout(() => dispatch({
       type: 'RESOLVE_BEG',
       coins: Math.round(coinsRef.current),
@@ -156,9 +159,20 @@ function BegMinigameInner() {
       // Le nez sensible et le paranoïaque sentent la ronde arriver : ils ont
       // le temps de retirer la main, les autres se font cueillir.
       const warn = mods.copWarnMs > 0 && now >= nextCop - mods.copWarnMs && now < nextCop;
-      if (warn !== warnRef.current) { warnRef.current = warn; setCopSoon(warn); }
+      if (warn !== warnRef.current) {
+        warnRef.current = warn;
+        setCopSoon(warn);
+        // Le flair sert enfin à quelque chose sans regarder l'écran.
+        if (warn) playPoliceApproche();
+      }
       const copHere = now < copUntil;
-      if (copHere !== copRef.current) { copRef.current = copHere; setCopOn(copHere); }
+      if (copHere !== copRef.current) {
+        copRef.current = copHere;
+        setCopOn(copHere);
+        // Elle entre par le bord de l'écran, là où le joueur ne regarde pas :
+        // il suit un passant du doigt. L'oreille est le seul canal libre.
+        if (copHere) playPolicePresence();
+      }
       if (copHere) setCopX(1 - (copUntil - now) / T.copStayMs);
 
       // Arrivée des passants.
@@ -227,6 +241,26 @@ function BegMinigameInner() {
       });
 
       setWalkers([...walkersRef.current]);
+
+      /*
+       * LES DIX DERNIÈRES SECONDES SE COMPTENT À L'OREILLE.
+       *
+       * La barre de temps est en haut de l'écran, et le pouce du joueur est en
+       * bas, sur les passants. Il ne la regarde jamais : la manche se
+       * terminait donc toujours par surprise. Un tic par seconde sur la fin,
+       * et le dernier geste devient un choix au lieu d'un hasard.
+       *
+       * Le fichier ne contient qu'un tic — c'est ici qu'on décide du tempo.
+       */
+      const resteS = Math.max(0, (roundMs - elapsed) / 1000);
+      if (resteS <= 10) {
+        const tic = Math.ceil(resteS);
+        if (tic !== dernierTicRef.current) {
+          dernierTicRef.current = tic;
+          playTensionTic();
+        }
+      }
+
       if (elapsed >= roundMs) { finish('time'); return; }
       raf = requestAnimationFrame(loop);
     };

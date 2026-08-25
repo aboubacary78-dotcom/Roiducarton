@@ -1,7 +1,7 @@
 import { useGame, LOCATIONS, heistTargetsFor, HEIST_TUNING, type HeistTarget } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { playCard, playCrit, playHit, playHurt, playPickUp, playSpotted, playStep, playTurnedAway, playUnlock } from '@/lib/sound';
+import { playCard, playCrit, playHit, playHurt, playPickUp, playStep, playTensionPalier, playTurnedAway, playUnlock } from '@/lib/sound';
 import { canOfferRewarded, showRewarded } from '@/lib/ads';
 import { useLang, tr } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
@@ -374,7 +374,9 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
     if (t > tierRef.current) {
       tierRef.current = t;
       setTier(t);
-      playSpotted();
+      // Un son par palier, et non trois fois le même de plus en plus fort :
+      // le joueur doit savoir OÙ il en est sans quitter la grille des yeux.
+      playTensionPalier(t);
       if (t >= 2 && !spawnedRef.current.chaser) {
         spawnedRef.current.chaser = true;
         for (let i = 0; i < tuning.spawnP2; i++) queueSpawn('chaser');

@@ -5,7 +5,7 @@ import {
 import type { SalvageFind } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { playCollapse, playCrit, playDig, playFind, playHurt, playPickUp, playStep, playUnlock } from '@/lib/sound';
+import { playCollapse, playCrit, playDig, playFind, playHurt, playPickUp, playStep, playTensionRisque, playUnlock } from '@/lib/sound';
 import { canOfferRewarded, showRewarded } from '@/lib/ads';
 import { haptic } from '@/lib/haptics';
 import { isFirstEverRun } from '@/lib/coach';
@@ -207,8 +207,20 @@ function SalvageInner() {
       const dt = (now - last) / 1000; last = now;
       if (!endedRef.current && rubbingRef.current) {
         const l = LAYERS[Math.min(depthRef.current, LAYERS.length - 1)];
+        const avant = riskRef.current;
         riskRef.current = Math.min(T.riskMax, riskRef.current + l.riskPerS * riskMul * dt);
         setRisk(riskRef.current);
+        /*
+         * Le tas prévient tous les quarts de jauge. On regardait jusqu'ici une
+         * barre monter en silence, et le « bust » tombait d'un coup — ce qui
+         * se lit comme une sanction arbitraire alors que le risque était
+         * affiché. Par crans plutôt qu'en continu : un son qui suit la jauge
+         * devient une alarme, et une alarme se fait couper.
+         */
+        const cran = (v: number) => Math.floor((v / T.riskMax) * 4);
+        if (cran(riskRef.current) > cran(avant) && riskRef.current < T.riskMax) {
+          playTensionRisque();
+        }
         if (riskRef.current >= T.riskMax) { finish('bust'); return; }
       }
       raf = requestAnimationFrame(loop);
