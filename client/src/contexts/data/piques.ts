@@ -13,12 +13,21 @@
  *      l'écran pendant que le pouce travaille en bas ; une phrase qu'il faut
  *      relire n'est jamais lue.
  *
- *   2. LA CHUTE EN DEUXIÈME PHRASE. Un constat plat, un point, puis le coup.
- *      « Un centime. Encadrez-le. » L'arythmie fait tout le travail : la
- *      première phrase installe, la seconde retire la chaise.
+ *   2. LA FORME CHANGE. La première version faisait trente fois « constat,
+ *      point, chute » — et une structure qu'on voit venir dès la deuxième
+ *      vanne n'a plus aucune percussion. Il y a donc maintenant des phrases
+ *      d'un seul bloc (« Le vigile n'a même pas eu à courir »), des faux
+ *      compliments (« Record personnel »), des décalages de registre
+ *      administratif (« Arrondi au supérieur »), et des tierces personnes qui
+ *      commentent à votre place (« Un pigeon s'est écarté. Par respect »).
  *
- *   3. ON SE MOQUE DE LA SITUATION, JAMAIS DU JOUEUR. « Vous courez mal »
- *      passe parce que c'est la rue qui parle et qu'elle a raison. « Vous êtes
+ *   3. DU CONCRET, ET AUCUN ADOUCISSANT. Un chiffre, un objet, un geste. La
+ *      première version disait « la honte, ça s'use, vous êtes PRESQUE
+ *      tranquille » : chaque mot de prudence désamorce la phrase. Le cynisme
+ *      a besoin de certitude, et surtout pas de lyrisme sur le froid.
+ *
+ *   4. ON SE MOQUE DE LA SITUATION, JAMAIS DU JOUEUR. « Votre plan avait une
+ *      faille. C'était vous. » passe parce que la rue a raison. « Vous êtes
  *      nul » ne passerait pas : le jeu deviendrait le concurrent du joueur au
  *      lieu d'être son commentateur.
  *
@@ -39,101 +48,107 @@ export interface Pique { fr: string; en: string }
 
 export const PIQUES: Record<CategoriePique, Pique[]> = {
   /* ── ① SANTÉ CRITIQUE ────────────────────────────────────────────────────
-   * Le corps lâche. Le registre est celui du constat administratif appliqué à
-   * une catastrophe intime : c'est le décalage qui fait rire, pas la douleur.
+   * Le corps lâche. Le rire vient du DÉCALAGE DE REGISTRE : on parle d'un
+   * corps qui meurt avec le vocabulaire d'un constat d'huissier ou d'un
+   * pigeon poli. Jamais de lyrisme sur le froid — c'est là que la première
+   * version se plantait.
    */
   'sante-critique': [
-    { fr: 'Votre corps a déposé le bilan. Reste la liquidation.',
-      en: 'Your body has filed for bankruptcy. Liquidation pending.' },
-    { fr: 'L\'estomac a arrêté de crier. Il a renoncé.',
-      en: 'Your stomach stopped complaining. It gave up.' },
-    { fr: 'Vous tremblez. Personne ne mettra ça sur le compte de l\'émotion.',
-      en: 'You\'re shaking. Nobody will blame that on emotion.' },
-    { fr: 'Debout, oui. Vivant, c\'est plus discutable.',
-      en: 'Upright, yes. Alive is more debatable.' },
-    { fr: 'Le froid ne vous cherchait pas. Il vous a trouvé.',
-      en: 'The cold wasn\'t looking for you. It found you.' },
-    { fr: 'Vos jambes négocient avec le sol. Elles perdent.',
-      en: 'Your legs are negotiating with the ground. They\'re losing.' },
+    { fr: 'Un pigeon s\'est écarté de votre chemin. Par respect.',
+      en: 'A pigeon stepped out of your way. Out of respect.' },
+    { fr: 'Votre estomac ne réclame plus rien. Il a fait son deuil.',
+      en: 'Your stomach stopped asking. It\'s in mourning now.' },
+    { fr: 'Vous n\'avez même plus la force de vous évanouir.',
+      en: 'You don\'t even have the strength to faint.' },
+    { fr: 'Vos dents claquent. C\'est le seul bruit que vous produisez encore.',
+      en: 'Your teeth are chattering. It\'s the only noise you still make.' },
+    { fr: 'Le froid a gagné. Il jouait contre personne.',
+      en: 'The cold won. It wasn\'t playing anyone.' },
+    { fr: 'Techniquement vivant. Le service des impôts n\'est pas prévenu.',
+      en: 'Technically alive. The tax office hasn\'t been told.' },
   ],
 
   /* ── ② DIGNITÉ À ZÉRO ────────────────────────────────────────────────────
-   * Le sujet du jeu. Ces six-là sont les plus dures et les moins drôles, et
-   * c'est voulu : le rire s'arrête pile là où le jeu veut qu'on réfléchisse.
+   * Le sujet du jeu, et la catégorie qui doit faire le moins rire. Elles
+   * frappent sur un GESTE PRÉCIS — dire merci, baisser les yeux, s'excuser —
+   * parce qu'un geste se reconnaît et qu'un concept ne se reconnaît pas.
    */
   'dignite-zero': [
-    { fr: 'Vous vous êtes baissé. Vous ne vous relevez pas tout à fait.',
-      en: 'You stooped. You don\'t quite straighten back up.' },
-    { fr: 'Il restait un fond de fierté. Vous l\'avez raclé.',
-      en: 'There was a bit of pride left. You scraped it out.' },
-    { fr: 'Personne ne vous juge. Personne ne vous regarde non plus.',
-      en: 'Nobody\'s judging you. Nobody\'s looking either.' },
-    { fr: 'Vous auriez refusé ça mardi. On est vendredi.',
-      en: 'You\'d have refused that on Tuesday. It\'s Friday.' },
-    { fr: 'La honte, ça s\'use. Vous êtes presque tranquille.',
-      en: 'Shame wears out. You\'re almost comfortable.' },
-    { fr: 'Vous avez fait pire. C\'est exactement ça, le problème.',
-      en: 'You\'ve done worse. That\'s exactly the problem.' },
+    { fr: 'Vous avez dit merci. C\'est ça qui fait mal.',
+      en: 'You said thank you. That\'s the part that hurts.' },
+    { fr: 'Il vous restait une limite. Vous venez de la déménager.',
+      en: 'You had one line left. You just moved it.' },
+    { fr: 'Personne n\'a détourné le regard. Personne ne regardait.',
+      en: 'Nobody looked away. Nobody was looking.' },
+    { fr: 'Vous marchandez votre fierté. Le cours s\'effondre.',
+      en: 'You\'re trading your pride. The price is collapsing.' },
+    { fr: 'Vous vous êtes excusé d\'exister. Ils ont accepté.',
+      en: 'You apologised for existing. They accepted it.' },
+    { fr: 'Mardi, vous auriez refusé. On est vendredi.',
+      en: 'On Tuesday you\'d have refused. It\'s Friday.' },
   ],
 
   /* ── ③ ÉCHEC TOTAL AU VOL ────────────────────────────────────────────────
    * Le seul moment où le jeu a le droit d'être franchement moqueur : le
-   * joueur a pris un risque en connaissance de cause, et il a raté. On tape
-   * sur l'exécution, jamais sur l'intention.
+   * joueur a pris un risque en connaissance de cause. On tape sur
+   * l'exécution, jamais sur l'intention — et c'est la catégorie où les
+   * phrases d'un seul bloc font le plus de dégâts.
    */
   'vol-rate': [
-    { fr: 'La main dans le sac. Le sac n\'était pas le vôtre.',
-      en: 'Caught red-handed. The hand wasn\'t even quick.' },
-    { fr: 'Repéré en trois secondes. Un record, dans un sens.',
-      en: 'Spotted in three seconds. A record, in a way.' },
-    { fr: 'Vous n\'êtes pas discret. Vous êtes juste lent.',
-      en: 'You\'re not subtle. You\'re just slow.' },
-    { fr: 'Le vigile s\'ennuyait. Vous lui avez fait sa journée.',
-      en: 'The guard was bored. You made his day.' },
-    { fr: 'Tout le monde a vu. Personne n\'a filmé. Ça console.',
-      en: 'Everyone saw. Nobody filmed it. Small mercies.' },
-    { fr: 'Vous courez mal. On ne vous l\'avait jamais dit ?',
-      en: 'You run badly. Has nobody ever told you?' },
+    { fr: 'Discret pendant six secondes. Record personnel.',
+      en: 'Unseen for six whole seconds. Personal best.' },
+    { fr: 'Le vigile n\'a même pas eu à courir.',
+      en: 'The guard didn\'t even have to run.' },
+    { fr: 'Votre plan avait une faille. C\'était vous.',
+      en: 'Your plan had one flaw. It was you.' },
+    { fr: 'Repéré, rattrapé, ressorti. Dans cet ordre.',
+      en: 'Spotted, caught, thrown out. In that order.' },
+    { fr: 'Il y avait une caméra. Vous êtes une anecdote de pause déjeuner.',
+      en: 'There was a camera. You\'re now a lunch-break anecdote.' },
+    { fr: 'Vous avez volé l\'attention de tout le monde. Rien d\'autre.',
+      en: 'You stole everyone\'s attention. Nothing else.' },
   ],
 
   /* ── ④ RÉVEIL DOULOUREUX ─────────────────────────────────────────────────
-   * Le matin, tous les jours, cent fois par partie. Ce sont donc les six qui
-   * doivent le mieux vieillir : aucune ne pousse la blague, toutes se
-   * contentent d'un détail exact.
+   * Une fois par nuit, cent fois par partie : ce sont les six qui doivent le
+   * mieux vieillir. Aucune ne pousse la blague, toutes tiennent sur un
+   * DÉTAIL VÉRIFIABLE — un chiffre, un balayeur, un chien. Un détail exact ne
+   * s'use pas ; une vanne, si.
    */
   'reveil': [
-    { fr: 'Vous avez dormi. Le mot est généreux.',
-      en: 'You slept. Generous word for it.' },
-    { fr: 'Le carton a pris l\'humidité. Vous aussi.',
-      en: 'The cardboard took on damp. So did you.' },
-    { fr: 'Une nuit de plus. Personne ne compte, sauf vous.',
-      en: 'One more night. Nobody\'s counting, except you.' },
-    { fr: 'Votre dos a un avis. Il le donne.',
-      en: 'Your back has an opinion. It\'s sharing it.' },
-    { fr: 'Réveillé par le froid. Ponctuel, lui.',
-      en: 'Woken by the cold. Always on time, that one.' },
-    { fr: 'Vous avez rêvé d\'un lit. Le réveil a été rapide.',
-      en: 'You dreamt of a bed. Waking up was quick.' },
+    { fr: 'Le carton a pris l\'eau. Vous aussi.',
+      en: 'The cardboard took on water. So did you.' },
+    { fr: 'Quatre heures de sommeil. En six fois.',
+      en: 'Four hours of sleep. In six instalments.' },
+    { fr: 'Votre dos a quinze ans de plus que vous.',
+      en: 'Your back is fifteen years older than you.' },
+    { fr: 'Un chien vous a reniflé cette nuit. Il n\'est pas resté.',
+      en: 'A dog sniffed you in the night. It didn\'t stay.' },
+    { fr: 'Réveillé par le balayeur. Il ne s\'est pas excusé.',
+      en: 'Woken by the street sweeper. He didn\'t apologise.' },
+    { fr: 'Vous avez rêvé de draps. Le réveil a réglé ça.',
+      en: 'You dreamt of bed sheets. Waking up settled that.' },
   ],
 
   /* ── ⑤ GAINS MISÉRABLES ──────────────────────────────────────────────────
-   * Le pire moment pour le joueur, et donc le meilleur pour une blague : elle
-   * transforme une frustration en anecdote. C'est la catégorie qui fait le
-   * plus de travail dans tout ce fichier.
+   * Le pire moment pour le joueur, donc le meilleur pour une vanne : elle
+   * transforme une frustration en anecdote. Toutes chiffrent, ou comparent à
+   * quelque chose de trop petit — c'est la précision qui fait rire, pas
+   * l'idée générale d'être pauvre.
    */
   'gain-miserable': [
     { fr: 'Un centime. Encadrez-le.',
       en: 'One cent. Frame it.' },
-    { fr: 'Deux heures de travail. Voilà le salaire.',
-      en: 'Two hours of work. There\'s the wage.' },
-    { fr: 'Ça ne paie pas le pain. Ça paie l\'idée du pain.',
-      en: 'It won\'t buy bread. It buys the idea of bread.' },
-    { fr: 'Vous êtes riche. À l\'échelle du trottoir.',
-      en: 'You\'re rich. By pavement standards.' },
-    { fr: 'Un bout de ficelle. La rue a de l\'humour.',
-      en: 'A bit of string. The street has jokes.' },
-    { fr: 'Le marché du travail a répondu. Sèchement.',
-      en: 'The job market has answered. Curtly.' },
+    { fr: 'Un centime de l\'heure. Arrondi au supérieur.',
+      en: 'One cent an hour. Rounded up.' },
+    { fr: 'De quoi acheter un quart de baguette. Sans le quart.',
+      en: 'Enough for a quarter of a baguette. Minus the quarter.' },
+    { fr: 'Une ficelle. Vous voilà dans le textile.',
+      en: 'A piece of string. You\'re in textiles now.' },
+    { fr: 'Ce butin tiendrait dans une dent creuse.',
+      en: 'This haul would fit in a hollow tooth.' },
+    { fr: 'Le marché a parlé. Il a dit non.',
+      en: 'The market has spoken. It said no.' },
   ],
 };
 

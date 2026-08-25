@@ -45,12 +45,28 @@ const plusLongue = Math.max(...toutes.map(p => Math.max(mots(p.fr), mots(p.en)))
 verifier('douze mots maximum, français ET anglais',
   trop.length === 0, trop.slice(0, 3).join(' | ') || `la plus longue en fait ${plusLongue}`);
 
-// ── Deux phrases, jamais une seule ─────────────────────────────────────────
-// La chute est en deuxième phrase : c'est la règle d'écriture du lot, et une
-// ligne sans point médian est une ligne qui a perdu son ressort.
-const sansChute = toutes.filter(p => !/[.!?…]\s+\S/.test(p.fr));
-verifier('la chute arrive en deuxième phrase',
-  sansChute.length === 0, sansChute.slice(0, 2).map(p => p.fr).join(' | '));
+/* ── LA FORME DOIT VARIER ──────────────────────────────────────────────────
+ *
+ * Ce contrôle demandait l'inverse : que TOUTES les phrases aient leur chute en
+ * deuxième phrase. C'était une règle d'écriture, elle a été respectée trente
+ * fois sur trente, et le résultat n'était pas percutant — parce qu'une
+ * structure qu'on voit venir dès la deuxième vanne ne surprend plus personne.
+ * Le test verrouillait donc exactement le défaut qu'on cherchait à éviter.
+ *
+ * On mesure maintenant le contraire : qu'il y ait des phrases d'un seul bloc
+ * ET des phrases en deux temps, sans qu'une forme écrase l'autre.
+ */
+const enDeuxTemps = toutes.filter(p => /[.!?…]\s+\S/.test(p.fr)).length;
+const dUnBloc = 30 - enDeuxTemps;
+verifier('les deux formes cohabitent',
+  dUnBloc >= 4 && enDeuxTemps >= 15,
+  `${dUnBloc} d'un bloc, ${enDeuxTemps} en deux temps`);
+
+// Et aucune ne s'adoucit : un mot de prudence désamorce une vanne.
+const ADOUCISSANTS = /\b(presque|un peu|assez|plutôt|quelque part|peut-être)\b/i;
+const molles = toutes.filter(p => ADOUCISSANTS.test(p.fr));
+verifier('aucun adoucissant', molles.length === 0,
+  molles.slice(0, 2).map(p => p.fr).join(' | '));
 
 // ── Aucun doublon ──────────────────────────────────────────────────────────
 const fr = toutes.map(p => p.fr.toLowerCase());

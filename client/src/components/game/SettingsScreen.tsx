@@ -31,7 +31,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.41.0';
+const APP_VERSION = '3.41.1';
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
