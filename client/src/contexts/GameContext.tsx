@@ -43,7 +43,7 @@ import {
 import { getHeistTarget, HEIST_TARGETS } from './data/heist';
 import { RECIPES, recipeCost, pickMaterials, usureNuit } from './data/crafting';
 import { bagCapacity } from './data/world';
-import { encounterFlag, preteurDuJour, DETTE_PRET, DETTE_DU, DETTE_DELAI, DETTE_RELANCE } from './data/npc';
+import { encounterFlag, preteurDuJour, DETTE_PRET, DETTE_DU, DETTE_DELAI } from './data/npc';
 
 // Façade stable : ré-exporte types & données pour les composants existants.
 export * from './types';
@@ -910,7 +910,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         character: {
           ...c,
           money: c.money + DETTE_PRET,
-          dette: { ...preteur, montant: DETTE_DU, echeance: c.day + DETTE_DELAI, relances: 0 },
+          dette: { ...preteur, montant: DETTE_DU, echeance: c.day + DETTE_DELAI },
         },
       };
     }
@@ -937,6 +937,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           statChanges: {},
           moneyChange: -c.dette.montant,
           respectChange: 3,
+          image: '/assets/result-dette-payee.webp',
+          fallbackImage: '/assets/result-steal-success.webp',
         },
       };
     }
@@ -977,27 +979,54 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             ),
             statChanges: { dignity: -6 },
             moneyChange: 0,
+            image: '/assets/result-dette-saisie.webp',
+            fallbackImage: '/assets/result-steal-fail.webp',
           },
         };
       }
 
-      // Rien à saisir : la note monte et il revient.
-      const montant = c.dette.montant + DETTE_RELANCE;
+      /*
+       * RIEN À SAISIR : IL SE PAIE SUR VOTRE PEAU.
+       *
+       * Première version : la note montait de quatre euros et il revenait dans
+       * deux jours. C'était une non-conséquence — on empruntait, on dépensait
+       * tout, on encaissait un report, et le prêteur devenait une banque
+       * gratuite. Rien ne dissuadait de l'ignorer.
+       *
+       * Il tabasse, donc. Fort. Et la dette est éteinte : il s'est payé, à sa
+       * façon, ce qui est plus juste qu'une spirale sans issue et bien plus
+       * dissuasif qu'un report. Le calcul du joueur redevient sérieux —
+       * emprunter en sachant qu'on ne pourra pas rendre, c'est accepter
+       * d'y laisser la moitié de sa santé et son allure.
+       *
+       * ET ÇA PEUT TUER. La santé est une condition de mort comme une autre :
+       * un personnage déjà entamé qui emprunte sans pouvoir rendre meurt sur
+       * le trottoir, et le jeu ne fait aucune exception pour lui. C'est un
+       * roguelite ; la mort est le principe, pas l'accident.
+       */
+      const DEGATS = 30;
+      const HUMILIATION = 25;
+      const statDelta: Partial<Stats> = { health: -DEGATS, dignity: -HUMILIATION };
+      const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
+      const vivant = newStats.health > 0 && newStats.mental > 0;
+      if (!vivant) {
+        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, 'poissard')));
+        clearSave();
+      }
       return {
         ...state,
-        character: {
-          ...c,
-          stats: { ...c.stats, dignity: Math.max(0, c.stats.dignity - 4) },
-          dette: { ...c.dette, montant, echeance: c.day + 2, relances: c.dette.relances + 1 },
-        },
+        character: { ...c, stats: newStats, alive: vivant, dette: undefined },
         eventResult: {
           text: L(
-            `${nom} regarde votre sac vide, puis vous. Il n'y a rien à prendre, et ça n'arrange personne. « ${montant}, dans deux jours. » ${nom} s'en va, et ce n'était pas une question.`,
-            `${nom} looks at your empty bag, then at you. There's nothing to take, and that suits nobody. "${montant}, two days." ${nom} walks off, and it wasn't a question.`,
+            `${nom} regarde votre sac vide, puis vous. « Alors c'est comme ça. » Ça va vite. Vous ne vous souvenez pas d'être tombé, seulement du trottoir contre la joue et des gens qui contournent. ${nom} s'en va sans se retourner : la dette est payée, et tout le quartier a vu comment.`,
+            `${nom} looks at your empty bag, then at you. "So that's how it is." It's over quickly. You don't remember falling, only the pavement against your cheek and people stepping around. ${nom} leaves without looking back: the debt is settled, and the whole neighbourhood saw how.`,
           ),
-          statChanges: { dignity: -4 },
+          statChanges: statDelta,
           moneyChange: 0,
+          image: '/assets/result-dette-raclee.webp',
+          fallbackImage: '/assets/result-steal-fail.webp',
         },
+        screen: vivant ? 'main' : 'game-over',
       };
     }
 

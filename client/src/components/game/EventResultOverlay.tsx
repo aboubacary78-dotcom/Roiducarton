@@ -6,6 +6,7 @@ import { showRewarded, canOfferRewarded } from '@/lib/ads';
 import { DIGNITY_TIERS, dignityTierIndex } from '@/contexts/data/dignity';
 import { playBack, playGoodOutcome, playKO, playMiss, playMoneyOut, playObjetPlein, playPickUp, playWin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
+import { charabia } from '@/lib/charabia';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, moodFor } from './SceneIllustration';
 
@@ -24,7 +25,7 @@ const FLAG_LABELS: Record<string, { fr: string; en: string }> = {
 
 export default function EventResultOverlay() {
   const { state, dispatch } = useGame();
-  useLang();
+  const en = useLang() === 'en';
   const result = state.eventResult;
   const [doubling, setDoubling] = useState(false);
   const [keeping, setKeeping] = useState(false);
@@ -219,7 +220,10 @@ export default function EventResultOverlay() {
           </motion.div>
 
           {/* Result text */}
-          <p className="text-sm text-[#3D3020] leading-relaxed mb-4 text-center">{tc(result.text)}</p>
+          {/* Ce qui vient d'arriver passe par la même tête que le reste. */}
+          <p className="text-sm text-[#3D3020] leading-relaxed mb-4 text-center">
+            {charabia(tc(result.text), state.character?.stats.mental ?? 100, en)}
+          </p>
 
           {/*
            * LA JOURNÉE COUPÉE NET.

@@ -7286,7 +7286,6 @@ function encounterFlag(day2, location) {
 var DETTE_PRET = 10;
 var DETTE_DU = 15;
 var DETTE_DELAI = 3;
-var DETTE_RELANCE = 4;
 function preteurDuJour(day2, location, playerSeed) {
   const rng = makeRng(hashStr(`preteur|${day2}|${location}|${playerSeed}`));
   const nom = NPC_NAMES[Math.floor(rng() * NPC_NAMES.length)];
@@ -7932,7 +7931,7 @@ function gameReducer(state, action) {
         character: {
           ...c,
           money: c.money + DETTE_PRET,
-          dette: { ...preteur, montant: DETTE_DU, echeance: c.day + DETTE_DELAI, relances: 0 }
+          dette: { ...preteur, montant: DETTE_DU, echeance: c.day + DETTE_DELAI }
         }
       };
     }
@@ -7955,7 +7954,9 @@ function gameReducer(state, action) {
           ),
           statChanges: {},
           moneyChange: -c.dette.montant,
-          respectChange: 3
+          respectChange: 3,
+          image: "/assets/result-dette-payee.webp",
+          fallbackImage: "/assets/result-steal-success.webp"
         }
       };
     }
@@ -7994,26 +7995,35 @@ function gameReducer(state, action) {
               `${nom} doesn't argue. ${nom} opens your bag, pulls out ${gage.name} ${gage.emoji}, and weighs it. "We're square." You had no say, and you knew that when you took the money.`
             ),
             statChanges: { dignity: -6 },
-            moneyChange: 0
+            moneyChange: 0,
+            image: "/assets/result-dette-saisie.webp",
+            fallbackImage: "/assets/result-steal-fail.webp"
           }
         };
       }
-      const montant = c.dette.montant + DETTE_RELANCE;
+      const DEGATS = 30;
+      const HUMILIATION = 25;
+      const statDelta = { health: -DEGATS, dignity: -HUMILIATION };
+      const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
+      const vivant = newStats.health > 0 && newStats.mental > 0;
+      if (!vivant) {
+        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, "poissard")));
+        clearSave();
+      }
       return {
         ...state,
-        character: {
-          ...c,
-          stats: { ...c.stats, dignity: Math.max(0, c.stats.dignity - 4) },
-          dette: { ...c.dette, montant, echeance: c.day + 2, relances: c.dette.relances + 1 }
-        },
+        character: { ...c, stats: newStats, alive: vivant, dette: void 0 },
         eventResult: {
           text: L(
-            `${nom} regarde votre sac vide, puis vous. Il n'y a rien \xE0 prendre, et \xE7a n'arrange personne. \xAB ${montant}, dans deux jours. \xBB ${nom} s'en va, et ce n'\xE9tait pas une question.`,
-            `${nom} looks at your empty bag, then at you. There's nothing to take, and that suits nobody. "${montant}, two days." ${nom} walks off, and it wasn't a question.`
+            `${nom} regarde votre sac vide, puis vous. \xAB Alors c'est comme \xE7a. \xBB \xC7a va vite. Vous ne vous souvenez pas d'\xEAtre tomb\xE9, seulement du trottoir contre la joue et des gens qui contournent. ${nom} s'en va sans se retourner : la dette est pay\xE9e, et tout le quartier a vu comment.`,
+            `${nom} looks at your empty bag, then at you. "So that's how it is." It's over quickly. You don't remember falling, only the pavement against your cheek and people stepping around. ${nom} leaves without looking back: the debt is settled, and the whole neighbourhood saw how.`
           ),
-          statChanges: { dignity: -4 },
-          moneyChange: 0
-        }
+          statChanges: statDelta,
+          moneyChange: 0,
+          image: "/assets/result-dette-raclee.webp",
+          fallbackImage: "/assets/result-steal-fail.webp"
+        },
+        screen: vivant ? "main" : "game-over"
       };
     }
     case "RATTRAPER_CONTRAT": {
@@ -9035,7 +9045,7 @@ var initialState = {
 };
 var GameContext = createContext(void 0);
 
-// ../../../tmp/monet-rJfVDE/cap.js
+// ../../../tmp/monet-GJfY9I/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/ads.ts

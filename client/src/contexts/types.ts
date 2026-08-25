@@ -111,7 +111,7 @@ export interface Character {
    * `refusee` retient qu'on a déjà dit non au prêteur : il ne repropose pas
    * le même jour, sinon le refus n'en serait pas un.
    */
-  dette?: { nom: string; seed: string; gender: 'm' | 'f'; quartier: string; montant: number; echeance: number; relances: number };
+  dette?: { nom: string; seed: string; gender: 'm' | 'f'; quartier: string; montant: number; echeance: number };
   detteRefuseeJour?: number;
   // Graine unique servant à générer le visage du personnage (voir CardboardAvatar).
   seed: string;

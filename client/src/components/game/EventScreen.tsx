@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { showRewarded, canOfferRewarded } from '@/lib/ads';
 import { useLang, tr, tc } from '@/lib/lang';
+import { charabia } from '@/lib/charabia';
 import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
 import { stampTap, liftHover } from '@/lib/anim';
@@ -151,7 +152,16 @@ export default function EventScreen() {
         <h2 className="text-2xl text-[#2A1F1A] mb-2">{tc(event.title)}</h2>
 
         {/* Description */}
-        <p className="text-sm text-[#5C4A38] leading-relaxed mb-4">{tc(event.description)}</p>
+        {/*
+          LE RÉCIT PASSE PAR LA TÊTE DU PERSONNAGE, LES CHOIX NON.
+          Sous 60 de mental, les mots de la description se mélangent (voir
+          lib/charabia). Les LIBELLÉS DE CHOIX, eux, restent intacts : brouiller
+          ce dont dépend une décision ne rend pas le jeu inquiétant, il le rend
+          injouable — on ne joue plus, on subit.
+        */}
+        <p className="text-sm text-[#5C4A38] leading-relaxed mb-4">
+          {charabia(tc(event.description), state.character?.stats.mental ?? 100, en)}
+        </p>
 
         {/* Choices */}
         <div className="flex flex-col gap-2">

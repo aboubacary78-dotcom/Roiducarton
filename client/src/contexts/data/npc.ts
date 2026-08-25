@@ -239,9 +239,6 @@ export function encounterFlag(day: number, location: string): string {
 export const DETTE_PRET = 10;
 export const DETTE_DU = 15;
 export const DETTE_DELAI = 3;
-/** Ce qu'il ajoute à chaque jour de retard. */
-export const DETTE_RELANCE = 4;
-
 /** En dessous de quoi on est assez fauché pour qu'il vienne vous trouver. */
 const DETTE_SEUIL_MISERE = 3;
 

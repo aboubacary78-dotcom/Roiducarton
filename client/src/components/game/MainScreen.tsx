@@ -31,6 +31,7 @@ import { WEATHER_TYPES, getNextWeather } from '@/contexts/GameContext';
 import { playActionLieu, playBack, playBag, playCard, playClick, playFightStart, playMoneyIn, playMoneyOut, playNextDay, playTab, playTurnedAway, playUnlock } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
 import LocationBackdrop from './LocationBackdrop';
+import SafeImg from './SafeImg';
 import { stampTap, liftHover } from '@/lib/anim';
 import { isFirstEverRun, arsenalVisible, ARRIVEE, CREPUSCULE } from '@/lib/coach';
 import { loadHighScores } from '@/contexts/GameContext';
@@ -645,6 +646,13 @@ export default function MainScreen() {
             animate={{ opacity: 1, y: 0 }}
             className="craft-card p-3 border-[#B8860B]/40 flex flex-col gap-2"
           >
+            {/* Un visage, pas un emoji : on emprunte à QUELQU'UN, et c'est ce
+                visage qu'on reverra le jour de l'échéance. */}
+            <SafeImg
+              src="/assets/npc-preteur.webp"
+              alt=""
+              className="w-full h-24 object-cover rounded-lg"
+            />
             <div className="flex items-center gap-2">
               <span className="text-lg">🤲</span>
               <span className="text-xs text-[#3D3020] flex-1 leading-snug">

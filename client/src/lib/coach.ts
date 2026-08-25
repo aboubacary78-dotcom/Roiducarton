@@ -70,6 +70,23 @@ export const COACHES: Coach[] = [
     when: ({ char }) => bas(char.stats) <= 30,
   },
   /*
+   * LA TÊTE QUI PART — et il faut le DIRE, une fois.
+   *
+   * Sous 60 de mental, les mots des rencontres commencent à se mélanger (voir
+   * lib/charabia). Sans cette phrase, le joueur croit à un bug d'affichage et
+   * va le signaler ; avec elle, il comprend que le jeu lui parle de son
+   * personnage. C'est la différence entre une mécanique et un défaut.
+   *
+   * Une seule fois, au franchissement. La répéter reviendrait à expliquer une
+   * blague.
+   */
+  {
+    id: 'tete', emoji: '🌀', targetId: 'tuto-stats',
+    fr: 'Vous relisez deux fois et les mots ne tiennent pas en place. Ce n\'est pas le jeu, c\'est votre tête. Dormez.',
+    en: 'You read it twice and the words won\'t sit still. That\'s not the game, that\'s your head. Get some sleep.',
+    when: ({ char }) => char.stats.mental < 60,
+  },
+  /*
    * LE RÉVEIL — quatrième et dernier temps.
    *
    * La nuit vient de prendre quinze points de sommeil sans rien demander. On

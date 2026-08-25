@@ -141,14 +141,36 @@ verifier('sans argent, il prend l\'objet le plus cher',
   saisi.inventory.map(i => i.id).join(', '));
 verifier('et la dette est éteinte : c\'est un paiement, pas une punition', !saisi.dette);
 
-// ── Ne pas pouvoir payer, sac vide : la note monte ─────────────────────────
-await situer({ day: dette.echeance, money: 0, location: 'gare', dette, inventory: [] });
-await clic('Je n\'ai pas|don\'t have it'); await pause(1000);
-const relance = await perso();
-verifier('sac vide, la dette n\'est PAS effacée', !!relance.dette);
-verifier('elle monte de 4 €', relance.dette?.montant === 19, String(relance.dette?.montant));
-verifier('et il revient dans deux jours', relance.dette?.echeance === relance.day + 2,
-  `jour ${relance.day}, échéance ${relance.dette?.echeance}`);
+/*
+ * ── Ne pas pouvoir payer, sac vide : il se paie sur votre peau ─────────────
+ *
+ * Première version : la note montait de quatre euros et il revenait dans deux
+ * jours. C'était une non-conséquence — on empruntait, on dépensait tout, on
+ * encaissait un report, et le prêteur devenait une banque gratuite. Il tabasse
+ * désormais, et la dette est éteinte : il s'est payé à sa façon, ce qui est
+ * plus dissuasif qu'un report et plus juste qu'une spirale sans issue.
+ */
+await situer({ day: dette.echeance, money: 0, location: 'gare', dette, inventory: [],
+  stats: { health: 90, mental: 80, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
+await clic('Je n\'ai pas|don\'t have it'); await pause(1200);
+const battu = await perso();
+verifier('sac vide, ça coûte beaucoup de santé', battu.stats.health <= 60,
+  `${battu.stats.health} pour 90 avant`);
+verifier('et beaucoup de dignité', battu.stats.dignity <= 45,
+  `${battu.stats.dignity} pour 70 avant`);
+verifier('la dette est éteinte : il s\'est payé', !battu.dette);
+verifier('le personnage est encore en vie à 90 de santé', battu.alive !== false);
+
+// ── Et ça peut tuer : c'est un roguelite, la mort est le principe ──────────
+await situer({ day: dette.echeance, money: 0, location: 'gare', dette, inventory: [],
+  stats: { health: 12, mental: 80, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
+await clic('Je n\'ai pas|don\'t have it'); await pause(1400);
+const mort = await p.evaluate(() => {
+  const brut = localStorage.getItem('roi-du-carton-save');
+  return { save: brut, ecran: document.body.innerText.slice(0, 60) };
+});
+verifier('à 12 de santé, la raclée tue', !mort.save || /game.?over|fin|score|repose/i.test(mort.ecran),
+  mort.save ? mort.ecran : 'sauvegarde effacée');
 
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 
