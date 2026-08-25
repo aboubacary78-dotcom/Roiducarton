@@ -404,8 +404,30 @@ Tout ce qui précède, c'est l'installation : elle ne se fait qu'une fois. Pour
 récupérer les changements, il n'y a plus que **quatre lignes**, et deux d'entre
 elles sont des vérifications.
 
-Ouvre PowerShell **dans le dossier du projet** (clic droit dans le dossier →
-« Ouvrir dans le terminal »), et tape ceci ligne par ligne.
+### 0. Se mettre dans le bon dossier — la moitié des ratés viennent de là
+
+Le projet est ici :
+
+```
+C:\Users\aboub\Documents\Roiducarton
+```
+
+PowerShell s'ouvre par défaut dans `C:\Users\aboub`, où il n'y a rien. Toutes
+les commandes qui suivent échouent alors avec `not a git repository` ou
+`ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND` — c'est le même problème dit deux fois,
+et il ne veut pas dire que quelque chose est cassé.
+
+```powershell
+cd $HOME\Documents\Roiducarton
+```
+
+Si le dossier a été déplacé un jour, cette ligne-ci le retrouve et y va :
+
+```powershell
+cd (gci $HOME capacitor.config.ts -r -ea 0 | % Directory | select -f 1)
+```
+
+`pwd` doit répondre un chemin qui finit par **`Roiducarton`**.
 
 ### 1. Vérifier que tu n'as rien modifié par accident
 
