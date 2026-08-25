@@ -109,19 +109,41 @@ print(f'        stéréo : {", ".join(s[:-4] for s in stereo) or "—"}')
 # ── Comparaison à la commande ──────────────────────────────────────────────
 if commande and commande.exists():
     texte = commande.read_text()
+    """
+    LES NOMS DE FICHIERS, QUEL QUE SOIT LE FORMAT DE LA COMMANDE.
+
+    La première version exigeait `nom.mp3` SUIVI d'une durée sur la même ligne.
+    Une commande écrite autrement — noms sans extension, durée donnée une fois
+    pour tout le lot dans les réglages de sortie — ne produisait donc aucun
+    attendu, et le script annonçait « 0 commandés, 0 livrés » avec un `ok`
+    tranquille. Le contrôle le plus important du script était désactivé sans
+    que rien ne le signale, ce qui est pire que de ne pas l'avoir.
+
+    On accepte donc les deux écritures, et l'extension est facultative. La
+    durée, quand elle figure sur la ligne, sert encore au contrôle grossier ;
+    quand elle manque, on ne compare pas les durées, et on le dit.
+    """
     attendus = {}
     for ligne in texte.splitlines():
-        m = re.search(r'`([a-z0-9-]+\.mp3)`(?: 🔁)?\s*\|\s*([0-9,–\-\s]+)s', ligne)
-        if m:
-            attendus[m.group(1)] = m.group(2).strip()
+        m = re.search(r'`([a-z][a-z0-9-]{3,}?)(\.mp3)?`(?: 🔁)?', ligne)
+        if not m:
+            continue
+        duree = re.search(r'\|\s*([0-9,–\-\s]+)s\s*\|', ligne)
+        attendus[m.group(1) + '.mp3'] = duree.group(1).strip() if duree else ''
     livres = {f.name for f in fichiers}
     manquants = sorted(set(attendus) - livres)
     en_plus = sorted(livres - set(attendus))
 
     print()
-    print(f'  {"ok  " if not manquants else "RATÉ"}  {len(attendus)} commandés, '
-          f'{len(attendus) - len(manquants)} livrés'
-          + (f' — MANQUE : {manquants}' if manquants else ''))
+    # Une commande dont on n'extrait AUCUN nom n'est pas une commande vérifiée :
+    # c'est un analyseur qui n'a rien compris au document.
+    if not attendus:
+        print('  RATÉ  aucun nom de fichier extrait de la commande')
+        rate('commande illisible', str(commande))
+    else:
+        print(f'  {"ok  " if not manquants else "RATÉ"}  {len(attendus)} commandés, '
+              f'{len(attendus) - len(manquants)} livrés'
+              + (f' — MANQUE : {manquants}' if manquants else ''))
     if manquants:
         rate('fichiers manquants', str(manquants))
     if en_plus:

@@ -94,7 +94,10 @@ const dire = (nom, liste, bloquant = true) => {
   }
 };
 
-dire('les 81 se décodent dans un vrai navigateur', casses);
+// Le compte vient du lot qu'on inspecte : il était écrit en dur (« les 81 »)
+// depuis la livraison précédente, et le script annonçait donc fièrement un
+// nombre faux sur tous les lots suivants.
+dire(`les ${resultats.length} se décodent dans un vrai navigateur`, casses);
 dire('aucun fichier silencieux', muets);
 dire('aucun fichier inaudiblement faible', faibles, false);
 dire('silence de tête sous 10 ms', tardifs, false);

@@ -236,17 +236,49 @@ verifier('le gain s\'annonce en pièces, jamais avec l\'objet du passant',
   (manche.gains || []).length > 0 && manche.gains.every(g => g.startsWith('🪙')),
   (manche.gains || []).join(' · '));
 
-// ── Rien de tout ça n'existe encore sur le disque ──────────────────────────
-const manquants = await p.evaluate(async (liste) => {
-  const out = [];
+/* ── LES 42 PRISES SONT-ELLES BIEN LÀ, ET SE DÉCODENT-ELLES ? ──────────────
+ *
+ * Ce contrôle vérifiait l'inverse avant la livraison : que le jeu tourne sans
+ * les fichiers. Il tourne toujours sans eux — les replis n'ont pas bougé — mais
+ * ce n'est plus ce qu'il faut surveiller.
+ *
+ * Le vrai risque, maintenant, est le silence discret : un nom de fichier avec
+ * un tiret de travers, ou un MP3 qui se télécharge sans se décoder. Dans les
+ * deux cas le repli prend la main, personne ne voit d'erreur, et le son
+ * qu'on a payé ne se joue jamais. On demande donc les 42 par leur nom exact
+ * et on les décode dans le moteur audio du jeu.
+ */
+const NOMS = [];
+for (const g of ['h', 'f']) {
+  NOMS.push(`voix-${g}-tete-1`, `voix-${g}-tete-2`);
+  for (const q of ['douleur', 'degout', 'effort']) for (const n of [1, 2, 3]) NOMS.push(`voix-${g}-${q}-${n}`);
+  for (const q of ['agace', 'refus']) for (const n of [1, 2, 3]) NOMS.push(`passant-${g}-${q}-${n}`);
+}
+NOMS.push('recup-rat-1', 'recup-rat-2', 'recup-rat-3', 'recup-guepes', 'recup-verre',
+  'recup-pourri-1', 'recup-pourri-2', 'recup-pourri-3');
+
+const bilan = await p.evaluate(async (liste) => {
+  const absents = [], sourds = [];
+  const ac = new AudioContext();
   for (const f of liste) {
-    const r = await fetch(`/audio/${f}.mp3`, { method: 'HEAD' });
-    if (!r.ok) out.push(f);
+    const r = await fetch(`/audio/${f}.mp3`);
+    if (!r.ok) { absents.push(f); continue; }
+    try {
+      const a = await ac.decodeAudioData(await r.arrayBuffer());
+      const e = a.getChannelData(0);
+      let crete = 0;
+      for (let i = 0; i < e.length; i++) { const v = Math.abs(e[i]); if (v > crete) crete = v; }
+      if (crete < 0.01) sourds.push(f);
+    } catch { sourds.push(f); }
   }
-  return out;
-}, ['voix-h-tete-1', 'voix-f-douleur-1', 'recup-rat-1', 'passant-f-agace-1']);
-verifier('les prises ne sont pas encore livrées, et le jeu tourne quand même',
-  manquants.length === 4, `${manquants.length}/4 absentes, aucune erreur de page`);
+  await ac.close();
+  return { absents, sourds };
+}, NOMS);
+
+verifier(`les ${NOMS.length} prises sont en place`,
+  bilan.absents.length === 0, bilan.absents.join(', ') || `${NOMS.length}/${NOMS.length}`);
+verifier('  …et se décodent toutes, avec du son dedans',
+  bilan.sourds.length === 0, bilan.sourds.join(', ') || 'aucune muette');
 
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 

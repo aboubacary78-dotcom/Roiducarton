@@ -82,13 +82,34 @@ for (const [jauge, attendu] of [
     sons.includes(attendu), sons.filter(s => s.startsWith('corps-')).join(', ') || 'aucun son de corps');
 }
 
-// Une jauge qui n'est pas du corps garde l'alerte neutre.
+/*
+ * LE MENTAL A CHANGÉ DE CAMP, ET CE TEST AVEC LUI.
+ *
+ * Il gardait l'alerte neutre, et ce test le vérifiait : il ne se soignait
+ * d'aucun geste, lui donner une voix de corps aurait été un contresens.
+ *
+ * Ça ne tient plus. Depuis que la tête qui part brouille le texte des
+ * rencontres, le joueur VOIT quelque chose d'anormal sans savoir d'où ça
+ * vient, et il peut y remédier — en dormant. Symptôme visible plus remède
+ * connu : la jauge a mérité sa voix, et sans elle le brouillage passe pour un
+ * bug d'affichage.
+ *
+ * Le test dit donc maintenant le contraire de ce qu'il disait, à dessein.
+ */
 vide();
 await jauges({ health: 80, mental: 12, hunger: 80, thirst: 80, sleep: 80 });
 await pause(900);
-verifier('le mental garde l\'alerte neutre',
-  sons.includes('jauge-rouge') && !sons.some(s => s.startsWith('corps-')),
-  sons.filter(s => /jauge|corps/.test(s)).join(', ') || 'aucun');
+verifier('le mental appelle sa propre voix',
+  sons.some(s => /^voix-[hf]-tete/.test(s)),
+  sons.filter(s => /jauge|corps|voix/.test(s)).join(', ') || 'aucun');
+
+// La dignité, elle, garde bien l'alerte neutre : aucun geste ne la répare.
+vide();
+await jauges({ health: 80, mental: 80, hunger: 80, thirst: 80, sleep: 80, dignity: 12 });
+await pause(900);
+verifier('la dignité garde l\'alerte neutre',
+  sons.includes('jauge-rouge') && !sons.some(s => s.startsWith('corps-') || /^voix-/.test(s)),
+  sons.filter(s => /jauge|corps|voix/.test(s)).join(', ') || 'aucun');
 
 // ── Les fichiers de tension existent et se chargent ────────────────────────
 const dispo = await p.evaluate(async () => {

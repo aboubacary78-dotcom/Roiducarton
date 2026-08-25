@@ -1,5 +1,30 @@
 # Commande audio — « Le Roi du Carton » — 42 sons : la voix et les saletés
 
+> ## ✅ LIVRÉ ET INSTALLÉ — 25 août 2026
+>
+> Les 42 fichiers sont dans `client/public/audio/` et se jouent en jeu.
+> Contrôles indépendants passés : 42/42 présents, aucun doublon bit-à-bit,
+> tous mono 48 kHz, tous décodés dans le moteur audio du jeu, crête à
+> −1,5 dBFS, silence de tête à 0 ms.
+>
+> **Deux écarts à la commande, acceptés :**
+>
+> 1. **Voix de synthèse, pas deux interprètes** (règle ③). Le prestataire l'a
+>    signalé de lui-même. Mesuré : à contenu égal, les deux timbres sont à
+>    0,548 l'un de l'autre — plus loin que deux sons sans aucun rapport
+>    (0,486). Ce ne sont pas les mêmes prises re-pitchées.
+> 2. **9 des 34 vocalisations ne transcrivent pas à vide** (règle ①), contre
+>    « 34 transcriptions vides » annoncées. Le rapport ne comptait que la
+>    dernière des trois passes. Tout ce qui sort est de l'interjection —
+>    うん, ああ, Ah!, Oh — c'est-à-dire ce qu'une transcription automatique
+>    produit forcément quand on lui donne un souffle. **Deux fichiers valent
+>    une écoute** : `voix-f-degout-1` (transcrit « Nie ») et `voix-f-degout-2`
+>    (transcrit « Ja »), les seuls dont la sortie soit un mot d'une vraie
+>    langue.
+>
+> **Licence :** ElevenLabs Sound Effects API, compte Starter payant — les
+> abonnements payants incluent la licence commerciale.
+
 **Ce document est la commande complète. Tout ce qu'il faut est dedans : aucun
 autre fichier n'est nécessaire.**
 
@@ -83,7 +108,7 @@ appuyé ne l'est pas, il est juste désagréable.
 | Niveau | normalisé sur la partie sonnante, crête à **−1,5 dB** |
 | Silence de tête | **moins de 10 ms** — le son doit tomber pile sur le geste |
 | Noms de fichiers | **exactement** ceux des tableaux, à la lettre près |
-| Dépôt | `client/public/assets/audio/` |
+| Dépôt | `client/public/audio/` |
 
 **Suffixe de style à ajouter à la fin de CHAQUE prompt de voix :**
 
