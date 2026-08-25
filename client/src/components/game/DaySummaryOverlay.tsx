@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr } from '@/lib/lang';
 import { canOfferRewarded, showRewarded } from '@/lib/ads';
 import { playWakeUp, playWear, playBack, playGaugeFilled, playUnlock } from '@/lib/sound';
-import { piquer } from '@/contexts/data/piques';
-import { pushToast } from '@/lib/toast';
 
 /** Sous ce niveau une jauge est en danger — le même seuil que l'alerte sonore. */
 const SEUIL_ALERTE = 25;
@@ -49,17 +47,14 @@ export default function DaySummaryOverlay() {
      * lire, et deux informations qui arrivent ensemble n'en font qu'une.
      */
     /*
-      LA NUIT QU'ON VIENT DE PASSER, PAS UNE NUIT EN GÉNÉRAL.
+      LE COMMENTAIRE DU MATIN N'EST PLUS ICI.
 
-      La remarque tombait tous les matins, quelle qu'ait été la nuit — « le
-      carton a pris l'eau » après une nuit sèche, et le joueur comprend d'un
-      coup que rien n'est regardé. On passe donc la météo et ce que le sommeil
-      a coûté ; `piquer` ne garde que ce qui colle, et se tait quand rien ne
-      colle. Un matin sans commentaire est le prix à payer pour que les autres
-      matins veuillent dire quelque chose.
+      Il partait en bandeau flottant au-dessus de ce bilan et disparaissait en
+      trois secondes — une notification posée sur le jeu, pas une ligne du
+      jeu. Il est maintenant écrit dans les NOTES de la nuit (voir le reducer,
+      cas NEXT_DAY), au milieu du réchaud qui a tenu et du carton qui a lâché.
+      On le lit avec le reste, et aussi longtemps qu'on veut.
     */
-    const p = piquer('reveil', { meteo: s.weather, sommeil: s.deltas.sleep ?? 0 });
-    if (p) setTimeout(() => pushToast(tr(p.fr, p.en), { emoji: '🌅', duration: 3400 }), 1400);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jour]);
 

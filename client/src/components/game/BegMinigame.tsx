@@ -7,8 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playCoin, playHurt, playMiss, playPassantAgace, playPassantRefus, playPoliceApproche, playPoliceIntervention, playPolicePresence, playStep, playTensionTic } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
-import { piquer } from '@/contexts/data/piques';
-import { pushToast } from '@/lib/toast';
 import MinigameIntro, { introSeen } from './MinigameIntro';
 import MinigameHelpButton from './MinigameHelpButton';
 import CardboardAvatar from './CardboardAvatar';
@@ -137,18 +135,14 @@ function BegMinigameInner() {
     if (reason === 'cop') playPoliceIntervention();
     else if (reason !== 'time') playHurt();
     /*
-     * VINGT-QUATRE SECONDES DE MANCHE POUR UNE PIÈCE.
+     * LE COMMENTAIRE SUR LA RÉCOLTE N'EST PLUS ICI.
      *
-     * Le pire moment du mini-jeu, et donc le meilleur endroit pour une vanne :
-     * elle transforme une frustration en anecdote, ce qu'aucun chiffre ne sait
-     * faire. Seulement quand la ronde n'a rien confisqué et qu'aucune bagarre
-     * n'a éclaté — sinon la mauvaise récolte a une cause, et se moquer d'une
-     * cause connue tombe à plat.
+     * Il flottait en bandeau au-dessus de l'écran de fin. Il est maintenant
+     * DANS le texte du résultat (voir le reducer), à côté de « Même les rats
+     * vous ont regardé avec pitié » qui tenait déjà ce rôle depuis toujours —
+     * c'est cet endroit-là qui fait la différence entre une vanne du jeu et
+     * une notification posée dessus.
      */
-    if (reason === 'time' && coinsRef.current <= 1) {
-      const p = piquer('gain-miserable', { gain: Math.round(coinsRef.current) });
-      if (p) setTimeout(() => pushToast(tr(p.fr, p.en), { emoji: '🪙', tone: 'bad', duration: 3400 }), 900);
-    }
     setTimeout(() => dispatch({
       type: 'RESOLVE_BEG',
       coins: Math.round(coinsRef.current),

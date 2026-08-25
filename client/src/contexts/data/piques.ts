@@ -289,6 +289,43 @@ export function piquer(
   return banque[i];
 }
 
+/**
+ * LA PIQUE COLLÉE AU BOUT DU TEXTE QUE LE JEU ÉCRIT DÉJÀ.
+ *
+ * C'est le bon endroit, et il existait avant les piques : « Vingt minutes les
+ * bras dans les ordures pour rien. Même les rats vous ont regardé avec
+ * pitié. » vit dans le TEXTE DU RÉSULTAT de la Récup', sur la grande carte,
+ * avec l'image. Elle reste tant qu'on lit, elle fait partie du récit.
+ *
+ * Mes piques, elles, flottaient en bandeau au-dessus de l'écran et
+ * disparaissaient en trois secondes. Même bien écrites, elles se lisaient
+ * comme une notification posée par-dessus le jeu — d'où « on dirait que c'est
+ * mis pour être mis ». La différence n'est pas dans les phrases, elle est dans
+ * l'endroit.
+ *
+ * Elles rejoignent donc le texte. Le toast ne reste que là où le jeu n'écrit
+ * rien — c'est-à-dire quand rien ne vient de se produire, seulement un seuil
+ * qu'on a franchi en vivant.
+ */
+export function avecPique(
+  texte: string,
+  cat: CategoriePique,
+  ctx: Contexte = {},
+): string {
+  const p = piquer(cat, ctx);
+  return p ? `${texte} ${p.fr}` : texte;
+}
+
+/** La même, pour un texte déjà bilingue (`L(fr, en)` rend une paire). */
+export function avecPiqueBilingue(
+  fr: string, en: string,
+  cat: CategoriePique,
+  ctx: Contexte = {},
+): { fr: string; en: string } {
+  const p = piquer(cat, ctx);
+  return p ? { fr: `${fr} ${p.fr}`, en: `${en} ${p.en}` } : { fr, en };
+}
+
 /** Nouvelle partie : le défunt n'emporte pas le compteur de piques. */
 export function reinitialiserPiques(): void {
   dernierePique = 0;

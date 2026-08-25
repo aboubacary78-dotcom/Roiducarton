@@ -54,23 +54,23 @@ const verifier = (nom, ok, detail) => {
 };
 
 /*
- * On SURVEILLE les toasts au lieu de les cueillir à un instant donné : ils
- * vivent trois secondes et arrivent avec un décalage volontaire, pour ne pas
- * se poser sur l'animation qu'ils commentent. Un `innerText` pris au hasard
- * les rate une fois sur deux.
+ * ON LIT L'ÉCRAN, PLUS LES TOASTS.
+ *
+ * Les piques flottaient en bandeau au-dessus du jeu et disparaissaient en
+ * trois secondes ; ce test les guettait donc à la volée. Elles sont
+ * maintenant écrites DANS le texte que le jeu produit — le résultat d'une
+ * action, les notes de la nuit — exactement là où vivait déjà « Même les rats
+ * vous ont regardé avec pitié ». On lit donc simplement la page, et elles y
+ * restent aussi longtemps que le joueur.
  */
-async function guetterToasts(ms) {
-  const vus = new Set();
+async function lireEcran(ms) {
+  const vu = new Set();
   const fin = Date.now() + ms;
   while (Date.now() < fin) {
-    // `[data-toasts]` et pas une classe de position : la pile a déjà déménagé
-    // une fois, et le test s'était retrouvé à guetter un endroit vide.
-    const t = await p.evaluate(() => [...document.querySelectorAll('[data-toasts] span')]
-      .map(e => e.textContent.trim()).filter(Boolean));
-    t.forEach(x => vus.add(x));
-    await pause(120);
+    vu.add(await p.evaluate(() => document.body.innerText.replace(/\s+/g, ' ')));
+    await pause(200);
   }
-  return [...vus];
+  return [...vu].join(' ');
 }
 
 await p.goto('http://localhost:8099/', { waitUntil: 'networkidle2' });
@@ -119,7 +119,23 @@ await situer({
   day: 4, money: 20, location: 'gare',
   stats: { health: 80, mental: 80, hunger: 4, thirst: 80, sleep: 80, dignity: 60 },
 });
-const vusAgonie = await guetterToasts(3500);
+/*
+ * L'AGONIE RESTE UN TOAST, ET C'EST LE SEUL CAS.
+ *
+ * Franchir un seuil de jauge n'est le résultat d'aucune action : ça arrive en
+ * vivant, sur le hub, où le jeu n'écrit rien. Il n'y a donc aucun texte où
+ * poser la remarque, et le bandeau reste le seul endroit possible. Les quatre
+ * autres catégories, elles, ont toutes une carte de résultat ou un bilan de
+ * nuit qui les accueille.
+ */
+const vusAgonie = await p.evaluate(async () => {
+  const vu = new Set();
+  for (let i = 0; i < 30; i++) {
+    document.querySelectorAll('[data-toasts] span').forEach(e => vu.add(e.textContent.trim()));
+    await new Promise(r => setTimeout(r, 120));
+  }
+  return [...vu].filter(Boolean);
+});
 const piqueAgonie = vusAgonie.find(t => AGONIE.some(a => t.includes(a.slice(0, 22))));
 verifier(`le ventre à 4, la rue commente (${AGONIE.length} phrases possibles)`,
   !!piqueAgonie, piqueAgonie || vusAgonie.join(' | ') || 'aucun toast');
@@ -156,10 +172,12 @@ await pause(1100);
 await clic('Continuer la partie|Continue'); await pause(1400);
 await clic('compris|Got it'); await pause(400);
 verifier('la nuit se lance', await clic('Jour Suivant|Next Day'));
-const vusMatin = await guetterToasts(6000);
-const piqueMatin = vusMatin.find(t => REVEIL.some(r => t.includes(r.slice(0, 22))));
-verifier(`au réveil, la rue commente (${REVEIL.length} phrases possibles)`,
-  !!piqueMatin, piqueMatin || vusMatin.join(' | ') || 'aucun toast');
+// Le matin, la remarque est une NOTE du bilan de nuit — au milieu du réchaud
+// qui a tenu et du carton qui a lâché, et elle y reste tant qu'on lit.
+const ecranMatin = await lireEcran(4000);
+const piqueMatin = REVEIL.find(r => ecranMatin.includes(r.slice(0, 24)));
+verifier(`au réveil, la remarque est DANS le bilan (${REVEIL.length} possibles)`,
+  !!piqueMatin, piqueMatin || ecranMatin.slice(0, 150));
 
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 

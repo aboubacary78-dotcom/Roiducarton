@@ -32,6 +32,7 @@ import { takePendingGifts } from '@/lib/daily';
 import { isFirstEverRun } from '@/lib/coach';
 import { progress as commandeProgress } from '@/lib/commande';
 import { DIGNITY_TIERS } from './data/dignity';
+import { avecPiqueBilingue, piquer } from './data/piques';
 import {
   generateEvents, generateBegEvents, generateRestEvents, generateTravelEvent,
   freshPool, rememberEvent, flavorFrom, makeLegendEvent, dueSursaut,
@@ -485,9 +486,19 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const respectDelta = money >= 8 ? 1 : 0;
       const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
       const isAlive = newStats.health > 0 && newStats.mental > 0;
+      /*
+       * Le commentaire de la rue entre DANS le texte du résultat, comme la
+       * phrase des rats de la Récup'. Seulement quand la récolte est
+       * dérisoire : c'est le moment où une vanne transforme une frustration
+       * en anecdote, et le seul où elle a quelque chose à dire.
+       */
+      const maigre = money <= 1
+        ? avecPiqueBilingue('💨 Pas un sou aujourd\'hui.', '💨 Not a penny today.',
+            'gain-miserable', { gain: money })
+        : null;
       const prefix = money >= 8 ? L('🎩 Manche exceptionnelle ! ', '🎩 An exceptional haul! ')
         : money > 0 ? L('🪙 Quelques pièces au fond du chapeau. ', '🪙 A few coins in the bottom of the hat. ')
-        : L('💨 Pas un sou aujourd\'hui. ', '💨 Not a penny today. ');
+        : L(`${maigre!.fr} `, `${maigre!.en} `);
       const weatherNote = modifier !== 1 ? (modifier > 1 ? L(' Le beau temps a rendu les passants généreux.', ' The good weather made passers-by generous.') : L(' Le mauvais temps a fait fuir les passants.', ' The bad weather scared off passers-by.')) : '';
       const dignityNote = c.stats.dignity >= 70 ? L(' Votre allure soignée a inspiré confiance.', ' Your neat appearance inspired trust.')
         : c.stats.dignity < 25 ? L(' Votre allure négligée a fait fuir plus d\'un passant.', ' Your unkempt look scared off more than one passer-by.') : '';
@@ -609,8 +620,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             `🐀 The pile won. What you'd pulled out stayed down there with the rest.${savedNote} ${deep >= 3 ? 'You should have climbed out sooner.' : 'It happens.'}`,
           )
         : haul === ''
-          ? L('🗑️ Vingt minutes les bras dans les ordures pour rien. Même les rats vous ont regardé avec pitié.',
-              '🗑️ Twenty minutes elbow-deep in rubbish for nothing. Even the rats looked at you with pity.')
+          /*
+           * La phrase des rats est le MODÈLE de toutes les piques : elle vit
+           * dans le texte du résultat, sur la grande carte, avec l'image, et
+           * elle reste tant qu'on lit. Les piques la rejoignent ici plutôt que
+           * de flotter en bandeau au-dessus de l'écran — c'est l'endroit, pas
+           * l'écriture, qui faisait qu'elles sonnaient posées là par hasard.
+           */
+          ? (() => {
+              const p = avecPiqueBilingue(
+                '🗑️ Vingt minutes les bras dans les ordures pour rien. Même les rats vous ont regardé avec pitié.',
+                '🗑️ Twenty minutes elbow-deep in rubbish for nothing. Even the rats looked at you with pity.',
+                'gain-miserable', { gain: 0 });
+              return L(p.fr, p.en);
+            })()
           : L(
               `♻️ Vous ressortez avec ${haul}.${deep >= 3 ? ' Vous êtes descendu loin, et vous êtes remonté à temps.' : ''}`,
               `♻️ You come out with ${haul}.${deep >= 3 ? ' You went deep, and you got out in time.' : ''}`,
@@ -723,9 +746,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           ...state,
           character: { ...c, stats: newStats, respect: c.respect - 2, alive: isAlive },
           eventResult: {
-            text: rossee
-              ? L(`🦺 Raté ! Les vigiles vous « raccompagnent » loin de ${target.label}, réglementairement mais très fermement. Tout fait mal.`, `🦺 Failed! The guards "escort" you away from ${target.labelEn}, by the book but very firmly. Everything hurts.`)
-              : L(`🚨 Raté ! Repéré en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoché.`, `🚨 Failed! Spotted trying to steal ${target.labelEn}, you flee amid insults, a little battered.`),
+            /*
+             * La rue commente le casse raté DANS le texte du résultat, pas en
+             * bandeau par-dessus. C'est le seul échec du jeu que le joueur ait
+             * intégralement choisi — il a vu les gardes et il a tenté quand
+             * même — donc le seul où la moquerie porte sans être injuste.
+             */
+            text: (() => {
+              const base = rossee
+                ? { fr: `🦺 Raté ! Les vigiles vous « raccompagnent » loin de ${target.label}, réglementairement mais très fermement. Tout fait mal.`,
+                    en: `🦺 Failed! The guards "escort" you away from ${target.labelEn}, by the book but very firmly. Everything hurts.` }
+                : { fr: `🚨 Raté ! Repéré en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoché.`,
+                    en: `🚨 Failed! Spotted trying to steal ${target.labelEn}, you flee amid insults, a little battered.` };
+              const p = avecPiqueBilingue(base.fr, base.en, 'vol-rate');
+              return L(p.fr, p.en);
+            })(),
             statChanges: statDelta, respectChange: -2, image: '/assets/result-steal-fail.webp',
           },
           screen: isAlive ? 'main' : 'game-over',
@@ -1511,6 +1546,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         const d = decayedStats[k] - ch.stats[k];
         if (d !== 0) deltas[k] = d;
       });
+
+      /*
+       * LE COMMENTAIRE DU MATIN REJOINT LES NOTES DE LA NUIT.
+       *
+       * Il flottait en bandeau au-dessus du bilan, trois secondes, avant de
+       * disparaître — une notification posée sur le jeu plutôt qu'une ligne
+       * du jeu. Ici, il prend sa place au milieu de ce que la nuit a fait :
+       * le réchaud qui a tenu, le carton qui a lâché, et la remarque de la
+       * rue. On le lit avec le reste, aussi longtemps qu'on veut.
+       *
+       * `piquer` ne rend rien si la nuit ne mérite aucun commentaire, et les
+       * notes restent alors telles quelles.
+       */
+      const piqueMatin = piquer('reveil', { meteo: nextWeather, sommeil: deltas.sleep ?? 0 });
+      if (piqueMatin) { notes.push(`🌅 ${piqueMatin.fr}`); notesEn.push(`🌅 ${piqueMatin.en}`); }
 
       return {
         ...state,
