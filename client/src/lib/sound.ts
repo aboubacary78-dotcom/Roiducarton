@@ -124,6 +124,119 @@ export function setMuted(v: boolean): void {
   muteListeners.forEach(f => { try { f(v); } catch { /* silent */ } });
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LES DEUX VOLUMES
+ *
+ * Il n'y avait qu'un bouton sourdine : tout ou rien. Ça ne répondait à aucune
+ * des deux plaintes reçues — « le son du jeu est trop fort » et « le fond du
+ * hub est trop fort », qui ne sont PAS la même. Baisser tout à cause du fond
+ * fait disparaître les alertes de survie, et c'est précisément ce qu'il ne
+ * faut pas.
+ *
+ * D'où deux curseurs et pas un :
+ *
+ *   · VOLUME  — tout le jeu, effets compris.
+ *   · FOND    — les ambiances et les lits de mini-jeu seuls. Il se multiplie
+ *               au précédent, donc le fond ne peut jamais passer devant.
+ *
+ * Tout passe désormais par ces deux nœuds : plus rien ne se branche
+ * directement sur `destination`. C'est ce qui rend le réglage instantané —
+ * changer un gain de nœud agit sur ce qui joue DÉJÀ, alors qu'un facteur
+ * appliqué à l'appel n'agirait qu'au son suivant, et jamais sur une boucle
+ * d'ambiance qui tourne depuis dix minutes.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+const VOL_KEY = 'roi-du-carton-volume';
+const VOL_FOND_KEY = 'roi-du-carton-volume-fond';
+
+/*
+ * Lit un volume mémorisé. Une valeur absente ou aberrante rend le défaut.
+ *
+ * Le `=== null` n'est pas de la prudence décorative, c'est la correction d'un
+ * bug qui rendait le jeu MUET à la première installation : `getItem` rend
+ * `null` quand la clé n'existe pas, et `Number(null)` vaut 0 — un zéro
+ * parfaitement fini, parfaitement dans [0, 1], donc accepté comme un réglage
+ * volontaire. Chaque nouveau joueur aurait lancé le jeu avec les deux
+ * curseurs à zéro, et rien à l'écran n'aurait expliqué le silence.
+ */
+function lireVolume(cle: string, defaut: number): number {
+  try {
+    const brut = localStorage.getItem(cle);
+    if (brut === null || brut === '') return defaut;
+    const v = Number(brut);
+    return Number.isFinite(v) && v >= 0 && v <= 1 ? v : defaut;
+  } catch { return defaut; }
+}
+
+let volume = lireVolume(VOL_KEY, 1);
+let volumeFond = lireVolume(VOL_FOND_KEY, 1);
+
+let busEffets: GainNode | null = null;
+let busFond: GainNode | null = null;
+
+/** La sortie des effets. Tout bruitage s'y branche au lieu de `destination`. */
+export function sortieEffets(ac: AudioContext): AudioNode {
+  if (!busEffets || busEffets.context !== ac) {
+    busEffets = ac.createGain();
+    busEffets.gain.value = volume;
+    busEffets.connect(ac.destination);
+    busFond = null;   // le fond passe par les effets : il suit le contexte
+  }
+  return busEffets;
+}
+
+/** La sortie du fond sonore. Branchée SOUS celle des effets, jamais à côté. */
+export function sortieFond(ac: AudioContext): AudioNode {
+  const effets = sortieEffets(ac);
+  if (!busFond || busFond.context !== ac) {
+    busFond = ac.createGain();
+    busFond.gain.value = volumeFond;
+    busFond.connect(effets);
+  }
+  return busFond;
+}
+
+export function getVolume(): number { return volume; }
+export function getVolumeFond(): number { return volumeFond; }
+
+export function setVolume(v: number): void {
+  volume = Math.min(1, Math.max(0, v));
+  try { localStorage.setItem(VOL_KEY, String(volume)); } catch { /* silent */ }
+  // Une rampe courte plutôt qu'un saut : un gain qui bouge d'un coup claque.
+  const ac = ctx;
+  if (busEffets && ac) busEffets.gain.setTargetAtTime(volume, ac.currentTime, 0.02);
+}
+
+export function setVolumeFond(v: number): void {
+  volumeFond = Math.min(1, Math.max(0, v));
+  try { localStorage.setItem(VOL_FOND_KEY, String(volumeFond)); } catch { /* silent */ }
+  const ac = ctx;
+  if (busFond && ac) busFond.gain.setTargetAtTime(volumeFond, ac.currentTime, 0.02);
+}
+
+/*
+ * PRISE DE MESURE — et pourquoi elle n'est pas conditionnée au mode debug.
+ *
+ * Un réglage de volume est le contrôle qui a l'air de marcher sans marcher :
+ * le curseur bouge, le pourcentage change, la valeur part dans le
+ * localStorage, et le son sort au même niveau parce que le facteur n'a jamais
+ * atteint le graphe audio. Rien à l'écran ne le dirait.
+ *
+ * `scripts/test-volume.mjs` mesure donc le signal réel en sortie. Il tourne
+ * sur le BUILD DE PRODUCTION — c'est le seul qui prouve quelque chose — donc
+ * une prise réservée au développement ne lui servirait à rien.
+ *
+ * Ce qui est exposé ici ne fait rien qu'un joueur ne puisse déjà faire depuis
+ * l'écran Options : régler son propre volume.
+ */
+if (typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>).__bus = {
+    get effets() { const ac = audio(); return ac ? sortieEffets(ac) : null; },
+    get fond() { const ac = audio(); return ac ? sortieFond(ac) : null; },
+    setVolume, setVolumeFond, getVolume, getVolumeFond,
+  };
+}
+
 // Une note synthétisée avec enveloppe simple.
 function tone(freq: number, dur: number, type: OscillatorType, gain: number, slideTo?: number) {
   const ac = audio();
@@ -137,7 +250,7 @@ function tone(freq: number, dur: number, type: OscillatorType, gain: number, sli
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(gain, t0 + 0.008);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  osc.connect(g).connect(ac.destination);
+  osc.connect(g).connect(sortieEffets(ac));
   osc.start(t0);
   osc.stop(t0 + dur + 0.02);
 }
@@ -164,7 +277,7 @@ function noise(dur: number, gain: number, hp = 800) {
   const g = ac.createGain();
   g.gain.setValueAtTime(gain, t0);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-  src.connect(filter).connect(g).connect(ac.destination);
+  src.connect(filter).connect(g).connect(sortieEffets(ac));
   src.start(t0);
   src.stop(t0 + dur + 0.02);
 }

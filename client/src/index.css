@@ -367,3 +367,65 @@ body.conseil-affiche {
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
+/*
+ * LE CURSEUR DE VOLUME, EN CARTON.
+ *
+ * Un `<input type="range">` natif habillé : on garde le glissé au doigt, le
+ * clavier et la zone de toucher élargie du navigateur, on ne refait que
+ * l'apparence.
+ *
+ * Le rail est du kraft strié — le même geste que le ruban de chantier, mais
+ * sans le noir : ici la rayure n'est pas un signal, c'est de la matière. La
+ * poignée est un bout de scotch bleu, la couleur d'action de la palette : le
+ * même bleu que les boutons principaux, parce que c'est bien ce que c'est, un
+ * contrôle qu'on manipule.
+ *
+ * 26 px de poignée, au-dessus des 24 px que Google exige comme cible tactile
+ * minimale, et le rail seul en fait 8 — d'où le `padding` vertical qui rend
+ * toute la ligne attrapable, pas seulement le trait.
+ */
+.curseur-carton {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  background: transparent;
+  padding: 9px 0;          /* la ligne entière devient attrapable */
+  cursor: pointer;
+}
+
+.curseur-carton::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  border: 1px solid #C8AE8E;
+  background: repeating-linear-gradient(-56deg, #E0CBA8 0 6px, #D6BE97 6px 12px);
+}
+.curseur-carton::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+  border: 1px solid #C8AE8E;
+  background: repeating-linear-gradient(-56deg, #E0CBA8 0 6px, #D6BE97 6px 12px);
+}
+
+.curseur-carton::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -10px;       /* recentre la poignée sur un rail de 8 px */
+  border-radius: 7px;
+  background: var(--carton-scotch);
+  border: 1px solid #14507c;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.28);
+}
+.curseur-carton::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--carton-scotch);
+  border: 1px solid #14507c;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.28);
+}
+
+.curseur-carton:focus-visible::-webkit-slider-thumb { outline: 2px solid #2A1F1A; outline-offset: 2px; }
+.curseur-carton:focus-visible::-moz-range-thumb { outline: 2px solid #2A1F1A; outline-offset: 2px; }

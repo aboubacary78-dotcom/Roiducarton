@@ -28,7 +28,7 @@
  * pose la couche météo, indépendamment du quartier. La sourdine des Options
  * coupe/relance proprement (voir onMuteChange dans sound.ts).
  */
-import { getAudio, isMuted, onMuteChange } from './sound';
+import { getAudio, isMuted, onMuteChange, sortieFond } from './sound';
 import { loadAudio, startLoop, type Loop } from './audioFiles';
 
 export type AmbienceId = 'title' | 'parc' | 'centre-ville' | 'zone-industrielle' | 'gare' | 'marche'
@@ -137,27 +137,22 @@ const WEATHER_GAIN = 0.42;  // la couche météo reste sous le lit du quartier
  * commit. Voir docs/design/couches-sonores-hub.md.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-/** Une seule couche se pose encore sur le quartier : la météo. */
-function syncCouches(): void {
-  syncWeather();
-}
-
 function sync(): void {
   const ac = getAudio();
   const want = isMuted() ? null : desired;
 
   // Rien à faire si on joue déjà ce qu'il faut.
-  if (running && running.id === want) { syncCouches(); return; }
-  if (fileLoop && fileLoop.id === want) { syncCouches(); return; }
+  if (running && running.id === want) { syncWeather(); return; }
+  if (fileLoop && fileLoop.id === want) { syncWeather(); return; }
 
   if (running) { running.stop(); running = null; }
   if (fileLoop) { fileLoop.loop.stop(1.0); fileLoop = null; }
-  if (!want) { syncCouches(); return; }
+  if (!want) { syncWeather(); return; }
   if (!ac) return;
   if (ac.state !== 'running') { armGesture(); return; }
 
   // Le thème du titre reste synthétisé : il plaît tel quel.
-  if (want === 'title') { running = { id: want, stop: BUILDERS[want]!(ac) }; syncCouches(); return; }
+  if (want === 'title') { running = { id: want, stop: BUILDERS[want]!(ac) }; syncWeather(); return; }
 
   // Les lits de mini-jeu : le fichier ou rien. Ils sont plus discrets que les
   // quartiers — on joue par-dessus, la tension vient des effets.
@@ -168,7 +163,7 @@ function sync(): void {
       const loop = startLoop(buf, MINIGAME_GAIN, 1.8);
       if (loop) fileLoop = { id: want, loop };
     });
-    syncCouches();
+    syncWeather();
     return;
   }
 
@@ -185,7 +180,7 @@ function sync(): void {
       const loop = startLoop(buf, MORT_GAIN, 4);
       if (loop) fileLoop = { id: want, loop };
     });
-    syncCouches();
+    syncWeather();
     return;
   }
 
@@ -195,13 +190,13 @@ function sync(): void {
     if (running || fileLoop) return;                  // quelqu'un a déjà démarré
     if (buf) {
       const loop = startLoop(buf, MASTER_GAIN, 1.6);
-      if (loop) { fileLoop = { id: want, loop }; syncCouches(); return; }
+      if (loop) { fileLoop = { id: want, loop }; syncWeather(); return; }
     }
     const ac2 = getAudio();
     if (!ac2 || ac2.state !== 'running') return;
     const build = BUILDERS[want];
     if (build) running = { id: want, stop: build(ac2) };
-    syncCouches();
+    syncWeather();
   });
 }
 
@@ -227,7 +222,7 @@ function armGesture(): void {
   EVENTS.forEach((e) => window.addEventListener(e, kick, { capture: true }));
 }
 
-onMuteChange(() => { sync(); syncCouches(); });
+onMuteChange(() => { sync(); syncWeather(); });
 
 /* ------------------------------------------------------------------ */
 /* Boîte à outils commune                                              */
@@ -245,7 +240,7 @@ function makeKit(ac: AudioContext): Kit {
   const out = ac.createGain();
   out.gain.setValueAtTime(0.0001, ac.currentTime);
   out.gain.exponentialRampToValueAtTime(MASTER_GAIN, ac.currentTime + 1.2); // fondu d'entrée
-  out.connect(ac.destination);
+  out.connect(sortieFond(ac));
   return { ac, out, timers: [], nodes: [out], stopped: false };
 }
 

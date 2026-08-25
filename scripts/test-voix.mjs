@@ -212,12 +212,43 @@ await p.evaluate(() => {
  */
 demandes.length = 0;
 let rueOuverte = false;
-for (let essai = 0; essai < 3 && !rueOuverte; essai++) {
+/*
+ * SIX ESSAIS, ET LE CHIFFRE EST MESURÉ.
+ *
+ * Le balayage des deux côtés a fait passer l'échec d'une fois sur trois à une
+ * fois sur dix (10 exécutions), mais il en reste : la rue n'est pas toujours
+ * là au bout de trois tentatives. Chaque essai repose entièrement l'état et
+ * refait le chemin, donc les tentatives sont quasi indépendantes — doubler
+ * leur nombre écrase ce qui reste, et ne coûte du temps que sur les
+ * exécutions qui auraient échoué.
+ */
+for (let essai = 0; essai < 6 && !rueOuverte; essai++) {
   await situer({ day: 4, gender: 'f', ...SOLVABLE, stats: { health: 90, mental: 90, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
-  for (const bouton of ['compris|Got it', 'Continuer|Continue', 'Fermer|Close']) {
-    if (await clic(bouton)) await pause(400);
-  }
+  /*
+   * ON BALAIE AVANT ET APRÈS, ET C'EST TOUT LE CORRECTIF.
+   *
+   * Ce test échouait une fois sur cinq, toujours sur « la manche s'ouvre »,
+   * les quatre contrôles suivants tombant en cascade — cinq échecs pour un
+   * seul clic manqué. En capturant l'écran bloquant, TROIS obstacles
+   * différents sont apparus, et ils n'arrivent pas au même moment :
+   *
+   *   · une rencontre (« Le Marché de Noël », « La Station de Lavage ») qui
+   *     s'ouvre par-dessus le hub et ne se quitte que par sa flèche ;
+   *   · la carte de règles du mini-jeu — « 🎩 La manche / COMMENT JOUER » —
+   *     qui, elle, apparaît APRÈS le clic sur Mendier. Le balayage d'avant ne
+   *     pouvait pas la voir : la manche était bien ouverte, et cachée.
+   *
+   * D'où un balayage des deux côtés du clic plutôt qu'un seul avant.
+   */
+  const balayer = async () => {
+    for (const bouton of ['on y va|Got it', 'compris|Understood', 'Continuer|Continue',
+      'Fermer|Close', '← Retour|← Back']) {
+      if (await clic(bouton)) await pause(400);
+    }
+  };
+  await balayer();
   await clic('Mendier|Beg'); await pause(1300);
+  await balayer(); await pause(500);
   rueOuverte = await p.evaluate(() => !!document.querySelector('[aria-label*="Rue"], [aria-label*="Street"]'));
   if (!rueOuverte) console.log('   …essai', essai + 1, ':', await p.evaluate(() => ({
     ecran: document.body.innerText.replace(/\s+/g, ' ').slice(0, 110),

@@ -1,7 +1,7 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { isMuted, playBack, playDignityTier, playMoneyOut, playPage, playToggle, setMuted } from '@/lib/sound';
+import { getVolume, getVolumeFond, isMuted, playBack, playDignityTier, playMoneyOut, playPage, playToggle, setMuted, setVolume, setVolumeFond } from '@/lib/sound';
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
@@ -31,13 +31,58 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.46.0';
+const APP_VERSION = '3.47.0';
+
+/*
+ * UN CURSEUR EN CARTON.
+ *
+ * `<input type="range">` natif, et volontairement : il apporte gratuitement
+ * le glissé au doigt, le clavier, et surtout la zone de toucher élargie que
+ * les navigateurs mobiles accordent aux contrôles de formulaire. Un curseur
+ * refait en div se rate au pouce une fois sur trois.
+ *
+ * L'apparence est reprise dans `index.css` (.curseur-carton) : rail de kraft
+ * strié, poignée en bout de scotch bleu — la couleur d'action de la palette
+ * diégétique, la même que les boutons principaux.
+ *
+ * Le retour sonore part au RELÂCHEMENT, pas à chaque pas : un bip par pixel
+ * pendant qu'on fait glisser rendrait le réglage du volume insupportable,
+ * ce qui serait une belle ironie.
+ */
+function Curseur({ libelle, valeur, onChange, onRelache }: {
+  libelle: string;
+  valeur: number;
+  onChange: (v: number) => void;
+  onRelache: () => void;
+}) {
+  return (
+    <label className="block">
+      <span className="flex items-center justify-between text-sm font-semibold text-[#2A1F1A]">
+        {libelle}
+        <span className="text-xs text-[#8B6B4A] tabular-nums">{Math.round(valeur * 100)} %</span>
+      </span>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={Math.round(valeur * 100)}
+        onChange={(e) => onChange(Number(e.target.value) / 100)}
+        onPointerUp={onRelache}
+        onKeyUp={onRelache}
+        className="curseur-carton mt-1.5"
+        aria-label={libelle}
+      />
+    </label>
+  );
+}
 
 export default function SettingsScreen() {
   const { state, dispatch } = useGame();
   const lang = useLang();
   const [confirmReset, setConfirmReset] = useState(false);
   const [muted, setMutedState] = useState(isMuted());
+  const [vol, setVol] = useState(getVolume());
+  const [volFond, setVolFond] = useState(getVolumeFond());
   const [vibre, setVibre] = useState(hapticsEnabled());
   const [rappels, setRappels] = useState(notificationsEnabled());
   const [noAds, setNoAds] = useState(isAdsRemoved());
@@ -142,6 +187,38 @@ export default function SettingsScreen() {
             {muted ? tr('Coupé', 'Off') : tr('Activé', 'On')}
           </span>
         </button>
+
+        {/*
+         * DEUX CURSEURS, ET PAS UN SEUL.
+         *
+         * Deux plaintes sont arrivées, et elles ne sont pas la même : « le son
+         * du jeu est trop fort » et « le fond du hub est trop fort ». Un
+         * volume unique ne règle que la première — baisser tout à cause du
+         * fond emporte les alertes de survie avec lui, alors que ce sont
+         * elles qu'il faut entendre.
+         *
+         * Le second curseur se multiplie au premier, donc le fond ne peut
+         * jamais repasser devant les effets, quel que soit le réglage.
+         *
+         * Ils disparaissent en sourdine : un curseur qui ne fait rien est pire
+         * qu'un curseur absent.
+         */}
+        {!muted && (
+          <div className="mt-3 pt-3 border-t border-[#E8D5C0] space-y-3">
+            <Curseur
+              libelle={`🔊 ${tr('Volume', 'Volume')}`}
+              valeur={vol}
+              onChange={(v) => { setVol(v); setVolume(v); }}
+              onRelache={() => playToggle()}
+            />
+            <Curseur
+              libelle={`🌧️ ${tr('Fond sonore', 'Background')}`}
+              valeur={volFond}
+              onChange={(v) => { setVolFond(v); setVolumeFond(v); }}
+              onRelache={() => playToggle()}
+            />
+          </div>
+        )}
 
         {/* Réglage SÉPARÉ : couper le son ne doit pas couper le retour
             tactile, c'est justement là qu'il devient le seul canal. */}

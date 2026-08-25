@@ -20,7 +20,7 @@
  * 2. UN SEUL DÉCODAGE. Les tampons décodés sont gardés en mémoire : revenir
  *    au parc ne redécode pas 400 Ko.
  */
-import { getAudio } from './sound';
+import { getAudio, sortieEffets, sortieFond } from './sound';
 
 /** Marge rognée aux deux bouts d'une boucle, en secondes (voir en-tête). */
 const LOOP_TRIM = 0.06;
@@ -76,7 +76,7 @@ export function playBuffer(buffer: AudioBuffer, gain = 1): void {
   src.buffer = buffer;
   const g = ac.createGain();
   g.gain.value = gain;
-  src.connect(g).connect(ac.destination);
+  src.connect(g).connect(sortieEffets(ac));
   src.start();
   src.onended = () => { try { src.disconnect(); g.disconnect(); } catch { /* silent */ } };
 }
@@ -189,7 +189,9 @@ export function startLoop(buffer: AudioBuffer, gain: number, fadeInS = 1.2): Loo
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + fadeInS);
 
-  src.connect(g).connect(ac.destination);
+  // Une boucle est toujours du fond : ambiance de quartier, lit de
+  // mini-jeu, musique de mort. Rien d'autre n'appelle startLoop.
+  src.connect(g).connect(sortieFond(ac));
   src.start();
 
   let stopped = false;
