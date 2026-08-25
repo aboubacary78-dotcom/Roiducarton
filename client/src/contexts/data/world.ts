@@ -3,20 +3,57 @@ import type { Job, Trait, InventoryItem, HeritageKit, Character, Stats } from '.
 import { randomFromArray } from './util';
 import { loadHeritage } from '@/lib/necrology';
 
-const NAMES = [
+export const NAMES = [
   'Marcel', 'Gérard', 'Lucienne', 'Albert', 'Yvette', 'René', 'Josette', 'Fernand',
   'Ginette', 'Maurice', 'Colette', 'Raymond', 'Simone', 'Jean-Claude', 'Bernadette',
   'Didier', 'Monique', 'Thierry', 'Huguette', 'Patrick'
 ];
 
-// Prénoms féminins (pour que le visage corresponde au prénom).
+/*
+ * ═══════════════════════════════════════════════════════════════════════════
+ * QUI EST UNE FEMME, DANS TOUT LE JEU.
+ *
+ * Cette table ne couvrait que les vingt prénoms du JOUEUR. Les PNJ de la rue
+ * en ont trente (voir data/npc), dont six femmes qui n'y figuraient pas —
+ * Odette, Paulette, Suzanne, Denise, Micheline, Jacqueline. Toutes étaient
+ * donc traitées comme des hommes : le mauvais visage sur l'avatar, et « il »
+ * dans chaque phrase.
+ *
+ * Ça se voyait à peine tant que les PNJ tenaient dans une ligne de texte. Le
+ * jour où le prêteur a eu droit à une vraie rencontre avec son portrait, on a
+ * lu « Jacqueline vous a regardé compter vos pièces, et IL a attendu ».
+ *
+ * LES DEUX LISTES SONT DONC EXHAUSTIVES ET VÉRIFIÉES. `prenomsNonClasses()`
+ * rend ce qui manque : c'est ce qui empêche qu'ajouter un prénom quelque part
+ * recrée silencieusement le même défaut.
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
 const FEMALE_NAMES = new Set([
   'Lucienne', 'Yvette', 'Josette', 'Ginette', 'Colette', 'Simone',
   'Bernadette', 'Monique', 'Huguette',
+  'Odette', 'Paulette', 'Suzanne', 'Denise', 'Micheline', 'Jacqueline',
+]);
+
+const MALE_NAMES = new Set([
+  'Marcel', 'Gérard', 'Albert', 'René', 'Fernand', 'Maurice', 'Raymond',
+  'Jean-Claude', 'Didier', 'Thierry', 'Patrick', 'Roger', 'Robert', 'Lucien',
+  'André', 'Gaston', 'Henri',
 ]);
 
 export function genderFromName(name: string): 'm' | 'f' {
   return FEMALE_NAMES.has(name) ? 'f' : 'm';
+}
+
+/**
+ * Les prénoms qu'aucune des deux listes ne connaît.
+ *
+ * `genderFromName` répond « homme » par défaut, ce qui est un repli honnête
+ * mais silencieux : un prénom oublié ne lève rien et se lit comme un bug de
+ * texte des mois plus tard. Cette fonction existe pour que le contrôle soit
+ * possible, et elle est appelée par les tests.
+ */
+export function prenomsNonClasses(noms: string[]): string[] {
+  return noms.filter(n => !FEMALE_NAMES.has(n) && !MALE_NAMES.has(n));
 }
 
 export const JOBS: Job[] = [

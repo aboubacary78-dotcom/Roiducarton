@@ -82,6 +82,16 @@ async function rencontre(mental) {
   await p.evaluate((m) => {
     const s = JSON.parse(localStorage.getItem('roi-du-carton-save'));
     s.character.day = 4;
+    /*
+     * DE QUOI NE PAS INTÉRESSER LE PRÊTEUR.
+     *
+     * Il aborde qui a moins de trois euros en poche, et sa proposition est
+     * elle aussi une rencontre à part entière depuis peu : le test tombait
+     * dessus une fois sur trois et lisait SON texte au lieu de celui d'une
+     * exploration. Ce test-ci porte sur le brouillage des rencontres, pas sur
+     * la dette — on écarte donc la dette du décor.
+     */
+    s.character.money = 20;
     s.character.stats.mental = m;
     s.character.activeFlags = ['origin-vu'];
     s.dayActions = 0;
@@ -89,10 +99,27 @@ async function rencontre(mental) {
   }, mental);
   await p.reload({ waitUntil: 'networkidle2' }); await pause(1000);
   await clic('Continue|Reprendre'); await pause(1000);
-  await clic('Regarder|Take a look'); await pause(300);
-  await clic('Merci|Thanks'); await pause(500);
-  if (!await clic('Explorer|Explore')) return null;
-  await pause(1200);
+  /*
+   * LE HUB N'EST PAS TOUJOURS NU EN ARRIVANT.
+   *
+   * Selon le personnage tiré et ses jauges, le récit d'origine, la carte du
+   * tutoriel ou un conseil du coach peuvent être posés devant — et ils avalent
+   * le clic sur « Explorer ». Une fois sur trois, le test ne trouvait donc
+   * aucune rencontre et accusait le brouillage de ne pas s'appliquer, alors
+   * qu'il n'avait jamais atteint l'écran où on l'aurait vu.
+   *
+   * On balaie ce qui peut recouvrir, puis on insiste.
+   */
+  for (const bouton of ['Regarder|Take a look', 'Merci|Thanks', 'compris|Got it', 'Continuer|Continue']) {
+    if (await clic(bouton)) await pause(400);
+  }
+  let ouvert = false;
+  for (let essai = 0; essai < 3 && !ouvert; essai++) {
+    if (await clic('Explorer|Explore')) { await pause(1200); }
+    ouvert = await p.evaluate(() => !!document.querySelector('.craft-card p'));
+    if (!ouvert) { await clic('compris|Got it'); await pause(400); }
+  }
+  if (!ouvert) return null;
   return p.evaluate(() => {
     const desc = document.querySelector('.craft-card p');
     const choix = [...document.querySelectorAll('button.action-btn')]

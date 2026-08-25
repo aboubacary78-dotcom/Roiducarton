@@ -6,9 +6,10 @@
 // Génération DÉTERMINISTE par (jour + lieu + seed du joueur) : le même PNJ est
 // présent toute la journée à un lieu donné, et « bouge » d'un jour à l'autre —
 // sans rien stocker en sauvegarde.
-import type { Character, Enemy, InventoryItem, Job, Trait } from '../types';
+import type { Character, Enemy, GameEvent, InventoryItem, Job, Trait } from '../types';
 import { JOBS, TRAITS, genderFromName } from './world';
 import { generateOrigin, type OriginStory } from './backstory';
+import { L } from './util';
 
 // Les lieux où l'on croise du monde.
 export const SOCIAL_LOCATIONS = ['centre-ville', 'gare', 'marche'];
@@ -18,7 +19,9 @@ export function isSocialLocation(location: string): boolean {
 }
 
 // Un large éventail de prénoms (mixte) pour la variété des rencontres.
-const NPC_NAMES = [
+// Exporté pour que les tests vérifient que TOUS sont classés en genre : un
+// prénom oublié se lit « il » sans rien signaler (voir prenomsNonClasses).
+export const NPC_NAMES = [
   'Marcel', 'Gérard', 'Lucienne', 'Albert', 'Yvette', 'René', 'Josette', 'Fernand',
   'Ginette', 'Maurice', 'Colette', 'Raymond', 'Simone', 'Bernadette', 'Roger',
   'Monique', 'Thierry', 'Huguette', 'Patrick', 'Odette', 'Robert', 'Paulette',
@@ -276,6 +279,107 @@ export function preteurDuJour(day: number, location: string, playerSeed: string)
 /** L'échéance est-elle tombée ? Il vous trouve partout — c'est le principe. */
 export function detteExigible(c: { day: number; dette?: { echeance: number } }): boolean {
   return !!c.dette && c.day >= c.dette.echeance;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * LES DEUX RENDEZ-VOUS, MIS EN SCÈNE COMME DES RENCONTRES
+ *
+ * Ils vivaient dans une carte du hub, avec une bande d'image de 96 pixels
+ * coincée entre la météo et les boutons d'action. C'est le format d'un rappel,
+ * pas d'un moment : le prêteur passait au même rang qu'un contrat du jour.
+ *
+ * Or ce sont exactement des rencontres — quelqu'un vous aborde, vous avez deux
+ * réponses possibles, et le choix vous suit. Elles passent donc par l'écran
+ * des rencontres, comme les compagnons : la grande image, le nom, le visage
+ * qu'on reverra. C'est ce visage-là qui fait toute la mécanique, et il ne
+ * pouvait rien faire en vignette.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/*
+ * LE PRÊTEUR N'EST PAS TOUJOURS UN HOMME.
+ *
+ * Son prénom est tiré de la même liste mixte que tous les PNJ du jeu, et la
+ * première version de ces deux textes disait « il » quoi qu'il arrive : on
+ * lisait « Suzanne vous a regardé compter vos pièces, et IL a attendu ». Le
+ * reste du jeu accorde partout (voir SITUATIONS et ses {S}) ; ces deux
+ * rencontres-là faisaient exception, et c'étaient les seules à montrer un
+ * visage — donc les seules où la faute saute aux yeux.
+ */
+interface Preteur { nom: string; gender: 'm' | 'f' }
+
+/** Il ou elle vous a vu compter vos pièces. Refusable — sinon ce n'est pas un choix. */
+export function evenementPreteur(preteur: Preteur): GameEvent {
+  const { nom } = preteur;
+  const f = preteur.gender === 'f';
+  const Il = f ? 'Elle' : 'Il', il = f ? 'elle' : 'il';
+  const He = f ? 'She' : 'He';
+  return {
+    id: 'dette-offre',
+    type: 'social',
+    title: L(
+      f ? 'Celle qui avance l\'argent' : 'Celui qui avance l\'argent',
+      'The one who fronts the money',
+    ),
+    description: L(
+      `${nom} vous a regardé compter vos pièces, et ${il} a attendu que vous ayez fini. « ${DETTE_PRET}€ tout de suite. Tu m'en rends ${DETTE_DU} dans ${DETTE_DELAI} jours. » ${Il} ne sourit pas. ${Il} ne menace pas non plus. ${Il} attend, comme si ${il} avait déjà entendu toutes les réponses possibles.`,
+      `${nom} watched you count your coins, and waited until you were done. "${DETTE_PRET}€ right now. You give me back ${DETTE_DU} in ${DETTE_DELAI} days." ${He} isn't smiling. ${He} isn't threatening either. ${He} waits, like someone who has already heard every possible answer.`,
+    ),
+    image: '/assets/npc-preteur.webp',
+    fallbackImage: '/assets/scene-gare.webp',
+    choices: [
+      {
+        text: L(`Prendre les ${DETTE_PRET}€`, `Take the ${DETTE_PRET}€`),
+        risk: 'risky', emoji: '🤲', action: 'ACCEPTER_PRET', outcomes: [],
+      },
+      {
+        text: L('Refuser, et repartir les mains vides', 'Refuse, and walk away empty-handed'),
+        risk: 'safe', emoji: '🚶', action: 'REFUSER_PRET', outcomes: [],
+      },
+    ],
+  };
+}
+
+/**
+ * Le jour dit. Il vous a trouvé, et il n'y a pas de bouton pour l'éviter.
+ *
+ * `sansRetour` : c'est la seule rencontre du jeu qu'on ne peut pas quitter.
+ * Trois jours à compter ses euros ne veulent rien dire si le rendez-vous se
+ * ferme d'un « Retour ».
+ */
+export function evenementEcheance(
+  dette: { nom: string; montant: number; gender: 'm' | 'f' },
+  argent: number,
+): GameEvent {
+  const peutPayer = argent >= dette.montant;
+  const f = dette.gender === 'f';
+  const Il = f ? 'Elle' : 'Il', il = f ? 'elle' : 'il';
+  const He = f ? 'She' : 'He', he = f ? 'she' : 'he';
+  return {
+    id: 'dette-echeance',
+    type: 'social',
+    sansRetour: true,
+    title: L('L\'échéance', 'The due date'),
+    description: L(
+      `${dette.nom} est ${f ? 'adossée' : 'adossé'} au mur, les bras croisés. ${Il} était là avant vous. ${Il} ne dit rien pendant un moment, puis : « ${dette.montant}. » C'est tout ce qu'${il} dit, et c'est suffisant.`,
+      `${dette.nom} is leaning against the wall, arms folded. ${He} was here before you got here. ${He} says nothing for a moment, then: "${dette.montant}." That's all ${he} says, and it's enough.`,
+    ),
+    image: '/assets/npc-preteur-echeance.webp',
+    fallbackImage: '/assets/npc-preteur.webp',
+    choices: [
+      {
+        text: L(`Payer les ${dette.montant}€`, `Pay the ${dette.montant}€`),
+        risk: 'safe', emoji: '💶', action: 'REMBOURSER_DETTE', outcomes: [],
+        // Le bouton reste VISIBLE quand on n'a pas la somme, et verrouillé :
+        // le joueur doit voir ce qu'il aurait pu faire, sinon l'autre choix
+        // n'en est plus un.
+        bloqueSi: peutPayer ? undefined : { argentMoinsDe: dette.montant },
+      },
+      {
+        text: L('Dire que vous n\'avez pas', 'Say you don\'t have it'),
+        risk: 'risky', emoji: '🫥', action: 'AVOUER_INSOLVABILITE', outcomes: [],
+      },
+    ],
+  };
 }
 
 /**

@@ -44,7 +44,10 @@ import {
 import { getHeistTarget, HEIST_TARGETS } from './data/heist';
 import { RECIPES, recipeCost, pickMaterials, usureNuit } from './data/crafting';
 import { bagCapacity } from './data/world';
-import { encounterFlag, preteurDuJour, DETTE_PRET, DETTE_DU, DETTE_DELAI } from './data/npc';
+import {
+  encounterFlag, preteurDuJour, preteurPresent, detteExigible,
+  evenementPreteur, evenementEcheance, DETTE_PRET, DETTE_DU, DETTE_DELAI,
+} from './data/npc';
 
 // Façade stable : ré-exporte types & données pour les composants existants.
 export * from './types';
@@ -266,6 +269,7 @@ type GameAction =
   | { type: 'GARDER_OBJET' }
   // Fait compter comme rempli un contrat raté de peu.
   | { type: 'RATTRAPER_CONTRAT' }
+  | { type: 'OUVRIR_RENDEZ_VOUS_DETTE' }
   | { type: 'ACCEPTER_PRET' }
   | { type: 'REFUSER_PRET' }
   | { type: 'REMBOURSER_DETTE' }
@@ -902,6 +906,32 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
      * Le remboursement ne se marchande pas. Ce qui se joue, c'est l'échéance :
      * trois jours de jeu pendant lesquels chaque euro dépensé se compte.
      * ═══════════════════════════════════════════════════════════════════════ */
+    /*
+     * OUVRIR LE RENDEZ-VOUS QUI ATTEND.
+     *
+     * L'échéance d'abord : elle ne se refuse pas, et si les deux tombaient le
+     * même jour ce serait absurde de proposer un prêt à quelqu'un qu'on est en
+     * train de venir tabasser.
+     *
+     * Le hub appelle ça en arrivant. C'est le reducer qui décide s'il y a
+     * quelque chose à ouvrir, pour que la condition vive au même endroit que
+     * la mécanique — l'écran, lui, n'a pas à savoir ce qu'est une échéance.
+     */
+    case 'OUVRIR_RENDEZ_VOUS_DETTE': {
+      const c = state.character;
+      if (!c || !c.alive || state.screen !== 'main') return state;
+      if (state.currentEvent || state.eventResult || state.daySummary) return state;
+
+      if (detteExigible(c) && c.dette) {
+        return { ...state, currentEvent: evenementEcheance(c.dette, c.money), screen: 'event' };
+      }
+      if (preteurPresent(c)) {
+        const preteur = preteurDuJour(c.day, c.location, c.seed);
+        return { ...state, currentEvent: evenementPreteur(preteur), screen: 'event' };
+      }
+      return state;
+    }
+
     case 'ACCEPTER_PRET': {
       const c = state.character;
       if (!c || c.dette || state.screen !== 'main') return state;
@@ -1119,6 +1149,26 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'CHOOSE_EVENT': {
       if (!state.currentEvent || !state.character) return state;
       const choice = state.currentEvent.choices[action.choiceIndex];
+
+      /*
+       * LE CHOIX QUI N'EST PAS UN TIRAGE.
+       *
+       * Emprunter, rembourser, avouer qu'on ne peut pas : ce sont des règles,
+       * pas des probabilités. Elles ont déjà leur cas dans ce reducer, avec
+       * leurs conséquences exactes et leurs images de résultat. On ferme la
+       * rencontre et on leur passe la main plutôt que de réécrire quoi que ce
+       * soit — c'est ce qui permet de mettre en scène une mécanique comme une
+       * rencontre sans en dupliquer un octet.
+       *
+       * On repose l'écran sur « main » AVANT de déléguer : ces cas-là refusent
+       * de s'exécuter ailleurs, et c'est leur garde-fou, pas un détail.
+       */
+      if (choice.action) {
+        return gameReducer(
+          { ...state, currentEvent: null, screen: 'main' },
+          { type: choice.action },
+        );
+      }
 
       let outcome = choice.outcomes[0];
       // Valeur « heureuse » d'une issue (sert au coup de pouce et au Poissard).

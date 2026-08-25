@@ -13,6 +13,7 @@
  *     note monte. Une seule des deux, et c'est soit une punition, soit rien.
  */
 import puppeteer from 'puppeteer-core';
+import { readFileSync } from 'node:fs';
 
 const b = await puppeteer.launch({
   executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
@@ -55,15 +56,32 @@ await clic('Start surviving|Commencer'); await pause(900);
 await clic('Regarder|Take a look'); await pause(400);
 await clic('Merci|Thanks'); await pause(700);
 
+/*
+ * `null` EFFACE, `undefined` NE FAIT RIEN — ET C'EST UN PIÈGE.
+ *
+ * Puppeteer sérialise en JSON l'argument passé à `evaluate`, et JSON supprime
+ * purement et simplement les clés dont la valeur est `undefined`. Écrire
+ * `{ dette: undefined }` ne remet donc RIEN à zéro dans la page : la clé
+ * n'arrive jamais, la dette reste, et le test observe l'état précédent en
+ * croyant observer celui qu'il vient de poser. On efface avec `null`, qui, lui,
+ * traverse.
+ */
+function appliquer(cible, patch) {
+  for (const [k, v] of Object.entries(patch)) {
+    if (v === null) delete cible[k];
+    else cible[k] = v;
+  }
+}
+
 /** Se place dans une situation donnée, puis rouvre l'écran principal. */
 async function situer(patch) {
-  await p.evaluate((j) => {
+  await p.evaluate((j, src) => {
     const s = JSON.parse(localStorage.getItem('roi-du-carton-save'));
-    Object.assign(s.character, j);
+    (new Function('cible', 'patch', `return (${src})(cible, patch)`))(s.character, j);
     s.character.activeFlags = ['origin-vu'];
     s.dayActions = 0;
     localStorage.setItem('roi-du-carton-save', JSON.stringify(s));
-  }, patch);
+  }, patch, appliquer.toString());
   await p.reload({ waitUntil: 'networkidle2' });
   await pause(1000);
   await clic('Continue|Reprendre'); await pause(1100);
@@ -71,7 +89,7 @@ async function situer(patch) {
   await clic('Merci|Thanks'); await pause(500);
 }
 
-const RICHE = { day: 4, money: 40, location: 'gare', dette: undefined, detteRefuseeJour: undefined };
+const RICHE = { day: 4, money: 40, location: 'gare', dette: null, detteRefuseeJour: null };
 const FAUCHE = { ...RICHE, money: 1 };
 
 // ── Le prêteur n'arrive qu'au moment de la faiblesse ───────────────────────
@@ -115,6 +133,70 @@ verifier('la dette est inscrite à 15 €', apres.dette?.montant === 15, String(
 verifier('l\'échéance est à trois jours', apres.dette?.echeance === apres.day + 3,
   `jour ${apres.day}, échéance ${apres.dette?.echeance}`);
 verifier('le compteur s\'affiche dans l\'en-tête', /⏳\s*15€/.test(await texte()));
+
+/* ── LES DEUX RENDEZ-VOUS SONT DES RENCONTRES, PAS DES ENCARTS ─────────────
+ *
+ * Ils vivaient dans une carte du hub avec une bande d'image de 96 pixels,
+ * coincée entre la météo et les boutons — au même rang qu'un rappel de
+ * contrat. Toute la mécanique repose pourtant sur un visage qu'on reconnaît
+ * trois jours plus tard, et un visage ne fait pas ça en vignette.
+ *
+ * Trois choses à tenir, et chacune casse séparément :
+ *   · la rencontre s'OUVRE toute seule en arrivant sur le hub ;
+ *   · elle montre LA BONNE IMAGE — celle du prêteur qui propose, puis celle
+ *     du même qui attend ;
+ *   · et l'échéance ne se QUITTE PAS. Un bouton « Retour » viderait de leur
+ *     sens les trois jours qu'on vient de passer à compter ses euros.
+ */
+async function rendezVous(patch) {
+  /*
+   * L'ÉCRITURE ET LE RECHARGEMENT DANS LE MÊME SOUFFLE.
+   *
+   * L'application se sauvegarde d'elle-même à chaque changement d'état. Entre
+   * un `setItem` et un `reload` pilotés depuis Node, elle a tout le temps de
+   * réécrire par-dessus — et le test se retrouvait à examiner l'état
+   * précédent, en croyant examiner celui qu'il venait de poser. Ici, le
+   * `reload()` part depuis la page, sur la ligne suivante : il ne reste aucune
+   * fenêtre pour que React s'intercale.
+   */
+  await p.evaluate((j, src) => {
+    const s = JSON.parse(localStorage.getItem('roi-du-carton-save'));
+    (new Function('cible', 'patch', `return (${src})(cible, patch)`))(s.character, j);
+    s.character.activeFlags = ['origin-vu'];
+    s.dayActions = 0;
+    localStorage.setItem('roi-du-carton-save', JSON.stringify(s));
+    location.reload();
+  }, patch, appliquer.toString()).catch(() => { /* le rechargement coupe l'évaluation : c'est voulu */ });
+  await p.waitForNavigation({ waitUntil: 'networkidle2' }).catch(() => {});
+  await pause(1100);
+  await clic('Continuer la partie|Continue'); await pause(1500);
+  await clic('Regarder|Take a look'); await pause(300);
+  await clic('Merci|Thanks'); await pause(1200);
+  return p.evaluate(() => ({
+    // Le badge « Rencontre » n'existe que sur l'écran des rencontres.
+    surEcranRencontre: /Rencontre|Encounter/.test(document.body.innerText),
+    image: [...document.querySelectorAll('img')].map(i => i.src.split('/').pop()).find(s => /npc-preteur/.test(s)) || null,
+    retour: [...document.querySelectorAll('button')].some(b => b.offsetWidth && /^←/.test(b.textContent || '')),
+    choix: [...document.querySelectorAll('button.action-btn')].filter(b => b.offsetWidth).length,
+    ecran: document.body.innerText.replace(/\s+/g, ' ').slice(0, 130),
+  }));
+}
+
+const OFFRE = await rendezVous({ day: 4, money: 1, location: 'gare', dette: null, detteRefuseeJour: null });
+verifier('l\'offre s\'ouvre comme une rencontre', OFFRE.surEcranRencontre, OFFRE.ecran);
+verifier('  …avec le visage de celui qui propose',
+  OFFRE.image === 'npc-preteur.webp', OFFRE.image || 'aucune image de prêteur');
+verifier('  …et on peut passer son chemin', OFFRE.retour);
+
+const dueDette = { nom: 'Marcel', seed: 'x', gender: 'm', quartier: 'gare', montant: 15, echeance: 9 };
+const ECHEANCE = await rendezVous({ day: 9, money: 2, location: 'parc', inventory: [], dette: dueDette });
+verifier('l\'échéance s\'ouvre comme une rencontre', ECHEANCE.surEcranRencontre);
+verifier('  …avec le MÊME visage, trois jours plus tard',
+  ECHEANCE.image === 'npc-preteur-echeance.webp', ECHEANCE.image || 'aucune image de prêteur');
+verifier('  …et elle, on ne la quitte pas', !ECHEANCE.retour,
+  ECHEANCE.retour ? 'un bouton Retour permet de fuir l\'échéance' : 'aucune sortie');
+verifier('  …payer reste affiché, verrouillé, quand on n\'a pas la somme',
+  /15€ requis|15€ needed/.test(await texte()));
 
 // ── L'échéance trouve le joueur, même ailleurs ─────────────────────────────
 const dette = apres.dette;
@@ -247,6 +329,38 @@ const rendu = await p.evaluate(() => {
 });
 verifier('  …c\'est pourquoi la une la cadre par le bas',
   !!rendu && /bottom|100%/.test(rendu), rendu ?? 'image absente de la une');
+
+/*
+ * ── TOUS LES PRÉNOMS DU JEU ONT UN GENRE ──────────────────────────────────
+ *
+ * `genderFromName` répond « homme » par défaut. C'est un repli honnête et
+ * parfaitement silencieux : six prénoms de femmes de la liste des PNJ n'y
+ * figuraient pas, et le jeu écrivait « Jacqueline vous a regardé compter vos
+ * pièces, et IL a attendu » — avec le mauvais visage sur l'avatar, en prime.
+ * Rien ne l'aurait signalé sans une lecture attentive au bon moment.
+ *
+ * On lit les listes à la source plutôt que dans le bundle : c'est là qu'on
+ * ajoute un prénom, et c'est donc là que l'oubli se produira.
+ */
+const listes = (fichier, nom) => {
+  const src = readFileSync(fichier, 'utf8');
+  // Ancré sur `const` : sans ça, chercher MALE_NAMES tombe dans FEMALE_NAMES,
+  // qui le contient — et les deux listes n'en faisaient plus qu'une.
+  const m = src.match(new RegExp(`const ${nom}\\s*=\\s*(?:new Set\\()?\\[([^\\]]*)\\]`));
+  return m ? [...m[1].matchAll(/'([^']+)'/g)].map(x => x[1]) : [];
+};
+const tousPrenoms = new Set([
+  ...listes('client/src/contexts/data/world.ts', 'NAMES'),
+  ...listes('client/src/contexts/data/npc.ts', 'NPC_NAMES'),
+]);
+const classes = new Set([
+  ...listes('client/src/contexts/data/world.ts', 'FEMALE_NAMES'),
+  ...listes('client/src/contexts/data/world.ts', 'MALE_NAMES'),
+]);
+const oublies = [...tousPrenoms].filter(n => !classes.has(n));
+verifier(`les ${tousPrenoms.size} prénoms du jeu ont tous un genre déclaré`,
+  tousPrenoms.size > 20 && oublies.length === 0,
+  oublies.length ? `sans genre : ${oublies.join(', ')}` : `${classes.size} classés`);
 
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 

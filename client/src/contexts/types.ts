@@ -155,6 +155,16 @@ export interface GameEvent {
   fallbackImage?: string;
   requiresFlag?: string;
   isFollowUp?: boolean;
+  /**
+   * RENCONTRE DONT ON NE SORT PAS.
+   *
+   * Toutes les rencontres du jeu ont un bouton « Retour » : on peut passer son
+   * chemin, et c'est juste — la rue ne vous force à rien. L'échéance d'une
+   * dette, si. Le prêteur ne vous propose pas de le rencontrer, il est déjà
+   * devant vous, et un bouton pour l'éviter viderait de son sens les trois
+   * jours qu'on vient de passer à compter ses euros.
+   */
+  sansRetour?: boolean;
 }
 
 export interface EventChoice {
@@ -163,6 +173,19 @@ export interface EventChoice {
   emoji: string;
   requirements?: { item?: string; stat?: keyof Stats; minValue?: number; respect?: number };
   outcomes: EventOutcome[];
+  /**
+   * UN CHOIX QUI DÉCLENCHE UNE MÉCANIQUE, PAS UN TIRAGE.
+   *
+   * Une rencontre ordinaire tire une issue au sort dans `outcomes`. Emprunter
+   * dix euros, rembourser, ou avouer qu'on ne peut pas ne se tirent pas au
+   * sort : ce sont des règles du jeu, écrites dans le reducer, avec leurs
+   * conséquences exactes. Ce champ les branche sur l'écran de rencontre pour
+   * qu'elles aient la même mise en scène — la grande image, le nom, le visage
+   * — sans dupliquer une ligne de leur logique.
+   */
+  action?: 'ACCEPTER_PRET' | 'REFUSER_PRET' | 'REMBOURSER_DETTE' | 'AVOUER_INSOLVABILITE';
+  /** Verrou explicite, quand la condition ne tient pas dans `requirements`. */
+  bloqueSi?: { argentMoinsDe?: number };
 }
 
 export interface EventOutcome {

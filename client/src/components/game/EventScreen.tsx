@@ -1,4 +1,4 @@
-import { useGame, STAT_META, type Character, type EventChoice } from '@/contexts/GameContext';
+import { useGame, STAT_META, DETTE_PRET, type Character, type EventChoice } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { showRewarded, canOfferRewarded } from '@/lib/ads';
@@ -8,7 +8,7 @@ import KenBurnsImage from './KenBurnsImage';
 import SceneIllustration, { sceneFor, type SceneTheme } from './SceneIllustration';
 import { stampTap, liftHover } from '@/lib/anim';
 import { playEventSfx } from '@/lib/eventSfx';
-import { playBack, playClick, playMemory, playUnlock } from '@/lib/sound';
+import { playBack, playClick, playMemory, playMoneyIn, playMoneyOut, playTurnedAway, playUnlock } from '@/lib/sound';
 
 const COMBAT_IMG_FALLBACK = '/assets/combat-scene.webp';
 
@@ -23,6 +23,18 @@ const TYPE_SCENE: Record<string, SceneTheme> = {
 // Vérifie les conditions d'un choix (stat minimale, objet, compétence de
 // métier) et fournit le libellé à afficher sur le cadenas.
 function checkRequirements(choice: EventChoice, char: Character | null, en: boolean): { ok: boolean; label: string | null } {
+  /*
+   * Le verrou explicite, quand la condition ne rentre pas dans `requirements`
+   * : rembourser demande une SOMME, pas un objet ni un seuil de statistique.
+   * Le bouton reste visible et barré plutôt que retiré — le joueur doit voir
+   * ce qu'il aurait pu faire, sinon l'autre choix n'en est plus un.
+   */
+  if (choice.bloqueSi?.argentMoinsDe !== undefined && char) {
+    const somme = choice.bloqueSi.argentMoinsDe;
+    if (char.money < somme) {
+      return { ok: false, label: `${somme}€ ${en ? 'needed' : 'requis'}` };
+    }
+  }
   const req = choice.requirements;
   if (!req || !char) return { ok: true, label: null };
   if (req.stat && req.minValue !== undefined) {
@@ -38,6 +50,21 @@ function checkRequirements(choice: EventChoice, char: Character | null, en: bool
   }
   return { ok: true, label: null };
 }
+
+/*
+ * Les choix qui déclenchent une mécanique gardent le son de cette mécanique.
+ *
+ * Ils sonnaient tous comme un clic d'interface depuis qu'ils sont passés par
+ * l'écran des rencontres — alors que prendre dix euros et repartir sans rien
+ * ne s'entendaient pas pareil du temps où c'étaient des boutons du hub. On ne
+ * perd pas ça en changeant de mise en scène.
+ */
+const SON_DU_CHOIX: Record<string, () => void> = {
+  ACCEPTER_PRET: () => playMoneyIn(DETTE_PRET),
+  REFUSER_PRET: playBack,
+  REMBOURSER_DETTE: playMoneyOut,
+  AVOUER_INSOLVABILITE: playTurnedAway,
+};
 
 const TYPE_LABELS: Record<string, { label: string; labelEn: string; color: string }> = {
   combat: { label: 'Combat', labelEn: 'Combat', color: '#D94F4F' },
@@ -90,6 +117,12 @@ export default function EventScreen() {
   const candidates = [event.image, event.fallbackImage, isCombat ? COMBAT_IMG_FALLBACK : null].filter(Boolean) as string[];
   const eventImage = imgError < candidates.length ? candidates[imgError] : null;
   const typeInfo = TYPE_LABELS[event.type] || TYPE_LABELS['narrative'];
+  /*
+   * Une rencontre dont les choix sont des RÈGLES n'a pas d'issue à tirer, donc
+   * rien à garantir : proposer d'y « garantir le meilleur résultat » contre
+   * une publicité serait vendre quelque chose qui n'existe pas.
+   */
+  const mecanique = event.choices.every(c => !!c.action);
 
   return (
     <div className="min-h-screen bg-texture p-4 flex flex-col gap-3">
@@ -176,7 +209,10 @@ export default function EventScreen() {
                 transition={{ delay: 0.2 + i * 0.1 }}
                 whileHover={locked ? {} : liftHover}
                 whileTap={locked ? {} : stampTap}
-                onClick={locked ? undefined : () => { playClick(); dispatch({ type: 'CHOOSE_EVENT', choiceIndex: i, boosted }); }}
+                onClick={locked ? undefined : () => {
+                  (SON_DU_CHOIX[choice.action ?? ''] ?? playClick)();
+                  dispatch({ type: 'CHOOSE_EVENT', choiceIndex: i, boosted });
+                }}
                 disabled={locked}
                 className={`action-btn p-3 text-left flex items-start gap-2.5 ${boosted && !locked ? 'border-[#B8860B]/60' : ''} ${
                   locked ? 'opacity-50 pointer-events-none' : ''
@@ -200,7 +236,7 @@ export default function EventScreen() {
           <div className="mt-3 text-center text-xs font-semibold text-[#B8860B]">
             {tr('✨ Coup de pouce actif : votre prochain choix réussira au mieux.', '✨ Boost active: your next choice will get the best outcome.')}
           </div>
-        ) : canOfferRewarded() ? (
+        ) : canOfferRewarded() && !mecanique ? (
           <button
             onClick={() => { playUnlock(); activateBoost(); }}
             disabled={loadingBoost}
@@ -212,13 +248,26 @@ export default function EventScreen() {
         ) : null}
       </motion.div>
 
-      {/* Back */}
-      <button
-        onClick={() => { playBack(); dispatch({ type: 'SET_SCREEN', screen: 'main' }); }}
-        className="action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
-      >
-        ← {tr('Retour', 'Back')}
-      </button>
+      {/*
+        Back — sauf pour les rencontres dont on ne sort pas.
+
+        La rue ne vous force à rien, et toutes les rencontres se quittent : on
+        passe son chemin. L'échéance d'une dette, non. Un bouton « Retour »
+        viderait de leur sens les trois jours qu'on vient de passer à compter
+        ses euros, et le compteur de l'en-tête avec eux.
+      */}
+      {event.sansRetour ? (
+        <p className="text-center text-[11px] text-[#8B6B4A] py-3">
+          {tr('Personne ne bouge tant que vous n\'avez pas répondu.', 'Nobody moves until you answer.')}
+        </p>
+      ) : (
+        <button
+          onClick={() => { playBack(); dispatch({ type: 'SET_SCREEN', screen: 'main' }); }}
+          className="action-btn py-3 text-sm font-semibold text-[#6B5740] flex items-center justify-center gap-1.5"
+        >
+          ← {tr('Retour', 'Back')}
+        </button>
+      )}
     </div>
   );
 }

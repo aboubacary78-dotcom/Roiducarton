@@ -137,6 +137,26 @@ export default function MainScreen() {
   // lit son écran, pas au moment où il faut les montrer.
   useEffect(() => { prechargerActions(char.location); }, [char.location]);
 
+  /*
+   * LE RENDEZ-VOUS QUI ATTEND, OUVERT EN ARRIVANT.
+   *
+   * On arrive sur le hub, et s'il y a quelqu'un pour vous, la rencontre
+   * s'ouvre — comme un événement, parce que c'en est un.
+   *
+   * C'est le reducer qui décide s'il y a quelque chose à ouvrir : il connaît
+   * l'échéance, l'état des poches et les recouvrements d'écrans, et cet
+   * écran-ci n'a pas à les connaître. Il refuse de lui-même tant qu'un bilan
+   * de nuit ou une carte de résultat est encore devant, ce qui évite de faire
+   * surgir le prêteur par-dessus autre chose.
+   *
+   * Les dépendances sont les seules choses qui peuvent faire apparaître ou
+   * disparaître un rendez-vous : le jour, le quartier, l'argent, la dette. Sur
+   * `state` entier, l'effet se rejouerait à chaque battement du jeu.
+   */
+  useEffect(() => {
+    dispatch({ type: 'OUVRIR_RENDEZ_VOUS_DETTE' });
+  }, [dispatch, char.day, char.location, char.money, char.dette?.echeance, char.detteRefuseeJour, state.screen]);
+
 
   /*
    * LA COMMANDE DE LA SEMAINE.
@@ -195,8 +215,14 @@ export default function MainScreen() {
    * LA DETTE. Le prêteur n'apparaît qu'au moment de la faiblesse, et
    * l'échéance, elle, vous trouve partout : le jour venu, il n'y a plus de
    * quartier où ne pas être.
+   *
+   * Le hub n'en garde que le COMPTEUR, dans l'en-tête. Les deux rendez-vous
+   * eux-mêmes sont devenus des rencontres à part entière (voir data/npc) : ils
+   * tenaient dans une carte coincée entre la météo et les boutons, avec une
+   * bande d'image de 96 pixels, c'est-à-dire au même rang qu'un rappel de
+   * contrat. Or toute la mécanique repose sur un visage qu'on reconnaît trois
+   * jours plus tard, et un visage ne fait pas ça en vignette.
    */
-  const preteur = preteurPresent(char) ? preteurDuJour(char.day, char.location, char.seed) : undefined;
   const dette = char.dette;
   const exigible = detteExigible(char);
   const joursRestants = dette ? Math.max(0, dette.echeance - char.day) : 0;
@@ -358,55 +384,6 @@ export default function MainScreen() {
           </p>
         </button>
       </motion.div>
-
-      {/*
-        L'ÉCHÉANCE SE LIT SANS DÉFILER.
-        Placée près du voleur, en bas, il fallait faire défiler l'écran pour
-        découvrir qu'on était attendu — c'est-à-dire découvrir trop tard une
-        chose qui devait peser sur toutes les décisions de la journée. Elle
-        monte donc au-dessus de la météo, dans le tiers d'écran qu'on voit en
-        arrivant.
-      */}
-      {/* L'échéance est tombée : il vous a trouvé, et il n'y a pas de
-          bouton pour l'éviter. On paie, ou on lui dit qu'on ne peut pas. */}
-      {exigible && dette && (
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="craft-card p-3 border-[#B84A3A]/50 flex flex-col gap-2"
-        >
-          {/* Le MÊME visage que le jour de l'emprunt, trois jours plus tard :
-              c'est la répétition du portrait qui fait le rendez-vous, pas le
-              texte. Sans elle, l'échéance n'est qu'une ligne de plus. */}
-          <SafeImg
-            src="/assets/npc-preteur-echeance.webp"
-            alt=""
-            className="w-full h-24 object-cover rounded-lg"
-          />
-          <div className="flex items-center gap-2">
-            <span className="text-lg">💸</span>
-            <span className="text-xs font-semibold text-[#3D3020] flex-1">
-              {tr(`${dette.nom} vous attend. ${dette.montant}€.`, `${dette.nom} is waiting. ${dette.montant}€.`)}
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => { playMoneyOut(); dispatch({ type: 'REMBOURSER_DETTE' }); }}
-              disabled={char.money < dette.montant}
-              className="btn-primary flex-1 py-2 text-xs font-semibold disabled:opacity-40"
-            >
-              {tr(`Rembourser ${dette.montant}€`, `Pay ${dette.montant}€`)}
-            </button>
-            <button
-              onClick={() => { playTurnedAway(); dispatch({ type: 'AVOUER_INSOLVABILITE' }); }}
-              className="action-btn flex-1 py-2 text-xs font-medium text-[#6B5740]"
-            >
-              {tr('Je n\'ai pas', 'I don\'t have it')}
-            </button>
-          </div>
-        </motion.div>
-      )}
-
 
       {/* Météo */}
       <motion.div
@@ -645,47 +622,6 @@ export default function MainScreen() {
             {tr('matériaux', 'materials')}
           </span>
         </motion.button>
-
-        {/* Le prêteur, quand les poches sont vides. Refusable — c'est ce qui
-            fait de l'accepter un choix et non un passage obligé. */}
-        {preteur && !dette && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="craft-card p-3 border-[#B8860B]/40 flex flex-col gap-2"
-          >
-            {/* Un visage, pas un emoji : on emprunte à QUELQU'UN, et c'est ce
-                visage qu'on reverra le jour de l'échéance. */}
-            <SafeImg
-              src="/assets/npc-preteur.webp"
-              alt=""
-              className="w-full h-24 object-cover rounded-lg"
-            />
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🤲</span>
-              <span className="text-xs text-[#3D3020] flex-1 leading-snug">
-                {tr(
-                  `${preteur.nom} vous a vu compter vos pièces. « ${DETTE_PRET}€ tout de suite. Tu m'en rends ${DETTE_DU} dans ${DETTE_DELAI} jours. »`,
-                  `${preteur.nom} watched you count your coins. "${DETTE_PRET}€ right now. You give me back ${DETTE_DU} in ${DETTE_DELAI} days."`,
-                )}
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => { playMoneyIn(DETTE_PRET); dispatch({ type: 'ACCEPTER_PRET' }); }}
-                className="btn-primary flex-1 py-2 text-xs font-semibold"
-              >
-                {tr(`Prendre les ${DETTE_PRET}€`, `Take the ${DETTE_PRET}€`)}
-              </button>
-              <button
-                onClick={() => { playBack(); dispatch({ type: 'REFUSER_PRET' }); }}
-                className="action-btn flex-1 py-2 text-xs font-medium text-[#6B5740]"
-              >
-                {tr('Refuser', 'Refuse')}
-              </button>
-            </div>
-          </motion.div>
-        )}
 
         {/* Le voleur de la veille, s'il traîne encore dans ce quartier. */}
         {voleur && (
