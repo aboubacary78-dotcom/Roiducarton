@@ -69,32 +69,34 @@ async function jauges(patch) {
 }
 
 /*
- * ── LE CORPS S'EST TU, ET C'EST VOLONTAIRE ────────────────────────────────
+ * ── CHAQUE JAUGE A SON BRUIT, ET C'EST LE DEUXIÈME ESSAI ──────────────────
  *
- * Ce test vérifiait que chaque jauge appelle SA voix — `corps-faim` pour la
- * faim, `corps-soif` pour la soif. C'était le bon objectif, et les prises
- * livrées ne le tiennent pas : testées au casque, elles sont inaudibles, « un
- * cri bouillie ». Vérifié de mon côté, ce ne sont pas les fichiers qui sont
- * mal encodés (64 kbit/s, durées courtes, niveau juste) mais les prises
- * elles-mêmes, et aucun réglage ne rattrape ça.
+ * Ce test a dit l'inverse pendant un temps. Le premier lot était des voix de
+ * synthèse, renvoyé à l'écoute — « un cri bouillie » — et les cinq jauges
+ * retombaient sur `jauge-rouge`, l'alerte neutre : on savait qu'une jauge
+ * lâchait, jamais laquelle.
  *
- * Elles retombent donc sur `jauge-rouge`, le signal de foley d'avant, en
- * attendant des prises qui tiennent la route. On perd de dire LAQUELLE des
- * jauges lâche — c'est le texte de la pique qui s'en charge maintenant, et
- * lui le dit en toutes lettres.
+ * Le lot refait est du foley — liquide dans une bouteille, liège sec, carton
+ * qui s'affaisse, dominos, note au bord d'un verre. Chaque jauge retrouve donc
+ * SON bruit, et c'est ce que ce bloc vérifie à nouveau.
  *
- * Le test dit donc l'inverse de ce qu'il disait, à dessein : aucune voix de
- * corps ne doit plus partir, et l'alerte neutre doit bien être là.
+ * On vérifie aussi qu'aucune ALERTE NEUTRE ne part en plus : entendre les deux
+ * ferait un empilement, et surtout signifierait que le fichier n'a pas pu se
+ * charger et que le jeu est retombé sur son filet.
  */
-for (const jauge of ['hunger', 'thirst', 'sleep', 'health', 'mental']) {
+const BRUIT_DU_CORPS = {
+  hunger: 'corps-faim', thirst: 'corps-soif', sleep: 'corps-epuise',
+  health: 'corps-froid', mental: 'corps-tete',
+};
+for (const [jauge, fichier] of Object.entries(BRUIT_DU_CORPS)) {
   vide();
   await jauges({ health: 80, mental: 80, hunger: 80, thirst: 80, sleep: 80, [jauge]: 12 });
   await pause(900);
-  verifier(`${jauge} sous le seuil sonne l'alerte neutre`,
-    sons.includes('jauge-rouge'), sons.filter(s => /jauge|corps|voix/.test(s)).join(', ') || 'aucun');
-  verifier(`  …et aucune voix bouillie ne part`,
-    !sons.some(s => s.startsWith('corps-') || /^voix-[hf]-tete/.test(s)),
-    sons.filter(s => s.startsWith('corps-') || s.startsWith('voix-')).join(', ') || '');
+  verifier(`${jauge} sous le seuil sonne SON bruit`,
+    sons.includes(fichier), sons.filter(s => /jauge|corps|voix/.test(s)).join(', ') || 'aucun');
+  verifier(`  …et pas l'alerte neutre par-dessus`,
+    !sons.includes('jauge-rouge'),
+    sons.filter(s => /jauge|corps/.test(s)).join(', ') || '');
 }
 
 // La dignité aussi : aucun geste ne la répare, elle n'a jamais eu de voix.

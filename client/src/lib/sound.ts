@@ -791,50 +791,47 @@ const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
  * ═══════════════════════════════════════════════════════════════════════════
  */
 /*
- * ⚠️ COUPÉES POUR L'INSTANT — ET VOICI POURQUOI, PARCE QUE ÇA COMPTE.
+ * DEUXIÈME LOT — DU FOLEY, APRÈS DES VOIX RENVOYÉES.
  *
- * Testées au casque sur téléphone, ces cinq prises-là sont inaudibles : « un
- * cri bouillie », mot pour mot. Vérifié de mon côté : le débit est bon (64
- * kbit/s, au-dessus de ce que la commande demandait), les durées sont courtes
- * (0,4 à 0,8 s), le niveau est juste. Ce ne sont donc pas les fichiers qui
- * sont mal encodés — ce sont les PRISES qui ne valent rien, et aucun réglage
- * ne rattrape ça.
+ * Le premier lot était constitué de voix de synthèse et s'est fait couper :
+ * « un cri bouillie, on ne comprend rien du tout », en visant nommément la
+ * faim et le sommeil. La faute était dans ma commande, pas dans la livraison —
+ * un gargouillis d'estomac ou un bâillement sont du FOLEY, on les fabrique
+ * avec une bouteille d'eau et une boîte à chaussures, et ça n'avait jamais
+ * rien à faire dans une cabine. Ce lot-ci est refait sur cette base : liquide
+ * dans une bouteille, liège sec dans un goulot, carton qui s'affaisse,
+ * dominos secoués, note au bord d'un verre.
  *
- * LE MOTIF EST NET, ET IL EXPLIQUE POURQUOI SEULES CELLES-CI DÉRANGENT.
+ * CE QUI A ÉTÉ MESURÉ, ET CE QUE ÇA VAUT.
  *
- * Les autres voix du même lot — douleur, dégoût, effort, les passants — jouent
- * DERRIÈRE quelque chose : le rat qui détale, le verre qui craque, la pièce
- * qui tombe. Elles sont masquées, et le masque leur pardonne tout. Ces cinq-ci
- * jouent SEULES, dans le silence du hub, comme unique signal. On les entend
- * donc parfaitement — assez pour entendre qu'elles sont mauvaises.
+ * Une seule mesure sépare les deux lots, et elle tombe pile sur la plainte :
+ * la part d'énergie au-dessus de 500 Hz, en dessous de quoi un baffle de
+ * téléphone ne restitue plus rien. Sur les 528 sons que le jeu embarque déjà
+ * et que personne n'a renvoyés, le 10ᵉ centile est à 24,6 %. Les deux seuls
+ * fichiers du lot refusé à passer sous ce plancher étaient `corps-faim` (22 %)
+ * et `corps-epuise` (24 %) — exactement les deux nommés à l'écoute. Le
+ * nouveau lot les remonte à 35 % et 39 %, et les cinq passent.
  *
- * Elles retombent sur `jauge-rouge`, le signal de foley qui servait avant que
- * j'y touche et dont personne ne s'est jamais plaint. On perd de dire LAQUELLE
- * des jauges lâche ; on gagne de ne plus faire couper le son au joueur.
- *
- * ET LA VRAIE LEÇON EST AILLEURS. Tout ce jeu tient sur une règle : la bande-
- * son est du carton manipulé. Un gargouillis d'estomac, une déglutition à sec,
- * un bâillement, un claquement de dents sont du FOLEY — on les fabrique avec
- * une bouteille d'eau et une boîte à chaussures. J'ai demandé des voix, et
- * j'ai obtenu des voix de synthèse. La faute est dans la commande, pas dans la
- * livraison : ces quatre signaux n'avaient jamais rien à faire dans une
- * cabine. Ils repasseront en foley (voir la note de commande à venir).
- *
- * Pour les rallumer quand de meilleures prises arriveront : remettre les
- * `withFile(...)` ci-dessous à la place de `playGaugeLowFile`. La commande
- * refaite — en foley cette fois, avec la recette de chaque son — est dans
- * `docs/prompts-son/COMMANDE-AUDIO-5-SIGNAUX-DU-CORPS.md`.
+ * C'est un rapprochement après coup sur deux fichiers, pas une preuve. Et le
+ * reste de ce que j'avais tenté de mesurer ne prouve rien du tout : le lot
+ * refusé avait de MEILLEURS écarts spectraux entre fichiers que celui-ci, et
+ * un facteur de crête dans la même fourchette. Aucune mesure ne distingue un
+ * bruitage réussi d'un bruitage raté ; le détail de ce qui a été essayé et
+ * écarté est dans `scripts/controle-signaux-corps.mjs`.
  *
  * Le mental change de nom au passage : `corps-tete` et non `voix-*-tete`. Il
  * rejoint la famille du corps parce qu'il n'est plus une voix, et il cesse
  * d'être genré — un verre qu'on frotte n'a pas de sexe.
+ *
+ * Pour recouper en cas de nouveau doute : remettre `playGaugeLowFile` à la
+ * place des cinq `withFile(...)`, le jeu retombe sur l'alerte neutre.
  */
 const VOIX_DU_CORPS: Record<string, () => void> = {
-  hunger: playGaugeLowFile,   // withFile('corps-faim', 0.85, playFailSynth)
-  thirst: playGaugeLowFile,   // withFile('corps-soif', 0.85, playFailSynth)
-  sleep: playGaugeLowFile,    // withFile('corps-epuise', 0.85, playFailSynth)
-  health: playGaugeLowFile,   // withFile('corps-froid', 0.85, playFailSynth)
-  mental: playGaugeLowFile,   // withFile('corps-tete', 0.85, playFailSynth)
+  hunger: withFile('corps-faim', 0.85, playFailSynth),
+  thirst: withFile('corps-soif', 0.85, playFailSynth),
+  sleep: withFile('corps-epuise', 0.85, playFailSynth),
+  health: withFile('corps-froid', 0.85, playFailSynth),
+  mental: withFile('corps-tete', 0.85, playFailSynth),
 };
 
 /*

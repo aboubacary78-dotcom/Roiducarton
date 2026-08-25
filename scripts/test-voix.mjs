@@ -103,27 +103,30 @@ const BASSES = { health: 70, mental: 8, hunger: 70, thirst: 70, sleep: 70, digni
 const SOLVABLE = { money: 20, dette: null, detteRefuseeJour: null };
 
 /*
- * ── LA TÊTE QUI LÂCHE S'EST TUE, ET C'EST VOLONTAIRE ──────────────────────
+ * ── LA TÊTE QUI LÂCHE A UN BRUIT, ET IL N'EST PLUS GENRÉ ──────────────────
  *
- * Cette section vérifiait que le mental appelle `voix-h-tete` ou `voix-f-tete`
- * selon le personnage. Les prises livrées sont inaudibles au casque — « un cri
- * bouillie » — et ce ne sont pas les fichiers qui sont en cause (64 kbit/s,
- * 0,6 s, niveau juste) mais l'enregistrement lui-même.
+ * Cette section a vérifié trois choses successives, et le trajet vaut d'être
+ * noté. Elle attendait d'abord `voix-h-tete` ou `voix-f-tete` selon le
+ * personnage ; ces prises-là ont été renvoyées à l'écoute — « un cri
+ * bouillie » — et elle a vérifié pendant un temps l'inverse, que rien ne
+ * partait sauf l'alerte neutre.
  *
- * Elles sont coupées, avec toutes les voix qui jouent SEULES. Celles qui
- * jouent DERRIÈRE un bruitage — douleur, dégoût, effort — restent en place :
- * le masque leur pardonne, et c'est la section de la Récup' ci-dessous qui
- * prouve maintenant que le timbre suit bien le personnage.
+ * Le signal refait est du foley : une note fine au bord d'un verre et du
+ * journal froissé. Il s'appelle donc `corps-tete`, sans genre — un verre qu'on
+ * frotte n'a pas de sexe — et c'est ce qu'on attend ici. Les voix qui restent
+ * genrées sont celles qui jouent DERRIÈRE un bruitage, douleur et dégoût, et
+ * c'est la section de la Récup' plus bas qui prouve qu'elles suivent bien le
+ * personnage.
  */
 await situer({ day: 4, gender: 'm', ...SOLVABLE, stats: { ...BASSES, mental: 80 } });
 demandes.length = 0;
 await situer({ day: 4, gender: 'm', ...SOLVABLE, stats: BASSES });
 await pause(600);
 const auMental = demandes.filter(d => d.startsWith('voix-') || d.startsWith('corps-') || d.startsWith('jauge-'));
-verifier('mental à 8 : l\'alerte neutre part',
-  auMental.includes('jauge-rouge'), auMental.join(', ') || 'aucun son');
-verifier('  …et aucune voix bouillie',
-  !auMental.some(d => /^voix-[hf]-tete|^corps-/.test(d)), auMental.join(', '));
+verifier('mental à 8 : le bruit de la tête part',
+  auMental.includes('corps-tete'), auMental.join(', ') || 'aucun son');
+verifier('  …sans genre, et sans retomber sur l\'alerte neutre',
+  !auMental.some(d => /^voix-[hf]-tete|^jauge-rouge$/.test(d)), auMental.join(', '));
 
 // ── La Récup' : chaque saleté a son bruit à elle ───────────────────────────
 // La carte des règles est marquée « vue » à ce lancement-ci, sinon elle

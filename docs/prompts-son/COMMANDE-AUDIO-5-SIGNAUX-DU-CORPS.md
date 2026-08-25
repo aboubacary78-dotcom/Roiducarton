@@ -1,5 +1,33 @@
 # Commande audio — « Le Roi du Carton » — 5 signaux du corps (à refaire)
 
+> ## ✅ LIVRÉ — lot Stable Audio 3, intégré en 3.45.0
+>
+> Les cinq fichiers sont dans `client/public/audio/` et branchés dans la table
+> `VOIX_DU_CORPS` de `client/src/lib/sound.ts`. Chaque jauge a retrouvé son
+> bruit propre ; l'alerte neutre `jauge-rouge` ne sert plus que pour la
+> dignité, qui n'a pas de corps.
+>
+> **Ce qui a été mesuré.** Une seule mesure sépare ce lot du précédent, et elle
+> tombe sur la plainte d'origine : la part d'énergie au-dessus de 500 Hz, sous
+> laquelle un baffle de téléphone ne restitue plus rien. Sur les 528 sons déjà
+> embarqués et jamais renvoyés, le 10ᵉ centile est à 24,6 %. Les deux seuls
+> fichiers du lot refusé sous ce plancher étaient `corps-faim` (22 %) et
+> `corps-epuise` (24 %) — **exactement les deux nommés à l'écoute**. Le nouveau
+> lot les remonte à 35 % et 39 %, et les cinq passent.
+>
+> **Ce qui n'a pas pu être mesuré, et il faut le dire.** Le lot refusé avait de
+> MEILLEURS écarts spectraux entre fichiers que celui-ci (0,794 contre 0,325) et
+> un facteur de crête dans la même fourchette. Aucune mesure automatique ne
+> distingue un bruitage réussi d'un bruitage raté ; le détail de ce qui a été
+> essayé puis écarté est en tête de `scripts/controle-signaux-corps.mjs`.
+> **L'écoute reste le seul juge.**
+>
+> **Licence — action ouverte.** Les sources viennent d'un compte Stable Audio 3
+> et aucun justificatif de licence n'accompagne les exports. Avant publication
+> du jeu monétisé par publicité, vérifier dans les conditions de l'abonnement,
+> à la date de génération, que l'usage commercial est couvert — et en garder
+> une capture avec les archives du projet.
+
 **Ce document est la commande complète. Tout ce qu'il faut est dedans : aucun
 autre fichier n'est nécessaire.**
 
