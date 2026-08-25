@@ -821,14 +821,20 @@ const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
  * cabine. Ils repasseront en foley (voir la note de commande à venir).
  *
  * Pour les rallumer quand de meilleures prises arriveront : remettre les
- * `withFile(...)` ci-dessous à la place de `playGaugeLowFile`.
+ * `withFile(...)` ci-dessous à la place de `playGaugeLowFile`. La commande
+ * refaite — en foley cette fois, avec la recette de chaque son — est dans
+ * `docs/prompts-son/COMMANDE-AUDIO-5-SIGNAUX-DU-CORPS.md`.
+ *
+ * Le mental change de nom au passage : `corps-tete` et non `voix-*-tete`. Il
+ * rejoint la famille du corps parce qu'il n'est plus une voix, et il cesse
+ * d'être genré — un verre qu'on frotte n'a pas de sexe.
  */
 const VOIX_DU_CORPS: Record<string, () => void> = {
   hunger: playGaugeLowFile,   // withFile('corps-faim', 0.85, playFailSynth)
   thirst: playGaugeLowFile,   // withFile('corps-soif', 0.85, playFailSynth)
   sleep: playGaugeLowFile,    // withFile('corps-epuise', 0.85, playFailSynth)
   health: playGaugeLowFile,   // withFile('corps-froid', 0.85, playFailSynth)
-  mental: playGaugeLowFile,   // voix('tete', 2, 0.85, playGaugeLowFile)
+  mental: playGaugeLowFile,   // withFile('corps-tete', 0.85, playFailSynth)
 };
 
 /*
