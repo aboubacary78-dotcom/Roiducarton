@@ -83,13 +83,45 @@ function atteignable(nom) {
   return false;
 }
 
+/*
+ * LES DORMANTS ASSUMÉS — ET POURQUOI IL FAUT LES NOMMER ICI.
+ *
+ * Les vingt fichiers des couches du hub (`amb-sig-*`, `vie-*`) ont été
+ * débranchés : ils tombaient sans cause sur un écran immobile et se lisaient
+ * comme un bug plutôt que comme une atmosphère. Les fichiers restent, au cas
+ * où on rebranche.
+ *
+ * Le contrôle ci-dessus ne les a PAS vus partir, et c'est un trou : la
+ * remontée de préfixe accepte `amb-sig-parc` parce que le code contient encore
+ * `amb-`, et `vie-zi-rat` parce que le commentaire qui explique le retrait
+ * contient `vie-*`. Autrement dit, expliquer le débranchement suffisait à
+ * masquer le débranchement.
+ *
+ * On les déclare donc nommément. Un dormant listé ici est un choix ; un
+ * dormant non listé reste une erreur, et c'est tout l'intérêt de la liste.
+ */
+const DORMANTS = [
+  'amb-sig-parc', 'amb-sig-gare', 'amb-sig-marche',
+  'amb-sig-centre-ville', 'amb-sig-zone-industrielle',
+  'vie-parc-envol', 'vie-parc-banc', 'vie-cv-klaxon', 'vie-cv-vitrine',
+  'vie-gare-annonce', 'vie-gare-valise', 'vie-marche-cagette',
+  'vie-marche-kraft', 'vie-zi-tole', 'vie-zi-rat',
+];
+
 const inatteignables = [];
 for (const [fam, fichiers] of familles) {
+  if (DORMANTS.includes(fam)) continue;
   if (!atteignable(fam)) inatteignables.push(`${fam} (${fichiers.length})`);
 }
 
-verifier(`${familles.size} familles de sons, toutes atteignables depuis le code`,
+verifier(`${familles.size - DORMANTS.length} familles de sons, toutes atteignables depuis le code`,
   inatteignables.length === 0, inatteignables.slice(0, 8).join(', '));
+
+// Et l'inverse : un dormant qu'on rebranche doit sortir de la liste, sinon
+// elle devient un tapis sous lequel on glisse les oublis suivants.
+const rebranches = DORMANTS.filter(d => tout.includes(`/audio/${d}`) || tout.includes(`'${d}'`));
+verifier(`les ${DORMANTS.length} fichiers débranchés le sont toujours`,
+  rebranches.length === 0, rebranches.join(', '));
 
 // ── 3. Les sons du dernier lot jouent-ils vraiment ? ───────────────────────
 // Contrôle nommé, parce que ce sont eux qu'on vient de brancher et que

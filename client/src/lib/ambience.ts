@@ -29,7 +29,7 @@
  * coupe/relance proprement (voir onMuteChange dans sound.ts).
  */
 import { getAudio, isMuted, onMuteChange } from './sound';
-import { loadAudio, playBuffer as playBufferUneFois, startLoop, type Loop } from './audioFiles';
+import { loadAudio, startLoop, type Loop } from './audioFiles';
 
 export type AmbienceId = 'title' | 'parc' | 'centre-ville' | 'zone-industrielle' | 'gare' | 'marche'
   // Lits de mini-jeu (pack son 2). Ils n'ont pas de repli synthétisé : avant
@@ -108,90 +108,38 @@ function syncWeather(): void {
 const WEATHER_GAIN = 0.42;  // la couche météo reste sous le lit du quartier
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * LA SIGNATURE DU QUARTIER, ET SES RESPIRATIONS
+ * LA SIGNATURE DU QUARTIER ET SES RESPIRATIONS — RETIRÉES
  *
- * Les cinq lits `amb-<lieu>` tiennent le fond correctement, mais ils se
- * ressemblent : on ne reconnaît pas la gare du marché en fermant les yeux. Le
- * caractère demande des ÉVÉNEMENTS — le tapotement des pigeons, la brosse du
- * train, la cagette qu'on frappe — et un lit continu n'en contient pas.
+ * CE QUE C'ÉTAIT. Deux couches posées par-dessus le lit `amb-<lieu>` :
  *
- * On ne remplace donc pas les lits : on pose une SECONDE COUCHE par-dessus,
- * plus creuse et plus rare. Rien de livré n'est jeté, elle se règle seule, et
- * elle se coupe indépendamment le jour où elle fatiguerait.
+ *   · `amb-sig-<lieu>` : une SECONDE boucle continue par quartier, à 0,38 ;
+ *   · `vie-*` : dix sons ponctuels — pigeon qui décolle, klaxon, tôle, rat,
+ *     cagette, papier kraft — tirés au hasard toutes les 22 à 48 secondes,
+ *     à 0,42.
  *
- * Par-dessus encore, des respirations : un pigeon qui décolle, un klaxon, un
- * rat. Elles ne bouclent pas — elles tombent au hasard, largement espacées.
- * C'est ce qui fait la différence entre un décor et un endroit : dans un
- * endroit, il arrive des choses qu'on n'a pas demandées.
+ * CE QUE JE VOULAIS. Les cinq lits se ressemblent : on ne reconnaît pas la
+ * gare du marché en fermant les yeux. Je cherchais du caractère par des
+ * événements, en pariant que « dans un endroit, il arrive des choses qu'on n'a
+ * pas demandées ».
+ *
+ * POURQUOI C'ÉTAIT FAUX. Ce pari est vrai au cinéma et faux dans un jeu.
+ * Ailleurs dans « Le Roi du Carton », TOUT son a une cause visible : on
+ * touche, ça répond. Un grattement qui tombe seul, sur un hub immobile, n'est
+ * donc pas lu comme de l'atmosphère — il est lu comme un bug, et c'est le
+ * retour qui est arrivé : « des grattements, des bruits bizarres ».
+ *
+ * Et la couche continue posait un second problème, silencieux celui-là : trois
+ * boucles tournaient en même temps dans le hub — quartier 0,55 + signature
+ * 0,38 + météo 0,42, soit 1,35 de somme. C'est ça, le fond trop fort.
+ *
+ * LES VINGT FICHIERS RESTENT dans `client/public/audio/`. Ils ne coûtent rien
+ * tant qu'aucun code ne les demande, et les remettre est un `git revert` de ce
+ * commit. Voir docs/design/couches-sonores-hub.md.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-const SIGNATURE_GAIN = 0.38;   // sous le lit du quartier, jamais devant
-const VIE_GAIN = 0.42;
-/** Écart entre deux respirations. Large : une brève est une ponctuation, une
- *  fréquente est un tic. */
-const VIE_MIN_MS = 22000;
-const VIE_MAX_MS = 48000;
-
-/** Les respirations de chaque quartier (préfixes de fichiers `vie-*`). */
-const VIE: Record<string, readonly string[]> = {
-  'parc': ['vie-parc-envol', 'vie-parc-banc'],
-  'centre-ville': ['vie-cv-klaxon', 'vie-cv-vitrine'],
-  'gare': ['vie-gare-annonce', 'vie-gare-valise'],
-  'marche': ['vie-marche-cagette', 'vie-marche-kraft'],
-  'zone-industrielle': ['vie-zi-tole', 'vie-zi-rat'],
-};
-
-let signatureLoop: { id: string; loop: Loop } | null = null;
-let vieTimer: ReturnType<typeof setTimeout> | null = null;
-
-function syncSignature(): void {
-  // Un quartier, et rien d'autre : pas de signature sur un mini-jeu, l'écran
-  // de fin ou le titre.
-  const lieu = desired && VIE[desired] ? desired : null;
-  const want = isMuted() ? null : lieu;
-
-  if (signatureLoop && signatureLoop.id === want) { planifierVie(want); return; }
-  if (signatureLoop) { signatureLoop.loop.stop(1.6); signatureLoop = null; }
-  planifierVie(want);
-  if (!want) return;
-
-  const ac = getAudio();
-  if (!ac || ac.state !== 'running') { armGesture(); return; }
-  const id = want;
-  loadAudio(`/audio/amb-sig-${id}.mp3`).then(buf => {
-    // Le quartier a pu changer pendant le décodage.
-    if (!buf || desired !== id || isMuted()) return;
-    if (signatureLoop) signatureLoop.loop.stop(0.4);
-    const loop = startLoop(buf, SIGNATURE_GAIN, 3);
-    if (loop) signatureLoop = { id, loop };
-  });
-}
-
-function planifierVie(lieu: string | null): void {
-  if (vieTimer) { clearTimeout(vieTimer); vieTimer = null; }
-  if (!lieu || isMuted()) return;
-  const delai = VIE_MIN_MS + Math.random() * (VIE_MAX_MS - VIE_MIN_MS);
-  vieTimer = setTimeout(() => {
-    vieTimer = null;
-    // Le quartier a pu changer, ou la sourdine tomber, pendant l'attente.
-    if (desired !== lieu || isMuted()) return;
-    const choix = VIE[lieu];
-    const nom = choix[Math.floor(Math.random() * choix.length)];
-    loadAudio(`/audio/${nom}.mp3`).then(buf => {
-      if (buf && desired === lieu && !isMuted()) playBufferUneFois(buf, VIE_GAIN);
-    });
-    planifierVie(lieu);
-  }, delai);
-}
-
-/**
- * Les deux couches qui se posent sur le quartier vont toujours ensemble : la
- * météo et la signature du lieu. Les appeler séparément, c'était l'oubli
- * assuré sur l'un des sept chemins de sortie de `sync()`.
- */
+/** Une seule couche se pose encore sur le quartier : la météo. */
 function syncCouches(): void {
   syncWeather();
-  syncSignature();
 }
 
 function sync(): void {
@@ -279,7 +227,7 @@ function armGesture(): void {
   EVENTS.forEach((e) => window.addEventListener(e, kick, { capture: true }));
 }
 
-onMuteChange(() => { sync(); syncCouches(); syncSignature(); });
+onMuteChange(() => { sync(); syncCouches(); });
 
 /* ------------------------------------------------------------------ */
 /* Boîte à outils commune                                              */
