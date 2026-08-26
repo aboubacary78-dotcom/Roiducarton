@@ -407,10 +407,45 @@ let offresFaites = 0;
  * reste toujours disponible. Barrer un service qu'on est venu demander serait
  * une punition, pas une limite.
  */
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LA CADENCE DE L'ACHETEUR — trois actions entre deux bonus
+ *
+ * Premier essai : qui avait payé n'avait plus aucun plafond, au motif que le
+ * plafond protège du harcèlement publicitaire et qu'il n'y a plus de
+ * publicité à doser. Testé en jeu, le résultat est sans appel : « c'est trop
+ * cheater ». Et c'est juste — le plafond de trois offres par session ne
+ * protégeait pas seulement le joueur de la publicité, il protégeait aussi le
+ * JEU de ses propres bonus. Retirer la vidéo retirait par accident la seule
+ * chose qui limitait leur usage.
+ *
+ * Il fallait donc une autre monnaie que la patience, et c'est le TEMPS DE JEU :
+ * trois actions consommées entre deux bonus. La contrainte n'est plus de
+ * regarder trente secondes de vidéo, elle est de jouer — ce qui est une bien
+ * meilleure contrainte pour un jeu.
+ *
+ * Trois, parce qu'une journée en compte trois ou quatre : dans les faits, un
+ * bonus par jour environ. C'est confortable sans être un interrupteur.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+const ACTIONS_ENTRE_BONUS = 3;
+let actionsDepuisBonus = ACTIONS_ENTRE_BONUS;   // le premier bonus est offert
+
+/**
+ * Une action de jeu vient d'être consommée. Appelé une seule fois, depuis le
+ * GameProvider, en surveillant le compteur d'actions du jour — plutôt qu'aux
+ * dix endroits du reducer qui le font avancer, où l'oubli serait certain.
+ */
+export function noterAction(n = 1): void {
+  actionsDepuisBonus += n;
+}
+
+/** Combien d'actions restent avant que le prochain bonus se rouvre. */
+export function actionsAvantBonus(): number {
+  return Math.max(0, ACTIONS_ENTRE_BONUS - actionsDepuisBonus);
+}
+
 export function canOfferRewarded(): boolean {
-  // Qui a payé n'a plus de plafond : le plafond protège du harcèlement
-  // publicitaire, et il n'y a plus de publicité à doser.
-  if (adsRemoved) return true;
+  if (adsRemoved) return actionsDepuisBonus >= ACTIONS_ENTRE_BONUS;
   return offresFaites < MAX_OFFRES_PAR_SESSION;
 }
 
@@ -455,9 +490,20 @@ export function bonusEn(base: string): string {
  * parce que le joueur a doublé trois gains dans la journée serait absurde.
  */
 export async function showRewarded(opts?: { exempt?: boolean }): Promise<boolean> {
-  // L'achat retire la vidéo, pas la récompense — voir le pavé plus haut.
-  // Rien n'est compté au plafond : il n'y a rien à plafonner.
-  if (adsRemoved) return true;
+  /*
+   * L'achat retire la vidéo, pas la récompense — voir le pavé plus haut.
+   * Mais il ne retire pas la LIMITE : le compteur d'actions repart à zéro,
+   * et il faudra rejouer trois actions avant le bonus suivant.
+   *
+   * `exempt` est honoré ici comme ailleurs : ce que le joueur vient chercher
+   * lui-même — rouvrir la boutique, la distribution du jour, se relever à la
+   * mort — n'entame pas sa cadence. Barrer un service qu'on est venu demander
+   * serait une punition, pas une limite.
+   */
+  if (adsRemoved) {
+    if (!opts?.exempt) actionsDepuisBonus = 0;
+    return true;
+  }
 
   if (!opts?.exempt) offresFaites++;
   if (!isNative()) {
@@ -497,6 +543,6 @@ export async function showRewarded(opts?: { exempt?: boolean }): Promise<boolean
 if (typeof window !== 'undefined') {
   (window as unknown as Record<string, unknown>).__pub = {
     canOfferRewarded, showRewarded, bonusFr, bonusEn, bonusOffert,
-    isAdsRemoved, setAdsRemoved,
+    isAdsRemoved, setAdsRemoved, noterAction, actionsAvantBonus,
   };
 }

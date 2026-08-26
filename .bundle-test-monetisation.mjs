@@ -262,7 +262,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/monet-Jn2I4d/cap.js
+// ../../../tmp/monet-TPcyYF/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -808,6 +808,174 @@ var playToastMauvais = withFile("ui-toast-mauvais", 0.5, () => {
 var playVerrou = withFile("ui-verrou", 0.6, () => {
 });
 var playGaugeFilled = withFile("jauge-remplie", 0.85, playSuccessSynth);
+
+// client/src/lib/ads.ts
+var NOADS_KEY = "roi-du-carton-noads";
+var adsRemoved = (() => {
+  try {
+    return localStorage.getItem(NOADS_KEY) === "1";
+  } catch {
+    return false;
+  }
+})();
+function isAdsRemoved() {
+  return adsRemoved;
+}
+function setAdsRemoved(v) {
+  adsRemoved = v;
+  try {
+    localStorage.setItem(NOADS_KEY, v ? "1" : "0");
+  } catch {
+  }
+}
+var AD_UNITS = {
+  android: {
+    banner: "ca-app-pub-6336322065829631/1688618582",
+    interstitial: "ca-app-pub-6336322065829631/5639366683",
+    rewarded: "ca-app-pub-6336322065829631/8014353783"
+  },
+  ios: {
+    banner: "ca-app-pub-3940256099942544/2934735716",
+    interstitial: "ca-app-pub-3940256099942544/4411468910",
+    rewarded: "ca-app-pub-3940256099942544/1712485313"
+  }
+};
+var USE_TEST_ADS = true;
+function platform() {
+  const p = Capacitor.getPlatform();
+  if (p === "android") return "android";
+  if (p === "ios") return "ios";
+  return "web";
+}
+function isNative() {
+  return Capacitor.isNativePlatform();
+}
+function unit(kind) {
+  const p = platform();
+  if (p === "web") return AD_UNITS.android[kind];
+  return AD_UNITS[p][kind];
+}
+var consentStatus = null;
+function personalizedAdsAllowed() {
+  return consentStatus === "OBTAINED" || consentStatus === "NOT_REQUIRED";
+}
+var DELAI_INTERSTITIEL_MS = 9e4;
+var PARTIES_DE_GRACE = 3;
+var CLE_PARTIES = "roi-du-carton-parties-finies";
+var dernierInterstitiel = 0;
+var premiereMortDeLaSession = true;
+function partiesFinies() {
+  try {
+    return Number(localStorage.getItem(CLE_PARTIES) || "0");
+  } catch {
+    return 0;
+  }
+}
+function noterPartieFinie() {
+  try {
+    localStorage.setItem(CLE_PARTIES, String(partiesFinies() + 1));
+  } catch {
+  }
+}
+function partieTerminee() {
+  noterPartieFinie();
+}
+function verdictInterstitiel(maintenant = Date.now()) {
+  if (adsRemoved) return { montrer: false, raison: "sans-pub achet\xE9" };
+  if (partiesFinies() <= PARTIES_DE_GRACE) {
+    return { montrer: false, raison: `p\xE9riode de gr\xE2ce (${partiesFinies()}/${PARTIES_DE_GRACE} parties)` };
+  }
+  if (premiereMortDeLaSession) return { montrer: false, raison: "premi\xE8re mort de la session" };
+  const attente = maintenant - dernierInterstitiel;
+  if (attente < DELAI_INTERSTITIEL_MS) {
+    return { montrer: false, raison: `trop t\xF4t (${Math.round(attente / 1e3)} s sur ${DELAI_INTERSTITIEL_MS / 1e3})` };
+  }
+  return { montrer: true, raison: "ok" };
+}
+function reinitialiserInterstitiel() {
+  dernierInterstitiel = 0;
+  premiereMortDeLaSession = true;
+}
+async function showInterstitial() {
+  const verdict = verdictInterstitiel();
+  premiereMortDeLaSession = false;
+  if (!verdict.montrer || !isNative()) return;
+  dernierInterstitiel = Date.now();
+  try {
+    const { AdMob } = await import("@capacitor-community/admob");
+    await AdMob.prepareInterstitial({
+      adId: unit("interstitial"),
+      isTesting: USE_TEST_ADS,
+      // Refus, ou consentement inconnu : publicité NON personnalisée.
+      // Sans cette ligne, le formulaire de consentement ne servirait à rien.
+      npa: !personalizedAdsAllowed()
+    });
+    await AdMob.showInterstitial();
+  } catch (e) {
+    console.warn("[ads] showInterstitial:", e);
+  }
+}
+var MAX_OFFRES_PAR_SESSION = 3;
+var offresFaites = 0;
+var ACTIONS_ENTRE_BONUS = 3;
+var actionsDepuisBonus = ACTIONS_ENTRE_BONUS;
+function noterAction(n = 1) {
+  actionsDepuisBonus += n;
+}
+function actionsAvantBonus() {
+  return Math.max(0, ACTIONS_ENTRE_BONUS - actionsDepuisBonus);
+}
+function canOfferRewarded() {
+  if (adsRemoved) return actionsDepuisBonus >= ACTIONS_ENTRE_BONUS;
+  return offresFaites < MAX_OFFRES_PAR_SESSION;
+}
+function bonusOffert() {
+  return adsRemoved;
+}
+function bonusFr(base) {
+  return adsRemoved ? `\u2728 ${base}` : `\u{1F3AC} ${base} (pub)`;
+}
+function bonusEn(base) {
+  return adsRemoved ? `\u2728 ${base}` : `\u{1F3AC} ${base} (ad)`;
+}
+async function showRewarded(opts) {
+  if (adsRemoved) {
+    if (!opts?.exempt) actionsDepuisBonus = 0;
+    return true;
+  }
+  if (!opts?.exempt) offresFaites++;
+  if (!isNative()) {
+    return true;
+  }
+  try {
+    const { AdMob } = await import("@capacitor-community/admob");
+    await AdMob.prepareRewardVideoAd({
+      adId: unit("rewarded"),
+      isTesting: USE_TEST_ADS,
+      // Refus, ou consentement inconnu : publicité NON personnalisée.
+      // Sans cette ligne, le formulaire de consentement ne servirait à rien.
+      npa: !personalizedAdsAllowed()
+    });
+    const reward = await AdMob.showRewardVideoAd();
+    return !!reward && reward.amount !== void 0;
+  } catch (e) {
+    console.warn("[ads] showRewarded:", e);
+    return false;
+  }
+}
+if (typeof window !== "undefined") {
+  window.__pub = {
+    canOfferRewarded,
+    showRewarded,
+    bonusFr,
+    bonusEn,
+    bonusOffert,
+    isAdsRemoved,
+    setAdsRemoved,
+    noterAction,
+    actionsAvantBonus
+  };
+}
 
 // client/src/contexts/data/util.ts
 function randomFromArray(arr) {
@@ -9602,6 +9770,7 @@ function gameReducer(state, action) {
       if (!state.character || !state.currentCombat) return state;
       const c = state.character;
       const combat = state.currentCombat;
+      if (combat.enemyEmoji === "\u{1F451}") return state;
       const logs = [...state.combatLog];
       logs.push(L(
         `\u{1F9E8} Votre main trouve ${OBJET_MIRACLE.fr} au fond de la poche. ${combat.enemyName} n'a rien vu venir.`,
@@ -10084,161 +10253,6 @@ var initialState = {
   deathKind: null
 };
 var GameContext = createContext(void 0);
-
-// client/src/lib/ads.ts
-var NOADS_KEY = "roi-du-carton-noads";
-var adsRemoved = (() => {
-  try {
-    return localStorage.getItem(NOADS_KEY) === "1";
-  } catch {
-    return false;
-  }
-})();
-function isAdsRemoved() {
-  return adsRemoved;
-}
-function setAdsRemoved(v) {
-  adsRemoved = v;
-  try {
-    localStorage.setItem(NOADS_KEY, v ? "1" : "0");
-  } catch {
-  }
-}
-var AD_UNITS = {
-  android: {
-    banner: "ca-app-pub-6336322065829631/1688618582",
-    interstitial: "ca-app-pub-6336322065829631/5639366683",
-    rewarded: "ca-app-pub-6336322065829631/8014353783"
-  },
-  ios: {
-    banner: "ca-app-pub-3940256099942544/2934735716",
-    interstitial: "ca-app-pub-3940256099942544/4411468910",
-    rewarded: "ca-app-pub-3940256099942544/1712485313"
-  }
-};
-var USE_TEST_ADS = true;
-function platform() {
-  const p = Capacitor.getPlatform();
-  if (p === "android") return "android";
-  if (p === "ios") return "ios";
-  return "web";
-}
-function isNative() {
-  return Capacitor.isNativePlatform();
-}
-function unit(kind) {
-  const p = platform();
-  if (p === "web") return AD_UNITS.android[kind];
-  return AD_UNITS[p][kind];
-}
-var consentStatus = null;
-function personalizedAdsAllowed() {
-  return consentStatus === "OBTAINED" || consentStatus === "NOT_REQUIRED";
-}
-var DELAI_INTERSTITIEL_MS = 9e4;
-var PARTIES_DE_GRACE = 3;
-var CLE_PARTIES = "roi-du-carton-parties-finies";
-var dernierInterstitiel = 0;
-var premiereMortDeLaSession = true;
-function partiesFinies() {
-  try {
-    return Number(localStorage.getItem(CLE_PARTIES) || "0");
-  } catch {
-    return 0;
-  }
-}
-function noterPartieFinie() {
-  try {
-    localStorage.setItem(CLE_PARTIES, String(partiesFinies() + 1));
-  } catch {
-  }
-}
-function partieTerminee() {
-  noterPartieFinie();
-}
-function verdictInterstitiel(maintenant = Date.now()) {
-  if (adsRemoved) return { montrer: false, raison: "sans-pub achet\xE9" };
-  if (partiesFinies() <= PARTIES_DE_GRACE) {
-    return { montrer: false, raison: `p\xE9riode de gr\xE2ce (${partiesFinies()}/${PARTIES_DE_GRACE} parties)` };
-  }
-  if (premiereMortDeLaSession) return { montrer: false, raison: "premi\xE8re mort de la session" };
-  const attente = maintenant - dernierInterstitiel;
-  if (attente < DELAI_INTERSTITIEL_MS) {
-    return { montrer: false, raison: `trop t\xF4t (${Math.round(attente / 1e3)} s sur ${DELAI_INTERSTITIEL_MS / 1e3})` };
-  }
-  return { montrer: true, raison: "ok" };
-}
-function reinitialiserInterstitiel() {
-  dernierInterstitiel = 0;
-  premiereMortDeLaSession = true;
-}
-async function showInterstitial() {
-  const verdict = verdictInterstitiel();
-  premiereMortDeLaSession = false;
-  if (!verdict.montrer || !isNative()) return;
-  dernierInterstitiel = Date.now();
-  try {
-    const { AdMob } = await import("@capacitor-community/admob");
-    await AdMob.prepareInterstitial({
-      adId: unit("interstitial"),
-      isTesting: USE_TEST_ADS,
-      // Refus, ou consentement inconnu : publicité NON personnalisée.
-      // Sans cette ligne, le formulaire de consentement ne servirait à rien.
-      npa: !personalizedAdsAllowed()
-    });
-    await AdMob.showInterstitial();
-  } catch (e) {
-    console.warn("[ads] showInterstitial:", e);
-  }
-}
-var MAX_OFFRES_PAR_SESSION = 3;
-var offresFaites = 0;
-function canOfferRewarded() {
-  if (adsRemoved) return true;
-  return offresFaites < MAX_OFFRES_PAR_SESSION;
-}
-function bonusOffert() {
-  return adsRemoved;
-}
-function bonusFr(base) {
-  return adsRemoved ? `\u2728 ${base}` : `\u{1F3AC} ${base} (pub)`;
-}
-function bonusEn(base) {
-  return adsRemoved ? `\u2728 ${base}` : `\u{1F3AC} ${base} (ad)`;
-}
-async function showRewarded(opts) {
-  if (adsRemoved) return true;
-  if (!opts?.exempt) offresFaites++;
-  if (!isNative()) {
-    return true;
-  }
-  try {
-    const { AdMob } = await import("@capacitor-community/admob");
-    await AdMob.prepareRewardVideoAd({
-      adId: unit("rewarded"),
-      isTesting: USE_TEST_ADS,
-      // Refus, ou consentement inconnu : publicité NON personnalisée.
-      // Sans cette ligne, le formulaire de consentement ne servirait à rien.
-      npa: !personalizedAdsAllowed()
-    });
-    const reward = await AdMob.showRewardVideoAd();
-    return !!reward && reward.amount !== void 0;
-  } catch (e) {
-    console.warn("[ads] showRewarded:", e);
-    return false;
-  }
-}
-if (typeof window !== "undefined") {
-  window.__pub = {
-    canOfferRewarded,
-    showRewarded,
-    bonusFr,
-    bonusEn,
-    bonusOffert,
-    isAdsRemoved,
-    setAdsRemoved
-  };
-}
 export {
   CONTRACTS,
   gameReducer,

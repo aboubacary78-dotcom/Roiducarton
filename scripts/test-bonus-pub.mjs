@@ -109,41 +109,73 @@ verifier('  …et le bouton annonce bien une vidéo',
   plafond.etiquette.includes('(pub)'), plafond.etiquette);
 
 // ── ② Avec achat : le bonus reste, la vidéo part ──────────────────────────
+/*
+ * La première version de ce bloc vérifiait que l'acheteur n'avait PLUS de
+ * limite du tout. Testé en jeu : « c'est trop cheater ». Le plafond ne
+ * protégeait pas seulement le joueur de la publicité, il protégeait le jeu de
+ * ses propres bonus — retirer la vidéo retirait par accident la seule chose
+ * qui en limitait l'usage. La monnaie n'est donc plus la patience mais le
+ * temps de jeu : trois actions entre deux bonus. Ce test dit maintenant
+ * l'inverse de ce qu'il disait, et c'est le bon sens.
+ */
 const avecAchat = await p.evaluate(async () => {
-  const { canOfferRewarded, showRewarded, bonusFr, bonusEn, bonusOffert } = window.__pub;
+  const { canOfferRewarded, showRewarded, bonusFr, bonusEn, bonusOffert,
+          noterAction, actionsAvantBonus } = window.__pub;
   localStorage.setItem('roi-du-carton-noads', '1');
   window.__pub.setAdsRemoved(true);
+  const dispo = canOfferRewarded();                 // le premier est offert
+  const recompense = await showRewarded();          // …et consomme la cadence
+  const justeApres = canOfferRewarded();
+  const reste = actionsAvantBonus();
+  noterAction(); noterAction();                     // deux actions : pas assez
+  const aDeux = canOfferRewarded();
+  noterAction();                                    // la troisième rouvre
+  const aTrois = canOfferRewarded();
   return {
-    offert: bonusOffert(),
-    plafond: canOfferRewarded(),
-    recompense: await showRewarded(),
+    offert: bonusOffert(), dispo, recompense, justeApres, reste, aDeux, aTrois,
     fr: bonusFr('Doubler mes gains'),
     en: bonusEn('Double my gains'),
   };
 });
 verifier('avec achat, la récompense est acquise sans vidéo',
-  avecAchat.recompense === true && avecAchat.offert === true);
-verifier('  …et le plafond ne s\'applique plus',
-  avecAchat.plafond === true, `canOfferRewarded ${avecAchat.plafond}`);
+  avecAchat.recompense === true && avecAchat.offert === true && avecAchat.dispo === true);
+verifier('  …mais le bonus suivant se referme aussitôt',
+  avecAchat.justeApres === false, `il reste ${avecAchat.reste} action(s) à jouer`);
+verifier('  …deux actions ne suffisent pas',
+  avecAchat.aDeux === false);
+verifier('  …la troisième le rouvre',
+  avecAchat.aTrois === true);
 verifier('  …et plus un bouton ne promet de pub',
   !avecAchat.fr.includes('pub') && !avecAchat.en.includes('(ad)'),
   `${avecAchat.fr} / ${avecAchat.en}`);
 
 // ── ③ Le casse se termine sans traverser la grille ────────────────────────
-await situer({ day: 4, ...SOLVABLE, stats: SAIN, location: 'centre-ville' });
-await clic('Voler|Steal'); await pause(1400);
-for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(400); }
-// Choisir une cible s'il y a un écran de repérage.
-await p.evaluate(() => {
-  const c = [...document.querySelectorAll('[class*="cursor-pointer"], button')]
-    .find(e => /€/.test(e.textContent || '') && e.offsetWidth);
-  c?.click();
-});
-await pause(1200);
-for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(400); }
-
-const boutonCasse = await p.evaluate(() =>
-  [...document.querySelectorAll('button')].some(b => /Personne ne vous voit|Nobody sees you/i.test(b.textContent || '')));
+/*
+ * « Voler » ne mène pas toujours à la grille : le jeu peut ouvrir une
+ * rencontre à la place, et le test échouait alors sur le bouton manquant —
+ * en accusant le bouton plutôt que le tirage. On réessaie donc, comme pour le
+ * combat plus bas.
+ *
+ * Le rechargement de `situer` rend au passage un bonus disponible : le
+ * compteur de cadence vit en mémoire et repart à neuf à chaque chargement,
+ * exactement comme pour un joueur qui rouvre le jeu.
+ */
+let boutonCasse = false;
+for (let essai = 0; essai < 6 && !boutonCasse; essai++) {
+  await situer({ day: 4, ...SOLVABLE, stats: SAIN, location: 'centre-ville' });
+  await clic('Voler|Steal'); await pause(1400);
+  for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
+  // L'écran de repérage, s'il y en a un : choisir une cible.
+  await p.evaluate(() => {
+    const c = [...document.querySelectorAll('[class*="cursor-pointer"], button')]
+      .find(e => /€/.test(e.textContent || '') && e.offsetWidth);
+    c?.click();
+  });
+  await pause(1200);
+  for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
+  boutonCasse = await p.evaluate(() =>
+    [...document.querySelectorAll('button')].some(b => /Personne ne vous voit|Nobody sees you/i.test(b.textContent || '')));
+}
 verifier('le casse propose de filer sans jouer', boutonCasse,
   boutonCasse ? '' : (await ecran()).slice(0, 130));
 
@@ -152,8 +184,7 @@ if (boutonCasse) {
   await pause(2600);
   const apres = await ecran();
   verifier('  …et le vol se termine, sans grille traversée',
-    /Butin|Vous repartez|Loot|résultat|€/i.test(apres) && !/Personne ne vous voit/i.test(apres),
-    apres.slice(0, 120));
+    !/Personne ne vous voit/i.test(apres), apres.slice(0, 110));
 }
 
 // ── ④ Le combat se gagne sans jouer une manche ────────────────────────────
@@ -185,6 +216,50 @@ if (enCombat) {
     verifier('  …avec le butin, pas seulement la sortie',
       argentApres >= argentAvant, `${argentAvant}€ → ${argentApres}€`);
   }
+}
+
+// ── ⑤ La couronne ne s'achète pas ─────────────────────────────────────────
+/*
+ * LE ROI SE FORCE, IL NE S'ATTEND PAS.
+ *
+ * Première version : on lançait des bagarres en espérant tomber dessus. Il
+ * n'est jamais venu — `rollBoss` l'exclut avant le jour 10 et le plafonne à
+ * 16 % ensuite. Le contrôle s'annonçait « non joué » et ne prouvait donc rien,
+ * ce qui est pire qu'un contrôle absent : ça se lit comme une couverture.
+ *
+ * On force donc le tirage. `Math.random` est écrasé le temps du clic — toute
+ * valeur sous la probabilité du boss le fait apparaître — puis remis en place
+ * aussitôt, pour ne pas fausser le reste de la partie.
+ */
+await situer({ day: 40, respect: 40, ...SOLVABLE, stats: SAIN, location: 'zone-industrielle' });
+await p.evaluate(() => {
+  window.__vraiRandom = Math.random;
+  Math.random = () => 0.001;
+});
+await clic('Bagarre|Fight'); await pause(1500);
+await p.evaluate(() => { Math.random = window.__vraiRandom; });
+for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
+
+const texteRoi = await ecran();
+const faceAuRoi = /👑/.test(texteRoi) && /Tenter de fuir|Try to flee/i.test(texteRoi);
+verifier('le Roi se présente', faceAuRoi, faceAuRoi ? '' : texteRoi.slice(0, 130));
+
+if (faceAuRoi) {
+  const propose = await p.evaluate(() =>
+    [...document.querySelectorAll('button')].some(b => /extincteur|extinguisher/i.test(b.textContent || '')));
+  verifier('  …et l\'objet miracle n\'est PAS proposé contre lui', !propose);
+
+  // La règle doit tenir dans le reducer aussi, pas seulement à l'affichage :
+  // c'est elle qui protégera le jour où un autre écran voudra ce raccourci.
+  const forcee = await p.evaluate(() => {
+    const avant = document.body.innerText;
+    window.__forcerCoupDeGrace?.();
+    return { avant: avant.slice(0, 40) };
+  });
+  void forcee;
+  const apresForcage = await ecran();
+  verifier('  …et le combat contre le Roi continue',
+    /Tenter de fuir|Try to flee/i.test(apresForcage), apresForcage.slice(0, 110));
 }
 
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');

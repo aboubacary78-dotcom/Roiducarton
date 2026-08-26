@@ -412,6 +412,18 @@ function SignPhase({ combat, character, onPick, onFlee, onCoupDeGrace }: {
   const lang = useLang();
   const [choice, setChoice] = useState<SignId | 'special' | null>(null);
   const [sortantObjet, setSortantObjet] = useState(false);
+  /*
+   * LA COURONNE NE S'ACHÈTE PAS.
+   *
+   * L'extincteur ouvre tous les combats sauf un. Battre le Roi en place est la
+   * seule fin du jeu : c'est ce vers quoi tendent les jauges, le respect, la
+   * dette, tout. Le laisser tomber contre une vidéo ne raccourcirait pas un
+   * mini-jeu pénible — ça viderait la partie de son terme.
+   *
+   * On ne grise pas le bouton, on le retire : un bouton barré est une
+   * frustration affichée, une absence est une règle.
+   */
+  const estLeRoi = combat.enemyEmoji === '👑';
   const special = combat.specialId ? SPECIAL_DEFS.find(s => s.id === combat.specialId) : undefined;
   const usesLeft = 2 - combat.specialUses;
   // Arme lourde : les accrochages (égalités) tournent pour vous, affiché
@@ -548,7 +560,7 @@ function SignPhase({ combat, character, onPick, onFlee, onCoupDeGrace }: {
        * Il ne s'affiche que tant qu'aucun signe n'est choisi, comme la fuite :
        * une fois les signes révélés, la manche appartient au jeu.
        */}
-      {!choice && canOfferRewarded() && (
+      {!choice && !estLeRoi && canOfferRewarded() && (
         <button
           disabled={sortantObjet}
           onClick={async () => {

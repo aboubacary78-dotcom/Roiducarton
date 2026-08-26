@@ -3,6 +3,7 @@ import { syncRecords, recordGameEnd } from '@/lib/profile';
 import { getLang, tc } from '@/lib/lang';
 import { peekLegacy, clearLegacy, takePendingKits, loadGraves } from '@/lib/necrology';
 import { reglerVoix } from '@/lib/sound';
+import { noterAction } from '@/lib/ads';
 
 // ============================================================================
 // LE MONOLITHE, DÉCOUPÉ
@@ -1890,6 +1891,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (!state.character || !state.currentCombat) return state;
       const c = state.character;
       const combat = state.currentCombat;
+      /*
+       * La couronne ne s'achète pas. L'écran retire déjà le bouton face au
+       * Roi ; la règle est répétée ici parce que c'est ici qu'elle vit — un
+       * jour où un autre écran voudra ce raccourci, il trouvera la porte
+       * fermée sans qu'on ait à y penser.
+       */
+      if (combat.enemyEmoji === '\u{1F451}') return state;
       const logs = [...state.combatLog];
       logs.push(L(
         `🧨 Votre main trouve ${OBJET_MIRACLE.fr} au fond de la poche. ${combat.enemyName} n'a rien vu venir.`,
@@ -2496,6 +2504,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
    * sauvegardée doit retrouver la bonne voix sans qu'on y pense.
    */
   useEffect(() => { reglerVoix(state.character?.gender); }, [state.character?.gender]);
+
+  /*
+   * LA CADENCE DES BONUS, COMPTÉE EN UN SEUL ENDROIT.
+   *
+   * Qui a payé « Sans pub » obtient ses bonus sans vidéo, mais pas en
+   * rafale : il lui faut jouer trois actions entre deux. Le compteur vit dans
+   * `lib/ads` et se nourrit ici, en surveillant `dayActions`.
+   *
+   * C'est volontairement un observateur, pas un appel dans le reducer : dix
+   * endroits font avancer `dayActions`, et le onzième aurait été oublié. On
+   * ne compte QUE les hausses, parce que le passage à la nuit remet le
+   * compteur du jour à zéro et qu'une nuit n'est pas une action jouée.
+   */
+  const actionsVues = useRef(state.dayActions);
+  useEffect(() => {
+    const delta = state.dayActions - actionsVues.current;
+    actionsVues.current = state.dayActions;
+    if (delta > 0) noterAction(delta);
+  }, [state.dayActions]);
 
   // Met à jour les records permanents du profil et débloque les accessoires
   // correspondants (succès). Séparé de la sauvegarde de partie.
