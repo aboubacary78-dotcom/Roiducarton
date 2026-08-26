@@ -409,10 +409,15 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
    * cible qu'ils convoitaient leur restera fermée pour toujours. Ce bouton
    * leur ouvre la porte.
    *
-   * Il rend `ok`, jamais `jackpot`. La distinction est tout l'équilibre de la
-   * chose : on peut ACHETER un vol propre, on ne peut pas acheter un coup
-   * d'éclat. Le gros lot reste ce qu'on va chercher soi-même, sinon jouer
-   * proprement ne rapporte plus rien de particulier.
+   * Il rend `jackpot`, comme une sortie parfaite. J'avais d'abord mis `ok` —
+   * un vol propre mais sans l'objet convoité ni le respect — pour que le gros
+   * lot reste ce qu'on va chercher soi-même. Ce n'est pas la règle retenue,
+   * et la raison vaut d'être notée : ce qu'on achète, c'est de ne pas jouer le
+   * mini-jeu, pas une demi-récompense. Un butin amputé sans explication se lit
+   * comme un bug, pas comme un arbitrage.
+   *
+   * Le frein est ailleurs, et il est explicite : deux casses joués avant le
+   * troisième. Même règle que l'extincteur au combat.
    *
    * Il n'apparaît qu'avant le premier pas. Après, on est engagé — le proposer
    * au bord de la catastrophe en ferait un filet de rattrapage, et c'est déjà
@@ -426,7 +431,7 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
     const vue = await showRewarded({ famille: 'vol' });
     geleRef.current = false;
     setFilantDoux(false);
-    if (vue) { playUnlock(); finish('ok'); }
+    if (vue) { playUnlock(); finish('jackpot'); }
   }
 
   async function effacerUnPalier() {

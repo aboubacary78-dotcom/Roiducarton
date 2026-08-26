@@ -233,10 +233,27 @@ verifier('  …au troisième casse, on peut filer sans jouer', boutonCasse,
   boutonCasse ? '' : (await ecran()).slice(0, 120));
 
 if (boutonCasse) {
+  /*
+   * LE VOL ACHETÉ VAUT UN COUP DE MAÎTRE.
+   *
+   * Il rendait `ok` — un vol propre, mais sans le respect ni l'objet convoité.
+   * La règle retenue est la même que pour le combat : ce qu'on achète, c'est
+   * de ne pas jouer le mini-jeu, pas une demi-récompense.
+   *
+   * `jackpot` est le seul palier qui donne +2 de respect ; c'est donc lui
+   * qu'on mesure, et non l'argent, dont la fourchette chevauche celle d'une
+   * sortie ordinaire et ne prouverait rien.
+   */
+  const avantVol = await p.evaluate(() =>
+    JSON.parse(localStorage.getItem('roi-du-carton-save')).character.respect);
   await clic('Personne ne vous voit|Nobody sees you');
   await pause(2600);
   verifier('    …et le vol se termine, sans grille traversée',
     !/Personne ne vous voit/i.test(await ecran()));
+  const apresVol = await p.evaluate(() =>
+    JSON.parse(localStorage.getItem('roi-du-carton-save')).character.respect);
+  verifier('    …au palier du coup de maître : +2 de respect',
+    apresVol >= avantVol + 2, `respect ${avantVol} → ${apresVol}`);
 }
 
 // ── ④ Le combat : même règle, compteur séparé ─────────────────────────────
@@ -271,38 +288,28 @@ verifier('  …au troisième combat, l\'objet miracle est là', boutonObjet,
 
 if (boutonObjet) {
   /*
-   * ON ACHÈTE LA SORTIE, PAS LE TROPHÉE.
+   * UNE VICTOIRE ACHETÉE VAUT UNE VICTOIRE GAGNÉE.
    *
-   * Ce contrôle disait l'inverse : il exigeait « le butin, pas seulement la
-   * sortie ». C'était l'incohérence — le raccourci du VOL rend `ok` et jamais
-   * `jackpot`, donc moins d'argent, aucun respect, l'objet une fois sur deux ;
-   * le combat, lui, donnait la victoire COMPLÈTE. La cadence limitait la
-   * fréquence, jamais l'intérêt : chaque usage restait meilleur que de jouer.
+   * Ce contrôle a dit les deux choses. J'ai d'abord amputé le butin des
+   * combats gagnés à l'extincteur — argent oui, respect et objet non — au motif
+   * que le raccourci serait sinon meilleur que de jouer. Ce n'est pas la règle
+   * retenue : ce qu'on achète, c'est de ne pas jouer le mini-jeu, pas une
+   * demi-récompense. Un butin amputé sans explication se lit comme un bug.
    *
-   * L'argent reste — le combat a eu lieu. Le RESPECT ne suit pas : la rue
-   * admire ce qu'elle a vu faire. Et l'OBJET non plus : fouiller quelqu'un
-   * demande d'être resté sur place.
-   */
-  /*
-   * ON LIT LE BUTIN QUE CET ENNEMI-LÀ DÉCLARE.
-   *
-   * « respect 0 → 0 » ne prouve rien si l'adversaire n'en donnait pas : le
-   * Chat de Gouttière, par exemple, ne lâche que de l'argent. Le contrôle
-   * serait alors vert sans rien garantir. On identifie donc l'ennemi à
-   * l'écran, on relit SON butin dans le catalogue, et on n'affirme quelque
-   * chose que sur ce qu'il avait effectivement à donner.
+   * On vérifie donc que TOUT arrive, et on le prouve sur ce que cet
+   * adversaire-là déclare : affirmer « le respect a été donné » ne vaut rien
+   * face à un ennemi qui n'en donne pas. On relit son butin au catalogue.
    */
   const { readFileSync } = await import('node:fs');
   const src = readFileSync('client/src/contexts/data/enemies.ts', 'utf8');
   const nomEnnemi = await p.evaluate(() => {
-    const t = document.body.innerText;
-    const m = t.match(/([A-ZÉÈÀÇ][^\n❤]{2,30}?)\s*❤️/);
+    const m = document.body.innerText.match(/([A-ZÉÈÀÇ][^\n❤]{2,30}?)\s*❤️/);
     return m ? m[1].trim() : '';
   });
   const ligne = src.split('\n').find(l => l.includes(`name: '${nomEnnemi}'`)) ?? '';
   const declare = {
     respect: Number(ligne.match(/respect: (\d+)/)?.[1] ?? 0),
-    objet: /loot: \{[^}]*item:/.test(ligne) || /item: \{/.test(ligne),
+    objet: /item: \{/.test(ligne),
   };
 
   const etat = () => p.evaluate(() => {
@@ -313,20 +320,23 @@ if (boutonObjet) {
   await clic('extincteur|extinguisher'); await pause(2000);
   verifier('    …et le combat est gagné', /Victoire|Victory/i.test(await ecran()));
   const apres = await etat();
+
   verifier('    …l\'argent du butin suit',
     apres.money >= avant.money, `${avant.money}€ → ${apres.money}€`);
+
   if (declare.respect > 0) {
-    verifier('    …mais PAS le respect, qu\'il avait pourtant à donner',
-      apres.respect === avant.respect,
+    verifier('    …le respect AUSSI, comme un combat gagné en jouant',
+      apres.respect >= avant.respect + declare.respect,
       `${nomEnnemi} déclare +${declare.respect} · ${avant.respect} → ${apres.respect}`);
   } else {
-    console.log(`  (${nomEnnemi || 'cet adversaire'} ne donnait pas de respect — contrôle sans objet)`);
+    console.log(`  (${nomEnnemi || 'cet adversaire'} ne donne pas de respect — rien à vérifier)`);
   }
+
   if (declare.objet) {
-    verifier('    …ni l\'objet qu\'il lâche d\'ordinaire',
-      apres.sac === avant.sac, `sac ${avant.sac} → ${apres.sac}`);
+    verifier('    …et l\'objet qu\'il lâche',
+      apres.sac > avant.sac, `sac ${avant.sac} → ${apres.sac}`);
   } else {
-    console.log(`  (${nomEnnemi || 'cet adversaire'} ne lâche pas d'objet — contrôle sans objet)`);
+    console.log(`  (${nomEnnemi || 'cet adversaire'} ne lâche pas d'objet — rien à vérifier)`);
   }
 }
 

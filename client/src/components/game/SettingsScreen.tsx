@@ -31,7 +31,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.54.0';
+const APP_VERSION = '3.55.0';
 
 /*
  * UN CURSEUR EN CARTON.

@@ -211,27 +211,24 @@ function etatDeVictoire(
   combat: CombatState,
   cUpd: Character,
   logs: string[],
-  /*
-   * ON ACHÈTE LA SORTIE, PAS LE TROPHÉE.
-   *
-   * L'extincteur donnait la victoire COMPLÈTE — argent, respect, objet lâché —
-   * c'est-à-dire strictement mieux que de se battre. La cadence limitait la
-   * fréquence, jamais l'intérêt : chaque usage restait plus rentable que de
-   * jouer, et gagner au mérite ne rapportait rien de particulier.
-   *
-   * C'est la règle déjà appliquée au vol, où le raccourci rend `ok` et jamais
-   * `jackpot` — je ne l'avais pas reportée ici, et c'était l'incohérence.
-   *
-   * Le butin en argent reste : le combat a eu lieu, l'adversaire est à terre.
-   * Le RESPECT ne suit pas — la rue admire ce qu'elle a vu faire — et l'OBJET
-   * non plus, parce que fouiller quelqu'un demande d'être resté sur place.
-   */
-  achetee = false,
 ): GameState {
+  /*
+   * UNE VICTOIRE EST UNE VICTOIRE, ACHETÉE OU NON.
+   *
+   * J'ai essayé d'amputer le butin des combats gagnés à l'extincteur — argent
+   * oui, respect et objet non — au motif que le raccourci serait sinon
+   * meilleur que de jouer. Ce n'est pas la règle retenue : ce qu'on achète,
+   * c'est de ne pas jouer le mini-jeu, pas une demi-récompense.
+   *
+   * Et une demi-victoire se lit mal : le joueur voit « Victoire ! » puis un
+   * butin plus maigre que d'habitude, sans qu'aucun texte n'explique lequel
+   * des deux est cassé. La cadence — trois combats entre deux extincteurs —
+   * reste le seul frein, et elle est explicite.
+   */
   const lootMoney = combat.loot?.money || 0;
-  const lootRespect = achetee ? 0 : (combat.loot?.respect || 0);
+  const lootRespect = combat.loot?.respect || 0;
   // L'ennemi lâche parfois un objet à son image (sandwich, couteau…).
-  const drop = !achetee && combat.loot?.item && cUpd.inventory.length < bagCapacity(cUpd) ? combat.loot.item : undefined;
+  const drop = combat.loot?.item && cUpd.inventory.length < bagCapacity(cUpd) ? combat.loot.item : undefined;
   const en = tc(combat.enemyName);
   logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
   if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
@@ -1971,11 +1968,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         `🧨 Votre main trouve ${OBJET_MIRACLE.fr} au fond de la poche. ${combat.enemyName} n'a rien vu venir.`,
         `🧨 Your hand finds ${OBJET_MIRACLE.en} at the bottom of your pocket. ${tc(combat.enemyName)} never saw it coming.`,
       ));
-      logs.push(L(
-        '🏃 Vous ramassez ce qui traîne et vous filez : pas le temps de fouiller, et personne n\'a rien vu.',
-        '🏃 You scoop up what\'s lying around and go: no time to search, and nobody saw a thing.',
-      ));
-      return etatDeVictoire(state, combat, c, logs, true);
+      return etatDeVictoire(state, combat, c, logs);
     }
 
     // Fuite tentée depuis le duel de signes (soupape quand tout va mal :

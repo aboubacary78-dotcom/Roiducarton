@@ -299,7 +299,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/monet-x7yWi4/cap.js
+// ../../../tmp/monet-zt3gdg/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -1101,23 +1101,23 @@ function genderFromName(name) {
   return FEMALE_NAMES.has(name) ? "f" : "m";
 }
 var JOBS = [
-  { id: "comptable", name: "Ancien Comptable", description: "Les chiffres, \xE7a le conna\xEEt. Les poubelles, un peu moins.", bonusStats: { dignity: 10 }, startingItems: ["calculatrice"], emoji: "\u{1F9EE}" },
-  { id: "ouvrier", name: "Ancien Ouvrier", description: "Des mains en or et un dos en compote.", bonusStats: { health: 10 }, startingItems: ["cle-molette"], emoji: "\u{1F527}" },
-  { id: "professeur", name: "Ancien Professeur", description: "Il corrige encore les fautes sur les panneaux.", bonusStats: { mental: 15 }, startingItems: ["livre"], emoji: "\u{1F4DA}" },
-  { id: "sommelier", name: "Ancien Sommelier", description: "Peut distinguer un Bordeaux d'un jus de poubelle. Parfois.", bonusStats: { hunger: 10 }, startingItems: ["tire-bouchon"], emoji: "\u{1F377}" },
-  { id: "cascadeur", name: "Ancien Cascadeur", description: "Tombe de haut. Litt\xE9ralement et figurativement.", bonusStats: { health: 5 }, startingItems: ["genouillere"], emoji: "\u{1F938}" },
-  { id: "informaticien", name: "Ancien Informaticien", description: "Cherche encore le WiFi gratuit.", bonusStats: { mental: 10 }, startingItems: ["cable-usb"], emoji: "\u{1F4BB}" },
-  { id: "cuisinier", name: "Ancien Cuisinier", description: "Transforme un rat en ratatouille.", bonusStats: { hunger: 15 }, startingItems: ["couteau-suisse"], emoji: "\u{1F468}\u200D\u{1F373}" },
-  { id: "infirmier", name: "Ancien Infirmier", description: "Se soigne avec des feuilles de journal.", bonusStats: { health: 15 }, startingItems: ["bandage"], emoji: "\u{1F3E5}" },
-  { id: "artiste", name: "Ancien Artiste", description: "Son art n'a jamais \xE9t\xE9 compris. M\xEAme par lui.", bonusStats: { dignity: 15 }, startingItems: ["crayon"], emoji: "\u{1F3A8}" },
-  { id: "militaire", name: "Ancien Militaire", description: "Dort debout et mange n'importe quoi.", bonusStats: { health: 10 }, startingItems: ["couverture-survie"], emoji: "\u{1F396}\uFE0F" },
-  { id: "bibliothecaire", name: "Ancien Biblioth\xE9caire", description: "Conna\xEEt tous les recoins de la ville.", bonusStats: { mental: 10 }, startingItems: ["carte-ville"], emoji: "\u{1F4D6}" },
-  { id: "vendeur", name: "Ancien Vendeur de Voitures", description: "Peut vendre un carton mouill\xE9 comme un loft.", bonusStats: { dignity: 5 }, startingItems: ["cravate"], emoji: "\u{1F697}" },
-  { id: "jardinier", name: "Ancien Jardinier", description: "Fait pousser des tomates dans une chaussure.", bonusStats: { hunger: 10 }, startingItems: ["graines"], emoji: "\u{1F331}" },
-  { id: "avocat", name: "Ancien Avocat", description: "Conna\xEEt ses droits. Et ceux des pigeons.", bonusStats: { dignity: 10, mental: 5 }, startingItems: ["code-civil"], emoji: "\u2696\uFE0F" },
-  { id: "musicien", name: "Ancien Musicien", description: "Son harmonica a connu des jours meilleurs.", bonusStats: { mental: 10, dignity: 5 }, startingItems: ["harmonica-casse"], emoji: "\u{1F3B5}" },
-  { id: "boxeur", name: "Ancien Boxeur", description: "Les poings se souviennent. Le reste a un peu oubli\xE9.", bonusStats: { health: 10 }, startingItems: ["gants-boxe"], emoji: "\u{1F94A}", locked: true },
-  { id: "poete", name: "Ancien Po\xE8te", description: "Des vers plein la t\xEAte, des trous plein les poches.", bonusStats: { mental: 15 }, startingItems: ["carnet-poemes"], emoji: "\u{1F58B}\uFE0F", locked: true }
+  { id: "comptable", name: "Ancien Comptable", nameF: "Ancienne Comptable", description: "Les chiffres, \xE7a le conna\xEEt. Les poubelles, un peu moins.", bonusStats: { dignity: 10 }, startingItems: ["calculatrice"], emoji: "\u{1F9EE}" },
+  { id: "ouvrier", name: "Ancien Ouvrier", nameF: "Ancienne Ouvri\xE8re", description: "Des mains en or et un dos en compote.", bonusStats: { health: 10 }, startingItems: ["cle-molette"], emoji: "\u{1F527}" },
+  { id: "professeur", name: "Ancien Professeur", nameF: "Ancienne Professeure", description: "Il corrige encore les fautes sur les panneaux.", bonusStats: { mental: 15 }, startingItems: ["livre"], emoji: "\u{1F4DA}" },
+  { id: "sommelier", name: "Ancien Sommelier", nameF: "Ancienne Sommeli\xE8re", description: "Peut distinguer un Bordeaux d'un jus de poubelle. Parfois.", bonusStats: { hunger: 10 }, startingItems: ["tire-bouchon"], emoji: "\u{1F377}" },
+  { id: "cascadeur", name: "Ancien Cascadeur", nameF: "Ancienne Cascadeuse", description: "Tombe de haut. Litt\xE9ralement et figurativement.", bonusStats: { health: 5 }, startingItems: ["genouillere"], emoji: "\u{1F938}" },
+  { id: "informaticien", name: "Ancien Informaticien", nameF: "Ancienne Informaticienne", description: "Cherche encore le WiFi gratuit.", bonusStats: { mental: 10 }, startingItems: ["cable-usb"], emoji: "\u{1F4BB}" },
+  { id: "cuisinier", name: "Ancien Cuisinier", nameF: "Ancienne Cuisini\xE8re", description: "Transforme un rat en ratatouille.", bonusStats: { hunger: 15 }, startingItems: ["couteau-suisse"], emoji: "\u{1F468}\u200D\u{1F373}" },
+  { id: "infirmier", name: "Ancien Infirmier", nameF: "Ancienne Infirmi\xE8re", description: "Se soigne avec des feuilles de journal.", bonusStats: { health: 15 }, startingItems: ["bandage"], emoji: "\u{1F3E5}" },
+  { id: "artiste", name: "Ancien Artiste", nameF: "Ancienne Artiste", description: "Son art n'a jamais \xE9t\xE9 compris. M\xEAme par lui.", bonusStats: { dignity: 15 }, startingItems: ["crayon"], emoji: "\u{1F3A8}" },
+  { id: "militaire", name: "Ancien Militaire", nameF: "Ancienne Militaire", description: "Dort debout et mange n'importe quoi.", bonusStats: { health: 10 }, startingItems: ["couverture-survie"], emoji: "\u{1F396}\uFE0F" },
+  { id: "bibliothecaire", name: "Ancien Biblioth\xE9caire", nameF: "Ancienne Biblioth\xE9caire", description: "Conna\xEEt tous les recoins de la ville.", bonusStats: { mental: 10 }, startingItems: ["carte-ville"], emoji: "\u{1F4D6}" },
+  { id: "vendeur", name: "Ancien Vendeur de Voitures", nameF: "Ancienne Vendeuse de Voitures", description: "Peut vendre un carton mouill\xE9 comme un loft.", bonusStats: { dignity: 5 }, startingItems: ["cravate"], emoji: "\u{1F697}" },
+  { id: "jardinier", name: "Ancien Jardinier", nameF: "Ancienne Jardini\xE8re", description: "Fait pousser des tomates dans une chaussure.", bonusStats: { hunger: 10 }, startingItems: ["graines"], emoji: "\u{1F331}" },
+  { id: "avocat", name: "Ancien Avocat", nameF: "Ancienne Avocate", description: "Conna\xEEt ses droits. Et ceux des pigeons.", bonusStats: { dignity: 10, mental: 5 }, startingItems: ["code-civil"], emoji: "\u2696\uFE0F" },
+  { id: "musicien", name: "Ancien Musicien", nameF: "Ancienne Musicienne", description: "Son harmonica a connu des jours meilleurs.", bonusStats: { mental: 10, dignity: 5 }, startingItems: ["harmonica-casse"], emoji: "\u{1F3B5}" },
+  { id: "boxeur", name: "Ancien Boxeur", nameF: "Ancienne Boxeuse", description: "Les poings se souviennent. Le reste a un peu oubli\xE9.", bonusStats: { health: 10 }, startingItems: ["gants-boxe"], emoji: "\u{1F94A}", locked: true },
+  { id: "poete", name: "Ancien Po\xE8te", nameF: "Ancienne Po\xE9tesse", description: "Des vers plein la t\xEAte, des trous plein les poches.", bonusStats: { mental: 15 }, startingItems: ["carnet-poemes"], emoji: "\u{1F58B}\uFE0F", locked: true }
 ];
 var TRAITS = [
   { id: "estomac-acier", name: "Estomac d'Acier", description: "Dig\xE8re tout : la faim vient plus lentement", positive: true, effects: { hunger: 5 }, emoji: "\u{1F9BE}" },
