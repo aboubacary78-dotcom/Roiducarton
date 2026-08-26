@@ -2,7 +2,7 @@ import { useGame, computeScore, hasTrait, poissardMerite, nomMetier, loadHighSco
 import type { InventoryItem } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { bonusEn, bonusFr, partieTerminee, showInterstitial, showRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, isAtelierOwned, partieTerminee, showInterstitial, showRewarded } from '@/lib/ads';
 import PlayerFace from './PlayerFace';
 import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -237,6 +237,8 @@ export default function GameOverScreen() {
   // partie, il en ouvre une. Le joueur repart avec un nom en tête.
   useEffect(() => { dispatch({ type: 'PREPARE_SUCCESSOR' }); }, [dispatch]);
   const successor = state.characterChoices[0] ?? null;
+  // Avec l'Atelier, « recommencer » veut dire composer : le bouton le dit.
+  const atelier = isAtelierOwned();
   // Le nom du successeur est le meilleur texte de rappel dont on dispose :
   // « Marcel attend toujours son tour » ouvre une boucle que « Revenez
   // jouer ! » n'ouvre pas.
@@ -688,7 +690,16 @@ export default function GameOverScreen() {
             {tr(`Reprendre la rue avec ${successor.name}`, `Take the street with ${successor.name}`)}
           </motion.button>
           <p className="text-[9px] text-[#8B6B4A] text-center mt-1.5">
-            {tr('Vous pourrez encore changer d\'avis.', 'You can still change your mind.')}
+            {/*
+              * Quand un successeur est annoncé, c'est CE bouton-ci que le
+              * joueur touche — celui du bas devient secondaire. L'invitation à
+              * composer doit donc apparaître ici aussi, sans quoi elle ne se
+              * verrait que dans le cas le plus rare.
+              */}
+            {atelier
+              ? tr('Vous pourrez encore changer d\'avis, et composer son visage.',
+                   'You can still change your mind, and compose their face.')
+              : tr('Vous pourrez encore changer d\'avis.', 'You can still change your mind.')}
           </p>
         </motion.div>
       )}
@@ -916,9 +927,23 @@ export default function GameOverScreen() {
           boxShadow: '0 4px 16px rgba(212, 135, 77, 0.3)',
         }}
       >
+        {/*
+          * LE LIBELLÉ DIT CE QUI VA SE PASSER.
+          *
+          * Avec l'Atelier, choisir un candidat ouvre la composition : le
+          * visage et les deux traits. Ce n'est donc pas « recommencer », c'est
+          * fabriquer quelqu'un — et l'écran de fin est le seul endroit où on y
+          * pense, juste après avoir enterré le précédent.
+          *
+          * Un SECOND bouton « avec un personnage composé » aurait menti : il
+          * n'existe pas deux chemins, l'Atelier s'ouvre de toute façon pour qui
+          * l'a acheté. On renomme celui qui existe.
+          */}
         {successor
           ? tr('↻ Reprendre la rue', '↻ Take the street')
-          : tr('Recommencer', 'Play Again')}
+          : atelier
+            ? tr('🎨 Composer une nouvelle âme perdue', '🎨 Compose a new lost soul')
+            : tr('Recommencer', 'Play Again')}
       </motion.button>
     </motion.div>
   );

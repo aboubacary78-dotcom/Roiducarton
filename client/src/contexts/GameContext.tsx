@@ -1488,6 +1488,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // nuit qu'on aurait perdue, il ne fabrique pas du sommeil qu'on n'avait
       // pas. Sans ce calcul, s'endormir à zéro en aurait fait gagner quinze.
       const usesEtabli: string[] = [];
+      /*
+       * ON RETIENT COMBIEN, PAS SEULEMENT QUE.
+       *
+       * Ces objets annulent une perte au lieu d'ajouter une jauge : le bilan
+       * du matin n'affichait donc RIEN pour eux — pas de chiffre négatif,
+       * puisqu'il n'y avait plus de perte, et un chiffre positif aurait été
+       * faux. Le joueur lisait « le matelas vous a rendu votre nuit » sans
+       * jamais savoir ce que cette nuit valait. Le matériel se payait, et ne
+       * se voyait pas.
+       */
+      const epargnes: { emoji: string; fr: string; en: string; jauge: keyof Stats; montant: number }[] = [];
       if (cold && ch.inventory.some(i => i.id === 'craft-rechaud')) {
         const perdu = Math.min(Math.abs(weatherPenalty.health || 0), Math.max(0, ch.stats.health - s.health));
         if (perdu > 0) {
@@ -1495,6 +1506,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           notes.push('🔥 Le réchaud a tenu toute la nuit : le froid ne vous a rien pris.');
           notesEn.push('🔥 The stove burned all night: the cold took nothing from you.');
           usesEtabli.push('craft-rechaud');
+          epargnes.push({ emoji: '🔥', fr: 'Réchaud de fortune', en: 'Makeshift stove', jauge: 'health', montant: perdu });
         }
       }
       if (ch.inventory.some(i => i.id === 'craft-matelas')) {
@@ -1504,6 +1516,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           notes.push('🛏️ Le matelas de carton vous a rendu votre nuit entière.');
           notesEn.push('🛏️ The cardboard mattress gave you your whole night back.');
           usesEtabli.push('craft-matelas');
+          epargnes.push({ emoji: '🛏️', fr: 'Matelas de carton', en: 'Cardboard mattress', jauge: 'sleep', montant: perdu });
         }
       }
       for (const id of usesEtabli) {
@@ -1667,7 +1680,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         nextWeather: meteoApres,
         contract: isAlive ? nextContract : null,
         daySummary: isAlive
-          ? { day: ch.day + 1, weather: nextWeather, deltas, moneyChange: bonusMoney, notes, notesEn, contratRate }
+          ? { day: ch.day + 1, weather: nextWeather, deltas, moneyChange: bonusMoney, notes, notesEn, contratRate, epargnes }
           : null,
       };
     }
@@ -2626,6 +2639,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (affiche && !resultatVu.current) noterEngagement('evenement');
     resultatVu.current = affiche;
   }, [state.eventResult]);
+
+  /*
+   * La nuit compte à part : son secours n'existe qu'au bilan du matin, une
+   * fois par jour. L'attacher aux rencontres le rendait dépendant de ce qu'on
+   * avait fait la veille, et absent les jours calmes.
+   */
+  const nuitVue = useRef(!!state.daySummary);
+  useEffect(() => {
+    const affiche = !!state.daySummary;
+    if (affiche && !nuitVue.current) noterEngagement('nuit');
+    nuitVue.current = affiche;
+  }, [state.daySummary]);
 
   // Met à jour les records permanents du profil et débloque les accessoires
   // correspondants (succès). Séparé de la sauvegarde de partie.

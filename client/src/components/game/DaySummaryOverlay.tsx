@@ -98,7 +98,7 @@ export default function DaySummaryOverlay() {
    * contrat.
    */
   const contratDef = s.contratRate ? getContract(s.contratRate.id) : undefined;
-  const peutRattraperContrat = !!contratDef && !s.contratRattrape && canOfferRewarded('evenement');
+  const peutRattraperContrat = !!contratDef && !s.contratRattrape && canOfferRewarded('nuit');
 
   /*
    * UNE SEULE OFFRE PAR BILAN.
@@ -110,12 +110,12 @@ export default function DaySummaryOverlay() {
    * qu'une jauge basse de plus.
    */
   const peutRattraper = !peutRattraperContrat && !s.recovered
-    && jaugesEnDanger.length > 0 && canOfferRewarded('evenement');
+    && jaugesEnDanger.length > 0 && canOfferRewarded('nuit');
 
   async function rattraperLaNuit() {
     if (enCours) return;
     setEnCours(true);
-    const vue = await showRewarded({ famille: 'evenement' });
+    const vue = await showRewarded({ famille: 'nuit' });
     if (vue) {
       dispatch({ type: 'RECOVER_NIGHT' });
       playGaugeFilled();
@@ -126,7 +126,7 @@ export default function DaySummaryOverlay() {
   async function rattraperLeContrat() {
     if (enCours) return;
     setEnCours(true);
-    const vue = await showRewarded({ famille: 'evenement' });
+    const vue = await showRewarded({ famille: 'nuit' });
     if (vue) {
       dispatch({ type: 'RATTRAPER_CONTRAT' });
       playUnlock();
@@ -186,6 +186,45 @@ export default function DaySummaryOverlay() {
                 {s.moneyChange > 0 && (
                   <span className="text-[11px] px-2 py-1 rounded-full font-semibold font-mono bg-[#B8860B]/12 text-[#8B6B4A]">💰 +{s.moneyChange}€</span>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/*
+            * CE QUE LE MATÉRIEL A ÉPARGNÉ.
+            *
+            * Le matelas et le réchaud annulent une perte au lieu d'ajouter une
+            * jauge : le bilan n'affichait donc RIEN pour eux — pas de chiffre
+            * négatif puisqu'il n'y avait plus de perte, et un chiffre positif
+            * aurait été faux. On lisait « le matelas vous a rendu votre nuit »
+            * sans jamais savoir ce que cette nuit valait, et le matériel se
+            * payait sans se voir.
+            *
+            * Le montant est donc écrit BARRÉ, à côté des pertes réelles : ce
+            * n'est pas un gain, c'est une perte qui n'a pas eu lieu. Le trait
+            * dit exactement ça, sans une ligne d'explication.
+            */}
+          {(s.epargnes?.length ?? 0) > 0 && (
+            <div className="craft-card p-3">
+              <p className="text-[11px] font-semibold text-[#3d8b4f] mb-1.5">
+                {tr('Ce que votre matériel vous a évité', 'What your gear spared you')}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {s.epargnes!.map((e, i) => {
+                  const meta = STAT_META[e.jauge];
+                  return (
+                    <motion.span
+                      key={`${e.jauge}-${i}`}
+                      initial={{ scale: 0, y: 4 }}
+                      animate={{ scale: 1, y: 0 }}
+                      transition={{ type: 'spring', delay: 0.12 + i * 0.05 }}
+                      className="text-[11px] px-2 py-1 rounded-full font-semibold bg-[#4A9B5F]/12 text-[#3d8b4f]"
+                    >
+                      {e.emoji} {tr(e.fr, e.en)} · {meta.emoji}{' '}
+                      <span className="line-through opacity-70 font-mono">−{e.montant}</span>
+                    </motion.span>
+                  );
+                })}
               </div>
             </div>
           )}

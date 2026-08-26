@@ -528,6 +528,19 @@ export interface GameState {
   daySummary: {
     day: number; weather: WeatherType; deltas: Partial<Stats>; moneyChange: number;
     notes: string[]; notesEn: string[]; recovered?: Partial<Stats>;
+    /*
+     * CE QUE LA NUIT N'A PAS PRIS, ET GRÂCE À QUOI.
+     *
+     * Le matelas et le réchaud n'ajoutent pas de jauge : ils ANNULENT une
+     * perte. Résultat, un joueur bien équipé voyait un bilan sans rien de
+     * négatif et une phrase disant que le matelas avait « rendu la nuit » —
+     * sans jamais savoir ce qu'il aurait perdu sans lui. Le matériel se payait
+     * et ne se voyait pas.
+     *
+     * On garde donc le montant épargné, par objet, pour l'afficher en face des
+     * pertes plutôt qu'à leur place.
+     */
+    epargnes?: { emoji: string; fr: string; en: string; jauge: keyof Stats; montant: number }[];
     contratRate?: { id: string; valeur: number; cible: number }; contratRattrape?: boolean;
   } | null;
   // Contrat du matin : micro-objectif du jour (jugé à la nuit). `done` sert

@@ -550,7 +550,7 @@ let offresFaites = 0;
  * souvent, et un bonus visible une fois sur trois y serait invisible.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-export type FamilleBonus = 'combat' | 'vol' | 'recup' | 'evenement';
+export type FamilleBonus = 'combat' | 'vol' | 'recup' | 'evenement' | 'nuit';
 
 /** Combien de fois il faut engager l'activité avant que son bonus s'ouvre. */
 const CADENCE: Record<FamilleBonus, number> = {
@@ -558,10 +558,25 @@ const CADENCE: Record<FamilleBonus, number> = {
   vol: 3,
   recup: 3,
   evenement: 2,
+  /*
+   * LA NUIT A SA PROPRE CADENCE, ET C'EST UNE CORRECTION.
+   *
+   * Le bilan du matin — rattraper un contrat raté, dormir une heure de plus —
+   * était compté avec les rencontres. Mais une nuit n'est pas une rencontre :
+   * elle arrive UNE fois, à heure fixe, et son secours ne sert qu'à ce
+   * moment-là. Un joueur qui dormait sans avoir déclenché deux résultats de
+   * rencontre dans la journée trouvait le bouton absent, sans comprendre —
+   * « tu l'as enlevé pour les personnes qui payent », et c'était vrai en
+   * pratique.
+   *
+   * Deux nuits, donc : une nuit sur deux, ce qui se compte tout seul et ne
+   * dépend plus de ce qu'on a fait dans la journée.
+   */
+  nuit: 2,
 };
 
 const engagements: Record<FamilleBonus, number> = {
-  combat: 0, vol: 0, recup: 0, evenement: 0,
+  combat: 0, vol: 0, recup: 0, evenement: 0, nuit: 0,
 };
 
 /**
