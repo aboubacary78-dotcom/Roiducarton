@@ -196,7 +196,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/tirage-4hiyYE/cap.js
+// ../../../tmp/tirage-EFSLQm/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -762,6 +762,24 @@ function setAdsRemoved(v) {
   } catch {
   }
 }
+var ATELIER_KEY = "roi-du-carton-atelier";
+var atelierOwned = (() => {
+  try {
+    return localStorage.getItem(ATELIER_KEY) === "1";
+  } catch {
+    return false;
+  }
+})();
+function isAtelierOwned() {
+  return atelierOwned;
+}
+function setAtelierOwned(v) {
+  atelierOwned = v;
+  try {
+    localStorage.setItem(ATELIER_KEY, v ? "1" : "0");
+  } catch {
+  }
+}
 var AD_UNITS = {
   android: {
     banner: "ca-app-pub-6336322065829631/1688618582",
@@ -864,7 +882,9 @@ if (typeof window !== "undefined") {
     isAdsRemoved,
     setAdsRemoved,
     noterEngagement,
-    engagementsAvantBonus
+    engagementsAvantBonus,
+    isAtelierOwned,
+    setAtelierOwned
   };
 }
 

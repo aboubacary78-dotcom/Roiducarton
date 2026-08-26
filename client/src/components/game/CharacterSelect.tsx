@@ -1,10 +1,11 @@
 import { useGame, type Character } from '@/contexts/GameContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import PlayerFace from './PlayerFace';
 import { useLang, tr, tc } from '@/lib/lang';
-import { playPickCharacter, playReroll } from '@/lib/sound';
-import { bonusEn, bonusFr, isAdsRemoved, showRewarded } from '@/lib/ads';
+import { playBack, playCard, playPickCharacter, playReroll } from '@/lib/sound';
+import { bonusEn, bonusFr, isAdsRemoved, isAtelierOwned, showRewarded } from '@/lib/ads';
+import AtelierOverlay from './AtelierOverlay';
 
 function CharacterCard({ char, index, onSelect }: { char: Character; index: number; onSelect: () => void }) {
   return (
@@ -71,6 +72,10 @@ export default function CharacterSelect() {
   // pub récompensée (gratuits si le joueur a acheté « Sans pub »).
   const [rerolls, setRerolls] = useState(0);
   const [loadingAd, setLoadingAd] = useState(false);
+  // Index du candidat en cours de retouche, ou null. L'Atelier est un achat :
+  // sans lui, ce chemin n'existe simplement pas.
+  const [retouche, setRetouche] = useState<number | null>(null);
+  const atelier = isAtelierOwned();
   const freeReroll = rerolls === 0 || isAdsRemoved();
 
   async function handleReroll() {
@@ -112,7 +117,17 @@ export default function CharacterSelect() {
             key={i}
             char={char}
             index={i}
-            onSelect={() => dispatch({ type: 'SELECT_CHARACTER', index: i })}
+            /*
+             * AVEC L'ATELIER, CHOISIR OUVRE LA RETOUCHE ; SANS LUI, ÇA PART.
+             *
+             * Le même geste, deux suites différentes — et pas un second bouton
+             * « personnaliser » à côté du premier, qui obligerait tout le monde
+             * à lire une option que la plupart n'ont pas.
+             */
+            onSelect={() => {
+              if (atelier) { playCard(); setRetouche(i); return; }
+              dispatch({ type: 'SELECT_CHARACTER', index: i });
+            }}
           />
         ))}
       </div>
@@ -132,6 +147,25 @@ export default function CharacterSelect() {
             ? tr('🎲 Relancer les dés', '🎲 Reroll')
             : tr(bonusFr('Relancer les dés'), bonusEn('Reroll'))}
       </motion.button>
+
+      {/* Bandeau discret : ce que l'Atelier change, pour qui ne l'a pas. */}
+      {!atelier && (
+        <p className="text-[11px] text-[#A08B70] text-center leading-snug px-4">
+          {tr('L\'Atelier (Options) permet de composer le visage et de choisir les deux traits.',
+              'The Workshop (Settings) lets you compose the face and pick both traits.')}
+        </p>
+      )}
+
+      <AnimatePresence>
+        {retouche !== null && state.characterChoices[retouche] && (
+          <AtelierOverlay
+            char={state.characterChoices[retouche]}
+            onAnnuler={() => { playBack(); setRetouche(null); }}
+            onValider={(visage, traits) =>
+              dispatch({ type: 'SELECT_CHARACTER', index: retouche, visage, traits })}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

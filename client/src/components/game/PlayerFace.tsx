@@ -33,6 +33,8 @@ export default function PlayerFace({
       className={className}
       // Sa tenue à lui : deux personnages successifs n'ont plus la même tête.
       accessories={char.equipped ?? {}}
+      // Ce qui a été composé dans l'Atelier ; le reste vient de la graine.
+      visage={char.visage}
       condition={faceCondition(char)}
       // Le second axe : la tenue, pilotée par la Dignité. Le corps et
       // l'allure se dégradent séparément, et c'est tout l'intérêt.

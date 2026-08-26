@@ -299,7 +299,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/monet-jcQ7ME/cap.js
+// ../../../tmp/monet-9HHW2Q/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -865,6 +865,24 @@ function setAdsRemoved(v) {
   } catch {
   }
 }
+var ATELIER_KEY = "roi-du-carton-atelier";
+var atelierOwned = (() => {
+  try {
+    return localStorage.getItem(ATELIER_KEY) === "1";
+  } catch {
+    return false;
+  }
+})();
+function isAtelierOwned() {
+  return atelierOwned;
+}
+function setAtelierOwned(v) {
+  atelierOwned = v;
+  try {
+    localStorage.setItem(ATELIER_KEY, v ? "1" : "0");
+  } catch {
+  }
+}
 var AD_UNITS = {
   android: {
     banner: "ca-app-pub-6336322065829631/1688618582",
@@ -1023,7 +1041,9 @@ if (typeof window !== "undefined") {
     isAdsRemoved,
     setAdsRemoved,
     noterEngagement,
-    engagementsAvantBonus
+    engagementsAvantBonus,
+    isAtelierOwned,
+    setAtelierOwned
   };
 }
 
@@ -1275,6 +1295,9 @@ function traitPretable(traits) {
 function hasTrait(c, id) {
   if (c.traits.some((t) => t.id === id)) return true;
   return c.compagnon?.traitId === id && c.compagnon.jour === c.day;
+}
+function poissardMerite(c) {
+  return hasTrait(c, "poissard") && !c.traitsChoisis;
 }
 function computeScore(day2, respect, money2, poissard = false) {
   return (day2 * 10 + respect * 5 + money2 * 2) * (poissard ? 2 : 1);
@@ -8448,7 +8471,7 @@ function withFirstDayNet(c, stats) {
 }
 function stateApresMort(state, cause, logs) {
   const c = state.character;
-  saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, "poissard")));
+  saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, poissardMerite(c)));
   clearSave();
   return {
     ...state,
@@ -8584,7 +8607,12 @@ function gameReducer(state, action) {
       if (state.characterChoices.length > 0) return state;
       return { ...state, characterChoices: generateCharacterTrio(state.character ? [state.character.name] : []) };
     case "SELECT_CHARACTER": {
-      const char = state.characterChoices[action.index];
+      const brut = state.characterChoices[action.index];
+      const char = !brut ? brut : {
+        ...brut,
+        ...action.visage && Object.keys(action.visage).length > 0 ? { visage: action.visage } : {},
+        ...action.traits ? { traits: action.traits, traitsChoisis: true } : {}
+      };
       const legacy = peekLegacy();
       clearLegacy();
       const kits = takePendingKits();
@@ -8711,7 +8739,7 @@ function gameReducer(state, action) {
         const newStats2 = withFirstDayNet(c, applyStatDelta(c.stats, statDelta2));
         const isAlive2 = newStats2.health > 0 && newStats2.mental > 0;
         if (!isAlive2) {
-          saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, hasTrait(c, "poissard")));
+          saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, poissardMerite(c)));
           clearSave();
         }
         return {
@@ -8744,7 +8772,7 @@ function gameReducer(state, action) {
       const dignityNote = c.stats.dignity >= 70 ? L(" Votre allure soign\xE9e a inspir\xE9 confiance.", " Your neat appearance inspired trust.") : c.stats.dignity < 25 ? L(" Votre allure n\xE9glig\xE9e a fait fuir plus d'un passant.", " Your unkempt look scared off more than one passer-by.") : "";
       const insistNote = insisted >= 8 ? L(" Vous avez retenu des manches un peu trop longtemps : \xE7a se paie en fiert\xE9.", " You held on to a few sleeves a bit too long: that costs pride.") : insisted >= 3 ? L(" Vous avez un peu insist\xE9.", " You pushed it a little.") : "";
       if (!isAlive) {
-        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money2, hasTrait(c, "poissard")));
+        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money2, poissardMerite(c)));
         clearSave();
       }
       const begEvt = randomFromArray(BEG_EVENTS);
@@ -8822,7 +8850,7 @@ function gameReducer(state, action) {
       const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
       const isAlive = newStats.health > 0 && newStats.mental > 0;
       if (!isAlive) {
-        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money2, hasTrait(c, "poissard")));
+        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money2, poissardMerite(c)));
         clearSave();
       }
       const haul = [
@@ -8909,7 +8937,7 @@ function gameReducer(state, action) {
           const newStats3 = withFirstDayNet(c, applyStatDelta(c.stats, statDelta3));
           const isAlive2 = newStats3.health > 0 && newStats3.mental > 0;
           if (!isAlive2) {
-            saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, hasTrait(c, "poissard")));
+            saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, poissardMerite(c)));
             clearSave();
           }
           return {
@@ -8938,7 +8966,7 @@ function gameReducer(state, action) {
         const newStats2 = withFirstDayNet(c, applyStatDelta(c.stats, statDelta2));
         const isAlive = newStats2.health > 0 && newStats2.mental > 0;
         if (!isAlive) {
-          saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, "poissard")));
+          saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, poissardMerite(c)));
           clearSave();
         }
         return {
@@ -9246,7 +9274,7 @@ function gameReducer(state, action) {
       const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
       const vivant = newStats.health > 0 && newStats.mental > 0;
       if (!vivant) {
-        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, "poissard")));
+        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, poissardMerite(c)));
         clearSave();
       }
       return {
@@ -9373,7 +9401,7 @@ function gameReducer(state, action) {
       }
       const isAlive = newStats.health > 0 && newStats.mental > 0;
       if (!isAlive) {
-        const score = computeScore(state.character.day, newRespect, newMoney, hasTrait(state.character, "poissard"));
+        const score = computeScore(state.character.day, newRespect, newMoney, poissardMerite(state.character));
         saveHighScore(state.character.name, state.character.day, score);
         clearSave();
       }
@@ -9567,7 +9595,7 @@ function gameReducer(state, action) {
       const decayedStats = withFirstDayNet(ch, clampStats(s));
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
       if (!isAlive) {
-        const score = computeScore(ch.day, ch.respect, ch.money, hasTrait(ch, "poissard"));
+        const score = computeScore(ch.day, ch.respect, ch.money, poissardMerite(ch));
         saveHighScore(ch.name, ch.day, score);
         clearSave();
       }

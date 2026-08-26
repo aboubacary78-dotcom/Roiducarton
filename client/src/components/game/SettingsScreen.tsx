@@ -5,7 +5,7 @@ import { getVolume, getVolumeFond, isMuted, playBack, playDignityTier, playMoney
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
-import { isAdsRemoved, purchaseRemoveAds, reopenConsentForm } from '@/lib/ads';
+import { isAdsRemoved, isAtelierOwned, purchaseAtelier, purchaseRemoveAds, reopenConsentForm } from '@/lib/ads';
 import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
 import { resetCoaches } from '@/lib/coach';
@@ -31,7 +31,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.51.0';
+const APP_VERSION = '3.52.0';
 
 /*
  * UN CURSEUR EN CARTON.
@@ -87,7 +87,17 @@ export default function SettingsScreen() {
   const [rappels, setRappels] = useState(notificationsEnabled());
   const [noAds, setNoAds] = useState(isAdsRemoved());
   const [buying, setBuying] = useState(false);
+  const [atelier, setAtelier] = useState(isAtelierOwned());
+  const [buyingAtelier, setBuyingAtelier] = useState(false);
   const [consentBusy, setConsentBusy] = useState(false);
+
+  async function handleBuyAtelier() {
+    if (buyingAtelier || atelier) return;
+    setBuyingAtelier(true);
+    const ok = await purchaseAtelier();
+    if (ok) setAtelier(true);
+    setBuyingAtelier(false);
+  }
 
   async function handleBuyNoAds() {
     if (buying || noAds) return;
@@ -295,6 +305,43 @@ export default function SettingsScreen() {
               style={{ background: 'linear-gradient(135deg, #7B68EE, #5A4ABB)', boxShadow: '0 4px 12px rgba(123,104,238,0.25)' }}
             >
               {buying ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : tr('Acheter « Sans pub »', 'Buy "Ad-free"')}
+            </button>
+          </>
+        )}
+      </motion.section>
+
+      {/* L'Atelier — le second achat, indépendant du premier */}
+      <motion.section
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="craft-card p-4"
+      >
+        {atelier ? (
+          <div className="flex items-center justify-between">
+            <span className="text-base font-semibold text-[#2A1F1A]">🎨 {tr('L\'Atelier', 'The Workshop')}</span>
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#4A9B5F]/15 text-[#3d8b4f]">
+              {tr('✅ Ouvert', '✅ Open')}
+            </span>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-base font-semibold text-[#2A1F1A]">🎨 {tr('L\'Atelier', 'The Workshop')}</span>
+            </div>
+            <p className="text-xs text-[#6B5740] mb-3 leading-relaxed">
+              {tr(
+                'Composez le visage de votre personnage — teint, coiffure, regard, barbe, cicatrice — et choisissez ses deux traits de départ au lieu de les subir. Ce que vous ne touchez pas reste tiré au sort.',
+                'Compose your character\'s face — skin, hair, eyes, beard, scar — and pick their two starting traits instead of taking what you\'re given. Anything you leave alone stays randomly drawn.',
+              )}
+            </p>
+            <button
+              onClick={() => { playMoneyOut(); handleBuyAtelier(); }}
+              disabled={buyingAtelier}
+              className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg, #C4723A, #9B5B3A)', boxShadow: '0 4px 12px rgba(196,114,58,0.25)' }}
+            >
+              {buyingAtelier ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : tr('Ouvrir l\'Atelier', 'Open the Workshop')}
             </button>
           </>
         )}

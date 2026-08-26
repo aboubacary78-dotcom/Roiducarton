@@ -1,4 +1,4 @@
-import { useGame, computeScore, hasTrait, loadHighScores, knownEnemyNames } from '@/contexts/GameContext';
+import { useGame, computeScore, hasTrait, poissardMerite, loadHighScores, knownEnemyNames } from '@/contexts/GameContext';
 import type { InventoryItem } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo, useRef } from 'react';
@@ -433,7 +433,7 @@ export default function GameOverScreen() {
     { cle: 'respect', emoji: '⭐', valeur: `${char.respect}`, garder: char.respect > 0 },
   ].filter(p => p.garder);
 
-  const score = computeScore(char.day, char.respect, char.money, hasTrait(char, 'poissard'));
+  const score = computeScore(char.day, char.respect, char.money, poissardMerite(char));
   const highScores = loadHighScores();
 
   // Ce dont il s'est le plus approché sans l'avoir : l'écran ne se referme

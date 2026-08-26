@@ -17,10 +17,10 @@ import type { AccessorySlot } from '@/lib/cosmetics';
 // ============================================================================
 import type {
   GameState, GameScreen, Character, Stats, GameEvent, CombatState, Enemy, SignId,
-  ShopItem, ShopEvent, EventOutcome, InventoryItem,
+  ShopItem, ShopEvent, EventOutcome, InventoryItem, Trait,
 } from './types';
 import { randomFromArray, L } from './data/util';
-import { generateCharacterTrio, hasTrait, computeScore, genderFromName, HERITAGE_KITS, STARTING_ITEMS } from './data/world';
+import { generateCharacterTrio, hasTrait, computeScore, poissardMerite, genderFromName, HERITAGE_KITS, STARTING_ITEMS } from './data/world';
 import { SALVAGE_JUNK, SALVAGE_TUNING, salvagePayout, trouvailleById, piegeHurts, salvageResultImage } from './data/salvage';
 import { enemyByName, BEG_TUNING } from './data/passersby';
 import { WEATHER_TYPES, getNextWeather, getInitialWeather } from './data/weather';
@@ -120,7 +120,7 @@ function withFirstDayNet(c: Character, stats: Stats): Stats {
  */
 function stateApresMort(state: GameState, cause: string, logs?: string[]): GameState {
   const c = state.character!;
-  saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, 'poissard')));
+  saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, poissardMerite(c)));
   clearSave();
   return {
     ...state,
@@ -317,7 +317,11 @@ type GameAction =
   // l'annoncer par son nom : on ne quitte plus une partie finie, on quitte une
   // partie déjà commencée (voir GameOverScreen).
   | { type: 'PREPARE_SUCCESSOR' }
-  | { type: 'SELECT_CHARACTER'; index: number }
+  /*
+   * `traits` est un COUPLE, pas une liste : le jeu en donne exactement deux à
+   * chacun, et l'Atelier n'ouvre pas le nombre — seulement lesquels.
+   */
+  | { type: 'SELECT_CHARACTER'; index: number; visage?: Record<string, number>; traits?: [Trait, Trait] }
   | { type: 'EXPLORE' }
   | { type: 'BEG' }
   | { type: 'STEAL' }
@@ -397,7 +401,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, characterChoices: generateCharacterTrio(state.character ? [state.character.name] : []) };
 
     case 'SELECT_CHARACTER': {
-      const char = state.characterChoices[action.index];
+      const brut = state.characterChoices[action.index];
+      /*
+       * L'ATELIER SE POSE ICI, ET NULLE PART AILLEURS.
+       *
+       * Le visage composé et les traits choisis arrivent avec l'action, pas
+       * dans un état à part : le personnage est fabriqué en une fois, et il
+       * n'existe aucun instant où il serait à moitié personnalisé. L'écran de
+       * choix ne les envoie que si l'Atelier est acheté ; le reducer n'a pas à
+       * revérifier l'achat — c'est un produit payant, pas une protection.
+       */
+      const char = !brut ? brut : {
+        ...brut,
+        ...(action.visage && Object.keys(action.visage).length > 0 ? { visage: action.visage } : {}),
+        ...(action.traits ? { traits: action.traits, traitsChoisis: true } : {}),
+      };
       // Dernières volontés + kits de L'Héritage : tout ce qui attendait le
       // prochain personnage est déposé sur son carton au départ.
       const legacy = peekLegacy();
@@ -526,7 +544,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         const statDelta: Partial<Stats> = { dignity: -10, mental: -6 };
         const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
         const isAlive = newStats.health > 0 && newStats.mental > 0;
-        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, hasTrait(c, 'poissard'))); clearSave(); }
+        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, poissardMerite(c))); clearSave(); }
         return {
           ...state,
           character: { ...c, stats: newStats, money: c.money - amende, alive: isAlive },
@@ -570,7 +588,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const insistNote = insisted >= 8 ? L(' Vous avez retenu des manches un peu trop longtemps : ça se paie en fierté.', ' You held on to a few sleeves a bit too long: that costs pride.')
         : insisted >= 3 ? L(' Vous avez un peu insisté.', ' You pushed it a little.') : '';
       if (!isAlive) {
-        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, hasTrait(c, 'poissard')));
+        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, poissardMerite(c)));
         clearSave();
       }
       // Variante réussite/échec par scène de manche (result-beg-<id>-good/bad),
@@ -668,7 +686,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           };
       const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
       const isAlive = newStats.health > 0 && newStats.mental > 0;
-      if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, hasTrait(c, 'poissard'))); clearSave(); }
+      if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money + money, poissardMerite(c))); clearSave(); }
 
       const haul = [
         money > 0 ? L(`${money}€ de consigne`, `€${money} of deposit`) : '',
@@ -780,7 +798,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           const statDelta: Partial<Stats> = { dignity: -15, mental: -8 };
           const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
           const isAlive = newStats.health > 0 && newStats.mental > 0;
-          if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, hasTrait(c, 'poissard'))); clearSave(); }
+          if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money - amende, poissardMerite(c))); clearSave(); }
           return {
             ...state,
             character: { ...c, stats: newStats, money: c.money - amende, respect: c.respect - 3, alive: isAlive },
@@ -806,7 +824,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           : { dignity: -12, health: -6, mental: -6 };
         const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
         const isAlive = newStats.health > 0 && newStats.mental > 0;
-        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, 'poissard'))); clearSave(); }
+        if (!isAlive) { saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, poissardMerite(c))); clearSave(); }
         return {
           ...state,
           character: { ...c, stats: newStats, respect: c.respect - 2, alive: isAlive },
@@ -1158,7 +1176,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
       const vivant = newStats.health > 0 && newStats.mental > 0;
       if (!vivant) {
-        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, hasTrait(c, 'poissard')));
+        saveHighScore(c.name, c.day, computeScore(c.day, c.respect, c.money, poissardMerite(c)));
         clearSave();
       }
       return {
@@ -1346,7 +1364,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const isAlive = newStats.health > 0 && newStats.mental > 0;
 
       if (!isAlive) {
-        const score = computeScore(state.character.day, newRespect, newMoney, hasTrait(state.character, 'poissard'));
+        const score = computeScore(state.character.day, newRespect, newMoney, poissardMerite(state.character));
         saveHighScore(state.character.name, state.character.day, score);
         clearSave();
       }
@@ -1600,7 +1618,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const isAlive = decayedStats.health > 0 && decayedStats.mental > 0;
 
       if (!isAlive) {
-        const score = computeScore(ch.day, ch.respect, ch.money, hasTrait(ch, 'poissard'));
+        const score = computeScore(ch.day, ch.respect, ch.money, poissardMerite(ch));
         saveHighScore(ch.name, ch.day, score);
         clearSave();
       }

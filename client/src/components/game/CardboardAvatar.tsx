@@ -25,10 +25,10 @@ function heart(cx: number, cy: number, s: number): string {
   return `M${cx} ${cy + s * 0.9} C${cx - s * 1.2} ${cy - s * 0.2}, ${cx - s} ${cy - s}, ${cx} ${cy - s * 0.3} C${cx + s} ${cy - s}, ${cx + s * 1.2} ${cy - s * 0.2}, ${cx} ${cy + s * 0.9} Z`;
 }
 
-const SKIN = ['#F2DAB8', '#EAD0A8', '#DDB483', '#CB9A63', '#B27F4C', '#946237', '#7C5230', '#5E3E24'];
-const HAIR = ['#2E2018', '#4A3320', '#6B4A2C', '#141414', '#7C7C7C', '#B8862F', '#CBCBCB', '#8A5A2A', '#E8E8E8', '#B5432F'];
-const BG = ['#F1E1C9', '#EBD3B4', '#F0DAC0', '#E7D8C0', '#F2E0CE', '#E9D6BB', '#EFE0CA'];
-const HAT_COLORS = ['#C4723A', '#4A7FB5', '#6B8E5A', '#9B5B3A', '#7B68A8', '#B8894A'];
+export const SKIN = ['#F2DAB8', '#EAD0A8', '#DDB483', '#CB9A63', '#B27F4C', '#946237', '#7C5230', '#5E3E24'];
+export const HAIR = ['#2E2018', '#4A3320', '#6B4A2C', '#141414', '#7C7C7C', '#B8862F', '#CBCBCB', '#8A5A2A', '#E8E8E8', '#B5432F'];
+export const BG = ['#F1E1C9', '#EBD3B4', '#F0DAC0', '#E7D8C0', '#F2E0CE', '#E9D6BB', '#EFE0CA'];
+export const HAT_COLORS = ['#C4723A', '#4A7FB5', '#6B8E5A', '#9B5B3A', '#7B68A8', '#B8894A'];
 
 // Hash déterministe (FNV-1a) d'une chaîne -> entier 32 bits.
 function hashSeed(s: string): number {
@@ -55,32 +55,64 @@ function hashSeed(s: string): number {
  * Le carton s'écorne, le trait de feutre bave, le col se plie : on lit ce que
  * la survie coûte sans qu'aucun texte ne le dise.
  */
-export default function CardboardAvatar({ seed, gender, size = 40, className = '', accessories, condition, dignity }: { seed: string; gender?: 'm' | 'f'; size?: number; className?: string; accessories?: Partial<Record<AccessorySlot, string>>; condition?: number; dignity?: number }) {
+export default function CardboardAvatar({ seed, gender, size = 40, className = '', accessories, condition, dignity, visage }: { seed: string; gender?: 'm' | 'f'; size?: number; className?: string; accessories?: Partial<Record<AccessorySlot, string>>; condition?: number; dignity?: number; visage?: Record<string, number> }) {
   const s = seed || 'anon';
   const female = gender === 'f';
   // Un tirage indépendant par caractéristique (graine + sel).
   const pick = (salt: string, n: number) => hashSeed(`${s}|${salt}`) % n;
 
-  const skin = SKIN[pick('skin', SKIN.length)];
-  const hair = HAIR[pick('hair', HAIR.length)];
-  const bg = BG[pick('bg', BG.length)];
-  const hatColor = HAT_COLORS[pick('hatc', HAT_COLORS.length)];
+  /*
+   * LE HASARD RESTE LE DÉFAUT, LE CHOIX PASSE DEVANT.
+   *
+   * `visage` vient de l'Atelier (lib/visage) : un sel → une valeur. Ce qui n'y
+   * est pas continue d'être tiré de la graine, ce qui rend un visage
+   * PARTIELLEMENT composé parfaitement valable — on décide de la barbe et on
+   * laisse le reste au sort.
+   *
+   * La clé d'un trait EST son sel : c'est tout le contrat entre ce fichier et
+   * le catalogue, et `scripts/test-atelier.mjs` le vérifie des deux côtés.
+   */
+  const choisir = (salt: string, n: number) => {
+    const v = visage?.[salt];
+    return typeof v === 'number' && Number.isFinite(v) ? ((v % n) + n) % n : pick(salt, n);
+  };
+  /*
+   * Les traits « avec ou sans » se tiraient à une chance sur n. Un choix ne
+   * peut pas s'exprimer dans cette échelle sans devenir illisible (« mettez 0
+   * pour oui, 1 à 6 pour non ») : on lit donc 0 = oui, tout le reste = non, et
+   * l'écran ne propose que ces deux valeurs.
+   */
+  const oui = (salt: string, chanceSur: number) => {
+    const v = visage?.[salt];
+    if (typeof v === 'number' && Number.isFinite(v)) return v === 0;
+    return pick(salt, chanceSur) === 0;
+  };
+
+  const skin = SKIN[choisir('skin', SKIN.length)];
+  const hair = HAIR[choisir('hair', HAIR.length)];
+  const bg = BG[choisir('bg', BG.length)];
+  const hatColor = HAT_COLORS[choisir('hatc', HAT_COLORS.length)];
 
   // Coiffure : les femmes ont toujours des cheveux (pas chauve/dégarni).
-  let hairStyle = pick('hairstyle', 7);      // 0 chauve, 1 court, 2 touffe, 3 raie, 4 volume, 5 dégarni, 6 longs
-  if (female) {
+  let hairStyle = choisir('hairstyle', 7);   // 0 chauve, 1 court, 2 touffe, 3 raie, 4 volume, 5 dégarni, 6 longs
+  /*
+   * Le biais féminin ne s'applique qu'au TIRAGE. Choisir explicitement une
+   * coiffure la donne telle quelle : une table de pondération est là pour que
+   * le hasard tombe juste, pas pour corriger quelqu'un qui a décidé.
+   */
+  if (female && typeof visage?.hairstyle !== 'number') {
     const femaleHair = [1, 2, 3, 4, 6, 6];   // biais vers volume/longs
     hairStyle = femaleHair[pick('fhair', femaleHair.length)];
   }
-  const eyeStyle = pick('eyes', 4);          // 0 points, 1 ronds, 2 traits, 3 fatigué
-  const browStyle = pick('brow', 3);         // 0 aucun, 1 droit, 2 relevé
-  const mouthStyle = pick('mouth', 5);       // 0 neutre, 1 sourire, 2 grimace, 3 "o", 4 rictus
-  const beardStyle = female ? 0 : pick('beard', 4); // pas de barbe/moustache pour les femmes
-  const hat = pick('hat', 4);                // 0 aucun, 1 bonnet, 2 casquette, 3 aucun (pondère le "aucun")
-  const glasses = pick('glasses', 5);        // 0/1 aucun, 2 rondes, 3 carrées, 4 solaires
-  const hasFreckles = pick('freckles', 4) === 0;
-  const hasScar = !female && pick('scar', 7) === 0;
-  const earrings = female && pick('earring', 3) === 0;
+  const eyeStyle = choisir('eyes', 4);       // 0 points, 1 ronds, 2 traits, 3 fatigué
+  const browStyle = choisir('brow', 3);      // 0 aucun, 1 droit, 2 relevé
+  const mouthStyle = choisir('mouth', 5);    // 0 neutre, 1 sourire, 2 grimace, 3 "o", 4 rictus
+  const beardStyle = female ? 0 : choisir('beard', 4); // pas de barbe/moustache pour les femmes
+  const hat = choisir('hat', 4);             // 0 aucun, 1 bonnet, 2 casquette, 3 aucun (pondère le "aucun")
+  const glasses = choisir('glasses', 5);     // 0/1 aucun, 2 rondes, 3 carrées, 4 solaires
+  const hasFreckles = oui('freckles', 4);
+  const hasScar = !female && oui('scar', 7);
+  const earrings = female && oui('earring', 3);
   const mouthColor = female ? '#B85763' : OUTLINE; // lèvres colorées pour les femmes
 
   // Accessoires cosmétiques équipés (voir lib/cosmetics + garde-robe).

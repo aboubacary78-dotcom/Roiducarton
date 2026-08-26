@@ -93,6 +93,23 @@ export interface Character {
    * On s'habille désormais soi-même, avec ce qu'on a gagné.
    */
   equipped?: Partial<Record<AccessorySlot, string>>;
+  /*
+   * LE VISAGE COMPOSÉ — ce qui a été choisi plutôt que tiré.
+   *
+   * Un sel de tirage → la valeur retenue (voir lib/visage). Ce qui n'y figure
+   * pas reste dérivé de la graine, donc un visage à moitié composé est normal.
+   * Absent = personnage entièrement tiré au sort, ce qui reste le cas par
+   * défaut et le seul cas pour qui n'a pas l'Atelier.
+   */
+  visage?: Record<string, number>;
+  /*
+   * SES TRAITS ONT-ILS ÉTÉ CHOISIS PLUTÔT QUE SUBIS ?
+   *
+   * Sert au seul endroit où ça change quelque chose : le score. Voir
+   * `poissardMerite` — le ×2 récompense d'avoir accepté une mauvaise main,
+   * pas de se l'être composée.
+   */
+  traitsChoisis?: boolean;
   // Sacré Roi du Carton (a battu le Roi en place). À sa mort, ce personnage
   // devient le boss des parties suivantes (voir la couronne, lib/necrology).
   crowned?: boolean;

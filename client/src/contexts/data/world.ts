@@ -329,6 +329,23 @@ export function hasTrait(c: Character, id: string): boolean {
 
 // Formule de score UNIQUE (écran de fin + meilleurs scores + reducer).
 // Le Poissard vit plus mal mais marque double : son trait promet « score ×2 ».
+/*
+ * LE ×2 DU POISSARD SE MÉRITE.
+ *
+ * `poissard` est un trait NÉGATIF qui double le score : c'est la prime au
+ * courage, on encaisse plus d'ennuis et on marque davantage. Le calcul tenait
+ * tant que personne ne choisissait ses traits.
+ *
+ * Depuis l'Atelier, on peut se composer un poissard + les deux meilleurs
+ * bonus, et le classement n'aurait plus voulu dire grand-chose. Le multiplicateur
+ * ne s'applique donc qu'à une main SUBIE. Tout le reste de la partie compte
+ * normalement : on ne punit pas l'achat, on retire seulement une prime qui
+ * récompensait exactement ce qu'on vient de supprimer — le hasard.
+ */
+export function poissardMerite(c: Character): boolean {
+  return hasTrait(c, 'poissard') && !c.traitsChoisis;
+}
+
 export function computeScore(day: number, respect: number, money: number, poissard = false): number {
   return (day * 10 + respect * 5 + money * 2) * (poissard ? 2 : 1);
 }

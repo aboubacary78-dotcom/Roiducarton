@@ -54,6 +54,40 @@ export async function purchaseRemoveAds(): Promise<boolean> {
   return true;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * L'ATELIER — le second achat, et il ne touche pas à la publicité
+ *
+ * « Sans pub » retire les interruptions. L'Atelier, lui, ouvre deux choses que
+ * le jeu tirait au sort : le VISAGE du personnage, et ses TRAITS de départ.
+ *
+ * Les deux achats sont indépendants — on peut vouloir composer sa tête sans
+ * vouloir payer pour la publicité, et l'inverse. Les vendre liés ferait payer
+ * à chacun la moitié qui ne l'intéresse pas.
+ *
+ * ⚠️ PRODUCTION : comme `purchaseRemoveAds`, la fonction ci-dessous ouvre
+ * l'accès sans passer par un vrai achat. À brancher sur un produit non
+ * consommable « atelier » avant publication.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+const ATELIER_KEY = 'roi-du-carton-atelier';
+let atelierOwned = (() => {
+  try { return localStorage.getItem(ATELIER_KEY) === '1'; } catch { return false; }
+})();
+
+export function isAtelierOwned(): boolean {
+  return atelierOwned;
+}
+
+export function setAtelierOwned(v: boolean): void {
+  atelierOwned = v;
+  try { localStorage.setItem(ATELIER_KEY, v ? '1' : '0'); } catch { /* silent */ }
+}
+
+export async function purchaseAtelier(): Promise<boolean> {
+  setAtelierOwned(true);
+  return true;
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // CONFIGURATION DES BLOCS D'ANNONCES
 //
@@ -574,5 +608,6 @@ if (typeof window !== 'undefined') {
   (window as unknown as Record<string, unknown>).__pub = {
     canOfferRewarded, showRewarded, bonusFr, bonusEn, bonusOffert,
     isAdsRemoved, setAdsRemoved, noterEngagement, engagementsAvantBonus,
+    isAtelierOwned, setAtelierOwned,
   };
 }
