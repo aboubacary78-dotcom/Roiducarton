@@ -5,7 +5,7 @@ import { getVolume, getVolumeFond, isMuted, playBack, playDignityTier, playMoney
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
-import { isAdsRemoved, isAtelierOwned, purchaseAtelier, purchaseRemoveAds, reopenConsentForm } from '@/lib/ads';
+import { isAdsRemoved, isAtelierOwned, packUtile, purchaseAtelier, purchasePack, purchaseRemoveAds, reopenConsentForm } from '@/lib/ads';
 import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
 import { resetCoaches } from '@/lib/coach';
@@ -31,7 +31,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.52.0';
+const APP_VERSION = '3.53.0';
 
 /*
  * UN CURSEUR EN CARTON.
@@ -89,13 +89,25 @@ export default function SettingsScreen() {
   const [buying, setBuying] = useState(false);
   const [atelier, setAtelier] = useState(isAtelierOwned());
   const [buyingAtelier, setBuyingAtelier] = useState(false);
+  // Le pack ne s'affiche que pour qui ne possède ni l'un ni l'autre : le
+  // proposer à qui a déjà une moitié lui ferait racheter ce qu'il a.
+  const [pack, setPack] = useState(packUtile());
+  const [buyingPack, setBuyingPack] = useState(false);
   const [consentBusy, setConsentBusy] = useState(false);
+
+  async function handleBuyPack() {
+    if (buyingPack) return;
+    setBuyingPack(true);
+    const ok = await purchasePack();
+    if (ok) { setNoAds(true); setAtelier(true); setPack(false); }
+    setBuyingPack(false);
+  }
 
   async function handleBuyAtelier() {
     if (buyingAtelier || atelier) return;
     setBuyingAtelier(true);
     const ok = await purchaseAtelier();
-    if (ok) setAtelier(true);
+    if (ok) { setAtelier(true); setPack(false); }
     setBuyingAtelier(false);
   }
 
@@ -103,7 +115,7 @@ export default function SettingsScreen() {
     if (buying || noAds) return;
     setBuying(true);
     const ok = await purchaseRemoveAds();
-    if (ok) setNoAds(true);
+    if (ok) { setNoAds(true); setPack(false); }
     setBuying(false);
   }
 
@@ -272,6 +284,37 @@ export default function SettingsScreen() {
           </span>
         </button>
       </motion.section>
+
+      {/* Le pack — seulement pour qui ne possède encore rien */}
+      {pack && (
+        <motion.section
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.085 }}
+          className="craft-card p-4"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-base font-semibold text-[#2A1F1A]">🎁 {tr('Le Pack', 'The Bundle')}</span>
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#B8860B]/15 text-[#8B6B4A]">
+              {tr('1 € économisé', 'Save €1')}
+            </span>
+          </div>
+          <p className="text-xs text-[#6B5740] mb-3 leading-relaxed">
+            {tr(
+              'Sans pub et l\'Atelier réunis : plus d\'écrans de publicité, et le visage comme les traits de chaque personnage entre vos mains.',
+              'Ad-free and the Workshop together: no more full-screen ads, and every character\'s face and traits in your hands.',
+            )}
+          </p>
+          <button
+            onClick={() => { playMoneyOut(); handleBuyPack(); }}
+            disabled={buyingPack}
+            className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
+            style={{ background: 'linear-gradient(135deg, #B8860B, #8B6B0A)', boxShadow: '0 4px 12px rgba(184,134,11,0.28)' }}
+          >
+            {buyingPack ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : tr('Prendre le Pack', 'Get the Bundle')}
+          </button>
+        </motion.section>
+      )}
 
       {/* Sans pub */}
       <motion.section

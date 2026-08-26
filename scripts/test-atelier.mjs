@@ -167,7 +167,13 @@ await pause(400);
 verifier('on peut composer le visage et prendre un trait précis',
   regles.length >= 2 && traitPris, `réglés : ${regles.join(' / ')}`);
 
-await clic('C\'est lui|That\'s him'); await pause(1600);
+/*
+ * « C'est lui » OU « C'est elle » : le bouton s'accorde au personnage, et ce
+ * test ne cherchait que le masculin. Il échouait donc une fois sur trois —
+ * exactement quand le tirage donnait une femme, c'est-à-dire précisément dans
+ * le cas que la correction d'accord venait d'ajouter.
+ */
+await clic('C\'est (lui|elle)|That\'s (him|her)'); await pause(1600);
 for (const m of ['Regarder|Take a look', 'Merci|Thanks', 'compris|Got it']) {
   if (await clic(m)) await pause(400);
 }
@@ -187,13 +193,16 @@ verifier('  …et les traits choisis aussi',
  * posé : la prime récompense d'avoir accepté une mauvaise main, pas de se
  * l'être composée. Tout le reste de la partie compte normalement.
  */
-const score = await p.evaluate(() => {
-  const c = JSON.parse(localStorage.getItem('roi-du-carton-save')).character;
-  const brut = c.day * 10 + c.respect * 5 + c.money * 2;
-  return { brut, choisis: c.traitsChoisis === true };
-});
+/*
+ * On relit la sauvegarde par le même chemin que le reste du test, qui rend
+ * `null` proprement. La version précédente déréférençait directement et
+ * PLANTAIT quand la partie n'avait pas démarré : le test mourait au lieu
+ * d'échouer, et n'affichait donc aucun des contrôles précédents.
+ */
+const fin = await perso();
 verifier('le ×2 du poissard ne s\'applique pas à un trait choisi',
-  score.choisis === true, `score de base ${score.brut}, traits composés : ${score.choisis}`);
+  fin?.traitsChoisis === true,
+  fin ? `jour ${fin.day}, traits composés : ${fin.traitsChoisis === true}` : 'aucune partie en cours');
 
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 

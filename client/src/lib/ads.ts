@@ -88,6 +88,33 @@ export async function purchaseAtelier(): Promise<boolean> {
   return true;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LE PACK — les deux ensemble, et il doit être VISIBLEMENT moins cher
+ *
+ * Un lot qui coûte la somme de ses parties n'est pas un lot, c'est une
+ * quatrième façon de dire la même chose. Il faut qu'on voie l'économie sans
+ * calculer : d'où la grille retenue (voir docs/design/prix.md).
+ *
+ *   Sans pub   2,99 €
+ *   Atelier    4,99 €
+ *   Pack       6,99 €   — 1,00 € de moins que les deux séparément
+ *
+ * ET ON NE LE PROPOSE PAS À QUI POSSÈDE DÉJÀ UNE MOITIÉ. Lui vendre le lot
+ * lui ferait racheter ce qu'il a ; l'écran ne montre alors que la pièce qui
+ * lui manque, à son prix. C'est `packUtile()` qui tranche.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Le pack a-t-il encore un sens pour ce joueur ? (il ne possède rien) */
+export function packUtile(): boolean {
+  return !adsRemoved && !atelierOwned;
+}
+
+export async function purchasePack(): Promise<boolean> {
+  setAdsRemoved(true);
+  setAtelierOwned(true);
+  return true;
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // CONFIGURATION DES BLOCS D'ANNONCES
 //
@@ -608,6 +635,6 @@ if (typeof window !== 'undefined') {
   (window as unknown as Record<string, unknown>).__pub = {
     canOfferRewarded, showRewarded, bonusFr, bonusEn, bonusOffert,
     isAdsRemoved, setAdsRemoved, noterEngagement, engagementsAvantBonus,
-    isAtelierOwned, setAtelierOwned,
+    isAtelierOwned, setAtelierOwned, packUtile,
   };
 }

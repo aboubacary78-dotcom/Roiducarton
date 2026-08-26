@@ -299,7 +299,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/monet-9HHW2Q/cap.js
+// ../../../tmp/monet-x7yWi4/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -883,6 +883,9 @@ function setAtelierOwned(v) {
   } catch {
   }
 }
+function packUtile() {
+  return !adsRemoved && !atelierOwned;
+}
 var AD_UNITS = {
   android: {
     banner: "ca-app-pub-6336322065829631/1688618582",
@@ -1043,7 +1046,8 @@ if (typeof window !== "undefined") {
     noterEngagement,
     engagementsAvantBonus,
     isAtelierOwned,
-    setAtelierOwned
+    setAtelierOwned,
+    packUtile
   };
 }
 
