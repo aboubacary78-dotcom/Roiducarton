@@ -8,7 +8,6 @@
  * retrouver un ancien personnage. Un seul composant, plus de dérive possible.
  */
 import type { Character } from '@/contexts/types';
-import { getEquipped } from '@/lib/profile';
 import CardboardAvatar from './CardboardAvatar';
 
 /** État général du personnage, de 0 (à l'agonie) à 1 (en pleine forme). */
@@ -32,7 +31,8 @@ export default function PlayerFace({
       gender={char.gender}
       size={size}
       className={className}
-      accessories={getEquipped()}
+      // Sa tenue à lui : deux personnages successifs n'ont plus la même tête.
+      accessories={char.equipped ?? {}}
       condition={faceCondition(char)}
       // Le second axe : la tenue, pilotée par la Dignité. Le corps et
       // l'allure se dégradent séparément, et c'est tout l'intérêt.

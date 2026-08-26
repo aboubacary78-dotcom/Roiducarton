@@ -8,7 +8,6 @@ import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
 import { DEATH_DEFS, recordDeath, setLegacy, clearLegacy, setCrown, loadDeathBook, enemyDeathImages } from '@/lib/necrology';
 import { STREET_TITLES } from '@/contexts/data/progression';
-import { getEquipped } from '@/lib/profile';
 import { pushToast } from '@/lib/toast';
 import { playBack, playBequeath, playCard, playDeath, playFind, playNewEnding, resetGaugeAlerts } from '@/lib/sound';
 import { reinitialiserPiques } from '@/contexts/data/piques';
@@ -229,7 +228,7 @@ export default function GameOverScreen() {
     }
     return recordDeath({
       ids, name: char.name, day: char.day, respect: char.respect, seed: char.seed,
-      grave: { name: char.name, seed: char.seed, gender: char.gender, day: char.day, jobEmoji: char.job.emoji, jobName: char.job.name, cause: headline, accessories: getEquipped() as Record<string, string> },
+      grave: { name: char.name, seed: char.seed, gender: char.gender, day: char.day, jobEmoji: char.job.emoji, jobName: char.job.name, cause: headline, accessories: (char.equipped ?? {}) as Record<string, string> },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [char?.seed]);

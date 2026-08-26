@@ -124,6 +124,43 @@ var ACHIEVEMENTS = [
 var ACCESSORY_BY_ID = new Map(ACCESSORIES.map((a) => [a.id, a]));
 var ACHIEVEMENT_BY_REWARD = new Map(ACHIEVEMENTS.map((a) => [a.reward, a]));
 
+// client/src/lib/profile.ts
+var PROFILE_KEY = "roi-du-carton-profile";
+function defaultProfile() {
+  return {
+    records: {
+      bestDay: 0,
+      bestRespect: 0,
+      bestMoney: 0,
+      bestDignity: 0,
+      totalGames: 0,
+      totalDays: 0,
+      balancedDay: false,
+      lowDignity: false,
+      brokeDay: false,
+      ironMental: false
+    },
+    unlocked: [],
+    equipped: {}
+  };
+}
+function loadProfile() {
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      const base = defaultProfile();
+      return {
+        records: { ...base.records, ...data.records || {} },
+        unlocked: Array.isArray(data.unlocked) ? data.unlocked : [],
+        equipped: data.equipped && typeof data.equipped === "object" ? data.equipped : {}
+      };
+    }
+  } catch {
+  }
+  return defaultProfile();
+}
+
 // client/src/lib/lang.ts
 import { useEffect, useReducer } from "react";
 var dico = null;
@@ -262,7 +299,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/monet-VKOerm/cap.js
+// ../../../tmp/monet-jcQ7ME/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -1199,7 +1236,9 @@ function generateCharacter(evite) {
     activeFlags: [],
     stealCount: 0,
     seed: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`,
-    gender: genderFromName(name)
+    gender: genderFromName(name),
+    // Il arrive sans rien : la garde-robe est ouverte, mais il faut l'ouvrir.
+    equipped: {}
   };
 }
 function generateCharacterTrio(evites = []) {
@@ -8493,6 +8532,7 @@ function loadGame() {
         if (!data.character.activeFlags) data.character.activeFlags = [];
         if (!data.character.seed) data.character.seed = `${data.character.name || "sdf"}-${data.character.job?.id || "x"}`;
         if (!data.character.gender) data.character.gender = genderFromName(data.character.name || "");
+        if (!data.character.equipped) data.character.equipped = loadProfile().equipped ?? {};
         return {
           character: data.character,
           dayActions: data.dayActions || 0,
@@ -9779,6 +9819,27 @@ function gameReducer(state, action) {
      * Ce qu'il ne donne pas : la santé perdue avant de le sortir. On efface
      * le combat, pas ce qu'il a déjà coûté.
      */
+    /*
+     * S'HABILLER — et ça appartient au personnage, pas au profil.
+     *
+     * La tenue vivait dans le profil permanent, à côté des accessoires
+     * débloqués. Conséquence : un nouveau venu héritait du chapeau et de
+     * l'écharpe du mort, et deux vies successives avaient exactement la même
+     * tête. « Ça ne le rend pas unique », et c'est exact.
+     *
+     * Les DÉBLOCAGES restent permanents — ils se gagnent aux succès et doivent
+     * survivre à toutes les morts, sinon les succès ne récompenseraient rien.
+     * Ce qui est PORTÉ est à celui qui le porte.
+     */
+    case "EQUIPER": {
+      const c = state.character;
+      if (!c) return state;
+      if (!loadProfile().unlocked.includes(action.id)) return state;
+      const tenue = { ...c.equipped ?? {} };
+      if (tenue[action.slot] === action.id) delete tenue[action.slot];
+      else tenue[action.slot] = action.id;
+      return { ...state, character: { ...c, equipped: tenue } };
+    }
     case "COUP_DE_GRACE": {
       if (!state.character || !state.currentCombat) return state;
       const c = state.character;

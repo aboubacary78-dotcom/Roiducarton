@@ -233,6 +233,8 @@ export function generateCharacter(evite?: { prenoms?: readonly string[]; metiers
     stealCount: 0,
     seed: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`,
     gender: genderFromName(name),
+    // Il arrive sans rien : la garde-robe est ouverte, mais il faut l'ouvrir.
+    equipped: {},
   };
 }
 

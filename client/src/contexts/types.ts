@@ -9,6 +9,8 @@
 // ============================================================================
 
 // ============ JOUEUR ============
+import type { AccessorySlot } from '@/lib/cosmetics';
+
 export interface Job {
   id: string;
   name: string;
@@ -78,6 +80,19 @@ export interface Character {
   // Gorgées de fontaine prises aujourd'hui, et le jour où on les compte.
   fountainToday?: number;
   fountainDay?: number;
+  /*
+   * CE QU'IL PORTE — sa tenue à lui, et pas celle du précédent.
+   *
+   * Les accessoires DÉBLOQUÉS restent dans le profil permanent : ils se
+   * gagnent aux succès et doivent survivre à toutes les morts, sans quoi les
+   * succès ne récompenseraient rien.
+   *
+   * Ce qui est PORTÉ, en revanche, appartient au personnage. C'était rangé
+   * dans le profil, et un nouveau venu héritait donc du chapeau et de
+   * l'écharpe du mort : deux vies différentes avec exactement la même tête.
+   * On s'habille désormais soi-même, avec ce qu'on a gagné.
+   */
+  equipped?: Partial<Record<AccessorySlot, string>>;
   // Sacré Roi du Carton (a battu le Roi en place). À sa mort, ce personnage
   // devient le boss des parties suivantes (voir la couronne, lib/necrology).
   crowned?: boolean;

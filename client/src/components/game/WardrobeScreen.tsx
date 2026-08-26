@@ -17,7 +17,7 @@ import {
   achievementDesc,
   type AccessorySlot,
 } from '@/lib/cosmetics';
-import { loadProfile, toggleEquip, type PlayerProfile } from '@/lib/profile';
+import { loadProfile, type PlayerProfile } from '@/lib/profile';
 import { useLang, tr } from '@/lib/lang';
 import { pushToast } from '@/lib/toast';
 
@@ -32,8 +32,12 @@ export default function WardrobeScreen() {
   const gender = char?.gender;
   const unlockedCount = profile.unlocked.length;
 
+  // La tenue appartient au personnage : c'est lui qui la porte, et c'est lui
+  // qui l'emporte dans la tombe. Le profil ne garde que ce qui est débloqué.
+  const tenue = char?.equipped ?? {};
+
   const equip = (slot: AccessorySlot, id: string) => {
-    const wasEquipped = profile.equipped[slot] === id;
+    const wasEquipped = tenue[slot] === id;
     /*
      * S'habiller a son son : tissu qu'on enfile et boucle qu'on serre d'un
      * cran. Le clic générique convenait pour ouvrir un onglet, pas pour le
@@ -41,7 +45,7 @@ export default function WardrobeScreen() {
      * on ne fait pas une cérémonie d'un accessoire qu'on enlève.
      */
     if (wasEquipped) playClick(); else playObjetEquipe();
-    setProfile({ ...toggleEquip(slot, id) });
+    dispatch({ type: 'EQUIPER', slot, id });
     pushToast(
       wasEquipped ? tr('Accessoire retiré', 'Accessory removed') : tr('Accessoire équipé !', 'Accessory equipped!'),
       { emoji: wasEquipped ? '👕' : '✨', tone: wasEquipped ? 'info' : 'good' },
@@ -78,7 +82,7 @@ export default function WardrobeScreen() {
               regarde le plus longtemps, et un visage pimpant ici pendant que
               la tenue s'effondre ailleurs annulerait tout le signal. */}
           <CardboardAvatar
-            seed={seed} gender={gender} size={96} accessories={profile.equipped}
+            seed={seed} gender={gender} size={96} accessories={tenue}
             condition={char ? faceCondition(char) : undefined}
             dignity={char?.stats.dignity}
           />
@@ -123,7 +127,7 @@ export default function WardrobeScreen() {
                 <div className="grid grid-cols-3 gap-2">
                   {items.map((acc) => {
                     const unlocked = profile.unlocked.includes(acc.id);
-                    const equipped = profile.equipped[slot] === acc.id;
+                    const equipped = tenue[slot] === acc.id;
                     const ach = achievementForAccessory(acc.id);
                     return (
                       <button

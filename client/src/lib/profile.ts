@@ -16,7 +16,16 @@ const PROFILE_KEY = 'roi-du-carton-profile';
 export interface PlayerProfile {
   records: ProfileRecords;
   unlocked: string[]; // ids d'accessoires débloqués
-  equipped: Partial<Record<AccessorySlot, string>>; // un accessoire par emplacement
+  /*
+   * ANCIEN EMPLACEMENT DE LA TENUE — conservé pour la reprise, plus alimenté.
+   *
+   * Ce qui est PORTÉ appartient maintenant au personnage (voir
+   * `Character.equipped`) : rangée ici, la tenue passait du mort au vivant, et
+   * deux vies successives avaient la même tête. Le champ reste lu une fois,
+   * au chargement d'une partie commencée avant le changement, pour ne pas
+   * déshabiller quelqu'un en cours de route. Rien ne l'écrit plus.
+   */
+  equipped: Partial<Record<AccessorySlot, string>>;
 }
 
 function defaultProfile(): PlayerProfile {
@@ -51,23 +60,6 @@ function saveProfile(p: PlayerProfile) {
   try {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
   } catch { /* silent */ }
-}
-
-export function getEquipped(): Partial<Record<AccessorySlot, string>> {
-  return loadProfile().equipped;
-}
-
-// Équipe ou retire un accessoire (bascule si déjà équipé). Ignore si non débloqué.
-export function toggleEquip(slot: AccessorySlot, id: string): PlayerProfile {
-  const p = loadProfile();
-  if (!p.unlocked.includes(id)) return p;
-  if (p.equipped[slot] === id) {
-    delete p.equipped[slot];
-  } else {
-    p.equipped[slot] = id;
-  }
-  saveProfile(p);
-  return p;
 }
 
 // Réévalue tous les succès face aux records courants et débloque les

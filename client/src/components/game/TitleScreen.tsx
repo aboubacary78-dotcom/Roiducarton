@@ -9,7 +9,6 @@ import { useLang, tr } from '@/lib/lang';
  */
 import { playCard, playTab } from '@/lib/sound';
 import { DEATH_DEFS, loadDeathBook, loadKarma, loadGraves, loadCrown } from '@/lib/necrology';
-import { getEquipped } from '@/lib/profile';
 import CardboardAvatar from './CardboardAvatar';
 
 const SAVE_KEY = 'roi-du-carton-save';
@@ -31,7 +30,7 @@ export default function TitleScreen() {
       const list: typeof lineage = [];
       // Le personnage en cours ouvre la lignée (avec sa tenue actuelle).
       const seen = new Set<string>();
-      if (c?.seed) { seen.add(c.seed); list.push({ seed: c.seed, gender: c.gender === 'f' ? 'f' : 'm', name: c.name, day: c.day ?? 1, acc: getEquipped() as Record<string, string>, alive: true }); }
+      if (c?.seed) { seen.add(c.seed); list.push({ seed: c.seed, gender: c.gender === 'f' ? 'f' : 'm', name: c.name, day: c.day ?? 1, acc: (c.equipped ?? {}) as Record<string, string>, alive: true }); }
       // Puis les défunts, chacun dans la tenue qu'il portait ce jour-là. Une
       // seule apparition par personnage : la procession ne se répète pas.
       for (const g of graves) {

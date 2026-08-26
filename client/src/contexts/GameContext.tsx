@@ -1,9 +1,10 @@
 import { createContext, useContext, useReducer, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
-import { syncRecords, recordGameEnd } from '@/lib/profile';
+import { syncRecords, recordGameEnd, loadProfile } from '@/lib/profile';
 import { getLang, tc } from '@/lib/lang';
 import { peekLegacy, clearLegacy, takePendingKits, loadGraves } from '@/lib/necrology';
 import { reglerVoix } from '@/lib/sound';
 import { noterEngagement } from '@/lib/ads';
+import type { AccessorySlot } from '@/lib/cosmetics';
 
 // ============================================================================
 // LE MONOLITHE, DÉCOUPÉ
@@ -255,6 +256,16 @@ function loadGame(): Partial<GameState> | null {
         if (!data.character.activeFlags) data.character.activeFlags = [];
         if (!data.character.seed) data.character.seed = `${data.character.name || 'sdf'}-${data.character.job?.id || 'x'}`;
         if (!data.character.gender) data.character.gender = genderFromName(data.character.name || '');
+        /*
+         * REPRISE D'UNE PARTIE COMMENCÉE AVANT QUE LA TENUE DÉMÉNAGE.
+         *
+         * Elle vivait dans le profil permanent. Un joueur au milieu d'une
+         * partie se serait retrouvé déshabillé d'un chargement à l'autre, sans
+         * comprendre — le changement était pour les personnages SUIVANTS, pas
+         * pour le sien. On la lui rend une fois, et elle lui appartient
+         * désormais.
+         */
+        if (!data.character.equipped) data.character.equipped = loadProfile().equipped ?? {};
         return {
           character: data.character,
           dayActions: data.dayActions || 0,
@@ -352,6 +363,7 @@ type GameAction =
   | { type: 'PLAY_SIGN'; sign: SignId | 'special' }
   | { type: 'FLEE_ATTEMPT' }
   | { type: 'COUP_DE_GRACE' }
+  | { type: 'EQUIPER'; slot: AccessorySlot; id: string }
   | { type: 'DODGE_RESULT'; hits: number }
   | { type: 'PLAY_CARD'; cardId: string; junkItemId?: string }
   | { type: 'BUY_ITEM'; shopItem: ShopItem; actualPrice: number }
@@ -1887,6 +1899,28 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
      * Ce qu'il ne donne pas : la santé perdue avant de le sortir. On efface
      * le combat, pas ce qu'il a déjà coûté.
      */
+    /*
+     * S'HABILLER — et ça appartient au personnage, pas au profil.
+     *
+     * La tenue vivait dans le profil permanent, à côté des accessoires
+     * débloqués. Conséquence : un nouveau venu héritait du chapeau et de
+     * l'écharpe du mort, et deux vies successives avaient exactement la même
+     * tête. « Ça ne le rend pas unique », et c'est exact.
+     *
+     * Les DÉBLOCAGES restent permanents — ils se gagnent aux succès et doivent
+     * survivre à toutes les morts, sinon les succès ne récompenseraient rien.
+     * Ce qui est PORTÉ est à celui qui le porte.
+     */
+    case 'EQUIPER': {
+      const c = state.character;
+      if (!c) return state;
+      if (!loadProfile().unlocked.includes(action.id)) return state;   // pas gagné, pas porté
+      const tenue = { ...(c.equipped ?? {}) };
+      if (tenue[action.slot] === action.id) delete tenue[action.slot];
+      else tenue[action.slot] = action.id;
+      return { ...state, character: { ...c, equipped: tenue } };
+    }
+
     case 'COUP_DE_GRACE': {
       if (!state.character || !state.currentCombat) return state;
       const c = state.character;
@@ -2486,11 +2520,23 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setNewlyUnlocked((prev) => prev.filter((x) => x !== id));
   }, []);
 
-  // Auto-save on state changes
+  /*
+   * SAUVEGARDE AUTOMATIQUE — le hub, ET la garde-robe.
+   *
+   * Elle ne s'écrivait que depuis le hub, ce qui a suffi tant que la tenue
+   * vivait dans le profil permanent : s'habiller écrivait aussitôt, ailleurs.
+   * Depuis qu'elle appartient au personnage, une tenue choisie dans la
+   * garde-robe n'existait qu'en mémoire — fermer le jeu depuis cet écran la
+   * perdait sans un mot. C'est un défaut introduit par le déménagement, pas
+   * un oubli d'origine.
+   *
+   * On n'ouvre pas la sauvegarde à tous les écrans pour autant : les mini-jeux
+   * et les combats sont des états transitoires, et les y figer demanderait de
+   * savoir les reprendre.
+   */
   useEffect(() => {
-    if (state.character && state.character.alive && state.screen === 'main') {
-      saveGame(state);
-    }
+    if (!state.character || !state.character.alive) return;
+    if (state.screen === 'main' || state.screen === 'wardrobe') saveGame(state);
   }, [state]);
 
   /*

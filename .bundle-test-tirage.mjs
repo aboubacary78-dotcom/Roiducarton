@@ -150,6 +150,724 @@ function loadHeritage() {
   }
 }
 
+// client/src/lib/audioFiles.ts
+var cache = /* @__PURE__ */ new Map();
+var pending = /* @__PURE__ */ new Map();
+function loadAudio(url) {
+  if (cache.has(url)) return Promise.resolve(cache.get(url));
+  const already = pending.get(url);
+  if (already) return already;
+  const ac = getAudio();
+  if (!ac) return Promise.resolve(null);
+  const p = fetch(url).then((r) => {
+    const type = r.headers.get("content-type") || "";
+    if (!r.ok || /text\/html/i.test(type)) return Promise.reject(new Error("absent"));
+    return r.arrayBuffer();
+  }).then((buf) => ac.decodeAudioData(buf)).then((decoded) => {
+    cache.set(url, decoded);
+    return decoded;
+  }).catch(() => {
+    cache.set(url, null);
+    return null;
+  }).finally(() => {
+    pending.delete(url);
+  });
+  pending.set(url, p);
+  return p;
+}
+function isKnownMissing(url) {
+  return cache.get(url) === null;
+}
+function playBuffer(buffer, gain = 1) {
+  const ac = getAudio();
+  if (!ac) return;
+  const src = ac.createBufferSource();
+  src.buffer = buffer;
+  const g = ac.createGain();
+  g.gain.value = gain;
+  src.connect(g).connect(sortieEffets(ac));
+  src.start();
+  src.onended = () => {
+    try {
+      src.disconnect();
+      g.disconnect();
+    } catch {
+    }
+  };
+}
+
+// ../../../tmp/tirage-4hiyYE/cap.js
+var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
+
+// client/src/lib/haptics.ts
+var HAPTICS_KEY = "roi-du-carton-haptics";
+var enabled = (() => {
+  try {
+    return localStorage.getItem(HAPTICS_KEY) !== "0";
+  } catch {
+    return true;
+  }
+})();
+var FALLBACK_MS = { light: 12, medium: 28, heavy: 55 };
+var plugin = null;
+var styles = null;
+var loading = null;
+function ensurePlugin() {
+  if (plugin || loading) return loading ?? Promise.resolve();
+  loading = import("@capacitor/haptics").then((m) => {
+    plugin = m.Haptics;
+    styles = {
+      light: m.ImpactStyle.Light,
+      medium: m.ImpactStyle.Medium,
+      heavy: m.ImpactStyle.Heavy
+    };
+  }).catch(() => {
+    plugin = null;
+  });
+  return loading;
+}
+function fallback(level) {
+  try {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(FALLBACK_MS[level]);
+    }
+  } catch {
+  }
+}
+function haptic(level = "light") {
+  if (!enabled) return;
+  if (!Capacitor.isNativePlatform()) {
+    fallback(level);
+    return;
+  }
+  ensurePlugin().then(() => {
+    if (!plugin || !styles) {
+      fallback(level);
+      return;
+    }
+    plugin.impact({ style: styles[level] }).catch(() => fallback(level));
+  });
+}
+function hapticPattern(pattern) {
+  if (!enabled) return;
+  if (!Capacitor.isNativePlatform()) {
+    try {
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(pattern);
+    } catch {
+    }
+    return;
+  }
+  let delay = 0;
+  pattern.forEach((ms, i) => {
+    if (i % 2 === 0 && ms > 0) {
+      const level = ms >= 90 ? "heavy" : ms >= 45 ? "medium" : "light";
+      setTimeout(() => haptic(level), delay);
+    }
+    delay += ms;
+  });
+}
+
+// client/src/lib/sound.ts
+var MUTE_KEY = "roi-du-carton-muted";
+var muted = (() => {
+  try {
+    return localStorage.getItem(MUTE_KEY) === "1";
+  } catch {
+    return false;
+  }
+})();
+var ctx = null;
+var pageEnVeille = false;
+if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
+  document.addEventListener("visibilitychange", () => {
+    pageEnVeille = document.visibilityState === "hidden";
+    if (!ctx) return;
+    try {
+      if (pageEnVeille) ctx.suspend().catch(() => {
+      });
+      else if (!muted) ctx.resume().catch(() => {
+      });
+    } catch {
+    }
+  });
+}
+function audio() {
+  if (typeof window === "undefined") return null;
+  try {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+    }
+    if (ctx.state === "suspended" && !pageEnVeille) ctx.resume();
+    return ctx;
+  } catch {
+    return null;
+  }
+}
+function getAudio() {
+  const ac = audio();
+  if (ac) preloadGestures();
+  return ac;
+}
+var GESTURES = [
+  "geste-clic-1",
+  "geste-clic-2",
+  "geste-clic-3",
+  "geste-onglet-1",
+  "geste-onglet-2",
+  "geste-onglet-3",
+  "geste-carte-1",
+  "geste-carte-2",
+  "geste-carte-3",
+  "geste-pas-1",
+  "geste-pas-2",
+  "geste-pas-3",
+  "geste-coup-1",
+  "geste-coup-2",
+  "geste-coup-3",
+  "perte-rate-1",
+  "perte-rate-2",
+  "perte-rate-3",
+  "geste-retour",
+  "geste-reglage",
+  "geste-coup-fort",
+  "geste-encaisse",
+  "geste-gong",
+  "geste-bricole",
+  "geste-succes",
+  "geste-troc"
+];
+var gesturesAsked = false;
+function preloadGestures() {
+  if (gesturesAsked) return;
+  gesturesAsked = true;
+  for (const g of GESTURES) loadAudio(`/audio/${g}.mp3`);
+}
+var VOL_KEY = "roi-du-carton-volume";
+var VOL_FOND_KEY = "roi-du-carton-volume-fond";
+function lireVolume(cle, defaut) {
+  try {
+    const brut = localStorage.getItem(cle);
+    if (brut === null || brut === "") return defaut;
+    const v = Number(brut);
+    return Number.isFinite(v) && v >= 0 && v <= 1 ? v : defaut;
+  } catch {
+    return defaut;
+  }
+}
+var volume = lireVolume(VOL_KEY, 1);
+var volumeFond = lireVolume(VOL_FOND_KEY, 1);
+var busEffets = null;
+var busFond = null;
+function sortieEffets(ac) {
+  if (!busEffets || busEffets.context !== ac) {
+    busEffets = ac.createGain();
+    busEffets.gain.value = volume;
+    busEffets.connect(ac.destination);
+    busFond = null;
+  }
+  return busEffets;
+}
+function sortieFond(ac) {
+  const effets = sortieEffets(ac);
+  if (!busFond || busFond.context !== ac) {
+    busFond = ac.createGain();
+    busFond.gain.value = volumeFond;
+    busFond.connect(effets);
+  }
+  return busFond;
+}
+function getVolume() {
+  return volume;
+}
+function getVolumeFond() {
+  return volumeFond;
+}
+function setVolume(v) {
+  volume = Math.min(1, Math.max(0, v));
+  try {
+    localStorage.setItem(VOL_KEY, String(volume));
+  } catch {
+  }
+  const ac = ctx;
+  if (busEffets && ac) busEffets.gain.setTargetAtTime(volume, ac.currentTime, 0.02);
+}
+function setVolumeFond(v) {
+  volumeFond = Math.min(1, Math.max(0, v));
+  try {
+    localStorage.setItem(VOL_FOND_KEY, String(volumeFond));
+  } catch {
+  }
+  const ac = ctx;
+  if (busFond && ac) busFond.gain.setTargetAtTime(volumeFond, ac.currentTime, 0.02);
+}
+if (typeof window !== "undefined") {
+  window.__bus = {
+    get effets() {
+      const ac = audio();
+      return ac ? sortieEffets(ac) : null;
+    },
+    get fond() {
+      const ac = audio();
+      return ac ? sortieFond(ac) : null;
+    },
+    setVolume,
+    setVolumeFond,
+    getVolume,
+    getVolumeFond
+  };
+}
+function tone(freq, dur, type, gain, slideTo) {
+  const ac = audio();
+  if (!ac) return;
+  const osc = ac.createOscillator();
+  const g = ac.createGain();
+  const t0 = ac.currentTime;
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t0);
+  if (slideTo) osc.frequency.exponentialRampToValueAtTime(Math.max(1, slideTo), t0 + dur);
+  g.gain.setValueAtTime(1e-4, t0);
+  g.gain.exponentialRampToValueAtTime(gain, t0 + 8e-3);
+  g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+  osc.connect(g).connect(sortieEffets(ac));
+  osc.start(t0);
+  osc.stop(t0 + dur + 0.02);
+}
+var noiseBuffer = null;
+function noise(dur, gain, hp = 800) {
+  const ac = audio();
+  if (!ac) return;
+  if (!noiseBuffer || noiseBuffer.sampleRate !== ac.sampleRate) {
+    const frames = Math.floor(ac.sampleRate * 0.25);
+    noiseBuffer = ac.createBuffer(1, frames, ac.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < frames; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / frames);
+  }
+  const t0 = ac.currentTime;
+  const src = ac.createBufferSource();
+  src.buffer = noiseBuffer;
+  const filter = ac.createBiquadFilter();
+  filter.type = "highpass";
+  filter.frequency.value = hp;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(gain, t0);
+  g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+  src.connect(filter).connect(g).connect(sortieEffets(ac));
+  src.start(t0);
+  src.stop(t0 + dur + 0.02);
+}
+function playHitSynth() {
+  if (muted) return;
+  tone(150, 0.13, "triangle", 0.14, 70);
+  noise(0.09, 0.09, 600);
+}
+function playCritSynth() {
+  if (muted) return;
+  noise(0.14, 0.16, 900);
+  tone(320, 0.16, "square", 0.1, 640);
+  tone(180, 0.2, "triangle", 0.14, 90);
+  vibrate([0, 40, 30, 60]);
+}
+function playHurtSynth() {
+  if (muted) return;
+  tone(300, 0.18, "sawtooth", 0.08, 110);
+}
+function playWinSynth() {
+  if (muted) return;
+  const notes = [523, 659, 784, 1047];
+  notes.forEach((f, i) => setTimeout(() => tone(f, 0.16, "triangle", 0.12), i * 90));
+}
+function playClickSynth() {
+  if (muted) return;
+  tone(880, 0.045, "triangle", 0.045);
+}
+function playSuccessSynth() {
+  if (muted) return;
+  tone(523, 0.12, "triangle", 0.09);
+  setTimeout(() => tone(784, 0.16, "triangle", 0.09), 110);
+}
+function playFailSynth() {
+  if (muted) return;
+  tone(330, 0.14, "triangle", 0.08);
+  setTimeout(() => tone(220, 0.2, "triangle", 0.08), 120);
+}
+function playCoinSynth() {
+  if (muted) return;
+  tone(1180, 0.06, "triangle", 0.08);
+  setTimeout(() => tone(1560, 0.09, "triangle", 0.07), 55);
+}
+function playNextDaySynth() {
+  if (muted) return;
+  tone(660, 0.18, "sine", 0.09, 440);
+  setTimeout(() => tone(440, 0.32, "sine", 0.08, 300), 120);
+}
+function playUnlockSynth() {
+  if (muted) return;
+  const notes = [784, 988, 1319, 1568];
+  notes.forEach((f, i) => setTimeout(() => tone(f, 0.14, "triangle", 0.09), i * 70));
+  vibrate([0, 30, 40, 30]);
+}
+function playStepSynth() {
+  if (muted) return;
+  tone(190, 0.03, "sine", 0.05);
+}
+function playSpottedSynth() {
+  if (muted) return;
+  tone(440, 0.1, "square", 0.08, 680);
+  setTimeout(() => tone(440, 0.12, "square", 0.08, 680), 130);
+  vibrate(60);
+}
+function playWhooshSynth() {
+  if (muted) return;
+  noise(0.32, 0.05, 400);
+  tone(300, 0.28, "sine", 0.05, 700);
+}
+var marqueDernierSon = 0;
+function noterSon() {
+  if (typeof performance !== "undefined") marqueDernierSon = performance.now();
+}
+function withFile(file, gain, fallback2) {
+  return () => {
+    if (muted) return;
+    noterSon();
+    const url = `/audio/${file}.mp3`;
+    if (isKnownMissing(url)) {
+      fallback2();
+      return;
+    }
+    loadAudio(url).then((buf) => {
+      if (buf) playBuffer(buf, gain);
+      else fallback2();
+    });
+  };
+}
+function playFightStartSynth() {
+  if (muted) return;
+  noise(0.25, 0.13, 200);
+  tone(160, 0.9, "sine", 0.11, 78);
+  tone(240, 0.7, "triangle", 0.06, 120);
+  setTimeout(() => tone(320, 0.45, "sine", 0.045, 190), 90);
+  vibrate([0, 60, 40, 90]);
+}
+function playKingArrivalSynth() {
+  if (muted) return;
+  [0, 620, 1240].forEach((d) => setTimeout(() => {
+    noise(0.3, 0.1, 150);
+    tone(110, 1.4, "sine", 0.13, 54);
+    tone(165, 1, "triangle", 0.07, 82);
+  }, d));
+  [1900, 2050, 2200, 2350].forEach((d, i) => setTimeout(() => tone([196, 233, 294, 349][i], 0.4, "sawtooth", 0.075), d));
+  setTimeout(() => {
+    noise(0.5, 0.08, 90);
+    tone(70, 0.9, "sawtooth", 0.11, 48);
+  }, 2750);
+  vibrate([0, 120, 90, 120, 90, 220]);
+}
+function playKOSynth() {
+  if (muted) return;
+  noise(0.16, 0.18, 500);
+  tone(120, 0.28, "triangle", 0.16, 55);
+  setTimeout(() => {
+    noise(0.22, 0.12, 160);
+    tone(90, 0.4, "sine", 0.12, 45);
+  }, 170);
+  setTimeout(() => [1320, 1050, 1560].forEach((f, i) => setTimeout(() => tone(f, 0.1, "triangle", 0.05), i * 80)), 430);
+  vibrate([0, 80, 50, 120]);
+}
+function playCraftSynth() {
+  if (muted) return;
+  noise(0.13, 0.05, 1400);
+  setTimeout(() => noise(0.13, 0.05, 1200), 150);
+  setTimeout(() => {
+    tone(210, 0.07, "square", 0.07, 130);
+    noise(0.05, 0.06, 900);
+  }, 320);
+  setTimeout(() => {
+    tone(240, 0.07, "square", 0.07, 150);
+    noise(0.05, 0.06, 900);
+  }, 440);
+  setTimeout(() => {
+    tone(660, 0.12, "triangle", 0.07);
+    setTimeout(() => tone(880, 0.16, "triangle", 0.07), 100);
+  }, 580);
+  vibrate([0, 25, 60, 25]);
+}
+function playShareSynth() {
+  if (muted) return;
+  tone(440, 0.16, "sine", 0.075);
+  setTimeout(() => tone(554, 0.2, "sine", 0.075), 90);
+  setTimeout(() => tone(659, 0.26, "sine", 0.06), 190);
+}
+function playPaperSynth() {
+  if (muted) return;
+  noise(0.18, 0.035, 2200);
+  setTimeout(() => noise(0.14, 0.028, 1800), 160);
+  setTimeout(() => tone(330, 0.5, "sine", 0.045, 262), 260);
+}
+function vibrate(pattern) {
+  if (typeof pattern === "number") {
+    haptic(pattern >= 90 ? "heavy" : pattern >= 45 ? "medium" : "light");
+  } else {
+    hapticPattern(pattern);
+  }
+}
+var dernierePrise = /* @__PURE__ */ new Map();
+function withVariants(base, nb, gain, fallback2) {
+  return () => {
+    if (muted) return;
+    noterSon();
+    const avant = dernierePrise.get(base);
+    let n = 1 + Math.floor(Math.random() * nb);
+    if (n === avant) n = 1 + n % nb;
+    dernierePrise.set(base, n);
+    const url = `/audio/${base}-${n}.mp3`;
+    if (isKnownMissing(url)) {
+      fallback2();
+      return;
+    }
+    loadAudio(url).then((buf) => {
+      if (buf) playBuffer(buf, gain);
+      else fallback2();
+    });
+  };
+}
+var playCoinSmall = withVariants("argent-piece-entree", 3, 0.85, playCoinSynth);
+var playCoinHandful = withFile("argent-poignee-entree", 0.85, playCoinSynth);
+var playCoinNotes = withFile("argent-liasse", 0.85, playCoinSynth);
+var playMoneyOut = withFile("argent-sortie", 0.85, playCoinSynth);
+var playCoin = withFile("moment-piece", 0.85, playCoinSynth);
+var playDig = withVariants("geste-fouille", 3, 0.8, playHitSynth);
+var playPickUp = withFile("geste-ramasse", 0.8, playHitSynth);
+var playCraft = withFile("geste-bricole", 0.85, playCraftSynth);
+var playFind = withFile("moment-trouvaille", 0.85, playUnlockSynth);
+var playWear = withFile("geste-usure", 0.8, playFailSynth);
+var playBag = withFile("geste-sac", 0.75, playClickSynth);
+var playMorningBox = withFile("moment-carton-matin", 0.85, playPaperSynth);
+var playTravel = withFile("moment-trajet", 0.8, playStepSynth);
+var playHit = withVariants("geste-coup", 3, 0.85, playHitSynth);
+var playCrit = withFile("geste-coup-fort", 0.9, playCritSynth);
+var playHurt = withFile("geste-encaisse", 0.9, playHurtSynth);
+var playStep = withVariants("geste-pas", 3, 0.8, playStepSynth);
+var playKO = withFile("moment-ko", 0.9, playKOSynth);
+var playGive = withFile("social-partage", 0.85, playShareSynth);
+var playHandshake = withFile("moment-poignee-main", 0.85, playShareSynth);
+var playTurnedAway = withFile("social-econduit", 0.85, playFailSynth);
+var playShare = withFile("geste-troc", 0.85, playShareSynth);
+var playMiss = withVariants("perte-rate", 3, 0.75, playFailSynth);
+var playSpotted = withFile("moment-attrape", 0.9, playSpottedSynth);
+var playCollapse = withFile("moment-craquement", 0.9, playFailSynth);
+var playDignityLoss = withFile("perte-dignite", 0.9, playFailSynth);
+var playDignityTier = withFile("perte-palier", 0.95, playFailSynth);
+var playPickCharacter = withFile("moment-choix-perso", 0.85, playPaperSynth);
+var playReroll = withFile("moment-relance", 0.8, playPaperSynth);
+var playBequeath = withFile("moment-legs", 0.85, playPaperSynth);
+var playLedger = withFile("moment-registre", 0.85, playPaperSynth);
+var playNewEnding = withFile("moment-fin-inedite", 0.9, playUnlockSynth);
+var playDeath = withFile("moment-mort", 0.95, playFailSynth);
+var playKingArrival = withFile("moment-sacre", 0.9, playKingArrivalSynth);
+var playPage = withFile("moment-page", 0.75, playPaperSynth);
+var playWakeUp = withFile("moment-reveil", 0.8, playPaperSynth);
+var playNextDay = withFile("moment-jour-nouveau", 0.8, playNextDaySynth);
+var playWin = withFile("moment-victoire", 0.85, playWinSynth);
+var playFightStart = withFile("geste-gong", 0.9, playFightStartSynth);
+var playMemory = withFile("moment-souvenir", 0.85, playUnlockSynth);
+var playGoodOutcome = withFile("moment-resultat-bon", 0.85, playSuccessSynth);
+var playClick = withVariants("geste-clic", 3, 0.7, playClickSynth);
+var playBack = withFile("geste-retour", 0.7, playClickSynth);
+var playTab = withVariants("geste-onglet", 3, 0.65, playClickSynth);
+var playToggle = withFile("geste-reglage", 0.7, playClickSynth);
+var playCard = withVariants("geste-carte", 3, 0.7, playWhooshSynth);
+var playUnlock = withFile("geste-succes", 0.85, playUnlockSynth);
+var genreVoix = "m";
+var muet = () => {
+};
+function voix(quoi, nb, gain, repli = muet) {
+  const prises = {
+    m: withVariants(`voix-h-${quoi}`, nb, gain, repli),
+    f: withVariants(`voix-f-${quoi}`, nb, gain, repli)
+  };
+  return () => prises[genreVoix]();
+}
+var playVoixDouleur = voix("douleur", 3, 0.8);
+var playVoixDegout = voix("degout", 3, 0.8);
+var playVoixEffort = voix("effort", 3, 0.7);
+var playGaugeLowFile = withFile("jauge-rouge", 0.85, playFailSynth);
+var VOIX_DU_CORPS = {
+  hunger: withFile("corps-faim", 0.85, playFailSynth),
+  thirst: withFile("corps-soif", 0.85, playFailSynth),
+  sleep: withFile("corps-epuise", 0.85, playFailSynth),
+  health: withFile("corps-froid", 0.85, playFailSynth),
+  mental: withFile("corps-tete", 0.85, playFailSynth)
+};
+var PALIERS_ALERTE = [
+  withFile("tension-alerte-1", 0.8, playSpottedSynth),
+  withFile("tension-alerte-2", 0.85, playSpottedSynth),
+  withFile("tension-alerte-3", 0.9, playSpottedSynth)
+];
+var playTensionRisque = withFile("tension-risque", 0.55, () => {
+});
+var playTensionTic = withFile("tension-compte", 0.6, () => {
+});
+var playRecupRat = withVariants("recup-rat", 3, 0.85, playHurtSynth);
+var playRecupGuepes = withFile("recup-guepes", 0.85, playHurtSynth);
+var playRecupVerre = withFile("recup-verre", 0.85, playHurtSynth);
+var playRecupPourri = withVariants("recup-pourri", 3, 0.8, playHurtSynth);
+var AGACE = {
+  m: withVariants("passant-h-agace", 3, 0.7, muet),
+  f: withVariants("passant-f-agace", 3, 0.7, muet)
+};
+var REFUS = {
+  m: withVariants("passant-h-refus", 3, 0.85, playFailSynth),
+  f: withVariants("passant-f-refus", 3, 0.85, playFailSynth)
+};
+var playPoliceApproche = withFile("police-approche", 0.7, () => {
+});
+var playPolicePresence = withFile("police-presence", 0.75, () => {
+});
+var playPoliceIntervention = withFile("police-intervention", 0.85, playSpottedSynth);
+var playCombatCharge = withFile("combat-charge", 0.8, () => {
+});
+var playCombatEsquive = withFile("combat-esquive", 0.7, () => {
+});
+var playCombatEsquiveParfaite = withFile("combat-esquive-parfaite", 0.85, () => {
+});
+var playObjetEquipe = withFile("objet-equipe", 0.8, playSuccessSynth);
+var playObjetCasse = withFile("objet-casse", 0.85, playFailSynth);
+var playObjetPlein = withFile("objet-plein", 0.75, playFailSynth);
+var playToastBon = withFile("ui-toast-bon", 0.5, () => {
+});
+var playToastMauvais = withFile("ui-toast-mauvais", 0.5, () => {
+});
+var playVerrou = withFile("ui-verrou", 0.6, () => {
+});
+var playGaugeFilled = withFile("jauge-remplie", 0.85, playSuccessSynth);
+
+// client/src/lib/ads.ts
+var NOADS_KEY = "roi-du-carton-noads";
+var adsRemoved = (() => {
+  try {
+    return localStorage.getItem(NOADS_KEY) === "1";
+  } catch {
+    return false;
+  }
+})();
+function isAdsRemoved() {
+  return adsRemoved;
+}
+function setAdsRemoved(v) {
+  adsRemoved = v;
+  try {
+    localStorage.setItem(NOADS_KEY, v ? "1" : "0");
+  } catch {
+  }
+}
+var AD_UNITS = {
+  android: {
+    banner: "ca-app-pub-6336322065829631/1688618582",
+    interstitial: "ca-app-pub-6336322065829631/5639366683",
+    rewarded: "ca-app-pub-6336322065829631/8014353783"
+  },
+  ios: {
+    banner: "ca-app-pub-3940256099942544/2934735716",
+    interstitial: "ca-app-pub-3940256099942544/4411468910",
+    rewarded: "ca-app-pub-3940256099942544/1712485313"
+  }
+};
+var USE_TEST_ADS = true;
+function platform() {
+  const p = Capacitor.getPlatform();
+  if (p === "android") return "android";
+  if (p === "ios") return "ios";
+  return "web";
+}
+function isNative() {
+  return Capacitor.isNativePlatform();
+}
+function unit(kind) {
+  const p = platform();
+  if (p === "web") return AD_UNITS.android[kind];
+  return AD_UNITS[p][kind];
+}
+var consentStatus = null;
+function personalizedAdsAllowed() {
+  return consentStatus === "OBTAINED" || consentStatus === "NOT_REQUIRED";
+}
+var MAX_OFFRES_PAR_SESSION = 3;
+var offresFaites = 0;
+var CADENCE = {
+  combat: 3,
+  vol: 3,
+  recup: 3,
+  evenement: 2
+};
+var engagements = {
+  combat: 0,
+  vol: 0,
+  recup: 0,
+  evenement: 0
+};
+function noterEngagement(f) {
+  engagements[f] += 1;
+}
+function engagementsAvantBonus(f) {
+  return Math.max(0, CADENCE[f] - engagements[f]);
+}
+function canOfferRewarded(famille) {
+  if (adsRemoved) {
+    if (!famille) return true;
+    return engagements[famille] >= CADENCE[famille];
+  }
+  return offresFaites < MAX_OFFRES_PAR_SESSION;
+}
+function bonusOffert() {
+  return adsRemoved;
+}
+function bonusFr(base) {
+  return adsRemoved ? `\u2728 ${base}` : `\u{1F3AC} ${base} (pub)`;
+}
+function bonusEn(base) {
+  return adsRemoved ? `\u2728 ${base}` : `\u{1F3AC} ${base} (ad)`;
+}
+async function showRewarded(opts) {
+  if (adsRemoved) {
+    if (!opts?.exempt && opts?.famille) engagements[opts.famille] = 0;
+    return true;
+  }
+  if (!opts?.exempt) offresFaites++;
+  if (!isNative()) {
+    return true;
+  }
+  try {
+    const { AdMob } = await import("@capacitor-community/admob");
+    await AdMob.prepareRewardVideoAd({
+      adId: unit("rewarded"),
+      isTesting: USE_TEST_ADS,
+      // Refus, ou consentement inconnu : publicité NON personnalisée.
+      // Sans cette ligne, le formulaire de consentement ne servirait à rien.
+      npa: !personalizedAdsAllowed()
+    });
+    const reward = await AdMob.showRewardVideoAd();
+    return !!reward && reward.amount !== void 0;
+  } catch (e) {
+    console.warn("[ads] showRewarded:", e);
+    return false;
+  }
+}
+if (typeof window !== "undefined") {
+  window.__pub = {
+    canOfferRewarded,
+    showRewarded,
+    bonusFr,
+    bonusEn,
+    bonusOffert,
+    isAdsRemoved,
+    setAdsRemoved,
+    noterEngagement,
+    engagementsAvantBonus
+  };
+}
+
 // client/src/contexts/data/util.ts
 function randomFromArray(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -187,7 +905,13 @@ var FEMALE_NAMES = /* @__PURE__ */ new Set([
   "Simone",
   "Bernadette",
   "Monique",
-  "Huguette"
+  "Huguette",
+  "Odette",
+  "Paulette",
+  "Suzanne",
+  "Denise",
+  "Micheline",
+  "Jacqueline"
 ]);
 function genderFromName(name) {
   return FEMALE_NAMES.has(name) ? "f" : "m";
@@ -297,7 +1021,9 @@ function generateCharacter(evite) {
     activeFlags: [],
     stealCount: 0,
     seed: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`,
-    gender: genderFromName(name)
+    gender: genderFromName(name),
+    // Il arrive sans rien : la garde-robe est ouverte, mais il faut l'ouvrir.
+    equipped: {}
   };
 }
 function generateCharacterTrio(evites = []) {
@@ -5403,7 +6129,8 @@ var initialState = {
   highScores: loadHighScores(),
   weather: initialWeather,
   nextWeather: getNextWeather(initialWeather, 1),
-  deathCause: null
+  deathCause: null,
+  deathKind: null
 };
 var GameContext = createContext(void 0);
 export {
