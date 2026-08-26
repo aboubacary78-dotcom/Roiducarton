@@ -262,7 +262,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/monet-TPcyYF/cap.js
+// ../../../tmp/monet-VKOerm/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -917,16 +917,29 @@ async function showInterstitial() {
 }
 var MAX_OFFRES_PAR_SESSION = 3;
 var offresFaites = 0;
-var ACTIONS_ENTRE_BONUS = 3;
-var actionsDepuisBonus = ACTIONS_ENTRE_BONUS;
-function noterAction(n = 1) {
-  actionsDepuisBonus += n;
+var CADENCE = {
+  combat: 3,
+  vol: 3,
+  recup: 3,
+  evenement: 2
+};
+var engagements = {
+  combat: 0,
+  vol: 0,
+  recup: 0,
+  evenement: 0
+};
+function noterEngagement(f) {
+  engagements[f] += 1;
 }
-function actionsAvantBonus() {
-  return Math.max(0, ACTIONS_ENTRE_BONUS - actionsDepuisBonus);
+function engagementsAvantBonus(f) {
+  return Math.max(0, CADENCE[f] - engagements[f]);
 }
-function canOfferRewarded() {
-  if (adsRemoved) return actionsDepuisBonus >= ACTIONS_ENTRE_BONUS;
+function canOfferRewarded(famille) {
+  if (adsRemoved) {
+    if (!famille) return true;
+    return engagements[famille] >= CADENCE[famille];
+  }
   return offresFaites < MAX_OFFRES_PAR_SESSION;
 }
 function bonusOffert() {
@@ -940,7 +953,7 @@ function bonusEn(base) {
 }
 async function showRewarded(opts) {
   if (adsRemoved) {
-    if (!opts?.exempt) actionsDepuisBonus = 0;
+    if (!opts?.exempt && opts?.famille) engagements[opts.famille] = 0;
     return true;
   }
   if (!opts?.exempt) offresFaites++;
@@ -972,8 +985,8 @@ if (typeof window !== "undefined") {
     bonusOffert,
     isAdsRemoved,
     setAdsRemoved,
-    noterAction,
-    actionsAvantBonus
+    noterEngagement,
+    engagementsAvantBonus
   };
 }
 

@@ -108,64 +108,117 @@ verifier('sans achat, le plafond de trois offres tient',
 verifier('  …et le bouton annonce bien une vidéo',
   plafond.etiquette.includes('(pub)'), plafond.etiquette);
 
-// ── ② Avec achat : le bonus reste, la vidéo part ──────────────────────────
+// ── ② Avec achat : la cadence est PAR ACTIVITÉ ────────────────────────────
 /*
- * La première version de ce bloc vérifiait que l'acheteur n'avait PLUS de
- * limite du tout. Testé en jeu : « c'est trop cheater ». Le plafond ne
- * protégeait pas seulement le joueur de la publicité, il protégeait le jeu de
- * ses propres bonus — retirer la vidéo retirait par accident la seule chose
- * qui en limitait l'usage. La monnaie n'est donc plus la patience mais le
- * temps de jeu : trois actions entre deux bonus. Ce test dit maintenant
- * l'inverse de ce qu'il disait, et c'est le bon sens.
+ * Trois versions de ce bloc, et les deux premières se sont fait renvoyer à
+ * l'écoute du jeu réel :
+ *
+ *   1. « aucune limite pour qui a payé »  →  « c'est trop cheater » ;
+ *   2. « trois actions, toutes activités confondues »  →  « ultra facile, il
+ *      n'y avait plus rien à faire ». Trois mendicités rouvraient l'extincteur
+ *      ET le vol tranquille ET le coup de pouce, d'un seul coup.
+ *
+ * Ce que ce contrôle vérifie donc maintenant, et qui manquait aux deux
+ * précédents : les compteurs sont ÉTANCHES. Jouer un combat n'ouvre rien du
+ * côté du vol.
  */
-const avecAchat = await p.evaluate(async () => {
+const cadence = await p.evaluate(async () => {
   const { canOfferRewarded, showRewarded, bonusFr, bonusEn, bonusOffert,
-          noterAction, actionsAvantBonus } = window.__pub;
+          noterEngagement, engagementsAvantBonus } = window.__pub;
   localStorage.setItem('roi-du-carton-noads', '1');
   window.__pub.setAdsRemoved(true);
-  const dispo = canOfferRewarded();                 // le premier est offert
-  const recompense = await showRewarded();          // …et consomme la cadence
-  const justeApres = canOfferRewarded();
-  const reste = actionsAvantBonus();
-  noterAction(); noterAction();                     // deux actions : pas assez
-  const aDeux = canOfferRewarded();
-  noterAction();                                    // la troisième rouvre
-  const aTrois = canOfferRewarded();
+
+  const auDepart = canOfferRewarded('combat');            // rien de joué encore
+  noterEngagement('combat');                              // 1er combat
+  const apres1 = canOfferRewarded('combat');
+  noterEngagement('combat');                              // 2e
+  const apres2 = canOfferRewarded('combat');
+  const restant = engagementsAvantBonus('combat');
+  noterEngagement('combat');                              // 3e : ça s'ouvre
+  const apres3 = canOfferRewarded('combat');
+
+  // …et le vol, lui, n'a rien reçu au passage. C'est le cœur du correctif.
+  const volFerme = canOfferRewarded('vol');
+
+  const recompense = await showRewarded({ famille: 'combat' });
+  const refermé = canOfferRewarded('combat');             // consommé, ça referme
+
+  // Les rencontres tiennent sur deux, pas trois : elles arrivent bien plus
+  // souvent, et un bonus visible une fois sur trois y serait invisible.
+  noterEngagement('evenement');
+  const evt1 = canOfferRewarded('evenement');
+  noterEngagement('evenement');
+  const evt2 = canOfferRewarded('evenement');
+
   return {
-    offert: bonusOffert(), dispo, recompense, justeApres, reste, aDeux, aTrois,
-    fr: bonusFr('Doubler mes gains'),
-    en: bonusEn('Double my gains'),
+    offert: bonusOffert(), auDepart, apres1, apres2, restant, apres3,
+    volFerme, recompense, refermé, evt1, evt2,
+    fr: bonusFr('Doubler mes gains'), en: bonusEn('Double my gains'),
   };
 });
-verifier('avec achat, la récompense est acquise sans vidéo',
-  avecAchat.recompense === true && avecAchat.offert === true && avecAchat.dispo === true);
-verifier('  …mais le bonus suivant se referme aussitôt',
-  avecAchat.justeApres === false, `il reste ${avecAchat.reste} action(s) à jouer`);
-verifier('  …deux actions ne suffisent pas',
-  avecAchat.aDeux === false);
-verifier('  …la troisième le rouvre',
-  avecAchat.aTrois === true);
-verifier('  …et plus un bouton ne promet de pub',
-  !avecAchat.fr.includes('pub') && !avecAchat.en.includes('(ad)'),
-  `${avecAchat.fr} / ${avecAchat.en}`);
 
-// ── ③ Le casse se termine sans traverser la grille ────────────────────────
+verifier('le bonus de combat est fermé tant qu\'on n\'a pas joué',
+  cadence.auDepart === false && cadence.apres1 === false && cadence.apres2 === false,
+  `départ ${cadence.auDepart}, après 1 ${cadence.apres1}, après 2 ${cadence.apres2}`);
+verifier('  …le TROISIÈME combat l\'ouvre',
+  cadence.apres3 === true, `il restait ${cadence.restant} combat(s) à jouer`);
+verifier('  …et jouer des combats n\'ouvre RIEN du côté du vol',
+  cadence.volFerme === false);
+verifier('  …s\'en servir le referme aussitôt',
+  cadence.recompense === true && cadence.refermé === false);
+verifier('  …les rencontres, elles, tiennent sur deux',
+  cadence.evt1 === false && cadence.evt2 === true);
+verifier('  …et plus un bouton ne promet de pub',
+  cadence.offert === true && !cadence.fr.includes('pub') && !cadence.en.includes('(ad)'),
+  `${cadence.fr} / ${cadence.en}`);
+
+// ── ③ Le casse : la cadence se remplit EN JOUANT ──────────────────────────
 /*
- * « Voler » ne mène pas toujours à la grille : le jeu peut ouvrir une
- * rencontre à la place, et le test échouait alors sur le bouton manquant —
- * en accusant le bouton plutôt que le tirage. On réessaie donc, comme pour le
- * combat plus bas.
+ * Deux choses distinctes se vérifient ici, et la première est la plus
+ * importante : que le fait d'ENTRER dans le casse fasse bien avancer le
+ * compteur du vol. C'est le branchement réel — un compteur juste que rien
+ * n'alimente donnerait un bonus qui ne s'ouvre jamais, et le test précédent
+ * ne l'aurait pas vu puisqu'il poussait le compteur lui-même.
  *
- * Le rechargement de `situer` rend au passage un bonus disponible : le
- * compteur de cadence vit en mémoire et repart à neuf à chaque chargement,
- * exactement comme pour un joueur qui rouvre le jeu.
+ * On complète ensuite à la main pour atteindre le troisième, SANS recharger
+ * la page : le compteur vit en mémoire, un rechargement le remettrait à zéro.
+ */
+let dansLeCasse = false;
+let avantEntree = null, apresEntree = null;
+for (let essai = 0; essai < 6 && !dansLeCasse; essai++) {
+  await situer({ day: 4, ...SOLVABLE, stats: SAIN, location: 'centre-ville' });
+  avantEntree = await p.evaluate(() => window.__pub.engagementsAvantBonus('vol'));
+  await clic('Voler|Steal'); await pause(1400);
+  for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
+  await p.evaluate(() => {
+    const c = [...document.querySelectorAll('[class*="cursor-pointer"], button')]
+      .find(e => /€/.test(e.textContent || '') && e.offsetWidth);
+    c?.click();
+  });
+  await pause(1200);
+  for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
+  dansLeCasse = /Discret|Unseen/i.test(await ecran());
+  if (dansLeCasse) apresEntree = await p.evaluate(() => window.__pub.engagementsAvantBonus('vol'));
+}
+verifier('on entre dans le casse', dansLeCasse, dansLeCasse ? '' : (await ecran()).slice(0, 120));
+verifier('  …et y entrer fait avancer le compteur du vol',
+  avantEntree === 3 && apresEntree === 2, `${avantEntree} → ${apresEntree} casse(s) restant(s)`);
+
+/*
+ * ON REMPLIT LA CADENCE AVANT D'ENTRER, PAS PENDANT.
+ *
+ * `canOfferRewarded` est lu au RENDU. Pousser le compteur pendant qu'un écran
+ * est déjà affiché ne le redessine pas — React n'a aucune raison de le savoir,
+ * et un joueur ne peut de toute façon pas jouer deux casses depuis l'intérieur
+ * d'un casse. On simule donc les deux premiers, puis on entre : le troisième
+ * est compté par le jeu lui-même, à l'entrée, avant le premier rendu.
  */
 let boutonCasse = false;
 for (let essai = 0; essai < 6 && !boutonCasse; essai++) {
   await situer({ day: 4, ...SOLVABLE, stats: SAIN, location: 'centre-ville' });
+  await p.evaluate(() => { window.__pub.noterEngagement('vol'); window.__pub.noterEngagement('vol'); });
   await clic('Voler|Steal'); await pause(1400);
   for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
-  // L'écran de repérage, s'il y en a un : choisir une cible.
   await p.evaluate(() => {
     const c = [...document.querySelectorAll('[class*="cursor-pointer"], button')]
       .find(e => /€/.test(e.textContent || '') && e.offsetWidth);
@@ -176,46 +229,55 @@ for (let essai = 0; essai < 6 && !boutonCasse; essai++) {
   boutonCasse = await p.evaluate(() =>
     [...document.querySelectorAll('button')].some(b => /Personne ne vous voit|Nobody sees you/i.test(b.textContent || '')));
 }
-verifier('le casse propose de filer sans jouer', boutonCasse,
-  boutonCasse ? '' : (await ecran()).slice(0, 130));
+verifier('  …au troisième casse, on peut filer sans jouer', boutonCasse,
+  boutonCasse ? '' : (await ecran()).slice(0, 120));
 
 if (boutonCasse) {
   await clic('Personne ne vous voit|Nobody sees you');
   await pause(2600);
-  const apres = await ecran();
-  verifier('  …et le vol se termine, sans grille traversée',
-    !/Personne ne vous voit/i.test(apres), apres.slice(0, 110));
+  verifier('    …et le vol se termine, sans grille traversée',
+    !/Personne ne vous voit/i.test(await ecran()));
 }
 
-// ── ④ Le combat se gagne sans jouer une manche ────────────────────────────
+// ── ④ Le combat : même règle, compteur séparé ─────────────────────────────
 await situer({ day: 5, ...SOLVABLE, stats: SAIN, location: 'zone-industrielle' });
 let enCombat = false;
+let avantCombat = null, apresCombat = null;
 for (let essai = 0; essai < 6 && !enCombat; essai++) {
+  avantCombat = await p.evaluate(() => window.__pub.engagementsAvantBonus('combat'));
   await clic('Bagarre|Fight'); await pause(1500);
-  for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(400); }
+  for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
   enCombat = /Tenter de fuir|Try to flee/i.test(await ecran());
-  if (!enCombat) await situer({ day: 5, ...SOLVABLE, stats: SAIN, location: 'zone-industrielle' });
+  if (enCombat) apresCombat = await p.evaluate(() => window.__pub.engagementsAvantBonus('combat'));
+  else await situer({ day: 5, ...SOLVABLE, stats: SAIN, location: 'zone-industrielle' });
 }
-verifier('un combat s\'engage', enCombat, enCombat ? '' : (await ecran()).slice(0, 130));
+verifier('un combat s\'engage', enCombat, enCombat ? '' : (await ecran()).slice(0, 120));
+verifier('  …et l\'engager fait avancer le compteur du combat',
+  avantCombat === 3 && apresCombat === 2, `${avantCombat} → ${apresCombat} combat(s) restant(s)`);
 
-if (enCombat) {
-  const argentAvant = await p.evaluate(() =>
+// Même chose pour le combat : deux engagements simulés, le troisième joué.
+let boutonObjet = false, argentAvant = 0;
+for (let essai = 0; essai < 8 && !boutonObjet; essai++) {
+  await situer({ day: 5, ...SOLVABLE, stats: SAIN, location: 'zone-industrielle' });
+  await p.evaluate(() => { window.__pub.noterEngagement('combat'); window.__pub.noterEngagement('combat'); });
+  argentAvant = await p.evaluate(() =>
     JSON.parse(localStorage.getItem('roi-du-carton-save')).character.money);
-  const boutonObjet = await p.evaluate(() =>
+  await clic('Bagarre|Fight'); await pause(1500);
+  for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
+  if (!/Tenter de fuir|Try to flee/i.test(await ecran())) continue;
+  boutonObjet = await p.evaluate(() =>
     [...document.querySelectorAll('button')].some(b => /extincteur|extinguisher/i.test(b.textContent || '')));
-  verifier('  le combat propose l\'objet miracle', boutonObjet,
-    boutonObjet ? '' : (await ecran()).slice(0, 130));
+}
+verifier('  …au troisième combat, l\'objet miracle est là', boutonObjet,
+  boutonObjet ? '' : (await ecran()).slice(0, 120));
 
-  if (boutonObjet) {
-    await clic('extincteur|extinguisher'); await pause(2000);
-    const apres = await ecran();
-    verifier('  …et le combat est gagné', /Victoire|Victory/i.test(apres), apres.slice(0, 120));
-    // Une demi-victoire serait pire que rien : le butin doit suivre.
-    const argentApres = await p.evaluate(() =>
-      JSON.parse(localStorage.getItem('roi-du-carton-save')).character.money);
-    verifier('  …avec le butin, pas seulement la sortie',
-      argentApres >= argentAvant, `${argentAvant}€ → ${argentApres}€`);
-  }
+if (boutonObjet) {
+  await clic('extincteur|extinguisher'); await pause(2000);
+  verifier('    …et le combat est gagné', /Victoire|Victory/i.test(await ecran()));
+  const argentApres = await p.evaluate(() =>
+    JSON.parse(localStorage.getItem('roi-du-carton-save')).character.money);
+  verifier('    …avec le butin, pas seulement la sortie',
+    argentApres >= argentAvant, `${argentAvant}€ → ${argentApres}€`);
 }
 
 // ── ⑤ La couronne ne s'achète pas ─────────────────────────────────────────
@@ -240,6 +302,14 @@ await clic('Bagarre|Fight'); await pause(1500);
 await p.evaluate(() => { Math.random = window.__vraiRandom; });
 for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
 
+await p.evaluate(() => {
+  // Cadence remplie exprès : sans ça, l'absence du bouton ne prouverait rien,
+  // il manquerait faute de combats joués et non parce que c'est le Roi.
+  window.__pub.noterEngagement('combat');
+  window.__pub.noterEngagement('combat');
+  window.__pub.noterEngagement('combat');
+});
+await pause(400);
 const texteRoi = await ecran();
 const faceAuRoi = /👑/.test(texteRoi) && /Tenter de fuir|Try to flee/i.test(texteRoi);
 verifier('le Roi se présente', faceAuRoi, faceAuRoi ? '' : texteRoi.slice(0, 130));

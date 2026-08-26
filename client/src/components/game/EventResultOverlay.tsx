@@ -56,12 +56,12 @@ export default function EventResultOverlay() {
 
   if (!result) return null;
 
-  const canDouble = !!result.moneyChange && result.moneyChange > 0 && !result.doubled && canOfferRewarded();
+  const canDouble = !!result.moneyChange && result.moneyChange > 0 && !result.doubled && canOfferRewarded('evenement');
 
   async function handleDouble() {
     if (doubling) return;
     setDoubling(true);
-    const rewarded = await showRewarded();
+    const rewarded = await showRewarded({ famille: 'evenement' });
     if (rewarded) {
       dispatch({ type: 'DOUBLE_REWARD' });
     }
@@ -85,12 +85,12 @@ export default function EventResultOverlay() {
   const palierQuitte = paliersPerdus
     ? DIGNITY_TIERS.find(t => Math.min(100, digniteActuelle + perduDignite) >= t.min)
     : undefined;
-  const canKeepFace = !!palierQuitte && !result.faceKept && canOfferRewarded();
+  const canKeepFace = !!palierQuitte && !result.faceKept && canOfferRewarded('evenement');
 
   async function handleKeepFace() {
     if (keeping) return;
     setKeeping(true);
-    const rewarded = await showRewarded();
+    const rewarded = await showRewarded({ famille: 'evenement' });
     if (rewarded) {
       dispatch({ type: 'KEEP_FACE' });
     }
@@ -113,12 +113,12 @@ export default function EventResultOverlay() {
    * d'aller voir le bouton juste en dessous.
    */
   useEffect(() => { if (objetRefuse) playObjetPlein(); }, [objetRefuse?.id]);
-  const canGarderObjet = !!objetRefuse && canOfferRewarded();
+  const canGarderObjet = !!objetRefuse && canOfferRewarded('evenement');
 
   async function handleGarderObjet() {
     if (ramassant) return;
     setRamassant(true);
-    const rewarded = await showRewarded();
+    const rewarded = await showRewarded({ famille: 'evenement' });
     if (rewarded) {
       dispatch({ type: 'GARDER_OBJET' });
       playPickUp();

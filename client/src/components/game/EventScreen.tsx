@@ -105,7 +105,7 @@ export default function EventScreen() {
   async function activateBoost() {
     if (loadingBoost || boosted) return;
     setLoadingBoost(true);
-    const rewarded = await showRewarded();
+    const rewarded = await showRewarded({ famille: 'evenement' });
     if (rewarded) setBoosted(true);
     setLoadingBoost(false);
   }
@@ -236,7 +236,7 @@ export default function EventScreen() {
           <div className="mt-3 text-center text-xs font-semibold text-[#B8860B]">
             {tr('✨ Coup de pouce actif : votre prochain choix réussira au mieux.', '✨ Boost active: your next choice will get the best outcome.')}
           </div>
-        ) : canOfferRewarded() && !mecanique ? (
+        ) : canOfferRewarded('evenement') && !mecanique ? (
           <button
             onClick={() => { playUnlock(); activateBoost(); }}
             disabled={loadingBoost}

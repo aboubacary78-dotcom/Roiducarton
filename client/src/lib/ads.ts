@@ -408,44 +408,74 @@ let offresFaites = 0;
  * une punition, pas une limite.
  */
 /* ═══════════════════════════════════════════════════════════════════════════
- * LA CADENCE DE L'ACHETEUR — trois actions entre deux bonus
+ * LA CADENCE DE L'ACHETEUR — comptée PAR ACTIVITÉ, et c'est tout le sujet
  *
- * Premier essai : qui avait payé n'avait plus aucun plafond, au motif que le
- * plafond protège du harcèlement publicitaire et qu'il n'y a plus de
- * publicité à doser. Testé en jeu, le résultat est sans appel : « c'est trop
- * cheater ». Et c'est juste — le plafond de trois offres par session ne
- * protégeait pas seulement le joueur de la publicité, il protégeait aussi le
- * JEU de ses propres bonus. Retirer la vidéo retirait par accident la seule
- * chose qui limitait leur usage.
+ * Trois versions ont été nécessaires, et les deux ratées disent chacune
+ * quelque chose.
  *
- * Il fallait donc une autre monnaie que la patience, et c'est le TEMPS DE JEU :
- * trois actions consommées entre deux bonus. La contrainte n'est plus de
- * regarder trente secondes de vidéo, elle est de jouer — ce qui est une bien
- * meilleure contrainte pour un jeu.
+ *   1. AUCUNE LIMITE pour qui a payé, au motif qu'il n'y a plus de publicité
+ *      à doser. Testé : « c'est trop cheater ». Le plafond de trois offres par
+ *      session ne protégeait pas seulement le joueur de la publicité, il
+ *      protégeait le JEU de ses propres bonus.
  *
- * Trois, parce qu'une journée en compte trois ou quatre : dans les faits, un
- * bonus par jour environ. C'est confortable sans être un interrupteur.
+ *   2. TROIS ACTIONS, toutes activités confondues. Testé : « ultra facile, il
+ *      n'y avait plus rien à faire ». Le défaut est net une fois vu — trois
+ *      actions quelconques rouvraient TOUS les bonus d'un coup. On mendiait
+ *      trois fois, et l'extincteur, le vol tranquille et le coup de pouce
+ *      étaient tous rechargés ensemble. Un compteur commun rend les activités
+ *      interchangeables, alors que le joueur, lui, les vit séparément.
+ *
+ *   3. UN COMPTEUR PAR FAMILLE, celui-ci. Le raccourci d'un mini-jeu ne
+ *      s'ouvre qu'en JOUANT CE MINI-JEU. Il faut deux combats pour avoir droit
+ *      à l'extincteur au troisième, deux casses pour filer en douce au
+ *      troisième. Ce qu'on paie n'est plus « attendre » ni « faire n'importe
+ *      quoi », c'est « avoir joué la chose qu'on veut sauter ».
+ *
+ * Les rencontres sont à deux plutôt qu'à trois : elles arrivent bien plus
+ * souvent, et un bonus visible une fois sur trois y serait invisible.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-const ACTIONS_ENTRE_BONUS = 3;
-let actionsDepuisBonus = ACTIONS_ENTRE_BONUS;   // le premier bonus est offert
+export type FamilleBonus = 'combat' | 'vol' | 'recup' | 'evenement';
+
+/** Combien de fois il faut engager l'activité avant que son bonus s'ouvre. */
+const CADENCE: Record<FamilleBonus, number> = {
+  combat: 3,
+  vol: 3,
+  recup: 3,
+  evenement: 2,
+};
+
+const engagements: Record<FamilleBonus, number> = {
+  combat: 0, vol: 0, recup: 0, evenement: 0,
+};
 
 /**
- * Une action de jeu vient d'être consommée. Appelé une seule fois, depuis le
- * GameProvider, en surveillant le compteur d'actions du jour — plutôt qu'aux
- * dix endroits du reducer qui le font avancer, où l'oubli serait certain.
+ * L'activité vient d'être engagée : un combat s'ouvre, un casse commence, une
+ * rencontre rend son verdict. Appelé depuis le GameProvider, qui observe les
+ * transitions d'état — et non depuis les écrans, où un montage double de React
+ * compterait deux fois.
  */
-export function noterAction(n = 1): void {
-  actionsDepuisBonus += n;
+export function noterEngagement(f: FamilleBonus): void {
+  engagements[f] += 1;
 }
 
-/** Combien d'actions restent avant que le prochain bonus se rouvre. */
-export function actionsAvantBonus(): number {
-  return Math.max(0, ACTIONS_ENTRE_BONUS - actionsDepuisBonus);
+/** Combien de fois il reste à jouer avant que le bonus de `f` s'ouvre. */
+export function engagementsAvantBonus(f: FamilleBonus): number {
+  return Math.max(0, CADENCE[f] - engagements[f]);
 }
 
-export function canOfferRewarded(): boolean {
-  if (adsRemoved) return actionsDepuisBonus >= ACTIONS_ENTRE_BONUS;
+/**
+ * Le bonus peut-il être proposé ?
+ *
+ * `famille` omise : on répond pour l'ancien régime seul (le plafond de
+ * session). Les écrans qui gèrent une cadence la passent ; ceux qui offrent un
+ * service demandé par le joueur passent par `exempt` et ne viennent pas ici.
+ */
+export function canOfferRewarded(famille?: FamilleBonus): boolean {
+  if (adsRemoved) {
+    if (!famille) return true;
+    return engagements[famille] >= CADENCE[famille];
+  }
   return offresFaites < MAX_OFFRES_PAR_SESSION;
 }
 
@@ -489,7 +519,7 @@ export function bonusEn(base: string): string {
  * n'offre un gain — et il est déjà limité à une fois par partie. Le priver
  * parce que le joueur a doublé trois gains dans la journée serait absurde.
  */
-export async function showRewarded(opts?: { exempt?: boolean }): Promise<boolean> {
+export async function showRewarded(opts?: { exempt?: boolean; famille?: FamilleBonus }): Promise<boolean> {
   /*
    * L'achat retire la vidéo, pas la récompense — voir le pavé plus haut.
    * Mais il ne retire pas la LIMITE : le compteur d'actions repart à zéro,
@@ -501,7 +531,7 @@ export async function showRewarded(opts?: { exempt?: boolean }): Promise<boolean
    * serait une punition, pas une limite.
    */
   if (adsRemoved) {
-    if (!opts?.exempt) actionsDepuisBonus = 0;
+    if (!opts?.exempt && opts?.famille) engagements[opts.famille] = 0;
     return true;
   }
 
@@ -543,6 +573,6 @@ export async function showRewarded(opts?: { exempt?: boolean }): Promise<boolean
 if (typeof window !== 'undefined') {
   (window as unknown as Record<string, unknown>).__pub = {
     canOfferRewarded, showRewarded, bonusFr, bonusEn, bonusOffert,
-    isAdsRemoved, setAdsRemoved, noterAction, actionsAvantBonus,
+    isAdsRemoved, setAdsRemoved, noterEngagement, engagementsAvantBonus,
   };
 }

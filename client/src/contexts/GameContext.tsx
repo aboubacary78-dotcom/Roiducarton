@@ -3,7 +3,7 @@ import { syncRecords, recordGameEnd } from '@/lib/profile';
 import { getLang, tc } from '@/lib/lang';
 import { peekLegacy, clearLegacy, takePendingKits, loadGraves } from '@/lib/necrology';
 import { reglerVoix } from '@/lib/sound';
-import { noterAction } from '@/lib/ads';
+import { noterEngagement } from '@/lib/ads';
 
 // ============================================================================
 // LE MONOLITHE, DÉCOUPÉ
@@ -2506,23 +2506,49 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => { reglerVoix(state.character?.gender); }, [state.character?.gender]);
 
   /*
-   * LA CADENCE DES BONUS, COMPTÉE EN UN SEUL ENDROIT.
+   * LA CADENCE DES BONUS, COMPTÉE PAR ACTIVITÉ.
    *
-   * Qui a payé « Sans pub » obtient ses bonus sans vidéo, mais pas en
-   * rafale : il lui faut jouer trois actions entre deux. Le compteur vit dans
-   * `lib/ads` et se nourrit ici, en surveillant `dayActions`.
+   * Qui a payé « Sans pub » obtient ses bonus sans vidéo, mais le raccourci
+   * d'un mini-jeu ne s'ouvre qu'en JOUANT ce mini-jeu : deux combats pour
+   * avoir droit à l'extincteur au troisième, deux casses pour filer en douce
+   * au troisième.
    *
-   * C'est volontairement un observateur, pas un appel dans le reducer : dix
-   * endroits font avancer `dayActions`, et le onzième aurait été oublié. On
-   * ne compte QUE les hausses, parce que le passage à la nuit remet le
-   * compteur du jour à zéro et qu'une nuit n'est pas une action jouée.
+   * La version précédente comptait les actions toutes activités confondues, et
+   * c'était faux : on mendiait trois fois, et l'extincteur comme le vol
+   * tranquille étaient rechargés ensemble. Un compteur commun rend les
+   * activités interchangeables, alors que le joueur les vit séparément.
+   *
+   * On observe les TRANSITIONS d'état plutôt que d'appeler depuis les écrans :
+   * un montage double de React compterait deux fois, et le reducer a trop de
+   * chemins pour qu'aucun ne soit oublié.
    */
-  const actionsVues = useRef(state.dayActions);
+  const combatVu = useRef(!!state.currentCombat);
   useEffect(() => {
-    const delta = state.dayActions - actionsVues.current;
-    actionsVues.current = state.dayActions;
-    if (delta > 0) noterAction(delta);
-  }, [state.dayActions]);
+    const enCombat = !!state.currentCombat;
+    if (enCombat && !combatVu.current) noterEngagement('combat');
+    combatVu.current = enCombat;
+  }, [state.currentCombat]);
+
+  const ecranVu = useRef(state.screen);
+  useEffect(() => {
+    if (state.screen !== ecranVu.current) {
+      if (state.screen === 'steal-game') noterEngagement('vol');
+      if (state.screen === 'salvage-game') noterEngagement('recup');
+      ecranVu.current = state.screen;
+    }
+  }, [state.screen]);
+
+  /*
+   * Les rencontres se comptent au RÉSULTAT, pas à l'ouverture : c'est là que
+   * les bonus s'offrent — doubler ses gains, garder l'objet refusé, rester au
+   * palier qu'on vient de quitter.
+   */
+  const resultatVu = useRef(!!state.eventResult);
+  useEffect(() => {
+    const affiche = !!state.eventResult;
+    if (affiche && !resultatVu.current) noterEngagement('evenement');
+    resultatVu.current = affiche;
+  }, [state.eventResult]);
 
   // Met à jour les records permanents du profil et débloque les accessoires
   // correspondants (succès). Séparé de la sauvegarde de partie.

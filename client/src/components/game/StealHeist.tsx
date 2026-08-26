@@ -423,7 +423,7 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
     if (filantDoux || statusRef.current !== 'playing') return;
     setFilantDoux(true);
     geleRef.current = true;
-    const vue = await showRewarded();
+    const vue = await showRewarded({ famille: 'vol' });
     geleRef.current = false;
     setFilantDoux(false);
     if (vue) { playUnlock(); finish('ok'); }
@@ -433,7 +433,7 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
     if (effacant || palierEfface || statusRef.current !== 'playing') return;
     setEffacant(true);
     geleRef.current = true;
-    const vue = await showRewarded();
+    const vue = await showRewarded({ famille: 'vol' });
     if (vue) {
       setPalierEfface(true);
       const cible = Math.max(0, tierRef.current - 1) as Tier;
@@ -655,7 +655,7 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
             jauge ne redescend pas toute seule. Le bouton dit ce qu'il rend —
             un palier — parce que c'est exactement le mot que le mini-jeu a
             employé pour dire qu'on ne le récupérerait jamais. */}
-        {status === 'playing' && !palierEfface && tier === 2 && canOfferRewarded() && (
+        {status === 'playing' && !palierEfface && tier === 2 && canOfferRewarded('vol') && (
           <motion.button
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
@@ -670,7 +670,7 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
         )}
 
         {/* Avant le premier pas seulement : passé ça, on est engagé. */}
-        {status === 'playing' && !moved && canOfferRewarded() && (
+        {status === 'playing' && !moved && canOfferRewarded('vol') && (
           <motion.button
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}

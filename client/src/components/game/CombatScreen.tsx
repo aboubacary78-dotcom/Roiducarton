@@ -560,13 +560,13 @@ function SignPhase({ combat, character, onPick, onFlee, onCoupDeGrace }: {
        * Il ne s'affiche que tant qu'aucun signe n'est choisi, comme la fuite :
        * une fois les signes révélés, la manche appartient au jeu.
        */}
-      {!choice && !estLeRoi && canOfferRewarded() && (
+      {!choice && !estLeRoi && canOfferRewarded('combat') && (
         <button
           disabled={sortantObjet}
           onClick={async () => {
             if (sortantObjet || choice) return;
             setSortantObjet(true);
-            const vue = await showRewarded();
+            const vue = await showRewarded({ famille: 'combat' });
             setSortantObjet(false);
             if (vue) { playCrit(); onCoupDeGrace(); }
           }}

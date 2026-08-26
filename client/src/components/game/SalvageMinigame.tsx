@@ -249,7 +249,7 @@ function SalvageInner() {
     // Le doigt quitte le tas le temps de la vidéo : sans ça, la boucle
     // continuerait de monter le risque pendant qu'on regarde la publicité.
     rubbingRef.current = false;
-    const vue = await showRewarded();
+    const vue = await showRewarded({ famille: 'recup' });
     if (vue) {
       setTasCalme(true);
       riskRef.current = T.riskMax * (REPLI_SECOURS / 100);
@@ -371,7 +371,7 @@ function SalvageInner() {
         {/* Le dernier cran avant l'écroulement. Le bouton dit ce qu'on garde,
             pas ce qu'on gagne : « continuer » ne pèse rien face à « garder mes
             trois trouvailles ». */}
-        {!ended && !tasCalme && riskPct >= SEUIL_SECOURS && canOfferRewarded() && (
+        {!ended && !tasCalme && riskPct >= SEUIL_SECOURS && canOfferRewarded('recup') && (
           <motion.button
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}

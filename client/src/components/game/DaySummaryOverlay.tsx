@@ -98,7 +98,7 @@ export default function DaySummaryOverlay() {
    * contrat.
    */
   const contratDef = s.contratRate ? getContract(s.contratRate.id) : undefined;
-  const peutRattraperContrat = !!contratDef && !s.contratRattrape && canOfferRewarded();
+  const peutRattraperContrat = !!contratDef && !s.contratRattrape && canOfferRewarded('evenement');
 
   /*
    * UNE SEULE OFFRE PAR BILAN.
@@ -110,12 +110,12 @@ export default function DaySummaryOverlay() {
    * qu'une jauge basse de plus.
    */
   const peutRattraper = !peutRattraperContrat && !s.recovered
-    && jaugesEnDanger.length > 0 && canOfferRewarded();
+    && jaugesEnDanger.length > 0 && canOfferRewarded('evenement');
 
   async function rattraperLaNuit() {
     if (enCours) return;
     setEnCours(true);
-    const vue = await showRewarded();
+    const vue = await showRewarded({ famille: 'evenement' });
     if (vue) {
       dispatch({ type: 'RECOVER_NIGHT' });
       playGaugeFilled();
@@ -126,7 +126,7 @@ export default function DaySummaryOverlay() {
   async function rattraperLeContrat() {
     if (enCours) return;
     setEnCours(true);
-    const vue = await showRewarded();
+    const vue = await showRewarded({ famille: 'evenement' });
     if (vue) {
       dispatch({ type: 'RATTRAPER_CONTRAT' });
       playUnlock();
