@@ -21,11 +21,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Character, Trait } from '@/contexts/types';
-import { TRAITS } from '@/contexts/GameContext';
+import { TRAITS, nomMetier } from '@/contexts/GameContext';
 import CardboardAvatar, { SKIN, HAIR, BG, HAT_COLORS } from './CardboardAvatar';
 import { traitsPour, nbChoix, nomValeur, type Visage } from '@/lib/visage';
 import { playCard, playClick, playObjetEquipe, playToggle } from '@/lib/sound';
-import { tr, useLang } from '@/lib/lang';
+import { tc, tr, useLang } from '@/lib/lang';
 
 export default function AtelierOverlay({ char, onAnnuler, onValider }: {
   char: Character;
@@ -112,7 +112,7 @@ export default function AtelierOverlay({ char, onAnnuler, onValider }: {
           <div className="rounded-xl overflow-hidden shadow-sm shrink-0">{apercu}</div>
           <div className="min-w-0">
             <h2 className="text-lg font-semibold text-[#2A1F1A] truncate">{char.name}</h2>
-            <p className="text-xs text-[#8B6B4A]">{char.job.emoji} {char.job.name}</p>
+            <p className="text-xs text-[#8B6B4A]">{char.job.emoji} {tc(nomMetier(char.job, char.gender))}</p>
             <p className="text-[11px] text-[#A08B70] mt-1 leading-snug">
               {tr('Ce que vous ne touchez pas reste tiré au sort.',
                   'Anything you leave alone stays randomly drawn.')}

@@ -14,6 +14,18 @@ import type { AccessorySlot } from '@/lib/cosmetics';
 export interface Job {
   id: string;
   name: string;
+  /*
+   * LA FORME FÉMININE, PARCE QUE LA MOITIÉ DES PERSONNAGES SONT DES FEMMES.
+   *
+   * Les dix-sept métiers étaient écrits au masculin et rien d'autre : Simone
+   * s'affichait « Ancien Militaire » au choix du personnage, sur le hub, au
+   * cimetière et à l'écran de fin. Ça ne cassait rien, et ça se lisait comme
+   * une faute de frappe à chaque partie sur deux.
+   *
+   * L'anglais n'en a pas besoin — « Former Soldier » ne s'accorde pas — d'où
+   * un champ optionnel plutôt qu'une seconde table.
+   */
+  nameF?: string;
   description: string;
   bonusStats: Partial<Stats>;
   startingItems: string[];

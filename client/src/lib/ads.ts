@@ -115,6 +115,60 @@ export async function purchasePack(): Promise<boolean> {
   return true;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * RESTAURER SES ACHATS — obligatoire, et pas seulement poli
+ *
+ * Les trois produits sont NON CONSOMMABLES : achetés une fois, acquis pour
+ * toujours. Or ce qui les mémorise ici est le `localStorage`, c'est-à-dire le
+ * téléphone — pas le compte Google. Trois situations très ordinaires effacent
+ * donc un achat payé :
+ *
+ *   · on change de téléphone ;
+ *   · on désinstalle et on réinstalle ;
+ *   · le système vide les données de l'application pour faire de la place.
+ *
+ * Sans un moyen de récupérer, la seule issue du joueur est de repayer ou de
+ * demander un remboursement. Google le sait, et l'absence de restauration est
+ * le premier motif de rejet des applications à achats non consommables.
+ *
+ * CE QUE FAIT CETTE FONCTION AUJOURD'HUI, ET CE QU'ELLE FERA. Le vrai achat
+ * n'est pas branché (voir `purchaseRemoveAds`) : il n'existe donc aucun
+ * historique à interroger, et rendre `false` est la réponse HONNÊTE — « rien
+ * retrouvé » plutôt qu'un succès inventé. Le jour où l'achat passera par la
+ * facturation Play, c'est ici que `queryPurchases()` viendra, et les deux
+ * `setXxx` ci-dessous rouvriront ce qui a été payé.
+ *
+ * Le bouton, lui, existe déjà dans les Options : il doit être visible AVANT
+ * la publication, parce que c'est lui que cherche un joueur qui vient de
+ * changer de téléphone — et c'est lui que cherche l'examinateur de Google.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+export interface Restauration {
+  /** Un achat au moins a été retrouvé et réactivé. */
+  retrouve: boolean;
+  /** L'achat n'a pas pu être interrogé (hors ligne, service indisponible). */
+  indisponible: boolean;
+}
+
+export async function restaurerAchats(): Promise<Restauration> {
+  if (!isNative()) {
+    // Sur le web il n'y a pas de facturation : on ne prétend pas le contraire.
+    return { retrouve: false, indisponible: true };
+  }
+  try {
+    /*
+     * À BRANCHER : interroger les achats du compte, puis pour chacun
+     *   'noads'        → setAdsRemoved(true)
+     *   'atelier'      → setAtelierOwned(true)
+     *   'pack_complet' → les deux
+     * et rendre `retrouve: true` si au moins un est revenu.
+     */
+    return { retrouve: false, indisponible: true };
+  } catch {
+    return { retrouve: false, indisponible: true };
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // CONFIGURATION DES BLOCS D'ANNONCES
 //

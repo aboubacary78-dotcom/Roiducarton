@@ -59,8 +59,13 @@ manquante, à son prix.
 2. Brancher `purchaseRemoveAds`, `purchaseAtelier` et `purchasePack` sur le
    vrai achat — elles ouvrent l'accès directement aujourd'hui, ce qui est un
    marqueur de développement, pas un oubli.
-3. Prévoir la **restauration des achats** : Google l'exige pour les produits
-   non consommables, et c'est le premier motif de rejet sur ce type d'app.
+3. **La restauration des achats** : le bouton existe déjà dans les Options —
+   « ♻️ Restaurer mes achats » — et il reste visible même pour qui possède
+   tout, parce que sur un nouveau téléphone le jeu ne sait justement plus rien.
+   Il ne lui manque que d'interroger la facturation : `restaurerAchats()` dans
+   `lib/ads.ts` répond aujourd'hui « rien retrouvé », honnêtement, faute
+   d'historique à consulter. Y brancher `queryPurchases()` et rouvrir chaque
+   produit trouvé.
 4. Ne PAS écrire les prix en dur dans l'application. Google renvoie le prix
    localisé — un joueur canadien doit lire des dollars canadiens, pas des
    euros convertis de travers. Les cartes des Options n'affichent donc aucun

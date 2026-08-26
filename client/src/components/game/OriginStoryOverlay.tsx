@@ -1,5 +1,5 @@
 import { useVerrouScroll } from '@/lib/verrouScroll';
-import { useGame, generateOrigin } from '@/contexts/GameContext';
+import { useGame, generateOrigin, nomMetier } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 import { playCard, playPage } from '@/lib/sound';
@@ -83,7 +83,7 @@ export default function OriginStoryOverlay() {
             {tr(story.titleFr, story.titleEn)}
           </h2>
           <p className="text-[11px] text-[#8B6B4A] text-center mb-3 mt-0.5">
-            {char.job.emoji} {tc(char.job.name)}
+            {char.job.emoji} {tc(nomMetier(char.job, char.gender))}
           </p>
 
           {/* Le récit */}

@@ -1,4 +1,4 @@
-import { useGame, computeScore, hasTrait, poissardMerite, loadHighScores, knownEnemyNames } from '@/contexts/GameContext';
+import { useGame, computeScore, hasTrait, poissardMerite, nomMetier, loadHighScores, knownEnemyNames } from '@/contexts/GameContext';
 import type { InventoryItem } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo, useRef } from 'react';
@@ -222,13 +222,13 @@ export default function GameOverScreen() {
     if (char.crowned) {
       setCrown({
         name: char.name, seed: char.seed, gender: char.gender,
-        jobName: char.job.name, jobEmoji: char.job.emoji,
+        jobName: nomMetier(char.job, char.gender), jobEmoji: char.job.emoji,
         days: char.day, crownedAt: Date.now(), reigns: char.kingsBeaten ?? 1,
       });
     }
     return recordDeath({
       ids, name: char.name, day: char.day, respect: char.respect, seed: char.seed,
-      grave: { name: char.name, seed: char.seed, gender: char.gender, day: char.day, jobEmoji: char.job.emoji, jobName: char.job.name, cause: headline, accessories: (char.equipped ?? {}) as Record<string, string> },
+      grave: { name: char.name, seed: char.seed, gender: char.gender, day: char.day, jobEmoji: char.job.emoji, jobName: nomMetier(char.job, char.gender), cause: headline, accessories: (char.equipped ?? {}) as Record<string, string> },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [char?.seed]);
@@ -598,7 +598,7 @@ export default function GameOverScreen() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[12px] font-bold text-[#2A1F1A] truncate">{char.job.emoji} {char.name}</p>
-            <p className="text-[10px] text-[#6B5740] truncate">{tc(char.job.name)} · {char.traits.map(t => t.emoji).join(' ')}</p>
+            <p className="text-[10px] text-[#6B5740] truncate">{tc(nomMetier(char.job, char.gender))} · {char.traits.map(t => t.emoji).join(' ')}</p>
           </div>
           <div className="text-right font-mono shrink-0">
             <p className="text-[11px] text-[#2A1F1A] font-bold">{char.day} {tr(char.day > 1 ? 'jours' : 'jour', char.day > 1 ? 'days' : 'day')} · {char.money}€</p>
@@ -659,7 +659,7 @@ export default function GameOverScreen() {
                 {tr('Le suivant sur la liste', 'Next in line')}
               </p>
               <p className="text-[13px] font-bold text-[#F0D9C4] truncate">
-                {successor.name} · {successor.job.emoji} {tc(successor.job.name)}
+                {successor.name} · {successor.job.emoji} {tc(nomMetier(successor.job, successor.gender))}
               </p>
               <p className="text-[10px] text-[#A08060] truncate">
                 {successor.traits.map(t => `${t.emoji} ${tc(t.name)}`).join(' · ')}

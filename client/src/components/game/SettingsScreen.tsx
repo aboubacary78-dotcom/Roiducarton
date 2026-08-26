@@ -5,7 +5,7 @@ import { getVolume, getVolumeFond, isMuted, playBack, playDignityTier, playMoney
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
-import { isAdsRemoved, isAtelierOwned, packUtile, purchaseAtelier, purchasePack, purchaseRemoveAds, reopenConsentForm } from '@/lib/ads';
+import { isAdsRemoved, isAtelierOwned, packUtile, purchaseAtelier, purchasePack, purchaseRemoveAds, reopenConsentForm, restaurerAchats } from '@/lib/ads';
 import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
 import { resetCoaches } from '@/lib/coach';
@@ -31,7 +31,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.53.0';
+const APP_VERSION = '3.54.0';
 
 /*
  * UN CURSEUR EN CARTON.
@@ -93,6 +93,7 @@ export default function SettingsScreen() {
   // proposer à qui a déjà une moitié lui ferait racheter ce qu'il a.
   const [pack, setPack] = useState(packUtile());
   const [buyingPack, setBuyingPack] = useState(false);
+  const [restaurant, setRestaurant] = useState(false);
   const [consentBusy, setConsentBusy] = useState(false);
 
   async function handleBuyPack() {
@@ -388,6 +389,57 @@ export default function SettingsScreen() {
             </button>
           </>
         )}
+      </motion.section>
+
+      {/*
+        * RESTAURER — visible en permanence, y compris pour qui possède déjà.
+        *
+        * C'est le bouton que cherche quelqu'un qui vient de changer de
+        * téléphone et retrouve les publicités qu'il avait payé pour ne plus
+        * voir. Le cacher à qui « possède déjà » n'aurait aucun sens : sur le
+        * nouvel appareil, justement, il ne possède plus rien aux yeux du jeu.
+        */}
+      <motion.section
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.11 }}
+        className="craft-card p-4"
+      >
+        <button
+          onClick={async () => {
+            if (restaurant) return;
+            playToggle();
+            setRestaurant(true);
+            const r = await restaurerAchats();
+            setRestaurant(false);
+            setNoAds(isAdsRemoved());
+            setAtelier(isAtelierOwned());
+            setPack(packUtile());
+            pushToast(
+              r.retrouve
+                ? tr('Achats restaurés !', 'Purchases restored!')
+                : r.indisponible
+                  ? tr('Impossible de vérifier vos achats pour l\'instant.', 'Can\'t check your purchases right now.')
+                  : tr('Aucun achat à restaurer sur ce compte.', 'No purchases to restore on this account.'),
+              { emoji: r.retrouve ? '✅' : 'ℹ️', tone: r.retrouve ? 'good' : 'info' },
+            );
+          }}
+          disabled={restaurant}
+          className="w-full flex items-center justify-between disabled:opacity-60"
+        >
+          <span className="text-base font-semibold text-[#2A1F1A]">
+            ♻️ {tr('Restaurer mes achats', 'Restore purchases')}
+          </span>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#E8D5C0] text-[#8B6B4A]">
+            {restaurant ? tr('⏳', '⏳') : tr('Toucher', 'Tap')}
+          </span>
+        </button>
+        <p className="text-xs text-[#8B6B4A] mt-2 leading-relaxed">
+          {tr(
+            'Nouveau téléphone, ou jeu réinstallé ? Vos achats sont liés à votre compte Google : touchez ici pour les récupérer sans repayer.',
+            'New phone, or reinstalled the game? Your purchases are tied to your Google account: tap here to get them back without paying again.',
+          )}
+        </p>
       </motion.section>
 
       {/* Données */}

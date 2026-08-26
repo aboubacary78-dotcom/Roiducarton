@@ -1,5 +1,5 @@
 import { useVerrouScroll } from '@/lib/verrouScroll';
-import { bagCapacity, traitPretable } from '@/contexts/GameContext';
+import { bagCapacity, traitPretable, nomMetier } from '@/contexts/GameContext';
 import { useGame, type StreetNpc } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -82,7 +82,7 @@ export default function StreetEncounter({ npc, onClose }: { npc: StreetNpc; onCl
             </div>
             <div className="min-w-0">
               <h2 className="text-lg text-[#2A1F1A] leading-tight">{npc.name}</h2>
-              <p className="text-[11px] text-[#8B6B4A]">{npc.job.emoji} {tc(npc.job.name)}</p>
+              <p className="text-[11px] text-[#8B6B4A]">{npc.job.emoji} {tc(nomMetier(npc.job, npc.gender))}</p>
             </div>
           </div>
 

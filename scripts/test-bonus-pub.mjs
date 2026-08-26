@@ -256,12 +256,10 @@ verifier('  …et l\'engager fait avancer le compteur du combat',
   avantCombat === 3 && apresCombat === 2, `${avantCombat} → ${apresCombat} combat(s) restant(s)`);
 
 // Même chose pour le combat : deux engagements simulés, le troisième joué.
-let boutonObjet = false, argentAvant = 0;
+let boutonObjet = false;
 for (let essai = 0; essai < 8 && !boutonObjet; essai++) {
   await situer({ day: 5, ...SOLVABLE, stats: SAIN, location: 'zone-industrielle' });
   await p.evaluate(() => { window.__pub.noterEngagement('combat'); window.__pub.noterEngagement('combat'); });
-  argentAvant = await p.evaluate(() =>
-    JSON.parse(localStorage.getItem('roi-du-carton-save')).character.money);
   await clic('Bagarre|Fight'); await pause(1500);
   for (const m of ['on y va|Got it', 'compris|Understood']) { if (await clic(m)) await pause(350); }
   if (!/Tenter de fuir|Try to flee/i.test(await ecran())) continue;
@@ -272,12 +270,64 @@ verifier('  …au troisième combat, l\'objet miracle est là', boutonObjet,
   boutonObjet ? '' : (await ecran()).slice(0, 120));
 
 if (boutonObjet) {
+  /*
+   * ON ACHÈTE LA SORTIE, PAS LE TROPHÉE.
+   *
+   * Ce contrôle disait l'inverse : il exigeait « le butin, pas seulement la
+   * sortie ». C'était l'incohérence — le raccourci du VOL rend `ok` et jamais
+   * `jackpot`, donc moins d'argent, aucun respect, l'objet une fois sur deux ;
+   * le combat, lui, donnait la victoire COMPLÈTE. La cadence limitait la
+   * fréquence, jamais l'intérêt : chaque usage restait meilleur que de jouer.
+   *
+   * L'argent reste — le combat a eu lieu. Le RESPECT ne suit pas : la rue
+   * admire ce qu'elle a vu faire. Et l'OBJET non plus : fouiller quelqu'un
+   * demande d'être resté sur place.
+   */
+  /*
+   * ON LIT LE BUTIN QUE CET ENNEMI-LÀ DÉCLARE.
+   *
+   * « respect 0 → 0 » ne prouve rien si l'adversaire n'en donnait pas : le
+   * Chat de Gouttière, par exemple, ne lâche que de l'argent. Le contrôle
+   * serait alors vert sans rien garantir. On identifie donc l'ennemi à
+   * l'écran, on relit SON butin dans le catalogue, et on n'affirme quelque
+   * chose que sur ce qu'il avait effectivement à donner.
+   */
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync('client/src/contexts/data/enemies.ts', 'utf8');
+  const nomEnnemi = await p.evaluate(() => {
+    const t = document.body.innerText;
+    const m = t.match(/([A-ZÉÈÀÇ][^\n❤]{2,30}?)\s*❤️/);
+    return m ? m[1].trim() : '';
+  });
+  const ligne = src.split('\n').find(l => l.includes(`name: '${nomEnnemi}'`)) ?? '';
+  const declare = {
+    respect: Number(ligne.match(/respect: (\d+)/)?.[1] ?? 0),
+    objet: /loot: \{[^}]*item:/.test(ligne) || /item: \{/.test(ligne),
+  };
+
+  const etat = () => p.evaluate(() => {
+    const c = JSON.parse(localStorage.getItem('roi-du-carton-save')).character;
+    return { money: c.money, respect: c.respect, sac: c.inventory.length };
+  });
+  const avant = await etat();
   await clic('extincteur|extinguisher'); await pause(2000);
   verifier('    …et le combat est gagné', /Victoire|Victory/i.test(await ecran()));
-  const argentApres = await p.evaluate(() =>
-    JSON.parse(localStorage.getItem('roi-du-carton-save')).character.money);
-  verifier('    …avec le butin, pas seulement la sortie',
-    argentApres >= argentAvant, `${argentAvant}€ → ${argentApres}€`);
+  const apres = await etat();
+  verifier('    …l\'argent du butin suit',
+    apres.money >= avant.money, `${avant.money}€ → ${apres.money}€`);
+  if (declare.respect > 0) {
+    verifier('    …mais PAS le respect, qu\'il avait pourtant à donner',
+      apres.respect === avant.respect,
+      `${nomEnnemi} déclare +${declare.respect} · ${avant.respect} → ${apres.respect}`);
+  } else {
+    console.log(`  (${nomEnnemi || 'cet adversaire'} ne donnait pas de respect — contrôle sans objet)`);
+  }
+  if (declare.objet) {
+    verifier('    …ni l\'objet qu\'il lâche d\'ordinaire',
+      apres.sac === avant.sac, `sac ${avant.sac} → ${apres.sac}`);
+  } else {
+    console.log(`  (${nomEnnemi || 'cet adversaire'} ne lâche pas d'objet — contrôle sans objet)`);
+  }
 }
 
 // ── ⑤ La couronne ne s'achète pas ─────────────────────────────────────────

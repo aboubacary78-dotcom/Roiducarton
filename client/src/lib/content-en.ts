@@ -1155,4 +1155,30 @@ export const CONTENT_EN: Record<string, string> = {
   'Pleurer un bon coup': 'Have a good cry',
   'Ça vide, et ça lave. Vous vous relevez plus léger, étrangement.': 'It empties you out, and it cleanses. You get back up lighter, strangely.',
   'Le Sursaut': 'The Jolt',
+
+/*
+ * LES MÉTIERS AU FÉMININ.
+ *
+ * Même traduction que la forme masculine : l'anglais ne s'accorde pas, et
+ * « Former Soldier » convient à tout le monde. Ces entrées existent parce que
+ * `tc()` cherche la chaîne FRANÇAISE exacte — sans elles, Simone resterait en
+ * français au milieu d'un écran anglais.
+ */
+  'Ancienne Comptable': 'Former Accountant',
+  'Ancienne Ouvrière': 'Former Laborer',
+  'Ancienne Professeure': 'Former Teacher',
+  'Ancienne Sommelière': 'Former Sommelier',
+  'Ancienne Cascadeuse': 'Former Stuntman',
+  'Ancienne Informaticienne': 'Former IT Guy',
+  'Ancienne Cuisinière': 'Former Cook',
+  'Ancienne Infirmière': 'Former Nurse',
+  'Ancienne Artiste': 'Former Artist',
+  'Ancienne Militaire': 'Former Soldier',
+  'Ancienne Bibliothécaire': 'Former Librarian',
+  'Ancienne Vendeuse de Voitures': 'Former Car Salesman',
+  'Ancienne Jardinière': 'Former Gardener',
+  'Ancienne Avocate': 'Former Lawyer',
+  'Ancienne Musicienne': 'Former Musician',
+  'Ancienne Boxeuse': 'Ex-Boxer',
+  'Ancienne Poétesse': 'Ex-Poet',
 };

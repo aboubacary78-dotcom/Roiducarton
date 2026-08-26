@@ -1,4 +1,4 @@
-import { useGame, type Character } from '@/contexts/GameContext';
+import { useGame, nomMetier, type Character } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import PlayerFace from './PlayerFace';
@@ -25,7 +25,7 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
         </div>
         <div>
           <h3 className="text-xl text-[#2A1F1A]">{char.name}</h3>
-          <p className="text-xs text-[#8B6B4A]">{char.job.emoji} {tc(char.job.name)}</p>
+          <p className="text-xs text-[#8B6B4A]">{char.job.emoji} {tc(nomMetier(char.job, char.gender))}</p>
         </div>
       </div>
 
