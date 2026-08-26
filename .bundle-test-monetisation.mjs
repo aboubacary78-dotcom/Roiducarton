@@ -216,6 +216,599 @@ function clearLegacy() {
   }
 }
 
+// client/src/lib/audioFiles.ts
+var cache = /* @__PURE__ */ new Map();
+var pending = /* @__PURE__ */ new Map();
+function loadAudio(url) {
+  if (cache.has(url)) return Promise.resolve(cache.get(url));
+  const already = pending.get(url);
+  if (already) return already;
+  const ac = getAudio();
+  if (!ac) return Promise.resolve(null);
+  const p = fetch(url).then((r) => {
+    const type = r.headers.get("content-type") || "";
+    if (!r.ok || /text\/html/i.test(type)) return Promise.reject(new Error("absent"));
+    return r.arrayBuffer();
+  }).then((buf) => ac.decodeAudioData(buf)).then((decoded) => {
+    cache.set(url, decoded);
+    return decoded;
+  }).catch(() => {
+    cache.set(url, null);
+    return null;
+  }).finally(() => {
+    pending.delete(url);
+  });
+  pending.set(url, p);
+  return p;
+}
+function isKnownMissing(url) {
+  return cache.get(url) === null;
+}
+function playBuffer(buffer, gain = 1) {
+  const ac = getAudio();
+  if (!ac) return;
+  const src = ac.createBufferSource();
+  src.buffer = buffer;
+  const g = ac.createGain();
+  g.gain.value = gain;
+  src.connect(g).connect(sortieEffets(ac));
+  src.start();
+  src.onended = () => {
+    try {
+      src.disconnect();
+      g.disconnect();
+    } catch {
+    }
+  };
+}
+
+// ../../../tmp/monet-Jn2I4d/cap.js
+var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
+
+// client/src/lib/haptics.ts
+var HAPTICS_KEY = "roi-du-carton-haptics";
+var enabled = (() => {
+  try {
+    return localStorage.getItem(HAPTICS_KEY) !== "0";
+  } catch {
+    return true;
+  }
+})();
+var FALLBACK_MS = { light: 12, medium: 28, heavy: 55 };
+var plugin = null;
+var styles = null;
+var loading = null;
+function ensurePlugin() {
+  if (plugin || loading) return loading ?? Promise.resolve();
+  loading = import("@capacitor/haptics").then((m) => {
+    plugin = m.Haptics;
+    styles = {
+      light: m.ImpactStyle.Light,
+      medium: m.ImpactStyle.Medium,
+      heavy: m.ImpactStyle.Heavy
+    };
+  }).catch(() => {
+    plugin = null;
+  });
+  return loading;
+}
+function fallback(level) {
+  try {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(FALLBACK_MS[level]);
+    }
+  } catch {
+  }
+}
+function haptic(level = "light") {
+  if (!enabled) return;
+  if (!Capacitor.isNativePlatform()) {
+    fallback(level);
+    return;
+  }
+  ensurePlugin().then(() => {
+    if (!plugin || !styles) {
+      fallback(level);
+      return;
+    }
+    plugin.impact({ style: styles[level] }).catch(() => fallback(level));
+  });
+}
+function hapticPattern(pattern) {
+  if (!enabled) return;
+  if (!Capacitor.isNativePlatform()) {
+    try {
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(pattern);
+    } catch {
+    }
+    return;
+  }
+  let delay = 0;
+  pattern.forEach((ms, i) => {
+    if (i % 2 === 0 && ms > 0) {
+      const level = ms >= 90 ? "heavy" : ms >= 45 ? "medium" : "light";
+      setTimeout(() => haptic(level), delay);
+    }
+    delay += ms;
+  });
+}
+
+// client/src/lib/sound.ts
+var MUTE_KEY = "roi-du-carton-muted";
+var muted = (() => {
+  try {
+    return localStorage.getItem(MUTE_KEY) === "1";
+  } catch {
+    return false;
+  }
+})();
+var ctx = null;
+var pageEnVeille = false;
+if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
+  document.addEventListener("visibilitychange", () => {
+    pageEnVeille = document.visibilityState === "hidden";
+    if (!ctx) return;
+    try {
+      if (pageEnVeille) ctx.suspend().catch(() => {
+      });
+      else if (!muted) ctx.resume().catch(() => {
+      });
+    } catch {
+    }
+  });
+}
+function audio() {
+  if (typeof window === "undefined") return null;
+  try {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
+    }
+    if (ctx.state === "suspended" && !pageEnVeille) ctx.resume();
+    return ctx;
+  } catch {
+    return null;
+  }
+}
+function getAudio() {
+  const ac = audio();
+  if (ac) preloadGestures();
+  return ac;
+}
+var GESTURES = [
+  "geste-clic-1",
+  "geste-clic-2",
+  "geste-clic-3",
+  "geste-onglet-1",
+  "geste-onglet-2",
+  "geste-onglet-3",
+  "geste-carte-1",
+  "geste-carte-2",
+  "geste-carte-3",
+  "geste-pas-1",
+  "geste-pas-2",
+  "geste-pas-3",
+  "geste-coup-1",
+  "geste-coup-2",
+  "geste-coup-3",
+  "perte-rate-1",
+  "perte-rate-2",
+  "perte-rate-3",
+  "geste-retour",
+  "geste-reglage",
+  "geste-coup-fort",
+  "geste-encaisse",
+  "geste-gong",
+  "geste-bricole",
+  "geste-succes",
+  "geste-troc"
+];
+var gesturesAsked = false;
+function preloadGestures() {
+  if (gesturesAsked) return;
+  gesturesAsked = true;
+  for (const g of GESTURES) loadAudio(`/audio/${g}.mp3`);
+}
+var VOL_KEY = "roi-du-carton-volume";
+var VOL_FOND_KEY = "roi-du-carton-volume-fond";
+function lireVolume(cle, defaut) {
+  try {
+    const brut = localStorage.getItem(cle);
+    if (brut === null || brut === "") return defaut;
+    const v = Number(brut);
+    return Number.isFinite(v) && v >= 0 && v <= 1 ? v : defaut;
+  } catch {
+    return defaut;
+  }
+}
+var volume = lireVolume(VOL_KEY, 1);
+var volumeFond = lireVolume(VOL_FOND_KEY, 1);
+var busEffets = null;
+var busFond = null;
+function sortieEffets(ac) {
+  if (!busEffets || busEffets.context !== ac) {
+    busEffets = ac.createGain();
+    busEffets.gain.value = volume;
+    busEffets.connect(ac.destination);
+    busFond = null;
+  }
+  return busEffets;
+}
+function sortieFond(ac) {
+  const effets = sortieEffets(ac);
+  if (!busFond || busFond.context !== ac) {
+    busFond = ac.createGain();
+    busFond.gain.value = volumeFond;
+    busFond.connect(effets);
+  }
+  return busFond;
+}
+function getVolume() {
+  return volume;
+}
+function getVolumeFond() {
+  return volumeFond;
+}
+function setVolume(v) {
+  volume = Math.min(1, Math.max(0, v));
+  try {
+    localStorage.setItem(VOL_KEY, String(volume));
+  } catch {
+  }
+  const ac = ctx;
+  if (busEffets && ac) busEffets.gain.setTargetAtTime(volume, ac.currentTime, 0.02);
+}
+function setVolumeFond(v) {
+  volumeFond = Math.min(1, Math.max(0, v));
+  try {
+    localStorage.setItem(VOL_FOND_KEY, String(volumeFond));
+  } catch {
+  }
+  const ac = ctx;
+  if (busFond && ac) busFond.gain.setTargetAtTime(volumeFond, ac.currentTime, 0.02);
+}
+if (typeof window !== "undefined") {
+  window.__bus = {
+    get effets() {
+      const ac = audio();
+      return ac ? sortieEffets(ac) : null;
+    },
+    get fond() {
+      const ac = audio();
+      return ac ? sortieFond(ac) : null;
+    },
+    setVolume,
+    setVolumeFond,
+    getVolume,
+    getVolumeFond
+  };
+}
+function tone(freq, dur, type, gain, slideTo) {
+  const ac = audio();
+  if (!ac) return;
+  const osc = ac.createOscillator();
+  const g = ac.createGain();
+  const t0 = ac.currentTime;
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t0);
+  if (slideTo) osc.frequency.exponentialRampToValueAtTime(Math.max(1, slideTo), t0 + dur);
+  g.gain.setValueAtTime(1e-4, t0);
+  g.gain.exponentialRampToValueAtTime(gain, t0 + 8e-3);
+  g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+  osc.connect(g).connect(sortieEffets(ac));
+  osc.start(t0);
+  osc.stop(t0 + dur + 0.02);
+}
+var noiseBuffer = null;
+function noise(dur, gain, hp = 800) {
+  const ac = audio();
+  if (!ac) return;
+  if (!noiseBuffer || noiseBuffer.sampleRate !== ac.sampleRate) {
+    const frames = Math.floor(ac.sampleRate * 0.25);
+    noiseBuffer = ac.createBuffer(1, frames, ac.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < frames; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / frames);
+  }
+  const t0 = ac.currentTime;
+  const src = ac.createBufferSource();
+  src.buffer = noiseBuffer;
+  const filter = ac.createBiquadFilter();
+  filter.type = "highpass";
+  filter.frequency.value = hp;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(gain, t0);
+  g.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+  src.connect(filter).connect(g).connect(sortieEffets(ac));
+  src.start(t0);
+  src.stop(t0 + dur + 0.02);
+}
+function playHitSynth() {
+  if (muted) return;
+  tone(150, 0.13, "triangle", 0.14, 70);
+  noise(0.09, 0.09, 600);
+}
+function playCritSynth() {
+  if (muted) return;
+  noise(0.14, 0.16, 900);
+  tone(320, 0.16, "square", 0.1, 640);
+  tone(180, 0.2, "triangle", 0.14, 90);
+  vibrate([0, 40, 30, 60]);
+}
+function playHurtSynth() {
+  if (muted) return;
+  tone(300, 0.18, "sawtooth", 0.08, 110);
+}
+function playWinSynth() {
+  if (muted) return;
+  const notes = [523, 659, 784, 1047];
+  notes.forEach((f, i) => setTimeout(() => tone(f, 0.16, "triangle", 0.12), i * 90));
+}
+function playClickSynth() {
+  if (muted) return;
+  tone(880, 0.045, "triangle", 0.045);
+}
+function playSuccessSynth() {
+  if (muted) return;
+  tone(523, 0.12, "triangle", 0.09);
+  setTimeout(() => tone(784, 0.16, "triangle", 0.09), 110);
+}
+function playFailSynth() {
+  if (muted) return;
+  tone(330, 0.14, "triangle", 0.08);
+  setTimeout(() => tone(220, 0.2, "triangle", 0.08), 120);
+}
+function playCoinSynth() {
+  if (muted) return;
+  tone(1180, 0.06, "triangle", 0.08);
+  setTimeout(() => tone(1560, 0.09, "triangle", 0.07), 55);
+}
+function playNextDaySynth() {
+  if (muted) return;
+  tone(660, 0.18, "sine", 0.09, 440);
+  setTimeout(() => tone(440, 0.32, "sine", 0.08, 300), 120);
+}
+function playUnlockSynth() {
+  if (muted) return;
+  const notes = [784, 988, 1319, 1568];
+  notes.forEach((f, i) => setTimeout(() => tone(f, 0.14, "triangle", 0.09), i * 70));
+  vibrate([0, 30, 40, 30]);
+}
+function playStepSynth() {
+  if (muted) return;
+  tone(190, 0.03, "sine", 0.05);
+}
+function playSpottedSynth() {
+  if (muted) return;
+  tone(440, 0.1, "square", 0.08, 680);
+  setTimeout(() => tone(440, 0.12, "square", 0.08, 680), 130);
+  vibrate(60);
+}
+function playWhooshSynth() {
+  if (muted) return;
+  noise(0.32, 0.05, 400);
+  tone(300, 0.28, "sine", 0.05, 700);
+}
+var marqueDernierSon = 0;
+function noterSon() {
+  if (typeof performance !== "undefined") marqueDernierSon = performance.now();
+}
+function withFile(file, gain, fallback2) {
+  return () => {
+    if (muted) return;
+    noterSon();
+    const url = `/audio/${file}.mp3`;
+    if (isKnownMissing(url)) {
+      fallback2();
+      return;
+    }
+    loadAudio(url).then((buf) => {
+      if (buf) playBuffer(buf, gain);
+      else fallback2();
+    });
+  };
+}
+function playFightStartSynth() {
+  if (muted) return;
+  noise(0.25, 0.13, 200);
+  tone(160, 0.9, "sine", 0.11, 78);
+  tone(240, 0.7, "triangle", 0.06, 120);
+  setTimeout(() => tone(320, 0.45, "sine", 0.045, 190), 90);
+  vibrate([0, 60, 40, 90]);
+}
+function playKingArrivalSynth() {
+  if (muted) return;
+  [0, 620, 1240].forEach((d) => setTimeout(() => {
+    noise(0.3, 0.1, 150);
+    tone(110, 1.4, "sine", 0.13, 54);
+    tone(165, 1, "triangle", 0.07, 82);
+  }, d));
+  [1900, 2050, 2200, 2350].forEach((d, i) => setTimeout(() => tone([196, 233, 294, 349][i], 0.4, "sawtooth", 0.075), d));
+  setTimeout(() => {
+    noise(0.5, 0.08, 90);
+    tone(70, 0.9, "sawtooth", 0.11, 48);
+  }, 2750);
+  vibrate([0, 120, 90, 120, 90, 220]);
+}
+function playKOSynth() {
+  if (muted) return;
+  noise(0.16, 0.18, 500);
+  tone(120, 0.28, "triangle", 0.16, 55);
+  setTimeout(() => {
+    noise(0.22, 0.12, 160);
+    tone(90, 0.4, "sine", 0.12, 45);
+  }, 170);
+  setTimeout(() => [1320, 1050, 1560].forEach((f, i) => setTimeout(() => tone(f, 0.1, "triangle", 0.05), i * 80)), 430);
+  vibrate([0, 80, 50, 120]);
+}
+function playCraftSynth() {
+  if (muted) return;
+  noise(0.13, 0.05, 1400);
+  setTimeout(() => noise(0.13, 0.05, 1200), 150);
+  setTimeout(() => {
+    tone(210, 0.07, "square", 0.07, 130);
+    noise(0.05, 0.06, 900);
+  }, 320);
+  setTimeout(() => {
+    tone(240, 0.07, "square", 0.07, 150);
+    noise(0.05, 0.06, 900);
+  }, 440);
+  setTimeout(() => {
+    tone(660, 0.12, "triangle", 0.07);
+    setTimeout(() => tone(880, 0.16, "triangle", 0.07), 100);
+  }, 580);
+  vibrate([0, 25, 60, 25]);
+}
+function playShareSynth() {
+  if (muted) return;
+  tone(440, 0.16, "sine", 0.075);
+  setTimeout(() => tone(554, 0.2, "sine", 0.075), 90);
+  setTimeout(() => tone(659, 0.26, "sine", 0.06), 190);
+}
+function playPaperSynth() {
+  if (muted) return;
+  noise(0.18, 0.035, 2200);
+  setTimeout(() => noise(0.14, 0.028, 1800), 160);
+  setTimeout(() => tone(330, 0.5, "sine", 0.045, 262), 260);
+}
+function vibrate(pattern) {
+  if (typeof pattern === "number") {
+    haptic(pattern >= 90 ? "heavy" : pattern >= 45 ? "medium" : "light");
+  } else {
+    hapticPattern(pattern);
+  }
+}
+var dernierePrise = /* @__PURE__ */ new Map();
+function withVariants(base, nb, gain, fallback2) {
+  return () => {
+    if (muted) return;
+    noterSon();
+    const avant = dernierePrise.get(base);
+    let n = 1 + Math.floor(Math.random() * nb);
+    if (n === avant) n = 1 + n % nb;
+    dernierePrise.set(base, n);
+    const url = `/audio/${base}-${n}.mp3`;
+    if (isKnownMissing(url)) {
+      fallback2();
+      return;
+    }
+    loadAudio(url).then((buf) => {
+      if (buf) playBuffer(buf, gain);
+      else fallback2();
+    });
+  };
+}
+var playCoinSmall = withVariants("argent-piece-entree", 3, 0.85, playCoinSynth);
+var playCoinHandful = withFile("argent-poignee-entree", 0.85, playCoinSynth);
+var playCoinNotes = withFile("argent-liasse", 0.85, playCoinSynth);
+var playMoneyOut = withFile("argent-sortie", 0.85, playCoinSynth);
+var playCoin = withFile("moment-piece", 0.85, playCoinSynth);
+var playDig = withVariants("geste-fouille", 3, 0.8, playHitSynth);
+var playPickUp = withFile("geste-ramasse", 0.8, playHitSynth);
+var playCraft = withFile("geste-bricole", 0.85, playCraftSynth);
+var playFind = withFile("moment-trouvaille", 0.85, playUnlockSynth);
+var playWear = withFile("geste-usure", 0.8, playFailSynth);
+var playBag = withFile("geste-sac", 0.75, playClickSynth);
+var playMorningBox = withFile("moment-carton-matin", 0.85, playPaperSynth);
+var playTravel = withFile("moment-trajet", 0.8, playStepSynth);
+var playHit = withVariants("geste-coup", 3, 0.85, playHitSynth);
+var playCrit = withFile("geste-coup-fort", 0.9, playCritSynth);
+var playHurt = withFile("geste-encaisse", 0.9, playHurtSynth);
+var playStep = withVariants("geste-pas", 3, 0.8, playStepSynth);
+var playKO = withFile("moment-ko", 0.9, playKOSynth);
+var playGive = withFile("social-partage", 0.85, playShareSynth);
+var playHandshake = withFile("moment-poignee-main", 0.85, playShareSynth);
+var playTurnedAway = withFile("social-econduit", 0.85, playFailSynth);
+var playShare = withFile("geste-troc", 0.85, playShareSynth);
+var playMiss = withVariants("perte-rate", 3, 0.75, playFailSynth);
+var playSpotted = withFile("moment-attrape", 0.9, playSpottedSynth);
+var playCollapse = withFile("moment-craquement", 0.9, playFailSynth);
+var playDignityLoss = withFile("perte-dignite", 0.9, playFailSynth);
+var playDignityTier = withFile("perte-palier", 0.95, playFailSynth);
+var playPickCharacter = withFile("moment-choix-perso", 0.85, playPaperSynth);
+var playReroll = withFile("moment-relance", 0.8, playPaperSynth);
+var playBequeath = withFile("moment-legs", 0.85, playPaperSynth);
+var playLedger = withFile("moment-registre", 0.85, playPaperSynth);
+var playNewEnding = withFile("moment-fin-inedite", 0.9, playUnlockSynth);
+var playDeath = withFile("moment-mort", 0.95, playFailSynth);
+var playKingArrival = withFile("moment-sacre", 0.9, playKingArrivalSynth);
+var playPage = withFile("moment-page", 0.75, playPaperSynth);
+var playWakeUp = withFile("moment-reveil", 0.8, playPaperSynth);
+var playNextDay = withFile("moment-jour-nouveau", 0.8, playNextDaySynth);
+var playWin = withFile("moment-victoire", 0.85, playWinSynth);
+var playFightStart = withFile("geste-gong", 0.9, playFightStartSynth);
+var playMemory = withFile("moment-souvenir", 0.85, playUnlockSynth);
+var playGoodOutcome = withFile("moment-resultat-bon", 0.85, playSuccessSynth);
+var playClick = withVariants("geste-clic", 3, 0.7, playClickSynth);
+var playBack = withFile("geste-retour", 0.7, playClickSynth);
+var playTab = withVariants("geste-onglet", 3, 0.65, playClickSynth);
+var playToggle = withFile("geste-reglage", 0.7, playClickSynth);
+var playCard = withVariants("geste-carte", 3, 0.7, playWhooshSynth);
+var playUnlock = withFile("geste-succes", 0.85, playUnlockSynth);
+var genreVoix = "m";
+var muet = () => {
+};
+function voix(quoi, nb, gain, repli = muet) {
+  const prises = {
+    m: withVariants(`voix-h-${quoi}`, nb, gain, repli),
+    f: withVariants(`voix-f-${quoi}`, nb, gain, repli)
+  };
+  return () => prises[genreVoix]();
+}
+var playVoixDouleur = voix("douleur", 3, 0.8);
+var playVoixDegout = voix("degout", 3, 0.8);
+var playVoixEffort = voix("effort", 3, 0.7);
+var playGaugeLowFile = withFile("jauge-rouge", 0.85, playFailSynth);
+var VOIX_DU_CORPS = {
+  hunger: withFile("corps-faim", 0.85, playFailSynth),
+  thirst: withFile("corps-soif", 0.85, playFailSynth),
+  sleep: withFile("corps-epuise", 0.85, playFailSynth),
+  health: withFile("corps-froid", 0.85, playFailSynth),
+  mental: withFile("corps-tete", 0.85, playFailSynth)
+};
+var PALIERS_ALERTE = [
+  withFile("tension-alerte-1", 0.8, playSpottedSynth),
+  withFile("tension-alerte-2", 0.85, playSpottedSynth),
+  withFile("tension-alerte-3", 0.9, playSpottedSynth)
+];
+var playTensionRisque = withFile("tension-risque", 0.55, () => {
+});
+var playTensionTic = withFile("tension-compte", 0.6, () => {
+});
+var playRecupRat = withVariants("recup-rat", 3, 0.85, playHurtSynth);
+var playRecupGuepes = withFile("recup-guepes", 0.85, playHurtSynth);
+var playRecupVerre = withFile("recup-verre", 0.85, playHurtSynth);
+var playRecupPourri = withVariants("recup-pourri", 3, 0.8, playHurtSynth);
+var AGACE = {
+  m: withVariants("passant-h-agace", 3, 0.7, muet),
+  f: withVariants("passant-f-agace", 3, 0.7, muet)
+};
+var REFUS = {
+  m: withVariants("passant-h-refus", 3, 0.85, playFailSynth),
+  f: withVariants("passant-f-refus", 3, 0.85, playFailSynth)
+};
+var playPoliceApproche = withFile("police-approche", 0.7, () => {
+});
+var playPolicePresence = withFile("police-presence", 0.75, () => {
+});
+var playPoliceIntervention = withFile("police-intervention", 0.85, playSpottedSynth);
+var playCombatCharge = withFile("combat-charge", 0.8, () => {
+});
+var playCombatEsquive = withFile("combat-esquive", 0.7, () => {
+});
+var playCombatEsquiveParfaite = withFile("combat-esquive-parfaite", 0.85, () => {
+});
+var playObjetEquipe = withFile("objet-equipe", 0.8, playSuccessSynth);
+var playObjetCasse = withFile("objet-casse", 0.85, playFailSynth);
+var playObjetPlein = withFile("objet-plein", 0.75, playFailSynth);
+var playToastBon = withFile("ui-toast-bon", 0.5, () => {
+});
+var playToastMauvais = withFile("ui-toast-mauvais", 0.5, () => {
+});
+var playVerrou = withFile("ui-verrou", 0.6, () => {
+});
+var playGaugeFilled = withFile("jauge-remplie", 0.85, playSuccessSynth);
+
 // client/src/contexts/data/util.ts
 function randomFromArray(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -254,7 +847,13 @@ var FEMALE_NAMES = /* @__PURE__ */ new Set([
   "Simone",
   "Bernadette",
   "Monique",
-  "Huguette"
+  "Huguette",
+  "Odette",
+  "Paulette",
+  "Suzanne",
+  "Denise",
+  "Micheline",
+  "Jacqueline"
 ]);
 function genderFromName(name) {
   return FEMALE_NAMES.has(name) ? "f" : "m";
@@ -1399,6 +1998,239 @@ var DIGNITY_TIERS = [
   { min: 25, fr: "On change de trottoir", en: "People cross the street", color: "#B8703A" },
   { min: 0, fr: "Transparent", en: "Invisible", color: "#8B5A4A" }
 ];
+
+// client/src/contexts/data/piques.ts
+var PIQUES = {
+  /* ── ① SANTÉ CRITIQUE ────────────────────────────────────────────────────
+   * Chaque phrase nomme LA jauge qui lâche. C'est ce qui manquait le plus :
+   * mourir de soif et s'entendre parler du froid, c'est le jeu qui ne regarde
+   * pas son propre écran. Le rire vient du décalage de registre — un corps qui
+   * meurt décrit avec le vocabulaire d'un huissier ou d'un pigeon poli.
+   */
+  "sante-critique": [
+    {
+      quand: (c) => c.jauge === "hunger",
+      fr: "Votre estomac ne r\xE9clame plus rien. Il a fait son deuil.",
+      en: "Your stomach stopped asking. It's in mourning now."
+    },
+    {
+      quand: (c) => c.jauge === "hunger",
+      fr: "Un pigeon mange mieux que vous. Il le sait.",
+      en: "A pigeon is eating better than you. It knows."
+    },
+    {
+      quand: (c) => c.jauge === "thirst",
+      fr: "Votre langue colle. \xC9conomisez vos mots.",
+      en: "Your tongue is sticking. Save your words."
+    },
+    {
+      quand: (c) => c.jauge === "thirst",
+      fr: "Trois fontaines dans ce quartier. Toutes en travaux.",
+      en: "Three fountains in this neighbourhood. All under repair."
+    },
+    {
+      quand: (c) => c.jauge === "sleep",
+      fr: "Vous avez clign\xE9 des yeux pendant huit secondes.",
+      en: "You just blinked for eight seconds."
+    },
+    {
+      quand: (c) => c.jauge === "sleep",
+      fr: "Le corps commence \xE0 facturer les heures debout.",
+      en: "The body is starting to invoice the hours on your feet."
+    },
+    {
+      quand: (c) => c.jauge === "health",
+      fr: "Vous n'avez m\xEAme plus la force de vous \xE9vanouir.",
+      en: "You don't even have the strength to faint."
+    },
+    {
+      quand: (c) => c.jauge === "health",
+      fr: "Techniquement vivant. Le service des imp\xF4ts n'est pas pr\xE9venu.",
+      en: "Technically alive. The tax office hasn't been told."
+    },
+    {
+      quand: (c) => c.jauge === "mental",
+      fr: "Vous relisez la m\xEAme ligne pour la quatri\xE8me fois.",
+      en: "You're re-reading the same line for the fourth time."
+    },
+    {
+      quand: (c) => c.jauge === "mental",
+      fr: "Votre t\xEAte part en vacances. Sans vous.",
+      en: "Your head is going on holiday. Without you."
+    }
+  ],
+  /* ── ② DIGNITÉ À ZÉRO ────────────────────────────────────────────────────
+   * Elles se déclenchent au franchissement d'un palier — donc juste après un
+   * geste que le joueur vient de faire. Pas de condition : le palier EST la
+   * situation, et elles frappent toutes sur un geste précis plutôt que sur
+   * l'idée générale d'avoir honte.
+   */
+  "dignite-zero": [
+    {
+      fr: "Vous avez dit merci. C'est \xE7a qui fait mal.",
+      en: "You said thank you. That's the part that hurts."
+    },
+    {
+      fr: "Il vous restait une limite. Vous venez de la d\xE9m\xE9nager.",
+      en: "You had one line left. You just moved it."
+    },
+    {
+      fr: "Personne n'a d\xE9tourn\xE9 le regard. Personne ne regardait.",
+      en: "Nobody looked away. Nobody was looking."
+    },
+    {
+      fr: "Vous marchandez votre fiert\xE9. Le cours s'effondre.",
+      en: "You're trading your pride. The price is collapsing."
+    },
+    {
+      fr: "Vous vous \xEAtes excus\xE9 d'exister. Ils ont accept\xE9.",
+      en: "You apologised for existing. They accepted it."
+    },
+    {
+      fr: "Mardi, vous auriez refus\xE9. On est vendredi.",
+      en: "On Tuesday you'd have refused. It's Friday."
+    }
+  ],
+  /* ── ③ ÉCHEC TOTAL AU VOL ────────────────────────────────────────────────
+   * Le seul moment où le jeu a le droit d'être franchement moqueur : le
+   * joueur a pris un risque en connaissance de cause. On tape sur
+   * l'exécution, jamais sur l'intention. Pas de condition — se faire prendre
+   * est déjà la situation la plus précise du jeu.
+   */
+  "vol-rate": [
+    {
+      fr: "Discret pendant six secondes. Record personnel.",
+      en: "Unseen for six whole seconds. Personal best."
+    },
+    {
+      fr: "Le vigile n'a m\xEAme pas eu \xE0 courir.",
+      en: "The guard didn't even have to run."
+    },
+    {
+      fr: "Votre plan avait une faille. C'\xE9tait vous.",
+      en: "Your plan had one flaw. It was you."
+    },
+    {
+      fr: "Rep\xE9r\xE9, rattrap\xE9, ressorti. Dans cet ordre.",
+      en: "Spotted, caught, thrown out. In that order."
+    },
+    {
+      fr: "Il y avait une cam\xE9ra. Vous \xEAtes une anecdote de pause d\xE9jeuner.",
+      en: "There was a camera. You're now a lunch-break anecdote."
+    },
+    {
+      fr: "Vous avez vol\xE9 l'attention de tout le monde. Rien d'autre.",
+      en: "You stole everyone's attention. Nothing else."
+    }
+  ],
+  /* ── ④ RÉVEIL DOULOUREUX ─────────────────────────────────────────────────
+   * C'est ici que l'incohérence se voyait le plus : la remarque tombait tous
+   * les matins, quel qu'ait été la nuit. « Le carton a pris l'eau » après une
+   * nuit sèche, et le joueur comprend en une fois que le jeu ne regarde rien.
+   *
+   * Chacune dépend maintenant de ce que la nuit a VRAIMENT été. Et si la nuit
+   * s'est bien passée, aucune ne colle : le matin se passe en silence, ce qui
+   * rend les autres matins beaucoup plus mordants.
+   */
+  "reveil": [
+    {
+      quand: (c) => c.meteo === "rainy" || c.meteo === "storm",
+      fr: "Le carton a pris l'eau. Vous aussi.",
+      en: "The cardboard took on water. So did you."
+    },
+    {
+      quand: (c) => c.meteo === "rainy" || c.meteo === "storm",
+      fr: "Il a plu toute la nuit. Le carton a tenu deux heures.",
+      en: "It rained all night. The cardboard lasted two hours."
+    },
+    {
+      quand: (c) => c.meteo === "snow" || c.meteo === "storm",
+      fr: "R\xE9veill\xE9 par le froid. Ponctuel, lui.",
+      en: "Woken by the cold. Always on time, that one."
+    },
+    {
+      quand: (c) => c.meteo === "snow",
+      fr: "Il a neig\xE9 sur vous. Personne n'a trouv\xE9 \xE7a beau.",
+      en: "It snowed on you. Nobody found it pretty."
+    },
+    {
+      quand: (c) => c.meteo === "heatwave",
+      fr: "Trente degr\xE9s \xE0 six heures du matin. Bonne journ\xE9e.",
+      en: "Thirty degrees at six in the morning. Enjoy your day."
+    },
+    {
+      quand: (c) => (c.sommeil ?? 0) < -3,
+      fr: "Quatre heures de sommeil. En six fois.",
+      en: "Four hours of sleep. In six instalments."
+    },
+    {
+      quand: (c) => (c.sommeil ?? 0) < -3,
+      fr: "Votre dos a un avis sur cette nuit. Il le donne.",
+      en: "Your back has an opinion about last night. It's sharing it."
+    },
+    {
+      quand: (c) => (c.sommeil ?? 0) < -8,
+      fr: "Vous avez dormi. Le mot est g\xE9n\xE9reux.",
+      en: "You slept. Generous word for it."
+    }
+  ],
+  /* ── ⑤ GAINS MISÉRABLES ──────────────────────────────────────────────────
+   * Déjà causales par nature — elles ne sortent que sur une récolte nulle. On
+   * distingue quand même le ZÉRO du PRESQUE RIEN : « encadrez-le » n'a aucun
+   * sens quand on est reparti les mains vides, et c'est le genre de décalage
+   * d'un cran qui fait passer une vanne pour un tirage au sort.
+   */
+  "gain-miserable": [
+    {
+      quand: (c) => (c.gain ?? 0) > 0,
+      fr: "Un centime. Encadrez-le.",
+      en: "One cent. Frame it."
+    },
+    {
+      quand: (c) => (c.gain ?? 0) > 0,
+      fr: "Un centime de l'heure. Arrondi au sup\xE9rieur.",
+      en: "One cent an hour. Rounded up."
+    },
+    {
+      quand: (c) => (c.gain ?? 0) > 0,
+      fr: "De quoi acheter un quart de baguette. Sans le quart.",
+      en: "Enough for a quarter of a baguette. Minus the quarter."
+    },
+    {
+      quand: (c) => (c.gain ?? 0) <= 0,
+      fr: "Rien. Pas m\xEAme une ficelle.",
+      en: "Nothing. Not even a piece of string."
+    },
+    {
+      quand: (c) => (c.gain ?? 0) <= 0,
+      fr: "Z\xE9ro. Le march\xE9 a parl\xE9, et il a dit non.",
+      en: "Zero. The market has spoken, and it said no."
+    },
+    {
+      quand: (c) => (c.gain ?? 0) <= 0,
+      fr: "Vous repartez avec vos mains. C'est d\xE9j\xE0 \xE7a.",
+      en: "You leave with your hands. That's something."
+    }
+  ]
+};
+var ECART_MS = 3e4;
+var dernierePique = 0;
+var derniereDeLaCategorie = /* @__PURE__ */ new Map();
+function piquer(cat, ctx2 = {}, maintenant = Date.now()) {
+  if (maintenant - dernierePique < ECART_MS) return null;
+  const banque = (PIQUES[cat] ?? []).filter((p) => !p.quand || p.quand(ctx2));
+  if (!banque.length) return null;
+  const avant = derniereDeLaCategorie.get(cat);
+  let i = Math.floor(Math.random() * banque.length);
+  if (banque.length > 1 && banque[i].fr === avant) i = (i + 1) % banque.length;
+  derniereDeLaCategorie.set(cat, banque[i].fr);
+  dernierePique = maintenant;
+  return banque[i];
+}
+function avecPiqueBilingue(fr, en, cat, ctx2 = {}) {
+  const p = piquer(cat, ctx2);
+  return p ? { fr: `${fr} ${p.fr}`, en: `${en} ${p.en}` } : { fr, en };
+}
 
 // client/src/contexts/data/events2-explore.ts
 var EXPLORE_EVENTS_2 = [
@@ -7233,6 +8065,10 @@ function pickMaterials(c, count) {
 }
 
 // client/src/contexts/data/npc.ts
+var SOCIAL_LOCATIONS = ["centre-ville", "gare", "marche"];
+function isSocialLocation(location) {
+  return SOCIAL_LOCATIONS.includes(location);
+}
 var NPC_NAMES = [
   "Marcel",
   "G\xE9rard",
@@ -7286,6 +8122,14 @@ function encounterFlag(day2, location) {
 var DETTE_PRET = 10;
 var DETTE_DU = 15;
 var DETTE_DELAI = 3;
+var DETTE_SEUIL_MISERE = 3;
+function preteurPresent(c) {
+  if (c.dette) return false;
+  if (c.day < 2) return false;
+  if (c.money >= DETTE_SEUIL_MISERE) return false;
+  if (c.detteRefuseeJour === c.day) return false;
+  return isSocialLocation(c.location);
+}
 function preteurDuJour(day2, location, playerSeed) {
   const rng = makeRng(hashStr(`preteur|${day2}|${location}|${playerSeed}`));
   const nom = NPC_NAMES[Math.floor(rng() * NPC_NAMES.length)];
@@ -7294,6 +8138,83 @@ function preteurDuJour(day2, location, playerSeed) {
     seed: `preteur-${nom}-${day2}`,
     gender: genderFromName(nom),
     quartier: location
+  };
+}
+function detteExigible(c) {
+  return !!c.dette && c.day >= c.dette.echeance;
+}
+function evenementPreteur(preteur) {
+  const { nom } = preteur;
+  const f = preteur.gender === "f";
+  const Il = f ? "Elle" : "Il", il = f ? "elle" : "il";
+  const He = f ? "She" : "He";
+  return {
+    id: "dette-offre",
+    type: "social",
+    title: L(
+      f ? "Celle qui avance l'argent" : "Celui qui avance l'argent",
+      "The one who fronts the money"
+    ),
+    description: L(
+      `${nom} vous a regard\xE9 compter vos pi\xE8ces, et ${il} a attendu que vous ayez fini. \xAB ${DETTE_PRET}\u20AC tout de suite. Tu m'en rends ${DETTE_DU} dans ${DETTE_DELAI} jours. \xBB ${Il} ne sourit pas. ${Il} ne menace pas non plus. ${Il} attend, comme si ${il} avait d\xE9j\xE0 entendu toutes les r\xE9ponses possibles.`,
+      `${nom} watched you count your coins, and waited until you were done. "${DETTE_PRET}\u20AC right now. You give me back ${DETTE_DU} in ${DETTE_DELAI} days." ${He} isn't smiling. ${He} isn't threatening either. ${He} waits, like someone who has already heard every possible answer.`
+    ),
+    image: "/assets/npc-preteur.webp",
+    fallbackImage: "/assets/scene-gare.webp",
+    choices: [
+      {
+        text: L(`Prendre les ${DETTE_PRET}\u20AC`, `Take the ${DETTE_PRET}\u20AC`),
+        risk: "risky",
+        emoji: "\u{1F932}",
+        action: "ACCEPTER_PRET",
+        outcomes: []
+      },
+      {
+        text: L("Refuser, et repartir les mains vides", "Refuse, and walk away empty-handed"),
+        risk: "safe",
+        emoji: "\u{1F6B6}",
+        action: "REFUSER_PRET",
+        outcomes: []
+      }
+    ]
+  };
+}
+function evenementEcheance(dette, argent) {
+  const peutPayer = argent >= dette.montant;
+  const f = dette.gender === "f";
+  const Il = f ? "Elle" : "Il", il = f ? "elle" : "il";
+  const He = f ? "She" : "He", he = f ? "she" : "he";
+  return {
+    id: "dette-echeance",
+    type: "social",
+    sansRetour: true,
+    title: L("L'\xE9ch\xE9ance", "The due date"),
+    description: L(
+      `${dette.nom} est ${f ? "adoss\xE9e" : "adoss\xE9"} au mur, les bras crois\xE9s. ${Il} \xE9tait l\xE0 avant vous. ${Il} ne dit rien pendant un moment, puis : \xAB ${dette.montant}. \xBB C'est tout ce qu'${il} dit, et c'est suffisant.`,
+      `${dette.nom} is leaning against the wall, arms folded. ${He} was here before you got here. ${He} says nothing for a moment, then: "${dette.montant}." That's all ${he} says, and it's enough.`
+    ),
+    image: "/assets/npc-preteur-echeance.webp",
+    fallbackImage: "/assets/npc-preteur.webp",
+    choices: [
+      {
+        text: L(`Payer les ${dette.montant}\u20AC`, `Pay the ${dette.montant}\u20AC`),
+        risk: "safe",
+        emoji: "\u{1F4B6}",
+        action: "REMBOURSER_DETTE",
+        outcomes: [],
+        // Le bouton reste VISIBLE quand on n'a pas la somme, et verrouillé :
+        // le joueur doit voir ce qu'il aurait pu faire, sinon l'autre choix
+        // n'en est plus un.
+        bloqueSi: peutPayer ? void 0 : { argentMoinsDe: dette.montant }
+      },
+      {
+        text: L("Dire que vous n'avez pas", "Say you don't have it"),
+        risk: "risky",
+        emoji: "\u{1FAE5}",
+        action: "AVOUER_INSOLVABILITE",
+        outcomes: []
+      }
+    ]
   };
 }
 
@@ -7352,6 +8273,36 @@ function applyDailyDecay(stats) {
 }
 var SAVE_KEY = "roi-du-carton-save";
 var SCORES_KEY = "roi-du-carton-scores";
+var OBJET_MIRACLE = {
+  fr: "un extincteur de chantier \xE0 moiti\xE9 plein",
+  en: "a half-full site fire extinguisher",
+  bouton: { fr: "Sortir l'extincteur : fin du combat", en: "Pull out the extinguisher: fight over" }
+};
+function etatDeVictoire(state, combat, cUpd, logs) {
+  const lootMoney = combat.loot?.money || 0;
+  const lootRespect = combat.loot?.respect || 0;
+  const drop = combat.loot?.item && cUpd.inventory.length < bagCapacity(cUpd) ? combat.loot.item : void 0;
+  const en = tc(combat.enemyName);
+  logs.push(L(`\u{1F389} Victoire ! Vous avez vaincu ${combat.enemyName} !`, `\u{1F389} Victory! You defeated ${en}!`));
+  if (drop) logs.push(L(`${drop.emoji} Il l\xE2che : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
+  const wasKing = combat.enemyEmoji === "\u{1F451}";
+  if (wasKing) logs.push(L("\u{1F451} La couronne vous revient : vous \xEAtes le Roi du Carton !", "\u{1F451} The crown is yours: you are the Cardboard King!"));
+  return {
+    ...state,
+    contract: state.contract?.id === "contrat-combatif" ? { id: state.contract.id, done: true } : state.contract,
+    character: {
+      ...cUpd,
+      money: cUpd.money + lootMoney,
+      respect: cUpd.respect + lootRespect,
+      inventory: drop ? [...cUpd.inventory, drop] : cUpd.inventory,
+      ...wasKing ? { crowned: true, kingsBeaten: (cUpd.kingsBeaten ?? 0) + 1 } : {}
+    },
+    currentCombat: null,
+    combatLog: logs,
+    eventResult: { text: `${L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}\u20AC` : ""} ${lootRespect > 0 ? `+${lootRespect} respect` : ""}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+\u20AC${lootMoney}` : ""} ${lootRespect > 0 ? `+${lootRespect} respect` : ""}`.trim())}${drop ? L(` Il l\xE2che ${drop.name} ${drop.emoji} !`, ` It drops the ${tc(drop.name)} ${drop.emoji}!`) : ""}`, moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
+    screen: "main"
+  };
+}
 function loadGame() {
   try {
     const saved = localStorage.getItem(SAVE_KEY);
@@ -7405,7 +8356,7 @@ function gameReducer(state, action) {
   switch (action.type) {
     case "START_GAME":
       clearSave();
-      return { ...state, screen: "character-select", characterChoices: generateCharacterTrio(), deathCause: null };
+      return { ...state, screen: "character-select", characterChoices: generateCharacterTrio(), deathCause: null, deathKind: null };
     case "GENERATE_CHARACTERS":
       return { ...state, characterChoices: generateCharacterTrio(state.characterChoices.map((c) => c.name)) };
     case "PREPARE_SUCCESSOR":
@@ -7561,7 +8512,13 @@ function gameReducer(state, action) {
       const respectDelta = money2 >= 8 ? 1 : 0;
       const newStats = withFirstDayNet(c, applyStatDelta(c.stats, statDelta));
       const isAlive = newStats.health > 0 && newStats.mental > 0;
-      const prefix = money2 >= 8 ? L("\u{1F3A9} Manche exceptionnelle ! ", "\u{1F3A9} An exceptional haul! ") : money2 > 0 ? L("\u{1FA99} Quelques pi\xE8ces au fond du chapeau. ", "\u{1FA99} A few coins in the bottom of the hat. ") : L("\u{1F4A8} Pas un sou aujourd'hui. ", "\u{1F4A8} Not a penny today. ");
+      const maigre = money2 <= 1 ? avecPiqueBilingue(
+        "\u{1F4A8} Pas un sou aujourd'hui.",
+        "\u{1F4A8} Not a penny today.",
+        "gain-miserable",
+        { gain: money2 }
+      ) : null;
+      const prefix = money2 >= 8 ? L("\u{1F3A9} Manche exceptionnelle ! ", "\u{1F3A9} An exceptional haul! ") : money2 > 0 ? L("\u{1FA99} Quelques pi\xE8ces au fond du chapeau. ", "\u{1FA99} A few coins in the bottom of the hat. ") : L(`${maigre.fr} `, `${maigre.en} `);
       const weatherNote = modifier !== 1 ? modifier > 1 ? L(" Le beau temps a rendu les passants g\xE9n\xE9reux.", " The good weather made passers-by generous.") : L(" Le mauvais temps a fait fuir les passants.", " The bad weather scared off passers-by.") : "";
       const dignityNote = c.stats.dignity >= 70 ? L(" Votre allure soign\xE9e a inspir\xE9 confiance.", " Your neat appearance inspired trust.") : c.stats.dignity < 25 ? L(" Votre allure n\xE9glig\xE9e a fait fuir plus d'un passant.", " Your unkempt look scared off more than one passer-by.") : "";
       const insistNote = insisted >= 8 ? L(" Vous avez retenu des manches un peu trop longtemps : \xE7a se paie en fiert\xE9.", " You held on to a few sleeves a bit too long: that costs pride.") : insisted >= 3 ? L(" Vous avez un peu insist\xE9.", " You pushed it a little.") : "";
@@ -7656,10 +8613,15 @@ function gameReducer(state, action) {
       const text = action.busted ? L(
         `\u{1F400} Le tas a gagn\xE9. Ce que vous aviez sorti est rest\xE9 au fond, avec le reste.${savedNote} ${deep >= 3 ? "Il fallait remonter plus t\xF4t." : "\xC7a arrive."}`,
         `\u{1F400} The pile won. What you'd pulled out stayed down there with the rest.${savedNote} ${deep >= 3 ? "You should have climbed out sooner." : "It happens."}`
-      ) : haul === "" ? L(
-        "\u{1F5D1}\uFE0F Vingt minutes les bras dans les ordures pour rien. M\xEAme les rats vous ont regard\xE9 avec piti\xE9.",
-        "\u{1F5D1}\uFE0F Twenty minutes elbow-deep in rubbish for nothing. Even the rats looked at you with pity."
-      ) : L(
+      ) : haul === "" ? (() => {
+        const p = avecPiqueBilingue(
+          "\u{1F5D1}\uFE0F Vingt minutes les bras dans les ordures pour rien. M\xEAme les rats vous ont regard\xE9 avec piti\xE9.",
+          "\u{1F5D1}\uFE0F Twenty minutes elbow-deep in rubbish for nothing. Even the rats looked at you with pity.",
+          "gain-miserable",
+          { gain: 0 }
+        );
+        return L(p.fr, p.en);
+      })() : L(
         `\u267B\uFE0F Vous ressortez avec ${haul}.${deep >= 3 ? " Vous \xEAtes descendu loin, et vous \xEAtes remont\xE9 \xE0 temps." : ""}`,
         `\u267B\uFE0F You come out with ${haul}.${deep >= 3 ? " You went deep, and you got out in time." : ""}`
       );
@@ -7762,7 +8724,23 @@ function gameReducer(state, action) {
           ...state,
           character: { ...c, stats: newStats2, respect: c.respect - 2, alive: isAlive },
           eventResult: {
-            text: rossee ? L(`\u{1F9BA} Rat\xE9 ! Les vigiles vous \xAB raccompagnent \xBB loin de ${target.label}, r\xE9glementairement mais tr\xE8s fermement. Tout fait mal.`, `\u{1F9BA} Failed! The guards "escort" you away from ${target.labelEn}, by the book but very firmly. Everything hurts.`) : L(`\u{1F6A8} Rat\xE9 ! Rep\xE9r\xE9 en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoch\xE9.`, `\u{1F6A8} Failed! Spotted trying to steal ${target.labelEn}, you flee amid insults, a little battered.`),
+            /*
+             * La rue commente le casse raté DANS le texte du résultat, pas en
+             * bandeau par-dessus. C'est le seul échec du jeu que le joueur ait
+             * intégralement choisi — il a vu les gardes et il a tenté quand
+             * même — donc le seul où la moquerie porte sans être injuste.
+             */
+            text: (() => {
+              const base = rossee ? {
+                fr: `\u{1F9BA} Rat\xE9 ! Les vigiles vous \xAB raccompagnent \xBB loin de ${target.label}, r\xE9glementairement mais tr\xE8s fermement. Tout fait mal.`,
+                en: `\u{1F9BA} Failed! The guards "escort" you away from ${target.labelEn}, by the book but very firmly. Everything hurts.`
+              } : {
+                fr: `\u{1F6A8} Rat\xE9 ! Rep\xE9r\xE9 en tentant de voler ${target.label}, vous fuyez sous les insultes, un peu amoch\xE9.`,
+                en: `\u{1F6A8} Failed! Spotted trying to steal ${target.labelEn}, you flee amid insults, a little battered.`
+              };
+              const p = avecPiqueBilingue(base.fr, base.en, "vol-rate");
+              return L(p.fr, p.en);
+            })(),
             statChanges: statDelta2,
             respectChange: -2,
             image: "/assets/result-steal-fail.webp"
@@ -7922,6 +8900,46 @@ function gameReducer(state, action) {
      * Le remboursement ne se marchande pas. Ce qui se joue, c'est l'échéance :
      * trois jours de jeu pendant lesquels chaque euro dépensé se compte.
      * ═══════════════════════════════════════════════════════════════════════ */
+    /*
+     * OUVRIR LE RENDEZ-VOUS QUI ATTEND.
+     *
+     * L'échéance d'abord : elle ne se refuse pas, et si les deux tombaient le
+     * même jour ce serait absurde de proposer un prêt à quelqu'un qu'on est en
+     * train de venir tabasser.
+     *
+     * Le hub appelle ça en arrivant. C'est le reducer qui décide s'il y a
+     * quelque chose à ouvrir, pour que la condition vive au même endroit que
+     * la mécanique — l'écran, lui, n'a pas à savoir ce qu'est une échéance.
+     */
+    /*
+     * SEULE L'ÉCHÉANCE S'IMPOSE.
+     *
+     * Les deux rendez-vous s'ouvraient tout seuls en arrivant sur le hub, et
+     * c'était une erreur de ma part sur l'un des deux. Une DETTE À RENDRE n'a
+     * pas à demander la permission : le joueur a signé trois jours plus tôt,
+     * et un rendez-vous qu'on peut ignorer n'est pas un rendez-vous. Mais une
+     * PROPOSITION de prêt qui vous saute au visage sans prévenir donne
+     * exactement l'impression qu'elle a donnée : un événement forcé dont on ne
+     * comprend ni d'où il sort ni pourquoi maintenant.
+     *
+     * L'offre redevient donc une carte sur le hub, qu'on touche si on veut
+     * (voir ABORDER_PRETEUR). On garde le meilleur des deux : le visage a
+     * toujours son plein écran, mais c'est le joueur qui s'approche.
+     */
+    case "OUVRIR_RENDEZ_VOUS_DETTE": {
+      const c = state.character;
+      if (!c || !c.alive || state.screen !== "main") return state;
+      if (state.currentEvent || state.eventResult || state.daySummary) return state;
+      if (!detteExigible(c) || !c.dette) return state;
+      return { ...state, currentEvent: evenementEcheance(c.dette, c.money), screen: "event" };
+    }
+    /** Le joueur s'approche de lui. C'est lui qui décide, pas le jeu. */
+    case "ABORDER_PRETEUR": {
+      const c = state.character;
+      if (!c || state.screen !== "main" || !preteurPresent(c)) return state;
+      const preteur = preteurDuJour(c.day, c.location, c.seed);
+      return { ...state, currentEvent: evenementPreteur(preteur), screen: "event" };
+    }
     case "ACCEPTER_PRET": {
       const c = state.character;
       if (!c || c.dette || state.screen !== "main") return state;
@@ -8013,6 +9031,9 @@ function gameReducer(state, action) {
       return {
         ...state,
         character: { ...c, stats: newStats, alive: vivant, dette: void 0 },
+        // La rue saura de quoi il est mort : c'est la seule fin du jeu qu'on
+        // ait signée soi-même, trois jours plus tôt, en prenant les dix euros.
+        deathKind: vivant ? state.deathKind ?? null : "dette",
         eventResult: {
           text: L(
             `${nom} regarde votre sac vide, puis vous. \xAB Alors c'est comme \xE7a. \xBB \xC7a va vite. Vous ne vous souvenez pas d'\xEAtre tomb\xE9, seulement du trottoir contre la joue et des gens qui contournent. ${nom} s'en va sans se retourner : la dette est pay\xE9e, et tout le quartier a vu comment.`,
@@ -8081,6 +9102,12 @@ function gameReducer(state, action) {
     case "CHOOSE_EVENT": {
       if (!state.currentEvent || !state.character) return state;
       const choice = state.currentEvent.choices[action.choiceIndex];
+      if (choice.action) {
+        return gameReducer(
+          { ...state, currentEvent: null, screen: "main" },
+          { type: choice.action }
+        );
+      }
       let outcome = choice.outcomes[0];
       const outcomeScore = (o) => (o.moneyChange || 0) + (o.respectChange || 0) * 2 + Object.values(o.statChanges || {}).reduce((a, b) => a + (b || 0), 0) + (o.itemGain ? 5 : 0) - (o.itemLoss ? 3 : 0);
       if (action.boosted) {
@@ -8328,6 +9355,11 @@ function gameReducer(state, action) {
         const d = decayedStats[k] - ch.stats[k];
         if (d !== 0) deltas[k] = d;
       });
+      const piqueMatin = piquer("reveil", { meteo: nextWeather, sommeil: deltas.sleep ?? 0 });
+      if (piqueMatin) {
+        notes.push(`\u{1F305} ${piqueMatin.fr}`);
+        notesEn.push(`\u{1F305} ${piqueMatin.en}`);
+      }
       return {
         ...state,
         character: { ...ch, stats: decayedStats, day: ch.day + 1, alive: isAlive, inventory, money: ch.money + bonusMoney, respect: ch.respect + respectBonus, shopClosures, travelsToday: [], fountainDay: void 0, fountainToday: 0, vole },
@@ -8458,31 +9490,7 @@ function gameReducer(state, action) {
         ...rollSignRound(enemyLike, c, guaranteedTell, playerSign),
         ...over
       });
-      const victoryState = (cUpd) => {
-        const lootMoney = combat.loot?.money || 0;
-        const lootRespect = combat.loot?.respect || 0;
-        const drop = combat.loot?.item && cUpd.inventory.length < bagCapacity(cUpd) ? combat.loot.item : void 0;
-        const en = tc(combat.enemyName);
-        logs.push(L(`\u{1F389} Victoire ! Vous avez vaincu ${combat.enemyName} !`, `\u{1F389} Victory! You defeated ${en}!`));
-        if (drop) logs.push(L(`${drop.emoji} Il l\xE2che : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
-        const wasKing = combat.enemyEmoji === "\u{1F451}";
-        if (wasKing) logs.push(L("\u{1F451} La couronne vous revient : vous \xEAtes le Roi du Carton !", "\u{1F451} The crown is yours: you are the Cardboard King!"));
-        return {
-          ...state,
-          contract: state.contract?.id === "contrat-combatif" ? { id: state.contract.id, done: true } : state.contract,
-          character: {
-            ...cUpd,
-            money: cUpd.money + lootMoney,
-            respect: cUpd.respect + lootRespect,
-            inventory: drop ? [...cUpd.inventory, drop] : cUpd.inventory,
-            ...wasKing ? { crowned: true, kingsBeaten: (cUpd.kingsBeaten ?? 0) + 1 } : {}
-          },
-          currentCombat: null,
-          combatLog: logs,
-          eventResult: { text: `${L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}\u20AC` : ""} ${lootRespect > 0 ? `+${lootRespect} respect` : ""}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+\u20AC${lootMoney}` : ""} ${lootRespect > 0 ? `+${lootRespect} respect` : ""}`.trim())}${drop ? L(` Il l\xE2che ${drop.name} ${drop.emoji} !`, ` It drops the ${tc(drop.name)} ${drop.emoji}!`) : ""}`, moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
-          screen: "main"
-        };
-      };
+      const victoryState = (cUpd) => etatDeVictoire(state, combat, cUpd, logs);
       if (combat.trapRounds > 0 && eSign === "strike") {
         const trapDmg = 9;
         const hp = Math.max(0, combat.enemyHealth - trapDmg);
@@ -8572,6 +9580,34 @@ function gameReducer(state, action) {
       }
       logs.push(L(`${eDef.emoji} Sa ${eDef.name.toLowerCase()} prend votre ${pDef.name.toLowerCase()} de vitesse : esquivez !`, `${eDef.emoji} Its ${eDef.nameEn.toLowerCase()} beats your ${pDef.nameEn.toLowerCase()}: dodge!`));
       return { ...state, currentCombat: { ...combat, trapRounds: trapAfter, phase: "dodge", hand: [] }, combatLog: logs };
+    }
+    /*
+     * L'OBJET MIRACLE — gagner le combat sans le jouer.
+     *
+     * Le duel de signes est le seul mini-jeu dont on ne peut pas sortir sans
+     * y laisser des plumes : fuir coûte cinq points de dignité, et perdre peut
+     * tuer. Quelqu'un qui n'accroche pas au pierre-feuille-ciseaux se retrouve
+     * donc à éviter les combats, c'est-à-dire une partie entière du jeu.
+     *
+     * L'objet trouvé dans la poche règle ça en une fois. Il donne la victoire
+     * COMPLÈTE — butin, respect, couronne si c'était le Roi, contrat
+     * « combatif » validé — parce qu'une demi-victoire serait la pire des
+     * options : le joueur aurait dépensé quelque chose pour un résultat qu'il
+     * n'a pas compris.
+     *
+     * Ce qu'il ne donne pas : la santé perdue avant de le sortir. On efface
+     * le combat, pas ce qu'il a déjà coûté.
+     */
+    case "COUP_DE_GRACE": {
+      if (!state.character || !state.currentCombat) return state;
+      const c = state.character;
+      const combat = state.currentCombat;
+      const logs = [...state.combatLog];
+      logs.push(L(
+        `\u{1F9E8} Votre main trouve ${OBJET_MIRACLE.fr} au fond de la poche. ${combat.enemyName} n'a rien vu venir.`,
+        `\u{1F9E8} Your hand finds ${OBJET_MIRACLE.en} at the bottom of your pocket. ${tc(combat.enemyName)} never saw it coming.`
+      ));
+      return etatDeVictoire(state, combat, c, logs);
     }
     // Fuite tentée depuis le duel de signes (soupape quand tout va mal :
     // pas besoin de gagner une manche pour avoir le droit de renoncer).
@@ -8997,6 +10033,9 @@ ${outcome.text}`,
         currentCombat: null,
         combatLog: [],
         deathCause: null,
+        // Une seconde chance efface aussi l'étiquette : on ne meurt pas deux
+        // fois de la même dette, elle a été éteinte au premier coup.
+        deathKind: null,
         eventResult: { text: "\u{1F305} Une \xE2me charitable vous a port\xE9 secours. Vous reprenez vos esprits. La rue ne vous a pas encore eu...", image: "/assets/result-seconde-chance.webp" },
         character: {
           ...state.character,
@@ -9041,12 +10080,10 @@ var initialState = {
   highScores: loadHighScores(),
   weather: initialWeather,
   nextWeather: getNextWeather(initialWeather, 1),
-  deathCause: null
+  deathCause: null,
+  deathKind: null
 };
 var GameContext = createContext(void 0);
-
-// ../../../tmp/monet-GJfY9I/cap.js
-var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/ads.ts
 var NOADS_KEY = "roi-du-carton-noads";
@@ -9057,6 +10094,9 @@ var adsRemoved = (() => {
     return false;
   }
 })();
+function isAdsRemoved() {
+  return adsRemoved;
+}
 function setAdsRemoved(v) {
   adsRemoved = v;
   try {
@@ -9150,6 +10190,54 @@ async function showInterstitial() {
   } catch (e) {
     console.warn("[ads] showInterstitial:", e);
   }
+}
+var MAX_OFFRES_PAR_SESSION = 3;
+var offresFaites = 0;
+function canOfferRewarded() {
+  if (adsRemoved) return true;
+  return offresFaites < MAX_OFFRES_PAR_SESSION;
+}
+function bonusOffert() {
+  return adsRemoved;
+}
+function bonusFr(base) {
+  return adsRemoved ? `\u2728 ${base}` : `\u{1F3AC} ${base} (pub)`;
+}
+function bonusEn(base) {
+  return adsRemoved ? `\u2728 ${base}` : `\u{1F3AC} ${base} (ad)`;
+}
+async function showRewarded(opts) {
+  if (adsRemoved) return true;
+  if (!opts?.exempt) offresFaites++;
+  if (!isNative()) {
+    return true;
+  }
+  try {
+    const { AdMob } = await import("@capacitor-community/admob");
+    await AdMob.prepareRewardVideoAd({
+      adId: unit("rewarded"),
+      isTesting: USE_TEST_ADS,
+      // Refus, ou consentement inconnu : publicité NON personnalisée.
+      // Sans cette ligne, le formulaire de consentement ne servirait à rien.
+      npa: !personalizedAdsAllowed()
+    });
+    const reward = await AdMob.showRewardVideoAd();
+    return !!reward && reward.amount !== void 0;
+  } catch (e) {
+    console.warn("[ads] showRewarded:", e);
+    return false;
+  }
+}
+if (typeof window !== "undefined") {
+  window.__pub = {
+    canOfferRewarded,
+    showRewarded,
+    bonusFr,
+    bonusEn,
+    bonusOffert,
+    isAdsRemoved,
+    setAdsRemoved
+  };
 }
 export {
   CONTRACTS,

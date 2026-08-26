@@ -181,6 +181,57 @@ function applyDailyDecay(stats: Stats): Stats {
 const SAVE_KEY = 'roi-du-carton-save';
 const SCORES_KEY = 'roi-du-carton-scores';
 
+/*
+ * LA VICTOIRE, SORTIE DE `PLAY_SIGN`.
+ *
+ * Elle y vivait en fermeture, et n'était donc atteignable que par le chemin
+ * normal : un signe joué, une manche résolue, l'ennemi à zéro. Le jour où un
+ * SECOND chemin mène à la victoire — l'objet miracle acheté par vidéo — il
+ * fallait ou bien recopier ces vingt lignes, ou bien les sortir. Recopier
+ * aurait garanti qu'un des deux chemins oublie le butin, la couronne, ou le
+ * contrat « combatif » à la première modification.
+ *
+ * Rien n'est changé au contenu : mêmes gains, même couronne, même journal.
+ */
+/*
+ * L'objet est nommé ICI et nulle part ailleurs : le bouton et le journal de
+ * combat doivent désigner la même chose, sinon le joueur ne fait pas le lien
+ * entre ce qu'il a demandé et ce qu'il lit ensuite.
+ */
+export const OBJET_MIRACLE = {
+  fr: 'un extincteur de chantier à moitié plein',
+  en: 'a half-full site fire extinguisher',
+  bouton: { fr: 'Sortir l\'extincteur : fin du combat', en: 'Pull out the extinguisher: fight over' },
+};
+
+function etatDeVictoire(
+  state: GameState,
+  combat: CombatState,
+  cUpd: Character,
+  logs: string[],
+): GameState {
+  const lootMoney = combat.loot?.money || 0;
+  const lootRespect = combat.loot?.respect || 0;
+  // L'ennemi lâche parfois un objet à son image (sandwich, couteau…).
+  const drop = combat.loot?.item && cUpd.inventory.length < bagCapacity(cUpd) ? combat.loot.item : undefined;
+  const en = tc(combat.enemyName);
+  logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
+  if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
+  // Avoir battu le Roi en place, c'est ceindre la couronne.
+  const wasKing = combat.enemyEmoji === '\u{1F451}';
+  if (wasKing) logs.push(L('\u{1F451} La couronne vous revient : vous êtes le Roi du Carton !', '\u{1F451} The crown is yours: you are the Cardboard King!'));
+  return {
+    ...state,
+    contract: state.contract?.id === 'contrat-combatif' ? { id: state.contract.id, done: true } : state.contract,
+    character: { ...cUpd, money: cUpd.money + lootMoney, respect: cUpd.respect + lootRespect, inventory: drop ? [...cUpd.inventory, drop] : cUpd.inventory,
+      ...(wasKing ? { crowned: true, kingsBeaten: (cUpd.kingsBeaten ?? 0) + 1 } : {}) },
+    currentCombat: null,
+    combatLog: logs,
+    eventResult: { text: `${L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim())}${drop ? L(` Il lâche ${drop.name} ${drop.emoji} !`, ` It drops the ${tc(drop.name)} ${drop.emoji}!`) : ''}`, moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
+    screen: 'main',
+  };
+}
+
 function saveGame(state: GameState) {
   try {
     if (state.character && state.character.alive && state.screen !== 'title' && state.screen !== 'character-select') {
@@ -299,6 +350,7 @@ type GameAction =
   | { type: 'START_COMBAT'; enemy: Enemy; contreVoleur?: boolean }
   | { type: 'PLAY_SIGN'; sign: SignId | 'special' }
   | { type: 'FLEE_ATTEMPT' }
+  | { type: 'COUP_DE_GRACE' }
   | { type: 'DODGE_RESULT'; hits: number }
   | { type: 'PLAY_CARD'; cardId: string; junkItemId?: string }
   | { type: 'BUY_ITEM'; shopItem: ShopItem; actualPrice: number }
@@ -1715,28 +1767,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...over,
       });
 
-      const victoryState = (cUpd: Character): GameState => {
-        const lootMoney = combat.loot?.money || 0;
-        const lootRespect = combat.loot?.respect || 0;
-        // L'ennemi lâche parfois un objet à son image (sandwich, couteau…).
-        const drop = combat.loot?.item && cUpd.inventory.length < bagCapacity(cUpd) ? combat.loot.item : undefined;
-        const en = tc(combat.enemyName);
-        logs.push(L(`🎉 Victoire ! Vous avez vaincu ${combat.enemyName} !`, `🎉 Victory! You defeated ${en}!`));
-        if (drop) logs.push(L(`${drop.emoji} Il lâche : ${drop.name} !`, `${drop.emoji} It drops: ${tc(drop.name)}!`));
-        // Avoir battu le Roi en place, c'est ceindre la couronne.
-        const wasKing = combat.enemyEmoji === '\u{1F451}';
-        if (wasKing) logs.push(L('\u{1F451} La couronne vous revient : vous êtes le Roi du Carton !', '\u{1F451} The crown is yours: you are the Cardboard King!'));
-        return {
-          ...state,
-          contract: state.contract?.id === 'contrat-combatif' ? { id: state.contract.id, done: true } : state.contract,
-          character: { ...cUpd, money: cUpd.money + lootMoney, respect: cUpd.respect + lootRespect, inventory: drop ? [...cUpd.inventory, drop] : cUpd.inventory,
-            ...(wasKing ? { crowned: true, kingsBeaten: (cUpd.kingsBeaten ?? 0) + 1 } : {}) },
-          currentCombat: null,
-          combatLog: logs,
-          eventResult: { text: `${L(`Victoire contre ${combat.enemyName} ! ${lootMoney > 0 ? `+${lootMoney}€` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim(), `Victory over ${en}! ${lootMoney > 0 ? `+€${lootMoney}` : ''} ${lootRespect > 0 ? `+${lootRespect} respect` : ''}`.trim())}${drop ? L(` Il lâche ${drop.name} ${drop.emoji} !`, ` It drops the ${tc(drop.name)} ${drop.emoji}!`) : ''}`, moneyChange: lootMoney, respectChange: lootRespect, image: combat.image },
-          screen: 'main',
-        };
-      };
+      const victoryState = (cUpd: Character): GameState =>
+        etatDeVictoire(state, combat, cUpd, logs);
 
       // Le piège à carton se déclenche avant tout : l'ennemi charge dedans.
       if (combat.trapRounds > 0 && eSign === 'strike') {
@@ -1835,6 +1867,35 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // Manche perdue : l'ennemi presse, place à l'esquive de rattrapage.
       logs.push(L(`${eDef.emoji} Sa ${eDef.name.toLowerCase()} prend votre ${pDef.name.toLowerCase()} de vitesse : esquivez !`, `${eDef.emoji} Its ${eDef.nameEn.toLowerCase()} beats your ${pDef.nameEn.toLowerCase()}: dodge!`));
       return { ...state, currentCombat: { ...combat, trapRounds: trapAfter, phase: 'dodge', hand: [] }, combatLog: logs };
+    }
+
+    /*
+     * L'OBJET MIRACLE — gagner le combat sans le jouer.
+     *
+     * Le duel de signes est le seul mini-jeu dont on ne peut pas sortir sans
+     * y laisser des plumes : fuir coûte cinq points de dignité, et perdre peut
+     * tuer. Quelqu'un qui n'accroche pas au pierre-feuille-ciseaux se retrouve
+     * donc à éviter les combats, c'est-à-dire une partie entière du jeu.
+     *
+     * L'objet trouvé dans la poche règle ça en une fois. Il donne la victoire
+     * COMPLÈTE — butin, respect, couronne si c'était le Roi, contrat
+     * « combatif » validé — parce qu'une demi-victoire serait la pire des
+     * options : le joueur aurait dépensé quelque chose pour un résultat qu'il
+     * n'a pas compris.
+     *
+     * Ce qu'il ne donne pas : la santé perdue avant de le sortir. On efface
+     * le combat, pas ce qu'il a déjà coûté.
+     */
+    case 'COUP_DE_GRACE': {
+      if (!state.character || !state.currentCombat) return state;
+      const c = state.character;
+      const combat = state.currentCombat;
+      const logs = [...state.combatLog];
+      logs.push(L(
+        `🧨 Votre main trouve ${OBJET_MIRACLE.fr} au fond de la poche. ${combat.enemyName} n'a rien vu venir.`,
+        `🧨 Your hand finds ${OBJET_MIRACLE.en} at the bottom of your pocket. ${tc(combat.enemyName)} never saw it coming.`,
+      ));
+      return etatDeVictoire(state, combat, c, logs);
     }
 
     // Fuite tentée depuis le duel de signes (soupape quand tout va mal :

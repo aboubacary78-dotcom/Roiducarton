@@ -3,7 +3,7 @@ import { useVerrouScroll } from '@/lib/verrouScroll';
 import { useGame, STAT_META, WEATHER_TYPES, getContract, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLang, tr } from '@/lib/lang';
-import { canOfferRewarded, showRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, canOfferRewarded, showRewarded } from '@/lib/ads';
 import { playWakeUp, playWear, playBack, playGaugeFilled, playUnlock } from '@/lib/sound';
 
 /** Sous ce niveau une jauge est en danger — le même seuil que l'alerte sonore. */
@@ -226,7 +226,7 @@ export default function DaySummaryOverlay() {
             >
               {enCours ? tr('⏳ Chargement…', '⏳ Loading…') : (
                 <>
-                  🎬 {tr('Rattraper le contrat', 'Save the contract')}
+                  {tr(bonusFr('Rattraper le contrat'), bonusEn('Save the contract'))}
                   <span className="block text-[10px] font-normal opacity-80 mt-0.5">
                     {contratDef.emoji} {s.contratRate.valeur}/{s.contratRate.cible} ·{' '}
                     {tr(contratDef.rewardLabel, contratDef.rewardLabelEn)}
@@ -261,7 +261,7 @@ export default function DaySummaryOverlay() {
             >
               {enCours ? tr('⏳ Chargement…', '⏳ Loading…') : (
                 <>
-                  🎬 {tr('Dormir une heure de plus', 'Sleep one more hour')}
+                  {tr(bonusFr('Dormir une heure de plus'), bonusEn('Sleep one more hour'))}
                   <span className="block text-[10px] font-normal opacity-80 mt-0.5">
                     {tr('Au plus bas :', 'In the red:')}{' '}
                     {jaugesEnDanger.map(k => `${STAT_META[k].emoji} ${tr(STAT_META[k].label, STAT_META[k].labelEn)}`).join(' · ')}

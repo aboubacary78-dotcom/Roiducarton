@@ -9,7 +9,7 @@ import {
   loadDaily, rollCarton, milestoneFor, pushPendingGift, type CartonGift,
 } from '@/lib/daily';
 import { addKarma } from '@/lib/necrology';
-import { showRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, showRewarded } from '@/lib/ads';
 import { playBack, playFind, playMoneyIn, playMorningBox, playPage, playTurnedAway } from '@/lib/sound';
 import { haptic } from '@/lib/haptics';
 import SafeImg from './SafeImg';
@@ -178,7 +178,7 @@ export default function CartonMatinOverlay() {
                   className="w-full py-3.5 text-sm font-bold text-white rounded-xl mb-2 disabled:opacity-60"
                   style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)' }}
                 >
-                  {busy ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Le rattraper (regarder une pub)', '🎬 Get it back (watch an ad)')}
+                  {busy ? tr('⏳ Chargement…', '⏳ Loading…') : tr(bonusFr('Le rattraper'), bonusEn('Get it back'))}
                 </button>
               )}
               <button onClick={() => { playTurnedAway(); laisserTomber(); }} className="w-full py-2.5 text-[12px] font-semibold text-[#8B6B4A]">

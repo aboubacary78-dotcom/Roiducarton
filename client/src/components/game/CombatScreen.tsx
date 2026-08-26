@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { playBack, playCard, playCombatCharge, playCombatEsquive, playCombatEsquiveParfaite, playCrit, playEnemyCry, playFightStart, playHit, playHurt, playKingArrival, playTurnedAway, playVoix } from '@/lib/sound';
 import { setAmbience } from '@/lib/ambience';
-import { kingIsHeir } from '@/contexts/GameContext';
+import { bonusEn, bonusFr, canOfferRewarded, showRewarded } from '@/lib/ads';
+import { kingIsHeir, OBJET_MIRACLE } from '@/contexts/GameContext';
 import { useLang, tr, tc } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
@@ -241,6 +242,7 @@ function CombatScreenInner() {
             character={character}
             onPick={(sign) => dispatch({ type: 'PLAY_SIGN', sign })}
             onFlee={() => dispatch({ type: 'FLEE_ATTEMPT' })}
+            onCoupDeGrace={() => dispatch({ type: 'COUP_DE_GRACE' })}
           />
         ) : currentCombat.phase === 'dodge' ? (
           <DodgeArena
@@ -400,14 +402,16 @@ function CombatScreenInner() {
 /* ------------------------------------------------------------------ */
 const SIGN_ORDER: SignId[] = ['strike', 'feint', 'guard'];
 
-function SignPhase({ combat, character, onPick, onFlee }: {
+function SignPhase({ combat, character, onPick, onFlee, onCoupDeGrace }: {
   combat: CombatState;
   character: Character;
   onPick: (sign: SignId | 'special') => void;
   onFlee: () => void;
+  onCoupDeGrace: () => void;
 }) {
   const lang = useLang();
   const [choice, setChoice] = useState<SignId | 'special' | null>(null);
+  const [sortantObjet, setSortantObjet] = useState(false);
   const special = combat.specialId ? SPECIAL_DEFS.find(s => s.id === combat.specialId) : undefined;
   const usesLeft = 2 - combat.specialUses;
   // Arme lourde : les accrochages (égalités) tournent pour vous, affiché
@@ -533,6 +537,33 @@ function SignPhase({ combat, character, onPick, onFlee }: {
       >
         🏃 {tr('Tenter de fuir', 'Try to flee')}
       </button>
+
+      {/*
+       * L'OBJET MIRACLE.
+       *
+       * Placé sous la fuite, et c'est délibéré : ce sont les deux façons de ne
+       * pas jouer la manche, et le joueur qui cherche l'une trouve l'autre.
+       * Fuir coûte cinq points de dignité et peut rater ; celui-ci ne rate pas.
+       *
+       * Il ne s'affiche que tant qu'aucun signe n'est choisi, comme la fuite :
+       * une fois les signes révélés, la manche appartient au jeu.
+       */}
+      {!choice && canOfferRewarded() && (
+        <button
+          disabled={sortantObjet}
+          onClick={async () => {
+            if (sortantObjet || choice) return;
+            setSortantObjet(true);
+            const vue = await showRewarded();
+            setSortantObjet(false);
+            if (vue) { playCrit(); onCoupDeGrace(); }
+          }}
+          className="text-xs font-semibold text-[#8B6B4A] underline underline-offset-2 decoration-[#D8C4A8] disabled:opacity-60"
+        >
+          {sortantObjet ? tr('⏳ Chargement…', '⏳ Loading…')
+            : tr(bonusFr(OBJET_MIRACLE.bouton.fr), bonusEn(OBJET_MIRACLE.bouton.en))}
+        </button>
+      )}
 
       {/* Révélation des signes */}
       <AnimatePresence>

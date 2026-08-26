@@ -2,7 +2,7 @@ import { useVerrouScroll } from '@/lib/verrouScroll';
 import { useGame, STAT_META, type Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { showRewarded, canOfferRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, canOfferRewarded, showRewarded } from '@/lib/ads';
 import { DIGNITY_TIERS, dignityTierIndex } from '@/contexts/data/dignity';
 import { playBack, playGoodOutcome, playKO, playMiss, playMoneyOut, playObjetPlein, playPickUp, playWin } from '@/lib/sound';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -340,7 +340,7 @@ export default function EventResultOverlay() {
             >
               {ramassant
                 ? tr('⏳ Chargement…', '⏳ Loading…')
-                : `🎬 ${tr(`Garder ${objetRefuse.name} ${objetRefuse.emoji}`, `Keep ${tc(objetRefuse.name)} ${objetRefuse.emoji}`)}`}
+                : tr(bonusFr(`Garder ${objetRefuse.name} ${objetRefuse.emoji}`), bonusEn(`Keep ${tc(objetRefuse.name)} ${objetRefuse.emoji}`))}
             </motion.button>
           )}
 
@@ -370,7 +370,7 @@ export default function EventResultOverlay() {
             >
               {keeping
                 ? tr('⏳ Chargement…', '⏳ Loading…')
-                : `🎬 ${tr(`Rester « ${palierQuitte.fr} »`, `Stay "${palierQuitte.en}"`)}`}
+                : tr(bonusFr(`Rester « ${palierQuitte.fr} »`), bonusEn(`Stay "${palierQuitte.en}"`))}
             </motion.button>
           )}
 
@@ -396,7 +396,7 @@ export default function EventResultOverlay() {
                 boxShadow: '0 4px 16px rgba(184, 134, 11, 0.3)',
               }}
             >
-              {doubling ? tr('⏳ Chargement…', '⏳ Loading…') : `🎬 ${tr('Doubler mes gains', 'Double my gains')} (+${result.moneyChange}€)`}
+              {doubling ? tr('⏳ Chargement…', '⏳ Loading…') : tr(bonusFr(`Doubler mes gains (+${result.moneyChange}€)`), bonusEn(`Double my gains (+${result.moneyChange}€)`))}
             </motion.button>
           )}
 

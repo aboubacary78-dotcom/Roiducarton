@@ -1,7 +1,7 @@
 import { useGame, STAT_META, DETTE_PRET, type Character, type EventChoice } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { showRewarded, canOfferRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, canOfferRewarded, showRewarded } from '@/lib/ads';
 import { useLang, tr, tc } from '@/lib/lang';
 import { charabia } from '@/lib/charabia';
 import KenBurnsImage from './KenBurnsImage';
@@ -243,7 +243,7 @@ export default function EventScreen() {
             className="mt-3 w-full py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg, #B8860B, #9B7209)' }}
           >
-            {loadingBoost ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Coup de pouce (pub), garantir le meilleur résultat', '🎬 Boost (ad), guarantee the best outcome')}
+            {loadingBoost ? tr('⏳ Chargement…', '⏳ Loading…') : tr(bonusFr('Coup de pouce, garantir le meilleur résultat'), bonusEn('Boost, guarantee the best outcome'))}
           </button>
         ) : null}
       </motion.div>

@@ -408,7 +408,44 @@ let offresFaites = 0;
  * une punition, pas une limite.
  */
 export function canOfferRewarded(): boolean {
+  // Qui a payé n'a plus de plafond : le plafond protège du harcèlement
+  // publicitaire, et il n'y a plus de publicité à doser.
+  if (adsRemoved) return true;
   return offresFaites < MAX_OFFRES_PAR_SESSION;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * « SANS PUB » NE DOIT PAS VOULOIR DIRE « SANS BONUS »
+ *
+ * Dans ce jeu, la vidéo facultative n'est pas une nuisance : c'est un LEVIER
+ * DE JEU. Doubler un gain, forcer le meilleur résultat, garder son allure,
+ * rouvrir une boutique, se relever à la mort. Le joueur qui paie pour retirer
+ * les publicités achetait donc, sans le savoir, la disparition de la moitié de
+ * ses outils — il payait pour être moins bien servi. C'est le contraire d'un
+ * achat.
+ *
+ * La règle est donc : L'ACHAT RETIRE LA VIDÉO, PAS LA RÉCOMPENSE. Les boutons
+ * restent en place, la récompense tombe immédiatement, et rien ne se joue.
+ *
+ * Une seule ligne suffit dans `showRewarded` parce que les trente et un points
+ * d'appel du jeu passent tous par elle. C'est aussi la raison pour laquelle le
+ * défaut a pu vivre si longtemps sans se voir : il n'était visible nulle part
+ * en particulier.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Le bonus est-il acquis sans rien regarder ? (achat « Sans pub » effectué) */
+export function bonusOffert(): boolean {
+  return adsRemoved;
+}
+
+/** Libellé français d'un bouton de bonus, selon qu'il coûte une vidéo ou non. */
+export function bonusFr(base: string): string {
+  return adsRemoved ? `✨ ${base}` : `🎬 ${base} (pub)`;
+}
+
+/** Idem en anglais. */
+export function bonusEn(base: string): string {
+  return adsRemoved ? `✨ ${base}` : `🎬 ${base} (ad)`;
 }
 
 /**
@@ -418,6 +455,10 @@ export function canOfferRewarded(): boolean {
  * parce que le joueur a doublé trois gains dans la journée serait absurde.
  */
 export async function showRewarded(opts?: { exempt?: boolean }): Promise<boolean> {
+  // L'achat retire la vidéo, pas la récompense — voir le pavé plus haut.
+  // Rien n'est compté au plafond : il n'y a rien à plafonner.
+  if (adsRemoved) return true;
+
   if (!opts?.exempt) offresFaites++;
   if (!isNative()) {
     // En dev/web, on considère la récompense acquise pour pouvoir tester.
@@ -439,4 +480,23 @@ export async function showRewarded(opts?: { exempt?: boolean }): Promise<boolean
     console.warn('[ads] showRewarded:', e);
     return false;
   }
+}
+
+/*
+ * PRISE DE MESURE — même raison que celle de `sound.ts`.
+ *
+ * Le défaut que ce module vient de corriger — « Sans pub » qui emportait les
+ * bonus — était invisible : trente et un points d'appel, tous corrects pris
+ * un par un, et une règle fausse au centre. Rien à l'écran ne pouvait le dire.
+ * `scripts/test-bonus-pub.mjs` interroge donc la règle elle-même, sur le
+ * BUILD DE PRODUCTION, seul état qui prouve quelque chose.
+ *
+ * Rien ici ne fait ce qu'un joueur ne peut déjà faire : lire son propre
+ * réglage, ou consommer une offre qu'il aurait de toute façon consommée.
+ */
+if (typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>).__pub = {
+    canOfferRewarded, showRewarded, bonusFr, bonusEn, bonusOffert,
+    isAdsRemoved, setAdsRemoved,
+  };
 }

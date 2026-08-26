@@ -4,7 +4,7 @@ import { useState } from 'react';
 import PlayerFace from './PlayerFace';
 import { useLang, tr, tc } from '@/lib/lang';
 import { playPickCharacter, playReroll } from '@/lib/sound';
-import { showRewarded, isAdsRemoved } from '@/lib/ads';
+import { bonusEn, bonusFr, isAdsRemoved, showRewarded } from '@/lib/ads';
 
 function CharacterCard({ char, index, onSelect }: { char: Character; index: number; onSelect: () => void }) {
   return (
@@ -130,7 +130,7 @@ export default function CharacterSelect() {
           ? tr('⏳ Chargement…', '⏳ Loading…')
           : freeReroll
             ? tr('🎲 Relancer les dés', '🎲 Reroll')
-            : tr('🎬 Relancer les dés (pub)', '🎬 Reroll (ad)')}
+            : tr(bonusFr('Relancer les dés'), bonusEn('Reroll'))}
       </motion.button>
     </div>
   );

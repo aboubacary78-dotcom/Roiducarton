@@ -2,7 +2,7 @@ import { useGame, LOCATIONS, heistTargetsFor, HEIST_TUNING, type HeistTarget } f
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { playCard, playCrit, playHit, playHurt, playPickUp, playSpotted, playStep, playTensionPalier, playTurnedAway, playUnlock } from '@/lib/sound';
-import { canOfferRewarded, showRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, canOfferRewarded, showRewarded } from '@/lib/ads';
 import { useLang, tr } from '@/lib/lang';
 import PlayerFace from './PlayerFace';
 import MinigameIntro, { introSeen } from './MinigameIntro';
@@ -401,6 +401,34 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
     }
   }, [queueSpawn, tuning]);
 
+  /*
+   * SORTIR SANS JOUER — « personne ne vous a vu ».
+   *
+   * Le casse est le mini-jeu le plus exigeant du jeu : une grille, des rondes,
+   * une jauge qui ne redescend pas. Certains n'y arriveront jamais, et la
+   * cible qu'ils convoitaient leur restera fermée pour toujours. Ce bouton
+   * leur ouvre la porte.
+   *
+   * Il rend `ok`, jamais `jackpot`. La distinction est tout l'équilibre de la
+   * chose : on peut ACHETER un vol propre, on ne peut pas acheter un coup
+   * d'éclat. Le gros lot reste ce qu'on va chercher soi-même, sinon jouer
+   * proprement ne rapporte plus rien de particulier.
+   *
+   * Il n'apparaît qu'avant le premier pas. Après, on est engagé — le proposer
+   * au bord de la catastrophe en ferait un filet de rattrapage, et c'est déjà
+   * le rôle d'« effacer un palier ».
+   */
+  const [filantDoux, setFilantDoux] = useState(false);
+  async function filerEnDouce() {
+    if (filantDoux || statusRef.current !== 'playing') return;
+    setFilantDoux(true);
+    geleRef.current = true;
+    const vue = await showRewarded();
+    geleRef.current = false;
+    setFilantDoux(false);
+    if (vue) { playUnlock(); finish('ok'); }
+  }
+
   async function effacerUnPalier() {
     if (effacant || palierEfface || statusRef.current !== 'playing') return;
     setEffacant(true);
@@ -637,7 +665,24 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
             className="w-full mt-0.5 py-2 text-[12px] font-bold text-white rounded-lg disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg, #6B7FA8, #4C5F84)', boxShadow: '0 3px 12px rgba(76,95,132,0.3)' }}
           >
-            {effacant ? tr('⏳ Chargement…', '⏳ Loading…') : `🎬 ${tr('Effacer un palier d\'alerte', 'Clear one alert tier')}`}
+            {effacant ? tr('⏳ Chargement…', '⏳ Loading…') : tr(bonusFr('Effacer un palier d\'alerte'), bonusEn('Clear one alert tier'))}
+          </motion.button>
+        )}
+
+        {/* Avant le premier pas seulement : passé ça, on est engagé. */}
+        {status === 'playing' && !moved && canOfferRewarded() && (
+          <motion.button
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={filantDoux}
+            onClick={filerEnDouce}
+            className="w-full mt-0.5 py-2 text-[12px] font-bold text-white rounded-lg disabled:opacity-60"
+            style={{ background: 'linear-gradient(135deg, #6E8F6A, #4E6B4B)', boxShadow: '0 3px 12px rgba(78,107,75,0.3)' }}
+          >
+            {filantDoux ? tr('⏳ Chargement…', '⏳ Loading…')
+              : tr(bonusFr('Personne ne vous voit : prendre et filer'),
+                   bonusEn('Nobody sees you: grab it and go'))}
           </motion.button>
         )}
       </div>

@@ -1,7 +1,7 @@
 import { bagCapacity } from '@/contexts/GameContext';
 import { useState, useEffect } from 'react';
 import { useGame, getShopsForLocation, marketPrice, getBraderie, isSolidarityDay, SOLIDARITY_FLAG, getDiscountLabel, getNextDiscountTier, getShopEvent, shopClosure, absurdReopen, STAT_META, shopkeeperFor, HAGGLED_FLAG, HAGGLE_TUNING, haggleReopen } from '@/contexts/GameContext';
-import { showRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, showRewarded } from '@/lib/ads';
 import type { Shop, ShopItem, ShopEvent, Stats } from '@/contexts/GameContext';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import { playActionLieu, playBack, playCard, playClick, playMoneyOut, playShare, playUnlock } from '@/lib/sound';
@@ -567,7 +567,7 @@ export default function ShopScreen() {
               className="shrink-0 py-2 px-3 text-xs font-semibold text-white rounded-lg disabled:opacity-60"
               style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)' }}
             >
-              {claimingSolid ? tr('⏳', '⏳') : tr('🎬 Ma part (pub)', '🎬 My share (ad)')}
+              {claimingSolid ? tr('⏳', '⏳') : tr(bonusFr('Ma part'), bonusEn('My share'))}
             </button>
           )}
         </motion.div>
@@ -619,7 +619,7 @@ export default function ShopScreen() {
                   >
                     {reopeningId === shop.id
                       ? tr('⏳ Chargement…', '⏳ Loading…')
-                      : tr('🎬 Filer un coup de main (pub)', '🎬 Lend a hand (watch an ad)')}
+                      : tr(bonusFr('Filer un coup de main'), bonusEn('Lend a hand'))}
                   </button>
                 </motion.div>
               );

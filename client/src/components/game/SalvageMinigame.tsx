@@ -6,7 +6,7 @@ import type { SalvageFind } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { playCollapse, playCrit, playDig, playFind, playPickUp, playSaleteRecup, playStep, playTensionRisque, playUnlock } from '@/lib/sound';
-import { canOfferRewarded, showRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, canOfferRewarded, showRewarded } from '@/lib/ads';
 import { haptic } from '@/lib/haptics';
 import { isFirstEverRun } from '@/lib/coach';
 import { loadGraves } from '@/lib/necrology';
@@ -381,12 +381,11 @@ function SalvageInner() {
             className="w-full mt-1.5 py-2 text-[12px] font-bold text-white rounded-lg disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg, #B84A3A, #8E362A)', boxShadow: '0 3px 12px rgba(184,74,58,0.3)' }}
           >
-            {calmant ? tr('⏳ Chargement…', '⏳ Loading…') : `🎬 ${
-              trouvailles.length > 0
-                ? tr(`Garder mes ${trouvailles.length} trouvaille${trouvailles.length > 1 ? 's' : ''}`,
-                     `Keep my ${trouvailles.length} find${trouvailles.length > 1 ? 's' : ''}`)
-                : tr('Faire retomber le tas', 'Settle the pile')
-            }`}
+            {calmant ? tr('⏳ Chargement…', '⏳ Loading…')
+              : trouvailles.length > 0
+                ? tr(bonusFr(`Garder mes ${trouvailles.length} trouvaille${trouvailles.length > 1 ? 's' : ''}`),
+                     bonusEn(`Keep my ${trouvailles.length} find${trouvailles.length > 1 ? 's' : ''}`))
+                : tr(bonusFr('Faire retomber le tas'), bonusEn('Settle the pile'))}
           </motion.button>
         )}
       </div>

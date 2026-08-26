@@ -2,7 +2,7 @@ import { useGame, computeScore, hasTrait, loadHighScores, knownEnemyNames } from
 import type { InventoryItem } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { partieTerminee, showInterstitial, showRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, partieTerminee, showInterstitial, showRewarded } from '@/lib/ads';
 import PlayerFace from './PlayerFace';
 import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -523,7 +523,7 @@ export default function GameOverScreen() {
                 className="w-full py-3.5 text-[15px] font-bold text-white rounded-xl disabled:opacity-60"
                 style={{ background: 'linear-gradient(135deg, #2E7D46, #246237)', boxShadow: '0 4px 18px rgba(74,155,95,0.35)' }}
               >
-                {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Se relever (regarder une pub)', '🎬 Get back up (watch an ad)')}
+                {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr(bonusFr('Se relever'), bonusEn('Get back up'))}
               </motion.button>
 
               {/* La barre du temps qui reste. Elle se vide, elle n'accuse
@@ -887,7 +887,7 @@ export default function GameOverScreen() {
             boxShadow: '0 4px 16px rgba(74, 155, 95, 0.3)',
           }}
         >
-          {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr('🎬 Seconde chance (regarder une pub)', '🎬 Second chance (watch an ad)')}
+          {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr(bonusFr('Seconde chance'), bonusEn('Second chance'))}
         </motion.button>
       )}
 
