@@ -30,7 +30,20 @@ const CATEGORIES = Object.keys(PIQUES) as CategoriePique[];
 const toutes = CATEGORIES.flatMap(c => PIQUES[c]);
 
 // ── La forme du lot ────────────────────────────────────────────────────────
-verifier('cinq catégories', CATEGORIES.length === 5, CATEGORIES.join(', '));
+/*
+ * ON COMPTE LES BANQUES VIDES, PAS LES CATÉGORIES.
+ *
+ * Ce contrôle exigeait EXACTEMENT cinq catégories. Il a donc échoué à
+ * l'arrivée de la sixième — « tête qui part » — alors que rien n'était cassé :
+ * il mesurait un chiffre que le jeu a le droit de faire grandir.
+ *
+ * Ce qui doit tenir, c'est qu'aucune catégorie DÉCLARÉE ne soit vide : une
+ * catégorie sans phrases se branche sans erreur, ne dit jamais rien, et
+ * personne ne s'en aperçoit avant de chercher pourquoi le jeu se tait.
+ */
+const vides = CATEGORIES.filter(c => (PIQUES[c] ?? []).length === 0);
+verifier(`${CATEGORIES.length} catégories, toutes garnies`,
+  vides.length === 0, vides.length ? `vides : ${vides.join(', ')}` : CATEGORIES.join(', '));
 const tailles = CATEGORIES.map(c => PIQUES[c].length);
 verifier('au moins six phrases par catégorie', tailles.every(n => n >= 6), tailles.join(' / '));
 

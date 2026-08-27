@@ -207,6 +207,46 @@ const ponctuesAbimes = await p.evaluate(() =>
 verifier('les mots à apostrophe ou trait d\'union restent intacts',
   ponctuesAbimes.length === 0, ponctuesAbimes.slice(0, 5).join(', '));
 
+/*
+ * ET LE JEU DIT POURQUOI.
+ *
+ * Le brouillage était entièrement muet : rien ne reliait le texte troué à la
+ * jauge de mental, et il se faisait donc prendre pour un bug — c'est le
+ * retour qui est arrivé, capture à l'appui. Une pique tombe maintenant au
+ * franchissement du seuil, dans la voix du jeu plutôt qu'en mode d'emploi.
+ *
+ * On la cherche à la source : les phrases sont dans le catalogue, et les
+ * réécrire ici donnerait un contrôle vert sur un texte que le jeu n'affiche
+ * pas.
+ */
+const { readFileSync: lire } = await import('node:fs');
+const src = lire('client/src/contexts/data/piques.ts', 'utf8');
+const bloc = src.slice(src.indexOf("'tete-qui-part': ["), src.indexOf('],', src.indexOf("'tete-qui-part': [")));
+const PHRASES = [...bloc.matchAll(/fr: '((?:[^'\\]|\\.)*)'/g)]
+  .map(m => m[1].replace(/\\'/g, "'"));
+if (PHRASES.length < 5) throw new Error('les piques du mental sont introuvables dans le catalogue');
+
+/*
+ * On refait descendre le mental depuis un état LUCIDE : la pique ne sonne
+ * qu'au FRANCHISSEMENT, et le personnage était déjà sous le seuil depuis les
+ * contrôles précédents. Sans ce passage par le haut, on mesurerait un silence
+ * parfaitement correct.
+ */
+await rencontre(90);
+await clic('Retour|Back'); await pause(600);
+await rencontre(30);
+const vus = await p.evaluate(async () => {
+  const vu = new Set();
+  for (let i = 0; i < 40; i++) {
+    document.querySelectorAll('[data-toasts] span').forEach(e => vu.add(e.textContent.trim()));
+    await new Promise(r => setTimeout(r, 120));
+  }
+  return [...vu].filter(Boolean);
+});
+const prevenu = PHRASES.find(f => vus.some(v => v.includes(f.slice(0, 24))));
+verifier(`le jeu prévient que c'est la tête (${PHRASES.length} phrases possibles)`,
+  !!prevenu, prevenu || vus.join(' | ') || 'aucun bandeau');
+
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 
 await b.close();

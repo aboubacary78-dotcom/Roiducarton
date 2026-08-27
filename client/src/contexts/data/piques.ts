@@ -42,7 +42,8 @@ export type CategoriePique =
   | 'dignite-zero'      // on a fait ce qu'il fallait faire
   | 'vol-rate'          // la main dans le sac
   | 'reveil'            // le bilan du matin
-  | 'gain-miserable';   // beaucoup d'efforts, un centime
+  | 'gain-miserable'    // beaucoup d'efforts, un centime
+  | 'tete-qui-part';    // le mental passe sous le seuil de lisibilité
 
 /**
  * CE QUI VIENT DE SE PASSER.
@@ -87,6 +88,39 @@ export interface Pique {
 }
 
 export const PIQUES: Record<CategoriePique, Pique[]> = {
+  /* ── ⓪ LA TÊTE QUI PART ───────────────────────────────────────────────────
+   * LA SEULE CATÉGORIE QUI DOIT EXPLIQUER QUELQUE CHOSE.
+   *
+   * Sous 60 de mental, les mots des rencontres se remplacent par des signes
+   * illisibles (voir lib/charabia). C'est la mécanique la plus forte du jeu et
+   * c'était la plus muette : rien ne reliait le texte troué à la jauge, et le
+   * joueur concluait — capture d'écran à l'appui — que le jeu était cassé.
+   *
+   * Ces phrases-là ont donc un travail que les autres n'ont pas : faire le
+   * lien. Chacune nomme LA TÊTE et LA LECTURE dans la même phrase, sans jamais
+   * prendre le ton du mode d'emploi. « Les lettres se barrent » dit tout ce
+   * qu'un tutoriel dirait, et le dit dans la voix du jeu.
+   *
+   * Elles ne sonnent qu'au FRANCHISSEMENT du seuil, pas tant qu'on reste
+   * dessous : une explication répétée devient un reproche.
+   */
+  'tete-qui-part': [
+    { fr: 'Les lettres se barrent avant vous. Elles ont eu raison.',
+      en: 'The letters are leaving before you. They were right to.' },
+    { fr: 'Vous relisez trois fois. Ce n\'est pas le panneau, c\'est vous.',
+      en: 'You read it three times. It\'s not the sign, it\'s you.' },
+    { fr: 'La fatigue a mangé les mots. Elle commence toujours par le milieu.',
+      en: 'Exhaustion ate the words. It always starts in the middle.' },
+    { fr: 'Dormez, ou apprenez à lire les trous.',
+      en: 'Sleep, or learn to read the gaps.' },
+    { fr: 'Votre tête a rendu son tablier. Le monde devient illisible.',
+      en: 'Your head handed in its notice. The world goes unreadable.' },
+    { fr: 'Ce ne sont pas des fautes. C\'est vous qui décrochez.',
+      en: 'Those aren\'t typos. You\'re the one slipping.' },
+    { fr: 'Le texte tient debout. C\'est votre lecture qui titube.',
+      en: 'The text is fine. It\'s your reading that\'s staggering.' },
+  ],
+
   /* ── ① SANTÉ CRITIQUE ────────────────────────────────────────────────────
    * Chaque phrase nomme LA jauge qui lâche. C'est ce qui manquait le plus :
    * mourir de soif et s'entendre parler du froid, c'est le jeu qui ne regarde

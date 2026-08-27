@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useLang, tr } from '@/lib/lang';
 import { piquer } from '@/contexts/data/piques';
+import { SEUIL_LISIBLE } from '@/lib/charabia';
 import { pushToast } from '@/lib/toast';
 import { playDignityLoss, playDignityTier, playGaugeLow, playTab } from '@/lib/sound';
 
@@ -102,6 +103,7 @@ function useAlertesSonores(stats: Stats) {
   const palierPrecedent = useRef<number | null>(null);
   const digniteAvant = useRef<number | null>(null);
   const enAgonie = useRef(false);
+  const teteQuiPartait = useRef(false);
 
   useEffect(() => {
     for (const { key } of BODY) playGaugeLow(key, stats[key]);
@@ -130,6 +132,27 @@ function useAlertesSonores(stats: Stats) {
       if (p) pushToast(tr(p.fr, p.en), { emoji: STAT_META[touchee.key].emoji, tone: 'bad', duration: 3200 });
     }
     enAgonie.current = !!touchee;
+
+    /*
+     * ET LA TÊTE QUI PART SE NOMME, PARCE QUE SINON RIEN NE LA NOMME.
+     *
+     * Sous 60 de mental, les mots des rencontres deviennent des signes
+     * illisibles (lib/charabia). C'est la mécanique la plus visible du jeu et
+     * elle était entièrement muette : rien ne reliait le texte troué à la
+     * jauge, et le joueur en concluait — capture d'écran à l'appui — que le
+     * jeu était cassé. Une mécanique qu'on prend pour un bug est pire qu'une
+     * mécanique absente : elle abîme la confiance dans tout le reste.
+     *
+     * Le seuil est celui de `charabia`, pas celui de l'agonie : la remarque
+     * doit tomber AU MOMENT où l'écriture commence à lâcher, c'est-à-dire
+     * cinquante points avant qu'on soit en danger de mort.
+     */
+    const brouille = stats.mental < SEUIL_LISIBLE;
+    if (brouille && !teteQuiPartait.current) {
+      const p = piquer('tete-qui-part');
+      if (p) pushToast(tr(p.fr, p.en), { emoji: '🧠', tone: 'bad', duration: 4200 });
+    }
+    teteQuiPartait.current = brouille;
 
     /*
      * L'HUMILIATION. Aucun impact, que de l'arrachement — l'adhésif qu'on

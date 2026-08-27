@@ -35,8 +35,17 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-/** Au-dessus, on lit parfaitement. */
-const SEUIL_LUCIDE = 60;
+/**
+ * Au-dessus, on lit parfaitement.
+ *
+ * EXPORTÉ, et pas seulement utilisé ici : la pique qui prévient le joueur que
+ * sa tête part doit tomber exactement quand l'écriture commence à lâcher.
+ * Recopier « 60 » dans la barre de jauges aurait marché le premier jour et
+ * dérivé au premier réglage — la remarque arrivant trop tôt ou trop tard, sans
+ * que rien ne le signale.
+ */
+export const SEUIL_LISIBLE = 60;
+const SEUIL_LUCIDE = SEUIL_LISIBLE;
 
 /**
  * Mots de remplacement. Volontairement bêtes et concrets : ce sont ceux qui
