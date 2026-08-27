@@ -52,6 +52,20 @@ export const TRAITS_VISAGE: TraitVisage[] = [
   {
     cle: 'skin', fr: 'Teint', en: 'Skin', n: 8, palette: 'skin',
   },
+  /*
+   * La forme du crâne vient en deuxième parce qu'elle décide de la SILHOUETTE,
+   * et que la silhouette est ce qui se lit en premier — avant la couleur des
+   * yeux, avant la coiffure, et à toutes les tailles.
+   */
+  {
+    cle: 'face', fr: 'Visage', en: 'Face', n: 4,
+    valeurs: [
+      { fr: 'Ovale', en: 'Oval' },
+      { fr: 'Carré', en: 'Square' },
+      { fr: 'Allongé', en: 'Long' },
+      { fr: 'Rond', en: 'Round' },
+    ],
+  },
   {
     cle: 'hairstyle', fr: 'Coiffure', en: 'Hair', n: 7,
     valeurs: [
@@ -95,6 +109,9 @@ export const TRAITS_VISAGE: TraitVisage[] = [
   {
     cle: 'beard', fr: 'Barbe', en: 'Beard', n: 4, reserve: 'm',
     valeurs: [
+      // Ces libellés mentaient : « Moustache » dessinait une barbe pleine et
+      // « Barbe pleine » un bouc minuscule. Le dessin a été remis dans l'ordre
+      // annoncé — c'est un écran qu'on vend, il doit dire vrai.
       { fr: 'Rasé', en: 'Clean' },
       { fr: 'Moustache', en: 'Moustache' },
       { fr: 'Bouc', en: 'Goatee' },

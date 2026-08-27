@@ -27,8 +27,53 @@ function heart(cx: number, cy: number, s: number): string {
 
 export const SKIN = ['#F2DAB8', '#EAD0A8', '#DDB483', '#CB9A63', '#B27F4C', '#946237', '#7C5230', '#5E3E24'];
 export const HAIR = ['#2E2018', '#4A3320', '#6B4A2C', '#141414', '#7C7C7C', '#B8862F', '#CBCBCB', '#8A5A2A', '#E8E8E8', '#B5432F'];
-export const BG = ['#F1E1C9', '#EBD3B4', '#F0DAC0', '#E7D8C0', '#F2E0CE', '#E9D6BB', '#EFE0CA'];
+/*
+ * SEPT FONDS QUI SE DISTINGUENT VRAIMENT.
+ *
+ * Les sept précédents tenaient dans un mouchoir : #F1E1C9, #EBD3B4, #F0DAC0…
+ * sept crèmes qu'aucun œil ne sépare. Sur une planche de vingt-quatre visages,
+ * les fonds paraissaient identiques — et c'est un réglage qu'on VEND dans
+ * l'Atelier : sept boutons pour la même couleur. Ils couvrent maintenant toute
+ * l'étendue du kraft, de l'ivoire au carton brun, sans quitter la matière.
+ */
+export const BG = ['#F3E7D3', '#EBD9BC', '#E0C8A2', '#D3B68A', '#C4A272', '#E6D3B8', '#CFAE87'];
 export const HAT_COLORS = ['#C4723A', '#4A7FB5', '#6B8E5A', '#9B5B3A', '#7B68A8', '#B8894A'];
+// Les vêtements de la rue : lavés trop souvent, jamais assortis.
+const VETEMENT = ['#6E5F52', '#59685C', '#7A5A46', '#4E5A68', '#655A6B', '#7A6E54'];
+
+// ── Le carton comme matière : quelques outils de couleur ──────────────────
+function canaux(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+/** Clarté perçue, de 0 (noir) à 1 (blanc). */
+function clarte(hex: string): number {
+  const [r, g, b] = canaux(hex);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+/** Mélange deux couleurs, `t` = 0 garde la première, 1 donne la seconde. */
+function melanger(a: string, b: string, t: number): string {
+  const [r1, g1, b1] = canaux(a);
+  const [r2, g2, b2] = canaux(b);
+  const m = (x: number, y: number) => Math.round(x + (y - x) * t).toString(16).padStart(2, '0');
+  return `#${m(r1, r2)}${m(g1, g2)}${m(b1, b2)}`;
+}
+/*
+ * UN VISAGE NE DOIT PAS FONDRE DANS SON FOND.
+ *
+ * Le teint le plus clair (#F2DAB8) et le fond le plus clair (#F3E7D3) ne sont
+ * séparés que par le trait de contour : la tête disparaît, il ne reste qu'un
+ * dessin flottant. Le tirage étant indépendant, ce cas arrive tout seul.
+ *
+ * Plutôt que d'interdire des combinaisons — ce qui trahirait le choix fait
+ * dans l'Atelier — on ÉCARTE le fond du teint quand les deux se touchent :
+ * teint clair, le fond fonce ; teint sombre, le fond s'éclaircit. La couleur
+ * choisie reste reconnaissable, le visage se détache.
+ */
+function ecarter(bg: string, skin: string): string {
+  if (Math.abs(clarte(bg) - clarte(skin)) >= 0.085) return bg;
+  return melanger(bg, clarte(skin) > 0.5 ? '#8A6B48' : '#F6EBD9', 0.45);
+}
 
 // Hash déterministe (FNV-1a) d'une chaîne -> entier 32 bits.
 function hashSeed(s: string): number {
@@ -90,8 +135,46 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
 
   const skin = SKIN[choisir('skin', SKIN.length)];
   const hair = HAIR[choisir('hair', HAIR.length)];
-  const bg = BG[choisir('bg', BG.length)];
+  const bg = ecarter(BG[choisir('bg', BG.length)], skin);
   const hatColor = HAT_COLORS[choisir('hatc', HAT_COLORS.length)];
+  // Les tons dérivés : l'ombre du carton, le pli, le creux d'une joue.
+  const kraftOmbre = melanger(bg, '#3A2A1E', 0.26);
+  const cannelure = melanger(bg, '#3A2A1E', 0.14);
+  const peauOmbre = melanger(skin, '#5E3E24', 0.30);
+
+  /*
+   * LA FORME DU CRÂNE — ce qui manquait le plus.
+   *
+   * La tête était un rectangle arrondi, le MÊME pour tout le monde : deux
+   * douzaines d'inconnus avaient exactement la même silhouette, et toute la
+   * différence tenait aux cheveux et aux lunettes. À trente-deux pixels, où
+   * rien d'autre ne se lit, ils étaient interchangeables.
+   *
+   * Les tempes restent à 25/75 — c'est là-dessus que sont calés les chapeaux,
+   * les lunettes et les quarante accessoires — mais la MÂCHOIRE et le MENTON
+   * varient. Ça suffit à séparer les silhouettes sans rien décaler.
+   */
+  const FORMES = [
+    { jaw: 0.74, chin: 77 },   // ovale
+    { jaw: 0.95, chin: 74 },   // carrée
+    { jaw: 0.66, chin: 80 },   // longue, menton pointu
+    { jaw: 0.88, chin: 72 },   // ronde
+  ];
+  const forme = FORMES[choisir('face', FORMES.length)];
+  const chin = forme.chin;
+  const jx = 25 * forme.jaw;   // demi-largeur de la mâchoire
+  /** Le contour de la tête, éventuellement dilaté de `d` (pour l'ombre portée). */
+  const tete = (d = 0) => {
+    const t = 25 + d, j = jx + d, c = chin + d, h = 19 - d;
+    return `M${50 - t} 43 C${50 - t} ${h + 5} ${50 - t * 0.68} ${h} 50 ${h}`
+      + ` C${50 + t * 0.68} ${h} ${50 + t} ${h + 5} ${50 + t} 43`
+      + ` C${50 + t} ${43 + (c - 43) * 0.52} ${50 + j} ${c - 5} 50 ${c}`
+      + ` C${50 - j} ${c - 5} ${50 - t} ${43 + (c - 43) * 0.52} ${50 - t} 43 Z`;
+  };
+  // La bouche suit le menton : sur un visage long elle descend, sur un visage
+  // rond elle remonte. Sinon un menton allongé donnait un grand vide sous la
+  // lèvre, et un menton court une bouche posée sur le bord.
+  const mY = 65 + (chin - 77) * 0.5;
 
   // Coiffure : les femmes ont toujours des cheveux (pas chauve/dégarni).
   let hairStyle = choisir('hairstyle', 7);   // 0 chauve, 1 court, 2 touffe, 3 raie, 4 volume, 5 dégarni, 6 longs
@@ -140,6 +223,8 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   // sur un même écran, leurs clipPath ne doivent pas se marcher dessus.
   const clipId = `hairclip-${hashSeed(`${s}|hair`)}`;
   const hairClip = hairLine !== null ? `url(#${clipId})` : undefined;
+  // Même précaution pour la découpe du visage : les voiles d'état s'y appuient.
+  const faceId = `faceclip-${hashSeed(`${s}|face`)}`;
   // Les coiffures courtes (1 court, 2 touffe, 3 raie, 5 dégarni) ne descendent
   // pas sous la ligne du chapeau : les rogner ne laisserait rien, le
   // personnage aurait encore l'air rasé. On lui dessine donc les mèches qui
@@ -150,19 +235,44 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
 
   const eyeL = 40, eyeR = 60, eyeY = 47;
 
+  /*
+   * LE GRAIN DU PAPIER.
+   *
+   * Sept impuretés tirées de la graine, posées sur la joue. Une par une elles
+   * ne se voient pas ; ensemble elles empêchent l'aplat de peau de ressembler
+   * à du plastique. À trente-deux pixels elles disparaissent, et c'est bien.
+   */
+  const grains = Array.from({ length: 7 }, (_, i) => {
+    const h = hashSeed(`${s}|grain${i}`);
+    return { x: 30 + (h % 41), y: 34 + ((h >>> 7) % 38), r: 0.55 + ((h >>> 15) % 3) * 0.25 };
+  });
+
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} className={className} role="img" aria-label="Visage du personnage">
-      {/* Découpe des cheveux sous la ligne du chapeau (voir hairLine) */}
-      {hairLine !== null && (
-        <defs>
+      <defs>
+        {/* Découpe des cheveux sous la ligne du chapeau (voir hairLine) */}
+        {hairLine !== null && (
           <clipPath id={clipId}>
             <rect x="0" y={hairLine} width="100" height={100 - hairLine} />
           </clipPath>
-        </defs>
-      )}
+        )}
+        {/* Découpe du visage : les voiles d'état s'arrêtent au bord de la tête
+            au lieu de baver sur le fond comme une tache. */}
+        <clipPath id={faceId}><path d={tete()} /></clipPath>
+      </defs>
 
-      {/* Fond kraft */}
+      {/* ---- LE CARTON ----
+          Le fond n'est plus un aplat : c'est un morceau de carton découpé. La
+          cannelure se voit par la tranche, le bord de coupe est plus sombre
+          que la face, et la tête est une seconde épaisseur posée dessus —
+          c'est son ombre portée qui la décolle. */}
       <rect x="0" y="0" width="100" height="100" rx="20" fill={bg} />
+      <g stroke={cannelure} strokeWidth="0.9" opacity="0.26">
+        {[14, 28, 42, 56, 70, 84].map(x => (
+          <line key={x} x1={x} y1="2" x2={x} y2="98" />
+        ))}
+      </g>
+      <rect x="2.2" y="2.2" width="95.6" height="95.6" rx="18" fill="none" stroke={kraftOmbre} strokeWidth="1.4" opacity="0.45" />
 
       {/* Fond-accessoire (derrière la tête) */}
       {accBg === 'gold-bg' && (
@@ -257,8 +367,22 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         </g>
       )}
 
-      {/* Cou */}
-      <rect x="43" y="70" width="14" height="16" rx="4" fill={skin} stroke={OUTLINE} strokeWidth="2" />
+      {/*
+        DES ÉPAULES, PARCE QU'UN COU SEUL EST UNE TIGE.
+
+        La tête flottait au-dessus d'un rectangle de peau coupé net par le bord
+        du cadre : de loin, une sucette. Deux épaules suffisent à en faire un
+        portrait — et elles donnent enfin une assise aux accessoires de cou,
+        l'écharpe et la cravate, qui pendaient jusque-là dans le vide.
+
+        Le vêtement se tire de la graine sans passer par l'Atelier : c'est la
+        rue qui habille, pas le joueur.
+      */}
+      <rect x="43" y={chin - 7} width="14" height={95 - chin} rx="4" fill={skin} stroke={OUTLINE} strokeWidth="2" />
+      <path d={`M43.5 ${chin - 5} q6.5 5 13 0`} fill="none" stroke={peauOmbre} strokeWidth="1.6" opacity="0.5" />
+      <path d="M11 101 Q13 88 34 84 L66 84 Q87 88 89 101 Z" fill={VETEMENT[pick('cloth', VETEMENT.length)]} stroke={OUTLINE} strokeWidth="2.2" strokeLinejoin="round" />
+      {/* Le col, ouvert sur le cou. */}
+      <path d="M41 84.5 Q50 92 59 84.5" fill="none" stroke={OUTLINE} strokeWidth="1.8" strokeLinecap="round" opacity="0.6" />
 
       {/* Cheveux "arrière" (volume / longs), rognés sous le chapeau */}
       <g clipPath={hairClip}>
@@ -268,11 +392,22 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         )}
       </g>
 
-      {/* Tête */}
-      <rect x="25" y="20" width="50" height="56" rx="21" fill={skin} stroke={OUTLINE} strokeWidth="2.5" />
-      {/* Oreilles */}
-      <ellipse cx="25" cy="50" rx="4.5" ry="6" fill={skin} stroke={OUTLINE} strokeWidth="2" />
-      <ellipse cx="75" cy="50" rx="4.5" ry="6" fill={skin} stroke={OUTLINE} strokeWidth="2" />
+      {/* Oreilles — dessinées AVANT la tête : le visage recouvre leur moitié
+          interne et elles se rattachent au crâne. Posées par-dessus, elles
+          flottaient comme deux anses. */}
+      <ellipse cx="24.5" cy="50" rx="4.2" ry="5.6" fill={skin} stroke={OUTLINE} strokeWidth="2" />
+      <ellipse cx="75.5" cy="50" rx="4.2" ry="5.6" fill={skin} stroke={OUTLINE} strokeWidth="2" />
+
+      {/* Tête : l'ombre portée d'abord, puis la découpe */}
+      <path d={tete(1.6)} fill={kraftOmbre} opacity="0.55" transform="translate(1.6 2.2)" />
+      <path d={tete()} fill={skin} stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
+      {/* Le relief de la découpe : un bord de joue plus sombre, côté droit. */}
+      <g clipPath={`url(#${faceId})`}>
+        <path d={`M${50 + 25 * 0.92} 40 C${50 + 25} ${43 + (chin - 43) * 0.52} ${50 + jx} ${chin - 5} 50 ${chin} L100 ${chin} L100 30 Z`} fill={peauOmbre} opacity="0.16" />
+        <g fill={peauOmbre} opacity="0.16">
+          {grains.map((g, i) => <circle key={i} cx={g.x} cy={g.y} r={g.r} />)}
+        </g>
+      </g>
 
       {/* Cheveux "avant", rognés sous le chapeau */}
       <g clipPath={hairClip}>
@@ -372,8 +507,10 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         </g>
       )}
 
-      {/* Nez */}
-      <path d="M50 52 l-3 8 q3 2 6 0" fill="none" stroke={OUTLINE} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.75" />
+      {/* Nez — une petite ombre de papier plié plutôt qu'un crochet seul, et
+          calé sur la bouche : il s'arrête cinq unités au-dessus d'elle. */}
+      <path d={`M50 52 L${46.5} ${mY - 5} q3.5 2.2 7 0 Z`} fill={peauOmbre} opacity="0.28" />
+      <path d={`M50 52 l-3.5 ${mY - 57} q3.5 2.2 7 0`} fill="none" stroke={OUTLINE} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
 
       {/* Taches de rousseur */}
       {hasFreckles && (
@@ -388,12 +525,41 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         <line x1="63" y1="35" x2="68" y2="49" stroke="#B87A5A" strokeWidth="1.6" strokeLinecap="round" opacity="0.75" />
       )}
 
+      {/*
+        BARBE ET MOUSTACHE — AVANT la bouche, et à leur place.
+
+        Le « bouc » était dessiné de 62 à 66, la bouche de 65 à 68 : les deux
+        se chevauchaient et produisaient au milieu du visage une masse noire
+        qu'on lisait comme une bouche grande ouverte. C'est le défaut le plus
+        visible de la planche de contact.
+
+        Et les trois formes ne correspondaient pas à leurs propres libellés :
+        l'Atelier vendait « Moustache » et dessinait une barbe pleine. Chaque
+        valeur dessine maintenant ce que son nom annonce, et se cale sur le
+        menton du visage.
+      */}
+      {beardStyle === 1 && (
+        // Moustache : au-dessus de la lèvre, elle ne touche pas la bouche.
+        <path d={`M50 ${mY - 4.5} Q42 ${mY - 8} 35 ${mY - 4} Q40 ${mY} 46 ${mY - 3.5} Q48 ${mY - 4.5} 50 ${mY - 3} Q52 ${mY - 4.5} 54 ${mY - 3.5} Q60 ${mY} 65 ${mY - 4} Q58 ${mY - 8} 50 ${mY - 4.5} Z`} fill={hair} />
+      )}
+      {beardStyle === 2 && (
+        // Bouc : sous la lèvre, sur le menton, plus une moustache fine.
+        <g fill={hair}>
+          <path d={`M45 ${mY + 5.5} q5 2.5 10 0 q-1 ${chin - mY - 5} -5 ${chin - mY - 3.5} q-4 -1.5 -5 -${chin - mY - 5} Z`} />
+          <path d={`M50 ${mY - 4} Q44 ${mY - 7} 38 ${mY - 4} Q44 ${mY - 2.5} 50 ${mY - 3} Q56 ${mY - 2.5} 62 ${mY - 4} Q56 ${mY - 7} 50 ${mY - 4} Z`} />
+        </g>
+      )}
+      {beardStyle === 3 && (
+        // Barbe pleine : elle épouse la mâchoire, donc la forme du visage.
+        <path d={`M28 54 Q30 ${chin - 2} 50 ${chin + 4} Q70 ${chin - 2} 72 54 Q68 ${mY + 2} ${50 + jx * 0.6} ${mY + 3} Q50 ${mY + 7} ${50 - jx * 0.6} ${mY + 3} Q32 ${mY + 2} 28 54 Z`} fill={hair} />
+      )}
+
       {/* Bouche */}
-      {mouthStyle === 0 && <rect x="43" y="65" width="14" height={female ? 3 : 2.4} rx="1.5" fill={mouthColor} />}
-      {mouthStyle === 1 && <path d="M42 65 q8 8 16 0" fill="none" stroke={mouthColor} strokeWidth="2.6" strokeLinecap="round" />}
-      {mouthStyle === 2 && <path d="M42 68 q8 -8 16 0" fill="none" stroke={mouthColor} strokeWidth="2.4" strokeLinecap="round" />}
-      {mouthStyle === 3 && <ellipse cx="50" cy="66" rx="4" ry="5" fill={mouthColor} />}
-      {mouthStyle === 4 && <path d="M42 66 q8 6 16 -1" fill="none" stroke={mouthColor} strokeWidth="2.4" strokeLinecap="round" />}
+      {mouthStyle === 0 && <rect x="43" y={mY} width="14" height={female ? 3 : 2.4} rx="1.5" fill={mouthColor} />}
+      {mouthStyle === 1 && <path d={`M42 ${mY} q8 8 16 0`} fill="none" stroke={mouthColor} strokeWidth="2.6" strokeLinecap="round" />}
+      {mouthStyle === 2 && <path d={`M42 ${mY + 3} q8 -8 16 0`} fill="none" stroke={mouthColor} strokeWidth="2.4" strokeLinecap="round" />}
+      {mouthStyle === 3 && <ellipse cx="50" cy={mY + 1} rx="4" ry="5" fill={mouthColor} />}
+      {mouthStyle === 4 && <path d={`M42 ${mY + 1} q8 6 16 -1`} fill="none" stroke={mouthColor} strokeWidth="2.4" strokeLinecap="round" />}
 
       {/* Boucles d'oreilles */}
       {earrings && (
@@ -401,17 +567,6 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           <circle cx="25" cy="58" r="2.2" />
           <circle cx="75" cy="58" r="2.2" />
         </g>
-      )}
-
-      {/* Barbe / moustache */}
-      {beardStyle === 1 && (
-        <path d="M30 58 Q32 78 50 80 Q68 78 70 58 Q66 72 50 73 Q34 72 30 58 Z" fill={hair} opacity="0.35" />
-      )}
-      {beardStyle === 2 && (
-        <path d="M29 56 Q31 82 50 84 Q69 82 71 56 Q67 74 50 75 Q33 74 29 56 Z" fill={hair} />
-      )}
-      {beardStyle === 3 && (
-        <path d="M42 62 q8 5 16 0 q-3 4 -8 4 q-5 0 -8 -4 Z" fill={hair} />
       )}
 
       {/* Chapeaux procéduraux (masqués si un chapeau-accessoire est équipé) */}
@@ -724,27 +879,42 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
       {/* ---- Calque d'ÉTAT (dérivé des jauges, voir condition) ----
           Superposé au visage : bas = mine dégradée (teint verdâtre, cernes,
           sueur, bouche tombante) ; haut = bonne forme (joues roses, éclat). */}
+      {/*
+        LE VOILE S'ARRÊTE AU BORD DU VISAGE.
+
+        C'était un rectangle vert posé par-dessus tout, débordant sur le fond :
+        on ne lisait pas « il ne va pas bien », on lisait une tache. Découpé sur
+        la tête, gris-vert et deux fois moins dense, il se lit comme un teint.
+        La sueur, elle, quittait la tempe pour se poser à hauteur d'oreille —
+        où elle avait tout l'air d'une boucle d'oreille : elle remonte.
+      */}
       {typeof condition === 'number' && condition < 0.34 && (
         <g style={{ pointerEvents: 'none' }}>
-          {/* voile blafard/verdâtre */}
-          <rect x="14" y="26" width="72" height="60" rx="26" fill="#7C8B5A" opacity={0.16 + (0.34 - condition) * 0.5} />
+          <g clipPath={`url(#${faceId})`}>
+            <rect x="0" y="0" width="100" height="100" fill="#77836A" opacity={0.10 + (0.34 - condition) * 0.34} />
+            {/* Les joues se creusent : deux ombres le long de la mâchoire. */}
+            <path d={`M${50 - jx - 2} 52 Q${50 - jx + 3} ${mY - 2} ${50 - jx * 0.55} ${mY + 2}`} stroke={peauOmbre} strokeWidth="3.4" fill="none" strokeLinecap="round" opacity="0.4" />
+            <path d={`M${50 + jx + 2} 52 Q${50 + jx - 3} ${mY - 2} ${50 + jx * 0.55} ${mY + 2}`} stroke={peauOmbre} strokeWidth="3.4" fill="none" strokeLinecap="round" opacity="0.4" />
+          </g>
           {/* cernes */}
           <path d={`M${eyeL - 6} ${eyeY + 6} Q${eyeL} ${eyeY + 9} ${eyeL + 6} ${eyeY + 6}`} stroke="#6E5A4E" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
           <path d={`M${eyeR - 6} ${eyeY + 6} Q${eyeR} ${eyeY + 9} ${eyeR + 6} ${eyeY + 6}`} stroke="#6E5A4E" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
           {/* bouche tombante par-dessus */}
-          <path d="M42 70 Q50 64 58 70" stroke={OUTLINE} strokeWidth="2.4" fill="none" strokeLinecap="round" />
-          {/* goutte de sueur */}
-          <path d="M74 40 q-3 5 0 8 q3 -3 0 -8 Z" fill="#8FB8D8" stroke="#5E86A6" strokeWidth="0.6" opacity="0.9" />
+          <path d={`M42 ${mY + 5} Q50 ${mY - 1} 58 ${mY + 5}`} stroke={OUTLINE} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+          {/* goutte de sueur, à la tempe */}
+          <path d="M71 33 q-2.6 4.5 0 7 q2.6 -2.5 0 -7 Z" fill="#8FB8D8" stroke="#5E86A6" strokeWidth="0.6" opacity="0.9" />
         </g>
       )}
       {typeof condition === 'number' && condition > 0.72 && (
-        <g style={{ pointerEvents: 'none' }}>
+        <g style={{ pointerEvents: 'none' }} clipPath={`url(#${faceId})`}>
           {/* joues roses */}
-          <circle cx="30" cy="60" r="6" fill="#E8927C" opacity={0.18 + (condition - 0.72) * 0.6} />
-          <circle cx="70" cy="60" r="6" fill="#E8927C" opacity={0.18 + (condition - 0.72) * 0.6} />
-          {/* petite étincelle de forme */}
-          <path d="M78 30 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4 Z" fill="#F5D06B" opacity="0.9" />
+          <circle cx="32" cy="59" r="6" fill="#E8927C" opacity={0.18 + (condition - 0.72) * 0.6} />
+          <circle cx="68" cy="59" r="6" fill="#E8927C" opacity={0.18 + (condition - 0.72) * 0.6} />
         </g>
+      )}
+      {typeof condition === 'number' && condition > 0.72 && (
+        // L'étincelle reste HORS de la découpe : elle brille à côté de la tête.
+        <path d="M80 28 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4 Z" fill="#F5D06B" stroke={kraftOmbre} strokeWidth="0.4" opacity="0.95" style={{ pointerEvents: 'none' }} />
       )}
 
       {/* ---- Calque de TENUE (dérivé de la Dignité) ----
@@ -752,29 +922,50 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           présentation qui se dégrade, pas la santé. Sous 75, le carton
           commence à s'écorner ; sous 50, le trait de feutre bave ; sous 25, la
           barbe gagne et le col se plie pour de bon. */}
+      {/*
+        C'EST LE CARTON QUI S'ABÎME, PAS LE PERSONNAGE.
+
+        L'ancien premier palier posait un petit triangle beige au bord gauche du
+        visage : à la taille du hub, il ressemblait à une flèche pointant vers
+        la tête, pas à un coin corné. Les trois paliers sont maintenant des
+        accidents de la MATIÈRE — un pli, une déchirure, une réparation au
+        ruban — parce que c'est ce que le joueur peut reconnaître d'un coup
+        d'œil sans qu'aucun texte ne le dise.
+      */}
       {typeof dignity === 'number' && dignity < 75 && (
         <g style={{ pointerEvents: 'none' }}>
-          {/* Un coin de carton corné, en haut à gauche du visage. */}
-          <path d="M20 30 l7 -3 -1 6 Z" fill="#C9A97E" stroke={OUTLINE} strokeWidth="1.2" strokeLinejoin="round" opacity="0.85" />
+          {/* Le coin supérieur gauche est corné : le carton se replie sur
+              lui-même, et c'est le dos — plus clair — qu'on voit. */}
+          <path d="M2 20 L20 2 L20 20 Z" fill={melanger(bg, '#FFFFFF', 0.4)} stroke={kraftOmbre} strokeWidth="0.9" strokeLinejoin="round" />
+          <path d="M20 20 L20 2" stroke={kraftOmbre} strokeWidth="0.9" opacity="0.6" />
         </g>
       )}
       {typeof dignity === 'number' && dignity < 50 && (
         <g style={{ pointerEvents: 'none' }}>
-          {/* Le feutre bave : deux coulures sous le trait du visage. */}
-          <path d="M36 78 q1.5 5 0 8" stroke={OUTLINE} strokeWidth="1.4" fill="none" strokeLinecap="round" opacity="0.5" />
-          <path d="M64 76 q-1.2 6 0.4 9" stroke={OUTLINE} strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.42" />
-          {/* Une éraflure sur la joue droite. */}
-          <path d="M74 56 l5 4" stroke="#9A7B5A" strokeWidth="1.4" strokeLinecap="round" opacity="0.7" />
+          {/* Le bord droit est mangé : la cannelure sort par la déchirure. */}
+          <path d="M100 34 Q94 44 97 54 Q92 64 98 74 Q94 82 100 90 L100 34 Z" fill={melanger(bg, '#FFFFFF', 0.3)} stroke={kraftOmbre} strokeWidth="0.8" strokeLinejoin="round" />
+          <g stroke={kraftOmbre} strokeWidth="0.6" opacity="0.5">
+            <line x1="96" y1="40" x2="100" y2="40" /><line x1="97" y1="50" x2="100" y2="50" />
+            <line x1="95" y1="60" x2="100" y2="60" /><line x1="97" y1="70" x2="100" y2="70" />
+            <line x1="96" y1="80" x2="100" y2="80" />
+          </g>
+          {/* Le feutre bave : une coulure sous le trait du visage. */}
+          <path d={`M36 ${chin + 2} q1.5 5 0 8`} stroke={OUTLINE} strokeWidth="1.4" fill="none" strokeLinecap="round" opacity="0.5" />
         </g>
       )}
       {typeof dignity === 'number' && dignity < 25 && (
         <g style={{ pointerEvents: 'none' }}>
-          {/* Le col plié, franchement de travers. */}
-          <path d="M30 86 l10 -5 -2 7 Z" fill="#B9986E" stroke={OUTLINE} strokeWidth="1.2" strokeLinejoin="round" opacity="0.9" />
-          {/* Des poils qui dépassent partout : la barbe a gagné. */}
-          <path d="M24 64 l-5 2 M25 70 l-5 3 M76 64 l5 2 M75 70 l5 3" stroke={OUTLINE} strokeWidth="1.3" strokeLinecap="round" opacity="0.55" />
+          {/* Une fissure recollée au ruban adhésif : réparé, pas remplacé. */}
+          <path d="M8 6 L12 40 L7 92" stroke={kraftOmbre} strokeWidth="1.1" fill="none" opacity="0.6" />
+          <g transform="rotate(-12 10 44)">
+            <rect x="3" y="40" width="13" height="6" fill="#EFE6D2" opacity="0.5" stroke={kraftOmbre} strokeWidth="0.5" />
+          </g>
+          {/* La barbe de trois jours, semée le long de la mâchoire. */}
+          <g fill={OUTLINE} opacity="0.34" clipPath={`url(#${faceId})`}>
+            {grains.map((g, i) => <circle key={i} cx={50 + (g.x - 50) * 1.5} cy={mY + 2 + (i % 3) * 3} r="0.9" />)}
+          </g>
           {/* Un voile terne sur l'ensemble : plus personne ne vous regarde. */}
-          <rect x="14" y="26" width="72" height="60" rx="26" fill="#6B5740" opacity="0.13" />
+          <rect x="0" y="0" width="100" height="100" rx="20" fill="#6B5740" opacity="0.12" />
         </g>
       )}
     </svg>

@@ -126,3 +126,6 @@ temp/
 
 # Navigateur Chrome for Testing téléchargé pour les captures d'écran (lourd).
 /chrome
+
+# Bundle jetable de la planche de contact des visages (voir pnpm planche).
+scripts/.planche.mjs
