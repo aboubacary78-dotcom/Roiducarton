@@ -129,3 +129,9 @@ temp/
 
 # Bundle jetable de la planche de contact des visages (voir pnpm planche).
 scripts/.planche.mjs
+
+# Bundle jetable de la planche des états (voir pnpm planche-etat).
+scripts/.planche-etat.mjs
+
+# Bundle jetable du contrôle du calque d'état (voir pnpm test-etat).
+scripts/.test-etat.mjs

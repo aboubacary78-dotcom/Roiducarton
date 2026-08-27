@@ -35,7 +35,16 @@ export default function PlayerFace({
       accessories={char.equipped ?? {}}
       // Ce qui a été composé dans l'Atelier ; le reste vient de la graine.
       visage={char.visage}
-      condition={faceCondition(char)}
+      /*
+       * LES CINQ JAUGES ENTIÈRES, PAS LEUR MOYENNE.
+       *
+       * `faceCondition` reste exportée — d'autres écrans s'en servent pour
+       * autre chose — mais le portrait ne la reçoit plus : une moyenne ne
+       * peut dire que la gravité, jamais la cause. Avec les jauges séparées,
+       * le sommeil tombe sur les paupières, la faim creuse les joues, la soif
+       * gerce les lèvres. On lit CE QUI manque.
+       */
+      jauges={char.stats}
       // Le second axe : la tenue, pilotée par la Dignité. Le corps et
       // l'allure se dégradent séparément, et c'est tout l'intérêt.
       dignity={char.stats.dignity}

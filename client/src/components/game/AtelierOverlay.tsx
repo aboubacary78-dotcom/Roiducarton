@@ -77,7 +77,12 @@ export default function AtelierOverlay({ char, onAnnuler, onValider }: {
       gender={char.gender}
       size={112}
       visage={visage}
-      condition={1}
+      /*
+       * L'aperçu reste au repos : on compose un visage, pas un malade. Les
+       * cinq jauges au maximum plutôt qu'une moyenne à 1 — même intention,
+       * mais elle passe désormais par le même chemin que le vrai portrait.
+       */
+      jauges={{ health: 100, mental: 100, hunger: 100, thirst: 100, sleep: 100 }}
       dignity={char.stats.dignity}
     />
   );

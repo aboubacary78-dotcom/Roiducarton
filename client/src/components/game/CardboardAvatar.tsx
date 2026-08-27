@@ -100,7 +100,10 @@ function hashSeed(s: string): number {
  * Le carton s'écorne, le trait de feutre bave, le col se plie : on lit ce que
  * la survie coûte sans qu'aucun texte ne le dise.
  */
-export default function CardboardAvatar({ seed, gender, size = 40, className = '', accessories, condition, dignity, visage }: { seed: string; gender?: 'm' | 'f'; size?: number; className?: string; accessories?: Partial<Record<AccessorySlot, string>>; condition?: number; dignity?: number; visage?: Record<string, number> }) {
+/** Les cinq jauges de survie, telles quelles, de 0 à 100. */
+export interface JaugesVisage { health: number; mental: number; hunger: number; thirst: number; sleep: number }
+
+export default function CardboardAvatar({ seed, gender, size = 40, className = '', accessories, condition, jauges, dignity, visage }: { seed: string; gender?: 'm' | 'f'; size?: number; className?: string; accessories?: Partial<Record<AccessorySlot, string>>; condition?: number; jauges?: JaugesVisage; dignity?: number; visage?: Record<string, number> }) {
   const s = seed || 'anon';
   const female = gender === 'f';
   // Un tirage indépendant par caractéristique (graine + sel).
@@ -133,9 +136,73 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
     return pick(salt, chanceSur) === 0;
   };
 
-  const skin = SKIN[choisir('skin', SKIN.length)];
+  const skinBase = SKIN[choisir('skin', SKIN.length)];
   const hair = HAIR[choisir('hair', HAIR.length)];
+
+  /*
+   * ─────────── CE QUE LE VISAGE DIT DE L'ÉTAT ───────────
+   *
+   * Ce calque était le point noir du portrait, et une grille de onze crans l'a
+   * montré d'un coup : de 0,00 à 0,30, quatre visages IDENTIQUES ; de 0,40 à
+   * 0,70, rien du tout ; de 0,80 à 1,00, identiques encore. Trois états, pas
+   * un axe — et l'écart entre le mourant et l'homme en forme se résumait à une
+   * goutte de sueur. À quarante-quatre pixels, la taille du hub, seize
+   * combinaisons donnaient seize fois la même image.
+   *
+   * Deux principes en réponse.
+   *
+   * ① TOUT EST CONTINU. Plus un seul seuil : chaque signe a une intensité qui
+   *    suit la jauge. Un signe qui apparaît d'un coup se lit comme un bug ;
+   *    un signe qui monte se lit comme une dégradation.
+   *
+   * ② CHAQUE JAUGE A SON SIGNE. `condition` était la MOYENNE de cinq jauges :
+   *    le visage pouvait dire « ça va mal », jamais « il crève de soif ». Les
+   *    jauges arrivent maintenant entières, et chacune écrit sur une partie du
+   *    visage — le sommeil sur les paupières, la faim sur les joues, la soif
+   *    sur les lèvres, le mental sur le TRAIT lui-même, la santé sur le teint.
+   *    On lit la cause, plus seulement la gravité.
+   *
+   * `condition` reste accepté pour les visages qu'on ne suit pas (les
+   * passants) : on répartit alors la moyenne, et le portrait dit la gravité
+   * sans pouvoir nommer la cause.
+   */
+  const aEtat = jauges !== undefined || typeof condition === 'number';
+  const borne = (x: number) => Math.min(1, Math.max(0, x));
+  // Une jauge ne se ressent pas dès 99 : le manque commence à 62 et sature à 0.
+  const manque = (v: number) => borne((62 - v) / 62);
+  const moyenne = typeof condition === 'number' ? borne((0.62 - condition) / 0.62) : 0;
+  const mSommeil = jauges ? manque(jauges.sleep) : moyenne;
+  const mFaim = jauges ? manque(jauges.hunger) : moyenne;
+  const mSoif = jauges ? manque(jauges.thirst) : moyenne;
+  const mMental = jauges ? manque(jauges.mental) : moyenne;
+  const mSante = jauges ? manque(jauges.health) : moyenne;
+  // La gravité générale, c'est la PIRE jauge — pas leur moyenne. Mourir de
+  // soif en pleine forme par ailleurs reste mourir.
+  const mal = aEtat ? Math.max(mSommeil, mFaim, mSoif, mMental, mSante) : 0;
+  // Et la belle vigueur, c'est quand la plus basse est encore haute.
+  const vigueur = !aEtat ? 0
+    : jauges ? borne((Math.min(jauges.health, jauges.mental, jauges.hunger, jauges.thirst, jauges.sleep) - 68) / 32)
+    : borne(((condition ?? 0) - 0.68) / 0.32);
+
+  /*
+   * LE TEINT EST LE SIGNE QUI PORTE LE PLUS LOIN.
+   *
+   * Un voile translucide posé par-dessus se voyait à peine ; changer la
+   * couleur de la peau elle-même se lit encore à trente-deux pixels, où plus
+   * aucun détail ne survit. La santé tire vers le gris-vert, la forme vers le
+   * chaud.
+   */
+  const skin = melanger(melanger(skinBase, '#8A9078', (mSante * 0.55 + mal * 0.45) * 0.36), '#FFE3C4', vigueur * 0.16);
   const bg = ecarter(BG[choisir('bg', BG.length)], skin);
+  /*
+   * LA DIGNITÉ, ELLE AUSSI, DEVIENT CONTINUE.
+   *
+   * Elle avait trois paliers, et les trois marquaient les COINS de la carte —
+   * là où il reste deux pixels à quarante-quatre. Ce qui se dégrade
+   * maintenant, c'est d'abord ce qui est GRAND : le vêtement, la barbe, les
+   * cheveux. Le carton s'abîme encore, mais en second, et progressivement.
+   */
+  const crasse = typeof dignity === 'number' ? borne((100 - dignity) / 100) : 0;
   const hatColor = HAT_COLORS[choisir('hatc', HAT_COLORS.length)];
   // Les tons dérivés : l'ombre du carton, le pli, le creux d'une joue.
   const kraftOmbre = melanger(bg, '#3A2A1E', 0.26);
@@ -162,7 +229,16 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   ];
   const forme = FORMES[choisir('face', FORMES.length)];
   const chin = forme.chin;
-  const jx = 25 * forme.jaw;   // demi-largeur de la mâchoire
+  /*
+   * LA FAIM RENTRE DANS LA SILHOUETTE ELLE-MÊME.
+   *
+   * Deux ombres sur les joues restaient un maquillage : la planche montrait
+   * « faim 0 » et « faim 50 » presque semblables. Un affamé n'a pas les joues
+   * ombrées, il a le visage PLUS ÉTROIT. La mâchoire se resserre donc pour de
+   * bon — et comme tout le bas du visage (bouche, barbe, mâchoire) est calé
+   * sur `jx`, il suit sans qu'on ait à y penser.
+   */
+  const jx = 25 * forme.jaw * (1 - mFaim * 0.15);   // demi-largeur de la mâchoire
   /** Le contour de la tête, éventuellement dilaté de `d` (pour l'ombre portée). */
   const tete = (d = 0) => {
     const t = 25 + d, j = jx + d, c = chin + d, h = 19 - d;
@@ -196,7 +272,8 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   const hasFreckles = oui('freckles', 4);
   const hasScar = !female && oui('scar', 7);
   const earrings = female && oui('earring', 3);
-  const mouthColor = female ? '#B85763' : OUTLINE; // lèvres colorées pour les femmes
+  // Lèvres colorées pour les femmes ; la soif les décolore, chez tout le monde.
+  const mouthColor = melanger(female ? '#B85763' : OUTLINE, '#A98E80', mSoif * 0.65);
 
   // Accessoires cosmétiques équipés (voir lib/cosmetics + garde-robe).
   const accHat = accessories?.hat;
@@ -380,9 +457,33 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
       */}
       <rect x="43" y={chin - 7} width="14" height={95 - chin} rx="4" fill={skin} stroke={OUTLINE} strokeWidth="2" />
       <path d={`M43.5 ${chin - 5} q6.5 5 13 0`} fill="none" stroke={peauOmbre} strokeWidth="1.6" opacity="0.5" />
-      <path d="M11 101 Q13 88 34 84 L66 84 Q87 88 89 101 Z" fill={VETEMENT[pick('cloth', VETEMENT.length)]} stroke={OUTLINE} strokeWidth="2.2" strokeLinejoin="round" />
+      {/* La salissure du vêtement suit une courbe et non une droite : les
+          premiers points de dignité perdus se voient le plus, et c'est là que
+          se joue le début de partie. */}
+      <path d="M11 101 Q13 88 34 84 L66 84 Q87 88 89 101 Z" fill={melanger(VETEMENT[pick('cloth', VETEMENT.length)], '#463726', Math.pow(crasse, 0.65) * 0.55)} stroke={OUTLINE} strokeWidth="2.2" strokeLinejoin="round" />
       {/* Le col, ouvert sur le cou. */}
       <path d="M41 84.5 Q50 92 59 84.5" fill="none" stroke={OUTLINE} strokeWidth="1.8" strokeLinecap="round" opacity="0.6" />
+      {/* Un col tenu, boutonné — le seul signe POSITIF de la dignité. Le reste
+          de l'axe ne dit que ce qui se perd ; ici, quelque chose est encore
+          en place, et ça disparaît doucement quand on cesse d'y tenir. */}
+      {crasse < 0.45 && (
+        <g style={{ pointerEvents: 'none' }} opacity={(0.45 - crasse) * 2.2}>
+          <path d="M41 85 L46 90 L43 94" fill="none" stroke={OUTLINE} strokeWidth="1.3" strokeLinejoin="round" />
+          <path d="M59 85 L54 90 L57 94" fill="none" stroke={OUTLINE} strokeWidth="1.3" strokeLinejoin="round" />
+          <circle cx="50" cy="96" r="1.6" fill={OUTLINE} opacity="0.75" />
+        </g>
+      )}
+      {/* Le vêtement s'use : une déchirure à l'épaule, et des taches. */}
+      {crasse > 0.35 && (
+        <g style={{ pointerEvents: 'none' }} opacity={(crasse - 0.35) * 1.5}>
+          {/* Un ourlet déchiré, pas un gribouillis : le bas du vêtement part
+              en dents de scie et laisse voir le carton derrière. */}
+          <path d="M14 101 L18 92 L23 99 L28 90 L32 98 L36 101 Z" fill={bg} opacity="0.75" />
+          <path d="M14 101 L18 92 L23 99 L28 90 L32 98 L36 101" fill="none" stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+          <ellipse cx="72" cy="94" rx="7" ry="4" fill="#3A2A1E" opacity="0.28" />
+          <ellipse cx="60" cy="99" rx="5" ry="3" fill="#3A2A1E" opacity="0.22" />
+        </g>
+      )}
 
       {/* Cheveux "arrière" (volume / longs), rognés sous le chapeau */}
       <g clipPath={hairClip}>
@@ -480,6 +581,30 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           <path d={`M${eyeL - 4} ${eyeY} q4 3 8 0`} fill="none" stroke={OUTLINE} strokeWidth="2" strokeLinecap="round" />
           <path d={`M${eyeR - 4} ${eyeY} q4 3 8 0`} fill="none" stroke={OUTLINE} strokeWidth="2" strokeLinecap="round" />
         </>
+      )}
+
+      {/*
+        LES PAUPIÈRES TOMBENT AVEC LE SOMMEIL.
+
+        Elles passent SOUS les lunettes et par-dessus les yeux, quel que soit
+        le regard tiré : c'est le seul signe qui se lise encore à trente-deux
+        pixels, parce qu'il mange la moitié de la seule zone sombre du visage.
+      */}
+      {mSommeil > 0.06 && (
+        <g style={{ pointerEvents: 'none' }}>
+          {[eyeL, eyeR].map(x => {
+            const h = 1 + mSommeil * 6.4;
+            return (
+              <g key={x}>
+                {/* La paupière est un aplat de peau — sans contour en haut :
+                    un trait horizontal au-dessus de l'œil se lisait comme un
+                    second sourcil. Seul le BORD BAS est repassé au feutre. */}
+                <path d={`M${x - 6.4} ${eyeY - 6.5} h12.8 v${h} q-6.4 2.2 -12.8 0 Z`} fill={skin} />
+                <path d={`M${x - 6.4} ${eyeY - 6.5 + h} q6.4 2.2 12.8 0`} fill="none" stroke={OUTLINE} strokeWidth="1.5" strokeLinecap="round" />
+              </g>
+            );
+          })}
+        </g>
       )}
 
       {/* Lunettes (masquées si un accessoire yeux est équipé) */}
@@ -876,45 +1001,113 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         </g>
       )}
 
-      {/* ---- Calque d'ÉTAT (dérivé des jauges, voir condition) ----
-          Superposé au visage : bas = mine dégradée (teint verdâtre, cernes,
-          sueur, bouche tombante) ; haut = bonne forme (joues roses, éclat). */}
-      {/*
-        LE VOILE S'ARRÊTE AU BORD DU VISAGE.
+      {/* ══════════ CALQUE D'ÉTAT ══════════
+          Un signe par jauge, tous continus. Voir le long commentaire en tête
+          de composant : c'est ici que se joue « on lit la cause, pas seulement
+          la gravité ». `pnpm planche-etat` rend la grille qui juge ce bloc. */}
 
-        C'était un rectangle vert posé par-dessus tout, débordant sur le fond :
-        on ne lisait pas « il ne va pas bien », on lisait une tache. Découpé sur
-        la tête, gris-vert et deux fois moins dense, il se lit comme un teint.
-        La sueur, elle, quittait la tempe pour se poser à hauteur d'oreille —
-        où elle avait tout l'air d'une boucle d'oreille : elle remonte.
+      {/* LA FAIM CREUSE — joues et tempes. */}
+      {mFaim > 0.06 && (
+        <g clipPath={`url(#${faceId})`} style={{ pointerEvents: 'none' }}>
+          <path d={`M${50 - jx - 3} 50 Q${50 - jx + 4} ${mY - 4} ${50 - jx * 0.5} ${mY + 3}`} stroke={peauOmbre} strokeWidth={2 + mFaim * 3} fill="none" strokeLinecap="round" opacity={mFaim * 0.55} />
+          <path d={`M${50 + jx + 3} 50 Q${50 + jx - 4} ${mY - 4} ${50 + jx * 0.5} ${mY + 3}`} stroke={peauOmbre} strokeWidth={2 + mFaim * 3} fill="none" strokeLinecap="round" opacity={mFaim * 0.55} />
+          {/* Les tempes se creusent aussi : c'est ce qui vieillit un visage. */}
+          <ellipse cx="30" cy="41" rx="6" ry="4.5" fill={peauOmbre} opacity={mFaim * 0.3} />
+          <ellipse cx="70" cy="41" rx="6" ry="4.5" fill={peauOmbre} opacity={mFaim * 0.3} />
+        </g>
+      )}
+
+      {/* LE SOMMEIL CERNE — sous les paupières déjà tombées. */}
+      {mSommeil > 0.06 && (
+        <g style={{ pointerEvents: 'none' }} clipPath={`url(#${faceId})`}>
+          {[eyeL, eyeR].map(x => (
+            <g key={x}>
+              <path d={`M${x - 6} ${eyeY + 5.5} Q${x} ${eyeY + 9} ${x + 6} ${eyeY + 5.5}`} stroke="#6E5A4E" strokeWidth="2" fill="none" strokeLinecap="round" opacity={mSommeil * 0.85} />
+              <path d={`M${x - 5} ${eyeY + 8.5} Q${x} ${eyeY + 11} ${x + 5} ${eyeY + 8.5}`} stroke="#6E5A4E" strokeWidth="1.4" fill="none" strokeLinecap="round" opacity={Math.max(0, mSommeil - 0.45) * 1.4} />
+            </g>
+          ))}
+        </g>
+      )}
+
+      {/*
+        LA SOIF GERCE — et il en fallait bien plus que trois traits.
+
+        La planche donnait « soif 0 » et « soif 50 » quasiment identiques :
+        trois fissures d'une unité et une teinte de lèvre à peine décalée ne
+        se voient pas. La soif dessèche maintenant TOUT le pourtour de la
+        bouche — la peau blanchit et se craquelle sur cinq fentes franches —
+        en plus de la décoloration déjà appliquée aux lèvres.
       */}
-      {typeof condition === 'number' && condition < 0.34 && (
+      {mSoif > 0.15 && (
         <g style={{ pointerEvents: 'none' }}>
           <g clipPath={`url(#${faceId})`}>
-            <rect x="0" y="0" width="100" height="100" fill="#77836A" opacity={0.10 + (0.34 - condition) * 0.34} />
-            {/* Les joues se creusent : deux ombres le long de la mâchoire. */}
-            <path d={`M${50 - jx - 2} 52 Q${50 - jx + 3} ${mY - 2} ${50 - jx * 0.55} ${mY + 2}`} stroke={peauOmbre} strokeWidth="3.4" fill="none" strokeLinecap="round" opacity="0.4" />
-            <path d={`M${50 + jx + 2} 52 Q${50 + jx - 3} ${mY - 2} ${50 + jx * 0.55} ${mY + 2}`} stroke={peauOmbre} strokeWidth="3.4" fill="none" strokeLinecap="round" opacity="0.4" />
+            <ellipse cx="50" cy={mY + 0.5} rx="9.5" ry="5" fill="#E4D2BE" opacity={(mSoif - 0.15) * 0.34} />
           </g>
-          {/* cernes */}
-          <path d={`M${eyeL - 6} ${eyeY + 6} Q${eyeL} ${eyeY + 9} ${eyeL + 6} ${eyeY + 6}`} stroke="#6E5A4E" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
-          <path d={`M${eyeR - 6} ${eyeY + 6} Q${eyeR} ${eyeY + 9} ${eyeR + 6} ${eyeY + 6}`} stroke="#6E5A4E" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7" />
-          {/* bouche tombante par-dessus */}
-          <path d={`M42 ${mY + 5} Q50 ${mY - 1} 58 ${mY + 5}`} stroke={OUTLINE} strokeWidth="2.4" fill="none" strokeLinecap="round" />
-          {/* goutte de sueur, à la tempe */}
-          <path d="M71 33 q-2.6 4.5 0 7 q2.6 -2.5 0 -7 Z" fill="#8FB8D8" stroke="#5E86A6" strokeWidth="0.6" opacity="0.9" />
+          {/* Les fentes restent SUR la lèvre. Plus hautes, elles débordaient
+              en un rayé sombre qui se lisait comme une rangée de dents. */}
+          <g stroke={melanger(mouthColor, '#5E3A2A', 0.5)} strokeWidth="1" strokeLinecap="round" opacity={(mSoif - 0.15) * 1.05}>
+            <line x1="44.5" y1={mY - 1} x2="44.2" y2={mY + 2.4} />
+            <line x1="47.5" y1={mY - 1.6} x2="47.5" y2={mY + 3} />
+            <line x1="50.5" y1={mY - 1.8} x2="50.5" y2={mY + 3.2} />
+            <line x1="53.5" y1={mY - 1.6} x2="53.5" y2={mY + 3} />
+            <line x1="56.5" y1={mY - 1} x2="56.8" y2={mY + 2.4} />
+          </g>
         </g>
       )}
-      {typeof condition === 'number' && condition > 0.72 && (
-        <g style={{ pointerEvents: 'none' }} clipPath={`url(#${faceId})`}>
-          {/* joues roses */}
-          <circle cx="32" cy="59" r="6" fill="#E8927C" opacity={0.18 + (condition - 0.72) * 0.6} />
-          <circle cx="68" cy="59" r="6" fill="#E8927C" opacity={0.18 + (condition - 0.72) * 0.6} />
+
+      {/*
+        LE MENTAL FAIT TREMBLER LE TRAIT.
+
+        Pas le visage : le DESSIN. Un second contour décalé, comme une main qui
+        ne tient plus le feutre — c'est le même parti pris que le texte qui se
+        brouille quand le mental lâche, et ça ne dépend d'aucun des quatorze
+        traits tirés, donc ça ne peut entrer en conflit avec rien.
+      */}
+      {mMental > 0.12 && (
+        <g style={{ pointerEvents: 'none' }} opacity={(mMental - 0.12) * 0.85} strokeDasharray="3.5 2.5">
+          {/* Le trait est POINTILLÉ : un second contour plein se lisait comme
+              une image mal rendue, un contour repassé se lit comme un dessin
+              que la main n'arrive plus à fermer. */}
+          <path d={tete()} fill="none" stroke={OUTLINE} strokeWidth="1.5" transform={`translate(${-1.4 - mMental * 1.6} ${0.9 + mMental * 1.2})`} />
+          <path d={tete()} fill="none" stroke={OUTLINE} strokeWidth="1.1" transform={`translate(${1.1 + mMental * 1.2} ${-0.7 - mMental})`} />
         </g>
       )}
-      {typeof condition === 'number' && condition > 0.72 && (
+
+      {/* LA SANTÉ MARQUE — un hématome sur la pommette. */}
+      {mSante > 0.35 && (
+        <g clipPath={`url(#${faceId})`} style={{ pointerEvents: 'none' }} opacity={(mSante - 0.35) * 1.4}>
+          <ellipse cx="34" cy="55" rx="6.5" ry="4.5" fill="#7A5A78" opacity="0.5" transform="rotate(-12 34 55)" />
+          <ellipse cx="34" cy="55" rx="4" ry="2.6" fill="#6B4A6E" opacity="0.45" transform="rotate(-12 34 55)" />
+        </g>
+      )}
+
+      {/* LA GRAVITÉ GÉNÉRALE — les coins de la bouche, et la sueur.
+          Des coins, pas une seconde bouche : l'ancien calque en redessinait
+          une par-dessus la vraie, et on en voyait deux. */}
+      {mal > 0.1 && (
+        <g style={{ pointerEvents: 'none' }}>
+          <path d={`M41.5 ${mY + 0.5} q-1.6 ${1.5 + mal * 4.5} -3.4 ${2 + mal * 5}`} stroke={OUTLINE} strokeWidth={1.4 + mal} fill="none" strokeLinecap="round" opacity={mal * 0.8} />
+          <path d={`M58.5 ${mY + 0.5} q1.6 ${1.5 + mal * 4.5} 3.4 ${2 + mal * 5}`} stroke={OUTLINE} strokeWidth={1.4 + mal} fill="none" strokeLinecap="round" opacity={mal * 0.8} />
+        </g>
+      )}
+      {mal > 0.5 && (
+        <path d="M71 33 q-2.6 4.5 0 7 q2.6 -2.5 0 -7 Z" fill="#8FB8D8" stroke="#5E86A6" strokeWidth="0.6" opacity={(mal - 0.5) * 1.9} style={{ pointerEvents: 'none' }} />
+      )}
+
+      {/* LA BONNE FORME — joues, et un coin de bouche qui remonte. */}
+      {vigueur > 0.04 && (
+        <g style={{ pointerEvents: 'none' }}>
+          <g clipPath={`url(#${faceId})`}>
+            <circle cx="32" cy="59" r={5 + vigueur * 2} fill="#E8927C" opacity={vigueur * 0.42} />
+            <circle cx="68" cy="59" r={5 + vigueur * 2} fill="#E8927C" opacity={vigueur * 0.42} />
+          </g>
+          <path d={`M41.5 ${mY + 1.5} q-1.4 -${1 + vigueur * 3} -3 -${1.5 + vigueur * 3.5}`} stroke={OUTLINE} strokeWidth="1.5" fill="none" strokeLinecap="round" opacity={vigueur * 0.7} />
+          <path d={`M58.5 ${mY + 1.5} q1.4 -${1 + vigueur * 3} 3 -${1.5 + vigueur * 3.5}`} stroke={OUTLINE} strokeWidth="1.5" fill="none" strokeLinecap="round" opacity={vigueur * 0.7} />
+        </g>
+      )}
+      {vigueur > 0.55 && (
         // L'étincelle reste HORS de la découpe : elle brille à côté de la tête.
-        <path d="M80 28 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4 Z" fill="#F5D06B" stroke={kraftOmbre} strokeWidth="0.4" opacity="0.95" style={{ pointerEvents: 'none' }} />
+        <path d="M80 28 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4 Z" fill="#F5D06B" stroke={kraftOmbre} strokeWidth="0.4" opacity={(vigueur - 0.55) * 2.2} style={{ pointerEvents: 'none' }} />
       )}
 
       {/* ---- Calque de TENUE (dérivé de la Dignité) ----
@@ -932,16 +1125,45 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         ruban — parce que c'est ce que le joueur peut reconnaître d'un coup
         d'œil sans qu'aucun texte ne le dise.
       */}
-      {typeof dignity === 'number' && dignity < 75 && (
-        <g style={{ pointerEvents: 'none' }}>
-          {/* Le coin supérieur gauche est corné : le carton se replie sur
-              lui-même, et c'est le dos — plus clair — qu'on voit. */}
+      {/*
+        LA BARBE DE TROIS JOURS — le signe qui porte le plus loin, parce qu'il
+        assombrit toute la mâchoire. Densité et opacité continues.
+
+        Elle démarrait à 0,2 de crasse, c'est-à-dire à 80 de dignité — et le
+        contrôle a trouvé là une zone morte que l'œil ne voyait pas : entre 80
+        et 100, plus rien ne bougeait, alors que c'est la plage où l'on passe
+        le début de partie. Elle commence maintenant à peine la dignité
+        quittée, ce qui est aussi plus juste : on ne se rase pas dehors.
+      */}
+      {crasse > 0.06 && beardStyle !== 3 && (
+        <g clipPath={`url(#${faceId})`} style={{ pointerEvents: 'none' }}>
+          {/* Assombrie, jamais éclaircie : tirée telle quelle, une chevelure
+              blanche posait un bavoir clair au milieu du menton. Une barbe qui
+              repousse fonce le bas du visage, quelle que soit sa couleur. */}
+          <path
+            d={`M${50 - jx - 2} ${mY - 4} Q${50 - jx + 1} ${chin - 1} 50 ${chin + 2.5} Q${50 + jx - 1} ${chin - 1} ${50 + jx + 2} ${mY - 4} Q${50 + jx * 0.6} ${mY + 4} 50 ${mY + 5} Q${50 - jx * 0.6} ${mY + 4} ${50 - jx - 2} ${mY - 4} Z`}
+            fill={melanger(hair, '#2A1F16', 0.45)}
+            opacity={(crasse - 0.06) * 0.44}
+          />
+        </g>
+      )}
+      {/* Des mèches qui ne tiennent plus. */}
+      {crasse > 0.4 && hairStyle !== 0 && !accHat && hat !== 1 && hat !== 2 && (
+        <g stroke={hair} strokeWidth="1.6" strokeLinecap="round" fill="none" style={{ pointerEvents: 'none' }} opacity={(crasse - 0.4) * 1.6}>
+          <path d="M34 22 q-3 -6 -1 -10" /><path d="M50 17 q1 -7 4 -9" /><path d="M64 21 q4 -5 3 -10" />
+        </g>
+      )}
+
+      {/* ET LE CARTON, EN SECOND : un coin corné, un bord mangé, une fissure
+          recollée. Ils arrivent l'un après l'autre, mais en fondu. */}
+      {crasse > 0.25 && (
+        <g style={{ pointerEvents: 'none' }} opacity={Math.min(1, (crasse - 0.25) * 2.6)}>
           <path d="M2 20 L20 2 L20 20 Z" fill={melanger(bg, '#FFFFFF', 0.4)} stroke={kraftOmbre} strokeWidth="0.9" strokeLinejoin="round" />
           <path d="M20 20 L20 2" stroke={kraftOmbre} strokeWidth="0.9" opacity="0.6" />
         </g>
       )}
-      {typeof dignity === 'number' && dignity < 50 && (
-        <g style={{ pointerEvents: 'none' }}>
+      {crasse > 0.5 && (
+        <g style={{ pointerEvents: 'none' }} opacity={Math.min(1, (crasse - 0.5) * 2.6)}>
           {/* Le bord droit est mangé : la cannelure sort par la déchirure. */}
           <path d="M100 34 Q94 44 97 54 Q92 64 98 74 Q94 82 100 90 L100 34 Z" fill={melanger(bg, '#FFFFFF', 0.3)} stroke={kraftOmbre} strokeWidth="0.8" strokeLinejoin="round" />
           <g stroke={kraftOmbre} strokeWidth="0.6" opacity="0.5">
@@ -949,20 +1171,14 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
             <line x1="95" y1="60" x2="100" y2="60" /><line x1="97" y1="70" x2="100" y2="70" />
             <line x1="96" y1="80" x2="100" y2="80" />
           </g>
-          {/* Le feutre bave : une coulure sous le trait du visage. */}
-          <path d={`M36 ${chin + 2} q1.5 5 0 8`} stroke={OUTLINE} strokeWidth="1.4" fill="none" strokeLinecap="round" opacity="0.5" />
         </g>
       )}
-      {typeof dignity === 'number' && dignity < 25 && (
-        <g style={{ pointerEvents: 'none' }}>
+      {crasse > 0.75 && (
+        <g style={{ pointerEvents: 'none' }} opacity={Math.min(1, (crasse - 0.75) * 4)}>
           {/* Une fissure recollée au ruban adhésif : réparé, pas remplacé. */}
           <path d="M8 6 L12 40 L7 92" stroke={kraftOmbre} strokeWidth="1.1" fill="none" opacity="0.6" />
           <g transform="rotate(-12 10 44)">
             <rect x="3" y="40" width="13" height="6" fill="#EFE6D2" opacity="0.5" stroke={kraftOmbre} strokeWidth="0.5" />
-          </g>
-          {/* La barbe de trois jours, semée le long de la mâchoire. */}
-          <g fill={OUTLINE} opacity="0.34" clipPath={`url(#${faceId})`}>
-            {grains.map((g, i) => <circle key={i} cx={50 + (g.x - 50) * 1.5} cy={mY + 2 + (i % 3) * 3} r="0.9" />)}
           </g>
           {/* Un voile terne sur l'ensemble : plus personne ne vous regarde. */}
           <rect x="0" y="0" width="100" height="100" rx="20" fill="#6B5740" opacity="0.12" />

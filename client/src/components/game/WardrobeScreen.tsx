@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import CardboardAvatar from './CardboardAvatar';
-import { faceCondition } from './PlayerFace';
 import { playBack, playClick, playObjetEquipe, playTab } from '@/lib/sound';
 import {
   ACCESSORIES,
@@ -83,7 +82,7 @@ export default function WardrobeScreen() {
               la tenue s'effondre ailleurs annulerait tout le signal. */}
           <CardboardAvatar
             seed={seed} gender={gender} size={96} accessories={tenue}
-            condition={char ? faceCondition(char) : undefined}
+            jauges={char?.stats}
             dignity={char?.stats.dignity}
           />
         </div>
