@@ -72,11 +72,34 @@ function semer(texte: string, tranche: number): () => number {
   return tirer;
 }
 
-/** Un mot qu'on laisse tranquille : trop court, chiffré, ou nom propre. */
+/**
+ * Un mot qu'on laisse tranquille : trop court, chiffré, nom propre — ou
+ * PORTEUR D'UNE APOSTROPHE OU D'UN TRAIT D'UNION.
+ *
+ * Cette dernière règle est une correction, et elle vient d'une mesure. Le
+ * brouillage traitait « l'histoire » comme un seul mot et déplaçait
+ * l'apostrophe avec les lettres. Sur les 1 303 phrases du jeu, un mot brouillé
+ * sur dix ressortait ainsi :
+ *
+ *     quelqu'un  → qq'uuueln
+ *     grand-mère → gdr-nrmaèe
+ *     l'intérieur → lu'etinréir
+ *
+ * Ce ne sont pas des lectures difficiles, ce sont des caractères déplacés : ça
+ * ne se lit pas comme un symptôme, ça se lit comme une faute de frappe. Et
+ * c'est ce qui a fait signaler la mécanique entière comme « des phrases
+ * parasites ».
+ *
+ * On pourrait ne brouiller que les segments de lettres et laisser la
+ * ponctuation en place. On préfère épargner ces mots : ils sont une petite
+ * minorité, et « quelqu » brouillé seul reste une bouillie. Le brouillage doit
+ * produire des mots mal lus, jamais des restes.
+ */
 function intouchable(mot: string): boolean {
   if (mot.length < 6) return true;
   if (/\d/.test(mot)) return true;
   if (/^[A-ZÉÈÀÇ]/.test(mot)) return true;
+  if (/['’-]/.test(mot)) return true;
   return false;
 }
 

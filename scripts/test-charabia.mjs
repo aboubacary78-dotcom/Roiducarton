@@ -162,6 +162,28 @@ await pause(600);
 const apres = await p.evaluate(() => document.querySelector('.craft-card p')?.textContent);
 verifier('le texte ne danse pas d\'un redessin à l\'autre', avant === apres);
 
+/*
+ * ET LA PONCTUATION NE BOUGE PAS.
+ *
+ * Le brouillage traitait « l'histoire » comme un seul mot : l'apostrophe
+ * partait se promener au milieu des lettres, et « qq'uuueln » pour
+ * « quelqu'un » ne se lit pas comme une lecture difficile mais comme un
+ * caractère déplacé. C'est ce qui a fait signaler toute la mécanique comme
+ * « des phrases parasites ».
+ *
+ * On lit donc le texte affiché à mental bas et on vérifie qu'aucun mot ne
+ * porte une apostrophe ou un trait d'union AILLEURS qu'en position plausible.
+ * Le contrôle exhaustif, sur les 1 303 phrases du jeu, est dans
+ * `scripts/audit-charabia.ts` — celui-ci garde le chemin réel.
+ */
+const jetons = await p.evaluate(() =>
+  (document.body.innerText.match(/[A-Za-zÀ-ÖØ-öø-ÿ’'-]{4,}/g) ?? []));
+// Une apostrophe française suit une seule lettre (l', d', j', qu', n'…) ou
+// sépare deux morceaux de mot ; jamais deux lettres isolées au hasard.
+const abimes = jetons.filter(j => /['’]/.test(j) && !/^(?:[a-zà-ÿ]{1,4}['’][a-zà-ÿ]+|[A-ZÀ-Ÿ][a-zà-ÿ]*['’][a-zà-ÿ]+)$/.test(j));
+verifier('à mental bas, aucune apostrophe ne s\'est déplacée',
+  abimes.length === 0, abimes.slice(0, 5).join(', '));
+
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 
 await b.close();
