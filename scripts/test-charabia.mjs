@@ -176,13 +176,36 @@ verifier('le texte ne danse pas d\'un redessin à l\'autre', avant === apres);
  * Le contrôle exhaustif, sur les 1 303 phrases du jeu, est dans
  * `scripts/audit-charabia.ts` — celui-ci garde le chemin réel.
  */
-const jetons = await p.evaluate(() =>
-  (document.body.innerText.match(/[A-Za-zÀ-ÖØ-öø-ÿ’'-]{4,}/g) ?? []));
-// Une apostrophe française suit une seule lettre (l', d', j', qu', n'…) ou
-// sépare deux morceaux de mot ; jamais deux lettres isolées au hasard.
-const abimes = jetons.filter(j => /['’]/.test(j) && !/^(?:[a-zà-ÿ]{1,4}['’][a-zà-ÿ]+|[A-ZÀ-Ÿ][a-zà-ÿ]*['’][a-zà-ÿ]+)$/.test(j));
-verifier('à mental bas, aucune apostrophe ne s\'est déplacée',
-  abimes.length === 0, abimes.slice(0, 5).join(', '));
+/*
+ * ET LE MOT PERDU EST FAIT DE SIGNES, PAS DE LETTRES MÉLANGÉES.
+ *
+ * Mélanger les lettres produisait exactement l'aspect d'une faute de frappe,
+ * et se faisait signaler comme telle. Le contrôle vérifie donc la forme
+ * VOULUE — des formes géométriques — et non seulement que « le texte a
+ * changé », ce qu'une coquille satisferait tout aussi bien.
+ */
+const signes = await p.evaluate(() =>
+  (document.body.innerText.match(/[■□▲△▼▽◆◇●○◈◉◊◐◑]/g) ?? []).length);
+verifier('à mental bas, les mots perdus sont des signes illisibles',
+  signes > 0, `${signes} signe(s) à l'écran`);
+
+/*
+ * LES MOTS PONCTUÉS SONT ÉPARGNÉS, ET C'EST CE QU'ON VÉRIFIE.
+ *
+ * Première version de ce contrôle : une expression censée décrire « une
+ * apostrophe française plausible ». Elle refusait « quelqu'un » et
+ * « L'Escalator », qui sont l'un et l'autre du français parfaitement correct
+ * — le test accusait le jeu d'une faute qui était dans sa propre grammaire.
+ *
+ * La règle réelle est plus simple et se vérifie directement : le brouillage
+ * ne touche pas un mot porteur d'apostrophe ou de trait d'union. Aucun de ces
+ * mots ne doit donc contenir de signe illisible.
+ */
+const ponctuesAbimes = await p.evaluate(() =>
+  (document.body.innerText.match(/\S*[■□▲△▼▽◆◇●○◈◉◊◐◑]\S*/g) ?? [])
+    .filter(j => /['’-]/.test(j)));
+verifier('les mots à apostrophe ou trait d\'union restent intacts',
+  ponctuesAbimes.length === 0, ponctuesAbimes.slice(0, 5).join(', '));
 
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 

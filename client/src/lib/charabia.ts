@@ -14,9 +14,11 @@
  *
  * TROIS RÈGLES QUI EMPÊCHENT QUE ÇA PASSE POUR UN BUG :
  *
- *   1. LES LETTRES DU DÉBUT ET DE LA FIN NE BOUGENT PAS. On brouille
- *      l'intérieur des mots longs, qui restent devinables. Le joueur sent
- *      qu'il lit mal ; il ne se retrouve pas devant du bruit.
+ *   1. UN MOT QUI LÂCHE DEVIENT DES SIGNES, PAS UN MOT MAL ÉCRIT. Mélanger
+ *      les lettres — « accepte » → « acpetce » — produisait exactement
+ *      l'aspect d'une faute de frappe, et se faisait signaler comme telle.
+ *      Des formes géométriques à la place du mot ne se confondent avec rien :
+ *      c'est un trou dans la lecture, pas une coquille.
  *
  *   2. LE MÊME TEXTE DONNE TOUJOURS LE MÊME CHARABIA. Le tirage est semé sur
  *      le texte et sur la tranche de mental, jamais sur l'horloge : sinon les
@@ -103,29 +105,46 @@ function intouchable(mot: string): boolean {
   return false;
 }
 
-/**
- * Mélange l'intérieur d'un mot, première et dernière lettre en place.
+/* ═══════════════════════════════════════════════════════════════════════════
+ * UN MOT QUI LÂCHE DEVIENT DES SIGNES, PAS UN MOT MAL ÉCRIT
  *
- * ET GARANTIT QUE LE MOT CHANGE. Un mot de cinq lettres n'a que trois lettres
- * intérieures, souvent avec des doublons : « homme » remélangé redonne
- * « homme » une fois sur deux. La moitié du brouillage ne se voyait donc pas,
- * et l'effet paraissait bien plus faible qu'il ne l'était. On force un
- * échange tant que le résultat est identique.
+ * Pendant longtemps, un mot touché voyait ses lettres intérieures mélangées :
+ * « accepte » → « acpetce ». L'idée était bonne — le mot reste devinable, on
+ * SENT qu'on lit mal — mais elle a un défaut fatal, et il a fallu une capture
+ * d'écran pour le voir : un mot aux lettres mélangées, c'est exactement à quoi
+ * ressemble une faute de frappe. Le joueur ne lit pas « ma tête part », il lit
+ * « le développeur a mal écrit ». Toute la mécanique se faisait signaler comme
+ * « des phrases parasites ».
+ *
+ * Le mot touché devient donc ILLISIBLE : une suite de signes géométriques, de
+ * la même longueur, à la place des lettres. On ne peut pas confondre ça avec
+ * une coquille — c'est visiblement un trou dans la lecture, et c'est
+ * exactement ce que le Mental est censé produire.
+ *
+ * POURQUOI DES SIGNES UNICODE ET PAS WINGDINGS. Wingdings est une police
+ * Microsoft : elle n'existe ni sur Android ni sur iOS, et un texte qui la
+ * demande retombe silencieusement sur la police du système — c'est-à-dire sur
+ * les lettres d'origine, parfaitement lisibles. Le bloc « Formes
+ * géométriques » (U+25xx) est, lui, servi par les polices système partout, et
+ * ne demande aucun téléchargement dans l'APK.
+ *
+ * On garde les signes SOBRES et non colorés : les étoiles et les cœurs
+ * partent en emoji sur Android, ce qui ferait un mot en couleur au milieu
+ * d'une phrase, et une décoration là où il faut un manque.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+const SIGNES = ['■', '□', '▲', '△', '▼', '▽', '◆', '◇', '●', '○', '◈', '◉', '◊', '◐', '◑'];
+
+/**
+ * Remplace un mot par des signes de MÊME LONGUEUR.
+ *
+ * La longueur compte : un mot remplacé par trois symboles ferait sauter la
+ * mise en page et se lirait comme une troncature. Là, le texte garde sa
+ * forme — on voit qu'il manque un mot précis, à sa place exacte.
  */
-function melanger(mot: string, rng: () => number): string {
-  const lettres = mot.split('');
-  for (let i = lettres.length - 2; i > 1; i--) {
-    const j = 1 + Math.floor(rng() * i);
-    [lettres[i], lettres[j]] = [lettres[j], lettres[i]];
-  }
-  let sortie = lettres.join('');
-  for (let essai = 0; sortie === mot && essai < 6; essai++) {
-    const a = 1 + Math.floor(rng() * (lettres.length - 2));
-    const b = 1 + Math.floor(rng() * (lettres.length - 2));
-    if (a === b) continue;
-    [lettres[a], lettres[b]] = [lettres[b], lettres[a]];
-    sortie = lettres.join('');
-  }
+function illisible(mot: string, rng: () => number): string {
+  let sortie = '';
+  for (let i = 0; i < mot.length; i++) sortie += SIGNES[Math.floor(rng() * SIGNES.length)];
   return sortie;
 }
 
@@ -159,7 +178,7 @@ export function charabia(texte: string, mental: number, en = false): string {
     if (intouchable(mot)) return mot;
     const d = rng();
     if (d < partRemplacee) return banque[Math.floor(rng() * banque.length)];
-    if (d < partRemplacee + partMelangee) return melanger(mot, rng);
+    if (d < partRemplacee + partMelangee) return illisible(mot, rng);
     return mot;
   });
 }
