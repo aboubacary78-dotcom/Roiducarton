@@ -6,9 +6,9 @@
  * une seconde barre de vie déguisée, et rien ne rendait sa perte
  * INTÉRESSANTE — juste inquiétante.
  *
- * Désormais il tient la lisibilité du monde. Sous 60, les mots des rencontres
- * commencent à se mélanger ; plus bas, ils se remplacent carrément par
- * d'autres. Le joueur ne perd pas des points : il perd le fil de ce qu'on lui
+ * Désormais il tient la lisibilité du monde. Sous 20 — et pas avant — les mots
+ * des rencontres commencent à s'effacer ; plus bas, certains se remplacent
+ * carrément par d'autres. Le joueur ne perd pas des points : il perd le fil de ce qu'on lui
  * raconte, ce qui est autrement plus désagréable et — c'est le sujet du jeu —
  * autrement plus juste.
  *
@@ -38,13 +38,24 @@
 /**
  * Au-dessus, on lit parfaitement.
  *
- * EXPORTÉ, et pas seulement utilisé ici : la pique qui prévient le joueur que
- * sa tête part doit tomber exactement quand l'écriture commence à lâcher.
- * Recopier « 60 » dans la barre de jauges aurait marché le premier jour et
- * dérivé au premier réglage — la remarque arrivant trop tôt ou trop tard, sans
- * que rien ne le signale.
+ * VINGT, ET PAS SOIXANTE. Le seuil était à 60, c'est-à-dire que le texte
+ * commençait à s'effacer alors que la jauge était encore aux DEUX TIERS
+ * pleine. Le joueur voyait le monde devenir illisible en se sentant parfaitement
+ * bien, et la remarque qui l'en prévient tombait elle aussi hors de toute zone
+ * critique : « on n'est même pas à 20 % ». Un symptôme qui arrive avant la
+ * maladie ne se rattache à rien.
+ *
+ * Vingt est le territoire où les autres jauges commencent à faire mal — le
+ * corps crie sous 10, la tête décroche sous 20. La lecture qui se troue devient
+ * alors ce qu'elle doit être : le signe qu'on va mal, pas un effet de style.
+ *
+ * EXPORTÉ, et pas seulement utilisé ici : la pique qui prévient le joueur doit
+ * tomber exactement quand l'écriture commence à lâcher. Recopier le nombre
+ * dans la barre de jauges aurait marché le premier jour et dérivé au premier
+ * réglage — la remarque arrivant trop tôt ou trop tard, sans que rien ne le
+ * signale.
  */
-export const SEUIL_LISIBLE = 60;
+export const SEUIL_LISIBLE = 20;
 const SEUIL_LUCIDE = SEUIL_LISIBLE;
 
 /**
@@ -174,8 +185,21 @@ export function charabia(texte: string, mental: number, en = false): string {
    */
   const tranche = Math.floor(mental / 10);
   const gravite = (SEUIL_LUCIDE - mental) / SEUIL_LUCIDE; // 0 → 1
-  const partMelangee = 0.12 + gravite * 0.45;
-  const partRemplacee = Math.max(0, gravite - 0.45) * 0.30;
+
+  /*
+   * L'ENTRÉE EST PROGRESSIVE, ET ELLE NE L'ÉTAIT PAS.
+   *
+   * La part effacée partait d'un socle de 0,12 : au premier point sous le
+   * seuil, un mot éligible sur huit disparaissait déjà. Le brouillage
+   * s'allumait donc d'un coup, comme un interrupteur, ce qui se lit comme une
+   * panne plutôt que comme une dégradation.
+   *
+   * Sans socle, la courbe part de zéro : à un point sous le seuil on ne voit
+   * presque rien, et à l'agonie plus d'un mot sur deux s'efface. Le joueur
+   * sent la tête partir au lieu de la trouver soudain partie.
+   */
+  const partMelangee = gravite * 0.55;
+  const partRemplacee = Math.max(0, gravite - 0.5) * 0.30;
 
   const rng = semer(texte, tranche);
   const banque = en ? MOTS_QUI_PASSENT_EN : MOTS_QUI_PASSENT;

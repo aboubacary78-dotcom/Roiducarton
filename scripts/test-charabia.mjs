@@ -140,7 +140,24 @@ verifier('à mental haut, le texte est celui du catalogue, au caractère près',
   !!clair && CATALOGUE.has(propre(clair.desc)), clair?.desc.slice(0, 60));
 
 // ── La tête qui part : le récit se mélange ─────────────────────────────────
-const trouble = await rencontre(12);
+/*
+ * ON MESURE AU FOND, ET ON RÉESSAIE.
+ *
+ * À 12 de mental, la moitié des mots éligibles passe encore — mais une phrase
+ * courte peut n'en contenir que quatre, et n'en perdre aucun. Le test échouait
+ * alors une fois sur trois en accusant le brouillage, alors que le tirage était
+ * parfaitement correct : il mesurait une phrase, pas une règle.
+ *
+ * On descend donc à 2, où la proportion est la plus haute, et on accepte
+ * jusqu'à quatre rencontres. Une phrase sans aucun mot long reste possible ;
+ * quatre d'affilée ne l'est pas.
+ */
+let trouble = null;
+for (let essai = 0; essai < 4; essai++) {
+  trouble = await rencontre(2);
+  if (trouble && /[■□▲△▼▽◆◇●○◈◉◊◐◑]/.test(trouble.desc)) break;
+  await clic('Retour|Back'); await pause(500);
+}
 verifier('à mental bas, une rencontre s\'ouvre encore',
   !!trouble && trouble.desc.length > 20, trouble?.desc.slice(0, 60));
 verifier('à mental bas, le texte ne correspond plus à aucune description connue',
@@ -208,6 +225,25 @@ verifier('les mots à apostrophe ou trait d\'union restent intacts',
   ponctuesAbimes.length === 0, ponctuesAbimes.slice(0, 5).join(', '));
 
 /*
+ * JUSTE AU-DESSUS DU SEUIL, ON LIT ENCORE PARFAITEMENT.
+ *
+ * C'est la garde qui manquait, et son absence a coûté deux versions : le seuil
+ * était à 60, donc le texte s'effaçait alors que la jauge était encore aux
+ * deux tiers pleine. Vérifier « à 90 c'est propre, à 12 c'est troué » ne dit
+ * rien de l'endroit où la bascule se produit — et c'est précisément l'endroit
+ * qui était faux.
+ *
+ * On mesure donc À LA FRONTIÈRE, cinq points au-dessus : là, rien ne doit
+ * bouger. Si le seuil remonte un jour, ce contrôle tombe.
+ */
+await clic('Retour|Back'); await pause(600);
+const frontiere = await rencontre(25);
+const signesFrontiere = ((frontiere?.desc ?? '').match(/[■□▲△▼▽◆◇●○◈◉◊◐◑]/g) ?? []).length;
+verifier('à 25 de mental — au-dessus du seuil — le texte est intact',
+  !!frontiere && signesFrontiere === 0,
+  frontiere ? `${signesFrontiere} signe(s) : ${frontiere.desc.slice(0, 70)}` : 'aucune rencontre ouverte');
+
+/*
  * ET LE JEU DIT POURQUOI.
  *
  * Le brouillage était entièrement muet : rien ne reliait le texte troué à la
@@ -234,7 +270,10 @@ if (PHRASES.length < 5) throw new Error('les piques du mental sont introuvables 
  */
 await rencontre(90);
 await clic('Retour|Back'); await pause(600);
-await rencontre(30);
+// 12, et non 30 : le seuil de lisibilité est passé de 60 à 20 — le texte ne
+// commençait à s'effacer qu'alors que la jauge était encore aux deux tiers
+// pleine. Un 30 mesurerait désormais un silence parfaitement correct.
+await rencontre(12);
 const vus = await p.evaluate(async () => {
   const vu = new Set();
   for (let i = 0; i < 40; i++) {

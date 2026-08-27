@@ -42,7 +42,7 @@ let punctuationCassee = 0;
 console.log('  mental │ mots touchés │ ponctuation déplacée');
 console.log('  ───────┼──────────────┼─────────────────────');
 const exemples: string[] = [];
-for (const mental of [55, 45, 35, 25, 15, 5]) {
+for (const mental of [19, 15, 12, 8, 4, 0]) {
   let mots = 0, touches = 0, casses = 0;
   for (const t of textes) {
     const sortie = charabia(t, mental);
@@ -77,9 +77,9 @@ if (exemples.length) {
  * échantillon au niveau où le joueur le rencontre le plus — autour de 45,
  * juste sous le seuil — tranche mieux que n'importe quel chiffre.
  */
-console.log('\n  échantillon à mental 45 :');
+console.log('\n  échantillon à mental 10 :');
 for (const t of textes.slice(0, 3)) {
-  const brouille = charabia(t, 45);
+  const brouille = charabia(t, 10);
   if (brouille === t) continue;
   console.log(`\n    ${t.slice(0, 110)}`);
   console.log(`    ${brouille.slice(0, 110)}`);
