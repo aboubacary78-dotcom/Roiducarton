@@ -1,5 +1,32 @@
 # Commande images — « Le Roi du Carton » — La Boutique (7 images)
 
+> ## ✅ LIVRÉ ET INSTALLÉ
+>
+> Les sept images sont dans `client/public/assets/`. Contrôles : 7/7 présentes,
+> **toutes aux dimensions exactes demandées** (elles étaient différentes d'une
+> image à l'autre, c'est le point où une livraison dérape le plus souvent), de
+> 17 à 83 ko, plafond 150.
+>
+> **Les trois règles sont tenues.** Aucun mot lisible nulle part — l'enseigne
+> porte des gribouillis et une petite couronne, le reçu une croix seule. Le
+> vendeur et la main du reçu partagent la même manche rapiécée et le même gant
+> coupé aux doigts. Et les cinq têtes de l'établi sont vides sauf une, qui a
+> deux yeux et pas encore de bouche : exactement ce qui était demandé.
+>
+> **Un défaut trouvé et corrigé : `boutique-paix` avait des COINS ARRONDIS
+> BLANCS gravés dans le fichier** — 18,6 % de blanc pur dans les quatre angles,
+> mesuré. Posée sur une tuile kraft, elle aurait montré quatre encoches pâles.
+> Recadrée de 12 × 8 px (plus que la flèche de l'arc), rapport 3:2 conservé au
+> pixel près, 98 % de l'image gardée.
+>
+> **Et le contrôle écrit pour l'occasion en a trouvé une autre, déjà en
+> production :** `npc-preteur.webp`, livrée avec le lot de la dette, portait le
+> même défaut depuis le début. Personne ne l'avait vu. Elle est recadrée aussi.
+> `scripts/controle-images.mjs` passe maintenant les 1029 images du jeu.
+>
+> **Licence :** génération d'images Manus — l'utilisateur possède les sorties
+> et peut en faire un usage commercial.
+
 **Ce document est la commande complète. Tout ce qu'il faut est dedans : aucun
 autre fichier n'est nécessaire.**
 
