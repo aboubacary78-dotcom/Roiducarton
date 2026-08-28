@@ -372,19 +372,116 @@ Sans mesure, tout ce document n'est qu'une opinion bien écrite.
 
 ---
 
-## 6. Ordre de mise en œuvre
+## 6. Les biais, un par un, et où ils sont branchés
 
-Par rapport rendement / effort, et chaque étape se mesure seule :
+Passe complète. Chaque ligne dit **où** ça se joue dans le jeu — un biais qui
+n'a pas de point d'ancrage dans l'interface n'est pas activé, c'est une
+intention.
 
-1. **La dégustation** (§4). Aucun écran à dessiner, effet le plus fort.
-2. **L'Atelier en essai libre** avec paywall à la validation. Une garde à
-   déplacer.
-3. **Les textes** (§3) dans les cartes existantes des Options. Une heure, et
-   ça teste le recadrage « additif » de Sans Pub sans rien redessiner.
-4. **Les points d'entrée** 2 et 3.
-5. **L'écran Boutique** lui-même (§2), en dernier — c'est le plus long à faire
-   et le moins déterminant.
+### Ceux qui portent le plus
+
+| Biais | Où, concrètement |
+|---|---|
+| **Effet de dotation** — une chose possédée puis retirée pèse ~2× une chose jamais eue | La dégustation, §4. Dix minutes de paix offertes, puis la carte « c'était ça, tout le temps ». Le seul levier du document qui se déclenche par l'expérience et pas par le texte. |
+| **Effet IKEA** — on surévalue ce qu'on a fabriqué | Atelier en essai libre, paywall au clic de **valider**. On ne vend plus une fonction, on vend ce personnage-là, déjà fait, qui attend. |
+| **Engagement et cohérence** (pied dans la porte) | Le même essai libre fait passer le joueur de « je regarde » à « j'ai composé quarante secondes ». Il a déjà investi avant qu'on parle d'argent. |
+| **Aversion à la perte** | Le point de vente n° 2 est l'**écran de mort**, pas le hub : c'est le seul moment où « je recommence » est actif et où ce qu'on vient de perdre est encore chaud. |
+| **Effet Zeigarnik** — une tâche inachevée occupe l'esprit | Un visage composé mais non payé reste en attente. Sur le hub, une petite étiquette : « **Une tête vous attend à l'atelier.** » Elle apparaît **une fois**, et ne revient pas si on l'écarte : au-delà, ce n'est plus un rappel, c'est du harcèlement. |
+| **Ancrage** | Le Pack en haut. Le premier prix lu sert de référence à tous les suivants, et fait lire l'Atelier seul comme un repli raisonnable. |
+| **Réciprocité** | À la première ouverture de la boutique, le vendeur donne un accessoire de garde-robe. Gratuitement, sans condition, sans le rappeler ensuite. Ce qui déclenche la réciprocité, c'est le don sans contrepartie — un « cadeau » conditionné à un achat n'en est pas un et se lit immédiatement. |
+| **Effet von Restorff** — ce qui tranche se retient | Un seul accent chaud sur tout l'écran, §2. C'est la même règle vue sous un autre nom : le fluo n'existe que sur les boutons. |
+| **Effet d'unité / complétion** | Qui possède une moitié voit l'autre présentée comme un manque, pas comme un produit : « **Il vous manque encore la paix.** » `packUtile()` masque déjà le lot dans ce cas. |
+| **Règle du pic et de la fin** | L'achat réussi n'a aujourd'hui aucun moment. Le vendeur tend un **reçu en carton** — petite animation, 800 ms, une fois. C'est le souvenir qui restera de la transaction, et il ne coûte rien. |
+
+### Les trois objections, qui valent la moitié des biais réunis
+
+C'est le levier le plus négligé et le moins cher : personne n'achète en ayant
+une question sans réponse. Les trois vraies objections d'un joueur devant cet
+écran, et le texte qui les tue — **court, sous le bouton, en petit** :
+
+| Ce qu'il pense | Ce qu'il lit |
+|---|---|
+| « C'est un abonnement déguisé ? » | **Une fois. Jamais deux.** |
+| « Et si je change de téléphone ? » | **Ça suit votre compte, pas l'appareil.** |
+| « Et si je regrette ? » | **Google rembourse dans les 48 h. On ne discutera pas.** |
+
+Les trois sont **vraies** : les produits sont non consommables, la possession
+est relue depuis le compte Google au lancement (`facturation.ts`), et le Play
+Store applique son propre délai de rétractation, qu'on le dise ou non. Les
+énoncer ne concède rien — ça enlève trois raisons de ne pas cliquer.
+
+### La preuve sociale — sans inventer personne
+
+Un compteur « 12 483 joueurs ont acheté » est un mensonge s'il est faux, et
+une donnée qu'on n'a pas. Mais le jeu détient une preuve bien meilleure, parce
+qu'elle est **personnelle et vérifiable par le joueur lui-même** : son
+cimetière.
+
+> *« Onze morts. Onze visages tirés au sort. »*
+
+Le nombre vient de `profile.records` / de l'écran Cimetière. Il ne prouve rien
+sur les autres, il rappelle au joueur ce que **lui** a subi — et c'est
+strictement plus fort qu'une statistique inventée sur des inconnus.
+
+### Ce qu'on n'active pas, et ce que ça coûterait
+
+| Levier | Pourquoi non |
+|---|---|
+| Fausse promotion, prix barré fictif | Directive Omnibus / L.112-1-1, et *Deceptive Behavior* chez Google. Retrait possible. §0. |
+| Compte à rebours sur un produit permanent | Le joueur qui revient demain apprend qu'on lui a menti. Le gain d'un jour se paie sur la durée de vie du jeu. |
+| Compteur d'acheteurs inventé | Donnée fausse, et remplaçable par le cimetière, qui est vrai. |
+| Rappel répété du panier abandonné | Un rappel est utile, trois sont du harcèlement — et la note du Play Store s'en souvient plus longtemps que la conversion. |
+| Nerf du jeu gratuit pour vendre l'achat | La seule ligne rouge absolue. On vend un confort et une maîtrise, jamais la fin d'une gêne qu'on aurait ajoutée exprès. |
+
+---
+
+## 7. Les images à générer
+
+Convention du projet (voir `docs/prompts-images.md`) : dépôt dans
+`client/public/assets/`, nom de fichier **exact**, `.webp`, repli sur le dessin
+tant que le fichier manque.
+
+Préfixe de style à coller devant chaque prompt :
+
+> Handmade miniature cardboard diorama, brown kraft & corrugated cardboard,
+> cut-out puppet characters with hand-drawn marker faces, warm tungsten light,
+> tiny fairy-light string, shallow depth of field, photorealistic, gentle dark
+> humor.
+
+| Fichier | Format | Scène |
+|---|---|---|
+| `boutique-enseigne.webp` | 3:1 | Une pancarte en carton scotchée de travers sur un mur de carton, ruban adhésif jaune fluo aux quatre coins, « LE MARCHÉ NOIR » écrit au gros marqueur noir baveux, une ampoule nue qui pend au-dessus. Personne. Juste l'enseigne. |
+| `boutique-vendeur.webp` | 1:1 | Un vendeur en carton derrière un étal fait de cageots retournés, manteau trop grand, lunettes rafistolées au scotch, sourire au feutre un peu trop commercial, une main qui présente la marchandise. Il vous regarde droit dans les yeux. |
+| `boutique-paix.webp` | 3:2 | Le SDF en carton, enfin assis tranquille sous son porche, guirlande allumée, une tasse fumante. Autour de lui, empilés dos tourné contre le mur, des panneaux publicitaires en carton retournés face au mur. Silence. Chaleur. |
+| `boutique-atelier.webp` | 3:2 | Un établi en carton vu de dessus : quatre ou cinq têtes en carton découpé alignées, des yeux et des bouches au feutre sur des chutes, une paire de ciseaux, un marqueur ouvert, de la colle. Une tête à moitié finie au centre. Lumière d'atelier. |
+| `boutique-lot.webp` | 3:2 | Un paquet en carton ficelé avec de la grosse ficelle, une étiquette cartonnée pendue à l'œillet, deux objets qui dépassent : une tête en carton découpé et une petite pancarte « SILENCE ». Posé sur l'étal. |
+| `boutique-recu.webp` | 1:1 | Un bout de carton déchiré tendu par une main, tamponné d'une croix au feutre en guise de tampon. Un reçu de marché noir. Gros plan, faible profondeur de champ. |
+| `boutique-degustation.webp` | 3:2 | Le SDF en carton assis, les yeux fermés, visage détendu, et au premier plan un petit réveil en carton dont les aiguilles sont dessinées au feutre. Un moment volé. Doux, un peu triste. |
+
+**Ce qu'il ne faut PAS générer**, et c'est important : aucune image de visage
+de personnage pour la tuile Atelier. Le jeu en dessine un **vrai, vivant, celui
+du joueur** avec `CardboardAvatar` — une illustration figée à côté serait
+moins convaincante que la démonstration en direct, et contredirait la
+promesse (« votre tête », pas une tête de catalogue).
+
+---
+
+## 8. Ordre de mise en œuvre
+
+Par rapport rendement / effort. Chaque étape se mesure seule, ce qui est la
+seule façon de savoir laquelle a marché.
+
+| # | Quoi | Effort | Pourquoi là |
+|---|---|---|---|
+| 1 | **Les trois réponses aux objections** sous les boutons actuels | 20 min | Trois phrases vraies qui retirent trois raisons de ne pas cliquer. Rien à dessiner. |
+| 2 | **Les textes** du §3 dans les cartes existantes des Options | 1 h | Teste le recadrage « La paix » sans redessiner quoi que ce soit. |
+| 3 | **La dégustation** (§4) | ½ journée | L'effet de dotation, le levier le plus fort du document. |
+| 4 | **L'Atelier en essai libre**, paywall à la validation | ½ journée | Une garde à déplacer dans `AtelierOverlay`. Effet IKEA + engagement. |
+| 5 | **Les points d'entrée** 2 et 3 (mort, après-interstitiel) | ½ journée | On propose la chose au moment où elle manque. |
+| 6 | **Le reçu en carton** et la ligne du cimetière | 2 h | Le pic de fin, et la seule preuve sociale honnête. |
+| 7 | **L'écran Boutique** lui-même (§2) + les images (§7) | 2 jours | Le plus long, et le moins déterminant. |
 
 Un désaccord assumé avec l'intuition habituelle : le bel écran arrive en
-dernier. Il rend l'offre présentable ; ce sont les quatre premières étapes qui
-la rendent achetée.
+dernier. Il rend l'offre présentable ; ce sont les six premières lignes qui la
+rendent achetée. Les images du §7 peuvent être générées en parallèle — elles
+ne bloquent rien, le code affiche un repli tant qu'un fichier manque.
