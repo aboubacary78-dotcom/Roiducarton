@@ -464,32 +464,39 @@ strictement plus fort qu'une statistique inventée sur des inconnus.
 
 ## 7. Les images à générer
 
-Convention du projet (voir `docs/prompts-images.md`) : dépôt dans
-`client/public/assets/`, nom de fichier **exact**, `.webp`, repli sur le dessin
-tant que le fichier manque.
+La commande complète, prête à envoyer, est dans
+**`docs/prompts-images/COMMANDE-IMAGES-BOUTIQUE.md`** : sept images, prompts
+rédigés, dimensions et noms de fichiers exacts.
 
-Préfixe de style à coller devant chaque prompt :
+Trois règles y priment sur les prompts eux-mêmes, et la première a failli
+m'échapper :
 
-> Handmade miniature cardboard diorama, brown kraft & corrugated cardboard,
-> cut-out puppet characters with hand-drawn marker faces, warm tungsten light,
-> tiny fairy-light string, shallow depth of field, photorealistic, gentle dark
-> humor.
+**① Aucun texte lisible dans aucune image.** La première version de cette
+section demandait une pancarte portant « LE MARCHÉ NOIR » au marqueur. Le jeu
+existe en français ET en anglais : un mot peint dans une image ne se traduit
+jamais, et il serait resté en français pour la moitié des joueurs — sur le
+seul écran qui doit être compris. Les images portent des gribouillis
+illisibles, une croix, une flèche ; l'application écrit ses titres par-dessus,
+dans sa police, dans la bonne langue. L'étiquette de prix du lot est **vide**
+pour la même raison : le prix change selon le pays.
 
-| Fichier | Format | Scène |
-|---|---|---|
-| `boutique-enseigne.webp` | 3:1 | Une pancarte en carton scotchée de travers sur un mur de carton, ruban adhésif jaune fluo aux quatre coins, « LE MARCHÉ NOIR » écrit au gros marqueur noir baveux, une ampoule nue qui pend au-dessus. Personne. Juste l'enseigne. |
-| `boutique-vendeur.webp` | 1:1 | Un vendeur en carton derrière un étal fait de cageots retournés, manteau trop grand, lunettes rafistolées au scotch, sourire au feutre un peu trop commercial, une main qui présente la marchandise. Il vous regarde droit dans les yeux. |
-| `boutique-paix.webp` | 3:2 | Le SDF en carton, enfin assis tranquille sous son porche, guirlande allumée, une tasse fumante. Autour de lui, empilés dos tourné contre le mur, des panneaux publicitaires en carton retournés face au mur. Silence. Chaleur. |
-| `boutique-atelier.webp` | 3:2 | Un établi en carton vu de dessus : quatre ou cinq têtes en carton découpé alignées, des yeux et des bouches au feutre sur des chutes, une paire de ciseaux, un marqueur ouvert, de la colle. Une tête à moitié finie au centre. Lumière d'atelier. |
-| `boutique-lot.webp` | 3:2 | Un paquet en carton ficelé avec de la grosse ficelle, une étiquette cartonnée pendue à l'œillet, deux objets qui dépassent : une tête en carton découpé et une petite pancarte « SILENCE ». Posé sur l'étal. |
-| `boutique-recu.webp` | 1:1 | Un bout de carton déchiré tendu par une main, tamponné d'une croix au feutre en guise de tampon. Un reçu de marché noir. Gros plan, faible profondeur de champ. |
-| `boutique-degustation.webp` | 3:2 | Le SDF en carton assis, les yeux fermés, visage détendu, et au premier plan un petit réveil en carton dont les aiguilles sont dessinées au feutre. Un moment volé. Doux, un peu triste. |
+**② Le vendeur est le même sur ses deux apparitions** — le portrait et la main
+qui tend le reçu. Même manche, même gant coupé aux doigts.
 
-**Ce qu'il ne faut PAS générer**, et c'est important : aucune image de visage
-de personnage pour la tuile Atelier. Le jeu en dessine un **vrai, vivant, celui
-du joueur** avec `CardboardAvatar` — une illustration figée à côté serait
-moins convaincante que la démonstration en direct, et contredirait la
-promesse (« votre tête », pas une tête de catalogue).
+**③ Rien de neuf, rien de brillant.** Aucun coffre, aucune pièce d'or, aucune
+lueur premium. Ce sont les codes des boutiques de jeux mobiles, et à la
+seconde où la nôtre leur ressemble, le jeu perd le droit d'être cynique —
+c'est-à-dire tout ce qu'il a.
+
+Et une consigne inverse qui compte autant : **aucun visage fini dans
+`boutique-atelier`.** Les têtes sur l'établi sont vides ou à moitié dessinées.
+Le jeu affiche à côté un vrai visage vivant, celui du joueur, avec
+`CardboardAvatar` — un beau visage de catalogue dans l'illustration
+contredirait la promesse (« votre tête, pas celle du tirage ») et perdrait la
+comparaison.
+
+Les images ne bloquent rien : les tuiles s'affichent en kraft uni tant qu'un
+fichier manque, et chacune s'active toute seule à l'arrivée.
 
 ---
 
