@@ -135,6 +135,14 @@ variables = (ANDROID / 'variables.gradle').read_text(encoding='utf-8')
 cible = int(re.search(r'targetSdkVersion\s*=\s*(\d+)', variables).group(1))
 verifier('le niveau d\'API visé satisfait le Play Store (≥ 35)', cible >= 35, f'API {cible}')
 
+# La facturation impose son propre plancher : la Google Play Billing Library 9,
+# embarquée par cordova-plugin-purchase, refuse de compiler sous l'API 23. Le
+# gabarit de Capacitor descend à 22, et l'erreur n'apparaît qu'au premier
+# Gradle — c'est-à-dire sur une autre machine, une heure plus tard.
+plancher = int(re.search(r'minSdkVersion\s*=\s*(\d+)', variables).group(1))
+verifier('le niveau d\'API minimal satisfait la facturation (≥ 23)',
+         plancher >= 23, f'minSdk {plancher}')
+
 gradle = (ANDROID / 'app/build.gradle').read_text(encoding='utf-8')
 verifier('le numéro de version vient de package.json', 'pkg.version' in gradle
          and 'versionCode 1\n' not in gradle)

@@ -1,5 +1,16 @@
 ext {
-    minSdkVersion = 22
+    /*
+     * ANDROID 6 (API 23) AU MINIMUM, ET C'EST LA FACTURATION QUI L'IMPOSE.
+     *
+     * Le gabarit de Capacitor descend à 22 (Android 5.1). La Google Play
+     * Billing Library 9, embarquée par cordova-plugin-purchase, exige 23 :
+     * en dessous, la compilation échoue net.
+     *
+     * Ce qu'on abandonne : Android 5.1, sorti en 2015, sous les 0,2 % du parc
+     * et déjà exclu du Play Store pour les nouvelles applications. Personne
+     * ne perd le jeu — personne ne l'a jamais eu sur ces appareils.
+     */
+    minSdkVersion = 23
     /*
      * ANDROID 15 (API 35), ET PAS 34 COMME LE GABARIT.
      * Le Play Store refuse depuis le 31 août 2025 tout envoi qui ne vise pas

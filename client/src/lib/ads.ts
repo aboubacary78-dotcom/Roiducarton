@@ -20,6 +20,7 @@
  */
 
 import { Capacitor } from '@capacitor/core';
+import { acheter, brancherLivraison, restaurer, type Produit } from './facturation';
 
 // ─────────────────────────────────────────────────────────────────────────
 // Achat "Sans pub" : supprime les pubs intrusives (interstitielles + bannière).
@@ -40,18 +41,56 @@ export function setAdsRemoved(v: boolean): void {
   try { localStorage.setItem(NOADS_KEY, v ? '1' : '0'); } catch { /* silent */ }
 }
 
-/**
- * Lance l'achat "Sans pub". Renvoie true si l'achat a réussi.
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LA LIVRAISON — ce qu'un produit payé ouvre dans le jeu
  *
- * ⚠️ PRODUCTION : brancher ici un vrai achat in-app (RevenueCat ou
- * @capacitor-community/in-app-purchases) avec un produit non consommable
- * « remove_ads », puis appeler setAdsRemoved(true) seulement après confirmation.
- * En l'état, la fonction active directement le mode sans pub (placeholder de
- * démonstration), À REMPLACER avant publication (voir STORE_PUBLISHING.md).
+ * `facturation.ts` sait encaisser ; il ne sait pas ce que le jeu vend. C'est
+ * cette fonction-ci qui traduit un identifiant de produit en droits, et elle
+ * est le SEUL endroit où un achat s'active. Qu'il vienne d'un paiement qu'on
+ * vient de faire, d'une restauration, ou du démarrage sur un téléphone neuf,
+ * il passe par ici.
+ *
+ * Elle rend `true` quand elle a ouvert quelque chose qui ne l'était pas —
+ * c'est ce qui permet à l'écran de restauration de distinguer « j'ai retrouvé
+ * votre achat » de « le compte n'a rien acheté ».
+ * ═══════════════════════════════════════════════════════════════════════════ */
+function livrer(p: Produit): boolean {
+  let nouveau = false;
+  if (p === 'noads' || p === 'pack_complet') {
+    if (!adsRemoved) { setAdsRemoved(true); nouveau = true; }
+  }
+  if (p === 'atelier' || p === 'pack_complet') {
+    if (!atelierOwned) { setAtelierOwned(true); nouveau = true; }
+  }
+  return nouveau;
+}
+brancherLivraison(livrer);
+
+/*
+ * LA PORTE DE DÉVELOPPEMENT, ET POURQUOI ELLE NE PEUT PAS FUIR.
+ *
+ * Il faut bien pouvoir essayer les écrans d'achat dans un navigateur, où
+ * aucune facturation n'existe. Mais c'est exactement le trou qu'on est en
+ * train de boucher : jusqu'à cette version, appuyer sur « Acheter » ouvrait
+ * le produit gratuitement, PARTOUT.
+ *
+ * `import.meta.env.DEV` est remplacé par `false` à la compilation, et le bloc
+ * disparaît du paquet livré : il n'existe ni dans l'APK, ni dans un site
+ * construit avec `pnpm build`. Ce n'est pas une garde qu'on peut oublier
+ * d'activer — elle est absente ou elle n'est pas là.
  */
+async function acheterProduit(p: Produit): Promise<boolean> {
+  if (import.meta.env.DEV && !isNative()) {
+    console.warn(`[ads] achat simulé de « ${p} » — développement seulement`);
+    livrer(p);
+    return true;
+  }
+  return acheter(p);
+}
+
+/** Lance l'achat « Sans pub ». Rend true seulement si Google a confirmé. */
 export async function purchaseRemoveAds(): Promise<boolean> {
-  setAdsRemoved(true);
-  return true;
+  return acheterProduit('noads');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -84,8 +123,7 @@ export function setAtelierOwned(v: boolean): void {
 }
 
 export async function purchaseAtelier(): Promise<boolean> {
-  setAtelierOwned(true);
-  return true;
+  return acheterProduit('atelier');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -110,9 +148,7 @@ export function packUtile(): boolean {
 }
 
 export async function purchasePack(): Promise<boolean> {
-  setAdsRemoved(true);
-  setAtelierOwned(true);
-  return true;
+  return acheterProduit('pack_complet');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -131,16 +167,18 @@ export async function purchasePack(): Promise<boolean> {
  * demander un remboursement. Google le sait, et l'absence de restauration est
  * le premier motif de rejet des applications à achats non consommables.
  *
- * CE QUE FAIT CETTE FONCTION AUJOURD'HUI, ET CE QU'ELLE FERA. Le vrai achat
- * n'est pas branché (voir `purchaseRemoveAds`) : il n'existe donc aucun
- * historique à interroger, et rendre `false` est la réponse HONNÊTE — « rien
- * retrouvé » plutôt qu'un succès inventé. Le jour où l'achat passera par la
- * facturation Play, c'est ici que `queryPurchases()` viendra, et les deux
- * `setXxx` ci-dessous rouvriront ce qui a été payé.
+ * C'EST BRANCHÉ. `facturation.restaurer()` rejoue les transactions du compte
+ * Google, puis relit ce que le magasin dit posséder ; chaque produit retrouvé
+ * repasse par `livrer()`, comme un achat neuf. Les trois réponses possibles
+ * sont distinctes, et l'écran les distingue :
  *
- * Le bouton, lui, existe déjà dans les Options : il doit être visible AVANT
- * la publication, parce que c'est lui que cherche un joueur qui vient de
- * changer de téléphone — et c'est lui que cherche l'examinateur de Google.
+ *   · retrouve       — quelque chose s'est rouvert ;
+ *   · ni l'un ni l'autre — le compte a répondu, il n'avait rien ;
+ *   · indisponible   — on n'a pas pu demander (hors ligne, web, panne).
+ *
+ * La troisième compte autant que les deux autres : dire « aucun achat » à
+ * quelqu'un qu'on n'a pas réussi à interroger, c'est lui affirmer qu'il n'a
+ * rien payé.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 export interface Restauration {
@@ -155,18 +193,7 @@ export async function restaurerAchats(): Promise<Restauration> {
     // Sur le web il n'y a pas de facturation : on ne prétend pas le contraire.
     return { retrouve: false, indisponible: true };
   }
-  try {
-    /*
-     * À BRANCHER : interroger les achats du compte, puis pour chacun
-     *   'noads'        → setAdsRemoved(true)
-     *   'atelier'      → setAtelierOwned(true)
-     *   'pack_complet' → les deux
-     * et rendre `retrouve: true` si au moins un est revenu.
-     */
-    return { retrouve: false, indisponible: true };
-  } catch {
-    return { retrouve: false, indisponible: true };
-  }
+  return restaurer();
 }
 
 // ─────────────────────────────────────────────────────────────────────────

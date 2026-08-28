@@ -52,24 +52,65 @@ a déjà « Sans pub » lui ferait racheter ce qu'il a — Google rembourserait,
 raison. `packUtile()` tranche, et les Options n'affichent alors que la pièce
 manquante, à son prix.
 
-## Avant publication
+## C'est branché — ce qui reste à faire dans la Play Console
 
-1. Créer les trois produits dans la Play Console avec les identifiants
-   ci-dessus, en **non consommables**.
-2. Brancher `purchaseRemoveAds`, `purchaseAtelier` et `purchasePack` sur le
-   vrai achat — elles ouvrent l'accès directement aujourd'hui, ce qui est un
-   marqueur de développement, pas un oubli.
-3. **La restauration des achats** : le bouton existe déjà dans les Options —
-   « ♻️ Restaurer mes achats » — et il reste visible même pour qui possède
-   tout, parce que sur un nouveau téléphone le jeu ne sait justement plus rien.
-   Il ne lui manque que d'interroger la facturation : `restaurerAchats()` dans
-   `lib/ads.ts` répond aujourd'hui « rien retrouvé », honnêtement, faute
-   d'historique à consulter. Y brancher `queryPurchases()` et rouvrir chaque
-   produit trouvé.
-4. Ne PAS écrire les prix en dur dans l'application. Google renvoie le prix
-   localisé — un joueur canadien doit lire des dollars canadiens, pas des
-   euros convertis de travers. Les cartes des Options n'affichent donc aucun
-   montant tant que le vrai achat n'est pas branché.
+La facturation est en place côté application (`client/src/lib/facturation.ts`,
+greffon `cordova-plugin-purchase`, Google Play Billing Library 9). Ce qui suit
+ne se fait pas dans le code.
+
+### 1. Créer les trois produits
+
+Play Console → **Monétiser** → **Produits** → **Produits intégrés à
+l'application** → *Créer un produit*. Un par ligne du tableau ci-dessus.
+
+| Champ | Valeur |
+|---|---|
+| ID du produit | `noads`, `atelier`, `pack_complet` — **exactement**, en minuscules |
+| Nom | « Sans pub », « L'Atelier », « Le Pack » |
+| Prix | 2,99 € / 4,99 € / 6,99 € — Google convertit pour les autres pays |
+| État | **Actif** (un produit inactif reste invisible du jeu) |
+
+⚠️ **L'ID ne se change jamais.** Il est gravé dans les achats déjà faits :
+le renommer ferait perdre son produit à chaque acheteur.
+
+Ces produits sont non consommables par nature — la Play Console ne demande pas
+de choisir : tout produit intégré qui n'est pas consommé par l'application
+reste acquis. L'application ne les consomme jamais.
+
+### 2. Téléverser un premier paquet — avant de pouvoir tester
+
+**C'est le point qui surprend tout le monde :** on ne peut PAS essayer un achat
+avec un build lancé depuis Android Studio. Google Play Billing refuse de
+répondre à une application qui ne vient pas du Play Store. Il faut donc :
+
+1. fabriquer un `.aab` **signé** (voir la clé de signature, plus bas) ;
+2. le téléverser sur le canal **Test interne** ;
+3. s'ajouter soi-même à la liste des testeurs, et **installer le jeu depuis le
+   lien Play Store** que la console fournit.
+
+Tant que l'application vient d'ailleurs, les boutons d'achat afficheront
+« Boutique indisponible » — ce qui est le comportement correct, pas une panne.
+
+### 3. S'inscrire comme testeur de licence
+
+Play Console → **Paramètres** (compte développeur) → **Tests de licence** →
+ajouter son adresse Gmail.
+
+Un testeur de licence paie avec une **carte de test** : la fenêtre de paiement
+s'ouvre normalement, l'achat aboutit, et rien n'est débité. C'est le seul
+moyen d'essayer le parcours complet sans dépenser trois euros à chaque essai.
+
+Pour recommencer un achat déjà fait : Play Store → *Paiements et abonnements* →
+*Budget et historique* → annuler la commande de test.
+
+### 4. Ce qu'il faut vérifier une fois installé
+
+| | Pourquoi |
+|---|---|
+| Le prix s'affiche sur le bouton | Preuve que le magasin a répondu — s'il vient des chaînes de secours, il serait identique mais le magasin serait muet |
+| L'achat ouvre bien le produit | Le parcours complet |
+| **Désinstaller, réinstaller, puis « ♻️ Restaurer mes achats »** | Le motif de rejet n° 1 des applications à achats non consommables |
+| L'achat survit à un simple redémarrage | La possession est relue au lancement |
 
 ## Le prix se change, la clé non
 

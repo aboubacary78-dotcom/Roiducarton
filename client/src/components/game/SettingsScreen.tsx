@@ -1,11 +1,12 @@
 import { useGame } from '@/contexts/GameContext';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getVolume, getVolumeFond, isMuted, playBack, playDignityTier, playMoneyOut, playPage, playToggle, setMuted, setVolume, setVolumeFond } from '@/lib/sound';
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
 import { isAdsRemoved, isAtelierOwned, packUtile, purchaseAtelier, purchasePack, purchaseRemoveAds, reopenConsentForm, restaurerAchats } from '@/lib/ads';
+import { etatMagasin, prixAffiche, surMagasinChange } from '@/lib/facturation';
 import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
 import { resetCoaches } from '@/lib/coach';
@@ -31,7 +32,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.62.0';
+const APP_VERSION = '3.63.0';
 
 /*
  * UN CURSEUR EN CARTON.
@@ -96,11 +97,42 @@ export default function SettingsScreen() {
   const [restaurant, setRestaurant] = useState(false);
   const [consentBusy, setConsentBusy] = useState(false);
 
+  /*
+   * LES PRIX VIENNENT DU MAGASIN, ET IL RÉPOND APRÈS NOUS.
+   *
+   * Google convertit dans la monnaie du joueur, taxes locales comprises : un
+   * Canadien ne doit pas lire « 2,99 € ». Sa réponse arrive une à deux
+   * secondes après le lancement, donc éventuellement APRÈS l'ouverture de cet
+   * écran — d'où l'abonnement, sans lequel les prix de secours resteraient
+   * affichés pour toujours.
+   */
+  const [, redessiner] = useState(0);
+  useEffect(() => surMagasinChange(() => redessiner(n => n + 1)), []);
+  const magasinMuet = etatMagasin().indisponible;
+
+  /*
+   * UN ACHAT QUI ÉCHOUE DOIT LE DIRE.
+   *
+   * Tant que « acheter » voulait dire « ouvrir gratuitement », il ne pouvait
+   * pas échouer : le bouton n'avait aucun cas négatif à traiter. Maintenant
+   * qu'un vrai paiement est au bout, il y en a trois — refus de la banque,
+   * fenêtre fermée d'un geste, magasin injoignable — et sans ce message le
+   * joueur verrait le bouton cesser de tourner sans rien lui dire.
+   */
+  function echecAchat() {
+    pushToast(
+      magasinMuet
+        ? tr('Boutique indisponible pour l\'instant.', 'Store unavailable right now.')
+        : tr('Achat non abouti.', 'Purchase not completed.'),
+      { emoji: 'ℹ️', tone: 'info' },
+    );
+  }
+
   async function handleBuyPack() {
     if (buyingPack) return;
     setBuyingPack(true);
     const ok = await purchasePack();
-    if (ok) { setNoAds(true); setAtelier(true); setPack(false); }
+    if (ok) { setNoAds(true); setAtelier(true); setPack(false); } else echecAchat();
     setBuyingPack(false);
   }
 
@@ -108,7 +140,7 @@ export default function SettingsScreen() {
     if (buyingAtelier || atelier) return;
     setBuyingAtelier(true);
     const ok = await purchaseAtelier();
-    if (ok) { setAtelier(true); setPack(false); }
+    if (ok) { setAtelier(true); setPack(false); } else echecAchat();
     setBuyingAtelier(false);
   }
 
@@ -116,7 +148,7 @@ export default function SettingsScreen() {
     if (buying || noAds) return;
     setBuying(true);
     const ok = await purchaseRemoveAds();
-    if (ok) { setNoAds(true); setPack(false); }
+    if (ok) { setNoAds(true); setPack(false); } else echecAchat();
     setBuying(false);
   }
 
@@ -312,7 +344,7 @@ export default function SettingsScreen() {
             className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg, #B8860B, #8B6B0A)', boxShadow: '0 4px 12px rgba(184,134,11,0.28)' }}
           >
-            {buyingPack ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : tr('Prendre le Pack', 'Get the Bundle')}
+            {buyingPack ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : `${tr('Prendre le Pack', 'Get the Bundle')} — ${prixAffiche('pack_complet')}`}
           </button>
         </motion.section>
       )}
@@ -348,7 +380,7 @@ export default function SettingsScreen() {
               className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
               style={{ background: 'linear-gradient(135deg, #7B68EE, #5A4ABB)', boxShadow: '0 4px 12px rgba(123,104,238,0.25)' }}
             >
-              {buying ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : tr('Acheter « Sans pub »', 'Buy "Ad-free"')}
+              {buying ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : `${tr('Acheter « Sans pub »', 'Buy "Ad-free"')} — ${prixAffiche('noads')}`}
             </button>
           </>
         )}
@@ -385,7 +417,7 @@ export default function SettingsScreen() {
               className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
               style={{ background: 'linear-gradient(135deg, #C4723A, #9B5B3A)', boxShadow: '0 4px 12px rgba(196,114,58,0.25)' }}
             >
-              {buyingAtelier ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : tr('Ouvrir l\'Atelier', 'Open the Workshop')}
+              {buyingAtelier ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : `${tr('Ouvrir l\'Atelier', 'Open the Workshop')} — ${prixAffiche('atelier')}`}
             </button>
           </>
         )}

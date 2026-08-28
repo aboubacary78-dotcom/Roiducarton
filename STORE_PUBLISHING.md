@@ -219,23 +219,36 @@ l'interstitiel plein écran **puis** arrive sur l'écran de fin qui porte la
 bannière. Deux publicités dans le même moment. Si c'est trop lourd à l'usage,
 retirer `'game-over'` de `ECRANS_DE_LECTURE` dans `pages/Home.tsx` suffit.
 
-### Achat « Sans pub » (in-app)
+### Les achats intégrés — branchés
 
-Un bouton « Supprimer les pubs » existe dans l'écran Options : il désactive
-les pubs imposées (interstitielles + bannière) mais garde les bonus vidéo
-facultatifs. **Avant publication**, remplace le placeholder
-`purchaseRemoveAds()` dans `client/src/lib/ads.ts` par un vrai achat in-app :
+Trois produits non consommables, tous décrits dans **`docs/design/prix.md`** :
+`noads` (2,99 €), `atelier` (4,99 €), `pack_complet` (6,99 €).
 
-1. Crée un produit **non consommable** `remove_ads` dans Google Play Console
-   et App Store Connect.
-2. Intègre un SDK de facturation — le plus simple : [RevenueCat](https://www.revenuecat.com)
-   (`@revenuecat/purchases-capacitor`), sinon `cordova-plugin-purchase`.
-3. Dans `purchaseRemoveAds()`, lance l'achat, attends la confirmation du
-   store, puis appelle `setAdsRemoved(true)` **seulement si l'achat réussit**.
-   Prévois aussi la **restauration d'achat** (obligatoire chez Apple).
+La facturation passe par **`cordova-plugin-purchase` 13.18**, qui embarque la
+Google Play Billing Library 9. Elle vit dans **`client/src/lib/facturation.ts`**
+et n'est appelée que par `ads.ts` — aucun écran ne parle au magasin
+directement.
 
-⚠️ Tant que ce n'est pas fait, le bouton active le mode sans pub gratuitement
-(placeholder de démonstration).
+Ce qui a changé, et pourquoi c'était sérieux : jusqu'à la version 3.63,
+`purchaseRemoveAds()` ouvrait le produit GRATUITEMENT, partout. C'était un
+marqueur de développement assumé tant qu'aucun magasin n'existait, mais le
+défaut ne se voyait pas — l'écran est identique, le bouton répond, le produit
+s'ouvre, et personne ne paie. `scripts/test-facturation.mjs` appuie
+maintenant sur les trois boutons d'achat **sur le build de production** et
+vérifie que rien ne s'ouvre.
+
+Deux conséquences pour la compilation :
+
+- **`minSdkVersion` passe à 23** (`android/variables.gradle`). La Billing
+  Library 9 l'exige ; en dessous, Gradle refuse. On abandonne Android 5.1.
+- **Les achats ne se testent pas depuis Android Studio.** Google Play Billing
+  ne répond qu'à une application installée depuis le Play Store. Il faut donc
+  un `.aab` signé, téléversé sur le canal *Test interne*, installé par le lien
+  Play — et son compte inscrit en **testeur de licence** pour payer avec une
+  carte de test. La marche à suivre complète est dans `docs/design/prix.md`.
+
+Avant l'application, les boutons affichent « Boutique indisponible » : c'est
+le comportement correct, pas une panne.
 
 Toute la logique est centralisée dans **`client/src/lib/ads.ts`**. Pour ajouter
 une pub ailleurs, importe `showInterstitial`, `showRewarded` ou `showBanner`.
