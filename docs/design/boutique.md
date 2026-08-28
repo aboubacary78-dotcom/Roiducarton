@@ -274,6 +274,29 @@ Les trois boutons parlent à la **première personne**, au présent : le joueur
 lit sa propre phrase, pas une injonction. « Achetez » place le vendeur devant ;
 « Je prends tout » place le joueur dedans.
 
+### §3bis — L'étiquette de la tête inachevée
+
+Elle n'a rien à voir avec les tuiles : elle apparaît sur le **hub**, quand un
+visage a été composé dans l'Atelier sans être payé.
+
+> **Quelqu'un sèche sur l'établi.**
+> *Il ne lui manque que vous.*
+>
+> **[ ALLER LE CHERCHER ]**
+
+« Une tête vous attend à l'atelier » — la première version — ne pouvait pas
+fonctionner : c'est du vocabulaire de gestionnaire, ça décrit un état, et une
+tête n'attend personne. Il faut **quelqu'un**, pas un objet ; et il faut qu'il
+lui manque quelque chose, sinon rien ne tire.
+
+« Sèche » fait tout le travail de fabrication en un mot — la colle, le feutre,
+le carton posé à plat — sans avoir à dire « en cours ». Et « il ne lui manque
+que vous » est la seule chose vraie de la phrase : le visage existe, la
+personne non.
+
+Le bouton s'accorde en genre, comme partout ailleurs dans le jeu — « aller la
+chercher » quand c'est une femme qui sèche sur l'établi.
+
 ### Micro-textes
 
 | Où | Aujourd'hui | À la place |
@@ -386,7 +409,7 @@ intention.
 | **Effet IKEA** — on surévalue ce qu'on a fabriqué | Atelier en essai libre, paywall au clic de **valider**. On ne vend plus une fonction, on vend ce personnage-là, déjà fait, qui attend. |
 | **Engagement et cohérence** (pied dans la porte) | Le même essai libre fait passer le joueur de « je regarde » à « j'ai composé quarante secondes ». Il a déjà investi avant qu'on parle d'argent. |
 | **Aversion à la perte** | Le point de vente n° 2 est l'**écran de mort**, pas le hub : c'est le seul moment où « je recommence » est actif et où ce qu'on vient de perdre est encore chaud. |
-| **Effet Zeigarnik** — une tâche inachevée occupe l'esprit | Un visage composé mais non payé reste en attente. Sur le hub, une petite étiquette : « **Une tête vous attend à l'atelier.** » Elle apparaît **une fois**, et ne revient pas si on l'écarte : au-delà, ce n'est plus un rappel, c'est du harcèlement. |
+| **Effet Zeigarnik** — une tâche inachevée occupe l'esprit | Un visage composé mais non payé reste en attente. L'étiquette du hub est écrite au §3bis : elle apparaît **une fois**, et ne revient pas si on l'écarte — au-delà, ce n'est plus un rappel, c'est du harcèlement. |
 | **Ancrage** | Le Pack en haut. Le premier prix lu sert de référence à tous les suivants, et fait lire l'Atelier seul comme un repli raisonnable. |
 | **Réciprocité** | À la première ouverture de la boutique, le vendeur donne un accessoire de garde-robe. Gratuitement, sans condition, sans le rappeler ensuite. Ce qui déclenche la réciprocité, c'est le don sans contrepartie — un « cadeau » conditionné à un achat n'en est pas un et se lit immédiatement. |
 | **Effet von Restorff** — ce qui tranche se retient | Un seul accent chaud sur tout l'écran, §2. C'est la même règle vue sous un autre nom : le fluo n'existe que sur les boutons. |
@@ -403,12 +426,16 @@ une question sans réponse. Les trois vraies objections d'un joueur devant cet
 |---|---|
 | « C'est un abonnement déguisé ? » | **Une fois. Jamais deux.** |
 | « Et si je change de téléphone ? » | **Ça suit votre compte, pas l'appareil.** |
-| « Et si je regrette ? » | **Google rembourse dans les 48 h. On ne discutera pas.** |
 
-Les trois sont **vraies** : les produits sont non consommables, la possession
-est relue depuis le compte Google au lancement (`facturation.ts`), et le Play
-Store applique son propre délai de rétractation, qu'on le dise ou non. Les
-énoncer ne concède rien — ça enlève trois raisons de ne pas cliquer.
+Les deux sont **vraies** : les produits sont non consommables, et la
+possession est relue depuis le compte Google au lancement (`facturation.ts`).
+Les énoncer ne concède rien — ça enlève deux raisons de ne pas cliquer.
+
+**Une troisième objection existe — « et si je regrette ? » — et on n'y répond
+pas.** Le Play Store accorde son délai de rétractation qu'on le mentionne ou
+non ; celui qui se pose la question trouve la réponse seul, en dix secondes.
+L'écrire n'apporterait donc rien, et introduirait le mot « regret » à
+l'endroit précis où l'on veut qu'il n'y pense pas. On laisse Google le dire.
 
 ### La preuve sociale — sans inventer personne
 
