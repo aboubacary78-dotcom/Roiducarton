@@ -58,10 +58,10 @@ Le levier principal n'est pas un biais, c'est une **erreur de perception à
 corriger**, et elle est dans le nom du produit.
 
 « Supprimer les pubs » est un produit **soustractif** : le joueur croit acheter
-une absence. Or dans ce jeu, l'achat **ajoute** — les seize bonus vidéo du jeu
+une absence. Or dans ce jeu, l'achat **ajoute** — tous les coups de pouce du jeu
 (seconde chance, gains doublés, extincteur, vol tranquille, secours de nuit…)
-deviennent instantanés, à cadence. Il achète en réalité un jeu *plus riche*,
-et le libellé lui vend un jeu *amputé de quelque chose de désagréable*.
+lui viennent alors sans rien avoir à regarder. Il achète en réalité un jeu
+*plus riche*, et le libellé lui vend un jeu *amputé d'un désagrément*.
 
 Un produit additif se vend mieux qu'un produit soustractif, à contenu
 identique. Le recadrage est le premier levier, avant toute typographie.
@@ -92,7 +92,7 @@ attend sur l'écran. C'est un changement d'implémentation modeste
 |---|---|
 | **Effet IKEA** | Essai libre, paywall au clic de validation. |
 | **Agentivité vs hasard subi** | L'Atelier n'est PAS cosmétique : il choisit deux traits de départ sur douze positifs, et supprime le Poissard imposé. C'est de la maîtrise, ça se vend plus cher qu'une couleur de peau. Le texte doit le dire en premier. |
-| **Rareté vérifiable** | 15 réglages, **3 612 672 000 combinaisons**. Chiffre réel, calculé sur le catalogue, spectaculaire, gratuit. |
+| **Rareté** | Le catalogue permet 3 612 672 000 visages. Le chiffre sert à NOUS, pas au joueur : dans le texte il devient « Votre tête. Pas celle du tirage. » Un nombre à dix chiffres impressionne un tableur, pas quelqu'un qui veut une tête. |
 | **Aversion à la perte, version roguelite** | Ce jeu tue le personnage. L'Atelier est le seul achat dont la valeur *augmente* à chaque mort — et la mort est donc son meilleur moment de vente. Voir §4. |
 
 ### Le Pack — il est là pour ancrer, pas seulement pour se vendre
@@ -115,16 +115,17 @@ déjà, et lui vendre le lot lui ferait racheter ce qu'il a.
 
 ```
 ┌─────────────────────────────────────┐  scotch fluo aux deux coins
-│  ▚  LE MARCHÉ NOIR DU CARTON     ▚  │  pancarte, rotation −1.5°
-│     Tout est d'occasion. Les prix,  │
-│     non.                            │
+│  ▚      LE MARCHÉ NOIR           ▚  │  pancarte, rotation −1.5°
+│    Deux choses à vendre. Prenez,    │
+│    ou passez votre chemin.          │
 ├─────────────────────────────────────┤
 │ ╔═══════════════════════════════╗   │  ← ZONE 1 · 0–38 %
-│ ║ TOUT LE BAZAR      ⟋LES DEUX⟍ ║   │    kraft FONCÉ (contraste de valeur)
-│ ║ ✦ ✦ ✦                         ║   │    ruban d'angle 45°, coin haut droit
+│ ║ TOUT LE CARTON     ⟋LES DEUX⟍ ║   │    kraft FONCÉ (contraste de valeur)
+│ ║ La paix, et une tête à vous.  ║   │    ruban d'angle 45°, coin haut droit
+│ ║ ✦                             ║   │
 │ ║  ~7,98~   6,99 €              ║   │    barré au marqueur (SVG tremblé)
 │ ║ ┌───────────────────────────┐ ║   │
-│ ║ │  TOUT PRENDRE — 6,99 €    │ ║   │    ← FLUO
+│ ║ │  JE PRENDS TOUT — 6,99 €  │ ║   │    ← FLUO
 │ ║ └───────────────────────────┘ ║   │
 │ ╚═══════════════════════════════╝   │
 ├─────────────────────────────────────┤
@@ -132,19 +133,19 @@ déjà, et lui vendre le lot lui ferait racheter ce qu'il a.
 │ │ [avatar vivant]  L'ATELIER   ⌸│   │    étiquette percée, pendue, inclinée
 │ │       ↻          ✦ ✦ ✦        │   │    ↻ = « et si on retirait un trait ? »
 │ │ ┌───────────────────────────┐ │   │
-│ │ │ COMPOSER LE PROCHAIN — …  │ │   │    ← FLUO
+│ │ │  ME FAIRE UNE TÊTE — …    │ │   │    ← FLUO
 │ │ └───────────────────────────┘ │   │
 │ └───────────────────────────────┘   │
 ├─────────────────────────────────────┤
 │ ┌───────────────────────────────┐   │  ← ZONE 3 · 70–92 %
-│ │ SANS PUB          (ton FROID) │   │    violet #7B68EE, pas kraft
-│ │ ✦ ✦ ✦                         │   │
+│ │ LA PAIX           (ton FROID) │   │    violet #7B68EE, pas kraft
+│ │ ✦ ✦                           │   │
 │ │ ┌───────────────────────────┐ │   │
-│ │ │ RACHETER VOTRE TEMPS — …  │ │   │    ← FLUO
+│ │ │ QU'ON ME FICHE LA PAIX —… │ │   │    ← FLUO
 │ │ └───────────────────────────┘ │   │
 │ └───────────────────────────────┘   │
 ├─────────────────────────────────────┤
-│  ♻️ J'ai déjà payé sur un autre     │  texte seul, gris, jamais mis en avant
+│  ♻️ J'ai déjà payé, sur un autre    │  texte seul, gris, jamais mis en avant
 │     téléphone                       │
 └─────────────────────────────────────┘
 ```
@@ -200,88 +201,92 @@ paraître : il perdrait le droit de se moquer.
 
 ## 3. Les textes
 
-Interdits : « Achetez maintenant », « Offre limitée », « Meilleure valeur »,
-« Le plus populaire », toute forme de « ne ratez pas ».
+### La règle qui gouverne tout le reste
+
+**Rien de ce que le joueur lit ne décrit la mécanique.**
+
+Une première version de ces textes annonçait « les seize bonus du jeu tombent
+tout seuls — un combat sur trois, une nuit sur deux ». C'était juste, c'était
+vérifiable, et c'était à jeter : on y expliquait la cadence, on y comptait les
+points d'appel, on y montrait la salle des machines. Le joueur n'achète pas un
+système, il achète ce qu'il va ressentir. Un argument qui a besoin d'un nombre
+pour tenir n'est pas un argument, c'est une fiche technique.
+
+Bannis des textes visibles : *bonus*, *vidéo récompensée*, *interstitiel*,
+*cadence*, *toutes les X actions*, tout dénombrement de contenu, et toute
+formule qui suppose de savoir comment c'est branché. Bannis aussi : « Achetez
+maintenant », « Offre limitée », « Meilleure valeur », « Le plus populaire ».
+
+Et une contrainte de longueur, parce que c'est elle qui empêche la rechute :
+**trois puces au maximum, huit mots par puce au maximum.** Dès qu'une puce
+dépasse, c'est qu'elle explique.
 
 ### En-tête
 
-> **LE MARCHÉ NOIR DU CARTON**
-> *Tout est d'occasion. Les prix, non.*
+> **LE MARCHÉ NOIR**
+> *Deux choses à vendre. Prenez, ou passez votre chemin.*
 
 ### Tuile 1 — Le Pack
 
-> ### TOUT LE BAZAR
-> *Le fond du carton, retourné sur la table.*
+> ### TOUT LE CARTON
+> *La paix, et une tête à vous.*
 >
-> ✦ **L'Atelier** — votre tête et vos deux atouts, dès le premier réveil.
-> ✦ **Sans Pub** — plus un seul écran forcé, et les bonus qui tombent seuls.
-> ✦ **Un euro de moins** que les deux pris séparément. C'est écrit au-dessus,
->   vérifiez.
+> ✦ Moins cher que les deux séparément. Regardez en dessous.
 >
 > ~~{noads + atelier}~~  **{pack_complet}**
 >
-> **[ TOUT PRENDRE — {pack_complet} ]**
->
-> <sub>Le prix barré, c'est le total des deux pièces vendues juste en
-> dessous. On ne vous invente pas de réduction.</sub>
-
-La dernière ligne n'est pas de la modestie : dans un écran qui joue le
-marché noir, **dire qu'on ne triche pas est un argument**. Elle fait aussi le
-travail légal.
+> **[ JE PRENDS TOUT — {pack_complet} ]**
 
 ### Tuile 2 — L'Atelier
 
 > ### L'ATELIER
-> *La rue vous a fait une tête. Reprenez-la.*
+> *On ne choisit pas où on tombe. On peut choisir avec quoi.*
 >
-> 🎯 **Deux traits choisis, pas subis.** Fini le Poissard qu'on vous colle au
->    réveil sans rien demander.
-> 🪪 **Quinze réglages, 3 612 672 000 visages.** Le vôtre est là-dedans.
-> ⚰️ **Ça survit à vos morts.** Le personnage, non.
+> ✦ Votre tête. Pas celle du tirage.
+> ✦ Deux atouts dans la poche avant de vous lever.
+> ✦ Vous mourrez quand même. Mais vous saurez qui.
 >
-> **[ COMPOSER LE PROCHAIN — {atelier} ]**
+> **[ ME FAIRE UNE TÊTE — {atelier} ]**
 
-Note d'ordre : le trait choisi passe **avant** le visage. C'est l'argument de
-maîtrise, et il vaut plus cher que l'argument cosmétique — un joueur paie plus
-volontiers pour décider que pour décorer.
+La troisième puce fait le travail que trois paragraphes ne feraient pas : elle
+ne promet pas de gagner — ce jeu tue — elle promet que la perte sera la
+vôtre. C'est le seul argument que ce genre de jeu peut tenir sans mentir.
 
 Variante du bouton sur l'écran de mort :
-> **[ LE SUIVANT, VOUS LE CHOISISSEZ — {atelier} ]**
+> **[ LE PROCHAIN, C'EST MOI QUI LE FAIS — {atelier} ]**
 
 ### Tuile 3 — Sans Pub
 
-> ### SANS PUB
-> *Vous mourez cinq fois par quart d'heure. Ça fait beaucoup de salles
-> d'attente.*
+> ### LA PAIX
+> *Tout le monde vous prend quelque chose. Eux aussi.*
 >
-> 🚫 **Plus un seul plein écran imposé.** Jamais.
-> ✨ **Les seize bonus du jeu tombent tout seuls.** Un combat sur trois, un
->    casse sur trois, une nuit sur deux — sans rien regarder.
-> 🤝 **On ne vous retire rien.** C'est le même jeu, sans le sas.
+> ✦ Plus rien qui se met en travers.
+> ✦ Les coups de main viennent tout seuls.
 >
-> **[ RACHETER VOTRE TEMPS — {noads} ]**
->
-> <sub>Les bonus restent. C'est l'attente qui saute.</sub>
+> **[ QU'ON ME FICHE LA PAIX — {noads} ]**
 
-La deuxième puce est **le** point du produit et elle n'apparaît nulle part
-aujourd'hui. Elle transforme un produit soustractif en produit additif.
+Le titre ne dit plus ce qu'on retire, il dit ce qu'on obtient : « Sans Pub »
+vend une absence, « La paix » vend un état. Et la seconde puce dit tout le
+bénéfice additif du produit **sans nommer une seule pièce du moteur** — c'est
+exactement le même contenu que l'ancienne liste chiffrée, en six mots.
+
+Les trois boutons parlent à la **première personne**, au présent : le joueur
+lit sa propre phrase, pas une injonction. « Achetez » place le vendeur devant ;
+« Je prends tout » place le joueur dedans.
 
 ### Micro-textes
 
 | Où | Aujourd'hui | À la place |
 |---|---|---|
-| Produit possédé | « ✅ Actif, merci ! » | « **✅ Payé. On ne vous le redemandera pas.** » |
-| Restauration | « ♻️ Restaurer mes achats » | « **♻️ J'ai déjà payé sur un autre téléphone** » |
-| Achat échoué | « Achat non abouti. » | « **La boutique fait la sourde. Réessayez.** » |
-| Magasin injoignable | « Boutique indisponible pour l'instant. » | « **Le vendeur n'est pas à son carton. Réessayez plus tard.** » |
-| Achat réussi | *(rien)* | « **Ça y est. Le carton est à vous.** » |
+| Produit possédé | « ✅ Actif, merci ! » | « **✅ Payé. On ne vous embêtera plus.** » |
+| Restauration | « ♻️ Restaurer mes achats » | « **♻️ J'ai déjà payé, sur un autre téléphone** » |
+| Achat échoué | « Achat non abouti. » | « **Le vendeur regarde ailleurs. Réessayez.** » |
+| Magasin injoignable | « Boutique indisponible pour l'instant. » | « **Personne au carton. Repassez plus tard.** » |
+| Achat réussi | *(rien)* | « **C'est à vous.** » |
 
-Le libellé de restauration mérite un mot : « Restaurer mes achats » est le
-vocabulaire de l'éditeur. « J'ai déjà payé sur un autre téléphone » est la
-phrase que le joueur a réellement dans la tête au moment où il cherche ce
-bouton. On écrit sa phrase, pas la nôtre.
-
----
+« Restaurer mes achats » est le vocabulaire de l'éditeur ; « J'ai déjà payé,
+sur un autre téléphone » est la phrase que le joueur a réellement en tête au
+moment où il cherche ce bouton. On écrit la sienne.
 
 ## 4. Les points d'entrée — c'est là que se joue la conversion
 
