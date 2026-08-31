@@ -8,14 +8,14 @@ ext {
      *
      * Ce qu'on abandonne : Android 5.1, sorti en 2015, sous les 0,2 % du parc
      * et déjà exclu du Play Store pour les nouvelles applications. Personne
-     * ne perd le jeu — personne ne l'a jamais eu sur ces appareils.
+     * ne perd le jeu, personne ne l'a jamais eu sur ces appareils.
      */
     minSdkVersion = 23
     /*
      * ANDROID 15 (API 35), ET PAS 34 COMME LE GABARIT.
      * Le Play Store refuse depuis le 31 août 2025 tout envoi qui ne vise pas
      * au moins l'API 35 : le projet généré par Capacitor 6 aurait été rejeté
-     * au téléversement. La prochaine marche est l'API 36 — à passer quand le
+     * au téléversement. La prochaine marche est l'API 36, à passer quand le
      * greffon Android sera monté d'un cran (voir android/gradle.properties).
      */
     compileSdkVersion = 35

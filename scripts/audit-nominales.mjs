@@ -1,7 +1,7 @@
 /*
  * LA CHUTE NOMINALE.
  *
- * « Ambiance. » « Adrénaline pure. » « Gênant. » « Festin ! » — une phrase
+ * « Ambiance. » « Adrénaline pure. » « Gênant. » « Festin ! », une phrase
  * finale de deux mots, sans sujet ni verbe, qui NOMME l'émotion au lieu de la
  * montrer. C'est le tic qui fait « écrit par une machine » : le lecteur reçoit
  * l'étiquette du sentiment, jamais le détail qui le produirait.

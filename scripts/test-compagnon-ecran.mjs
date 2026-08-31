@@ -4,7 +4,7 @@
  * `test-compagnon.mjs` éprouve la règle sur le réducteur. Celui-ci éprouve ce
  * que le joueur voit : le bouton qui annonce ce qu'il apporte AVANT le geste,
  * le visage qui s'ancre en haut de l'écran, et le trait écrit en toutes
- * lettres. Un effet actif qu'on ne voit pas n'existe pas — et cette moitié-là
+ * lettres. Un effet actif qu'on ne voit pas n'existe pas, et cette moitié-là
  * ne se teste que sur pixels.
  *
  * Trouver quelqu'un demande un peu de patience : le tirage est stable par
@@ -34,7 +34,7 @@ const texte = () => p.evaluate(() => document.body.innerText);
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -79,7 +79,7 @@ async function seRendre(lieu, jour) {
 /*
  * La rencontre se reconnaît à son intention, pas à sa phrase : elle vit
  * désormais dans la scène, et son libellé visible n'est plus qu'un prénom.
- * `aria-label` porte le sens — c'est aussi ce que lit un lecteur d'écran.
+ * `aria-label` porte le sens, c'est aussi ce que lit un lecteur d'écran.
  */
 const RENCONTRE = 'Aller voir|Go see';
 let trouve = null;
@@ -110,7 +110,7 @@ await p.screenshot({ path: `${SCRATCH}/compagnon-carte.png` });
 
 /*
  * Le bouton doit annoncer la contrepartie AVANT le geste. Tous les PNJ n'ont
- * pas de trait à prêter — environ trois sur cinq — donc on ne l'exige que
+ * pas de trait à prêter (environ trois sur cinq) donc on ne l'exige que
  * lorsque l'annonce est là, et on vérifie alors qu'elle se tient jusqu'au bout.
  */
 const annonce = await p.evaluate(() => {
@@ -134,7 +134,7 @@ if (promet) {
   const ligne = apres.split('\n').find(l => l.includes('🤝'));
   console.log(`    en-tête : « ${(ligne || '').trim()} »`);
 } else {
-  console.log('    (ce PNJ n\'avait aucun trait à prêter — rien à annoncer)');
+  console.log('    (ce PNJ n\'avait aucun trait à prêter, rien à annoncer)');
   verifier('sans trait à prêter, aucune compagnie n\'est promise',
     !/🤝 /.test(apres.split('\n').slice(0, 6).join('\n')));
 }

@@ -1,4 +1,4 @@
-# Pack son 3.3 — Dormir (69 bruitages)
+# Pack son 3.3 · Dormir (69 bruitages)
 
 *Ce document est le socle. Chaque pack le répète en tête, pour être remis seul
 à qui fabrique les sons.*
@@ -25,7 +25,7 @@ son établi, micro à vingt centimètres :
 | le vent | un souffle contre une feuille de papier calque |
 
 C'est cette matière-là qui donne son unité au jeu. Un son trop propre, trop
-« vrai », trop cinématographique sonnera faux — même s'il est techniquement
+« vrai », trop cinématographique sonnera faux, même s'il est techniquement
 parfait. **Petit, proche, sec, fait main.**
 
 ## Le ton : comédie douce-amère
@@ -39,7 +39,7 @@ percussion de bande-annonce.
 
 1. **Aucune parole intelligible.** Le jeu existe en français et en anglais ;
    un mot compréhensible casserait la traduction. Un brouhaha de foule doit
-   rester un brouhaha — des voyelles, du murmure, jamais de phrase.
+   rester un brouhaha, des voyelles, du murmure, jamais de phrase.
 2. **Aucune mélodie reconnaissable** ni citation d'une musique existante.
 3. **Aucune stridence.** Le jeu se joue au casque dans le métro. Rien
    au-dessus de 8 kHz qui pique, pas de sifflement continu.
@@ -52,7 +52,7 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 
 ## Contraintes techniques (les mêmes pour les trois packs)
 
-- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps —
+- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps,
   la conversion finale sera faite à l'intégration.
 - **Boucles : stéréo. Bruitages courts : mono.**
 - **Les boucles doivent boucler.** La dernière milliseconde doit s'enchaîner
@@ -72,7 +72,7 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 # 🎯 Ce pack : un bruitage par rencontre
 
 Le jeu compte **296 rencontres**, et chacune a maintenant droit à SON bruitage.
-Jusqu'ici elles se partageaient 58 sons rangés par thème — ce qui donnait 30
+Jusqu'ici elles se partageaient 58 sons rangés par thème, ce qui donnait 30
 rencontres différentes sur le même bruit de voiture, et quelques absurdités
 (une laverie qui déclenchait le tonnerre, parce que le mot « éclairé » ressemble
 à « éclair »).
@@ -84,7 +84,7 @@ puis se tait.
 
 **Le son doit sortir de CETTE scène-là, pas de sa catégorie.** Chaque entrée
 ci-dessous vous donne le titre et le texte exact que le joueur lit à l'écran.
-Lisez-le, et cherchez **le bruit que fait précisément ce moment** — pas le bruit
+Lisez-le, et cherchez **le bruit que fait précisément ce moment**, pas le bruit
 que fait la catégorie à laquelle il appartient.
 
 Un « registre » est indiqué entre crochets : c'est une simple indication de
@@ -107,7 +107,7 @@ une matière, et si possible un silence bien placé.**
 
 ## ⚠️ Le contrôle qui compte : ils doivent différer ENTRE EUX
 
-Le premier lot livré était bon sur ce point ; le deuxième nettement moins —
+Le premier lot livré était bon sur ce point ; le deuxième nettement moins,
 mesuré, pas ressenti : ses sons se ressemblaient sensiblement plus entre eux,
 alors qu'ils couvraient des scènes tout aussi variées. C'est le piège d'une
 commande en nombre, et c'est ce qui ruinerait l'intérêt d'avoir un son par
@@ -115,14 +115,14 @@ rencontre plutôt qu'un son par catégorie.
 
 **Le test, à faire avant de livrer : jouez tout le lot à la suite, les yeux
 fermés.** Si deux bruitages sont difficiles à distinguer, l'un des deux est à
-refaire — même si chacun, pris seul, est réussi.
+refaire, même si chacun, pris seul, est réussi.
 
 Trois leviers pour varier, quand deux scènes se ressemblent :
 
 - **changer la matière** : le même geste sur du carton, sur du métal, sur du
   papier journal ne donne pas le même son ;
 - **changer le rythme** : un coup sec, deux coups espacés, un frottement
-  continu — la silhouette temporelle se reconnaît mieux que le timbre ;
+  continu, la silhouette temporelle se reconnaît mieux que le timbre ;
 - **changer ce qu'on écoute** : dans une scène il y a souvent trois sons
   possibles. Si la précédente a pris le plus évident, prenez-en un autre.
 

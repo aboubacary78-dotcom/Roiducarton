@@ -13,7 +13,7 @@
 // des jauges, l'établi fabrique du MATÉRIEL qui change les règles de la nuit.
 // Aucun commerçant ne vend une nuit sans perte de sommeil ni un hiver sans
 // perte de santé. Ces objets-là ne s'utilisent pas : ils se portent, ils
-// agissent tout seuls, et ils finissent par céder — ce qui redonne du travail
+// agissent tout seuls, et ils finissent par céder, ce qui redonne du travail
 // à l'établi plutôt que de clore le sujet.
 //
 // Choix de conception : les recettes coûtent un NOMBRE d'objets « bazar »

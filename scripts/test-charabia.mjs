@@ -1,5 +1,5 @@
 /*
- * LA TÊTE QUI PART — ce que le mental fait au texte.
+ * LA TÊTE QUI PART : ce que le mental fait au texte.
  *
  * Trois choses peuvent casser ici, et chacune transformerait une mécanique en
  * défaut :
@@ -22,7 +22,7 @@ import { readdirSync, readFileSync } from 'node:fs';
  * C'est la seule preuve solide qu'un texte a bougé : une description brouillée
  * ne figure dans aucun fichier de données. Chercher des suites de consonnes
  * « impossibles », comme le faisait la version précédente de ce test, ne prouve
- * rien — un mélange de lettres tombe très souvent sur une suite parfaitement
+ * rien, un mélange de lettres tombe très souvent sur une suite parfaitement
  * prononçable, et le test passait alors à côté d'un brouillage pourtant
  * parfaitement visible à l'écran.
  */
@@ -54,7 +54,7 @@ const clic = m => p.evaluate(s => {
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -89,7 +89,7 @@ async function rencontre(mental) {
      * elle aussi une rencontre à part entière depuis peu : le test tombait
      * dessus une fois sur trois et lisait SON texte au lieu de celui d'une
      * exploration. Ce test-ci porte sur le brouillage des rencontres, pas sur
-     * la dette — on écarte donc la dette du décor.
+     * la dette, on écarte donc la dette du décor.
      */
     s.character.money = 20;
     s.character.stats.mental = m;
@@ -103,7 +103,7 @@ async function rencontre(mental) {
    * LE HUB N'EST PAS TOUJOURS NU EN ARRIVANT.
    *
    * Selon le personnage tiré et ses jauges, le récit d'origine, la carte du
-   * tutoriel ou un conseil du coach peuvent être posés devant — et ils avalent
+   * tutoriel ou un conseil du coach peuvent être posés devant, et ils avalent
    * le clic sur « Explorer ». Une fois sur trois, le test ne trouvait donc
    * aucune rencontre et accusait le brouillage de ne pas s'appliquer, alors
    * qu'il n'avait jamais atteint l'écran où on l'aurait vu.
@@ -143,7 +143,7 @@ verifier('à mental haut, le texte est celui du catalogue, au caractère près',
 /*
  * ON MESURE AU FOND, ET ON RÉESSAIE.
  *
- * À 12 de mental, la moitié des mots éligibles passe encore — mais une phrase
+ * À 12 de mental, la moitié des mots éligibles passe encore, mais une phrase
  * courte peut n'en contenir que quatre, et n'en perdre aucun. Le test échouait
  * alors une fois sur trois en accusant le brouillage, alors que le tirage était
  * parfaitement correct : il mesurait une phrase, pas une règle.
@@ -191,14 +191,14 @@ verifier('le texte ne danse pas d\'un redessin à l\'autre', avant === apres);
  * On lit donc le texte affiché à mental bas et on vérifie qu'aucun mot ne
  * porte une apostrophe ou un trait d'union AILLEURS qu'en position plausible.
  * Le contrôle exhaustif, sur les 1 303 phrases du jeu, est dans
- * `scripts/audit-charabia.ts` — celui-ci garde le chemin réel.
+ * `scripts/audit-charabia.ts`, celui-ci garde le chemin réel.
  */
 /*
  * ET LE MOT PERDU EST FAIT DE SIGNES, PAS DE LETTRES MÉLANGÉES.
  *
  * Mélanger les lettres produisait exactement l'aspect d'une faute de frappe,
  * et se faisait signaler comme telle. Le contrôle vérifie donc la forme
- * VOULUE — des formes géométriques — et non seulement que « le texte a
+ * VOULUE (des formes géométriques) et non seulement que « le texte a
  * changé », ce qu'une coquille satisferait tout aussi bien.
  */
 const signes = await p.evaluate(() =>
@@ -211,8 +211,8 @@ verifier('à mental bas, les mots perdus sont des signes illisibles',
  *
  * Première version de ce contrôle : une expression censée décrire « une
  * apostrophe française plausible ». Elle refusait « quelqu'un » et
- * « L'Escalator », qui sont l'un et l'autre du français parfaitement correct
- * — le test accusait le jeu d'une faute qui était dans sa propre grammaire.
+ * « L'Escalator », qui sont l'un et l'autre du français parfaitement correct :
+ * le test accusait le jeu d'une faute qui était dans sa propre grammaire.
  *
  * La règle réelle est plus simple et se vérifie directement : le brouillage
  * ne touche pas un mot porteur d'apostrophe ou de trait d'union. Aucun de ces
@@ -230,7 +230,7 @@ verifier('les mots à apostrophe ou trait d\'union restent intacts',
  * C'est la garde qui manquait, et son absence a coûté deux versions : le seuil
  * était à 60, donc le texte s'effaçait alors que la jauge était encore aux
  * deux tiers pleine. Vérifier « à 90 c'est propre, à 12 c'est troué » ne dit
- * rien de l'endroit où la bascule se produit — et c'est précisément l'endroit
+ * rien de l'endroit où la bascule se produit, et c'est précisément l'endroit
  * qui était faux.
  *
  * On mesure donc À LA FRONTIÈRE, cinq points au-dessus : là, rien ne doit
@@ -239,7 +239,7 @@ verifier('les mots à apostrophe ou trait d\'union restent intacts',
 await clic('Retour|Back'); await pause(600);
 const frontiere = await rencontre(25);
 const signesFrontiere = ((frontiere?.desc ?? '').match(/[■□▲△▼▽◆◇●○◈◉◊◐◑]/g) ?? []).length;
-verifier('à 25 de mental — au-dessus du seuil — le texte est intact',
+verifier('à 25 de mental (au-dessus du seuil) le texte est intact',
   !!frontiere && signesFrontiere === 0,
   frontiere ? `${signesFrontiere} signe(s) : ${frontiere.desc.slice(0, 70)}` : 'aucune rencontre ouverte');
 
@@ -247,7 +247,7 @@ verifier('à 25 de mental — au-dessus du seuil — le texte est intact',
  * ET LE JEU DIT POURQUOI.
  *
  * Le brouillage était entièrement muet : rien ne reliait le texte troué à la
- * jauge de mental, et il se faisait donc prendre pour un bug — c'est le
+ * jauge de mental, et il se faisait donc prendre pour un bug, c'est le
  * retour qui est arrivé, capture à l'appui. Une pique tombe maintenant au
  * franchissement du seuil, dans la voix du jeu plutôt qu'en mode d'emploi.
  *
@@ -270,7 +270,7 @@ if (PHRASES.length < 5) throw new Error('les piques du mental sont introuvables 
  */
 await rencontre(90);
 await clic('Retour|Back'); await pause(600);
-// 12, et non 30 : le seuil de lisibilité est passé de 60 à 20 — le texte ne
+// 12, et non 30 : le seuil de lisibilité est passé de 60 à 20, le texte ne
 // commençait à s'effacer qu'alors que la jauge était encore aux deux tiers
 // pleine. Un 30 mesurerait désormais un silence parfaitement correct.
 await rencontre(12);

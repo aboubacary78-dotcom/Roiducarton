@@ -44,7 +44,7 @@ const { gameReducer, generateCharacter, bagCapacity, TRAITS, getNextWeather, get
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 const trait = id => TRAITS.find(t => t.id === id);
@@ -132,7 +132,7 @@ for (let i = 0; i < 20000; i++) if (getNextWeather('cloudy', 5) === 'snow') avan
 verifier('jamais avant le jour 6', avant6 === 0, `${avant6} sur 20000`);
 
 // ---- 7. La garde à vue annonce ce qu'elle emporte -------------------------
-// Elle coupe la journée net — souvent deux actions sur trois — et le disait
+// Elle coupe la journée net (souvent deux actions sur trois) et le disait
 // au milieu d'une phrase, avant de s'afficher comme un résultat mineur.
 const voleur = perso({ money: 20, stats: { health: 70, mental: 70, hunger: 70, thirst: 70, sleep: 70, dignity: 70 } });
 let annonces = 0, gardes = 0;

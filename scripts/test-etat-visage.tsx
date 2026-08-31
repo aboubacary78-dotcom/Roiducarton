@@ -2,14 +2,14 @@
  * LE VISAGE DIT-IL VRAIMENT L'ÉTAT ?
  *
  * Ce calque a été refait après une plainte simple : « c'est le point noir du
- * personnage ». La grille de onze crans a montré pourquoi — de 0 à 30, quatre
+ * personnage ». La grille de onze crans a montré pourquoi, de 0 à 30, quatre
  * visages identiques ; de 40 à 70, rien ; de 80 à 100, identiques. Un axe
  * continu avec trois valeurs.
  *
  * Le défaut n'était visible NULLE PART dans le code : chaque seuil, pris
  * isolément, se lisait comme une intention. C'est en rendant la série entière
  * qu'il saute aux yeux. Un test qui rend la série et compare les voisins
- * attrape donc ce que ni TypeScript ni une relecture ne peuvent attraper — et
+ * attrape donc ce que ni TypeScript ni une relecture ne peuvent attraper, et
  * il l'attrapera encore quand quelqu'un remettra un `if (x < 0.34)` en croyant
  * bien faire.
  *
@@ -18,7 +18,7 @@
  *   ① AUCUNE ZONE MORTE. Deux crans voisins doivent produire deux dessins
  *     différents, sur TOUTE la course. C'est la définition d'un axe continu.
  *   ② LA CAUSE, PAS SEULEMENT LA GRAVITÉ. Cinq jauges au plus bas, une par
- *     une, doivent donner cinq visages distincts — sinon on est revenu à la
+ *     une, doivent donner cinq visages distincts, sinon on est revenu à la
  *     moyenne, qui ne pouvait dire que « ça va mal ».
  *   ③ AUCUN NOMBRE CASSÉ. Une interpolation ratée écrit `NaN` dans un
  *     attribut SVG : le navigateur ignore la forme en silence, et le signe
@@ -32,7 +32,7 @@ import CardboardAvatar, { type JaugesVisage } from '../client/src/components/gam
 
 let echecs = 0;
 const verifier = (nom: string, ok: boolean, detail = '') => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -52,7 +52,7 @@ const rendu = (jauges: JaugesVisage, dignity: number) =>
  *
  * L'inégalité de chaîne ne suffit pas : une opacité qui bouge d'un millième
  * suffirait à la satisfaire alors que rien ne se voit. On compte les JETONS
- * qui changent — un jeton, c'est une coordonnée, une couleur, une opacité —
+ * qui changent, un jeton, c'est une coordonnée, une couleur, une opacité,
  * et on exige qu'il y en ait plusieurs.
  */
 function ecart(a: string, b: string): number {
@@ -86,7 +86,7 @@ for (const [nom, faire] of [
 // ── ② Chaque jauge écrit son propre signe ─────────────────────────────────
 /*
  * PIÈGE ÉVITÉ ICI : comparer une jauge basse à un visage en forme ne prouve
- * rien — ça montre seulement que « bas » diffère de « haut ». Ce sont les cinq
+ * rien, ça montre seulement que « bas » diffère de « haut ». Ce sont les cinq
  * jauges basses ENTRE ELLES qu'il faut comparer.
  */
 const JAUGES = ['sleep', 'hunger', 'thirst', 'mental', 'health'] as const;
@@ -131,7 +131,7 @@ verifier('aucun attribut SVG cassé sur les 121 combinaisons',
  *
  * Les passants n'ont pas de jauges. S'ils héritaient d'un teint blafard parce
  * qu'une valeur manquante vaut zéro quelque part, toute la rue aurait l'air
- * mourante — et c'est exactement le genre de défaut qu'on ne remarque qu'en
+ * mourante, et c'est exactement le genre de défaut qu'on ne remarque qu'en
  * comparant deux écrans.
  */
 const passant = renderToStaticMarkup(createElement(CardboardAvatar, { seed: GRAINE, gender: 'm', size: 96, visage: NEUTRE }));

@@ -75,7 +75,7 @@ export function spawnWave(
     add(sx, sy, (dx / d) * speed, (dy / d) * speed);
   } else {
     // straight : par la colonne du joueur, ou par le côté sur sa ligne. Les
-    // tirs latéraux visent désormais sa hauteur — avant ils passaient tous
+    // tirs latéraux visent désormais sa hauteur, avant ils passaient tous
     // au-dessus de quelqu'un posté en bas de l'arène.
     if (Math.random() < 0.5) {
       add(cx(player.x + jitter(50)), -10, jitter(20), speed);

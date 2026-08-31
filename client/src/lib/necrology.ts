@@ -32,15 +32,15 @@ export interface DeathDef {
    *
    * Une case vide ne retient rien : la mémoire ne maintient en tension qu'une
    * tâche dont elle a déjà une représentation. Tant que la fin est verrouillée,
-   * on ne montre donc pas « ??? » mais la CONDITION, sans la chute — le joueur
+   * on ne montre donc pas « ??? » mais la CONDITION, sans la chute, le joueur
    * doit savoir quoi tenter, pas ce qu'il va lire.
    */
   hint: string; hintEn: string;
   /*
    * À QUELLE DISTANCE cette fin est-elle tentable ?
-   *   0 — dès la partie en cours, il suffit de s'y prendre pour ;
-   *   1 — il faut que les circonstances s'y prêtent (météo, argent en poche) ;
-   *   2 — il faut d'abord tenir longtemps.
+   *   0, dès la partie en cours, il suffit de s'y prendre pour ;
+   *   1, il faut que les circonstances s'y prêtent (météo, argent en poche) ;
+   *   2, il faut d'abord tenir longtemps.
    * Sert à mettre en tête du Registre ce que le joueur peut viser ce soir : une
    * liste ordonnée par proximité tire, une liste ordonnée par déclaration non.
    */
@@ -62,7 +62,7 @@ export const DEATH_DEFS: DeathDef[] = [
    * LA SEULE FIN QU'ON A SIGNÉE SOI-MÊME.
    *
    * Toutes les autres arrivent : la faim, le froid, un coup de trop. Celle-ci,
-   * on l'a acceptée trois jours plus tôt en prenant dix euros — et le jeu l'a
+   * on l'a acceptée trois jours plus tôt en prenant dix euros, et le jeu l'a
    * dit à ce moment-là, en toutes lettres. C'est ce qui la rend intéressante à
    * collectionner et supportable à subir.
    *
@@ -85,7 +85,7 @@ export function loadKarma(): number {
 }
 
 // Mémoire de la dernière mort traitée. Sert à deux choses : ignorer un simple
-// re-montage de l'écran de fin, et surtout gérer la SECONDE CHANCE (pub) —
+// re-montage de l'écran de fin, et surtout gérer la SECONDE CHANCE (pub),
 // le personnage meurt, revit, puis remeurt quelques jours plus tard. C'est la
 // même vie : une seule tombe, un seul lot de karma (complété du delta).
 interface SeenDeath {
@@ -108,7 +108,7 @@ interface SeenDeath {
  * La quantité ne change pas. C'est la RÉVÉLATION qui devient variable : on
  * fouille les poches du défunt une par une, chacune est une petite décharge
  * séparée, et une fois sur dix il en sort une poche oubliée dont personne
- * n'avait parlé. Les fins inédites viennent en dernier — le meilleur se garde
+ * n'avait parlé. Les fins inédites viennent en dernier, le meilleur se garde
  * pour la fin, jamais l'inverse.
  */
 export interface KarmaPocket {
@@ -391,8 +391,8 @@ export function clearCrown(): void {
 /*
  * L'IMAGE DE LA MORT AU COMBAT.
  *
- * Les adversaires portent des noms complets — « Pigeon Alpha », « Mouette
- * Furibonde » — alors qu'une même bestiole en couvre souvent plusieurs. On
+ * Les adversaires portent des noms complets, « Pigeon Alpha », « Mouette
+ * Furibonde », alors qu'une même bestiole en couvre souvent plusieurs. On
  * descend donc trois crans : l'adversaire exact, puis sa FAMILLE (le pigeon,
  * la mouette), puis l'image générique de rixe. Une seule illustration de
  * mouette sert ainsi la Furibonde et la Géante, sans qu'on ait à la livrer

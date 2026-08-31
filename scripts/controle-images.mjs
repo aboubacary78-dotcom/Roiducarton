@@ -8,7 +8,7 @@
  *
  * Ce défaut a exactement la forme de ceux qui passent : il ne casse rien, il
  * ne lève aucune erreur, il ne se voit pas sur une vignette, et il se remarque
- * une fois l'image en place — parfois jamais, si le cadre qui l'accueille est
+ * une fois l'image en place, parfois jamais, si le cadre qui l'accueille est
  * lui-même arrondi. Avec plus de mille images dans le jeu, personne ne les
  * rouvre une par une.
  *
@@ -16,7 +16,7 @@
  * DEUX MESURES RATÉES AVANT LA BONNE, ET ELLES DISENT LA MÊME CHOSE
  *
  * ① « LE COIN EST PLUS CLAIR QUE LE CENTRE. » Comptait comme défaut une
- *   ampoule allumée dans un angle — soit un tiers des images du jeu, qui sont
+ *   ampoule allumée dans un angle, soit un tiers des images du jeu, qui sont
  *   toutes éclairées à la lampe chaude.
  *
  * ② « LES ANGLES CONTIENNENT DU BLANC PUR. » Meilleur, et faux quand même :
@@ -25,15 +25,15 @@
  *   c'est peut-être simplement le fond.
  *
  * Ce qu'il fallait mesurer n'est pas la couleur : c'est la FORME. Un coin
- * arrondi a une signature géométrique qu'un fond blanc n'a pas — le blanc
+ * arrondi a une signature géométrique qu'un fond blanc n'a pas, le blanc
  * s'arrête sur un ARC. En partant de l'angle, il court longtemps le long du
  * bord et très peu le long de la diagonale : pour un rayon R, environ R sur le
  * bord contre 0,29 R en diagonale. Un fond blanc, lui, s'étend autant dans les
  * deux directions.
  *
  * D'où la règle : les quatre angles doivent montrer ce rapport, avec une
- * course de bord courte. Et le contrôle est validé sur un TÉMOIN — l'image
- * fautive d'origine, conservée hors du dépôt — parce qu'un détecteur qu'on n'a
+ * course de bord courte. Et le contrôle est validé sur un TÉMOIN, l'image
+ * fautive d'origine, conservée hors du dépôt, parce qu'un détecteur qu'on n'a
  * jamais vu déclencher ne prouve rien.
  *
  *     node scripts/controle-images.mjs [--temoin chemin.webp]
@@ -51,15 +51,15 @@ const temoin = iTemoin > 0 ? process.argv[iTemoin + 1] : null;
  * LA MESURE, ÉCRITE UNE FOIS ET PARTAGÉE.
  *
  * Elle tourne dans le navigateur (seul décodeur WebP disponible ici), donc
- * elle part en chaîne de caractères. La définir deux fois — une pour le
- * témoin, une pour le dépôt — c'est la laisser diverger.
+ * elle part en chaîne de caractères. La définir deux fois, une pour le
+ * témoin, une pour le dépôt, c'est la laisser diverger.
  */
 /*
  * ⚠️ La parenthèse autour de la fonction n'est pas décorative. `new Function`
  * reçoit « return » suivi de cette chaîne : si elle commence par un retour à
  * la ligne, l'insertion automatique de point-virgule coupe après `return`, et
- * la fabrique rend `undefined` au lieu de la fonction. L'erreur qui en sort —
- * « f is not a function » — ne dit rien de sa cause.
+ * la fabrique rend `undefined` au lieu de la fonction. L'erreur qui en sort,
+ * « f is not a function », ne dit rien de sa cause.
  */
 const MESURE = `(async (chemin) => {
   const img = new Image();
@@ -93,7 +93,7 @@ const MESURE = `(async (chemin) => {
  *
  * Les quatre angles doivent commencer par du blanc, la course de bord doit
  * rester courte (un arrondi décoratif dépasse rarement 60 px), et la diagonale
- * doit être NETTEMENT plus courte que le bord — c'est là toute la géométrie de
+ * doit être NETTEMENT plus courte que le bord, c'est là toute la géométrie de
  * l'arc, et c'est ce qu'un fond blanc ne peut pas imiter.
  */
 function estArrondi(m) {
@@ -110,7 +110,7 @@ await p.goto('file:///tmp/');
 
 let echecs = 0;
 const verifier = (nom, ok, detail = '') => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 

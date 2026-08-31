@@ -1,6 +1,6 @@
-# Pack Écrans — Les décors du jeu (36 images)
+# Pack Écrans · Les décors du jeu (36 images)
 
-## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
+## 📦 Contexte projet (à lire en entier · tu pars de zéro, sans accès au code)
 
 Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie : un SDF
 survit jour après jour dans une ville française. Direction artistique

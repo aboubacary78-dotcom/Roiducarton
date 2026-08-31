@@ -42,7 +42,7 @@ export function setAdsRemoved(v: boolean): void {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * LA LIVRAISON — ce qu'un produit payé ouvre dans le jeu
+ * LA LIVRAISON : ce qu'un produit payé ouvre dans le jeu
  *
  * `facturation.ts` sait encaisser ; il ne sait pas ce que le jeu vend. C'est
  * cette fonction-ci qui traduit un identifiant de produit en droits, et elle
@@ -50,7 +50,7 @@ export function setAdsRemoved(v: boolean): void {
  * vient de faire, d'une restauration, ou du démarrage sur un téléphone neuf,
  * il passe par ici.
  *
- * Elle rend `true` quand elle a ouvert quelque chose qui ne l'était pas —
+ * Elle rend `true` quand elle a ouvert quelque chose qui ne l'était pas,
  * c'est ce qui permet à l'écran de restauration de distinguer « j'ai retrouvé
  * votre achat » de « le compte n'a rien acheté ».
  * ═══════════════════════════════════════════════════════════════════════════ */
@@ -77,11 +77,11 @@ brancherLivraison(livrer);
  * `import.meta.env.DEV` est remplacé par `false` à la compilation, et le bloc
  * disparaît du paquet livré : il n'existe ni dans l'APK, ni dans un site
  * construit avec `pnpm build`. Ce n'est pas une garde qu'on peut oublier
- * d'activer — elle est absente ou elle n'est pas là.
+ * d'activer, elle est absente ou elle n'est pas là.
  */
 async function acheterProduit(p: Produit): Promise<boolean> {
   if (import.meta.env.DEV && !isNative()) {
-    console.warn(`[ads] achat simulé de « ${p} » — développement seulement`);
+    console.warn(`[ads] achat simulé de « ${p} » (développement seulement)`);
     livrer(p);
     return true;
   }
@@ -94,12 +94,12 @@ export async function purchaseRemoveAds(): Promise<boolean> {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * L'ATELIER — le second achat, et il ne touche pas à la publicité
+ * L'ATELIER : le second achat, et il ne touche pas à la publicité
  *
  * « Sans pub » retire les interruptions. L'Atelier, lui, ouvre deux choses que
  * le jeu tirait au sort : le VISAGE du personnage, et ses TRAITS de départ.
  *
- * Les deux achats sont indépendants — on peut vouloir composer sa tête sans
+ * Les deux achats sont indépendants, on peut vouloir composer sa tête sans
  * vouloir payer pour la publicité, et l'inverse. Les vendre liés ferait payer
  * à chacun la moitié qui ne l'intéresse pas.
  *
@@ -127,7 +127,7 @@ export async function purchaseAtelier(): Promise<boolean> {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * LE PACK — les deux ensemble, et il doit être VISIBLEMENT moins cher
+ * LE PACK : les deux ensemble, et il doit être VISIBLEMENT moins cher
  *
  * Un lot qui coûte la somme de ses parties n'est pas un lot, c'est une
  * quatrième façon de dire la même chose. Il faut qu'on voie l'économie sans
@@ -135,7 +135,7 @@ export async function purchaseAtelier(): Promise<boolean> {
  *
  *   Sans pub   2,99 €
  *   Atelier    4,99 €
- *   Pack       6,99 €   — 1,00 € de moins que les deux séparément
+ *   Pack       6,99 €, 1,00 € de moins que les deux séparément
  *
  * ET ON NE LE PROPOSE PAS À QUI POSSÈDE DÉJÀ UNE MOITIÉ. Lui vendre le lot
  * lui ferait racheter ce qu'il a ; l'écran ne montre alors que la pièce qui
@@ -152,11 +152,11 @@ export async function purchasePack(): Promise<boolean> {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * RESTAURER SES ACHATS — obligatoire, et pas seulement poli
+ * RESTAURER SES ACHATS : obligatoire, et pas seulement poli
  *
  * Les trois produits sont NON CONSOMMABLES : achetés une fois, acquis pour
  * toujours. Or ce qui les mémorise ici est le `localStorage`, c'est-à-dire le
- * téléphone — pas le compte Google. Trois situations très ordinaires effacent
+ * téléphone, pas le compte Google. Trois situations très ordinaires effacent
  * donc un achat payé :
  *
  *   · on change de téléphone ;
@@ -172,9 +172,9 @@ export async function purchasePack(): Promise<boolean> {
  * repasse par `livrer()`, comme un achat neuf. Les trois réponses possibles
  * sont distinctes, et l'écran les distingue :
  *
- *   · retrouve       — quelque chose s'est rouvert ;
- *   · ni l'un ni l'autre — le compte a répondu, il n'avait rien ;
- *   · indisponible   — on n'a pas pu demander (hors ligne, web, panne).
+ *   · retrouve, quelque chose s'est rouvert ;
+ *   · ni l'un ni l'autre, le compte a répondu, il n'avait rien ;
+ *   · indisponible, on n'a pas pu demander (hors ligne, web, panne).
  *
  * La troisième compte autant que les deux autres : dire « aucun achat » à
  * quelqu'un qu'on n'a pas réussi à interroger, c'est lui affirmer qu'il n'a
@@ -200,7 +200,7 @@ export async function restaurerAchats(): Promise<Restauration> {
 // CONFIGURATION DES BLOCS D'ANNONCES
 //
 // ANDROID : les vrais blocs du compte AdMob du jeu. L'App ID qui va avec
-// (…~8445598624) est déclaré dans android/app/src/main/AndroidManifest.xml —
+// (…~8445598624) est déclaré dans android/app/src/main/AndroidManifest.xml,
 // les deux appartiennent au même éditeur, ca-app-pub-6336322065829631, et
 // c'est ce que vérifie scripts/verifie-android.py.
 //
@@ -232,7 +232,7 @@ const AD_UNITS = {
  * On pourrait croire qu'installer ses vrais identifiants veut dire couper le
  * mode test. C'est le contraire : la bonne façon de se relire, c'est de
  * demander des annonces de DÉMONSTRATION à TRAVERS ses vrais blocs. On vérifie
- * ainsi le vrai chemin — le bon compte, le bon bloc, le bon format — sans
+ * ainsi le vrai chemin (le bon compte, le bon bloc, le bon format) sans
  * jamais faire d'impression réelle.
  *
  * Le danger est là et il est sérieux : voir une vraie annonce dans sa propre
@@ -278,7 +278,7 @@ function unit(kind: 'banner' | 'interstitial' | 'rewarded'): string {
 //   2. iOS (App Tracking Transparency). Apple exige une demande explicite
 //      avant tout suivi entre applications. Le SDK UMP la déclenche à notre
 //      place, à condition d'avoir configuré un message ATT dans la console
-//      AdMob — d'où l'ordre : on demande le consentement AVANT d'initialiser
+//      AdMob, d'où l'ordre : on demande le consentement AVANT d'initialiser
 //      la publicité.
 //
 // Si l'utilisateur refuse, on ne coupe pas la publicité : on la sert
@@ -294,7 +294,7 @@ let consentStatus: string | null = null;
  *
  * Prudent par construction : tant que le consentement n'est pas explicitement
  * obtenu ou déclaré non requis, on répond non. Une erreur du SDK, un réseau
- * coupé, un formulaire abandonné — tous ces cas mènent à de la publicité non
+ * coupé, un formulaire abandonné, tous ces cas mènent à de la publicité non
  * personnalisée, jamais l'inverse.
  */
 export function personalizedAdsAllowed(): boolean {
@@ -449,16 +449,16 @@ let dernierInterstitiel = 0;
 let premiereMortDeLaSession = true;
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * LA TRÊVE — dix minutes offertes, et c'est le meilleur argument de vente
+ * LA TRÊVE : dix minutes offertes, et c'est le meilleur argument de vente
  *
  * On ne vend pas « la paix » en la décrivant : on la fait ESSAYER. Après le
  * deuxième plein écran d'une session, le jeu offre dix minutes sans aucune
- * publicité, annoncées comme un cadeau. À l'expiration, il le dit — et c'est
+ * publicité, annoncées comme un cadeau. À l'expiration, il le dit, et c'est
  * ce moment-là, pas la carte d'ouverture, qui vend.
  *
  * Une chose possédée puis retirée pèse environ le double d'une chose jamais
  * eue : c'est le seul levier de tout le dossier qui passe par l'expérience et
- * non par un texte. Ce qu'il coûte est connu et minuscule — deux impressions
+ * non par un texte. Ce qu'il coûte est connu et minuscule, deux impressions
  * chez quelqu'un qui n'achètera jamais.
  *
  * Et il ne se déclenche qu'UNE FOIS par session : le répéter en ferait une
@@ -487,8 +487,8 @@ export function resteDeTreve(maintenant = Date.now()): number {
 /*
  * CE QUI ÉCOUTE LES PLEINS ÉCRANS.
  *
- * Les deux propositions qui suivent une publicité — l'offre de trêve, puis la
- * carte « c'était ça, tout le temps » — n'ont rien à faire dans ce module :
+ * Les deux propositions qui suivent une publicité, l'offre de trêve, puis la
+ * carte « c'était ça, tout le temps », n'ont rien à faire dans ce module :
  * elles sont visuelles. Il rend donc un signal, et l'interface s'y abonne.
  *
  * `n` est le rang du plein écran dans la session. C'est lui qui décide : on ne
@@ -529,7 +529,7 @@ export function partieTerminee(): void {
 /**
  * L'interstitiel peut-il partir maintenant, et pourquoi ?
  *
- * La règle est ici, en un seul endroit, et elle ne modifie rien — c'est ce qui
+ * La règle est ici, en un seul endroit, et elle ne modifie rien, c'est ce qui
  * la rend vérifiable : un test peut l'interroger sans réseau publicitaire et
  * sans provoquer d'effet de bord.
  */
@@ -561,8 +561,8 @@ export function reinitialiserInterstitiel(): void {
  * `maintenant` n'est pas un caprice de test : c'est la MÊME couture que celle
  * de `verdictInterstitiel`, et pour la même raison. Le jeu impose quatre-vingt
  * -dix secondes entre deux pleins écrans ; sans pouvoir avancer l'horloge, la
- * seule façon d'observer le deuxième — donc la trêve, donc tout ce qui en
- * dépend — serait d'attendre une minute et demie par vérification.
+ * seule façon d'observer le deuxième, donc la trêve, donc tout ce qui en
+ * dépend, serait d'attendre une minute et demie par vérification.
  */
 export async function showInterstitial(maintenant = Date.now()): Promise<void> {
   const verdict = verdictInterstitiel(maintenant);
@@ -626,7 +626,7 @@ export async function showInterstitial(maintenant = Date.now()): Promise<void> {
  *
  * Une vidéo récompensée se propose, elle ne se subit pas. Au-delà de trois
  * offres dans la même session, le joueur cesse de voir un jeu et commence à
- * voir un distributeur — et c'est la session SUIVANTE qu'on perd. Le compteur
+ * voir un distributeur, et c'est la session SUIVANTE qu'on perd. Le compteur
  * vit en mémoire : il repart à zéro à chaque lancement de l'application, ce
  * qui est exactement ce qu'on veut.
  */
@@ -638,13 +638,13 @@ let offresFaites = 0;
  *
  * Le plafond ne concerne que ce que le jeu met devant le joueur sans qu'il ait
  * rien demandé : doubler ses gains, forcer un résultat, garder son allure. Ce
- * qu'il vient chercher lui-même — relancer le trio de personnages, rouvrir une
- * boutique, la fontaine, la distribution solidaire — passe en `exempt` et
+ * qu'il vient chercher lui-même, relancer le trio de personnages, rouvrir une
+ * boutique, la fontaine, la distribution solidaire, passe en `exempt` et
  * reste toujours disponible. Barrer un service qu'on est venu demander serait
  * une punition, pas une limite.
  */
 /* ═══════════════════════════════════════════════════════════════════════════
- * LA CADENCE DE L'ACHETEUR — comptée PAR ACTIVITÉ, et c'est tout le sujet
+ * LA CADENCE DE L'ACHETEUR : comptée PAR ACTIVITÉ, et c'est tout le sujet
  *
  * Trois versions ont été nécessaires, et les deux ratées disent chacune
  * quelque chose.
@@ -655,7 +655,7 @@ let offresFaites = 0;
  *      protégeait le JEU de ses propres bonus.
  *
  *   2. TROIS ACTIONS, toutes activités confondues. Testé : « ultra facile, il
- *      n'y avait plus rien à faire ». Le défaut est net une fois vu — trois
+ *      n'y avait plus rien à faire ». Le défaut est net une fois vu, trois
  *      actions quelconques rouvraient TOUS les bonus d'un coup. On mendiait
  *      trois fois, et l'extincteur, le vol tranquille et le coup de pouce
  *      étaient tous rechargés ensemble. Un compteur commun rend les activités
@@ -682,11 +682,11 @@ const CADENCE: Record<FamilleBonus, number> = {
   /*
    * LA NUIT A SA PROPRE CADENCE, ET C'EST UNE CORRECTION.
    *
-   * Le bilan du matin — rattraper un contrat raté, dormir une heure de plus —
+   * Le bilan du matin, rattraper un contrat raté, dormir une heure de plus,
    * était compté avec les rencontres. Mais une nuit n'est pas une rencontre :
    * elle arrive UNE fois, à heure fixe, et son secours ne sert qu'à ce
    * moment-là. Un joueur qui dormait sans avoir déclenché deux résultats de
-   * rencontre dans la journée trouvait le bouton absent, sans comprendre —
+   * rencontre dans la journée trouvait le bouton absent, sans comprendre,
    * « tu l'as enlevé pour les personnes qui payent », et c'était vrai en
    * pratique.
    *
@@ -703,7 +703,7 @@ const engagements: Record<FamilleBonus, number> = {
 /**
  * L'activité vient d'être engagée : un combat s'ouvre, un casse commence, une
  * rencontre rend son verdict. Appelé depuis le GameProvider, qui observe les
- * transitions d'état — et non depuis les écrans, où un montage double de React
+ * transitions d'état, et non depuis les écrans, où un montage double de React
  * compterait deux fois.
  */
 export function noterEngagement(f: FamilleBonus): void {
@@ -737,7 +737,7 @@ export function canOfferRewarded(famille?: FamilleBonus): boolean {
  * DE JEU. Doubler un gain, forcer le meilleur résultat, garder son allure,
  * rouvrir une boutique, se relever à la mort. Le joueur qui paie pour retirer
  * les publicités achetait donc, sans le savoir, la disparition de la moitié de
- * ses outils — il payait pour être moins bien servi. C'est le contraire d'un
+ * ses outils, il payait pour être moins bien servi. C'est le contraire d'un
  * achat.
  *
  * La règle est donc : L'ACHAT RETIRE LA VIDÉO, PAS LA RÉCOMPENSE. Les boutons
@@ -766,19 +766,19 @@ export function bonusEn(base: string): string {
 
 /**
  * `exempt` : la seconde chance à la mort échappe au plafond. C'est le meilleur
- * emplacement du jeu — une vidéo restaure bien mieux une perte qu'elle
- * n'offre un gain — et il est déjà limité à une fois par partie. Le priver
+ * emplacement du jeu, une vidéo restaure bien mieux une perte qu'elle
+ * n'offre un gain, et il est déjà limité à une fois par partie. Le priver
  * parce que le joueur a doublé trois gains dans la journée serait absurde.
  */
 export async function showRewarded(opts?: { exempt?: boolean; famille?: FamilleBonus }): Promise<boolean> {
   /*
-   * L'achat retire la vidéo, pas la récompense — voir le pavé plus haut.
+   * L'achat retire la vidéo, pas la récompense, voir le pavé plus haut.
    * Mais il ne retire pas la LIMITE : le compteur d'actions repart à zéro,
    * et il faudra rejouer trois actions avant le bonus suivant.
    *
    * `exempt` est honoré ici comme ailleurs : ce que le joueur vient chercher
-   * lui-même — rouvrir la boutique, la distribution du jour, se relever à la
-   * mort — n'entame pas sa cadence. Barrer un service qu'on est venu demander
+   * lui-même, rouvrir la boutique, la distribution du jour, se relever à la
+   * mort, n'entame pas sa cadence. Barrer un service qu'on est venu demander
    * serait une punition, pas une limite.
    */
   if (adsRemoved) {
@@ -810,10 +810,10 @@ export async function showRewarded(opts?: { exempt?: boolean; famille?: FamilleB
 }
 
 /*
- * PRISE DE MESURE — même raison que celle de `sound.ts`.
+ * PRISE DE MESURE : même raison que celle de `sound.ts`.
  *
- * Le défaut que ce module vient de corriger — « Sans pub » qui emportait les
- * bonus — était invisible : trente et un points d'appel, tous corrects pris
+ * Le défaut que ce module vient de corriger, « Sans pub » qui emportait les
+ * bonus, était invisible : trente et un points d'appel, tous corrects pris
  * un par un, et une règle fausse au centre. Rien à l'écran ne pouvait le dire.
  * `scripts/test-bonus-pub.mjs` interroge donc la règle elle-même, sur le
  * BUILD DE PRODUCTION, seul état qui prouve quelque chose.

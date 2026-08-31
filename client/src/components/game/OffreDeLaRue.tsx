@@ -3,7 +3,7 @@
  *
  * Un onglet boutique ne convertit presque personne : pour y aller, il faut
  * avoir déjà décidé. Ce qui convertit, c'est de proposer la chose au moment
- * précis où elle manque — et pour « la paix », ce moment est unique et il
+ * précis où elle manque, et pour « la paix », ce moment est unique et il
  * dure trois secondes : celui où le joueur vient de reprendre la main après
  * une publicité plein écran.
  *
@@ -14,7 +14,7 @@
  *     dégustation : on ne vend pas la paix en la décrivant.
  *
  *   ② LA FIN DU CADEAU. Dix minutes plus tard, le jeu le dit. C'est CETTE
- *     carte qui vend, pas la première — une chose possédée puis retirée pèse
+ *     carte qui vend, pas la première, une chose possédée puis retirée pèse
  *     environ le double d'une chose jamais eue.
  *
  *   ③ LE RAPPEL, une seule fois, pour qui n'a rien acheté après ça.
@@ -141,7 +141,7 @@ export default function OffreDeLaRue() {
                   className="flex-[1.6] py-3 rounded-xl text-sm font-bold text-[#2A1F1A] active:scale-[0.98]"
                   style={{ background: '#F2E14C', boxShadow: '0 3px 0 #C9B62A' }}
                 >
-                  {contenu.action} — {prixAffiche('noads')}
+                  {contenu.action} · {prixAffiche('noads')}
                 </button>
               </div>
             ) : (
@@ -149,7 +149,7 @@ export default function OffreDeLaRue() {
                * LE CADEAU N'A PAS DE BOUTON D'ACHAT, ET C'EST TOUT SON INTÉRÊT.
                *
                * Un présent assorti d'une offre n'est pas un présent, c'est une
-               * réclame — et ça se lit en une seconde. C'est la carte SUIVANTE,
+               * réclame, et ça se lit en une seconde. C'est la carte SUIVANTE,
                * dix minutes plus tard, qui a le droit de vendre.
                */
               <button

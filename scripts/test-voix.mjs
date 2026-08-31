@@ -1,5 +1,5 @@
 /*
- * LA VOIX DU PERSONNAGE — ce qui sort d'un corps, et de QUEL corps.
+ * LA VOIX DU PERSONNAGE : ce qui sort d'un corps, et de QUEL corps.
  *
  * Tout le reste du jeu est du carton manipulé. Ces sons-là sont les seuls qui
  * sortent de quelqu'un, et c'est précisément ce qui les rend fragiles :
@@ -13,7 +13,7 @@
  *     ne font pas un personnage qui souffre deux fois : elles font entendre
  *     l'échantillon.
  *   · LE REPLI. Aucun de ces fichiers n'est livré à ce jour. Le jeu doit
- *     tourner exactement pareil sans eux — c'est la règle de tout le pack son,
+ *     tourner exactement pareil sans eux, c'est la règle de tout le pack son,
  *     et c'est celle qu'on casse le plus facilement en ajoutant une famille.
  *
  * On écoute les requêtes réseau : c'est la seule preuve de ce que le jeu a
@@ -40,7 +40,7 @@ p.on('request', r => {
 const pause = ms => new Promise(r => setTimeout(r, ms));
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -98,7 +98,7 @@ const BASSES = { health: 70, mental: 8, hunger: 70, thirst: 70, sleep: 70, digni
  * Il aborde qui a moins de trois euros en poche, et sa proposition est une
  * rencontre plein écran depuis qu'elle a un visage : elle se posait donc
  * par-dessus le hub et le test cliquait dans le vide, deux fois sur trois. Ce
- * test-ci porte sur les voix, pas sur la dette — on écarte la dette du décor.
+ * test-ci porte sur les voix, pas sur la dette, on écarte la dette du décor.
  */
 const SOLVABLE = { money: 20, dette: null, detteRefuseeJour: null };
 
@@ -107,13 +107,13 @@ const SOLVABLE = { money: 20, dette: null, detteRefuseeJour: null };
  *
  * Cette section a vérifié trois choses successives, et le trajet vaut d'être
  * noté. Elle attendait d'abord `voix-h-tete` ou `voix-f-tete` selon le
- * personnage ; ces prises-là ont été renvoyées à l'écoute — « un cri
- * bouillie » — et elle a vérifié pendant un temps l'inverse, que rien ne
+ * personnage ; ces prises-là ont été renvoyées à l'écoute, « un cri
+ * bouillie », et elle a vérifié pendant un temps l'inverse, que rien ne
  * partait sauf l'alerte neutre.
  *
  * Le signal refait est du foley : une note fine au bord d'un verre et du
- * journal froissé. Il s'appelle donc `corps-tete`, sans genre — un verre qu'on
- * frotte n'a pas de sexe — et c'est ce qu'on attend ici. Les voix qui restent
+ * journal froissé. Il s'appelle donc `corps-tete`, sans genre, un verre qu'on
+ * frotte n'a pas de sexe, et c'est ce qu'on attend ici. Les voix qui restent
  * genrées sont celles qui jouent DERRIÈRE un bruitage, douleur et dégoût, et
  * c'est la section de la Récup' plus bas qui prouve qu'elles suivent bien le
  * personnage.
@@ -143,7 +143,7 @@ await clic('La Récup|Salvage'); await pause(1300);
 /*
  * On descend jusqu'au fond en déblayant chaque couche.
  *
- * La surface est presque propre — 5 % de saletés sur quatre objets — et une
+ * La surface est presque propre (5 % de saletés sur quatre objets) et une
  * seule passe ne prouverait donc rien la plupart du temps. Les saletés vivent
  * en bas : c'est tout le principe du mini-jeu, et c'est là qu'il faut aller
  * les chercher pour vérifier qu'elles sonnent.
@@ -188,7 +188,7 @@ verifier('  …et la réaction du corps garde le timbre du personnage',
  * Deux choses se vérifient ici, et toutes deux étaient invisibles avant :
  *
  *   · CE QUI TOMBE DANS LE CHAPEAU. Le gain s'annonçait avec le détail qui
- *     sert à RECONNAÎTRE le passant — « 🛍️ +1 », « 👶 +2 ». Collé devant un
+ *     sert à RECONNAÎTRE le passant, « 🛍️ +1 », « 👶 +2 ». Collé devant un
  *     « +1 », il se lit comme ce qu'on vient de recevoir, et le joueur croyait
  *     empocher un sac de courses. Ce sont des pièces, et rien d'autre.
  *   · LE PASSANT QUI GROGNE. Insister est la seule vraie décision du mini-jeu,
@@ -205,7 +205,7 @@ await p.evaluate(() => {
 });
 /*
  * On revient du fond d'un container, et la fouille a pu se terminer n'importe
- * comment — butin ramené, ou tas écroulé. Selon le cas, le hub s'ouvre sur un
+ * comment, butin ramené, ou tas écroulé. Selon le cas, le hub s'ouvre sur un
  * bilan, une carte de résultat ou rien du tout, et un simple clic sur
  * « Mendier » tombait alors dans le vide une fois sur trois. On insiste
  * jusqu'à voir la rue, en balayant ce qui peut être posé devant.
@@ -218,7 +218,7 @@ let rueOuverte = false;
  * Le balayage des deux côtés a fait passer l'échec d'une fois sur trois à une
  * fois sur dix (10 exécutions), mais il en reste : la rue n'est pas toujours
  * là au bout de trois tentatives. Chaque essai repose entièrement l'état et
- * refait le chemin, donc les tentatives sont quasi indépendantes — doubler
+ * refait le chemin, donc les tentatives sont quasi indépendantes, doubler
  * leur nombre écrase ce qui reste, et ne coûte du temps que sur les
  * exécutions qui auraient échoué.
  */
@@ -228,13 +228,13 @@ for (let essai = 0; essai < 6 && !rueOuverte; essai++) {
    * ON BALAIE AVANT ET APRÈS, ET C'EST TOUT LE CORRECTIF.
    *
    * Ce test échouait une fois sur cinq, toujours sur « la manche s'ouvre »,
-   * les quatre contrôles suivants tombant en cascade — cinq échecs pour un
+   * les quatre contrôles suivants tombant en cascade, cinq échecs pour un
    * seul clic manqué. En capturant l'écran bloquant, TROIS obstacles
    * différents sont apparus, et ils n'arrivent pas au même moment :
    *
    *   · une rencontre (« Le Marché de Noël », « La Station de Lavage ») qui
    *     s'ouvre par-dessus le hub et ne se quitte que par sa flèche ;
-   *   · la carte de règles du mini-jeu — « 🎩 La manche / COMMENT JOUER » —
+   *   · la carte de règles du mini-jeu, « 🎩 La manche / COMMENT JOUER »,
    *     qui, elle, apparaît APRÈS le clic sur Mendier. Le balayage d'avant ne
    *     pouvait pas la voir : la manche était bien ouverte, et cachée.
    *
@@ -311,7 +311,7 @@ verifier('le gain s\'annonce en pièces, jamais avec l\'objet du passant',
 /* ── LES 42 PRISES SONT-ELLES BIEN LÀ, ET SE DÉCODENT-ELLES ? ──────────────
  *
  * Ce contrôle vérifiait l'inverse avant la livraison : que le jeu tourne sans
- * les fichiers. Il tourne toujours sans eux — les replis n'ont pas bougé — mais
+ * les fichiers. Il tourne toujours sans eux (les replis n'ont pas bougé) mais
  * ce n'est plus ce qu'il faut surveiller.
  *
  * Le vrai risque, maintenant, est le silence discret : un nom de fichier avec

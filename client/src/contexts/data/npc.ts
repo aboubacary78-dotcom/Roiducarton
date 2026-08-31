@@ -4,7 +4,7 @@
 // ou passer son chemin. Chaque PNJ a sa propre « chute » (voir backstory.ts).
 //
 // Génération DÉTERMINISTE par (jour + lieu + seed du joueur) : le même PNJ est
-// présent toute la journée à un lieu donné, et « bouge » d'un jour à l'autre —
+// présent toute la journée à un lieu donné, et « bouge » d'un jour à l'autre,
 // sans rien stocker en sauvegarde.
 import type { Character, Enemy, GameEvent, InventoryItem, Job, Trait } from '../types';
 import { JOBS, TRAITS, genderFromName } from './world';
@@ -46,7 +46,7 @@ const SITUATIONS: { fr: string; en: string }[] = [
  * Un compagnon sur quatre s'en va au petit matin avec ce qu'il a pu prendre.
  * Ce n'est pas un piège tant qu'on peut le voir venir : ces huit phrases sont
  * l'indice, et le seul. Elles ne disent jamais « attention », elles décrivent
- * un geste — un regard qui tombe sur le sac, une main qui traîne, une amitié
+ * un geste, un regard qui tombe sur le sac, une main qui traîne, une amitié
  * trop rapide. Le joueur apprend à les reconnaître, ce qui est exactement ce
  * qu'on apprend dans la rue.
  *
@@ -177,7 +177,7 @@ export function voleurTrouvable(
  * L'ADVERSAIRE QU'IL DEVIENT.
  *
  * Ni un rat ni un vigile : quelqu'un qui dort dehors comme vous. Mais il a
- * mangé votre repas et dormi avec vos affaires — c'est, très précisément, la
+ * mangé votre repas et dormi avec vos affaires, c'est, très précisément, la
  * personne la mieux nourrie que vous croiserez dans la rue. Ses chiffres le
  * disent.
  *
@@ -191,7 +191,7 @@ export function voleurTrouvable(
  * voleur était plus faible que l'ennemi générique qui porte son nom.
  *
  * Il se place désormais juste au-dessus de ce Concurrent et sous le Voyou du
- * Coin — le plus dur des humains ordinaires, la brute du quartier exceptée.
+ * Coin, le plus dur des humains ordinaires, la brute du quartier exceptée.
  * `test-compagnon.mjs` tient cette fourchette, pas les chiffres eux-mêmes :
  * rééquilibrer le catalogue ne doit pas casser le test, seulement le déplacer.
  *
@@ -227,14 +227,14 @@ export function encounterFlag(day: number, location: string): string {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * LA DETTE — LE PRÊTEUR ET SON ÉCHÉANCE
+ * LA DETTE : LE PRÊTEUR ET SON ÉCHÉANCE
  *
  * Le jeu n'avait aucune raison de faire revenir le joueur un jour PRÉCIS. Les
  * suites d'événements arrivent ; elles ne s'attendent pas. Une échéance
  * inscrite dans l'en-tête change la nature de la partie : on ne ferme pas une
  * application à un jour d'un remboursement.
  *
- * Et surtout, ce n'est pas un bonus qu'on risque de rater — c'est une menace
+ * Et surtout, ce n'est pas un bonus qu'on risque de rater, c'est une menace
  * qu'on doit désamorcer. Ça tient deux fois mieux.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -264,7 +264,7 @@ export function preteurPresent(c: {
   return isSocialLocation(c.location);
 }
 
-/** Qui il est — stable pour un jour et un quartier donnés, comme les autres PNJ. */
+/** Qui il est, stable pour un jour et un quartier donnés, comme les autres PNJ. */
 export function preteurDuJour(day: number, location: string, playerSeed: string) {
   const rng = makeRng(hashStr(`preteur|${day}|${location}|${playerSeed}`));
   const nom = NPC_NAMES[Math.floor(rng() * NPC_NAMES.length)];
@@ -276,7 +276,7 @@ export function preteurDuJour(day: number, location: string, playerSeed: string)
   };
 }
 
-/** L'échéance est-elle tombée ? Il vous trouve partout — c'est le principe. */
+/** L'échéance est-elle tombée ? Il vous trouve partout, c'est le principe. */
 export function detteExigible(c: { day: number; dette?: { echeance: number } }): boolean {
   return !!c.dette && c.day >= c.dette.echeance;
 }
@@ -288,7 +288,7 @@ export function detteExigible(c: { day: number; dette?: { echeance: number } }):
  * coincée entre la météo et les boutons d'action. C'est le format d'un rappel,
  * pas d'un moment : le prêteur passait au même rang qu'un contrat du jour.
  *
- * Or ce sont exactement des rencontres — quelqu'un vous aborde, vous avez deux
+ * Or ce sont exactement des rencontres, quelqu'un vous aborde, vous avez deux
  * réponses possibles, et le choix vous suit. Elles passent donc par l'écran
  * des rencontres, comme les compagnons : la grande image, le nom, le visage
  * qu'on reverra. C'est ce visage-là qui fait toute la mécanique, et il ne
@@ -303,11 +303,11 @@ export function detteExigible(c: { day: number; dette?: { echeance: number } }):
  * lisait « Suzanne vous a regardé compter vos pièces, et IL a attendu ». Le
  * reste du jeu accorde partout (voir SITUATIONS et ses {S}) ; ces deux
  * rencontres-là faisaient exception, et c'étaient les seules à montrer un
- * visage — donc les seules où la faute saute aux yeux.
+ * visage, donc les seules où la faute saute aux yeux.
  */
 interface Preteur { nom: string; gender: 'm' | 'f' }
 
-/** Il ou elle vous a vu compter vos pièces. Refusable — sinon ce n'est pas un choix. */
+/** Il ou elle vous a vu compter vos pièces. Refusable, sinon ce n'est pas un choix. */
 export function evenementPreteur(preteur: Preteur): GameEvent {
   const { nom } = preteur;
   const f = preteur.gender === 'f';

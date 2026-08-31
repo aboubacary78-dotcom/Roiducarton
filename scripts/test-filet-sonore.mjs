@@ -26,7 +26,7 @@ await p.setViewport({ width: 390, height: 844 });
  *
  * L'ambiance de quartier tourne en permanence en synthèse : une première
  * version comptait ses oscillateurs et voyait « 4 sons » sur un bouton qui
- * n'en jouait qu'un. Les bruitages, eux, sont tous des fichiers — c'est donc
+ * n'en jouait qu'un. Les bruitages, eux, sont tous des fichiers, c'est donc
  * la bonne unité de mesure.
  */
 await p.evaluateOnNewDocument(() => {
@@ -69,7 +69,7 @@ await clicSur('←|Back|Retour');
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -116,7 +116,7 @@ async function sonsDe(motif, attente = 320) {
     /*
      * VISIBLE NE SUFFIT PAS : IL FAUT QUE LE DOIGT ARRIVE.
      *
-     * On clique à la souris, comme un joueur — donc le clic est soumis au
+     * On clique à la souris, comme un joueur, donc le clic est soumis au
      * recouvrement. Les superpositions laissent l'écran principal monté
      * derrière elles, et « Next Day » y matche le motif `Next` tout en étant
      * enseveli sous un voile. Le test cliquait donc huit fois de suite un
@@ -181,7 +181,7 @@ for (let i = 0; i < 4; i++) {
 /*
  * ÊTRE SUR L'ÉCRAN PRINCIPAL, C'EST DEUX CHOSES.
  *
- * Le bouton « Jour Suivant » doit exister — c'est lui qui signe l'écran, et
+ * Le bouton « Jour Suivant » doit exister, c'est lui qui signe l'écran, et
  * non le mot « Explorer », qui apparaît aussi dans les choix de certains
  * événements. Mais il doit AUSSI être atteignable : les superpositions plein
  * écran laissent l'écran principal monté derrière elles, si bien que le test
@@ -219,7 +219,7 @@ async function revenirAuPrincipal() {
  * COMBIEN D'ACTIONS RESTE-T-IL AUJOURD'HUI ?
  *
  * Le retour à l'écran principal traverse parfois un événement, et le seul
- * moyen d'en sortir est d'en choisir une issue — ce qui consomme une action.
+ * moyen d'en sortir est d'en choisir une issue, ce qui consomme une action.
  * Trois traversées et la journée est finie : les tuiles passent en désactivé,
  * le filet les ignore à juste titre, et le test annonçait « 0 son » comme si
  * le jeu s'était tu. C'était la journée qui était finie, pas le son qui
@@ -283,7 +283,7 @@ for (const [nom, motif] of [
  *
  * C'est le risque exact du filet : il doit se taire quand le geste a déjà fait
  * du bruit. On l'éprouve sur la bascule des vibrations, qui joue son clac et
- * n'entraîne aucune conséquence sonore — tout second fichier viendrait donc
+ * n'entraîne aucune conséquence sonore, tout second fichier viendrait donc
  * du filet.
  */
 // ---- La sourdine coupe tout, filet compris ---------------------------------

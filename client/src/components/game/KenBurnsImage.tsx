@@ -16,7 +16,7 @@ export default function KenBurnsImage({ src, alt = '', onError, className = '', 
    *
    * La une du journal est un bandeau : elle découpe une bande centrale dans
    * une image en 3:2 et jette 40 % de la hauteur. Ça marche pour toutes les
-   * photos de mort, qui ont leur sujet au milieu — et ça détruit celles dont
+   * photos de mort, qui ont leur sujet au milieu, et ça détruit celles dont
    * le sujet est en bas de cadre. Une image peut donc dire où est son sujet
    * plutôt que d'espérer qu'il tombe au bon endroit.
    */

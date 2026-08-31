@@ -1,4 +1,4 @@
-# Prompts d'images — Le Roi du Carton
+# Prompts d'images · Le Roi du Carton
 
 **216 images** à générer, découpées en 6 packs. Conçus pour être donnés tels
 quels à un générateur d'images **sans accès au dépôt** (compte Manus vierge,
@@ -33,15 +33,15 @@ Gemini Pro...) : chaque pack contient tout le contexte, la DA et le protocole.
 l'intégration) ; 1 fichier corrompu. D'où : webp réel OU png honnête ≤ 1600 px,
 < 200 Ko visé, et livraison zip uniquement.
 
-## Pack Nouveautés (bricolage, solidarité, braderie) — ✅ TERMINÉ
+## Pack Nouveautés (bricolage, solidarité, braderie) · ✅ TERMINÉ
 
-`pack-nouveautes-9.md` : **9 images** pour les fonctions récentes — les 6
+`pack-nouveautes-9.md` : **9 images** pour les fonctions récentes, les 6
 objets fabriqués à l'établi (`craft-*`), la scène de l'atelier (`atelier`), la
 distribution solidaire (`solidarite`) et la braderie du marché (`braderie`).
 
 **✅ Livré et intégré (9/9 vrais .webp, 1200 px, < 200 Ko chacun).**
 
-## Pack Origines (récit d'origine « La Chute de… ») — ✅ TERMINÉ
+## Pack Origines (récit d'origine « La Chute de… ») · ✅ TERMINÉ
 
 **✅ Livré et intégré (17/17 vrais .webp, 1200 px). v2 : réécrit pour l'humour
 noir (gag burlesque, expression exagérée) après un premier jet trop sage.**
@@ -50,7 +50,7 @@ noir (gag burlesque, expression exagérée) après un premier jet trop sage.**
 `pack-origines-17.md` : **17 images**, une par métier, pour l'écran d'intro qui
 raconte comment le personnage a fini à la rue. **Particularité** : le perso y
 est encore **présentable** (dans sa tenue de métier), saisi au moment comique
-de la bascule — pas encore le SDF barbu. En leur absence, l'écran retombe
+de la bascule, pas encore le SDF barbu. En leur absence, l'écran retombe
 proprement sur une scène de rue dessinée.
 
 ## Phase 2 (plus tard, optionnel)
@@ -59,7 +59,7 @@ Les variantes d'issue `result-<id>-good/bad.webp` des 186 nouveaux événements
 (~370 images) ne sont pas dans ces packs : en leur absence, le jeu retombe
 proprement sur l'illustration de l'événement.
 
-## Phase 2 — EN COURS : les variantes d'issue (372 images, 7 packs)
+## Phase 2 · EN COURS : les variantes d'issue (372 images, 7 packs)
 
 Dossier `phase2/` : pour chaque nouvel événement, l'issue heureuse
 (`result-<id>-good.webp`) et l'issue ratée (`result-<id>-bad.webp`), même
@@ -75,7 +75,7 @@ décor, ambiance opposée. Même protocole que les packs précédents.
 | `phase2-pack-6-voler.md` | 62 |
 | `phase2-pack-7-voyager.md` | 60 |
 
-## Pack Écrans (36 images) — les décors du jeu — ✅ TERMINÉ
+## Pack Écrans (36 images) · les décors du jeu · ✅ TERMINÉ
 
 `pack-ecrans-36.md` : panoramas de quartier, boutiques, cartes du Repérage,
 Sursaut/fantômes, bannières Cimetière/Registre. Presque tous SANS le héros
@@ -84,6 +84,6 @@ le code : chaque image s'affiche dès qu'elle arrive.
 
 **✅ Livré et intégré (36/36 vrais .webp, 1200 px, ~2,6 Mo au total).**
 
-### Phase 2 — suivi
+### Phase 2 · suivi
 - ✅ `phase2-pack-1-explorer-A.md` : 50/50 intégrées.
 - ✅ `phase2-pack-2-explorer-B.md` : 50/50 intégrées.

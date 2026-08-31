@@ -1,6 +1,6 @@
-# Commande audio — « Le Roi du Carton » — 5 signaux du corps (à refaire)
+# Commande audio · « Le Roi du Carton » · 5 signaux du corps (à refaire)
 
-> ## ✅ LIVRÉ — lot Stable Audio 3, intégré en 3.45.0
+> ## ✅ LIVRÉ, lot Stable Audio 3, intégré en 3.45.0
 >
 > Les cinq fichiers sont dans `client/public/audio/` et branchés dans la table
 > `VOIX_DU_CORPS` de `client/src/lib/sound.ts`. Chaque jauge a retrouvé son
@@ -12,7 +12,7 @@
 > laquelle un baffle de téléphone ne restitue plus rien. Sur les 528 sons déjà
 > embarqués et jamais renvoyés, le 10ᵉ centile est à 24,6 %. Les deux seuls
 > fichiers du lot refusé sous ce plancher étaient `corps-faim` (22 %) et
-> `corps-epuise` (24 %) — **exactement les deux nommés à l'écoute**. Le nouveau
+> `corps-epuise` (24 %) : **exactement les deux nommés à l'écoute**. Le nouveau
 > lot les remonte à 35 % et 39 %, et les cinq passent.
 >
 > **Ce qui n'a pas pu être mesuré, et il faut le dire.** Le lot refusé avait de
@@ -22,10 +22,10 @@
 > essayé puis écarté est en tête de `scripts/controle-signaux-corps.mjs`.
 > **L'écoute reste le seul juge.**
 >
-> **Licence — action ouverte.** Les sources viennent d'un compte Stable Audio 3
+> **Licence, action ouverte.** Les sources viennent d'un compte Stable Audio 3
 > et aucun justificatif de licence n'accompagne les exports. Avant publication
 > du jeu monétisé par publicité, vérifier dans les conditions de l'abonnement,
-> à la date de génération, que l'usage commercial est couvert — et en garder
+> à la date de génération, que l'usage commercial est couvert, et en garder
 > une capture avec les archives du projet.
 
 **Ce document est la commande complète. Tout ce qu'il faut est dedans : aucun
@@ -38,7 +38,7 @@ autre fichier n'est nécessaire.**
 Ces cinq signaux ont déjà été livrés une fois, **en voix humaine de synthèse**.
 Testés au casque sur téléphone, ils sont inaudibles : « un cri bouillie ».
 
-Le problème n'est pas technique — vérifié : 64 kbit/s, durées de 0,4 à 0,8 s,
+Le problème n'est pas technique, vérifié : 64 kbit/s, durées de 0,4 à 0,8 s,
 niveau correct. **Le problème est que je les avais demandés en voix.** C'était
 une erreur de commande, et elle se corrige ici.
 
@@ -50,7 +50,7 @@ une erreur de commande, et elle se corrige ici.
 
 Roguelite de survie mobile, comédie noire, sur quelqu'un qui dort dehors.
 Direction artistique : **dioramas en carton kraft photographiés**. Les 480
-autres sons du jeu suivent tous la même règle — la pluie est du riz sur du
+autres sons du jeu suivent tous la même règle, la pluie est du riz sur du
 papier tendu, un train est une brosse sur du carton ondulé, des pas sont des
 doigts sur une boîte à chaussures.
 
@@ -62,7 +62,7 @@ une boîte de dominos, pas dans une cabine.
 ## ⚠️ La consigne qui compte le plus
 
 **Aucun de ces cinq sons ne doit contenir de voix humaine.** Ni souffle, ni
-grognement, ni soupir, ni respiration. Si on entend quelqu'un, c'est raté —
+grognement, ni soupir, ni respiration. Si on entend quelqu'un, c'est raté,
 c'est très exactement ce qui a été livré la première fois.
 
 Le corps se signale par **ce qu'il fait**, pas par ce qu'il dit.
@@ -72,13 +72,13 @@ Le corps se signale par **ce qu'il fait**, pas par ce qu'il dit.
 ## Où ces sons se jouent, et pourquoi ils sont durs
 
 Ils partent **seuls, dans le silence**, quand une jauge de survie passe dans le
-rouge. Aucun autre son ne les accompagne — pas de musique, pas de bruitage
+rouge. Aucun autre son ne les accompagne, pas de musique, pas de bruitage
 d'action par-dessus. C'est ce qui les rend impitoyables : le moindre défaut
 s'entend, alors que les autres sons du jeu sont toujours masqués par autre
 chose.
 
 Ils doivent donc être **très propres, très courts, et immédiatement
-reconnaissables** — le joueur a le pouce sur un bouton et les yeux ailleurs.
+reconnaissables** : le joueur a le pouce sur un bouton et les yeux ailleurs.
 
 ---
 
@@ -104,7 +104,7 @@ whatsoever, lo-fi domestic recording.
 
 # Les cinq sons
 
-## 1. `corps-faim.mp3` — le ventre vide
+## 1. `corps-faim.mp3` · le ventre vide
 
 > **Recette foley.** Une bouteille d'eau **à moitié pleine**, inclinée
 > lentement d'avant en arrière à cinq centimètres du micro. Le glouglou grave
@@ -119,7 +119,7 @@ whatsoever, lo-fi domestic recording.
 gargouille est un son de comédie ; c'est ce qui empêche la scène de virer au
 misérabilisme.
 
-## 2. `corps-soif.mp3` — la gorge sèche
+## 2. `corps-soif.mp3` · la gorge sèche
 
 > **Recette foley.** Un bouchon de liège **tourné à sec** dans un goulot de
 > bouteille vide, un quart de tour, lentement. Le grincement râpeux est la
@@ -133,7 +133,7 @@ misérabilisme.
 **L'intention.** Un son qui donne soif à l'écoute. C'est le seul du lot qui
 doive être physiquement désagréable.
 
-## 3. `corps-epuise.mp3` — les jambes qui lâchent
+## 3. `corps-epuise.mp3` · les jambes qui lâchent
 
 > **Recette foley.** Un grand carton ondulé qu'on laisse **s'affaisser tout
 > seul** contre un mur, lentement, jusqu'au contact. Enregistrer la chute
@@ -149,11 +149,11 @@ doive être physiquement désagréable.
 qui s'affaisse dit l'épuisement mieux qu'un bâillement enregistré, et il reste
 dans le monde du jeu.
 
-## 4. `corps-froid.mp3` — le froid qui s'installe
+## 4. `corps-froid.mp3` · le froid qui s'installe
 
 > **Recette foley.** Six ou huit **dominos (ou dés) secoués vite dans les mains
 > en coupe**, très près du micro, deux secousses courtes espacées d'un souffle
-> — ce sont les dents qui claquent. Dessous, une feuille de papier calque tenue
+>, ce sont les dents qui claquent. Dessous, une feuille de papier calque tenue
 > à bout de doigts qui tremble.
 >
 > **Prompt.** Six wooden dominoes rattled fast in cupped hands, two short
@@ -163,10 +163,10 @@ dans le monde du jeu.
 **L'intention.** Le seul son du lot qui doive être **rapide**. Le froid ne
 s'installe pas lentement dans ce jeu : il attrape.
 
-## 5. `corps-tete.mp3` — la tête qui lâche ⚠️ le plus important
+## 5. `corps-tete.mp3` · la tête qui lâche ⚠️ le plus important
 
 > **Recette foley.** Un doigt mouillé qui tourne sur le **bord d'un verre**,
-> pour obtenir une note très fine et très haute, gardée TRÈS BASSE au mixage —
+> pour obtenir une note très fine et très haute, gardée TRÈS BASSE au mixage,
 > presque à la limite de l'audible. Par-dessus, un papier journal froissé
 > lentement, qui entre et sort du champ comme si l'attention décrochait.
 >
@@ -185,7 +185,7 @@ peur.
 # Livraison attendue
 
 1. **Cinq fichiers MP3**, nommés exactement comme ci-dessus.
-2. Confirmation qu'**aucun ne contient de voix humaine** — ni souffle, ni
+2. Confirmation qu'**aucun ne contient de voix humaine**, ni souffle, ni
    grognement, ni respiration. C'est le point qui a fait rater la première
    livraison.
 3. ⚠️ **La licence d'usage commercial** de l'outil ou de la banque employée,

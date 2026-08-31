@@ -24,7 +24,7 @@ export default function CoachTip({ ctx }: { ctx: CoachContext }) {
     if (allCoachesSeen()) return;
     // Le récit d'origine occupe tout l'écran au premier jour : un conseil qui
     // s'affiche par-dessous en même temps ne se lit pas, il encombre. On
-    // attend qu'il soit refermé — ce que signale le drapeau 'origin-vu'.
+    // attend qu'il soit refermé, ce que signale le drapeau 'origin-vu'.
     if (!ctx.char.activeFlags?.includes('origin-vu')) return;
     const c = nextCoach(ctx);
     if (!c || c.id === shown?.id) return;
@@ -36,7 +36,7 @@ export default function CoachTip({ ctx }: { ctx: CoachContext }) {
 
   /*
    * Le conseil flotte au-dessus de la page : il doit rendre sa place au flux,
-   * sinon il se pose sur le dernier élément de l'écran — et le dernier élément
+   * sinon il se pose sur le dernier élément de l'écran, et le dernier élément
    * de l'écran principal est « Jour Suivant ». Mesuré avant correction : les
    * deux occupaient exactement la même bande, et un doigt sur le bouton
    * refermait le conseil au lieu de finir la journée.

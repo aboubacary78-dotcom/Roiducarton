@@ -1,8 +1,8 @@
 /*
  * REFERMER LA BOUCLE DES MUSIQUES.
  *
- * Les sept morceaux arrivent au bon format — 60 s, stéréo, 44,1 kHz, 96 kbit/s,
- * −20 LUFS — mais chacun commence par ~240 ms de silence et finit par un fondu
+ * Les sept morceaux arrivent au bon format, 60 s, stéréo, 44,1 kHz, 96 kbit/s,
+ * −20 LUFS, mais chacun commence par ~240 ms de silence et finit par un fondu
  * vers le silence de 300 à 630 ms. Mis en boucle, ça fait **un trou de 0,55 à
  * 0,92 seconde à chaque tour** : la musique s'arrête, se tait, puis repart.
  *
@@ -10,7 +10,7 @@
  * RMS de 200 ms en tête et de 200 ms en queue, c'est-à-dire deux fenêtres de
  * silence. Elles se valent forcément, et l'écart mesuré vaut 0,00 dB.
  *
- * On coupe donc le silence — mais pas tout.
+ * On coupe donc le silence, mais pas tout.
  *
  * LE DÉTAIL QUI COMPTE : le moteur du jeu rentre déjà ses points de boucle de
  * 60 ms de chaque côté (`LOOP_TRIM` dans audioFiles.ts), pour sauter le blanc

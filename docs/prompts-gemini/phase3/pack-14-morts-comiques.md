@@ -1,17 +1,17 @@
-# Pack 14 — Les onze morts, en comédie (11 images)
+# Pack 14 · Les onze morts, en comédie (11 images)
 
-## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
+## 📦 Contexte projet (à lire en entier · tu pars de zéro, sans accès au code)
 
 Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie : un SDF
 survit jour après jour dans une ville française. Direction artistique
 **« Carton Craft »** : chaque illustration est un **diorama miniature en carton
 kraft fait main**, comme une maquette artisanale photographiée.
 
-## ⚠️ RÈGLE N°1 — L'HUMOUR EST LA SIGNATURE DU JEU
+## ⚠️ RÈGLE N°1 · L'HUMOUR EST LA SIGNATURE DU JEU
 
 « Le Roi du Carton » est une COMÉDIE noire, et TOUTE sa direction artistique
 repose là-dessus : on rit de la misère avec tendresse, on ne s'y vautre jamais.
-**CHAQUE image doit faire sourire** — une situation absurde, un gag visuel, une
+**CHAQUE image doit faire sourire** : une situation absurde, un gag visuel, une
 expression comique du personnage. Une image simplement triste, plate ou
 déprimante est HORS SUJET et sera refusée, même si elle est techniquement
 réussie.
@@ -46,7 +46,7 @@ personnage). Toute image qui s'en écarte sera refusée.
 Les sept premières images de cette liste **existent déjà et sont refusées**.
 Elles sont techniquement très réussies et ratent complètement leur cible :
 elles sont tristes. Un homme la tête dans les mains dans une ruelle sombre, un
-corps effondré sur un trottoir — c'est du misérabilisme, et le jeu ne fait pas
+corps effondré sur un trottoir, c'est du misérabilisme, et le jeu ne fait pas
 ça. Deux d'entre elles portent en plus du texte peint dans le décor, ce que le
 protocole interdit.
 
@@ -60,8 +60,8 @@ drame.
 
 ## 🎬 LES DEUX FILS CONDUCTEURS DU PACK
 
-Ces onze images s'affichent au même endroit — la une d'un journal, à la fin
-d'une partie — et doivent se lire comme **une série**. Deux personnages
+Ces onze images s'affichent au même endroit, la une d'un journal, à la fin
+d'une partie, et doivent se lire comme **une série**. Deux personnages
 récurrents assurent cette unité, et ce sont eux qui portent la comédie.
 
 ### 1. LE FANTÔME EN CARTON
@@ -69,7 +69,7 @@ récurrents assurent cette unité, et ce sont eux qui portent la comédie.
 **Le héros meurt, et son fantôme reste.** C'est une petite silhouette du même
 personnage, découpée dans du **papier calque froissé ou du carton très clair**,
 flottant à trente centimètres au-dessus du corps, légèrement transparente, avec
-le **même visage au feutre** — mais une expression totalement différente de
+le **même visage au feutre**, mais une expression totalement différente de
 celle du corps.
 
 C'est lui qui fait rire. Le corps est mort et immobile ; le fantôme, lui,
@@ -87,8 +87,8 @@ disproportionné. Un ou plusieurs selon les scènes.
 
 ### Ce que ces deux-là permettent
 
-Le corps peut être franchement mort — yeux en croix, langue de travers, pose
-absurde — sans que l'image devienne glauque, parce que le fantôme et le pigeon
+Le corps peut être franchement mort, yeux en croix, langue de travers, pose
+absurde, sans que l'image devienne glauque, parce que le fantôme et le pigeon
 tiennent le registre comique. C'est exactement le mécanisme du dessin animé.
 
 ---
@@ -109,13 +109,13 @@ Ces images s'affichent dans **la une d'un journal**, en photo de presse,
 
 # LES SEPT CAUSES DE MORT (remplacements)
 
-### 1. `death-despair.webp` — Le Moral à Zéro
+### 1. `death-despair.webp` · Le Moral à Zéro
 
 **Ce que le jeu dit :** « L'esprit a lâché avant le corps. »
 
-**Le gag — on prend la phrase au pied de la lettre.** Le corps se porte
+**Le gag, on prend la phrase au pied de la lettre.** Le corps se porte
 parfaitement bien : le héros est **debout, en pleine forme**, l'air surpris, en
-train de se palper le torse et de regarder autour de lui — il cherche quelque
+train de se palper le torse et de regarder autour de lui, il cherche quelque
 chose. Ce qu'il cherche est assis à deux mètres, sur une caisse : **son propre
 fantôme**, avachi, bras croisés, boudeur, qui refuse catégoriquement de
 remonter dedans. Le fantôme fait la tête ; le corps ne comprend pas.
@@ -127,7 +127,7 @@ l'autre, comme un arbitre de tennis.
 
 ---
 
-### 2. `death-hunger.webp` — Le Ventre Vide
+### 2. `death-hunger.webp` · Le Ventre Vide
 
 **Ce que le jeu dit :** « Mort de faim dans une ville pleine de restaurants. »
 
@@ -136,7 +136,7 @@ d'un restaurant en carton**, débordante de plats découpés dans du carton. Il 
 noué une serviette autour du cou et tient encore une fourchette en l'air, bien
 droite, à bout de bras. Son fantôme, lui, a **traversé la vitre** et se tient à
 l'intérieur, penché au-dessus d'une assiette, en train d'essayer désespérément
-de piquer un morceau — sa fourchette fantôme passe au travers à chaque fois. Il
+de piquer un morceau, sa fourchette fantôme passe au travers à chaque fois. Il
 est furieux.
 
 **Le pigeon :** à l'intérieur du restaurant lui aussi, attablé, une serviette
@@ -147,15 +147,15 @@ au cou, en train de manger tranquillement. Il a réussi, lui.
 
 ---
 
-### 3. `death-thirst.webp` — La Grande Soif
+### 3. `death-thirst.webp` · La Grande Soif
 
 **Ce que le jeu dit :** « Assoiffé au pays des fontaines publiques. Elles
 étaient toutes en travaux. »
 
-**Le gag — le timing.** Le héros est effondré au pied d'une fontaine en carton,
+**Le gag, le timing.** Le héros est effondré au pied d'une fontaine en carton,
 la bouche grande ouverte tournée vers le bec, la langue pendante, dans la pose
 du naufragé. Et **la fontaine vient de se remettre en marche** : un jet
-puissant, magnifique, en papier de soie bleu, qui arrose tout — juste à côté de
+puissant, magnifique, en papier de soie bleu, qui arrose tout, juste à côté de
 sa bouche. Trente secondes trop tard. Son fantôme, au-dessus, a les deux bras
 levés au ciel dans un « MAIS ENFIN » muet et parfaitement lisible.
 
@@ -166,13 +166,13 @@ lampadaire.
 
 ---
 
-### 4. `death-exhaustion.webp` — La Dernière Sieste
+### 4. `death-exhaustion.webp` · La Dernière Sieste
 
 **Ce que le jeu dit :** « Il voulait juste dormir un peu. Le corps a pris ça au
 pied de la lettre. »
 
 **Le gag :** le héros est allongé sur un banc en carton dans la position la plus
-confortable qu'il ait jamais trouvée — un vrai sourire de béatitude sur le
+confortable qu'il ait jamais trouvée, un vrai sourire de béatitude sur le
 visage, les mains croisées sur le ventre, un pied qui dépasse. Il n'a jamais
 été aussi bien. Son fantôme, au-dessus, essaie de le réveiller : il le secoue
 par l'épaule, il tape dans ses mains, il lui souffle dans l'oreille. Rien. Le
@@ -188,7 +188,7 @@ arbre au-dessus du banc.
 
 ---
 
-### 5. `death-cold.webp` — La Nuit Glaciale
+### 5. `death-cold.webp` · La Nuit Glaciale
 
 **Ce que le jeu dit :** « La rue est glaciale avec ses rois. »
 
@@ -202,19 +202,19 @@ branche, et un troisième s'est installé sur sa tête. Ils sont là depuis un
 moment.
 
 **Le fantôme :** il grelotte, lui aussi, ce qui n'a aucun sens et c'est justement
-la blague — il se frotte les bras en claquant des dents.
+la blague, il se frotte les bras en claquant des dents.
 
 **Ambiance :** nuit bleue très froide, halo d'un lampadaire, guirlande dont les
 ampoules sont prises dans la glace.
 
 ---
 
-### 6. `death-injury.webp` — Trop de Coups
+### 6. `death-injury.webp` · Trop de Coups
 
 **Ce que le jeu dit :** « Trop de coups, pas assez de pansements. L'arithmétique
 de la rue. »
 
-**Le gag — l'arithmétique, littéralement.** Le héros est allongé sur le dos,
+**Le gag, l'arithmétique, littéralement.** Le héros est allongé sur le dos,
 recouvert de la tête aux pieds de **dizaines de petits pansements en carton**,
 collés dans tous les sens, superposés, y compris sur son manteau et sur une de
 ses chaussures. Il en est entièrement tapissé. Et à trente centimètres de sa
@@ -230,11 +230,11 @@ regardant droit vers nous, comme pour prendre le spectateur à témoin.
 
 ---
 
-### 7. `death-combat.webp` — Tombé au combat
+### 7. `death-combat.webp` · Tombé au combat
 
 **Ce que le jeu dit :** la mort dans une rixe, quel que soit l'adversaire.
 
-**Le gag — la disproportion.** Le héros est étalé de tout son long sur le dos,
+**Le gag, la disproportion.** Le héros est étalé de tout son long sur le dos,
 bras en croix, yeux en croix, langue de travers, complètement K.O. Et le
 vainqueur, debout sur sa poitrine dans une pose de champion du monde, une aile
 levée en signe de victoire : **un pigeon**. Un seul. Tout petit. Il porte une
@@ -257,7 +257,7 @@ Le jeu reconnaît quatre morts remarquables, qui remplacent la photo générique
 quand elles se produisent. Ce sont les plus savoureuses, et celles que le
 joueur a envie de montrer.
 
-### 8. `death-jour-1.webp` — Le Speedrun
+### 8. `death-jour-1.webp` · Le Speedrun
 
 **Ce que le jeu dit :** « Mort le premier jour. Un record, dans un sens. »
 
@@ -273,14 +273,14 @@ affaires.
 avance.
 
 **Le pigeon :** il arrive en volant avec une petite banderole de bienvenue en
-carton — trop tard, évidemment.
+carton, trop tard, évidemment.
 
 **Ambiance :** grand jour, lumière franche, tout est neuf et propre, ce qui
 rend la scène encore plus absurde.
 
 ---
 
-### 9. `death-riche.webp` — Riche et Mort Quand Même
+### 9. `death-riche.webp` · Riche et Mort Quand Même
 
 **Ce que le jeu dit :** « Parti avec plus de 30 € en poche. L'argent ne fait pas
 la survie. »
@@ -302,7 +302,7 @@ guirlande et brillent beaucoup trop pour ce qu'elles valent.
 
 ---
 
-### 10. `death-canicule.webp` — Cuit par la Canicule
+### 10. `death-canicule.webp` · Cuit par la Canicule
 
 **Ce que le jeu dit :** « Le bitume était une plancha. Vous étiez dessus. »
 
@@ -322,12 +322,12 @@ guirlande qui pend molle et éteinte.
 
 ---
 
-### 11. `death-doyen.webp` — Le Doyen
+### 11. `death-doyen.webp` · Le Doyen
 
 **Ce que le jeu dit :** « Tombé après 10 jours de règne. Les légendes aussi
 finissent en carton. »
 
-**Le gag — les honneurs, à l'échelle du carton.** C'est un enterrement d'État
+**Le gag, les honneurs, à l'échelle du carton.** C'est un enterrement d'État
 en miniature, joué entièrement par des pigeons, et d'un sérieux total. Le héros
 est allongé sur un brancard fait de deux planches et d'un vieux tapis, les
 mains croisées sur la poitrine, un air de dignité immense. Sur un coussin en

@@ -24,10 +24,10 @@ import SafeImg from './SafeImg';
  *
  * Deux choses comptent dans cet écran :
  *
- * — LE CONTENU EST À VALEUR VARIABLE. Le plus souvent une bricole, parfois du
+ * · LE CONTENU EST À VALEUR VARIABLE. Le plus souvent une bricole, parfois du
  *   Karma, rarement une vraie trouvaille. Ouvrir devient un tirage.
  *
- * — LA SÉRIE SE RATTRAPE. Un jour manqué ne casse rien tant qu'il reste un
+ * · LA SÉRIE SE RATTRAPE. Un jour manqué ne casse rien tant qu'il reste un
  *   jeton (un par semaine) ou qu'on accepte une vidéo. On garde le poids de la
  *   perte et on supprime la falaise du « c'est cassé, tant pis ». Et une série
  *   perdue n'est jamais affichée à zéro : elle disparaît, simplement.
@@ -71,7 +71,7 @@ export default function CartonMatinOverlay() {
     if (g.kind === 'karma') { addKarma(g.karma ?? 0); return null; }
     const item = g.kind === 'trouvaille' ? randomFromArray(TROUVAILLES) : randomFromArray(SALVAGE_JUNK);
     // Une partie en cours reçoit l'objet tout de suite ; sinon il attend le
-    // prochain personnage, posé sur son carton — ce qui est la fiction même.
+    // prochain personnage, posé sur son carton, ce qui est la fiction même.
     if (state.character?.alive) dispatch({ type: 'CLAIM_CARTON', item });
     else pushPendingGift(item.id);
     return tc(item.name);
@@ -95,7 +95,7 @@ export default function CartonMatinOverlay() {
     setBusy(true);
     if (parPub) {
       // Restaurer une perte : c'est le meilleur emplacement de vidéo du jeu,
-      // et il est exempté du plafond — le joueur est venu le chercher.
+      // et il est exempté du plafond, le joueur est venu le chercher.
       const ok = await showRewarded({ exempt: true });
       if (!ok) { setBusy(false); return; }
     }

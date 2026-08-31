@@ -96,8 +96,8 @@ const SPECIAL_HEADLINES: Record<string, { fr: string; en: string }> = {
  * bande centrale, soit 40 % de la hauteur jetée. Toutes les photos de mort ont
  * leur sujet au milieu et traversent ce recadrage sans rien perdre.
  *
- * `death-dette` non. Son sujet — une chaussure abandonnée et une pièce par
- * terre, les deux seuls objets qui racontent quelque chose — est posé au sol,
+ * `death-dette` non. Son sujet, une chaussure abandonnée et une pièce par
+ * terre, les deux seuls objets qui racontent quelque chose, est posé au sol,
  * donc dans le bas de l'image. Recadrée au centre, la une ne montrait qu'un
  * trottoir vide : la chaussure coupée en deux au bord inférieur, la pièce hors
  * champ. Une photo magnifique qui ne disait plus rien à l'endroit précis où
@@ -105,7 +105,7 @@ const SPECIAL_HEADLINES: Record<string, { fr: string; en: string }> = {
  *
  * La commande demandait pourtant de garder les 20 % du haut et du bas
  * dégagés ; c'est la photo qui s'en écarte. La corriger ici coûte une ligne et
- * garde l'image telle qu'elle est — plutôt que de la faire refaire.
+ * garde l'image telle qu'elle est, plutôt que de la faire refaire.
  */
 const CADRAGE_BAS = new Set(['/assets/death-dette.webp']);
 
@@ -135,7 +135,7 @@ export default function GameOverScreen() {
    *
    * La catégorie se devine d'ordinaire dans les jauges du cadavre, et c'est
    * juste : un ventre à zéro raconte la faim. Mais mourir sous les coups du
-   * prêteur laisse une santé à zéro, exactement comme une bagarre — la une
+   * prêteur laisse une santé à zéro, exactement comme une bagarre, la une
    * annonçait donc « trop de coups » et effaçait la seule mort du jeu que le
    * joueur ait signée lui-même. Quand le reducer sait de quoi on est mort, il
    * le dit, et on ne redevine rien.
@@ -158,7 +158,7 @@ export default function GameOverScreen() {
   /*
    * L'IMAGE DE LA UNE : la fin PARTICULIÈRE avant la cause générique.
    *
-   * Le jeu reconnaît quatre morts remarquables — le premier jour, riche, cuit
+   * Le jeu reconnaît quatre morts remarquables, le premier jour, riche, cuit
    * par la canicule, tombé après dix jours de règne. Elles sont bien plus
    * racontables que « votre corps a lâché », et elles ne s'affichaient pas :
    * la photo était choisie sur la seule cause. On descend maintenant la chaîne
@@ -171,7 +171,7 @@ export default function GameOverScreen() {
   /*
    * La fin particulière, s'il y en a une, dans l'ordre de la rareté. Elle sert
    * à LA FOIS l'image et le gros titre : les faire choisir séparément donnait
-   * une une qui se contredisait — un enterrement d'État en photo sous un titre
+   * une une qui se contredisait, un enterrement d'État en photo sous un titre
    * parlant de coups reçus.
    */
   const specialEnding = !char ? null
@@ -263,7 +263,7 @@ export default function GameOverScreen() {
    * Une vidéo récompensée convertit bien mieux pour RESTAURER une perte que
    * pour offrir un gain. La perte est chaude à l'instant exact de la mort ;
    * dix secondes plus tard, le joueur a lu son récapitulatif, encaissé son
-   * Karma et accepté sa fin — l'offre arrive alors sur quelqu'un qui a déjà
+   * Karma et accepté sa fin, l'offre arrive alors sur quelqu'un qui a déjà
    * fait son deuil. L'offre passe donc devant tout le reste, une seule fois,
    * et se referme sans insister. Le bouton reste disponible plus bas pour qui
    * change d'avis.
@@ -275,7 +275,7 @@ export default function GameOverScreen() {
    *
    * Une offre sans horloge est une offre qu'on remet à plus tard, et « plus
    * tard », sur un écran de mort, veut dire jamais. Le compte à rebours ne
-   * ferme aucune porte — le bouton reste plus bas pour qui change d'avis —
+   * ferme aucune porte, le bouton reste plus bas pour qui change d'avis,
    * mais il transforme une décision reportable en décision présente.
    *
    * Il s'arrête pendant le chargement de la vidéo : sinon l'offre s'évanouit
@@ -294,7 +294,7 @@ export default function GameOverScreen() {
    * LE REFUS DEMANDE UN GESTE DE PLUS.
    *
    * Pas un piège : un seul appui supplémentaire, et le second bouton dit
-   * exactement ce qu'il fait — laisser partir quelqu'un qui a un nom. Un refus
+   * exactement ce qu'il fait, laisser partir quelqu'un qui a un nom. Un refus
    * réflexe et un refus décidé ne se valent pas, et seul le second mérite
    * d'être exaucé du premier coup.
    */
@@ -308,7 +308,7 @@ export default function GameOverScreen() {
   const [pochesOuvertes, setPochesOuvertes] = useState(0);
 
   /*
-   * LA UNE SE PARTAGE — mais pas à chaque mort.
+   * LA UNE SE PARTAGE, mais pas à chaque mort.
    *
    * Un partage proposé systématiquement n'est plus proposé, il est subi : le
    * joueur apprend à ignorer le bouton. On ne l'affiche que sur les morts qui
@@ -344,11 +344,11 @@ export default function GameOverScreen() {
   /*
    * Une fin inédite se tamponne : c'est le son de la collection qui avance, et
    * le seul moment franchement bon d'un écran de mort. Il attend que la
-   * dernière poche soit ouverte — avant, l'encadré n'est pas à l'écran.
+   * dernière poche soit ouverte, avant, l'encadré n'est pas à l'écran.
    *
    * Ce hook DOIT rester au-dessus du `if (!char) return null` qui suit. Placé
-   * dessous, il disparaissait du rendu dès que le personnage passait à null —
-   * c'est-à-dire au moment précis où l'on repart pour une nouvelle vie — et
+   * dessous, il disparaissait du rendu dès que le personnage passait à null,
+   * c'est-à-dire au moment précis où l'on repart pour une nouvelle vie, et
    * React refusait de rendre un composant qui compte soudain un hook de moins
    * (erreur #300). Le jeu plantait après le choix du personnage suivant.
    */
@@ -425,7 +425,7 @@ export default function GameOverScreen() {
    * Registre et la série quotidienne survivent au personnage : les faire
    * figurer ici serait un mensonge, et un joueur qui s'en aperçoit ne croit
    * plus rien de ce que l'écran lui dit. Restent les jours, l'argent, le sac
-   * et le respect — et on tait les lignes à zéro, qui affaibliraient les
+   * et le respect, et on tait les lignes à zéro, qui affaibliraient les
    * autres.
    */
   const nbObjets = char.inventory.length;
@@ -479,7 +479,7 @@ export default function GameOverScreen() {
              * z-80, au-dessus du carton du matin (z-75), et ce n'est pas un
              * détail : le cadeau quotidien s'affichait par-dessus cette offre
              * et la faisait expirer sans que personne l'ait vue. Le carton
-             * peut attendre dix secondes — l'offre, non.
+             * peut attendre dix secondes, l'offre, non.
              */
             className="fixed inset-0 z-[80] flex items-center justify-center p-5"
             style={{ background: 'rgba(12,8,14,0.975)', backdropFilter: 'blur(3px)' }}
@@ -496,8 +496,8 @@ export default function GameOverScreen() {
               </h2>
               <p className="text-[13px] text-[#A08060] leading-snug mb-4">
                 {tr(
-                  `${char.name} est encore là, de justesse. Une âme charitable peut passer — mais une seule fois par partie.`,
-                  `${char.name} is still here, barely. A kind soul may come by — but only once per game.`,
+                  `${char.name} est encore là, de justesse. Une âme charitable peut passer, mais une seule fois par partie.`,
+                  `${char.name} is still here, barely. A kind soul may come by, but only once per game.`,
                 )}
               </p>
 
@@ -693,7 +693,7 @@ export default function GameOverScreen() {
           <p className="text-[9px] text-[#8B6B4A] text-center mt-1.5">
             {/*
               * Quand un successeur est annoncé, c'est CE bouton-ci que le
-              * joueur touche — celui du bas devient secondaire. L'invitation à
+              * joueur touche, celui du bas devient secondaire. L'invitation à
               * composer doit donc apparaître ici aussi, sans quoi elle ne se
               * verrait que dans le cas le plus rare.
               */}
@@ -910,7 +910,7 @@ export default function GameOverScreen() {
         dans la tête du joueur, et c'est exactement ce que l'Atelier vend.
 
         Ailleurs, la même carte serait de la réclame. Ici, elle répond à la
-        question qu'il est déjà en train de se poser — et c'est toute la
+        question qu'il est déjà en train de se poser, et c'est toute la
         différence entre proposer et harceler.
 
         Pour qui l'a déjà acheté, rien ne s'affiche : le bouton de reprise, un
@@ -938,7 +938,7 @@ export default function GameOverScreen() {
         </motion.button>
       )}
 
-      {/* Reprise — répétée en bas de page pour qui a tout lu, et repli complet
+      {/* Reprise, répétée en bas de page pour qui a tout lu, et repli complet
           si le successeur n'a pas pu être tiré. */}
       <motion.button
         initial={{ y: 15, opacity: 0 }}
@@ -969,7 +969,7 @@ export default function GameOverScreen() {
           *
           * Avec l'Atelier, choisir un candidat ouvre la composition : le
           * visage et les deux traits. Ce n'est donc pas « recommencer », c'est
-          * fabriquer quelqu'un — et l'écran de fin est le seul endroit où on y
+          * fabriquer quelqu'un, et l'écran de fin est le seul endroit où on y
           * pense, juste après avoir enterré le précédent.
           *
           * Un SECOND bouton « avec un personnage composé » aurait menti : il

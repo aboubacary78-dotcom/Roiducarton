@@ -1,5 +1,5 @@
 /*
- * LE CULOT — marchander un prix.
+ * LE CULOT : marchander un prix.
  *
  * Modèle : Ace Attorney, pas SteamWorld Dig. La Récup' est déjà un jeu de
  * « jusqu'où je pousse ma chance » ; en refaire un ici donnerait deux fois le
@@ -7,21 +7,21 @@
  * c'est une affaire de culot et de lecture. D'où deux verbes, et deux
  * seulement :
  *
- *   INSISTER   — gratuit, illimité tant qu'il reste de la patience. Ça grignote
+ *   INSISTER : gratuit, illimité tant qu'il reste de la patience. Ça grignote
  *                le prix s'il reste de la marge, et surtout ça RENSEIGNE : la
  *                réplique du commerçant dit s'il peut encore descendre.
- *   UN ARGUMENT — ça engage quelque chose de vrai (un objet du sac, votre
+ *   UN ARGUMENT : ça engage quelque chose de vrai (un objet du sac, votre
  *                réputation, la pluie dehors, votre fierté). Bien placé, le prix
  *                s'effondre. Mal placé, il se braque et vous coûte cher.
  *
  * La ressource dépensée n'est pas de l'argent, c'est la patience d'en face. Et
- * la patience se lit sur un visage, pas sur un compteur — sauf si le
+ * la patience se lit sur un visage, pas sur un compteur, sauf si le
  * personnage a le nez creux (voir `haggleMods`).
  *
  * Trois règles de conception :
  *   1. Chaque argument s'appuie sur un fait que le joueur voit déjà à l'écran
  *      (la météo, son respect, son sac). On ne devine pas, on observe.
- *   2. Chaque commerçant a son seuil, sa patience et son TIC — la phrase qu'il
+ *   2. Chaque commerçant a son seuil, sa patience et son TIC, la phrase qu'il
  *      sort quand on a touché son plancher. On apprend des gens, pas des
  *      chiffres.
  *   3. Casser la négociation ne coûte pas d'argent : il ne vous sert plus de la
@@ -166,7 +166,7 @@ export const NO_HAGGLE: Record<string, string> = {
 
 /** Réouverture après une brouille de marchandage. `absurdReopen` ne convient
  *  pas ici : il raconte une panne réparée (« vous rallumez le four »), alors
- *  qu'il n'y a rien à réparer — juste quelqu'un à qui reparler. */
+ *  qu'il n'y a rien à réparer, juste quelqu'un à qui reparler. */
 const HAGGLE_REOPEN: Array<[string, string]> = [
   ['Vous revenez la tête basse et vous payez le prix affiché sans un mot. Le rideau se relève.',
    'You come back sheepish and pay the asking price without a word. The shutters roll up.'],
@@ -230,7 +230,7 @@ export const ARGUMENTS: Record<ArgumentId, HaggleArgument> = {
   pigeon: {
     id: 'pigeon', label: 'Le pigeon sur l\'épaule', emoji: '🐦',
     line: 'Un pigeon se pose sur le comptoir et incline la tête.',
-    cost: 'aucun — mais on ne peut pas le rappeler',
+    cost: 'aucun, mais on ne peut pas le rappeler',
     bite: 0.34, backfire: 10,
   },
   service: {
@@ -287,7 +287,7 @@ export const HAGGLE_TUNING = {
 //
 // Même règle que pour la fouille et la manche : l'effet doit découler du trait,
 // jamais être collé dessus. Le charismatique fait durer la conversation ;
-// l'haleine redoutable la raccourcit — mais donne envie de céder pour qu'il
+// l'haleine redoutable la raccourcit, mais donne envie de céder pour qu'il
 // s'en aille ; le nez creux LIT la patience au lieu de la deviner ; celui qui
 // ne craint pas le froid ne peut pas jouer les transis sous la pluie ;
 // l'ancien comptable sait ce que vaut une marge.
@@ -323,7 +323,7 @@ export function haggleMods(c: Character): HaggleMods {
     argMul: (hasTrait(c, 'charismatique') ? 1.2 : 1) * (hasTrait(c, 'haleine') ? 1.15 : 1),
     // Flairer l'humeur des gens, c'est le même nez que pour flairer les coups.
     readsPatience: hasTrait(c, 'nez-sensible') || hasTrait(c, 'paranoiaque'),
-    // Qui connaît le quartier connaît les commerçants — et leurs vrais prix.
+    // Qui connaît le quartier connaît les commerçants, et leurs vrais prix.
     floorDrop: hasTrait(c, 'orientation') ? 0.06 : 0,
     hasPigeon: hasTrait(c, 'ami-pigeons'),
     // Difficile de jouer les transis quand on dort dehors sans couverture.
@@ -356,7 +356,7 @@ export function availableArguments(c: Character, weather: WeatherType, mods: Hag
 }
 
 /** Un argument porte-t-il ? La condition est toujours quelque chose que le
- *  joueur a sous les yeux — sa météo, son respect, son sac. */
+ *  joueur a sous les yeux, sa météo, son respect, son sac. */
 export function argumentLands(id: ArgumentId, c: Character, weather: WeatherType, k: Shopkeeper): boolean {
   if (k.hard.includes(id)) return false;
   switch (id) {
@@ -386,7 +386,7 @@ export function openingPrice(marketFinal: number, mods: HaggleMods): number {
  * Première tentative : faire baisser le prix en euros, coup par coup. Ça ne
  * marche pas. Les prix du jeu sont de petits entiers (5 à 12 €) et le plancher
  * est à ~55 % : la marge fait deux à cinq pas entiers. Le simulateur a montré
- * un jeu à cinq états, sans texture — trois profils de joueur très différents
+ * un jeu à cinq états, sans texture, trois profils de joueur très différents
  * obtenaient exactement le même résultat.
  *
  * D'où le modèle retenu : on ne négocie pas des euros, on négocie une REMISE
@@ -396,7 +396,7 @@ export function openingPrice(marketFinal: number, mods: HaggleMods): number {
  *
  * Deuxième correction : insister était trop rentable. À lui seul il atteignait
  * 25 % sur 45 % possibles, ce qui rendait les arguments décoratifs. Insister
- * plafonne maintenant vers 11 % et s'éteint au troisième coup — le commerçant
+ * plafonne maintenant vers 11 % et s'éteint au troisième coup, le commerçant
  * le dit, et c'est le signal qu'il faut sortir autre chose.
  *
  * Troisième règle : plus il a déjà lâché, plus le coup suivant lui coûte cher.
@@ -417,7 +417,7 @@ export function argumentGain(a: HaggleArgument, k: Shopkeeper, cut: number, maxC
 }
 
 /** En dessous de ce gain, le commerçant « ne bouge plus » : on l'affiche, et ça
- *  ne coûte presque rien — pas de coup qui prend de la patience pour zéro. */
+ *  ne coûte presque rien, pas de coup qui prend de la patience pour zéro. */
 export function moves(gain: number): boolean {
   return gain > HAGGLE_TUNING.deadGain;
 }

@@ -119,7 +119,7 @@ for (const nom of fichiers) {
   const { mort, montee } = tempsDAttaque(f);
 
   /*
-   * La sonie intégrée n'a de sens qu'au-delà de 400 ms — c'est la fenêtre de
+   * La sonie intégrée n'a de sens qu'au-delà de 400 ms, c'est la fenêtre de
    * la norme EBU. En dessous, ebur128 renvoie son plancher de -70 LUFS, qui
    * ne dit rien du fichier. On ne retient donc que les sons assez longs, et
    * les courts se comparent entre eux au niveau moyen.
@@ -137,9 +137,9 @@ for (const nom of fichiers) {
   // le débit mesuré grimpe sans que le fichier soit plus gros : on ne compte
   // que les fichiers assez longs pour que la mesure ait un sens.
   if (duree > 0.3 && (debit < 30 || debit > 50)) anomalies.push(`${nom} : ${debit} kbit/s hors de la plage visée`);
-  if (crete < -40) anomalies.push(`${nom} : crête à ${crete} dB — le fichier est vide ou inaudible`);
-  if (crete > -0.5) anomalies.push(`${nom} : crête à ${crete} dB — écrêtage probable`);
-  if (mort > 0.020) anomalies.push(`${nom} : ${Math.round(mort * 1000)} ms de silence mort en tête — le son arrive après le geste`);
+  if (crete < -40) anomalies.push(`${nom} : crête à ${crete} dB, le fichier est vide ou inaudible`);
+  if (crete > -0.5) anomalies.push(`${nom} : crête à ${crete} dB, écrêtage probable`);
+  if (mort > 0.020) anomalies.push(`${nom} : ${Math.round(mort * 1000)} ms de silence mort en tête, le son arrive après le geste`);
 
   const cible = attendu.get(base);
   if (cible === undefined) anomalies.push(`${nom} : absent du cahier des charges`);
@@ -184,8 +184,8 @@ for (const [base, liste] of Object.entries(groupes)) {
       const d = Math.sqrt(emp[i].reduce((s, v, k) => s + (v - emp[j][k]) ** 2, 0) / emp[i].length);
       ecartMin = Math.min(ecartMin, d);
     }
-  const verdict = ecartMin < 0.02 ? 'JUMELLES — inutiles' : ecartMin < 0.08 ? 'très proches' : 'distinctes';
-  console.log(`  ${base.padEnd(22)} ${liste.length} variantes, écart min ${ecartMin.toFixed(3)} — ${verdict}`);
+  const verdict = ecartMin < 0.02 ? 'JUMELLES, inutiles' : ecartMin < 0.08 ? 'très proches' : 'distinctes';
+  console.log(`  ${base.padEnd(22)} ${liste.length} variantes, écart min ${ecartMin.toFixed(3)} · ${verdict}`);
   if (ecartMin < 0.02) anomalies.push(`${base} : les variantes sont indiscernables`);
 }
 
@@ -197,7 +197,7 @@ if (lufsValides.length) {
   console.log(`\nSONIE : médiane ${med.toFixed(1)} LUFS, de ${tri[0].toFixed(1)} à ${tri[tri.length - 1].toFixed(1)}.`);
   const horsPlage = mesures.filter(m => Number.isFinite(m.lufs) && Math.abs(m.lufs - med) > 6);
   if (horsPlage.length) {
-    console.log(`  ${horsPlage.length} fichier(s) à plus de 6 LU de la médiane — ils sauteront à l'oreille :`);
+    console.log(`  ${horsPlage.length} fichier(s) à plus de 6 LU de la médiane, ils sauteront à l'oreille :`);
     for (const m of horsPlage.sort((a, b) => a.lufs - b.lufs))
       console.log(`     ${m.nom.padEnd(30)} ${m.lufs.toFixed(1)} LUFS`);
   }

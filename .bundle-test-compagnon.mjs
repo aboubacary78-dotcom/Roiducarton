@@ -7692,12 +7692,12 @@ function gameReducer(state, action) {
       return state;
     }
     /*
-     * UN APPUI, UNE ACTION — le garde-fou des cinq tuiles.
+     * UN APPUI, UNE ACTION : le garde-fou des cinq tuiles.
      *
      * `state.screen !== 'main'` n'est pas une précaution de style. Mesuré :
      * deux appuis sur « Explorer » dans le même tick JavaScript consommaient
      * DEUX actions de la journée sur trois, pour un seul événement affiché.
-     * Le budget d'actions ne suffisait pas à s'en protéger — après le premier
+     * Le budget d'actions ne suffisait pas à s'en protéger, après le premier
      * envoi il en restait deux, donc le second passait.
      *
      * Ces cinq actions quittent toutes l'écran principal. En exiger le départ
@@ -8068,7 +8068,7 @@ function gameReducer(state, action) {
       };
     }
     /*
-     * UNE HEURE DE PLUS AU CHAUD — la nuit rendue à moitié.
+     * UNE HEURE DE PLUS AU CHAUD : la nuit rendue à moitié.
      *
      * Le bilan vient d'afficher, en chiffres, ce que la nuit a coûté. C'est le
      * seul instant du jeu où la perte est à l'écran, chiffrée, et pas encore
@@ -8078,7 +8078,7 @@ function gameReducer(state, action) {
      * On rend la MOITIÉ de chaque jauge perdue, arrondie au supérieur, et rien
      * d'autre : ni argent, ni objet, ni action. Le bilan n'existe que si le
      * personnage a survécu à la nuit (voir NEXT_DAY), donc cette offre ne
-     * ressuscite jamais personne — elle adoucit une nuit traversée.
+     * ressuscite jamais personne, elle adoucit une nuit traversée.
      */
     case "RECOVER_NIGHT": {
       const bilan = state.daySummary;
@@ -8102,7 +8102,7 @@ function gameReducer(state, action) {
       };
     }
     /*
-     * UNE POCHE DE PLUS — rattraper l'objet que le sac a refusé.
+     * UNE POCHE DE PLUS : rattraper l'objet que le sac a refusé.
      *
      * Le refus est visuel et immédiat : l'objet a un nom, une image, il était
      * dans la main, et le texte vient d'écrire qu'on le laisse sur place. On
@@ -8120,7 +8120,7 @@ function gameReducer(state, action) {
      * Effet du quasi-gain : un joueur qui rate de loin hausse les épaules, un
      * joueur qui rate de deux euros ne le supporte pas. Le bilan ne propose
      * donc l'offre que sur un échec à moins de 20 % du but (voir NEXT_DAY et
-     * `SEUIL_PRESQUE`), et la récompense est exactement celle du contrat —
+     * `SEUIL_PRESQUE`), et la récompense est exactement celle du contrat,
      * rien de plus, sinon la publicité paierait mieux que le jeu.
      */
     case "RATTRAPER_CONTRAT": {
@@ -8515,7 +8515,7 @@ function gameReducer(state, action) {
         /*
          * Aller chercher son voleur ne se tente qu'une fois : la trace
          * s'efface au moment où le combat commence, pas à la victoire. Gagner
-         * rend ce qu'il avait pris — c'est le butin de l'ennemi, le code de
+         * rend ce qu'il avait pris, c'est le butin de l'ennemi, le code de
          * victoire s'en charge déjà. Perdre, c'est perdre pour de bon.
          */
         character: action.contreVoleur ? { ...state.character, vole: void 0 } : state.character,

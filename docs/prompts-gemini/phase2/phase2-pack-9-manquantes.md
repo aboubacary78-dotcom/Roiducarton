@@ -1,17 +1,17 @@
-# Pack 9 — Les deux dernières (2 images)
+# Pack 9 · Les deux dernières (2 images)
 
-## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
+## 📦 Contexte projet (à lire en entier · tu pars de zéro, sans accès au code)
 
 Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie : un SDF
 survit jour après jour dans une ville française. Direction artistique
 **« Carton Craft »** : chaque illustration est un **diorama miniature en carton
 kraft fait main**, comme une maquette artisanale photographiée.
 
-## ⚠️ RÈGLE N°1 — L'HUMOUR EST LA SIGNATURE DU JEU
+## ⚠️ RÈGLE N°1 · L'HUMOUR EST LA SIGNATURE DU JEU
 
 « Le Roi du Carton » est une COMÉDIE noire, et TOUTE sa direction artistique
 repose là-dessus : on rit de la misère avec tendresse, on ne s'y vautre jamais.
-**CHAQUE image doit faire sourire** — une situation absurde, un gag visuel, une
+**CHAQUE image doit faire sourire** : une situation absurde, un gag visuel, une
 expression comique du personnage. Une image simplement triste, plate ou
 déprimante est HORS SUJET et sera refusée, même si elle est techniquement
 réussie.
@@ -57,7 +57,7 @@ qu'on peut négocier les prix en boutique. Elle doit faire comprendre le jeu
 d'un coup d'œil : **deux personnes, un objet, un prix, et un rapport de force.**
 
 **Ce qu'on veut voir :** un comptoir de boutique en carton, vu de trois quarts.
-D'un côté le héros, penché en avant, l'index levé, en pleine argumentation — le
+D'un côté le héros, penché en avant, l'index levé, en pleine argumentation, le
 visage d'un homme qui est en train d'expliquer quelque chose de très important
 et de complètement bidon. De l'autre côté, la commerçante en carton, bras
 croisés, un sourcil relevé, absolument pas dupe mais visiblement amusée. Entre
@@ -79,20 +79,20 @@ vitrine, guirlande au-dessus de la caisse.
 **Où elle apparaît :** « Le Sursaut » est un événement rare, qui ne se
 déclenche **qu'une seule fois par partie**, au moment où la santé ou le moral
 du personnage frôlent le zéro. Un souvenir remonte, et le personnage se relève.
-C'est le moment le plus grave du jeu — et il faut donc y aller **doucement sur
+C'est le moment le plus grave du jeu, et il faut donc y aller **doucement sur
 la blague**, sans pour autant tomber dans le pathos.
 
 **Ce qu'on veut voir :** le héros assis par terre, dos contre un mur de brique
 en carton, dans une ruelle la nuit. Il vient manifestement de très mal aller.
-Mais il tient dans ses mains une petite chose dérisoire qui a tout changé —
-**une photo de famille cornée, en carton, grande comme un timbre** — et il la
+Mais il tient dans ses mains une petite chose dérisoire qui a tout changé,
+**une photo de famille cornée, en carton, grande comme un timbre**, et il la
 regarde avec un sourire minuscule, un peu de travers, celui de quelqu'un qui
 vient de décider de continuer. Autour de lui, la ruelle s'illumine faiblement :
 la guirlande d'un balcon vient de s'allumer, et un pigeon en carton s'est posé
 à côté de lui, l'air de rien, comme un collègue qui ne dit rien mais qui reste.
 
 **Le ton :** ni gag ni misère. De la tendresse. C'est **la seule image du jeu**
-autorisée à ne pas faire rire — mais elle doit quand même avoir son détail
+autorisée à ne pas faire rire, mais elle doit quand même avoir son détail
 absurde discret : le pigeon a l'air très concerné, et il porte une minuscule
 couronne en carton de travers.
 

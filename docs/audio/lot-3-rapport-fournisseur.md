@@ -1,4 +1,4 @@
-# Rapport de contrôle qualité — lot 3 musical
+# Rapport de contrôle qualité · lot 3 musical
 
 Les sept exports Stable Audio ont été préparés en masters WAV de 60 secondes avec une amorce silencieuse de 200 ms et une queue en fondu vers le silence, puis encodés en MP3 à **gain constant**. Aucun compresseur ni limiteur dynamique n’a été appliqué. Les mesures réelles (`input_i` et `input_tp`) reposent sur l’analyse intégrée EBU R128 de FFmpeg et sur la comparaison RMS des fenêtres de 200 ms placées en tête et en queue de chaque **master WAV**.
 

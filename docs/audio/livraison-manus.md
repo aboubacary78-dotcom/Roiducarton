@@ -1,4 +1,4 @@
-# Livraison — Refonte audio
+# Livraison · Refonte audio
 
 Le dossier `audio/` contient les **65 fichiers MP3** attendus : 49 sons de base et 16 fichiers de variante pour les huit sons répétitifs. Les fichiers ont été générés avec ElevenLabs Sound Effects à partir des prompts du cahier des charges, puis postproduits automatiquement.
 

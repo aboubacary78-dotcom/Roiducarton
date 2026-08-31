@@ -1,4 +1,4 @@
-# Pack son 3.5 — Mendier et les suites (47 bruitages)
+# Pack son 3.5 · Mendier et les suites (47 bruitages)
 
 *Ce document est le socle. Chaque pack le répète en tête, pour être remis seul
 à qui fabrique les sons.*
@@ -25,7 +25,7 @@ son établi, micro à vingt centimètres :
 | le vent | un souffle contre une feuille de papier calque |
 
 C'est cette matière-là qui donne son unité au jeu. Un son trop propre, trop
-« vrai », trop cinématographique sonnera faux — même s'il est techniquement
+« vrai », trop cinématographique sonnera faux, même s'il est techniquement
 parfait. **Petit, proche, sec, fait main.**
 
 ## Le ton : comédie douce-amère
@@ -39,7 +39,7 @@ percussion de bande-annonce.
 
 1. **Aucune parole intelligible.** Le jeu existe en français et en anglais ;
    un mot compréhensible casserait la traduction. Un brouhaha de foule doit
-   rester un brouhaha — des voyelles, du murmure, jamais de phrase.
+   rester un brouhaha, des voyelles, du murmure, jamais de phrase.
 2. **Aucune mélodie reconnaissable** ni citation d'une musique existante.
 3. **Aucune stridence.** Le jeu se joue au casque dans le métro. Rien
    au-dessus de 8 kHz qui pique, pas de sifflement continu.
@@ -52,7 +52,7 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 
 ## Contraintes techniques (les mêmes pour les trois packs)
 
-- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps —
+- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps,
   la conversion finale sera faite à l'intégration.
 - **Boucles : stéréo. Bruitages courts : mono.**
 - **Les boucles doivent boucler.** La dernière milliseconde doit s'enchaîner
@@ -69,7 +69,7 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 
 ---
 
-# ⚠️ CE LOT EST À REFAIRE — lisez d'abord cette page
+# ⚠️ CE LOT EST À REFAIRE · lisez d'abord cette page
 
 Une première version a été livrée. Elle est correcte sur la forme : 47 noms
 exacts, durées dans la cible, aucun écrêtage, aucune paire strictement
@@ -86,7 +86,7 @@ depuis montrent qu'on peut faire nettement mieux.
 
 On pourrait croire que ces scènes se ressemblent par nature : elles se passent
 presque toutes sur le même trottoir, avec les mêmes passants. Sauf que ce lot
-contient aussi **dix suites de rencontre** qui, elles, se déroulent ailleurs —
+contient aussi **dix suites de rencontre** qui, elles, se déroulent ailleurs,
 une bibliothèque, une boulangerie, un toit. Si le décor commun était en cause,
 ces dix-là devraient se distinguer nettement du reste.
 
@@ -98,20 +98,20 @@ vient donc pas du sujet.
 
 | Proximité | Une scène | Et l'autre |
 |---|---|---|
-| 0.95 | **La Sortie du Karaoké** — *Le bar karaoké recrache ses clients à 2h : cordes vocales détruites, egos * | **Le Club de Lecture** — *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
-| 0.95 | **Le Cinéma** — *Le cinéma vient de projeter un film. Les spectateurs sortent.* | **La Sortie de Mariage** — *Un mariage se termine. Les invités sortent, éméchés et généreux.* |
-| 0.95 | **La Sortie du Match** — *Le match de foot est fini. Les supporters envahissent les rues.* | **Le Club de Lecture** — *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
-| 0.95 | **Le Cinéma** — *Le cinéma vient de projeter un film. Les spectateurs sortent.* | **La Station de Métro** — *L'entrée du métro. Flux constant de passagers pressés.* |
-| 0.95 | **L'Averse Soudaine** — *Un orage éclate sans prévenir sur la place. Vous êtes le seul être humain * | **La Vendetta du Père Noël** — *Le Père Noël du marché vous a retrouvé. Il a fait le tour des commerçants * |
-| 0.95 | **La Sortie du Loto des Anciens** — *La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des * | **Le Distributeur de Billets** — *Un distributeur automatique de billets. Des gens retirent de l'argent.* |
-| 0.95 | **La Sortie de Mariage** — *Un mariage se termine. Les invités sortent, éméchés et généreux.* | **La Station de Métro** — *L'entrée du métro. Flux constant de passagers pressés.* |
-| 0.95 | **La Sortie du Loto des Anciens** — *La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des * | **Le Club de Lecture** — *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
-| 0.95 | **La Station de Métro** — *L'entrée du métro. Flux constant de passagers pressés.* | **Le Bonnet Otage** — *Le vendeur de hot-dogs a puni votre larcin en épinglant votre bonnet EN HA* |
-| 0.94 | **La Sortie du Karaoké** — *Le bar karaoké recrache ses clients à 2h : cordes vocales détruites, egos * | **La Sortie du Match** — *Le match de foot est fini. Les supporters envahissent les rues.* |
-| 0.94 | **Le Musicien du Métro** — *Un musicien joue de l'accordéon dans le métro. Il gagne bien sa vie.* | **Le Bonnet Otage** — *Le vendeur de hot-dogs a puni votre larcin en épinglant votre bonnet EN HA* |
-| 0.94 | **La Sortie du Loto des Anciens** — *La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des * | **Le Marché de Noël** — *Vin chaud, sapins, chorales et culpabilité de fin d'année : le marché de N* |
-| 0.94 | **Le Distributeur de Billets** — *Un distributeur automatique de billets. Des gens retirent de l'argent.* | **Le Club de Lecture** — *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
-| 0.94 | **Le Fleuriste** — *Le fleuriste jette ses fleurs fanées. Elles sont encore belles.* | **La Terrasse du Brunch** — *Le dimanche, la terrasse du brunch déborde d'avocado toasts à 17€ et de co* |
+| 0.95 | **La Sortie du Karaoké** : *Le bar karaoké recrache ses clients à 2h : cordes vocales détruites, egos * | **Le Club de Lecture**, *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
+| 0.95 | **Le Cinéma** : *Le cinéma vient de projeter un film. Les spectateurs sortent.* | **La Sortie de Mariage**, *Un mariage se termine. Les invités sortent, éméchés et généreux.* |
+| 0.95 | **La Sortie du Match** : *Le match de foot est fini. Les supporters envahissent les rues.* | **Le Club de Lecture**, *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
+| 0.95 | **Le Cinéma** : *Le cinéma vient de projeter un film. Les spectateurs sortent.* | **La Station de Métro**, *L'entrée du métro. Flux constant de passagers pressés.* |
+| 0.95 | **L'Averse Soudaine** : *Un orage éclate sans prévenir sur la place. Vous êtes le seul être humain * | **La Vendetta du Père Noël**, *Le Père Noël du marché vous a retrouvé. Il a fait le tour des commerçants * |
+| 0.95 | **La Sortie du Loto des Anciens** : *La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des * | **Le Distributeur de Billets**, *Un distributeur automatique de billets. Des gens retirent de l'argent.* |
+| 0.95 | **La Sortie de Mariage** : *Un mariage se termine. Les invités sortent, éméchés et généreux.* | **La Station de Métro**, *L'entrée du métro. Flux constant de passagers pressés.* |
+| 0.95 | **La Sortie du Loto des Anciens** : *La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des * | **Le Club de Lecture**, *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
+| 0.95 | **La Station de Métro** : *L'entrée du métro. Flux constant de passagers pressés.* | **Le Bonnet Otage**, *Le vendeur de hot-dogs a puni votre larcin en épinglant votre bonnet EN HA* |
+| 0.94 | **La Sortie du Karaoké** : *Le bar karaoké recrache ses clients à 2h : cordes vocales détruites, egos * | **La Sortie du Match**, *Le match de foot est fini. Les supporters envahissent les rues.* |
+| 0.94 | **Le Musicien du Métro** : *Un musicien joue de l'accordéon dans le métro. Il gagne bien sa vie.* | **Le Bonnet Otage**, *Le vendeur de hot-dogs a puni votre larcin en épinglant votre bonnet EN HA* |
+| 0.94 | **La Sortie du Loto des Anciens** : *La salle des fêtes libère le loto du jeudi : quatre-vingts retraités, des * | **Le Marché de Noël**, *Vin chaud, sapins, chorales et culpabilité de fin d'année : le marché de N* |
+| 0.94 | **Le Distributeur de Billets** : *Un distributeur automatique de billets. Des gens retirent de l'argent.* | **Le Club de Lecture**, *La bibliothécaire du bibliobus vous repère de loin et brandit un livre : «* |
+| 0.94 | **Le Fleuriste** : *Le fleuriste jette ses fleurs fanées. Elles sont encore belles.* | **La Terrasse du Brunch**, *Le dimanche, la terrasse du brunch déborde d'avocado toasts à 17€ et de co* |
 
 Un karaoké et une carte de bibliothèque à 0,96 : rien ne les rapproche, ni le
 lieu, ni le geste, ni la matière.
@@ -129,7 +129,7 @@ lieu, ni le geste, ni la matière.
 ## Le contrôle à faire avant de livrer
 
 **Jouez les 47 à la suite, les yeux fermés.** Si deux se confondent, l'un des
-deux est à refaire — même si chacun, pris isolément, est réussi.
+deux est à refaire, même si chacun, pris isolément, est réussi.
 
 ---
 
@@ -137,7 +137,7 @@ deux est à refaire — même si chacun, pris isolément, est réussi.
 # 🎯 Ce pack : un bruitage par rencontre
 
 Le jeu compte **296 rencontres**, et chacune a maintenant droit à SON bruitage.
-Jusqu'ici elles se partageaient 58 sons rangés par thème — ce qui donnait 30
+Jusqu'ici elles se partageaient 58 sons rangés par thème, ce qui donnait 30
 rencontres différentes sur le même bruit de voiture, et quelques absurdités
 (une laverie qui déclenchait le tonnerre, parce que le mot « éclairé » ressemble
 à « éclair »).
@@ -149,7 +149,7 @@ puis se tait.
 
 **Le son doit sortir de CETTE scène-là, pas de sa catégorie.** Chaque entrée
 ci-dessous vous donne le titre et le texte exact que le joueur lit à l'écran.
-Lisez-le, et cherchez **le bruit que fait précisément ce moment** — pas le bruit
+Lisez-le, et cherchez **le bruit que fait précisément ce moment**, pas le bruit
 que fait la catégorie à laquelle il appartient.
 
 Un « registre » est indiqué entre crochets : c'est une simple indication de
@@ -172,7 +172,7 @@ une matière, et si possible un silence bien placé.**
 
 ## ⚠️ Le contrôle qui compte : ils doivent différer ENTRE EUX
 
-Le premier lot livré était bon sur ce point ; le deuxième nettement moins —
+Le premier lot livré était bon sur ce point ; le deuxième nettement moins,
 mesuré, pas ressenti : ses sons se ressemblaient sensiblement plus entre eux,
 alors qu'ils couvraient des scènes tout aussi variées. C'est le piège d'une
 commande en nombre, et c'est ce qui ruinerait l'intérêt d'avoir un son par
@@ -180,14 +180,14 @@ rencontre plutôt qu'un son par catégorie.
 
 **Le test, à faire avant de livrer : jouez tout le lot à la suite, les yeux
 fermés.** Si deux bruitages sont difficiles à distinguer, l'un des deux est à
-refaire — même si chacun, pris seul, est réussi.
+refaire, même si chacun, pris seul, est réussi.
 
 Trois leviers pour varier, quand deux scènes se ressemblent :
 
 - **changer la matière** : le même geste sur du carton, sur du métal, sur du
   papier journal ne donne pas le même son ;
 - **changer le rythme** : un coup sec, deux coups espacés, un frottement
-  continu — la silhouette temporelle se reconnaît mieux que le timbre ;
+  continu, la silhouette temporelle se reconnaît mieux que le timbre ;
 - **changer ce qu'on écoute** : dans une scène il y a souvent trois sons
   possibles. Si la précédente a pris le plus évident, prenez-en un autre.
 

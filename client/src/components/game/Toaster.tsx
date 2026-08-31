@@ -18,8 +18,8 @@ export default function Toaster() {
      * LES TOASTS PASSENT SOUS LE POST-IT DES SUCCÈS.
      *
      * Les deux étaient posés en `top-3` avec le même z-index : ils se
-     * recouvraient exactement, et le bandeau le plus rare du jeu — un succès
-     * débloqué — disparaissait derrière un retour éphémère. Ça se produit sur
+     * recouvraient exactement, et le bandeau le plus rare du jeu, un succès
+     * débloqué, disparaissait derrière un retour éphémère. Ça se produit sur
      * un chemin parfaitement ordinaire : le changement de jour débloque un
      * accessoire ET déclenche une pique du matin.
      *

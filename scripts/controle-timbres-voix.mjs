@@ -3,7 +3,7 @@
  *
  * La commande demandait deux interprètes différents, et le prestataire a livré
  * autre chose : deux voix de synthèse, en le disant franchement. C'est
- * acceptable — mais alors le risque change de nature, et il devient invisible.
+ * acceptable, mais alors le risque change de nature, et il devient invisible.
  *
  * Une voix simplement transposée passe tous les contrôles ordinaires : les
  * fichiers ne sont pas identiques bit à bit, ils se décodent, ils ont le bon
@@ -16,11 +16,11 @@
  *     pour attacher le joueur à SON personnage tombe à plat.
  *   · LES TROIS PRISES D'UNE FAMILLE SONT-ELLES DIFFÉRENTES ? Elles servent
  *     exactement à casser la répétition. Trois prises quasi identiques, et le
- *     son redevient le métronome qu'on cherchait à éviter — sauf qu'on aura
+ *     son redevient le métronome qu'on cherchait à éviter, sauf qu'on aura
  *     payé trois fichiers pour ça.
  *
  * On mesure une empreinte spectrale : l'énergie dans vingt-quatre bandes
- * log-espacées, normalisée. C'est grossier et c'est voulu — on ne cherche pas
+ * log-espacées, normalisée. C'est grossier et c'est voulu, on ne cherche pas
  * à décrire la voix, seulement à savoir si deux enregistrements viennent du
  * même endroit.
  *
@@ -84,7 +84,7 @@ const distance = (a, b) => a.reduce((s, v, i) => s + Math.abs(v - b[i]), 0) / 2;
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -154,7 +154,7 @@ for (const f of plates) console.log(`        ${f.base} : ${f.min.toFixed(3)}`);
 /* ── CE QUE CETTE MESURE NE PEUT PAS FAIRE, ET IL FAUT LE SAVOIR ───────────
  *
  * Un troisième contrôle a été écrit ici, puis retiré : « chaque voix
- * ressemble-t-elle plus à elle-même qu'à l'autre ? » — c'est-à-dire
+ * ressemble-t-elle plus à elle-même qu'à l'autre ? », c'est-à-dire
  * `voix-h-douleur-1` plus proche des autres `voix-h-*` que des `voix-f-*`.
  * Il échouait sur neuf fichiers, et il avait tort.
  *
@@ -166,7 +166,7 @@ for (const f of plates) console.log(`        ${f.base} : ${f.min.toFixed(3)}`);
  *
  * Un spectre en vingt-quatre bandes décrit CE QUI EST DIT, pas QUI le dit. Un
  * souffle de panique et un grognement d'effort ne se ressemblent pas, même
- * sortis de la même gorge — et deux souffles de panique se ressemblent, même
+ * sortis de la même gorge, et deux souffles de panique se ressemblent, même
  * sortis de deux gorges différentes. Le contrôle mesurait donc le contenu en
  * croyant mesurer l'identité, et un lot parfaitement bon le faisait échouer.
  *

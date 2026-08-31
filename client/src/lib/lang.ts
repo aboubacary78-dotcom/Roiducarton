@@ -16,7 +16,7 @@ export type Lang = 'fr' | 'en';
  * LE DICTIONNAIRE ANGLAIS NE PART QU'AUX ANGLOPHONES.
  *
  * Les deux tables de traduction pèsent 441 ko de source, 179 ko une fois
- * compressées — soit près du tiers du paquet JavaScript du jeu. Or `tc()` ne
+ * compressées, soit près du tiers du paquet JavaScript du jeu. Or `tc()` ne
  * les consulte JAMAIS quand la langue n'est pas l'anglais : elles étaient
  * téléchargées, décompressées et analysées par tous les joueurs français pour
  * n'être jamais lues une seule fois.

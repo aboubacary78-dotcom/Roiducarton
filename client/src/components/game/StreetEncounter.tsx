@@ -10,7 +10,7 @@ import CardboardAvatar from './CardboardAvatar';
 /*
  * Rencontre d'un PNJ errant (niveau « B ») : on découvre sa chute, puis on
  * peut partager à manger, troquer, ou passer son chemin. Retour non bloquant
- * (toast), comme le reste du jeu — pas d'overlay de résultat par-dessus.
+ * (toast), comme le reste du jeu, pas d'overlay de résultat par-dessus.
  */
 export default function StreetEncounter({ npc, onClose }: { npc: StreetNpc; onClose: () => void }) {
   const { state, dispatch } = useGame();

@@ -1,17 +1,17 @@
 /*
- * LA FACTURATION GOOGLE PLAY — l'argent réel, enfin branché.
+ * LA FACTURATION GOOGLE PLAY : l'argent réel, enfin branché.
  *
  * Jusqu'ici, `purchaseRemoveAds()` faisait `setAdsRemoved(true); return true`.
  * Autrement dit : les trois produits du jeu s'ouvraient GRATUITEMENT à qui
- * appuyait sur le bouton. C'était voulu pendant qu'on construisait le reste —
- * on ne branche pas une caisse sur un magasin qui n'existe pas — mais c'est
+ * appuyait sur le bouton. C'était voulu pendant qu'on construisait le reste,
+ * on ne branche pas une caisse sur un magasin qui n'existe pas, mais c'est
  * évidemment la dernière chose à corriger avant de publier.
  *
  * ─────────────────────────────────────────────────────────────────────────
  * POURQUOI cordova-plugin-purchase ET PAS AUTRE CHOSE
  *
  * Le commentaire qu'on remplace citait `@capacitor-community/in-app-purchases`.
- * Ce paquet N'EXISTE PAS sur npm (404) — c'était une piste écrite de mémoire,
+ * Ce paquet N'EXISTE PAS sur npm (404), c'était une piste écrite de mémoire,
  * jamais vérifiée. Deux candidats réels :
  *
  *   · RevenueCat (`@revenuecat/purchases-capacitor`). Excellent, mais il
@@ -20,7 +20,7 @@
  *     compatible avec le Capacitor 6 du projet est la 9, plus ancienne.
  *
  *   · cordova-plugin-purchase 13.18. Autonome, aucun compte à créer, et il
- *     embarque la Google Play Billing Library 9.0.0 — la version courante.
+ *     embarque la Google Play Billing Library 9.0.0, la version courante.
  *     Capacitor charge les greffons Cordova nativement, sans adaptateur.
  *
  * D'où le choix. Une conséquence : la Billing Library 9 réclame
@@ -49,7 +49,7 @@
  * ET L'ACQUITTEMENT, QU'ON OUBLIE TOUJOURS
  *
  * Google exige qu'un achat soit ACQUITTÉ dans les trois jours. Passé ce
- * délai, il est remboursé d'office et le joueur perd son produit — sans que
+ * délai, il est remboursé d'office et le joueur perd son produit, sans que
  * rien, nulle part, n'ait signalé d'erreur. C'est `transaction.finish()` qui
  * acquitte, dans le gestionnaire `approved` ci-dessous. Cette ligne-là n'est
  * pas un détail d'implémentation : c'est elle qui fait que l'argent arrive.
@@ -100,14 +100,14 @@ export function prixAffiche(p: Produit): string {
  * LE TOTAL DES DEUX PIÈCES, POUR LE PRIX BARRÉ DU LOT.
  *
  * Il ne s'écrit pas en dur : c'est LE chiffre que la loi regarde. Un prix
- * barré doit correspondre à un prix réellement pratiqué, et celui-ci l'est —
+ * barré doit correspondre à un prix réellement pratiqué, et celui-ci l'est,
  * les deux pièces sont vendues juste en dessous, au même instant.
  *
  * Deux prix localisés ne s'additionnent pas comme des chaînes : « 2,99 € » et
  * « 4,99 € » donneraient « 2,99 €4,99 € ». On additionne donc les micro-unités
  * rendues par le magasin, puis on formate dans SA devise.
  *
- * Et on rend `null` quand le magasin n'a pas répondu — sur le web, ou avant
+ * Et on rend `null` quand le magasin n'a pas répondu, sur le web, ou avant
  * son premier message. Un total calculé sur les prix de secours serait juste
  * en euros et faux partout ailleurs ; mieux vaut ne rien barrer du tout que
  * barrer un montant inventé.
@@ -119,8 +119,8 @@ export function totalBarre(a: Produit, b: Produit): string | null {
    *
    * Sans magasin, cette fonction rend `null`, et le couple « ancien prix barré
    * / nouveau prix » ne s'affiche donc JAMAIS dans un navigateur. Résultat :
-   * deux éléments de l'écran le plus important du jeu — le trait de marqueur
-   * et l'étiquette pendue — ne pouvaient être vus qu'une fois l'application
+   * deux éléments de l'écran le plus important du jeu, le trait de marqueur
+   * et l'étiquette pendue, ne pouvaient être vus qu'une fois l'application
    * installée depuis le Play Store, c'est-à-dire beaucoup trop tard pour les
    * corriger.
    *
@@ -151,7 +151,7 @@ export function totalBarre(a: Produit, b: Produit): string | null {
  *
  * Les prix arrivent de Google une à deux secondes après le lancement. Un
  * écran d'options ouvert entre-temps afficherait les prix de secours et ne
- * les corrigerait jamais — un Canadien y lirait « 2,99 € » pour toujours.
+ * les corrigerait jamais, un Canadien y lirait « 2,99 € » pour toujours.
  * D'où cet abonnement : l'écran se redessine quand le magasin a parlé.
  */
 const abonnes = new Set<() => void>();
@@ -168,7 +168,7 @@ function prevenir(): void {
  *
  * La facturation ne connaît pas le jeu : elle lui rend un identifiant de
  * produit, et c'est `ads.ts` qui sait ce que ça ouvre. On lui laisse donc
- * poser sa fonction ici plutôt que d'importer `ads.ts` — sans quoi les deux
+ * poser sa fonction ici plutôt que d'importer `ads.ts`, sans quoi les deux
  * modules s'importeraient l'un l'autre.
  */
 type Livraison = (p: Produit) => boolean;
@@ -188,7 +188,7 @@ export function brancherLivraison(f: Livraison): void {
  * `store.order()` ne rend pas le résultat de l'achat : il ouvre la fenêtre de
  * Google et rend la main. Le verdict arrive plus tard, dans un gestionnaire
  * d'événement. On garde donc, par produit, la promesse à résoudre quand il
- * tombe — et un minuteur, parce qu'un joueur qui ferme la fenêtre de paiement
+ * tombe, et un minuteur, parce qu'un joueur qui ferme la fenêtre de paiement
  * d'un geste ne produit pas toujours d'événement.
  */
 const enCours = new Map<Produit, { resoudre: (ok: boolean) => void; minuteur: number }>();
@@ -225,7 +225,7 @@ export async function initFacturation(): Promise<void> {
    * LE GREFFON ARRIVE APRÈS NOUS.
    *
    * `deviceready` est l'événement de Cordova : les greffons ne sont branchés
-   * qu'après. Appeler `store.register()` avant, c'est appeler `undefined` — et
+   * qu'après. Appeler `store.register()` avant, c'est appeler `undefined`, et
    * comme on avale les erreurs pour ne pas casser le jeu, ça donnerait un
    * magasin silencieusement mort. On attend donc, avec une limite : si
    * l'événement n'arrive jamais, mieux vaut un magasin indisponible qu'un
@@ -280,7 +280,7 @@ export async function initFacturation(): Promise<void> {
       })
       /*
        * TOUS LES REÇUS SONT LÀ : c'est le moment de rendre au joueur ce qu'il
-       * a déjà payé — sur un téléphone neuf, après une réinstallation, ou
+       * a déjà payé, sur un téléphone neuf, après une réinstallation, ou
        * simplement au lancement suivant.
        */
       .receiptsReady(() => {
@@ -321,7 +321,7 @@ function appliquer(id: string): boolean {
 
 /**
  * Lance l'achat d'un produit. Rend `true` seulement si Google a confirmé le
- * paiement — jamais par défaut, jamais par optimisme.
+ * paiement, jamais par défaut, jamais par optimisme.
  */
 export async function acheter(p: Produit): Promise<boolean> {
   const store = magasin();

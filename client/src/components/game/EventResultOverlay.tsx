@@ -73,7 +73,7 @@ export default function EventResultOverlay() {
    *
    * Cette action vient de faire quitter un palier de Dignité. Une vidéo
    * récompensée convertit bien mieux pour restaurer une perte que pour offrir
-   * un gain — et il n'y a pas de perte plus lisible dans ce jeu que celle-là,
+   * un gain, et il n'y a pas de perte plus lisible dans ce jeu que celle-là,
    * puisqu'elle a un nom que le joueur voit disparaître de son écran. On ne
    * rend que le strict nécessaire pour rester dans le palier : l'offre
    * restaure une allure, elle ne fabrique pas de la fierté.
@@ -155,7 +155,7 @@ export default function EventResultOverlay() {
          *
          * Les mini-jeux ont leurs boutons de sortie collés au bas de l'écran ;
          * la fenêtre de résultat les avait au milieu. Le pouce devait donc
-         * remonter entre le geste et sa conclusion — c'est ce déplacement qui
+         * remonter entre le geste et sa conclusion, c'est ce déplacement qui
          * sépare deux actions au lieu de les enchaîner. Le « Continuer » se
          * retrouve maintenant là où était le bouton qu'on venait de toucher.
          */
@@ -228,7 +228,7 @@ export default function EventResultOverlay() {
           {/*
            * LA JOURNÉE COUPÉE NET.
            *
-           * La garde à vue emporte le reste de la journée — souvent deux
+           * La garde à vue emporte le reste de la journée, souvent deux
            * actions sur trois, la perte la plus lourde du jeu. Elle le disait
            * au milieu de sa phrase, puis s'affichait comme n'importe quel
            * résultat mineur : trois pastilles grises alignées. On la sort du
@@ -352,7 +352,7 @@ export default function EventResultOverlay() {
           )}
 
           {/* Garder son allure : racheter le palier de Dignité qu'on vient de
-              quitter. Passe AVANT le doublement des gains — c'est la perte la
+              quitter. Passe AVANT le doublement des gains, c'est la perte la
               plus fraîche, et la seule qui ait un nom. */}
           {canKeepFace && palierQuitte && (
             <motion.button

@@ -19,7 +19,7 @@
  * il appuie plus fort au départ qu'à l'arrivée.
  *
  * D'où un chemin dessiné à la main, posé PAR-DESSUS le texte en position
- * absolue. Le texte, lui, garde sa hauteur de ligne normale — c'est ce qui
+ * absolue. Le texte, lui, garde sa hauteur de ligne normale, c'est ce qui
  * permet au barré de dépasser sans décaler quoi que ce soit.
  */
 export function Barre({ couleur = '#3A2A1E' }: { couleur?: string }) {
@@ -46,7 +46,7 @@ export function Barre({ couleur = '#3A2A1E' }: { couleur?: string }) {
  * LE SCOTCH.
  *
  * Deux bandes posées en biais aux coins d'une carte. Le jaune fluo est la
- * SEULE couleur vive de l'écran — voir docs/design/boutique.md : un accent
+ * SEULE couleur vive de l'écran, voir docs/design/boutique.md : un accent
  * dilué sur six éléments ne guide plus rien.
  *
  * Les bords sont déchirés (clip-path irrégulier) parce qu'un rectangle net
@@ -72,7 +72,7 @@ export function Scotch({ cote, className = '' }: { cote: 'gauche' | 'droite'; cl
  * L'ÉTIQUETTE PENDUE.
  *
  * Un prix dans un cadre gris se lit comme une donnée. Une étiquette cartonnée
- * percée d'un œillet et penchée se lit comme une marchandise — et c'est tout
+ * percée d'un œillet et penchée se lit comme une marchandise, et c'est tout
  * l'objet de cet écran.
  *
  * Elle ne tourne QU'AU MONTAGE (voir l'appelant) : rien ne clignote ici. Une

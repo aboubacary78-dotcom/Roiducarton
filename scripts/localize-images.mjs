@@ -70,7 +70,7 @@ for (const url of urls) {
     mapping.set(url, `${PUBLIC_PREFIX}/${name}`);
     ok++;
   } catch (e) {
-    console.log(`  ✗ ${name} — ${e.message}`);
+    console.log(`  ✗ ${name} · ${e.message}`);
     fail++;
   }
 }

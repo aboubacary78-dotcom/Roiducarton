@@ -1,15 +1,15 @@
-# Audit de rythme — dynamisme et captivation
+# Audit de rythme · dynamisme et captivation
 
 *Mesuré dans le jeu construit, pas estimé. Chaque chiffre est reproductible.*
 
 ---
 
-# ÉTAPE 1 — Les trois zones mortes
+# ÉTAPE 1 · Les trois zones mortes
 
 ## ① La nuit coûte quatre appuis pour zéro décision
 
 **Mesuré :** passer du jour 1 au jour 2 demande **4 appuis, 4 écrans, 3,6
-secondes** — et le bilan de nuit affiche **217 mots**.
+secondes**, et le bilan de nuit affiche **217 mots**.
 
 | Écran | Ce qu'on y décide |
 |---|---|
@@ -19,7 +19,7 @@ secondes** — et le bilan de nuit affiche **217 mots**.
 | Écran principal | *enfin* |
 
 Quatre fois « Continuer ». **Le joueur paie le prix d'une action pour un
-moment où il ne choisit rien**, et il le paie *tous les jours* — c'est la
+moment où il ne choisit rien**, et il le paie *tous les jours*, c'est la
 séquence la plus répétée du jeu. Au jour 20, il l'a traversée vingt fois.
 
 Le problème n'est pas la longueur : c'est que **la nuit est racontée au lieu
@@ -28,7 +28,7 @@ une sensation.
 
 ## ② L'action par défaut est la moins interactive du jeu
 
-Sept actions, dont **quatre sont des mini-jeux** où les mains travaillent — la
+Sept actions, dont **quatre sont des mini-jeux** où les mains travaillent, la
 Récup', le Vol, la Manche, la Bagarre. Et **la première tuile, celle que tout
 le monde touche en premier, est Explorer** : la seule qui soit intégralement
 du texte.
@@ -39,13 +39,13 @@ Ce qu'Explorer produit, mesuré sur les 296 rencontres :
 |---|---:|
 | Description à lire | **138 caractères** (médiane) |
 | Libellés de choix | **80 caractères** (médiane) |
-| Écrans traversés | **3** — carte, choix, résultat |
+| Écrans traversés | **3** : carte, choix, résultat |
 
 Un tiers de la journée part donc en lecture, **par défaut**. Les mini-jeux,
 eux, sont plus bas dans la page ou demandent une condition. Le jeu met en
 avant sa mécanique la plus passive et cache les nerveuses.
 
-> Ce n'est pas un problème de qualité d'écriture — les textes sont bons. C'est
+> Ce n'est pas un problème de qualité d'écriture, les textes sont bons. C'est
 > un problème de **placement** : la porte d'entrée du jeu donne sur sa pièce la
 > plus calme.
 
@@ -61,22 +61,22 @@ faim est basse, on dort quand le sommeil est bas, on fait la Récup' pour
 l'argent. Quatorze boutons présentent un choix, mais il n'y en a qu'un ou deux
 de raisonnables à un instant donné.
 
-L'ennui du Hub n'est donc pas visuel — le décor bouge, la météo change, le PNJ
+L'ennui du Hub n'est donc pas visuel, le décor bouge, la météo change, le PNJ
 est dans la rue. **C'est l'absence de dilemme.** Un écran qui pose une question
 dont on connaît la réponse est un écran d'attente, quelle que soit sa beauté.
 
 ---
 
-# ÉTAPE 2 — Dynamisme : créer de l'urgence avec du carton
+# ÉTAPE 2 · Dynamisme : créer de l'urgence avec du carton
 
-## ④ La carte qui s'affaisse — le compte à rebours qu'on ne voit pas
+## ④ La carte qui s'affaisse · le compte à rebours qu'on ne voit pas
 
 **Le constat :** un choix d'événement attend indéfiniment. Le joueur peut
 poser le téléphone, réfléchir, revenir. Or **hésiter dans la rue coûte
 quelque chose**, et le jeu ne le dit jamais.
 
 **La mécanique :** au bout de 6 secondes sans réponse, la carte de l'événement
-commence à **gondoler** — une rotation de 1,5° et une translation de 3 px, en
+commence à **gondoler** : une rotation de 1,5° et une translation de 3 px, en
 boucle lente, comme du carton qui prend l'humidité. À 10 secondes, **une des
 options se barre** : la situation a évolué sans vous.
 
@@ -93,7 +93,7 @@ options se barre** : la situation a évolué sans vous.
 **Réglage :** jamais sur le tout premier jour, ni sur les événements marqués
 narratifs. On presse les décisions ordinaires, pas les moments d'écriture.
 
-## ⑤ L'appui long — un deuxième verbe sans un écran de plus
+## ⑤ L'appui long · un deuxième verbe sans un écran de plus
 
 **Le constat :** les sept actions du Hub ont toutes le même geste, l'appui
 bref. Un jeu où tout se fait pareil se sent pareil.
@@ -102,22 +102,22 @@ bref. Un jeu où tout se fait pareil se sent pareil.
 
 | Tuile | Appui bref | **Appui maintenu** |
 |---|---|---|
-| 🙏 Mendier | la manche normale | **insister** — plus d'argent, la dignité paie |
-| 😴 Dormir | la nuit normale | **faire la grasse matinée** — récupération pleine, une action de moins |
-| 🔍 Explorer | une rencontre | **fouiller à fond** — meilleure issue, du temps en plus |
-| ♻️ Récup' | le mini-jeu | **descendre direct d'une couche** — plus riche, plus risqué |
+| 🙏 Mendier | la manche normale | **insister** : plus d'argent, la dignité paie |
+| 😴 Dormir | la nuit normale | **faire la grasse matinée** : récupération pleine, une action de moins |
+| 🔍 Explorer | une rencontre | **fouiller à fond** : meilleure issue, du temps en plus |
+| ♻️ Récup' | le mini-jeu | **descendre direct d'une couche** : plus riche, plus risqué |
 
 **Pourquoi c'est élégant ici :**
 
 - **Le nombre d'actions double sans un seul écran de plus.** Pas de menu, pas
   de sous-choix : le doigt décide.
 - **L'haptique devient le retour d'information.** La vibration monte en
-  intensité pendant l'appui — le téléphone dit « tu forces », et c'est
+  intensité pendant l'appui, le téléphone dit « tu forces », et c'est
   exactement le sujet du jeu. Le module `haptics` existe déjà.
 - **Ça se découvre tout seul.** Un joueur appuie toujours trop longtemps une
   fois par accident. Ce jour-là, il apprend une moitié de jeu.
 
-## ⑥ La physique du carton — la viscéralité par la micro-motion
+## ⑥ La physique du carton · la viscéralité par la micro-motion
 
 **Le constat :** l'interface est belle et **immobile**. Sur un écran statique,
 la sensation ne peut pas venir de l'animation : elle vient du **délai de
@@ -126,7 +126,7 @@ réponse** et de la **masse**.
 Trois réglages, tous en `framer-motion` qui est déjà dans le projet :
 
 **a. Les tuiles ont un poids.** À l'appui : `scale 0.96` en 60 ms, retour en
-ressort amorti. Pas de fondu — du **snap**. Une tuile qui revient lentement se
+ressort amorti. Pas de fondu, du **snap**. Une tuile qui revient lentement se
 sent molle ; c'est littéralement le mot que tu as employé.
 
 **b. Les jauges dépassent puis se posent.** Une jauge qui perd 8 points descend
@@ -134,7 +134,7 @@ sent molle ; c'est littéralement le mot que tu as employé.
 un `type: 'spring'` au lieu d'un `tween`.
 
 **c. L'écran encaisse.** Une perte de santé ou de dignité secoue toute la page
-de **2 px pendant 120 ms**. Deux pixels — invisible consciemment, ressenti
+de **2 px pendant 120 ms**. Deux pixels, invisible consciemment, ressenti
 totalement. C'est le seul moment où le jeu doit bouger.
 
 > **La règle qui tient les trois :** sur une direction artistique statique, on
@@ -143,9 +143,9 @@ totalement. C'est le seul moment où le jeu doit bouger.
 
 ---
 
-# ÉTAPE 3 — Captivation : le « un jour de plus »
+# ÉTAPE 3 · Captivation : le « un jour de plus »
 
-## ⑦ La dette — le seul minuteur que le joueur emporte dans sa tête
+## ⑦ La dette · le seul minuteur que le joueur emporte dans sa tête
 
 **Le constat :** le jeu a déjà des suites d'événements (`isFollowUp`), mais
 elles *arrivent*. Rien ne fait qu'un joueur **attende** un jour précis.
@@ -153,19 +153,19 @@ elles *arrivent*. Rien ne fait qu'un joueur **attende** un jour précis.
 **La mécanique :** au jour 2 ou 3, quelqu'un vous prête 10 €. Le jeu affiche
 alors, en permanence dans l'en-tête du Hub, une ligne :
 
-> ⏳ **Roger, dans 3 jours — 15 €**
+> ⏳ **Roger, dans 3 jours, 15 €**
 
 Le compteur descend chaque nuit. À échéance :
 
 - **On paie** → respect, et Roger reviendra, en mieux.
 - **On ne peut pas** → il prend l'objet le plus cher du sac. S'il n'y a rien,
-  c'est une bagarre — et il est nourri, lui.
+  c'est une bagarre, et il est nourri, lui.
 - **On l'évite en changeant de quartier** → il vous trouve au jour suivant, et
   la note a monté.
 
 **Pourquoi ça retient :** c'est un rendez-vous. Un joueur ferme une
 application quand rien ne l'attend ; il ne la ferme pas à un jour d'une
-échéance. Et l'échéance **n'est pas un bonus qu'on rate** — c'est une menace
+échéance. Et l'échéance **n'est pas un bonus qu'on rate**, c'est une menace
 qu'on doit désamorcer, ce qui est deux fois plus tenace.
 
 **Coût technique :** un objet dans le personnage (`{ qui, jour, montant }`),
@@ -180,7 +180,7 @@ existe aucune *intra*-session.
 **La mécanique :** une partie du karma devient un **service**, utilisable une
 seule fois par partie, depuis n'importe quel écran :
 
-> 🤝 **Appeler un service** — quelqu'un vous doit quelque chose. *(1 fois)*
+> 🤝 **Appeler un service** : quelqu'un vous doit quelque chose. *(1 fois)*
 
 Ce que ça fait dépend d'où on l'appelle : un repas au Hub, un gardien qui
 regarde ailleurs pendant un casse, un adversaire qui renonce en pleine bagarre,
@@ -188,7 +188,7 @@ un commerçant qui accepte le prix.
 
 **Pourquoi ça retient :** c'est une **ressource qu'on ne veut pas gâcher**. Un
 joueur qui possède un joker unique joue un jour de plus pour trouver le bon
-moment de s'en servir — et le jour où il le crame trop tôt, il rejoue pour
+moment de s'en servir, et le jour où il le crame trop tôt, il rejoue pour
 faire mieux. C'est le même ressort que la Seconde Chance, mais gratuit et
 décidé par lui.
 
@@ -200,7 +200,7 @@ décidé par lui.
 **La mécanique :** un compagnon nourri **trois jours de suite** ne repart plus.
 Il vous suit. Et à partir de là :
 
-- il **prête son trait en permanence** — un vrai gain, durable ;
+- il **prête son trait en permanence** : un vrai gain, durable ;
 - il **mange tous les jours**, sur votre nourriture ;
 - si on ne le nourrit pas, **son visage se dégrade** dans l'en-tête, jour après
   jour, avec le système de condition qui existe déjà pour le joueur ;

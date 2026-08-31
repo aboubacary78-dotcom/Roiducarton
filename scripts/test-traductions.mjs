@@ -43,6 +43,6 @@ for (const f of DICOS) {
 }
 
 console.log(`${total} traductions, ${orphelines.length} orpheline(s).`);
-for (const o of orphelines.slice(0, 25)) console.log(`  ${o.f} — « ${o.fr.slice(0, 90)} »`);
+for (const o of orphelines.slice(0, 25)) console.log(`  ${o.f} · « ${o.fr.slice(0, 90)} »`);
 if (orphelines.length > 25) console.log(`  … et ${orphelines.length - 25} autres`);
 process.exit(orphelines.length ? 1 : 0);

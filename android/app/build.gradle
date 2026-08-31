@@ -8,7 +8,7 @@ apply plugin: 'com.android.application'
  * et le Play Store aurait refusé la mise à jour suivante pour cause de
  * versionCode non incrémenté.
  *
- * Le versionCode se déduit du numéro sémantique — 3.31.0 → 33100 — donc il
+ * Le versionCode se déduit du numéro sémantique (3.31.0 → 33100) donc il
  * monte tout seul et ne peut pas reculer. Il n'y a rien à penser au moment de
  * publier : on relance `pnpm build && pnpm cap:sync`, et l'étiquette suit.
  */

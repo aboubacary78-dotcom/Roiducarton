@@ -5,7 +5,7 @@
  * Doubler un gain, garder son allure, rouvrir une boutique, se relever à la
  * mort. Le joueur qui achetait « Sans pub » achetait donc, sans le savoir, la
  * disparition de ses propres outils. Le défaut ne se voyait nulle part en
- * particulier — trente et un points d'appel, tous corrects pris un par un.
+ * particulier, trente et un points d'appel, tous corrects pris un par un.
  *
  * Trois choses se vérifient ici, et aucune n'est visible à l'œil :
  *
@@ -13,10 +13,10 @@
  *     du harcèlement, et un plafond qui ne plafonne plus ne se remarque
  *     qu'aux mauvais avis sur le store.
  *   ② AVEC ACHAT : la récompense tombe SANS vidéo, sans plafond, et les
- *     boutons cessent de dire « (pub) » — un acheteur à qui on promet une
+ *     boutons cessent de dire « (pub) », un acheteur à qui on promet une
  *     vidéo qui n'arrive pas se demande ce qui est cassé.
  *   ③ LES DEUX ÉCHAPPATOIRES : le casse se termine proprement sans traverser
- *     la grille, et le combat se gagne sans jouer une manche — butin compris,
+ *     la grille, et le combat se gagne sans jouer une manche, butin compris,
  *     parce qu'une demi-victoire serait pire que rien.
  *
  *     node scripts/test-bonus-pub.mjs
@@ -35,7 +35,7 @@ p.on('pageerror', e => erreurs.push(String(e).slice(0, 140)));
 const pause = ms => new Promise(r => setTimeout(r, ms));
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 const clic = m => p.evaluate(s => {
@@ -176,7 +176,7 @@ verifier('  …et plus un bouton ne promet de pub',
 /*
  * Deux choses distinctes se vérifient ici, et la première est la plus
  * importante : que le fait d'ENTRER dans le casse fasse bien avancer le
- * compteur du vol. C'est le branchement réel — un compteur juste que rien
+ * compteur du vol. C'est le branchement réel, un compteur juste que rien
  * n'alimente donnerait un bonus qui ne s'ouvre jamais, et le test précédent
  * ne l'aurait pas vu puisqu'il poussait le compteur lui-même.
  *
@@ -208,7 +208,7 @@ verifier('  …et y entrer fait avancer le compteur du vol',
  * ON REMPLIT LA CADENCE AVANT D'ENTRER, PAS PENDANT.
  *
  * `canOfferRewarded` est lu au RENDU. Pousser le compteur pendant qu'un écran
- * est déjà affiché ne le redessine pas — React n'a aucune raison de le savoir,
+ * est déjà affiché ne le redessine pas. React n'a aucune raison de le savoir,
  * et un joueur ne peut de toute façon pas jouer deux casses depuis l'intérieur
  * d'un casse. On simule donc les deux premiers, puis on entre : le troisième
  * est compté par le jeu lui-même, à l'entrée, avant le premier rendu.
@@ -236,7 +236,7 @@ if (boutonCasse) {
   /*
    * LE VOL ACHETÉ VAUT UN COUP DE MAÎTRE.
    *
-   * Il rendait `ok` — un vol propre, mais sans le respect ni l'objet convoité.
+   * Il rendait `ok`, un vol propre, mais sans le respect ni l'objet convoité.
    * La règle retenue est la même que pour le combat : ce qu'on achète, c'est
    * de ne pas jouer le mini-jeu, pas une demi-récompense.
    *
@@ -291,7 +291,7 @@ if (boutonObjet) {
    * UNE VICTOIRE ACHETÉE VAUT UNE VICTOIRE GAGNÉE.
    *
    * Ce contrôle a dit les deux choses. J'ai d'abord amputé le butin des
-   * combats gagnés à l'extincteur — argent oui, respect et objet non — au motif
+   * combats gagnés à l'extincteur (argent oui, respect et objet non) au motif
    * que le raccourci serait sinon meilleur que de jouer. Ce n'est pas la règle
    * retenue : ce qu'on achète, c'est de ne pas jouer le mini-jeu, pas une
    * demi-récompense. Un butin amputé sans explication se lit comme un bug.
@@ -329,14 +329,14 @@ if (boutonObjet) {
       apres.respect >= avant.respect + declare.respect,
       `${nomEnnemi} déclare +${declare.respect} · ${avant.respect} → ${apres.respect}`);
   } else {
-    console.log(`  (${nomEnnemi || 'cet adversaire'} ne donne pas de respect — rien à vérifier)`);
+    console.log(`  (${nomEnnemi || 'cet adversaire'} ne donne pas de respect, rien à vérifier)`);
   }
 
   if (declare.objet) {
     verifier('    …et l\'objet qu\'il lâche',
       apres.sac > avant.sac, `sac ${avant.sac} → ${apres.sac}`);
   } else {
-    console.log(`  (${nomEnnemi || 'cet adversaire'} ne lâche pas d'objet — rien à vérifier)`);
+    console.log(`  (${nomEnnemi || 'cet adversaire'} ne lâche pas d'objet, rien à vérifier)`);
   }
 }
 
@@ -345,12 +345,12 @@ if (boutonObjet) {
  * LE ROI SE FORCE, IL NE S'ATTEND PAS.
  *
  * Première version : on lançait des bagarres en espérant tomber dessus. Il
- * n'est jamais venu — `rollBoss` l'exclut avant le jour 10 et le plafonne à
+ * n'est jamais venu, `rollBoss` l'exclut avant le jour 10 et le plafonne à
  * 16 % ensuite. Le contrôle s'annonçait « non joué » et ne prouvait donc rien,
  * ce qui est pire qu'un contrôle absent : ça se lit comme une couverture.
  *
- * On force donc le tirage. `Math.random` est écrasé le temps du clic — toute
- * valeur sous la probabilité du boss le fait apparaître — puis remis en place
+ * On force donc le tirage. `Math.random` est écrasé le temps du clic, toute
+ * valeur sous la probabilité du boss le fait apparaître, puis remis en place
  * aussitôt, pour ne pas fausser le reste de la partie.
  */
 await situer({ day: 40, respect: 40, ...SOLVABLE, stats: SAIN, location: 'zone-industrielle' });

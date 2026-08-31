@@ -8,7 +8,7 @@ Jeu de simulation de vie/survie urbaine avec humour noir. Style cartes narrative
 <response>
 <text>
 
-## Idée 1 : "Carton Craft" — Esthétique Papier & Carton
+## Idée 1 : "Carton Craft" · Esthétique Papier & Carton
 
 ### Design Movement
 Inspiré du Paper Craft et du Collage Art. Tout l'univers visuel est construit comme s'il était fabriqué à partir de matériaux de récupération : carton ondulé, papier journal, scotch, feutres.
@@ -37,9 +37,9 @@ Les interactions simulent la manipulation d'objets physiques : les cartes glisse
 Animations de pliage/dépliage pour les menus. Les cartes d'événements arrivent en glissant depuis le côté. Les barres de stats se remplissent comme un liquide dans un tube en carton. Micro-animations de tremblement pour les éléments urgents.
 
 ### Typography System
-- Titres : Police manuscrite épaisse type "Permanent Marker" ou "Caveat Bold" — évoque l'écriture au feutre.
-- Corps : "Patrick Hand" ou "Architects Daughter" — lisible mais artisanale.
-- Stats/Chiffres : "Courier Prime" — contraste technique avec le style manuscrit.
+- Titres : Police manuscrite épaisse type "Permanent Marker" ou "Caveat Bold", évoque l'écriture au feutre.
+- Corps : "Patrick Hand" ou "Architects Daughter", lisible mais artisanale.
+- Stats/Chiffres : "Courier Prime", contraste technique avec le style manuscrit.
 
 </text>
 <probability>0.07</probability>
@@ -50,7 +50,7 @@ Animations de pliage/dépliage pour les menus. Les cartes d'événements arriven
 <response>
 <text>
 
-## Idée 2 : "Gazette Urbaine" — Esthétique Journal & Bande Dessinée
+## Idée 2 : "Gazette Urbaine" · Esthétique Journal & Bande Dessinée
 
 ### Design Movement
 Inspiré de la presse populaire, des tabloïds et de la bande dessinée franco-belge. L'interface ressemble à un journal satirique dont le joueur est le protagoniste.
@@ -79,10 +79,10 @@ Tourner les pages du journal pour naviguer. Les choix sont présentés comme des
 Effet de page qui tourne pour les transitions. Les articles apparaissent avec un effet "impression" (ligne par ligne). Les titres clignotent comme des néons de kiosque à journaux.
 
 ### Typography System
-- Titres : "Playfair Display Black" ou "Old Standard TT Bold" — style presse classique.
-- Sous-titres : "Merriweather Bold Italic" — style éditorial.
-- Corps : "Source Serif Pro" — lisibilité presse.
-- Accroches : "Bebas Neue" — impact tabloïd.
+- Titres : "Playfair Display Black" ou "Old Standard TT Bold", style presse classique.
+- Sous-titres : "Merriweather Bold Italic", style éditorial.
+- Corps : "Source Serif Pro", lisibilité presse.
+- Accroches : "Bebas Neue", impact tabloïd.
 
 </text>
 <probability>0.05</probability>
@@ -93,7 +93,7 @@ Effet de page qui tourne pour les transitions. Les articles apparaissent avec un
 <response>
 <text>
 
-## Idée 3 : "Néon de Rue" — Esthétique Graffiti Urbain & Street Art
+## Idée 3 : "Néon de Rue" · Esthétique Graffiti Urbain & Street Art
 
 ### Design Movement
 Inspiré du Street Art, du Graffiti et de l'art urbain underground. L'interface ressemble à un mur tagué dans une ruelle, avec des néons de magasins qui éclairent la nuit.
@@ -122,9 +122,9 @@ Les éléments réagissent comme s'ils étaient peints sur le mur : les boutons 
 Effets de néon qui clignotent. Les nouvelles cartes apparaissent avec un effet de "spray paint". Les transitions entre zones sont des fondus avec des particules de peinture.
 
 ### Typography System
-- Titres : "Bungee Shade" ou "Rubik Mono One" — impact street art.
-- Corps : "Space Grotesk" — moderne et lisible.
-- Accents : "Permanent Marker" — style tag rapide.
+- Titres : "Bungee Shade" ou "Rubik Mono One", impact street art.
+- Corps : "Space Grotesk", moderne et lisible.
+- Accents : "Permanent Marker", style tag rapide.
 
 </text>
 <probability>0.04</probability>
@@ -132,6 +132,6 @@ Effets de néon qui clignotent. Les nouvelles cartes apparaissent avec un effet 
 
 ---
 
-## Choix Final : Idée 1 — "Carton Craft"
+## Choix Final : Idée 1 · "Carton Craft"
 
 L'esthétique "Carton Craft" est le choix le plus cohérent avec le thème du jeu. Le titre même du jeu est "Le Roi du Carton", et cette direction artistique transforme littéralement l'interface en une expérience tactile et chaleureuse qui contraste avec l'humour noir du contenu. C'est cette tension entre la douceur visuelle et la dureté du sujet qui rendra le jeu mémorable.

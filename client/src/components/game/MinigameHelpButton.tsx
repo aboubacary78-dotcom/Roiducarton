@@ -6,7 +6,7 @@ import { useLang, tr } from '@/lib/lang';
  *
  * La carte « comment jouer » se rouvre à la demande. Sans ça, un joueur qui a
  * lu les règles une fois il y a trois semaines se retrouve devant un mini-jeu
- * muet — et une règle oubliée casse le flow bien plus sûrement qu'une
+ * muet, et une règle oubliée casse le flow bien plus sûrement qu'une
  * explication de trop.
  *
  * Discret, en coin, hors du chemin du pouce : il ne coûte rien à ceux qui

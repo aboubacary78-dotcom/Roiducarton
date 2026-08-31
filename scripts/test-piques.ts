@@ -1,11 +1,11 @@
 /*
- * LES PIQUES — TRENTE PHRASES QUI DOIVENT TENIR DANS UN TOAST.
+ * LES PIQUES : TRENTE PHRASES QUI DOIVENT TENIR DANS UN TOAST.
  *
  * Ce fichier-ci est du texte, donc rien ne peut « planter ». C'est exactement
  * pour ça qu'il a besoin d'un contrôle : ses défauts sont tous silencieux.
  *
  *   · LA LONGUEUR. Un toast vit deux secondes en haut de l'écran pendant que
- *     le pouce travaille en bas. Une phrase de vingt mots n'est pas lue — elle
+ *     le pouce travaille en bas. Une phrase de vingt mots n'est pas lue, elle
  *     est vue, puis elle disparaît, et le joueur a juste l'impression qu'on
  *     lui a caché quelque chose. Douze mots, dans les DEUX langues : la
  *     traduction anglaise est le côté qui déborde, toujours.
@@ -22,7 +22,7 @@ import { PIQUES, piquer, reinitialiserPiques, type CategoriePique, type Contexte
 
 let echecs = 0;
 const verifier = (nom: string, ok: boolean, detail = '') => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -34,7 +34,7 @@ const toutes = CATEGORIES.flatMap(c => PIQUES[c]);
  * ON COMPTE LES BANQUES VIDES, PAS LES CATÉGORIES.
  *
  * Ce contrôle exigeait EXACTEMENT cinq catégories. Il a donc échoué à
- * l'arrivée de la sixième — « tête qui part » — alors que rien n'était cassé :
+ * l'arrivée de la sixième (« tête qui part ») alors que rien n'était cassé :
  * il mesurait un chiffre que le jeu a le droit de faire grandir.
  *
  * Ce qui doit tenir, c'est qu'aucune catégorie DÉCLARÉE ne soit vide : une
@@ -61,7 +61,7 @@ verifier('douze mots maximum, français ET anglais',
  *
  * Ce contrôle demandait l'inverse : que TOUTES les phrases aient leur chute en
  * deuxième phrase. C'était une règle d'écriture, elle a été respectée trente
- * fois sur trente, et le résultat n'était pas percutant — parce qu'une
+ * fois sur trente, et le résultat n'était pas percutant, parce qu'une
  * structure qu'on voit venir dès la deuxième vanne ne surprend plus personne.
  * Le test verrouillait donc exactement le défaut qu'on cherchait à éviter.
  *
@@ -97,7 +97,7 @@ verifier('tout est traduit', toutes.every(p => p.fr.trim() && p.en.trim()));
  * situation. On pouvait mourir de soif et s'entendre parler du froid, ou lire
  * « le carton a pris l'eau » après une nuit sèche. Une vanne à côté ne rate
  * pas de peu : elle apprend au joueur que le jeu ne regarde rien, et il cesse
- * de les lire — toutes les autres tombent avec elle.
+ * de les lire, toutes les autres tombent avec elle.
  *
  * Ces contrôles-ci sont donc les plus importants du fichier.
  */

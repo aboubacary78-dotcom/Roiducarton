@@ -17,7 +17,7 @@ import LocationBackdrop from './LocationBackdrop';
 import SafeImg from './SafeImg';
 
 /*
- * LA RÉCUP' — le fond du container.
+ * LA RÉCUP' : le fond du container.
  *
  * On déblaie une couche de détritus du doigt ; ce qu'elle cachait apparaît et
  * tombe dans les poches. Puis vient la seule vraie question du jeu :
@@ -25,7 +25,7 @@ import SafeImg from './SafeImg';
  *      remonter avec ce qu'on a, ou descendre d'une couche ?
  *
  * Plus bas ça vaut plus cher, et le tas s'agite. S'il se réveille avant qu'on
- * soit ressorti, on perd TOUT — d'où le fait que renoncer soit l'action
+ * soit ressorti, on perd TOUT, d'où le fait que renoncer soit l'action
  * principale. Voir data/salvage pour les couches et le réglage.
  */
 
@@ -33,7 +33,7 @@ const T = SALVAGE_TUNING;
 const CELLS = T.gridW * T.gridH;
 
 // La couche de détritus qui recouvre tout. ATTENTION : surtout pas d'emoji
-// ici. La première version en mettait — journal, œuf, banane — et le joueur
+// ici. La première version en mettait (journal, œuf, banane) et le joueur
 // ne pouvait pas distinguer ce qu'il devait DÉBLAYER de ce qu'il devait
 // TROUVER : les deux étaient des petits dessins. On ne comprenait rien.
 // Le tas est donc une matière : des nuances de brun sale, sans forme lisible.
@@ -53,7 +53,7 @@ export default function SalvageMinigame() {
         lines={[
           { emoji: '🫳', fr: 'Frottez le doigt sur les détritus pour déblayer. Ce qui est dessous apparaît et part dans vos poches.', en: 'Rub your finger over the rubbish to clear it. What\'s underneath appears and goes into your pockets.' },
           { emoji: '⬇️', fr: 'Une couche déblayée, vous choisissez : REMONTER avec le butin, ou CREUSER encore.', en: 'Once a layer is cleared you choose: CLIMB OUT with the haul, or DIG deeper.' },
-          { emoji: '💎', fr: 'Plus bas, ça vaut plus cher. Les vraies trouvailles — manteau, barre de fer, duvet — sont tout au fond.', en: 'The deeper you go, the better it gets. The real finds — a coat, an iron bar, a sleeping bag — are at the very bottom.' },
+          { emoji: '💎', fr: 'Plus bas, ça vaut plus cher. Les vraies trouvailles (manteau, barre de fer, duvet) sont tout au fond.', en: 'The deeper you go, the better it gets. The real finds (a coat, an iron bar, a sleeping bag) are at the very bottom.' },
           { emoji: '🐀', fr: 'Mais le tas s\'agite : à chaque couche, et à chaque saleté que vous réveillez.', en: 'But the pile stirs: with every layer, and every nasty thing you wake up.' },
           { emoji: '💀', fr: 'S\'il se réveille avant que vous soyez ressorti, vous perdez TOUT. Savoir s\'arrêter, c\'est le jeu.', en: 'If it wakes before you\'re out, you lose EVERYTHING. Knowing when to stop is the game.' },
         ]}
@@ -79,7 +79,7 @@ function makeLayer(depth: number, mods: ReturnType<typeof salvageMods>): Cell[] 
    *
    * Une première partie qui commence par vingt minutes les bras dans les
    * ordures pour rien enseigne exactement la mauvaise chose. On garantit donc
-   * au moins une consigne dans la première couche de la première partie — pas
+   * au moins une consigne dans la première couche de la première partie, pas
    * un trésor, juste de quoi comprendre que ça peut payer.
    */
   if (depth === 0 && isFirstEverRun(loadHighScores().length, loadGraves().length)
@@ -123,7 +123,7 @@ function SalvageInner() {
   // Tant que le doigt n'a rien frotté, on montre le geste au lieu de l'écrire.
   const [touched, setTouched] = useState(false);
   /*
-   * LE TAS QUI SE CALME — vidéo récompensée de la Récup'.
+   * LE TAS QUI SE CALME : vidéo récompensée de la Récup'.
    *
    * Elle se propose au dernier cran avant l'écroulement, jamais après. À cet
    * instant le joueur a encore ses trouvailles dans les mains : on protège
@@ -159,7 +159,7 @@ function SalvageInner() {
    *
    * Quand le tas s'écroule, on révèle la meilleure chose encore enfouie dans
    * la couche qu'on fouillait. C'est ce qui donne envie de recommencer tout de
-   * suite — et c'est VRAI : l'objet était réellement dans la grille, à une
+   * suite, et c'est VRAI : l'objet était réellement dans la grille, à une
    * case près. On ne fabrique jamais ce regret, et s'il n'y avait plus rien à
    * trouver, on ne dit rien. Un presque-gagné inventé s'évente vite, et le jeu
    * en garde l'étiquette.
@@ -189,7 +189,7 @@ function SalvageInner() {
      *
      * Il flottait en bandeau au-dessus de l'écran de fin. Il est maintenant
      * DANS le texte du résultat (voir le reducer), à côté de « Même les rats
-     * vous ont regardé avec pitié » qui tenait déjà ce rôle depuis toujours —
+     * vous ont regardé avec pitié » qui tenait déjà ce rôle depuis toujours,
      * c'est cet endroit-là qui fait la différence entre une vanne du jeu et
      * une notification posée dessus.
      */
@@ -221,7 +221,7 @@ function SalvageInner() {
         setRisk(riskRef.current);
         /*
          * Le tas prévient tous les quarts de jauge. On regardait jusqu'ici une
-         * barre monter en silence, et le « bust » tombait d'un coup — ce qui
+         * barre monter en silence, et le « bust » tombait d'un coup, ce qui
          * se lit comme une sanction arbitraire alors que le risque était
          * affiché. Par crans plutôt qu'en continu : un son qui suit la jauge
          * devient une alarme, et une alarme se fait couper.
@@ -299,7 +299,7 @@ function SalvageInner() {
        * fait fuir les rats, le phobique en fait une attaque de panique.
        *
        * Et maintenant elle SONNE comme elle-même. Les six saletés partageaient
-       * un `playHurt` — un coup encaissé, alors que personne ne vous frappe.
+       * un `playHurt`, un coup encaissé, alors que personne ne vous frappe.
        * Un rat qui détale, un tesson dans la paume et un yaourt devenu
        * autonome ne s'entendaient donc pas ; le joueur, qui a le doigt sur la
        * grille, apprenait ce qu'il avait touché en lisant l'étiquette.
@@ -328,7 +328,7 @@ function SalvageInner() {
 
   return (
     <div className="h-screen bg-texture p-3 flex flex-col items-center gap-2 select-none overflow-hidden">
-      {/* Ce qu'on tient — et qu'on peut encore tout perdre */}
+      {/* Ce qu'on tient, et qu'on peut encore tout perdre */}
       <div className="w-full max-w-sm flex gap-1.5 shrink-0">
         {([
           ['♻️', tr('Consigne', 'Deposit'), held > 0 ? `${held}€` : `${centimes}c`, '#B8860B'],
@@ -357,7 +357,7 @@ function SalvageInner() {
               Les deux premiers crans gardent leurs dégradés : ils informent
               sans alarmer, et c'est ce qu'on veut tant qu'il reste de la
               marge. Au-delà de 70 %, la barre change de NATURE et pas
-              seulement de teinte — la rayure apparaît, et c'est elle qui
+              seulement de teinte, la rayure apparaît, et c'est elle qui
               alerte. Un rouge de plus sur du carton n'aurait fait que
               s'ajouter au décor ; une rayure de chantier n'appartient à rien
               d'autre sur cet écran.

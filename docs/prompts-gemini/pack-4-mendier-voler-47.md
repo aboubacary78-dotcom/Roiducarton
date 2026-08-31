@@ -1,6 +1,6 @@
-# Pack 4 — Mendier (15) + Voler (31) + le Vigile de Choc (1)
+# Pack 4 · Mendier (15) + Voler (31) + le Vigile de Choc (1)
 
-## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
+## 📦 Contexte projet (à lire en entier · tu pars de zéro, sans accès au code)
 
 Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie : un SDF
 survit jour après jour dans une ville française. Direction artistique

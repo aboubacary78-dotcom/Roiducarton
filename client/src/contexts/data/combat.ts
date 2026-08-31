@@ -99,13 +99,13 @@ export function bestWeaponBonus(c: Character): number {
  * LA DÉFENSE, ENFIN.
  *
  * Vingt-cinq objets du jeu annoncent « 🛡️ +N déf. » à l'inventaire et à
- * l'échoppe — le gilet de chantier à douze euros en promet cinq. Aucune ligne
+ * l'échoppe, le gilet de chantier à douze euros en promet cinq. Aucune ligne
  * de combat ne lisait ce nombre : les dégâts encaissés ne dépendaient que de
  * l'attaque de l'adversaire. Le joueur payait une promesse.
  *
  * On garde la règle des armes : SEULE la meilleure pièce compte, pour qu'un
  * sac de cinq manteaux ne rende pas invincible. La réduction est douce et
- * n'atteint jamais zéro — une armure rend les coups supportables, elle
+ * n'atteint jamais zéro, une armure rend les coups supportables, elle
  * n'annule pas la bagarre.
  *   +1 → −8 %   +3 → −20 %   +5 → −29 %
  */

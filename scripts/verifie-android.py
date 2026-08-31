@@ -11,7 +11,7 @@ une ressource qui n'existe pas. Celles-là se trouvent sans compilateur.
 Ce script contrôle donc :
   · que chaque XML du projet natif est bien formé ;
   · que chaque @color / @string / @drawable / @mipmap / @style / @xml cité
-    par le module de l'application est bien défini quelque part — dans le
+    par le module de l'application est bien défini quelque part, dans le
     module lui-même, dans une bibliothèque, ou dans Android ;
   · que les points de configuration qu'on a posés à la main sont toujours là :
     l'App ID AdMob sans lequel l'application se ferme au lancement, le niveau
@@ -39,7 +39,7 @@ oks: list[str] = []
 
 def verifier(nom: str, ok: bool, detail: str = '') -> None:
     (oks if ok else echecs).append(nom)
-    print(f"{'  ok  ' if ok else ' RATÉ '} {nom}{f' — {detail}' if detail else ''}")
+    print(f"{'  ok  ' if ok else ' RATÉ '} {nom}{f' · {detail}' if detail else ''}")
 
 
 # ── 1. Tous les XML sont-ils bien formés ? ──────────────────────────────────
@@ -103,7 +103,7 @@ L'APP ID ET LES BLOCS DOIVENT VENIR DU MÊME COMPTE.
 Le contrôle précédent exigeait que le natif et le web soient « dans le même
 mode », test ou réel. C'était une erreur d'analyse : l'état normal du
 développement, c'est justement d'avoir ses VRAIS blocs et le mode test
-allumé — on éprouve le vrai chemin sans jamais produire d'impression réelle.
+allumé, on éprouve le vrai chemin sans jamais produire d'impression réelle.
 
 La règle qui compte vraiment est ailleurs. Un App ID d'un compte avec des
 blocs d'un autre ne diffuse rien, et ne dit rien : pas d'erreur, pas de log,
@@ -125,7 +125,7 @@ DEMO = 'ca-app-pub-3940256099942544'
 verifier('les blocs Android ne sont plus ceux de démonstration',
          DEMO not in (bloc_android.group(1) if bloc_android else DEMO))
 if 'USE_TEST_ADS = true' in ads:
-    print('    rappel : USE_TEST_ADS = true — annonces de démonstration servies à '
+    print('    rappel : USE_TEST_ADS = true, annonces de démonstration servies à '
           'travers les vrais blocs.\n'
           "             À passer à false au moment de fabriquer l'AAB, pas avant : "
           'cliquer\n'
@@ -138,7 +138,7 @@ verifier('le niveau d\'API visé satisfait le Play Store (≥ 35)', cible >= 35,
 # La facturation impose son propre plancher : la Google Play Billing Library 9,
 # embarquée par cordova-plugin-purchase, refuse de compiler sous l'API 23. Le
 # gabarit de Capacitor descend à 22, et l'erreur n'apparaît qu'au premier
-# Gradle — c'est-à-dire sur une autre machine, une heure plus tard.
+# Gradle, c'est-à-dire sur une autre machine, une heure plus tard.
 plancher = int(re.search(r'minSdkVersion\s*=\s*(\d+)', variables).group(1))
 verifier('le niveau d\'API minimal satisfait la facturation (≥ 23)',
          plancher >= 23, f'minSdk {plancher}')

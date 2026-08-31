@@ -3,7 +3,7 @@
  *
  * L'écran de mort produit une une de journal illustrée, avec le nom du
  * personnage, la cause de sa mort et le nombre de jours tenus. C'est un objet
- * de partage idéal — spécifique, drôle, différent à chaque fois — et rien ne
+ * de partage idéal (spécifique, drôle, différent à chaque fois) et rien ne
  * permettait de l'envoyer.
  *
  * Deux règles tiennent ce fichier :

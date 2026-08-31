@@ -1,4 +1,4 @@
-# Pack son 5 — Les gestes (13 fichiers)
+# Pack son 5 · Les gestes (13 fichiers)
 
 *Ce document est le socle. Chaque pack le répète en tête, pour être remis seul
 à qui fabrique les sons.*
@@ -25,7 +25,7 @@ son établi, micro à vingt centimètres :
 | le vent | un souffle contre une feuille de papier calque |
 
 C'est cette matière-là qui donne son unité au jeu. Un son trop propre, trop
-« vrai », trop cinématographique sonnera faux — même s'il est techniquement
+« vrai », trop cinématographique sonnera faux, même s'il est techniquement
 parfait. **Petit, proche, sec, fait main.**
 
 ## Le ton : comédie douce-amère
@@ -39,7 +39,7 @@ percussion de bande-annonce.
 
 1. **Aucune parole intelligible.** Le jeu existe en français et en anglais ;
    un mot compréhensible casserait la traduction. Un brouhaha de foule doit
-   rester un brouhaha — des voyelles, du murmure, jamais de phrase.
+   rester un brouhaha, des voyelles, du murmure, jamais de phrase.
 2. **Aucune mélodie reconnaissable** ni citation d'une musique existante.
 3. **Aucune stridence.** Le jeu se joue au casque dans le métro. Rien
    au-dessus de 8 kHz qui pique, pas de sifflement continu.
@@ -52,7 +52,7 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 
 ## Contraintes techniques (les mêmes pour les trois packs)
 
-- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps —
+- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps,
   la conversion finale sera faite à l'intégration.
 - **Boucles : stéréo. Bruitages courts : mono.**
 - **Les boucles doivent boucler.** La dernière milliseconde doit s'enchaîner
@@ -73,7 +73,7 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 
 Tout le contenu narratif du jeu a désormais son son : les 296 rencontres, les
 27 ennemis, les cinq quartiers, les douze grands moments. **Il ne reste que les
-gestes** — cliquer, frapper, marcher, encaisser. Ce sont les seuls sons encore
+gestes** : cliquer, frapper, marcher, encaisser. Ce sont les seuls sons encore
 fabriqués à la volée par le navigateur, et ce sont paradoxalement **les plus
 entendus de tout le jeu** : un joueur entend le clic d'interface plusieurs
 centaines de fois par partie, le son de pas des dizaines de fois par mini-jeu.
@@ -85,7 +85,7 @@ encore supportable à la centième fois »**.
 
 Trois conséquences directes :
 
-1. **Courts.** 0,08 à 0,5 seconde selon les cas — voir chaque entrée. Un son de
+1. **Courts.** 0,08 à 0,5 seconde selon les cas, voir chaque entrée. Un son de
    manipulation qui traîne devient vite insupportable.
 2. **Doux dans les aigus.** Aucun pic strident : c'est ce qui fatigue en
    premier. Rien d'agressif au-dessus de 6 kHz.
@@ -94,7 +94,7 @@ Trois conséquences directes :
 
 ## Règles communes
 
-- **Mono**, aucun silence en tête — ils répondent à une action, tout retard
+- **Mono**, aucun silence en tête, ils répondent à une action, tout retard
   s'entend comme une latence.
 - Niveau **−18 LUFS**, crête −6 dBFS. Plus bas que les bruitages de rencontre :
   ils accompagnent, ils ne commentent pas.
@@ -107,33 +107,33 @@ Trois conséquences directes :
 
 ## A. Ce qu'on entend le plus (à soigner en priorité)
 
-### `geste-clic.mp3` — 0,08 s
+### `geste-clic.mp3` · 0,08 s
 Le clic d'interface, sur tous les boutons du jeu. **Le son le plus entendu, de
 très loin.** Un doigt qui tape une fois sur une boîte en carton vide : mat,
 court, un rien creux. Surtout pas un « bip » ni un claquement sec de plastique.
 S'il agace au bout de vingt clics, il est raté.
 
-### `geste-pas.mp3` — 0,15 s
+### `geste-pas.mp3` · 0,15 s
 Un pas, dans les mini-jeux de déplacement. Une semelle qui se pose sur du
-gravier fin — ou, en carton : une poignée de riz pressée dans un sac en papier.
+gravier fin, ou, en carton : une poignée de riz pressée dans un sac en papier.
 Feutré. Il se répète vite quand le joueur avance, donc pas de claquement.
 
-### `geste-coup.mp3` — 0,2 s
+### `geste-coup.mp3` · 0,2 s
 Un coup qui porte. Un poing dans du carton plein : sourd, avec du corps, sans
-aucun métal. C'est le retour le plus important d'une bagarre — il doit être
+aucun métal. C'est le retour le plus important d'une bagarre, il doit être
 **satisfaisant** sans être violent.
 
-### `geste-coup-fort.mp3` — 0,3 s
+### `geste-coup-fort.mp3` · 0,3 s
 Le coup décisif. Le même geste, mais dans quelque chose de plus gros et de plus
 creux : un grand carton qui résonne, plus un léger craquement de fibres. Il doit
 s'entendre comme le grand frère du précédent, pas comme un son étranger.
 
-### `geste-encaisse.mp3` — 0,3 s
+### `geste-encaisse.mp3` · 0,3 s
 Le joueur prend le coup. Vu de l'intérieur : un choc mat, une inspiration
 coupée (soufflée, **sans voix**), et le carton qui se froisse. Doit faire un
 peu mal à entendre, sans être désagréable.
 
-### `geste-souffle.mp3` — 0,25 s
+### `geste-souffle.mp3` · 0,25 s
 Le souffle d'un départ : une carte qu'on lance au combat, un voyage qui
 commence. Une feuille de papier qu'on fait passer vite devant le micro. Léger,
 filant, sans sifflement.
@@ -142,16 +142,16 @@ filant, sans sifflement.
 
 ## B. Les résultats
 
-### `geste-reussite.mp3` — 0,4 s
+### `geste-reussite.mp3` · 0,4 s
 Une issue positive. Deux ou trois notes qui montent, jouées sur quelque chose de
-fragile et fait main — verre frotté, élastique pincé, petit métallophone
+fragile et fait main, verre frotté, élastique pincé, petit métallophone
 étouffé. **Modeste** : dans ce jeu, une réussite reste une petite victoire.
 
-### `geste-echec.mp3` — 0,4 s
+### `geste-echec.mp3` · 0,4 s
 Une issue négative. Deux notes qui descendent, et un froissement de papier à la
-fin. Résigné plutôt que dramatique — on hausse les épaules, on continue.
+fin. Résigné plutôt que dramatique, on hausse les épaules, on continue.
 
-### `geste-gong.mp3` — 0,5 s
+### `geste-gong.mp3` · 0,5 s
 L'ouverture d'une bagarre. Un couvercle de poubelle frappé une fois, avec une
 courte résonance. Ridicule et solennel à la fois : c'est le gong du pauvre.
 
@@ -159,19 +159,19 @@ courte résonance. Ridicule et solennel à la fois : c'est le gong du pauvre.
 
 ## C. Les rares
 
-### `geste-bricole.mp3` — 0,5 s
+### `geste-bricole.mp3` · 0,5 s
 On vient de fabriquer un objet. Trois gestes enchaînés très vite : un coup de
 scie, un tour de vis, et une petite tape de vérification. Ça tient.
 
-### `geste-succes.mp3` — 0,5 s
-Un succès débloqué. Une cascade brève et scintillante — des petits objets en
+### `geste-succes.mp3` · 0,5 s
+Un succès débloqué. Une cascade brève et scintillante, des petits objets en
 carton qu'on laisse tomber en cascade sur une table. Pas de carillon céleste.
 
-### `geste-papier.mp3` — 0,45 s
+### `geste-papier.mp3` · 0,45 s
 Le récit d'origine s'ouvre. Un vieux papier plié en quatre qu'on déplie
 lentement. Un peu solennel : c'est le passé du personnage.
 
-### `geste-troc.mp3` — 0,4 s
+### `geste-troc.mp3` · 0,4 s
 Un échange conclu avec quelqu'un de la rue. Deux mains en carton qui se
 frottent puis se serrent, et un petit objet qui change de main. Chaleureux.
 

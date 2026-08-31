@@ -133,27 +133,27 @@ header{display:flex;flex-direction:column;gap:14px}
 
 .echantillon{height:96px;display:grid;place-items:center;position:relative}
 
-/* L'objet 1 — trait de marqueur qui bave */
+/* L'objet 1, trait de marqueur qui bave */
 .o-marqueur{
   width:150px;height:34px;background:var(--marqueur);
   border-radius:60% 40% 55% 45%/58% 62% 38% 42%;
   transform:rotate(-2.2deg);filter:url(#bave);
   box-shadow:0 0 10px rgba(179,36,28,.28);
 }
-/* L'objet 2 — bande de scotch d'électricien */
+/* L'objet 2, bande de scotch d'électricien */
 .o-scotch{
   width:168px;height:30px;background:var(--scotch);transform:rotate(-4deg);
   background-image:linear-gradient(180deg,rgba(255,255,255,.22),transparent 42%,rgba(0,0,0,.18));
   box-shadow:0 2px 5px rgba(0,0,0,.24);
   clip-path:polygon(0 8%,4% 0,97% 4%,100% 92%,95% 100%,3% 96%);
 }
-/* L'objet 3 — tampon encreur, encre irrégulière */
+/* L'objet 3, tampon encreur, encre irrégulière */
 .o-tampon{
   font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1.5rem;
   letter-spacing:.06em;color:var(--tampon);border:3px solid var(--tampon);
   padding:5px 16px;transform:rotate(-6deg);opacity:.88;filter:url(#usure);
 }
-/* L'objet 4 — post-it fluo, coin qui rebique */
+/* L'objet 4, post-it fluo, coin qui rebique */
 .o-postit{
   width:106px;height:106px;background:var(--postit);transform:rotate(3deg);
   box-shadow:2px 4px 10px rgba(0,0,0,.22);position:relative;
@@ -164,14 +164,14 @@ header{display:flex;flex-direction:column;gap:14px}
   border-color:transparent transparent var(--paper) transparent;
   filter:drop-shadow(-2px -2px 2px rgba(0,0,0,.2));
 }
-/* L'objet 5 — gaffer mat, arraché */
+/* L'objet 5, gaffer mat, arraché */
 .o-gaffer{
   width:160px;height:38px;background:var(--gaffer);transform:rotate(1.6deg);
   background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px);
   clip-path:polygon(2% 6%,98% 0,100% 88%,96% 100%,4% 94%,0 12%);
   box-shadow:0 2px 4px rgba(0,0,0,.3);
 }
-/* L'objet 6 — ruban de chantier rayé */
+/* L'objet 6, ruban de chantier rayé */
 .o-ruban{
   width:170px;height:32px;transform:rotate(-2.5deg);
   background:repeating-linear-gradient(-56deg,var(--ruban) 0 14px,#2B211A 14px 28px);
@@ -294,18 +294,18 @@ footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60c
 
     <p class="verdict">Les deux couleurs les plus employées pour signaler quelque chose sont
     <b>des cousines du carton</b>. Les deux seules qui s'en détachent vraiment sont
-    <b>les moins saturées de tout le jeu</b> — moins que le décor lui-même, qui plafonne à 61 %.
+    <b>les moins saturées de tout le jeu</b>, moins que le décor lui-même, qui plafonne à 61 %.
     D'où l'impression de grisaille : ce n'est pas un manque de couleur, c'est un manque d'écart.</p>
 
     <p class="lede">Le kraft est centré sur <span class="mono">28°</span>. Son opposé exact sur la roue
-    tombe sur <span class="mono">208°</span> — le bleu. C'est, physiquement, la couleur qui peut le
+    tombe sur <span class="mono">208°</span>, le bleu. C'est, physiquement, la couleur qui peut le
     moins se fondre dans ce décor. Et c'est la couleur du scotch d'électricien.</p>
   </section>
 
   <section class="feuille">
     <p class="eyebrow">La règle qui tient tout</p>
     <h2>L'encre va sur le papier.<br>Le papier va sous l'encre.</h2>
-    <p class="lede">Chaque objet a une physique, et cette physique décide de son rôle en CSS — ce
+    <p class="lede">Chaque objet a une physique, et cette physique décide de son rôle en CSS, ce
     n'est pas une convention, c'est une mesure. Un marqueur, un scotch, un tampon sont
     <b>des marques</b> : très lisibles posés sur le décor, illisibles s'ils portent du texte sombre.
     Un post-it et un ruban de chantier sont <b>des surfaces</b> : invisibles comme marques,
@@ -323,7 +323,7 @@ footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60c
         <p class="objet"><b>Un coup de marqueur indélébile</b>, tracé trop appuyé, qui bave dans les
         fibres du carton. Celui avec lequel on barre une date sur une caisse.</p>
         <p class="regle"><span>Uniquement en <b>trait</b> : remplissage de jauge, soulignement, croix
-        sur un objet cassé. Jamais un aplat plein écran — un marqueur ne recouvre pas une surface,
+        sur un objet cassé. Jamais un aplat plein écran, un marqueur ne recouvre pas une surface,
         il la raye. Le tracé garde ses bords irréguliers (filtre de turbulence), c'est ce qui le
         distingue d'une barre de progression.</span></p>
       </div>
@@ -337,7 +337,7 @@ footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60c
         doigts. La seule couleur du lot que le carton ne peut pas absorber.</p>
         <p class="regle"><span>Un seul bouton bleu à l'écran, toujours. C'est la couleur la plus
         éloignée du décor : deux morceaux de scotch en même temps et il n'y a plus d'action
-        principale. Bord coupé au <code>clip-path</code>, jamais de <code>border-radius</code> —
+        principale. Bord coupé au <code>clip-path</code>, jamais de <code>border-radius</code>,
         un adhésif se déchire, il ne s'arrondit pas. Texte blanc dessus (5,6:1), jamais sombre.</span></p>
       </div>
     </div>
@@ -350,7 +350,7 @@ footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60c
         dans les pleins. Celui de la consigne, du dépôt, du reçu.</p>
         <p class="regle"><span>Il <b>arrive</b>, il ne s'affiche pas : petite rotation, apparition
         d'un coup, opacité 0,85–0,9 avec une texture d'usure. Réservé à ce qui est
-        <b>définitivement acquis</b> — dette éteinte, succès débloqué, contrat rempli. Un gain
+        <b>définitivement acquis</b>, dette éteinte, succès débloqué, contrat rempli. Un gain
         ordinaire ne mérite pas un tampon.</span></p>
       </div>
     </div>
@@ -362,7 +362,7 @@ footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60c
         <p class="objet"><b>Un post-it fluo</b> froissé, collé au coin qui rebique. Le seul objet du
         lot qui soit lumineux plutôt que coloré.</p>
         <p class="regle"><span><b>Fond uniquement, jamais du texte.</b> Sur papier il ne contraste
-        qu'à 1,25:1 — invisible ; sous une écriture noire, il monte à 11,95:1, le meilleur score de
+        qu'à 1,25:1, invisible ; sous une écriture noire, il monte à 11,95:1, le meilleur score de
         toute la palette. Un post-it par écran au maximum, et il porte toujours un mot écrit à la
         main. Interdit sur une jauge : ça deviendrait un avertissement.</span></p>
       </div>
@@ -376,7 +376,7 @@ footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60c
         indisponible : on scotche par-dessus.</p>
         <p class="regle"><span>C'est <b>l'absence de couleur qui signale</b>, et c'est le seul état
         qui ait le droit d'être terne. La bande recouvre partiellement l'élément au lieu de le
-        griser — le joueur doit voir ce qu'il ne peut pas faire, sinon le choix disparaît. Ne porte
+        griser, le joueur doit voir ce qu'il ne peut pas faire, sinon le choix disparaît. Ne porte
         jamais de texte (2,98:1) : le libellé reste visible à côté.</span></p>
       </div>
     </div>
@@ -389,7 +389,7 @@ footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60c
         <b>la rayure porte le signal</b>, pas la teinte.</p>
         <p class="regle"><span>Toujours <b>rayé</b>, jamais uni : seul, ce jaune est un cousin du
         kraft (40°) et ne contraste qu'à 2:1. Rayé, il devient le motif le plus reconnaissable de
-        l'écran. Réservé au temps qui s'épuise — minuteur de la manche, jauge du tas, échéance du
+        l'écran. Réservé au temps qui s'épuise, minuteur de la manche, jauge du tas, échéance du
         jour. En bordure fine ou en liseré, jamais en aplat.</span></p>
       </div>
     </div>
@@ -434,7 +434,7 @@ footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60c
 
     <p class="verdict" style="border-color:var(--tampon);margin-top:18px">
       <b>Aucune couleur ne porte l'information toute seule.</b> Chaque objet a une forme qui lui est
-      propre — le trait qui bave, le bord déchiré, la rotation du tampon, la rayure diagonale — et
+      propre, le trait qui bave, le bord déchiré, la rotation du tampon, la rayure diagonale, et
       c'est cette forme qui reste lisible en plein soleil, pour un daltonien, et sur la capture
       d'écran en noir et blanc que quelqu'un partagera.</p>
   </section>
@@ -466,7 +466,7 @@ footer{font-size:.86rem;color:rgba(43,33,26,.55);text-align:center;max-width:60c
     <p class="lede">La jauge de Dignité garde l'or du carton, et c'est le seul endroit où une teinte
     proche du décor est un choix plutôt qu'un défaut : elle mesure à quel point on se fond dans la
     rue. Quand elle tombe, la couleur du personnage rejoint celle du trottoir. Aucun des six objets
-    ne doit l'approcher — personne ne colle de scotch sur sa propre fierté.</p>
+    ne doit l'approcher, personne ne colle de scotch sur sa propre fierté.</p>
   </section>
 
   <footer>Contrastes calculés selon WCAG 2.1 sur le fond papier du jeu (#FBF6F0).

@@ -10,7 +10,7 @@
  * On décode donc chaque fichier dans le vrai moteur audio d'un navigateur,
  * exactement celui qui les jouera, et on mesure sur les échantillons :
  *
- *   · la CRÊTE, pour attraper un fichier silencieux — le risque réel quand un
+ *   · la CRÊTE, pour attraper un fichier silencieux, le risque réel quand un
  *     son est un composite bricolé plutôt qu'une génération ;
  *   · le NIVEAU MOYEN, pour repérer un son qui existe mais qu'on n'entendra
  *     jamais par-dessus le reste ;
@@ -87,7 +87,7 @@ const cretes = resultats.filter(r => r.ok && dB(r.crete) > -0.5);
 
 const dire = (nom, liste, bloquant = true) => {
   const ok = liste.length === 0;
-  console.log(`${ok ? '  ok  ' : bloquant ? ' RATÉ ' : ' note '} ${nom}${ok ? '' : ` — ${liste.length}`}`);
+  console.log(`${ok ? '  ok  ' : bloquant ? ' RATÉ ' : ' note '} ${nom}${ok ? '' : ` · ${liste.length}`}`);
   if (!ok) {
     liste.slice(0, 6).forEach(r => console.log(`        ${r.nom}${r.erreur ? ` : ${r.erreur}` : ''}`));
     if (bloquant) echecs++;

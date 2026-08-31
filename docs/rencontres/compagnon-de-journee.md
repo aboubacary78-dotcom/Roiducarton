@@ -6,8 +6,8 @@
 
 ## Ce qu'on n'a pas eu à inventer
 
-La proposition reçue créait trois PNJ fixes — Robert le Parano, Paulette la
-Voix Douce, Gégé le Fouilleur — chacun avec un trait passif écrit pour
+La proposition reçue créait trois PNJ fixes. Robert le Parano, Paulette la
+Voix Douce, Gégé le Fouilleur, chacun avec un trait passif écrit pour
 l'occasion : moins d'alerte au vol, manche doublée, fouille garantie.
 
 Trois faits l'ont rendue caduque, et tous les trois se lisent dans le code.
@@ -24,11 +24,11 @@ c'est `paranoiaque` et `nez-sensible`. « Attirer la pitié » à la manche, c'e
 **Les PNJ portent déjà ces traits.** Ils étaient simplement décoratifs.
 
 D'où la version retenue : **le compagnon prête un de ses traits**. Aucun effet
-nouveau, aucun équilibrage à refaire — une porte ouverte sur ce qui existait.
+nouveau, aucun équilibrage à refaire, une porte ouverte sur ce qui existait.
 
 ## Le prix : un repas
 
-Pas de bouton « Faire équipe ». C'est **partager à manger** qui recrute — le
+Pas de bouton « Faire équipe ». C'est **partager à manger** qui recrute, le
 geste altruiste qui existait déjà et ne rapportait qu'un peu de moral. On
 n'obtient pas un coup de main gratuitement dans la rue, et le partage cesse
 d'être un choix purement sentimental.
@@ -67,9 +67,9 @@ pas par là. Vérifié au chiffre près par le test.
 C'est la limite à connaître, et elle est structurelle : **les PNJ et leurs
 traits sont tirés au sort.** On ne décide pas de croiser un bricoleur.
 
-Ce que l'on décide, c'est **où aller**. Le tirage est stable — même jour, même
+Ce que l'on décide, c'est **où aller**. Le tirage est stable, même jour, même
 quartier, même joueur donne toujours la même personne, ce n'est pas une machine
-à sous — et le voyage ne coûte aucune action. Trois quartiers reçoivent du
+à sous, et le voyage ne coûte aucune action. Trois quartiers reçoivent du
 monde : le centre-ville, la gare et le marché.
 
 Mesuré sur **24 000 visites simulées** :
@@ -80,7 +80,7 @@ Mesuré sur **24 000 visites simulées** :
 | … et il a un trait à prêter | **59 %** |
 | **Un jour donné, au moins un compagnon accessible** | **68,8 %** |
 | Compagnons possibles par jour, sur les trois quartiers | **0,96** |
-| Écart entre les sept traits prêtés | 13,5 % à 14,9 % — aucun ne domine |
+| Écart entre les sept traits prêtés | 13,5 % à 14,9 %, aucun ne domine |
 
 Deux jours sur trois, quelqu'un quelque part peut vous accompagner. Il faut
 aller voir.
@@ -91,7 +91,7 @@ Le jour du partage est inscrit dans la fiche du compagnon. La nuit passée, le
 compteur des jours avance et la comparaison cesse d'être vraie : le prêt expire
 tout seul. Rien à nettoyer, donc rien à oublier de nettoyer.
 
-Un seul compagnon à la fois — le dernier repas partagé remplace le précédent.
+Un seul compagnon à la fois, le dernier repas partagé remplace le précédent.
 
 ## Ce qui le rend visible
 
@@ -106,24 +106,24 @@ du coup ce n'est pas trouvable. »* C'était exact, et la capture d'écran le
 montrait sans discussion.
 
 La rencontre était une `craft-card` beige posée entre le contrat, la météo et
-les jauges — **la cinquième carte identique d'une pile de cartes identiques**.
+les jauges, **la cinquième carte identique d'une pile de cartes identiques**.
 Le défaut n'était pas la mécanique : un événement rare portait exactement le
 même habit que le mobilier permanent, et l'œil glissait dessus.
 
 Le décor du quartier est le seul élément de l'écran qui ne ressemble à rien
 d'autre. La personne y est donc entrée : **elle se tient dans la rue**, dans le
 coin de l'image, un halo doré qui bat lentement, son prénom sur une étiquette,
-et une respiration de trois secondes. La carte beige a disparu — l'écran compte
+et une respiration de trois secondes. La carte beige a disparu, l'écran compte
 un bloc de moins, pas un de plus.
 
 Et **sa phrase remplace la ligne d'ambiance** tant qu'il est là. Une odeur de
-café intéresse moins qu'une personne qui vous regarde — et c'est précisément
+café intéresse moins qu'une personne qui vous regarde, et c'est précisément
 cette phrase qui dit s'il faut s'en méfier (voir plus bas). L'indice du louche
 est ainsi lisible **sans même ouvrir la carte**.
 
 Le test cherche désormais la rencontre par son `aria-label` plutôt que par son
-libellé : le nom visible n'est plus qu'un prénom, et c'est l'intention — « aller
-voir Lucien » — qui doit rester stable. C'est aussi ce que lit un lecteur
+libellé : le nom visible n'est plus qu'un prénom, et c'est l'intention, « aller
+voir Lucien », qui doit rester stable. C'est aussi ce que lit un lecteur
 d'écran.
 
 ---
@@ -134,7 +134,7 @@ d'écran.
 Mesuré : 24,9 % des rencontres, sur 8 855.
 
 Il n'a pas triché pour autant : il a tenu sa part toute la journée, le trait
-prêté a servi. Il part simplement avec le plus cher du sac — ou, si le sac est
+prêté a servi. Il part simplement avec le plus cher du sac, ou, si le sac est
 vide, avec trois à sept euros de la poche.
 
 ## L'indice est toujours donné
@@ -156,8 +156,8 @@ dans la rue : lire les gens.
 
 ## Et on peut aller le chercher
 
-Une perte sans recours n'enseigne rien. Le vol laisse donc une trace — qui, où,
-quoi — et **le voleur traîne encore dans le quartier où vous l'avez nourri**,
+Une perte sans recours n'enseigne rien. Le vol laisse donc une trace, qui, où,
+quoi, et **le voleur traîne encore dans le quartier où vous l'avez nourri**,
 deux jours durant. Au-delà, il a revendu et disparu.
 
 Le retrouver ouvre le seul combat du jeu contre quelqu'un qui dort dehors comme
@@ -173,13 +173,13 @@ catalogue ». Elle était molle, et deux faits le montraient.
 Le catalogue contenait **déjà un « Concurrent Agressif » à 38/13** : le voleur
 était plus faible que l'ennemi générique qui porte son nom.
 
-Et il ne se retrouve que dans les trois quartiers sociaux — centre-ville, gare,
-marché — dont les rosters comptent les humains les plus durs du jeu, de moyenne
+Et il ne se retrouve que dans les trois quartiers sociaux, centre-ville, gare,
+marché, dont les rosters comptent les humains les plus durs du jeu, de moyenne
 405. À 374, il passait en dessous.
 
 Mesuré sur **400 combats simulés par jour de partie** (joueur volontairement
 médiocre : signes au hasard, deux touches encaissées à chaque esquive, première
-carte jouée systématiquement — les taux absolus sont donc pessimistes, c'est le
+carte jouée systématiquement, les taux absolus sont donc pessimistes, c'est le
 classement qui compte) :
 
 | Adversaire | Jour 2 | Jour 6 | Jour 12 |
@@ -197,7 +197,7 @@ motif, et il rend quelque chose.
 
 **42 PV, 14 d'attaque.** Juste au-dessus du Concurrent Agressif, sous le Voyou
 du Coin : le plus dur des humains ordinaires, la brute du quartier exceptée. Et
-la fiction le dit — il a mangé à vos frais et dormi avec vos affaires, c'est
+la fiction le dit, il a mangé à vos frais et dormi avec vos affaires, c'est
 très précisément la personne la mieux nourrie que vous croiserez dehors.
 
 Le test ne fige pas 42 et 14, il tient le **rang** : plus fort que le
@@ -214,7 +214,7 @@ retente pas sa chance jusqu'à gagner.
 pas le réducteur : elle **relit tout le code source** à la recherche des appels
 `hasTrait`, et vérifie que chacun des sept traits prêtables est réellement
 interrogé quelque part. Si l'un d'eux perd son branchement un jour, le test
-tombe — sans quoi le joueur donnerait son repas contre une ligne de texte, et
+tombe, sans quoi le joueur donnerait son repas contre une ligne de texte, et
 rien ne le lui dirait.
 
 La deuxième plus importante balaie 8 855 rencontres pour vérifier que **l'indice
@@ -224,4 +224,4 @@ propriété casse, le piège devient une punition arbitraire.
 `scripts/test-compagnon-ecran.mjs` fait le reste dans un vrai navigateur :
 le bouton qui annonce la contrepartie avant le geste, le visage ancré en haut
 de l'écran avec le trait en toutes lettres, le concurrent qu'on retrouve dans
-son quartier — et pas dans un autre.
+son quartier, et pas dans un autre.

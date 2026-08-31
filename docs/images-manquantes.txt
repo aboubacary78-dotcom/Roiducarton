@@ -1,7 +1,7 @@
 # Images manquantes (MAJ : pack 1 TERMINÉ, restent les packs 2-6)
 # Voir docs/prompts-gemini/ pour les prompts prêts à l'emploi.
 
-## Illustrations vague 2 (176) + suites (10) — packs 2 à 6
+## Illustrations vague 2 (176) + suites (10) · packs 2 à 6
 beg-averse.webp
 beg-bingo.webp
 beg-braderie.webp

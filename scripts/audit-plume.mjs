@@ -3,7 +3,7 @@
  *
  * « Beaucoup de passages font IA. » Pour agir dessus il faut savoir CE QUI
  * fait IA. On extrait tous les textes français des données du jeu et on
- * cherche des tics de forme — pas des mots interdits, des STRUCTURES qui se
+ * cherche des tics de forme, pas des mots interdits, des STRUCTURES qui se
  * répètent. Une bonne formule employée trois fois est un style ; employée
  * deux cents fois, c'est une machine.
  */
@@ -36,7 +36,7 @@ const phrases = s => s.split(/(?<=[.!?…])\s+/).filter(p => p.trim().length > 1
 
 // --- Tic n°1 : la chute courte qui reprend un mot de la phrase d'avant -----
 // « Le glacier tourne le dos à sa caisse à chaque cornet. Trois secondes par
-//   cornet. » — la blague atterrit toujours de la même façon.
+//   cornet. », la blague atterrit toujours de la même façon.
 let echo = 0; const exemplesEcho = [];
 // --- Tic n°2 : la chute courte tout court (fragment final < 6 mots) --------
 let fragment = 0; const exemplesFragment = [];

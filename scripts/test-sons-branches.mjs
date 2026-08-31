@@ -2,7 +2,7 @@
  * UN SON LIVRÉ QUE PERSONNE N'APPELLE N'EXISTE PAS.
  *
  * C'est l'état dans lequel ce projet a passé des mois sans s'en apercevoir :
- * dix-huit fichiers commandés, spécifiés, payés — et jamais fabriqués, sans
+ * dix-huit fichiers commandés, spécifiés, payés, et jamais fabriqués, sans
  * que rien ne le signale. Puis quatre-vingt-un fichiers livrés et installés,
  * dont aucun ne jouait, parce qu'installer n'est pas brancher.
  *
@@ -15,7 +15,7 @@
  *
  * Le second contrôle est indulgent par nécessité : beaucoup de sons sont
  * atteints par un nom CONSTRUIT (`cry-${slug}`, `sfx-${id}`, `geste-clic-2`).
- * On vérifie donc qu'une FAMILLE est branchée, pas chaque fichier — sans quoi
+ * On vérifie donc qu'une FAMILLE est branchée, pas chaque fichier, sans quoi
  * le test crierait sur les 296 bruitages de rencontre, qui vont tous très
  * bien.
  */
@@ -36,7 +36,7 @@ const sons = readFileSync('client/src/lib/sound.ts', 'utf8');
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -65,13 +65,13 @@ for (const f of readdirSync('client/public/audio').filter(f => f.endsWith('.mp3'
 }
 
 /*
- * Beaucoup de sons sont atteints par un nom CONSTRUIT — `cry-${slug}`,
+ * Beaucoup de sons sont atteints par un nom CONSTRUIT, `cry-${slug}`,
  * `act-${geste}-${code}`, `amb-sig-${lieu}`. Chercher le nom complet dans les
  * sources les déclarerait tous inatteignables à tort.
  *
  * On remonte donc les préfixes segment par segment : `act-dormir-gare` est
  * atteignable si le code contient `act-dormir-gare`, ou `act-dormir-`, ou
- * `act-`. Le test reste utile — une famille entière que RIEN ne mentionne,
+ * `act-`. Le test reste utile, une famille entière que RIEN ne mentionne,
  * pas même son préfixe, tombe toujours.
  */
 function atteignable(nom) {
@@ -84,7 +84,7 @@ function atteignable(nom) {
 }
 
 /*
- * LES DORMANTS ASSUMÉS — ET POURQUOI IL FAUT LES NOMMER ICI.
+ * LES DORMANTS ASSUMÉS : ET POURQUOI IL FAUT LES NOMMER ICI.
  *
  * Les vingt fichiers des couches du hub (`amb-sig-*`, `vie-*`) ont été
  * débranchés : ils tombaient sans cause sur un écran immobile et se lisaient

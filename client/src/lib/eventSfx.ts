@@ -220,7 +220,7 @@ export function sfxFor(text: string): EventSfx {
  * Joue le bruitage d'un événement.
  *
  * Ordre de priorité :
- *   1. `/audio/sfx-<identifiant>.mp3` — le son écrit POUR cette rencontre-là.
+ *   1. `/audio/sfx-<identifiant>.mp3`, le son écrit POUR cette rencontre-là.
  *   2. la banque thématique synthétisée, choisie en lisant le texte.
  *
  * Le second n'est déclenché que si le premier n'existe pas : jamais les deux.

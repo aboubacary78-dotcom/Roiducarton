@@ -1,4 +1,4 @@
-# Prompts d'images — Le Roi du Carton (pour Manus)
+# Prompts d'images · Le Roi du Carton (pour Manus)
 
 Manus connaît déjà la **DA** (diorama miniature en carton kraft, personnages en
 carton découpé à visage feutre, guirlande lumineuse, lumière chaude, humour noir
@@ -55,7 +55,7 @@ au joueur, dans une ruelle/coin de rue en carton.
 | `combat-pickpocket.webp` | Pickpocket en carton, agile, main tendue vers une poche. |
 | `combat-squatteur.webp` | Squatteur territorial en carton dans un hangar, l'air possessif et menaçant. |
 
-## C. Morts personnalisées (7) — « la mort »
+## C. Morts personnalisées (7) · « la mort »
 
 Écran de fin. Le **personnage SDF en carton** mort/effondré, selon la cause,
 ambiance **mélancolique**, lumière froide/tamisée, poignante mais sobre.
@@ -92,7 +92,7 @@ Nouveau bloc de jeu : un prêteur sur gages aborde le personnage quand il est
 fauché, avance dix euros, et revient trois jours plus tard réclamer quinze.
 Payer, se faire saisir un objet, ou se faire tabasser.
 
-**Le prêteur doit être le MÊME personnage sur les deux portraits** — c'est le
+**Le prêteur doit être le MÊME personnage sur les deux portraits**, c'est le
 principe : le visage qu'on voit en empruntant est celui qu'on redoute de
 revoir. Ni un voyou ni un mafieux : quelqu'un de la rue qui s'en sort un peu
 mieux que vous, manteau moins rapiécé, chaussures entières, l'air fatigué de
@@ -101,10 +101,10 @@ quelqu'un qui a déjà entendu toutes les excuses.
 | Fichier | Format | Scène |
 |---------|--------|-------|
 | `npc-preteur.webp` | **portrait rapproché, 16:9 large** | Le prêteur en carton, de trois quarts, tend deux billets pliés entre deux doigts. Il ne sourit pas, il ne menace pas : il propose. Sous une entrée de gare en carton, lumière chaude. On doit avoir envie de dire oui, et savoir que c'est une mauvaise idée. |
-| `npc-preteur-echeance.webp` | **portrait rapproché, 16:9 large** | **Le même personnage**, même manteau, trois jours plus tard. Adossé, bras croisés, il attend. Rien d'agressif dans la pose — c'est l'immobilité qui inquiète. Lumière plus froide, fin de journée. |
+| `npc-preteur-echeance.webp` | **portrait rapproché, 16:9 large** | **Le même personnage**, même manteau, trois jours plus tard. Adossé, bras croisés, il attend. Rien d'agressif dans la pose, c'est l'immobilité qui inquiète. Lumière plus froide, fin de journée. |
 | `result-dette-payee.webp` | 3:2 paysage | Deux mains en carton, celle du SDF et celle du prêteur, au moment où les billets passent de l'une à l'autre. Cadrage serré sur les mains, les visages hors champ ou flous. Ni joie ni soulagement : une transaction. C'est le seul dénouement propre des trois. |
 | `result-dette-saisie.webp` | 3:2 paysage | Le prêteur s'éloigne en emportant un manteau en carton sur l'épaule ; au premier plan, le SDF assis sur son carton, sac ouvert et vide entre les jambes, il regarde partir. Il n'a rien dit. **Personne ne crie dans cette image.** |
-| `result-dette-raclee.webp` | 3:2 paysage | Après. Le SDF en carton au sol contre un mur, le manteau retroussé, une chaussure plus loin. Le prêteur n'est **plus dans le cadre** — juste sa silhouette qui s'éloigne au fond, floue. Deux passants en carton contournent sans regarder. **Aucun sang, aucun coup montré** : c'est l'indifférence des passants qui doit faire mal, pas la violence. |
+| `result-dette-raclee.webp` | 3:2 paysage | Après. Le SDF en carton au sol contre un mur, le manteau retroussé, une chaussure plus loin. Le prêteur n'est **plus dans le cadre**, juste sa silhouette qui s'éloigne au fond, floue. Deux passants en carton contournent sans regarder. **Aucun sang, aucun coup montré** : c'est l'indifférence des passants qui doit faire mal, pas la violence. |
 
 > ⚠️ Les trois `result-*` sont des moments durs. Le jeu est une comédie noire,
 > pas un jeu de brutalité : on montre **les conséquences et l'indifférence**,

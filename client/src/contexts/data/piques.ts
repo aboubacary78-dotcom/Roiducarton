@@ -1,9 +1,9 @@
 /*
  * ═══════════════════════════════════════════════════════════════════════════
- * LES PIQUES — CE QUE LE JEU PENSE DE VOUS, ET QU'IL NE GARDE PAS POUR LUI.
+ * LES PIQUES : CE QUE LE JEU PENSE DE VOUS, ET QU'IL NE GARDE PAS POUR LUI.
  *
- * Le jeu commente déjà ses moments — « Vingt minutes les bras dans les ordures
- * pour rien. Même les rats vous ont regardé avec pitié. » — et c'est ce qui
+ * Le jeu commente déjà ses moments, « Vingt minutes les bras dans les ordures
+ * pour rien. Même les rats vous ont regardé avec pitié. », et c'est ce qui
  * l'empêche d'être un simulateur de misère. Trente phrases de plus, pour les
  * cinq instants où le joueur relève la tête en attendant une réaction.
  *
@@ -14,7 +14,7 @@
  *      relire n'est jamais lue.
  *
  *   2. LA FORME CHANGE. La première version faisait trente fois « constat,
- *      point, chute » — et une structure qu'on voit venir dès la deuxième
+ *      point, chute », et une structure qu'on voit venir dès la deuxième
  *      vanne n'a plus aucune percussion. Il y a donc maintenant des phrases
  *      d'un seul bloc (« Le vigile n'a même pas eu à courir »), des faux
  *      compliments (« Record personnel »), des décalages de registre
@@ -49,7 +49,7 @@ export type CategoriePique =
  * CE QUI VIENT DE SE PASSER.
  *
  * Sans ça, une pique est un fortune cookie : elle tombe, elle est bien
- * tournée, et elle ne parle de rien. Le premier joueur l'a dit sans détour —
+ * tournée, et elle ne parle de rien. Le premier joueur l'a dit sans détour,
  * « aucune cohérence, on dirait que c'est mis pour être mis ». Il avait
  * raison, et le défaut était de conception : les phrases étaient tirées AU
  * HASARD dans un sac de six, quel que soit ce qui venait d'arriver. Une
@@ -57,7 +57,7 @@ export type CategoriePique =
  * ne veut rien dire du tout.
  *
  * Chaque phrase déclare donc à quelle situation elle répond, et on ne tire que
- * parmi celles qui collent. S'il n'y en a aucune, LE JEU SE TAIT — c'est la
+ * parmi celles qui collent. S'il n'y en a aucune, LE JEU SE TAIT, c'est la
  * moitié du travail : une vanne qu'on retient vaut mieux qu'une vanne à côté.
  */
 export interface Contexte {
@@ -68,7 +68,7 @@ export interface Contexte {
    * corps : l'appelant les parcourt via une table typée `keyof Stats`, qui
    * inclut la dignité, et TypeScript ne sait pas la restreindre à cet
    * endroit. Une union ici obligerait à une conversion forcée au point
-   * d'appel — c'est-à-dire à éteindre le contrôle plutôt qu'à le satisfaire.
+   * d'appel, c'est-à-dire à éteindre le contrôle plutôt qu'à le satisfaire.
    * La dignité a de toute façon sa propre catégorie de piques.
    */
   jauge?: string;
@@ -94,7 +94,7 @@ export const PIQUES: Record<CategoriePique, Pique[]> = {
    * Sous 60 de mental, les mots des rencontres se remplacent par des signes
    * illisibles (voir lib/charabia). C'est la mécanique la plus forte du jeu et
    * c'était la plus muette : rien ne reliait le texte troué à la jauge, et le
-   * joueur concluait — capture d'écran à l'appui — que le jeu était cassé.
+   * joueur concluait (capture d'écran à l'appui) que le jeu était cassé.
    *
    * Ces phrases-là ont donc un travail que les autres n'ont pas : faire le
    * lien. Chacune nomme LA TÊTE et LA LECTURE dans la même phrase, sans jamais
@@ -124,7 +124,7 @@ export const PIQUES: Record<CategoriePique, Pique[]> = {
   /* ── ① SANTÉ CRITIQUE ────────────────────────────────────────────────────
    * Chaque phrase nomme LA jauge qui lâche. C'est ce qui manquait le plus :
    * mourir de soif et s'entendre parler du froid, c'est le jeu qui ne regarde
-   * pas son propre écran. Le rire vient du décalage de registre — un corps qui
+   * pas son propre écran. Le rire vient du décalage de registre, un corps qui
    * meurt décrit avec le vocabulaire d'un huissier ou d'un pigeon poli.
    */
   'sante-critique': [
@@ -161,7 +161,7 @@ export const PIQUES: Record<CategoriePique, Pique[]> = {
   ],
 
   /* ── ② DIGNITÉ À ZÉRO ────────────────────────────────────────────────────
-   * Elles se déclenchent au franchissement d'un palier — donc juste après un
+   * Elles se déclenchent au franchissement d'un palier, donc juste après un
    * geste que le joueur vient de faire. Pas de condition : le palier EST la
    * situation, et elles frappent toutes sur un geste précis plutôt que sur
    * l'idée générale d'avoir honte.
@@ -184,7 +184,7 @@ export const PIQUES: Record<CategoriePique, Pique[]> = {
   /* ── ③ ÉCHEC TOTAL AU VOL ────────────────────────────────────────────────
    * Le seul moment où le jeu a le droit d'être franchement moqueur : le
    * joueur a pris un risque en connaissance de cause. On tape sur
-   * l'exécution, jamais sur l'intention. Pas de condition — se faire prendre
+   * l'exécution, jamais sur l'intention. Pas de condition, se faire prendre
    * est déjà la situation la plus précise du jeu.
    */
   'vol-rate': [
@@ -239,7 +239,7 @@ export const PIQUES: Record<CategoriePique, Pique[]> = {
   ],
 
   /* ── ⑤ GAINS MISÉRABLES ──────────────────────────────────────────────────
-   * Déjà causales par nature — elles ne sortent que sur une récolte nulle. On
+   * Déjà causales par nature, elles ne sortent que sur une récolte nulle. On
    * distingue quand même le ZÉRO du PRESQUE RIEN : « encadrez-le » n'a aucun
    * sens quand on est reparti les mains vides, et c'est le genre de décalage
    * d'un cran qui fait passer une vanne pour un tirage au sort.
@@ -269,13 +269,13 @@ export const PIQUES: Record<CategoriePique, Pique[]> = {
 /*
  * ── LE DÉBIT ─────────────────────────────────────────────────────────────
  *
- * Une pique qui tombe à chaque action n'est plus une pique, c'est un tic — et
+ * Une pique qui tombe à chaque action n'est plus une pique, c'est un tic, et
  * un tic fait exactement ce que fait une alarme trop fréquente : on cesse de
  * le lire. Deux verrous, et ils font le même métier que ceux des jauges.
  *
  * L'ATTENTE. Trente secondes minimum entre deux piques, toutes catégories
- * confondues. Une mauvaise passe en enchaîne trois sinon — santé, dignité,
- * vol raté — et le jeu se met à ricaner sans s'arrêter au moment précis où le
+ * confondues. Une mauvaise passe en enchaîne trois sinon : santé, dignité,
+ * vol raté, et le jeu se met à ricaner sans s'arrêter au moment précis où le
  * joueur est en train de perdre.
  *
  * LA MÉMOIRE. Jamais deux fois la même phrase d'affilée dans une catégorie.
@@ -307,7 +307,7 @@ export function piquer(
    * Et s'il n'y en a aucune, on se tait. C'est le point important : la version
    * précédente piochait dans le sac entier et sortait donc une remarque sur le
    * carton mouillé après une nuit sèche. Une vanne à côté ne rate pas de peu,
-   * elle démolit toutes les autres avec elle — le joueur comprend en une fois
+   * elle démolit toutes les autres avec elle, le joueur comprend en une fois
    * que le jeu ne regarde rien, et il ne les lit plus.
    */
   const banque = (PIQUES[cat] ?? []).filter(p => !p.quand || p.quand(ctx));
@@ -315,7 +315,7 @@ export function piquer(
 
   const avant = derniereDeLaCategorie.get(cat);
   let i = Math.floor(Math.random() * banque.length);
-  // Jamais deux fois la même d'affilée — sauf s'il n'en reste qu'une qui
+  // Jamais deux fois la même d'affilée, sauf s'il n'en reste qu'une qui
   // colle, auquel cas se répéter vaut mieux que se taire à contretemps.
   if (banque.length > 1 && banque[i].fr === avant) i = (i + 1) % banque.length;
   derniereDeLaCategorie.set(cat, banque[i].fr);
@@ -333,12 +333,12 @@ export function piquer(
  *
  * Mes piques, elles, flottaient en bandeau au-dessus de l'écran et
  * disparaissaient en trois secondes. Même bien écrites, elles se lisaient
- * comme une notification posée par-dessus le jeu — d'où « on dirait que c'est
+ * comme une notification posée par-dessus le jeu, d'où « on dirait que c'est
  * mis pour être mis ». La différence n'est pas dans les phrases, elle est dans
  * l'endroit.
  *
  * Elles rejoignent donc le texte. Le toast ne reste que là où le jeu n'écrit
- * rien — c'est-à-dire quand rien ne vient de se produire, seulement un seuil
+ * rien, c'est-à-dire quand rien ne vient de se produire, seulement un seuil
  * qu'on a franchi en vivant.
  */
 export function avecPique(

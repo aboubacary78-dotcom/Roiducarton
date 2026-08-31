@@ -4,7 +4,7 @@
  * Neuf actions d'un coup au premier écran, dont deux qu'un débutant ne peut
  * pas évaluer : la Bagarre et le Vol quittent le tout premier écran, et
  * reviennent dès la première action faite. Ce test éprouve les deux moitiés de
- * l'idée — le masquage ET son alibi narratif — parce que l'un sans l'autre ne
+ * l'idée (le masquage ET son alibi narratif) parce que l'un sans l'autre ne
  * vaut rien : une option qui manque sans raison n'est pas de la pédagogie,
  * c'est un bug.
  *
@@ -38,7 +38,7 @@ const texte = () => p.evaluate(() => document.body.innerText);
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -60,7 +60,7 @@ async function nouvellePartie() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 1. L'arrivée — deux actions en moins, et une phrase qui le justifie
+// 1. L'arrivée, deux actions en moins, et une phrase qui le justifie
 // ═══════════════════════════════════════════════════════════════════════════
 await p.goto('http://localhost:8099/', { waitUntil: 'networkidle2' });
 await p.evaluate(() => localStorage.clear());   // une toute première partie
@@ -84,7 +84,7 @@ verifier('le texte d\'arrivée ne nomme aucun lieu',
 await p.screenshot({ path: `${SCRATCH}/jour1-arrivee.png` });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 2. La révélation — une action, et la rue montre ses prises
+// 2. La révélation, une action, et la rue montre ses prises
 // ═══════════════════════════════════════════════════════════════════════════
 await p.evaluate(() => {
   const e = [...document.querySelectorAll('button')].find(x => /(Explore|Explorer)/i.test(x.textContent || '') && !x.disabled && x.offsetWidth);
@@ -108,7 +108,7 @@ verifier('le texte d\'arrivée a cédé la place',
 await p.screenshot({ path: `${SCRATCH}/jour1-revelation.png` });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 3. Le crépuscule — le bouton ne reste pas seul
+// 3. Le crépuscule, le bouton ne reste pas seul
 // ═══════════════════════════════════════════════════════════════════════════
 await p.evaluate(() => {
   const s = JSON.parse(localStorage.getItem('roi-du-carton-save'));
@@ -135,7 +135,7 @@ await pause(500);
 await p.screenshot({ path: `${SCRATCH}/jour1-crepuscule.png` });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 4. La deuxième partie — la rue ne prend plus de gants
+// 4. La deuxième partie, la rue ne prend plus de gants
 // ═══════════════════════════════════════════════════════════════════════════
 await p.evaluate(() => {
   localStorage.clear();

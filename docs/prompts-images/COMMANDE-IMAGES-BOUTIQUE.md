@@ -1,4 +1,4 @@
-# Commande images — « Le Roi du Carton » — La Boutique (7 images)
+# Commande images · « Le Roi du Carton » · La Boutique (7 images)
 
 > ## ✅ LIVRÉ ET INSTALLÉ
 >
@@ -7,14 +7,14 @@
 > image à l'autre, c'est le point où une livraison dérape le plus souvent), de
 > 17 à 83 ko, plafond 150.
 >
-> **Les trois règles sont tenues.** Aucun mot lisible nulle part — l'enseigne
+> **Les trois règles sont tenues.** Aucun mot lisible nulle part, l'enseigne
 > porte des gribouillis et une petite couronne, le reçu une croix seule. Le
 > vendeur et la main du reçu partagent la même manche rapiécée et le même gant
 > coupé aux doigts. Et les cinq têtes de l'établi sont vides sauf une, qui a
 > deux yeux et pas encore de bouche : exactement ce qui était demandé.
 >
 > **Un défaut trouvé et corrigé : `boutique-paix` avait des COINS ARRONDIS
-> BLANCS gravés dans le fichier** — 18,6 % de blanc pur dans les quatre angles,
+> BLANCS gravés dans le fichier** : 18,6 % de blanc pur dans les quatre angles,
 > mesuré. Posée sur une tuile kraft, elle aurait montré quatre encoches pâles.
 > Recadrée de 12 × 8 px (plus que la flèche de l'arc), rapport 3:2 conservé au
 > pixel près, 98 % de l'image gardée.
@@ -24,7 +24,7 @@
 > même défaut depuis le début. Personne ne l'avait vu. Elle est recadrée aussi.
 > `scripts/controle-images.mjs` passe maintenant les 1029 images du jeu.
 >
-> **Licence :** génération d'images Manus — l'utilisateur possède les sorties
+> **Licence :** génération d'images Manus, l'utilisateur possède les sorties
 > et peut en faire un usage commercial.
 
 **Ce document est la commande complète. Tout ce qu'il faut est dedans : aucun
@@ -36,15 +36,15 @@ autre fichier n'est nécessaire.**
 
 Roguelite de survie mobile, comédie noire. On y joue quelqu'un qui dort dehors
 et qui essaie de tenir un jour de plus. Direction artistique : **dioramas
-miniatures en carton kraft, photographiés** — les voitures sont en carton, les
+miniatures en carton kraft, photographiés** : les voitures sont en carton, les
 pigeons sont en carton, la ville entière tient sur une table d'atelier.
 
 ## Ce que ces images racontent
 
 Le jeu ouvre une **boutique**. Deux choses à vendre, une fois pour toutes :
 
-- **la paix** — plus d'écrans de publicité imposés ;
-- **l'atelier** — le joueur compose le visage de son personnage et choisit ses
+- **la paix** : plus d'écrans de publicité imposés ;
+- **l'atelier** : le joueur compose le visage de son personnage et choisit ses
   atouts de départ, au lieu de les subir au tirage.
 
 La boutique n'est pas un magasin d'application. C'est **un étal de marché noir
@@ -62,7 +62,7 @@ deux choses et qui vous regarde.
 | Noms de fichiers | **exactement** ceux des titres, à la lettre près |
 | Dépôt | `client/public/assets/` |
 
-Les dimensions changent d'une image à l'autre — elles sont indiquées à chaque
+Les dimensions changent d'une image à l'autre, elles sont indiquées à chaque
 fois, et elles comptent : ces images sont posées dans des cadres fixes.
 
 ## Préfixe de style à coller devant CHAQUE prompt
@@ -82,7 +82,7 @@ photography of a tabletop set, gentle dark humor.
 
 Le jeu existe en **français et en anglais**. Un mot peint dans une image ne se
 traduit jamais : il resterait en français pour la moitié des joueurs, et sur
-la boutique — le seul écran qui doit être compris — ce serait le pire endroit.
+la boutique (le seul écran qui doit être compris) ce serait le pire endroit.
 
 L'application écrit elle-même tous ses titres par-dessus, dans sa propre
 police. Donc :
@@ -95,7 +95,7 @@ police. Donc :
 
 ## ② LE VENDEUR EST LE MÊME PARTOUT
 
-Il apparaît sur deux images (`boutique-vendeur`, `boutique-recu`) — la seconde
+Il apparaît sur deux images (`boutique-vendeur`, `boutique-recu`), la seconde
 n'est qu'une de ses mains, et il faut qu'on la reconnaisse : **même manche de
 manteau, même gant coupé aux doigts**.
 
@@ -110,7 +110,7 @@ jeu.
 Aucun coffre au trésor, aucune pièce d'or, aucune gemme, aucune lueur
 « premium », aucun rayon de lumière divine sur la marchandise. Ce sont les
 codes des boutiques de jeux mobiles, et à la seconde où la boutique leur
-ressemble, le jeu perd le droit d'être cynique — c'est-à-dire tout ce qu'il a.
+ressemble, le jeu perd le droit d'être cynique, c'est-à-dire tout ce qu'il a.
 
 Du carton, du scotch, une ampoule qui pend, de la ficelle. La marchandise doit
 avoir l'air **d'occasion**.
@@ -119,14 +119,14 @@ avoir l'air **d'occasion**.
 
 # Les sept images
 
-## 1. `boutique-enseigne.webp` — l'enseigne
+## 1. `boutique-enseigne.webp` · l'enseigne
 
 **1080 × 360 px, panoramique 3:1.**
 
 > **Prompt.** A hand-cut cardboard signboard taped crookedly onto a corrugated
 > cardboard wall, held by four strips of bright fluorescent yellow tape at the
 > corners. The sign is blank except for a few **illegible scrawled marker
-> strokes and a small hand-drawn crown doodle** — no readable words, no
+> strokes and a small hand-drawn crown doodle** : no readable words, no
 > letters. A bare lightbulb hangs above it on a twisted wire, casting warm
 > tungsten light and a hard shadow. Nobody in frame. Wide panoramic framing,
 > the sign centred with generous empty cardboard on both sides.
@@ -134,9 +134,9 @@ avoir l'air **d'occasion**.
 **L'intention.** C'est le bandeau de l'écran, et l'application écrit son titre
 par-dessus. **Il faut donc de l'air au centre** : la pancarte porte le regard,
 elle ne remplit pas le cadre. Le scotch fluo est la seule couleur vive de tout
-l'écran — c'est lui qui doit sauter aux yeux.
+l'écran, c'est lui qui doit sauter aux yeux.
 
-## 2. `boutique-vendeur.webp` — le vendeur
+## 2. `boutique-vendeur.webp` · le vendeur
 
 **720 × 720 px, carré.**
 
@@ -153,7 +153,7 @@ tout le levier** : on n'achète pas à un étal, on achète à quelqu'un. Le sou
 doit être d'un cran trop appuyé. On l'aime bien, et on sait qu'il prend sa
 marge.
 
-## 3. `boutique-paix.webp` — la paix
+## 3. `boutique-paix.webp` · la paix
 
 **1080 × 720 px, paysage 3:2.**
 
@@ -165,11 +165,11 @@ marge.
 > Nothing is happening. Nobody else in frame.
 
 **L'intention.** C'est le produit « plus de publicité », et il ne faut surtout
-pas montrer une publicité barrée d'une croix rouge — ce serait montrer la
+pas montrer une publicité barrée d'une croix rouge, ce serait montrer la
 gêne au lieu de montrer le bénéfice. **Les panneaux sont retournés face au
 mur : ils sont là, ils se taisent.** L'image doit donner envie de s'asseoir.
 
-## 4. `boutique-atelier.webp` — l'atelier
+## 4. `boutique-atelier.webp` · l'atelier
 
 **1080 × 720 px, paysage 3:2.**
 
@@ -177,36 +177,36 @@ mur : ils sont là, ils se taisent.** L'image doit donner envie de s'asseoir.
 > cardboard head shapes** laid out in a row, plus loose scraps with separate
 > hand-drawn eyes, mouths and eyebrows cut out and waiting beside them.
 > Scissors, an open black marker, a glue stick, pencil shavings. In the centre,
-> **one head half-finished — two eyes drawn, no mouth yet.** Warm workshop
+> **one head half-finished, two eyes drawn, no mouth yet.** Warm workshop
 > lamp light from the upper left, shallow depth of field on the centre head.
 
 **L'intention.** ⚠️ **Les têtes doivent être VIDES ou inachevées.** Aucun
 visage fini et attachant : le jeu dessine en direct celui du joueur juste à
 côté de cette image, et un beau visage de catalogue ici contredirait la
-promesse — « votre tête, pas celle du catalogue ». Ce qu'on vend, c'est
+promesse, « votre tête, pas celle du catalogue ». Ce qu'on vend, c'est
 **l'établi**, pas un personnage.
 
-## 5. `boutique-lot.webp` — le lot
+## 5. `boutique-lot.webp` · le lot
 
 **1080 × 720 px, paysage 3:2.**
 
 > **Prompt.** A cardboard parcel tied shut with thick rough twine, sitting on
 > the crate stall. A blank cardboard tag hangs from the knot by a small metal
-> eyelet — **the tag is empty, no writing**. Two things poke out of the top of
+> eyelet, **the tag is empty, no writing**. Two things poke out of the top of
 > the parcel: **a cut-out cardboard head shape** and **a tiny blank cardboard
 > placard**. Warm tungsten light, dark background, shallow depth of field on
 > the tag.
 
 **L'intention.** Le lot réunit les deux autres produits : la tête pour
 l'atelier, la pancarte muette pour la paix. **L'étiquette vide n'est pas un
-oubli** — l'application y écrit le prix par-dessus, et il change selon le pays.
+oubli** : l'application y écrit le prix par-dessus, et il change selon le pays.
 
-## 6. `boutique-recu.webp` — le reçu
+## 6. `boutique-recu.webp` · le reçu
 
 **720 × 720 px, carré.**
 
 > **Prompt.** Macro close-up: a torn scrap of brown cardboard held out toward
-> the viewer by a cardboard cut-out hand — **the same oversized patched coat
+> the viewer by a cardboard cut-out hand, **the same oversized patched coat
 > sleeve and fingerless glove as the vendor**. The scrap bears a single thick
 > **inked X stamped in the middle, no words, no numbers**. Very shallow depth
 > of field, the scrap sharp, the sleeve and background falling away. Warm low
@@ -217,7 +217,7 @@ réussi, pendant huit dixièmes de seconde. C'est le dernier souvenir que le
 joueur gardera de la transaction : un bout de carton déchiré tendu par une
 main, tamponné d'une croix. Un reçu de marché noir. **Ça doit faire sourire.**
 
-## 7. `boutique-degustation.webp` — les dix minutes offertes
+## 7. `boutique-degustation.webp` · les dix minutes offertes
 
 **1080 × 720 px, paysage 3:2.**
 
@@ -228,7 +228,7 @@ main, tamponné d'une croix. Un reçu de marché noir. **Ça doit faire sourire.
 > end-of-day light. A quiet stolen moment, faintly melancholy.
 
 **L'intention.** Le jeu offre dix minutes sans publicité, sans rien demander.
-Cette image accompagne le cadeau — et surtout le moment, dix minutes plus
+Cette image accompagne le cadeau, et surtout le moment, dix minutes plus
 tard, où il s'arrête. **Il faut donc qu'elle soit un peu triste**, parce que
 c'est ce qu'on ressent quand ça se termine. Le réveil est au premier plan pour
 qu'on sache que c'est compté.
@@ -239,7 +239,7 @@ qu'on sache que c'est compté.
 
 1. **Sept fichiers WebP**, nommés exactement comme ci-dessus, aux dimensions
    indiquées **image par image** (elles ne sont pas toutes identiques).
-2. Confirmation qu'**aucune image ne contient un mot lisible** — c'est la
+2. Confirmation qu'**aucune image ne contient un mot lisible**, c'est la
    règle ① et c'est celle qui casse la version anglaise si elle saute.
 3. `boutique-vendeur` et `boutique-recu` **côte à côte** dans le rapport, pour
    qu'on vérifie d'un coup d'œil que la manche et le gant sont les mêmes.
@@ -253,7 +253,7 @@ qu'on sache que c'est compté.
 
 Rien de grave, et c'est voulu. Les tuiles de la boutique s'affichent en kraft
 uni avec leur texte, exactement comme aujourd'hui dans l'écran des Options.
-Chaque image s'active toute seule à l'arrivée, sans rien changer au code — on
+Chaque image s'active toute seule à l'arrivée, sans rien changer au code, on
 peut donc livrer les sept d'un coup, ou une par une.
 
 Ordre d'utilité si l'on doit choisir : **`boutique-vendeur`**, puis

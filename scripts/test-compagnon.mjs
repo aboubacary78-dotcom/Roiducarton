@@ -9,7 +9,7 @@
  * D'où le contrôle qui compte le plus ici, et qu'aucun test de réducteur ne
  * peut faire : RELIRE LE CODE SOURCE pour vérifier que chaque trait prêtable
  * est réellement interrogé quelque part. Un trait qui n'est branché nulle part
- * se prêterait sans rien changer — le joueur donnerait son repas contre une
+ * se prêterait sans rien changer, le joueur donnerait son repas contre une
  * ligne de texte, et rien ne le lui dirait.
  */
 import { build } from 'esbuild';
@@ -53,7 +53,7 @@ const {
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 const trait = id => TRAITS.find(t => t.id === id);
@@ -268,14 +268,14 @@ verifier('sans vol, aucun concurrent à chercher',
 const adversaire = ennemiVoleur(trace);
 verifier('son butin est exactement ce qu’il avait pris',
   adversaire.loot.item?.id === 'manteau', JSON.stringify(adversaire.loot));
-verifier('c’est un humain, pas un rat — motif d’esquive « rival »',
+verifier('c’est un humain, pas un rat, motif d’esquive « rival »',
   adversaire.emoji === '💢' && adversaire.name === 'Gaston');
 
 /*
  * SA PLACE DANS LE CATALOGUE, PAS SES CHIFFRES.
  *
  * On ne fige pas 42 et 14 : rééquilibrer le jeu ne doit pas casser un test,
- * seulement le déplacer. Ce qui doit rester vrai, c'est le RANG — il a mangé
+ * seulement le déplacer. Ce qui doit rester vrai, c'est le RANG, il a mangé
  * vos affaires, il tient mieux que la moyenne, et ce combat se choisit au lieu
  * de se subir. Il doit donc taper plus fort que le « Concurrent Agressif »
  * qu'on croise au hasard, sans dépasser le Voyou du Coin, la brute du quartier.
@@ -294,7 +294,7 @@ verifier('mais il ne dépasse pas la brute du quartier',
   `${menace(adversaire)} contre ${menace(voyou)}`);
 
 /*
- * Les rosters des trois quartiers sociaux — les seuls où on le retrouve —
+ * Les rosters des trois quartiers sociaux, les seuls où on le retrouve,
  * comptent les adversaires humains les plus durs du jeu. Un combat qu'on
  * choisit ne doit pas être plus facile que la moyenne de ce qu'on y subit
  * sans l'avoir demandé.

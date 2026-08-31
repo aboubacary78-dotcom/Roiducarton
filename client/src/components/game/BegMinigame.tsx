@@ -13,14 +13,14 @@ import CardboardAvatar from './CardboardAvatar';
 import LocationBackdrop from './LocationBackdrop';
 
 /*
- * LA MANCHE — « tenir le regard ».
+ * LA MANCHE : « tenir le regard ».
  *
  * L'ancien mini-jeu consistait à taper des pièces qui apparaissaient au
  * hasard : aucune décision, aucun rapport avec le fait de mendier. Celui-ci
  * part du sujet. Mendier, c'est :
  *   - se faire voir (l'anneau qui se remplit pendant qu'on tient le regard) ;
  *   - CHOISIR qui solliciter, puisqu'on ne peut en suivre qu'un à la fois ;
- *   - insister, ou pas — ça rapporte plus et ça coûte de la dignité ;
+ *   - insister, ou pas, ça rapporte plus et ça coûte de la dignité ;
  *   - savoir s'arrêter quand la ronde passe ;
  *   - et savoir à qui on s'adresse : certains, poussés à bout, ne se
  *     contentent pas de râler (voir data/passersby).
@@ -51,8 +51,8 @@ interface Walker {
  * TOUTES LES COMBIEN IL RÂLE.
  *
  * La patience la plus courte du jeu est de 1,1 s et la plus longue de 5 s. Un
- * grognement toutes les 0,9 s donne donc au moins UN son à tout le monde — y
- * compris au gars à la casquette qu'on ne retient jamais longtemps — sans
+ * grognement toutes les 0,9 s donne donc au moins UN son à tout le monde, y
+ * compris au gars à la casquette qu'on ne retient jamais longtemps, sans
  * transformer le retraité du banc en boucle de râles.
  */
 const RALE_TOUS_LES_S = 0.9;
@@ -70,7 +70,7 @@ export default function BegMinigame() {
           { emoji: '👆', fr: 'Posez le doigt sur un passant et SUIVEZ-LE sans lâcher : l\'anneau se remplit tant que vous tenez son regard.', en: 'Put a finger on a passer-by and FOLLOW them without letting go: the ring fills while you hold their gaze.' },
           { emoji: '🎯', fr: 'Vous ne pouvez en suivre qu\'un. Lâcher quelqu\'un à mi-anneau pour un meilleur passant, c\'est tout le jeu.', en: 'You can only follow one. Dropping someone half-way for a better mark is the whole game.' },
           { emoji: '👑', fr: 'Une allure soignée vous fait remarquer plus vite. Débraillé, on regarde ailleurs.', en: 'A tidy look gets you noticed faster. Unkempt, people look away.' },
-          { emoji: '😤', fr: 'Continuez APRÈS l\'anneau plein et vous soutirez davantage — mais vous y laissez votre dignité, et certains se braquent.', en: 'Keep going AFTER the ring fills and you squeeze out more — but it costs your dignity, and some people snap.' },
+          { emoji: '😤', fr: 'Continuez APRÈS l\'anneau plein et vous soutirez davantage, mais vous y laissez votre dignité, et certains se braquent.', en: 'Keep going AFTER the ring fills and you squeeze out more, but it costs your dignity, and some people snap.' },
           { emoji: '👮', fr: 'Quand la ronde passe, LÂCHEZ TOUT LE MONDE. Ne rien faire, à ce moment-là, c\'est jouer.', en: 'When the patrol goes by, LET GO OF EVERYONE. Doing nothing, right then, is playing.' },
         ]}
         image="/assets/intro-manche.webp"
@@ -139,7 +139,7 @@ function BegMinigameInner() {
      *
      * Il flottait en bandeau au-dessus de l'écran de fin. Il est maintenant
      * DANS le texte du résultat (voir le reducer), à côté de « Même les rats
-     * vous ont regardé avec pitié » qui tenait déjà ce rôle depuis toujours —
+     * vous ont regardé avec pitié » qui tenait déjà ce rôle depuis toujours,
      * c'est cet endroit-là qui fait la différence entre une vanne du jeu et
      * une notification posée dessus.
      */
@@ -231,7 +231,7 @@ function BegMinigameInner() {
               /*
                * ON REÇOIT DE LA MONNAIE, PAS UN CABAS.
                *
-               * Le gain s'annonçait avec le `tell` du passant — « 🛍️ +1 »,
+               * Le gain s'annonçait avec le `tell` du passant, « 🛍️ +1 »,
                * « 👶 +2 ». Ce détail sert à RECONNAÎTRE quelqu'un dans la rue
                * d'un coup d'œil, et il continue de le faire sur son avatar.
                * Collé devant un « +1 », il se lit comme ce qu'on vient de
@@ -290,7 +290,7 @@ function BegMinigameInner() {
        * terminait donc toujours par surprise. Un tic par seconde sur la fin,
        * et le dernier geste devient un choix au lieu d'un hasard.
        *
-       * Le fichier ne contient qu'un tic — c'est ici qu'on décide du tempo.
+       * Le fichier ne contient qu'un tic, c'est ici qu'on décide du tempo.
        */
       const resteS = Math.max(0, (roundMs - elapsed) / 1000);
       if (resteS <= 10) {
@@ -402,7 +402,7 @@ function BegMinigameInner() {
           {/*
             LE TEMPS QUI RESTE EST UN RUBAN DE CHANTIER.
 
-            C'était un aplat jaune à 42° — la teinte du kraft à quatorze degrés
+            C'était un aplat jaune à 42°, la teinte du kraft à quatorze degrés
             près, et 1,56:1 de contraste sur le fond du jeu. Autant dire une
             barre invisible pour un joueur qui a le pouce sur les passants. La
             rayure diagonale, elle, se reconnaît sans qu'on ait à distinguer sa
@@ -424,8 +424,8 @@ function BegMinigameInner() {
              * LE PASSANT EST DESSINÉ LÀ OÙ IL EST, PAS À CÔTÉ.
              *
              * Le centrage (`translate(-50%,-50%)`) vivait sur le motion.div,
-             * en même temps qu'une animation d'échelle. À l'échelle 1 —
-             * c'est-à-dire tout le temps — framer-motion réécrit la propriété
+             * en même temps qu'une animation d'échelle. À l'échelle 1,
+             * c'est-à-dire tout le temps, framer-motion réécrit la propriété
              * `transform` en `none` et emporte le centrage avec elle : le
              * passant s'affichait donc en bas à droite de sa vraie position,
              * d'une demi-vignette. Le doigt devait viser à côté du dessin.

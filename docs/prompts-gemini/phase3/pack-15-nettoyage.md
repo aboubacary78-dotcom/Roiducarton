@@ -1,6 +1,6 @@
-# Pack 15 — La passe de nettoyage (142 images + protocole)
+# Pack 15 · La passe de nettoyage (142 images + protocole)
 
-## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
+## 📦 Contexte projet (à lire en entier · tu pars de zéro, sans accès au code)
 
 Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie : un SDF
 survit jour après jour dans une ville française. Direction artistique
@@ -12,11 +12,11 @@ lots successifs, et un audit vient d'être passé sur la totalité. Ce brief est
 le résultat de cet audit. Il ne demande pas de nouvelles scènes : il demande de
 **réparer deux défauts systématiques** sur des images existantes.
 
-## ⚠️ RÈGLE N°1 — L'HUMOUR EST LA SIGNATURE DU JEU
+## ⚠️ RÈGLE N°1 · L'HUMOUR EST LA SIGNATURE DU JEU
 
 « Le Roi du Carton » est une COMÉDIE noire, et TOUTE sa direction artistique
 repose là-dessus : on rit de la misère avec tendresse, on ne s'y vautre jamais.
-**CHAQUE image doit faire sourire** — une situation absurde, un gag visuel, une
+**CHAQUE image doit faire sourire** : une situation absurde, un gag visuel, une
 expression comique du personnage. Une image simplement triste, plate ou
 déprimante est HORS SUJET et sera refusée, même si elle est techniquement
 réussie.
@@ -31,7 +31,7 @@ réussie.
 
 ---
 
-# 🔴 DÉFAUT N°1 — LE TEXTE INCRUSTÉ (142 images, mesuré)
+# 🔴 DÉFAUT N°1 · LE TEXTE INCRUSTÉ (142 images, mesuré)
 
 ## Ce que l'audit a trouvé
 
@@ -47,7 +47,7 @@ troisième est la plus grave.
 
 Il se joue en français et en anglais. Une pancarte peinte dans le carton ne
 se traduit pas : elle reste figée dans une langue. **Sur les 142 images,
-40 portent du texte anglais** — un joueur français y lit « ANYTHING HELPS »,
+40 portent du texte anglais** : un joueur français y lit « ANYTHING HELPS »,
 « SPARE CHANGE », « HOME SWEET HOME ». L'inverse est vrai pour les 102 autres.
 Dans les deux cas, une partie des joueurs tombe sur une langue qui n'est pas
 la sienne, au milieu d'un décor par ailleurs parfait.
@@ -59,18 +59,18 @@ texte lisible à pleine résolution devient une tache grise illisible à
 l'affichage. On paie donc le coût (le texte fige la langue) sans jamais
 toucher le bénéfice (personne ne le lit).
 
-### 3. **Le texte fait le travail du dessin** — et c'est le vrai problème
+### 3. **Le texte fait le travail du dessin** · et c'est le vrai problème
 
 C'est la raison de fond, et elle est de métier.
 
-Exemple réel du jeu, l'image d'une traversée d'égout : la scène est excellente
-— vapeur verte, passants qui se bouchent le nez, un chien qui recule. Elle est
+Exemple réel du jeu, l'image d'une traversée d'égout : la scène est excellente,
+vapeur verte, passants qui se bouchent le nez, un chien qui recule. Elle est
 drôle **toute seule**. Et pourtant une grande pancarte a été ajoutée dans le
-décor, portant « TRAVERSE D'ÉGOUT — ODEUR : TERRIBLE — EFFET : IMMÉDIAT ».
+décor, portant « TRAVERSE D'ÉGOUT, ODEUR : TERRIBLE, EFFET : IMMÉDIAT ».
 
 La pancarte **explique la blague que l'image vient déjà de raconter**. Un gag
 visuel qui a besoin d'une légende n'est pas un gag visuel : c'est un dessin
-avec un mode d'emploi. Retirer la pancarte ne retire rien à la scène — ça la
+avec un mode d'emploi. Retirer la pancarte ne retire rien à la scène, ça la
 rend meilleure.
 
 Même chose sur une image de vol : le commerçant attrape le héros par le col,
@@ -103,9 +103,9 @@ encore des lettres, c'est refusé.
 
 ---
 
-# 🟠 DÉFAUT N°2 — LES IMAGES QUI NE FONT PAS RIRE
+# 🟠 DÉFAUT N°2 · LES IMAGES QUI NE FONT PAS RIRE
 
-## Ce que l'audit a trouvé — et ce qu'il n'a pas pu mesurer
+## Ce que l'audit a trouvé · et ce qu'il n'a pas pu mesurer
 
 **Soyons précis sur la solidité de ce constat.** Le défaut n°1 a été mesuré
 exhaustivement, par machine, sur les 989 images. Celui-ci ne l'a pas été :
@@ -118,7 +118,7 @@ Ce que cet échantillon montre :
 **La bonne nouvelle : la plupart des images sont drôles.** Le héros qui
 s'étale au milieu d'un orchestre pendant que le public se marre, la partie de
 loup-garou improvisée dans un amphi désert, le héros qui tient un parapluie
-au-dessus d'un cadre en costume pour lui soutirer une pièce — tout ça
+au-dessus d'un cadre en costume pour lui soutirer une pièce, tout ça
 fonctionne, c'est exactement le ton du jeu.
 
 **Le problème est concentré sur les images d'échec.** Il y a 295 images de
@@ -142,13 +142,13 @@ Trois exemples vérifiés :
 La différence est simple à tenir. Dans une image ratée, le héros subit et son
 visage est triste : on regarde quelqu'un souffrir. Dans une image réussie, le
 héros subit **et quelque chose d'absurde se produit en même temps** : on
-regarde l'univers se moquer de lui, ce qui est très différent — et beaucoup
+regarde l'univers se moquer de lui, ce qui est très différent, et beaucoup
 plus tendre.
 
 Trois recettes, qui suffisent à couvrir presque tous les cas :
 
 1. **Le témoin qui s'en fiche.** Un pigeon, un chat, un chien, un enfant, une
-   vieille dame — quelqu'un dans le cadre qui regarde le désastre avec un
+   vieille dame, quelqu'un dans le cadre qui regarde le désastre avec un
    détachement total, ou qui en profite. Le pigeon est le témoin par défaut
    du jeu : il est partout, il ne s'émeut de rien.
 
@@ -187,7 +187,7 @@ premières.
 
 ## 🚚 Protocole de livraison
 
-1. **Noms de fichiers EXACTS**, identiques aux originaux — ces images en
+1. **Noms de fichiers EXACTS**, identiques aux originaux, ces images en
    remplacent d'autres, un nom différent ne serait jamais chargé par le jeu.
 2. **VRAIS fichiers .webp** ; sinon des .png honnêtes, max 1600 px de large.
 3. ≤ 1200 px de large, objectif < 200 Ko par image.
@@ -197,14 +197,14 @@ premières.
 
 ---
 
-# 📎 ANNEXE — les 142 images contenant du texte
+# 📎 ANNEXE · les 142 images contenant du texte
 
 Liste produite par reconnaissance de caractères sur la totalité des images,
 avec un seuil de confiance de 75 %. Quelques faux positifs sont possibles
 (les textures de carton peuvent tromper l'OCR) : si une image de la liste ne
 contient manifestement aucun texte, ignore-la et signale-le.
 
-## Lot A — texte anglais (40 images)
+## Lot A · texte anglais (40 images)
 
 Prioritaires : le jeu se joue en français, ces pancartes ne se traduiront jamais.
 
@@ -251,7 +251,7 @@ result-rest-container-good.webp
 result-rest-lavomatic-good.webp
 ```
 
-## Lot B — texte français ou indéterminé (102 images)
+## Lot B · texte français ou indéterminé (102 images)
 
 ```
 beg-couple-riche-fGABmQHzGdaNfYfNeimiRm.webp

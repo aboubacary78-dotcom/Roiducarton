@@ -3,14 +3,14 @@
  *
  * Certains générateurs appliquent un arrondi décoratif aux quatre angles et
  * le remplissent de blanc. Posée dans un cadre carré, l'image montre alors
- * quatre encoches pâles — voir `scripts/controle-images.mjs`, qui les trouve.
+ * quatre encoches pâles, voir `scripts/controle-images.mjs`, qui les trouve.
  *
  * On ne repeint pas les angles : on RECADRE. Pour un arc de rayon R, il suffit
  * de rentrer de R·(1 − 1/√2) ≈ 0,29 R pour que les quatre coins du nouveau
  * cadre tombent sur des pixels pleins. On rentre un peu plus, on garde le
  * rapport d'origine au pixel près, et on remet à la taille de départ : la
  * perte est de l'ordre de deux pour cent, invisible, et il ne reste aucun
- * artefact — ce qu'un rebouchage laisserait toujours.
+ * artefact, ce qu'un rebouchage laisserait toujours.
  *
  *     node scripts/recadre-coins.mjs client/public/assets/xxx.webp [...]
  */
@@ -32,7 +32,7 @@ const p = await b.newPage();
 await p.goto('file:///tmp/');
 
 for (const cible of cibles) {
-  if (!existsSync(cible)) { console.log(` RATÉ  ${cible} — introuvable`); continue; }
+  if (!existsSync(cible)) { console.log(` RATÉ  ${cible} · introuvable`); continue; }
   const avant = statSync(cible).size / 1024;
   const r = await p.evaluate(async (url) => {
     const img = new Image();
@@ -63,7 +63,7 @@ for (const cible of cibles) {
 
     /*
      * La flèche de l'arc suffirait (0,29 R) ; on prend le double, arrondi au
-     * pixel, pour absorber le lissage du bord — un arrondi n'est jamais net,
+     * pixel, pour absorber le lissage du bord, un arrondi n'est jamais net,
      * il est anticrénelé sur deux ou trois pixels.
      */
     const marge = Math.ceil(rayon * 0.58);
@@ -79,10 +79,10 @@ for (const cible of cibles) {
     return { rayon, dx, dy, b64: out.toDataURL('image/webp', 0.86).split(',')[1] };
   }, `file://${resolve(cible)}`);
 
-  if (!r.rayon) { console.log(`  --   ${cible} — aucun arrondi détecté, laissée telle quelle`); continue; }
+  if (!r.rayon) { console.log(`  --   ${cible}, aucun arrondi détecté, laissée telle quelle`); continue; }
   writeFileSync(cible, Buffer.from(r.b64, 'base64'));
   const apres = statSync(cible).size / 1024;
-  console.log(`  ok   ${cible} — rayon ~${r.rayon} px, recadrée de ${r.dx}×${r.dy}, ${avant.toFixed(0)} → ${apres.toFixed(0)} ko`);
+  console.log(`  ok   ${cible}, rayon ~${r.rayon} px, recadrée de ${r.dx}×${r.dy}, ${avant.toFixed(0)} → ${apres.toFixed(0)} ko`);
 }
 
 await b.close();

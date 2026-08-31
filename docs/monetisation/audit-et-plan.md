@@ -1,10 +1,10 @@
-# Le Roi du Carton — Audit neuro-économique et plan de monétisation
+# Le Roi du Carton · Audit neuro-économique et plan de monétisation
 
 *Chiffres mesurés dans le code, pas estimés.*
 
 ---
 
-# PHASE 0 — Ce qu'il faut savoir avant de lire le reste
+# PHASE 0 · Ce qu'il faut savoir avant de lire le reste
 
 ## Le jeu rapporte 0 €, et rapportera 0 € le jour du lancement
 
@@ -24,11 +24,11 @@ pas d'A/B test, pas d'ARPDAU. Zéro.
 
 ## Le second bloquant, moins visible
 
-`PRIVACY_URL = '/confidentialite.html'` — un chemin relatif. Les stores exigent
+`PRIVACY_URL = '/confidentialite.html'` : un chemin relatif. Les stores exigent
 une **URL absolue et publique**, consultable sans installer l'application. Un
 refus de validation coûte deux semaines de revenus.
 
-Sur iOS, le projet natif n'est pas encore généré — donc rien n'est cassé
+Sur iOS, le projet natif n'est pas encore généré, donc rien n'est cassé
 aujourd'hui, mais la clé `NSUserTrackingUsageDescription` devra y figurer dès
 sa création. Sans elle, le consentement ATT ne se déclenche jamais, toute la
 pub iOS passe en non personnalisée, et **l'eCPM y chute de 40 à 60 %**.
@@ -38,13 +38,13 @@ il ne manque que l'adresse absolue une fois le domaine choisi.
 
 ---
 
-# PHASE 1 — L'audit neuro-économique de l'existant
+# PHASE 1 · L'audit neuro-économique de l'existant
 
 ## L'inventaire réel : dix placements, pas « quelques-uns »
 
 | # | Emplacement | Type | Plafonné ? | Ce que le joueur obtient |
 |---|---|---|---|---|
-| 1 | Écran de mort | **Interstitiel** | **NON** | rien — il subit |
+| 1 | Écran de mort | **Interstitiel** | **NON** | rien, il subit |
 | 2 | Résurrection à la mort | Rewarded | exempt | une seconde vie |
 | 3 | Doubler le gain d'un événement | Rewarded | oui (3/session) | ×2 sur l'argent |
 | 4 | « Garder la face » | Rewarded | oui | annule la perte d'un palier de Dignité |
@@ -61,7 +61,7 @@ une punition, pas une limite. La logique en place est saine.
 
 ## Verdict sur les deux placements que tu cites
 
-### La résurrection à la mort — bien placée, mal vendue
+### La résurrection à la mort · bien placée, mal vendue
 
 Le placement est le meilleur du jeu et il est correctement exempté. **Mais son
 opt-in rate est laissé sur la table.**
@@ -70,29 +70,29 @@ Ce qui manque, dans l'ordre d'impact :
 
 **1. On ne montre pas ce qu'on perd.** L'écran affiche le successeur *avant* de
 proposer la résurrection. Erreur : présenter le remplaçant réduit l'aversion à
-la perte — le joueur voit qu'il a une porte de sortie gratuite. **Il faut
+la perte, le joueur voit qu'il a une porte de sortie gratuite. **Il faut
 proposer la vidéo AVANT de révéler le successeur**, et afficher en gros ce qui
 disparaît : le nombre de jours survécus, l'argent accumulé, les objets
 bricolés, la série en cours.
 
-**2. Aucune rareté.** « Une âme charitable peut passer — mais une seule fois
+**2. Aucune rareté.** « Une âme charitable peut passer, mais une seule fois
 par partie » est déjà bien écrit. Il manque le **compte à rebours** : une offre
 sans horloge est une offre qu'on remet à plus tard, et « plus tard » sur un
 écran de mort signifie jamais. Dix secondes, avec la barre qui se vide.
 
 **3. Le refus est trop propre.** « Non, c'est fini » est un bouton de même
 poids visuel que l'acceptation. Un refus doit demander un geste
-supplémentaire — pas un piège, juste une friction d'une demi-seconde.
+supplémentaire, pas un piège, juste une friction d'une demi-seconde.
 
 **Gain attendu : opt-in de ~25 % à ~45 %.** C'est le placement le plus
 rentable du jeu ; chaque point compte double.
 
-### Le sauvetage de série — correct, sous-exploité
+### Le sauvetage de série · correct, sous-exploité
 
 Bien exempté, bien placé. Deux manques :
 
 **1. La série n'a pas de valeur affichée.** « Sauver ma série de 6 jours » ne
-dit rien. « Sauver ma série de 6 jours — le palier de 7 jours débloque 25
+dit rien. « Sauver ma série de 6 jours, le palier de 7 jours débloque 25
 karma, tu y es presque » transforme une abstraction en perte chiffrée.
 
 **2. On ne le propose qu'une fois.** Un joueur qui refuse et ferme
@@ -108,7 +108,7 @@ GameOverScreen.tsx:207   useEffect(() => { showInterstitial(); }, []);
 
 Aucun plafond. Aucun délai minimum. Il part **à chaque mort**.
 
-Et voici la mesure qui rend ça grave — 400 parties simulées :
+Et voici la mesure qui rend ça grave, 400 parties simulées :
 
 | | |
 |---|---|
@@ -120,7 +120,7 @@ Et voici la mesure qui rend ça grave — 400 parties simulées :
 **C'est ton plus gros risque de rétention J7, et en même temps ta plus grosse
 ligne de revenu.** Un roguelite à mort rapide qui balance un interstitiel à
 chaque fin de partie forme exactement l'association mentale à éviter : *mourir
-= pub*. Or on meurt tout le temps — c'est le cœur du jeu.
+= pub*. Or on meurt tout le temps, c'est le cœur du jeu.
 
 **Correctifs, par ordre de rentabilité :**
 
@@ -148,14 +148,14 @@ longue** où une bannière ancrée en bas ne gêne aucun geste :
 - le bilan de nuit
 - l'écran de fin
 
-**Jamais en jeu, jamais sur un mini-jeu** — le pouce y travaille. Une bannière
+**Jamais en jeu, jamais sur un mini-jeu** : le pouce y travaille. Une bannière
 sur ces cinq écrans seulement, c'est typiquement **+15 à +25 % d'ARPDAU** pour
 zéro friction, parce que ce sont les écrans où le joueur ne fait rien d'autre
 que lire.
 
 ---
 
-# PHASE 2 — Cinq nouveaux placements
+# PHASE 2 · Cinq nouveaux placements
 
 Tous s'appuient sur des mécaniques **déjà codées**. Aucun ne demande d'inventer
 du gameplay : c'est ce qui les rend livrables en quelques jours, pas en
@@ -163,12 +163,12 @@ quelques semaines.
 
 ---
 
-### 1. La Récup' — « Une couche de plus »
+### 1. La Récup' · « Une couche de plus »
 
 | | |
 |---|---|
 | **Type** | Vidéo récompensée |
-| **Déclencheur neuro** | À l'instant où la jauge de risque franchit son dernier cran avant l'effondrement — pas après. Le joueur voit le tas trembler, il a encore ses trouvailles en main, il n'a **rien perdu**. C'est le pic d'aversion à la perte : on protège toujours plus fort ce qu'on tient déjà. |
+| **Déclencheur neuro** | À l'instant où la jauge de risque franchit son dernier cran avant l'effondrement, pas après. Le joueur voit le tas trembler, il a encore ses trouvailles en main, il n'a **rien perdu**. C'est le pic d'aversion à la perte : on protège toujours plus fort ce qu'on tient déjà. |
 | **Récompense** | Une couche supplémentaire, sans risque. |
 | **Plafond** | 2 par session. |
 | **Pourquoi ça marche** | Coût irrécupérable. Il a déjà investi trente secondes de fouille ; abandonner maintenant lui coûte plus, subjectivement, que trente secondes de pub. |
@@ -178,24 +178,24 @@ quelques semaines.
 
 ---
 
-### 2. Le casse — « Effacer un palier d'alerte »
+### 2. Le casse · « Effacer un palier d'alerte »
 
 | | |
 |---|---|
 | **Type** | Vidéo récompensée |
-| **Déclencheur neuro** | Quand la jauge d'alerte atteint **l'avant-dernier palier**. La jauge est à cliquets — elle ne redescend jamais — donc le joueur sait que c'est irréversible. Proposer l'irréversible réversible, c'est le seul moment où une pub ressemble à un cadeau. |
+| **Déclencheur neuro** | Quand la jauge d'alerte atteint **l'avant-dernier palier**. La jauge est à cliquets (elle ne redescend jamais) donc le joueur sait que c'est irréversible. Proposer l'irréversible réversible, c'est le seul moment où une pub ressemble à un cadeau. |
 | **Récompense** | Un palier effacé, un seul. |
-| **Plafond** | **1 par casse.** Non négociable : deux effacements détruisent la tension qui fait le mini-jeu, et un mini-jeu sans tension ne se rejoue pas — donc plus de pub du tout. |
+| **Plafond** | **1 par casse.** Non négociable : deux effacements détruisent la tension qui fait le mini-jeu, et un mini-jeu sans tension ne se rejoue pas, donc plus de pub du tout. |
 | **Pourquoi ça marche** | Aversion à la perte **plus** réassurance. Le joueur n'achète pas un gain, il achète le droit de continuer à espérer. |
 
 ---
 
-### 3. Le bilan de nuit — « Une heure de plus au chaud »
+### 3. Le bilan de nuit · « Une heure de plus au chaud »
 
 > **Correction sur ce point.** Il s'appelait « La météo de demain » et reposait
 > sur l'idée qu'il suffisait de retirer un voile. Le voile n'existe pas :
 > l'écran principal affiche déjà la météo du lendemain, en haut à droite, sous
-> le mot « demain », gratuitement — `MainScreen.tsx:316`. Faire payer une
+> le mot « demain », gratuitement, `MainScreen.tsx:316`. Faire payer une
 > information visible deux secondes plus tard ne convertit pas ; ça se
 > remarque, et ça se raconte. Le moment était bon, la récompense ne l'était
 > pas. Le déclencheur est donc conservé mot pour mot, la contrepartie change.
@@ -206,7 +206,7 @@ quelques semaines.
 | **Déclencheur neuro** | Sur le bilan de nuit, **juste après** l'annonce des dégâts subis. Le joueur vient de constater ce que la nuit lui a coûté : c'est le moment exact où il veut reprendre le contrôle. |
 | **Récompense** | **La moitié de ce que la nuit a pris**, jauge par jauge, arrondie au supérieur. Ni argent, ni objet, ni action. |
 | **Plafond** | 1 par jour de jeu, **et seulement les nuits qui font mal** : l'offre n'apparaît que si la nuit vient de pousser une jauge sous 25. |
-| **Pourquoi ça marche** | Aversion à la perte sur des chiffres **déjà à l'écran**. Le bilan vient d'écrire « −22 soif, −18 faim » : il n'y a rien à imaginer, rien à projeter. La perte est fraîche, précise, et elle menace — c'est le cadrage qui convertit le mieux du répertoire. |
+| **Pourquoi ça marche** | Aversion à la perte sur des chiffres **déjà à l'écran**. Le bilan vient d'écrire « −22 soif, −18 faim » : il n'y a rien à imaginer, rien à projeter. La perte est fraîche, précise, et elle menace, c'est le cadrage qui convertit le mieux du répertoire. |
 
 **Le filtre des 25 n'est pas un scrupule, c'est ce qui rend le placement
 rentable.** Le bilan revient chaque jour de jeu ; proposé chaque jour, il
@@ -217,12 +217,12 @@ au seul moment où le joueur a peur.
 
 **Le coût pour l'équilibrage est borné et mesuré** : la moitié d'une seule
 nuit, une fois par jour, jamais au-delà de 100, et jamais sur un personnage
-mort — le bilan n'existe pas quand la nuit a tué. Vérifié dans
+mort, le bilan n'existe pas quand la nuit a tué. Vérifié dans
 `scripts/test-monetisation.mjs`.
 
 ---
 
-### 4. Sac plein — « Une poche de plus »
+### 4. Sac plein · « Une poche de plus »
 
 | | |
 |---|---|
@@ -234,15 +234,15 @@ mort — le bilan n'existe pas quand la nuit a tué. Vérifié dans
 
 ---
 
-### 5. Le contrat du jour — « Rattraper le contrat »
+### 5. Le contrat du jour · « Rattraper le contrat »
 
 | | |
 |---|---|
 | **Type** | Vidéo récompensée |
-| **Déclencheur neuro** | Au verdict de fin de journée, **quand le contrat est raté de peu** — moins de 20 % de l'objectif manquant. Le « presque » est le déclencheur le plus puissant du répertoire : un joueur qui rate de loin hausse les épaules, un joueur qui rate de peu ne le supporte pas. |
+| **Déclencheur neuro** | Au verdict de fin de journée, **quand le contrat est raté de peu**, moins de 20 % de l'objectif manquant. Le « presque » est le déclencheur le plus puissant du répertoire : un joueur qui rate de loin hausse les épaules, un joueur qui rate de peu ne le supporte pas. |
 | **Récompense** | Le contrat compte comme rempli. |
 | **Plafond** | 1 par jour, et **uniquement si l'échec est proche**. |
-| **Pourquoi ça marche** | Effet du quasi-gain. Le proposer sur un échec large ne convertirait pas et userait l'inventaire pour rien — d'où le filtre. |
+| **Pourquoi ça marche** | Effet du quasi-gain. Le proposer sur un échec large ne convertirait pas et userait l'inventaire pour rien, d'où le filtre. |
 
 ---
 
@@ -253,7 +253,7 @@ mort — le bilan n'existe pas quand la nuit a tué. Vérifié dans
 | **1** | Vrais identifiants AdMob + URL de confidentialité + ATT iOS | 1 jour | **passe de 0 € à des revenus** |
 | **2** | Discipliner l'interstitiel (plancher 90 s, grâce J1, sur RESTART) | 1 jour | protège le J7, améliore l'eCPM |
 | **3** | Bannière sur les 5 écrans de lecture | 1 jour | +15 à 25 % d'ARPDAU |
-| **4** | Bilan de nuit — une heure de plus au chaud | 1 jour | perte fraîche et chiffrée, le meilleur cadrage disponible |
+| **4** | Bilan de nuit, une heure de plus au chaud | 1 jour | perte fraîche et chiffrée, le meilleur cadrage disponible |
 | **5** | Optimiser la résurrection (ordre, compte à rebours, ce qu'on perd) | 2 jours | opt-in 25 % → 45 % sur le meilleur emplacement |
 | **6** | Sac plein, Récup', casse, contrat | 3-4 jours | volume additionnel |
 
@@ -267,7 +267,7 @@ calcule sur des utilisateurs actifs quotidiens : tuer le DAU pour gonfler
 l'ARPU est le calcul le plus courant et le plus perdant du secteur.
 
 **Aucune pub pendant un mini-jeu en cours.** Interrompre une action en cours ne
-produit pas de la frustration, ça produit une désinstallation — et une note
+produit pas de la frustration, ça produit une désinstallation, et une note
 d'une étoile, qui coûte durablement en visibilité.
 
 **Un point sur le thème, purement commercial.** Le jeu porte sur la misère et
@@ -283,9 +283,9 @@ installations.
 
 # Journal d'implémentation
 
-## Fait — points 2, 3, 4, 5 et 6
+## Fait · points 2, 3, 4, 5 et 6
 
-**Point 2 — l'interstitiel discipliné.** La règle vit désormais dans une
+**Point 2, l'interstitiel discipliné.** La règle vit désormais dans une
 fonction seule, `verdictInterstitiel()` (`lib/ads.ts`), qui ne modifie rien :
 elle répond, avec sa raison. C'est ce qui la rend vérifiable sans réseau
 publicitaire. Trois refus, dans l'ordre : le joueur qui n'a pas fini quatre
@@ -296,29 +296,29 @@ partait à l'affichage de l'écran de mort, il part maintenant sur le bouton
 **RECOMMENCER**. Le joueur qui repart a déjà décidé de rester ; celui qui lit
 sa nécrologie n'a rien décidé du tout.
 
-**Point 3 — la bannière.** Elle ne s'affichait nulle part. Elle est branchée
-sur les quatre écrans où l'on lit au lieu de jouer — registre, cimetière,
-boutique, écran de fin — et masquée partout ailleurs (`pages/Home.tsx`). Aucun
+**Point 3, la bannière.** Elle ne s'affichait nulle part. Elle est branchée
+sur les quatre écrans où l'on lit au lieu de jouer, registre, cimetière,
+boutique, écran de fin, et masquée partout ailleurs (`pages/Home.tsx`). Aucun
 écran de jeu, aucun mini-jeu.
 
-**Point 4 — une heure de plus au chaud.** Décrit plus haut, avec la correction
+**Point 4, une heure de plus au chaud.** Décrit plus haut, avec la correction
 qui l'a fait changer de récompense.
 
-**Point 5 — la résurrection.** Trois choses, plus une quatrième qu'on n'avait
+**Point 5, la résurrection.** Trois choses, plus une quatrième qu'on n'avait
 pas vue.
 
 *Ce qu'on perd est désormais chiffré.* L'offre disait « une âme charitable
 peut passer » et rien d'autre. Elle affiche maintenant, sous le nom du
 personnage, ce que la mort emporte : les jours tenus, l'argent, les objets du
-sac, le respect. Rien d'inventé — le Karma, le Registre et la série
+sac, le respect. Rien d'inventé, le Karma, le Registre et la série
 quotidienne survivent au personnage, ils ne figurent donc pas dans la liste.
 Un joueur qui prend l'écran en défaut sur ce point ne croit plus rien de ce
 qu'il lit ensuite.
 
 *Dix secondes, avec une barre qui se vide.* Une offre sans horloge se remet à
 plus tard, et « plus tard » sur un écran de mort veut dire jamais. Le compte à
-rebours se met en pause pendant le chargement de la vidéo — sans quoi l'offre
-s'évanouirait sous les doigts de celui qui vient de l'accepter — et à zéro il
+rebours se met en pause pendant le chargement de la vidéo, sans quoi l'offre
+s'évanouirait sous les doigts de celui qui vient de l'accepter, et à zéro il
 ne ferme rien : le bouton reste plus bas pour qui change d'avis.
 
 *Le refus demande un geste de plus.* Un seul appui supplémentaire, et le second
@@ -328,27 +328,27 @@ réflexe et un refus décidé ne se valent pas.
 *Et le défaut qu'on n'avait pas vu :* **le carton du matin s'affichait
 par-dessus l'offre** (z-75 contre z-70). Sur toute partie où le cadeau
 quotidien tombait, le meilleur placement du jeu se jouait derrière une image
-d'oiseaux — et avec le compte à rebours, il aurait expiré sans que personne le
+d'oiseaux, et avec le compte à rebours, il aurait expiré sans que personne le
 voie. L'offre passe au-dessus ; le carton attend dix secondes.
 
-**Point 6 — les quatre placements de volume.**
+**Point 6, les quatre placements de volume.**
 
 *Le sac plein.* Un vol réussi dont le butin ne rentre pas écrivait déjà « il
 était là, mais votre sac est plein à craquer : vous le laissez sur place ».
-L'objet a un nom, une image, et il vient de vous échapper — on vend donc **cet
+L'objet a un nom, une image, et il vient de vous échapper, on vend donc **cet
 objet-là**, pas « deux places de plus », qui ne veut rien dire. Le sac dépasse
 alors sa capacité d'un cran, et c'est assumé : tous les autres chemins
 vérifient la place avant d'ajouter, si bien qu'il ne rentrera plus rien tant
 que le joueur n'aura pas vendu ou consommé quelque chose. La contrepartie est
 un objet, jamais une capacité durable.
 
-*La Récup'.* L'offre apparaît au dernier cran avant l'écroulement — à 82 % de
-la jauge — et jamais après. À cet instant le joueur a encore ses trouvailles
+*La Récup'.* L'offre apparaît au dernier cran avant l'écroulement, à 82 % de
+la jauge, et jamais après. À cet instant le joueur a encore ses trouvailles
 dans les mains, et le bouton les compte : « Garder mes 3 trouvailles ». Le tas
 retombe à 50 %. Une seule fois par fouille.
 
 *Le casse.* Au palier **Alerte**, celui d'avant le bouclage. La jauge est à
-cliquets — le mini-jeu a dit au joueur qu'elle ne redescendrait jamais — et
+cliquets (le mini-jeu a dit au joueur qu'elle ne redescendrait jamais) et
 rendre réversible ce qu'on a présenté comme irréversible est le seul cas où
 une publicité ressemble à un cadeau. Les renforts appelés par le palier effacé
 repartent avec lui : sans ça, le joueur aurait payé pour un chiffre qui baisse
@@ -356,21 +356,21 @@ pendant que quatre chasseurs continuent de le traquer. Le monde se fige
 pendant la vidéo. Une seule fois par casse, non négociable.
 
 *Le contrat.* Les contrats à seuil savent désormais dire **à quelle distance
-du but on s'est arrêté**. L'offre n'apparaît qu'au-dessus de 80 % — 10 € sur
-12, 4 objets sur 5 — et la récompense est exactement celle du contrat, à
+du but on s'est arrêté**. L'offre n'apparaît qu'au-dessus de 80 %, 10 € sur
+12, 4 objets sur 5, et la récompense est exactement celle du contrat, à
 l'unité près : une vidéo qui paierait mieux que le contrat ferait cesser de
 remplir des contrats. « Gagner un combat » n'a pas de mesure de distance et
 n'est donc jamais proposé : on ne rate pas un combat de peu.
 
 *Une seule offre par bilan de nuit.* Le contrat et la nuit rendue tombent au
 même endroit. Deux boutons de publicité côte à côte ne doublent pas les
-impressions — ils apprennent au joueur que cet écran est un panneau
+impressions, ils apprennent au joueur que cet écran est un panneau
 d'affichage, et il cesse de le lire. Le contrat passe devant : il est plus
 rare, et rater de deux euros pique davantage qu'une jauge basse de plus.
 
 `scripts/test-monetisation.mjs` éprouve l'ensemble : les trois refus de
 l'interstitiel (dont le plancher à 89,999 s puis 90,000 s), les cinq règles de
-la nuit rendue, la récompense du contrat rattrapé, et l'objet repêché — avec,
+la nuit rendue, la récompense du contrat rattrapé, et l'objet repêché, avec,
 à chaque fois, la vérification qu'une seconde vidéo ne donne rien de plus.
 
 ## Ce qui reste
@@ -387,7 +387,7 @@ Reste, sur le sauvetage de série : afficher la valeur chiffrée de la série
 une fois à la session suivante.
 
 Et une chose qui ne se code pas : **mesurer**. Six placements nouveaux ou
-retouchés attendent des chiffres réels — taux d'opt-in par emplacement, et
+retouchés attendent des chiffres réels, taux d'opt-in par emplacement, et
 surtout rétention J7 avant/après. Tout ce document repose sur des mécaniques
 connues, pas sur les joueurs de ce jeu-ci ; le premier mois de données vaudra
 plus que le reste.

@@ -1,4 +1,4 @@
-# À lire avant de publier — deux points trouvés dans le code
+# À lire avant de publier · deux points trouvés dans le code
 
 En relevant ce que l'application fait réellement pour rédiger le prompt de la
 politique de confidentialité, deux manques sont apparus. **Ils ne concernent
@@ -26,7 +26,7 @@ l'application au moment de la revue.
 Ce sont des points à trancher avant publication, pas des bugs. Deux chemins :
 
 - **le plus simple** : ne diffuser que de la publicité non personnalisée, ce
-  qui allège les obligations — mais rapporte moins ;
+  qui allège les obligations, mais rapporte moins ;
 - **le plus complet** : brancher la demande de consentement UMP et la demande
   iOS, puis n'activer la personnalisation que si l'utilisateur accepte.
 

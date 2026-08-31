@@ -1,15 +1,15 @@
 /*
- * LA DETTE — le seul rendez-vous que le joueur emporte dans sa tête.
+ * LA DETTE : le seul rendez-vous que le joueur emporte dans sa tête.
  *
  * Tout le reste du jeu ARRIVE : les rencontres, les suites, la météo. La dette
  * est la première chose qui ATTEND, à un jour connu d'avance. Ce test suit le
  * cycle entier, parce que chacune de ses trois sorties peut casser seule :
  *
- *   · le prêteur ne doit se montrer QU'AU MOMENT DE LA FAIBLESSE — sinon ce
+ *   · le prêteur ne doit se montrer QU'AU MOMENT DE LA FAIBLESSE, sinon ce
  *     n'est plus un prêteur sur gages, c'est un distributeur ;
  *   · l'échéance doit trouver le joueur DANS N'IMPORTE QUEL QUARTIER, sans
  *     quoi il suffirait de déménager ;
- *   · et l'insolvabilité doit avoir deux issues distinctes — il se sert, ou la
+ *   · et l'insolvabilité doit avoir deux issues distinctes, il se sert, ou la
  *     note monte. Une seule des deux, et c'est soit une punition, soit rien.
  */
 import puppeteer from 'puppeteer-core';
@@ -36,7 +36,7 @@ const perso = () => p.evaluate(() => JSON.parse(localStorage.getItem('roi-du-car
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -57,7 +57,7 @@ await clic('Regarder|Take a look'); await pause(400);
 await clic('Merci|Thanks'); await pause(700);
 
 /*
- * `null` EFFACE, `undefined` NE FAIT RIEN — ET C'EST UN PIÈGE.
+ * `null` EFFACE, `undefined` NE FAIT RIEN, ET C'EST UN PIÈGE.
  *
  * Puppeteer sérialise en JSON l'argument passé à `evaluate`, et JSON supprime
  * purement et simplement les clés dont la valeur est `undefined`. Écrire
@@ -98,7 +98,7 @@ const FAUCHE = { ...RICHE, money: 1 };
  *
  * La proposition s'ouvrait d'office en plein écran en arrivant sur le hub, et
  * le premier joueur l'a lu comme ce que c'était : un événement forcé dont on
- * ne comprenait ni l'origine ni le moment. Une dette À RENDRE peut s'imposer —
+ * ne comprenait ni l'origine ni le moment. Une dette À RENDRE peut s'imposer,
  * on a signé trois jours plus tôt. Une PROPOSITION, non.
  *
  * On cherche donc la carte sur le hub (« vous a vu compter vos pièces »), et
@@ -154,13 +154,13 @@ verifier('le compteur s\'affiche dans l\'en-tête', /⏳\s*15€/.test(await tex
 /* ── LES DEUX RENDEZ-VOUS SONT DES RENCONTRES, PAS DES ENCARTS ─────────────
  *
  * Ils vivaient dans une carte du hub avec une bande d'image de 96 pixels,
- * coincée entre la météo et les boutons — au même rang qu'un rappel de
+ * coincée entre la météo et les boutons, au même rang qu'un rappel de
  * contrat. Toute la mécanique repose pourtant sur un visage qu'on reconnaît
  * trois jours plus tard, et un visage ne fait pas ça en vignette.
  *
  * Trois choses à tenir, et chacune casse séparément :
  *   · la rencontre s'OUVRE toute seule en arrivant sur le hub ;
- *   · elle montre LA BONNE IMAGE — celle du prêteur qui propose, puis celle
+ *   · elle montre LA BONNE IMAGE, celle du prêteur qui propose, puis celle
  *     du même qui attend ;
  *   · et l'échéance ne se QUITTE PAS. Un bouton « Retour » viderait de leur
  *     sens les trois jours qu'on vient de passer à compter ses euros.
@@ -171,7 +171,7 @@ async function rendezVous(patch) {
    *
    * L'application se sauvegarde d'elle-même à chaque changement d'état. Entre
    * un `setItem` et un `reload` pilotés depuis Node, elle a tout le temps de
-   * réécrire par-dessus — et le test se retrouvait à examiner l'état
+   * réécrire par-dessus, et le test se retrouvait à examiner l'état
    * précédent, en croyant examiner celui qu'il venait de poser. Ici, le
    * `reload()` part depuis la page, sur la ligne suivante : il ne reste aucune
    * fenêtre pour que React s'intercale.
@@ -251,7 +251,7 @@ verifier('et la dette est éteinte : c\'est un paiement, pas une punition', !sai
  * ── Ne pas pouvoir payer, sac vide : il se paie sur votre peau ─────────────
  *
  * Première version : la note montait de quatre euros et il revenait dans deux
- * jours. C'était une non-conséquence — on empruntait, on dépensait tout, on
+ * jours. C'était une non-conséquence, on empruntait, on dépensait tout, on
  * encaissait un report, et le prêteur devenait une banque gratuite. Il tabasse
  * désormais, et la dette est éteinte : il s'est payé à sa façon, ce qui est
  * plus dissuasif qu'un report et plus juste qu'une spirale sans issue.
@@ -283,14 +283,14 @@ verifier('à 12 de santé, la raclée tue', !mort.save || /game.?over|fin|score|
  *
  * Elle laisse une santé à zéro, exactement comme une bagarre : l'écran de fin
  * la rangeait donc dans « trop de coups », et la seule mort du jeu que le
- * joueur ait signée lui-même — trois jours plus tôt, en prenant dix euros —
+ * joueur ait signée lui-même, trois jours plus tôt, en prenant dix euros,
  * ne laissait aucune trace, ni dans la une ni dans le Registre.
  */
 await pause(900);
 const une = await p.evaluate(() => document.body.innerText);
 verifier('la une parle de la dette, pas d\'une bagarre',
   /QUINZE EUROS|FIFTEEN EUROS/i.test(une),
-  (une.match(/[A-ZÉÈÀÇ' ,]{16,}/) || ['—'])[0].trim().slice(0, 52));
+  (une.match(/[A-ZÉÈÀÇ' ,]{16,}/) || ['(rien)'])[0].trim().slice(0, 52));
 const registre = await p.evaluate(() => {
   try { return Object.keys(JSON.parse(localStorage.getItem('roi-du-carton-deathbook') || '{}')); }
   catch { return []; }
@@ -304,7 +304,7 @@ verifier('le Registre des Morts enregistre « La Note Réglée »',
  * Deux choses distinctes, et la seconde est celle qui s'est déjà produite.
  *
  * Qu'un fichier manque se voit : le repli prend la main. Qu'une image soit
- * LÀ mais que le cadre n'en montre rien ne se voit pas du tout — la une
+ * LÀ mais que le cadre n'en montre rien ne se voit pas du tout, la une
  * découpe un bandeau dans une image en 3:2 et jette 40 % de la hauteur. La
  * photo de la mort par dette a son sujet au sol : recadrée au centre, elle
  * n'affichait qu'un trottoir vide, la chaussure coupée en deux et la pièce
@@ -360,7 +360,7 @@ verifier('  …c\'est pourquoi la une la cadre par le bas',
  * `genderFromName` répond « homme » par défaut. C'est un repli honnête et
  * parfaitement silencieux : six prénoms de femmes de la liste des PNJ n'y
  * figuraient pas, et le jeu écrivait « Jacqueline vous a regardé compter vos
- * pièces, et IL a attendu » — avec le mauvais visage sur l'avatar, en prime.
+ * pièces, et IL a attendu », avec le mauvais visage sur l'avatar, en prime.
  * Rien ne l'aurait signalé sans une lecture attentive au bon moment.
  *
  * On lit les listes à la source plutôt que dans le bundle : c'est là qu'on
@@ -369,7 +369,7 @@ verifier('  …c\'est pourquoi la une la cadre par le bas',
 const listes = (fichier, nom) => {
   const src = readFileSync(fichier, 'utf8');
   // Ancré sur `const` : sans ça, chercher MALE_NAMES tombe dans FEMALE_NAMES,
-  // qui le contient — et les deux listes n'en faisaient plus qu'une.
+  // qui le contient, et les deux listes n'en faisaient plus qu'une.
   const m = src.match(new RegExp(`const ${nom}\\s*=\\s*(?:new Set\\()?\\[([^\\]]*)\\]`));
   return m ? [...m[1].matchAll(/'([^']+)'/g)].map(x => x[1]) : [];
 };

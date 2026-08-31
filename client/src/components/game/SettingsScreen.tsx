@@ -16,7 +16,7 @@ import { pushToast } from '@/lib/toast';
 /*
  * L'ADRESSE EST ABSOLUE, ET ELLE DOIT LE RESTER.
  *
- * C'était un chemin relatif — `/confidentialite.html` — au motif qu'il suit
+ * C'était un chemin relatif (`/confidentialite.html`) au motif qu'il suit
  * l'hébergement sans domaine en dur. Élégant sur le web, inutilisable ailleurs :
  *
  *   · Dans l'application empaquetée, le lien porte `target="_blank"` et passe
@@ -27,12 +27,12 @@ import { pushToast } from '@/lib/toast';
  *     relatif n'en est pas une.
  *
  * La même adresse sert donc aux trois : la fiche du store, le formulaire de
- * consentement, et ce bouton. À changer ici si le domaine change un jour —
+ * consentement, et ce bouton. À changer ici si le domaine change un jour,
  * et à changer aussi dans la console AdMob et la fiche Play, qui en gardent
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.66.0';
+const APP_VERSION = '3.67.0';
 
 /*
  * UN CURSEUR EN CARTON.
@@ -43,7 +43,7 @@ const APP_VERSION = '3.66.0';
  * refait en div se rate au pouce une fois sur trois.
  *
  * L'apparence est reprise dans `index.css` (.curseur-carton) : rail de kraft
- * strié, poignée en bout de scotch bleu — la couleur d'action de la palette
+ * strié, poignée en bout de scotch bleu, la couleur d'action de la palette
  * diégétique, la même que les boutons principaux.
  *
  * Le retour sonore part au RELÂCHEMENT, pas à chaque pas : un bip par pixel
@@ -90,7 +90,7 @@ export default function SettingsScreen() {
   const [consentBusy, setConsentBusy] = useState(false);
 
   /*
-   * L'écran ne vend plus rien — les trois achats ont leur propre écran — mais
+   * L'écran ne vend plus rien (les trois achats ont leur propre écran) mais
    * il montre encore ce qu'on POSSÈDE, et il propose la restauration. Il doit
    * donc se redessiner quand le magasin finit par répondre : sans ça, un
    * joueur qui restaure verrait la porte du marché noir rester ouverte alors
@@ -195,7 +195,7 @@ export default function SettingsScreen() {
          *
          * Deux plaintes sont arrivées, et elles ne sont pas la même : « le son
          * du jeu est trop fort » et « le fond du hub est trop fort ». Un
-         * volume unique ne règle que la première — baisser tout à cause du
+         * volume unique ne règle que la première, baisser tout à cause du
          * fond emporte les alertes de survie avec lui, alors que ce sont
          * elles qu'il faut entendre.
          *
@@ -269,7 +269,7 @@ export default function SettingsScreen() {
         LES TROIS ACHATS ONT DÉMÉNAGÉ.
 
         Ils vivaient ici, entre le volume sonore et le formulaire de
-        consentement — l'endroit où l'on va quand quelque chose ne va pas, pas
+        consentement, l'endroit où l'on va quand quelque chose ne va pas, pas
         quand on a envie de quelque chose. Ils ont maintenant leur écran, avec
         des images et de la place pour dire ce qu'ils font.
 
@@ -302,7 +302,7 @@ export default function SettingsScreen() {
       )}
 
       {/*
-        * RESTAURER — visible en permanence, y compris pour qui possède déjà.
+        * RESTAURER : visible en permanence, y compris pour qui possède déjà.
         *
         * C'est le bouton que cherche quelqu'un qui vient de changer de
         * téléphone et retrouve les publicités qu'il avait payé pour ne plus
@@ -378,7 +378,7 @@ export default function SettingsScreen() {
 
         {/* Revenir sur son consentement publicitaire. Obligatoire en Europe :
             un consentement doit pouvoir être retiré aussi facilement qu'il a
-            été donné. Le bouton ne s'affiche que dans l'application native —
+            été donné. Le bouton ne s'affiche que dans l'application native,
             la version web n'a pas de publicité, donc rien à consentir. */}
         {Capacitor.isNativePlatform() && (
           <button

@@ -2,7 +2,7 @@
  * LES GESTES DU JOUEUR : UN APPUI VAUT UN, ET RIEN NE SE POSE SUR LE BOUTON.
  *
  * Deux défauts trouvés par un rapport de playtest, et l'un comme l'autre
- * s'étaient glissés sous les tests existants — parce qu'aucun ne tapait vite,
+ * s'étaient glissés sous les tests existants, parce qu'aucun ne tapait vite,
  * et qu'aucun ne regardait QUI reçoit le doigt.
  *
  *   1. Deux appuis sur « Jour Suivant » dans le même tick JavaScript faisaient
@@ -18,7 +18,7 @@
  *      conseil. C'est le pire genre de défaut : rien n'a l'air cassé.
  *
  * On ne mesure donc pas seulement l'état après coup, mais aussi ce que
- * `elementFromPoint` renvoie au centre du bouton — la seule question qui
+ * `elementFromPoint` renvoie au centre du bouton, la seule question qui
  * compte pour un pouce.
  */
 import puppeteer from 'puppeteer-core';
@@ -50,7 +50,7 @@ const actionsAffichees = () => p.evaluate(() => {
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -96,7 +96,7 @@ const bas = await p.evaluate(() => {
 if (!bas) {
   verifier('« Jour Suivant » est à l\'écran', false);
 } else if (!bas.conseilPresent) {
-  console.log('  (aucun conseil affiché sur cette partie — mesure d\'occlusion sautée)');
+  console.log('  (aucun conseil affiché sur cette partie, mesure d\'occlusion sautée)');
 } else {
   verifier('le conseil du moment ne recouvre pas « Jour Suivant »',
     bas.recouvrement === 0, `${bas.recouvrement} px de recouvrement`);

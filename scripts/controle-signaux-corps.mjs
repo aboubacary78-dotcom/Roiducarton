@@ -3,7 +3,7 @@
  *
  * Le premier lot a passé tous les contrôles de format et s'est fait renvoyer
  * à la première écoute : « un cri bouillie, on ne comprend rien du tout ».
- * D'où ce contrôle — et d'où, aussi, sa modestie.
+ * D'où ce contrôle, et d'où, aussi, sa modestie.
  *
  * CE QUE J'AI ESSAYÉ DE MESURER, ET QUI NE MARCHE PAS.
  *
@@ -13,7 +13,7 @@
  *
  *   · `jauge-remplie` et `jauge-rouge`, les deux signaux les plus utilisés du
  *     jeu et que personne n'a jamais confondus, mesurent 0,201 d'écart ;
- *   · le lot REFUSÉ mesurait 0,794 — mieux que celui qui l'a remplacé.
+ *   · le lot REFUSÉ mesurait 0,794, mieux que celui qui l'a remplacé.
  *
  * L'empreinte décrit où l'énergie se trouve, pas ce que l'oreille reconnaît.
  * Le facteur de crête ne sépare pas davantage : les fichiers renvoyés
@@ -24,7 +24,7 @@
  * CE QUI RESTE, ET POURQUOI ON PEUT S'Y FIER.
  *
  * Deux planchers, tous deux relevés sur les 528 sons que le jeu embarque
- * déjà et que personne n'a renvoyés (`scripts/profil-corpus-audio.mjs`) —
+ * déjà et que personne n'a renvoyés (`scripts/profil-corpus-audio.mjs`),
  * et non posés au jugé, ce qui était mon erreur précédente :
  *
  *   · ÉNERGIE AU-DESSUS DE 500 Hz. Le jeu se joue sur un téléphone, souvent
@@ -47,7 +47,7 @@ import { join } from 'path';
 const dossier = process.argv[2];
 if (!dossier) throw new Error('usage : node scripts/controle-signaux-corps.mjs <dossier-mp3>');
 
-// Relevés sur les 528 fichiers de client/public/audio/ — voir l'en-tête.
+// Relevés sur les 528 fichiers de client/public/audio/, voir l'en-tête.
 const PART_AIGUE_MIN = 0.246;   // 10ᵉ centile du corpus admis
 const CRETE_MIN = 9.9;          //  5ᵉ centile du corpus admis
 
@@ -74,7 +74,7 @@ for (const nom of noms) {
     for (let i = 0; i < x.length; i++) { const a = Math.abs(x[i]); if (a > crete) crete = a; somme += x[i] * x[i]; }
     const rms = Math.sqrt(somme / x.length);
 
-    // Passe-haut du premier ordre à 500 Hz — la MÊME mesure que celle qui a
+    // Passe-haut du premier ordre à 500 Hz, la MÊME mesure que celle qui a
     // servi à relever les centiles du corpus, sans quoi la comparaison ment.
     const dt = 1 / sr, rc = 1 / (2 * Math.PI * 500), alpha = rc / (rc + dt);
     let yPrev = 0, xPrev = 0, eHaut = 0, eTout = 0;
@@ -95,7 +95,7 @@ await b.close();
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 

@@ -26,7 +26,7 @@ function checkRequirements(choice: EventChoice, char: Character | null, en: bool
   /*
    * Le verrou explicite, quand la condition ne rentre pas dans `requirements`
    * : rembourser demande une SOMME, pas un objet ni un seuil de statistique.
-   * Le bouton reste visible et barré plutôt que retiré — le joueur doit voir
+   * Le bouton reste visible et barré plutôt que retiré, le joueur doit voir
    * ce qu'il aurait pu faire, sinon l'autre choix n'en est plus un.
    */
   if (choice.bloqueSi?.argentMoinsDe !== undefined && char) {
@@ -55,7 +55,7 @@ function checkRequirements(choice: EventChoice, char: Character | null, en: bool
  * Les choix qui déclenchent une mécanique gardent le son de cette mécanique.
  *
  * Ils sonnaient tous comme un clic d'interface depuis qu'ils sont passés par
- * l'écran des rencontres — alors que prendre dix euros et repartir sans rien
+ * l'écran des rencontres, alors que prendre dix euros et repartir sans rien
  * ne s'entendaient pas pareil du temps où c'étaient des boutons du hub. On ne
  * perd pas ça en changeant de mise en scène.
  */
@@ -190,7 +190,7 @@ export default function EventScreen() {
           Sous 60 de mental, les mots de la description se mélangent (voir
           lib/charabia). Les LIBELLÉS DE CHOIX, eux, restent intacts : brouiller
           ce dont dépend une décision ne rend pas le jeu inquiétant, il le rend
-          injouable — on ne joue plus, on subit.
+          injouable : on ne joue plus, on subit.
         */}
         <p className="text-sm text-[#5C4A38] leading-relaxed mb-4">
           {charabia(tc(event.description), state.character?.stats.mental ?? 100, en)}
@@ -249,7 +249,7 @@ export default function EventScreen() {
       </motion.div>
 
       {/*
-        Back — sauf pour les rencontres dont on ne sort pas.
+        Back, sauf pour les rencontres dont on ne sort pas.
 
         La rue ne vous force à rien, et toutes les rencontres se quittent : on
         passe son chemin. L'échéance d'une dette, non. Un bouton « Retour »

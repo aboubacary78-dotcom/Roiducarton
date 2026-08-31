@@ -35,7 +35,7 @@ import { loadDaily } from '@/lib/daily';
  *
  * Les mini-jeux, la boutique, l'écran de mort, le registre, le cimetière, la
  * penderie et les options représentent le plus gros morceau de code de
- * l'application — et aucun d'eux n'est le premier écran. Ils partaient
+ * l'application, et aucun d'eux n'est le premier écran. Ils partaient
  * pourtant dans le même paquet que l'écran-titre : le joueur téléchargeait la
  * bagarre, le casse et la fin de partie avant même d'avoir choisi son
  * personnage.
@@ -94,7 +94,7 @@ function prechargerEcrans(): void {
 /*
  * Le temps d'aller chercher un morceau, on garde le fond de carton plutôt
  * qu'une page blanche. En pratique le réchauffage fait que ce voile n'est
- * presque jamais vu — il n'existe que pour le cas où l'on appuie plus vite que
+ * presque jamais vu, il n'existe que pour le cas où l'on appuie plus vite que
  * le réseau.
  */
 const VOILE = <div className="min-h-screen bg-texture" aria-busy="true" />;
@@ -128,7 +128,7 @@ export default function Home() {
   /*
    * Le filet sonore, posé une fois pour toute la session : aucun appui de
    * bouton ne peut rester muet, même sur un écran ajouté plus tard. Les sons
-   * posés explicitement gagnent toujours — celui-ci ne comble que les trous.
+   * posés explicitement gagnent toujours, celui-ci ne comble que les trous.
    */
   useEffect(() => { installerClicParDefaut(); }, []);
 
@@ -191,7 +191,7 @@ export default function Home() {
    *
    * Jamais en jeu, jamais sur un mini-jeu : le pouce y travaille, et une
    * bannière sous le pouce ne produit pas de la frustration mais des clics
-   * accidentels — que les régies sanctionnent, et qui font désinstaller.
+   * accidentels, que les régies sanctionnent, et qui font désinstaller.
    */
   useEffect(() => {
     /*
@@ -247,7 +247,7 @@ export default function Home() {
         {/* La visite guidée en huit écrans n'est plus imposée au premier
             lancement : elle reste disponible depuis les Options pour qui la
             veut. Au premier lancement, les conseils contextuels prennent le
-            relais (voir CoachTip) — une phrase quand elle sert, au lieu de
+            relais (voir CoachTip), une phrase quand elle sert, au lieu de
             huit écrans avant la première action. */}
         {state.screen === 'main' && <TutorialOverlay />}
 
@@ -257,7 +257,7 @@ export default function Home() {
         )}
 
         {/* Le carton du matin : première ouverture d'un jour calendaire. Passe
-            au-dessus de tout, y compris de l'écran-titre — c'est le rendez-vous
+            au-dessus de tout, y compris de l'écran-titre, c'est le rendez-vous
             quotidien, il ne dépend pas d'une partie en cours. */}
         <CartonMatinOverlay />
 

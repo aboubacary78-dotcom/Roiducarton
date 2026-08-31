@@ -1,5 +1,5 @@
 /*
- * L'ATELIER DU VISAGE — le catalogue de ce qu'on peut choisir.
+ * L'ATELIER DU VISAGE : le catalogue de ce qu'on peut choisir.
  *
  * Le portrait carton était entièrement tiré de la graine du personnage : une
  * douzaine de tirages indépendants (peau, cheveux, yeux, bouche…) dérivés du
@@ -8,12 +8,12 @@
  *
  * Ce module ne remplace pas ce mécanisme : il l'OUVRE. Chaque tirage peut être
  * remplacé par un choix, et ce qui n'est pas choisi reste tiré. Un visage
- * partiellement composé est donc parfaitement valable — on décide de la barbe
+ * partiellement composé est donc parfaitement valable, on décide de la barbe
  * et on laisse le hasard faire le reste.
  *
  * La correspondance avec `CardboardAvatar` tient sur une seule règle : la clé
  * d'un trait EST le sel de son tirage. Renommer l'un sans l'autre casse le
- * lien en silence — d'où le contrôle de `scripts/test-atelier.mjs`, qui relit
+ * lien en silence, d'où le contrôle de `scripts/test-atelier.mjs`, qui relit
  * les deux fichiers et compare.
  */
 
@@ -34,12 +34,12 @@ export interface TraitVisage {
   /** Libellés des valeurs, quand elles se nomment mieux qu'un numéro. */
   valeurs?: { fr: string; en: string }[];
   /*
-   * PALETTE — pour les réglages qui sont une COULEUR.
+   * PALETTE : pour les réglages qui sont une COULEUR.
    *
    * « Teint : 1 2 3 4 5 6 7 8 » ne dit rien à personne, et c'est pire sur un
    * écran qu'on vend : il faut cliquer huit fois pour voir ce qu'on achète.
    * Ces réglages-là s'affichent en pastilles de la vraie couleur, prise dans
-   * la palette que le dessin utilise — pas une copie, qui dériverait.
+   * la palette que le dessin utilise, pas une copie, qui dériverait.
    */
   palette?: 'skin' | 'hair' | 'hat' | 'bg';
 }
@@ -54,7 +54,7 @@ export const TRAITS_VISAGE: TraitVisage[] = [
   },
   /*
    * La forme du crâne vient en deuxième parce qu'elle décide de la SILHOUETTE,
-   * et que la silhouette est ce qui se lit en premier — avant la couleur des
+   * et que la silhouette est ce qui se lit en premier, avant la couleur des
    * yeux, avant la coiffure, et à toutes les tailles.
    */
   {
@@ -111,7 +111,7 @@ export const TRAITS_VISAGE: TraitVisage[] = [
     valeurs: [
       // Ces libellés mentaient : « Moustache » dessinait une barbe pleine et
       // « Barbe pleine » un bouc minuscule. Le dessin a été remis dans l'ordre
-      // annoncé — c'est un écran qu'on vend, il doit dire vrai.
+      // annoncé, c'est un écran qu'on vend, il doit dire vrai.
       { fr: 'Rasé', en: 'Clean' },
       { fr: 'Moustache', en: 'Moustache' },
       { fr: 'Bouc', en: 'Goatee' },

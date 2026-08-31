@@ -1,4 +1,4 @@
-# Pack son 1 — Les quartiers et le ciel (10 fichiers)
+# Pack son 1 · Les quartiers et le ciel (10 fichiers)
 
 *Ce document est le socle. Chaque pack le répète en tête, pour être remis seul
 à qui fabrique les sons.*
@@ -25,7 +25,7 @@ son établi, micro à vingt centimètres :
 | le vent | un souffle contre une feuille de papier calque |
 
 C'est cette matière-là qui donne son unité au jeu. Un son trop propre, trop
-« vrai », trop cinématographique sonnera faux — même s'il est techniquement
+« vrai », trop cinématographique sonnera faux, même s'il est techniquement
 parfait. **Petit, proche, sec, fait main.**
 
 ## Le ton : comédie douce-amère
@@ -39,7 +39,7 @@ percussion de bande-annonce.
 
 1. **Aucune parole intelligible.** Le jeu existe en français et en anglais ;
    un mot compréhensible casserait la traduction. Un brouhaha de foule doit
-   rester un brouhaha — des voyelles, du murmure, jamais de phrase.
+   rester un brouhaha, des voyelles, du murmure, jamais de phrase.
 2. **Aucune mélodie reconnaissable** ni citation d'une musique existante.
 3. **Aucune stridence.** Le jeu se joue au casque dans le métro. Rien
    au-dessus de 8 kHz qui pique, pas de sifflement continu.
@@ -52,7 +52,7 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 
 ## Contraintes techniques (les mêmes pour les trois packs)
 
-- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps —
+- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps,
   la conversion finale sera faite à l'intégration.
 - **Boucles : stéréo. Bruitages courts : mono.**
 - **Les boucles doivent boucler.** La dernière milliseconde doit s'enchaîner
@@ -103,7 +103,7 @@ Le centre commerçant : passants, vitrines, police.
 Une rumeur de circulation continue et lointaine (souffle grave, filtré), deux
 passages de véhicule (glissement de main sur carton ondulé, d'une oreille à
 l'autre), un klaxon court et un peu ridicule (un couinement, pas une trompe de
-camion), un murmure de foule très en arrière — **sans aucun mot articulé**.
+camion), un murmure de foule très en arrière, **sans aucun mot articulé**.
 **Sensation visée :** ça bouge, on est un obstacle sur le trottoir.
 
 ### `amb-zone-industrielle.wav`
@@ -115,10 +115,10 @@ beaucoup de réverbération), un grattement discret quelque part.
 **Sensation visée :** grand, vide, on n'est pas censé être là.
 
 ### `amb-gare.wav`
-Voyageurs, abri, sécurité — un toit temporaire.
+Voyageurs, abri, sécurité, un toit temporaire.
 Une grande réverbération de halle (tout ce qui se passe ici sonne loin et
 haut), un carillon d'annonce à trois notes (le seul élément presque musical du
-pack — trois notes de métallophone, douces, jamais la même hauteur qu'un vrai
+pack, trois notes de métallophone, douces, jamais la même hauteur qu'un vrai
 jingle SNCF), suivi d'un murmure d'annonce **inintelligible et étouffé**, et
 un train qui passe au loin (brosse sur carton ondulé, qui accélère puis
 s'éloigne).
@@ -127,9 +127,9 @@ s'éloigne).
 ### `amb-marche.wav`
 Nourriture, commerçants, vigiles.
 Le plus vivant des cinq. Brouhaha de foule proche (plusieurs feuilles de
-journal froissées ensemble, en couches), deux appels de marchand — **une
+journal froissées ensemble, en couches), deux appels de marchand, **une
 intonation qui monte et redescend, sans mot reconnaissable**, comme entendu de
-trop loin —, une clochette, des cageots qu'on empile (petites boîtes en carton).
+trop loin, une clochette, des cageots qu'on empile (petites boîtes en carton).
 **Sensation visée :** dense, chaud, on pourrait manger.
 
 ---
@@ -158,7 +158,7 @@ pressée dans un sac).
 
 ### `meteo-brouillard.wav`
 Un souffle sourd, sans direction, et une réverbération anormalement longue sur
-un seul petit son isolé (une goutte, un tintement) — comme si le monde était
+un seul petit son isolé (une goutte, un tintement), comme si le monde était
 plus loin qu'il ne devrait.
 
 ### `meteo-canicule.wav`

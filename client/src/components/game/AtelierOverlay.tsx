@@ -1,5 +1,5 @@
 /*
- * L'ATELIER — composer un visage et choisir ses deux traits.
+ * L'ATELIER : composer un visage et choisir ses deux traits.
  *
  * Il se pose PAR-DESSUS l'écran de choix, sur le candidat qu'on vient de
  * retenir, plutôt que d'être un écran séparé avant lui. La raison est simple :
@@ -13,7 +13,7 @@
  *     chaque trait non choisi reste dérivé de la graine, donc « ne rien
  *     toucher » donne exactement le personnage tiré au sort.
  *   · LES TRAITS touchent au jeu. On en choisit EXACTEMENT deux, comme le jeu
- *     en donne deux à tout le monde — l'Atelier ouvre lesquels, jamais combien.
+ *     en donne deux à tout le monde, l'Atelier ouvre lesquels, jamais combien.
  *
  * Rien n'est appliqué tant qu'on n'a pas validé : la croix rend le candidat
  * intact, et c'est ce qui permet d'essayer sans s'engager.
@@ -33,10 +33,10 @@
  * MAIS C'EST ÉCRIT DÈS L'OUVERTURE. Un péage qui tombe à la fin sans prévenir
  * se lit comme un traquenard : quarante secondes de composition, et la
  * découverte qu'on vous a fait perdre votre temps. Pour un jeu dont tout le
- * ton repose sur « on ne vous ment pas », ce serait cher payé — et le bandeau
+ * ton repose sur « on ne vous ment pas », ce serait cher payé, et le bandeau
  * n'enlève rien au levier, puisqu'on compose quand même.
  *
- * Le bouton dit aussi ce qui va se passer : « Le prendre — 4,99 € », pas
+ * Le bouton dit aussi ce qui va se passer : « Le prendre, 4,99 € », pas
  * « Commencer ». Un bouton qui annonce autre chose que ce qu'il fait est la
  * définition du piège, quelle que soit la note en petit.
  * ═══════════════════════════════════════════════════════════════════════════
@@ -105,7 +105,7 @@ export default function AtelierOverlay({ char, essai = false, onAnnuler, onValid
       visage={visage}
       /*
        * L'aperçu reste au repos : on compose un visage, pas un malade. Les
-       * cinq jauges au maximum plutôt qu'une moyenne à 1 — même intention,
+       * cinq jauges au maximum plutôt qu'une moyenne à 1, même intention,
        * mais elle passe désormais par le même chemin que le vrai portrait.
        */
       jauges={{ health: 100, mental: 100, hunger: 100, thirst: 100, sleep: 100 }}
@@ -123,8 +123,8 @@ export default function AtelierOverlay({ char, essai = false, onAnnuler, onValid
        *
        * Le carton quotidien passe volontairement par-dessus tout, y compris
        * l'écran-titre : c'est un rendez-vous, pas une notification. Mais il
-       * tombait aussi par-dessus l'Atelier, en plein milieu d'une composition
-       * — le joueur voyait sa retouche disparaître derrière un cadeau.
+       * tombait aussi par-dessus l'Atelier, en plein milieu d'une composition,
+       * le joueur voyait sa retouche disparaître derrière un cadeau.
        *
        * L'Atelier est une tâche que le joueur a ouverte lui-même : il passe
        * donc devant, et le carton l'attend en dessous. Il sera vu à la
@@ -272,8 +272,8 @@ export default function AtelierOverlay({ char, essai = false, onAnnuler, onValid
            * puis oubliée ne prévient personne.
            */
           <p className="text-[11px] text-[#8B6B4A] text-center leading-snug shrink-0 -mb-1">
-            {tr('Essai libre. L\'Atelier se paie au moment de valider — et ce visage-ci vous attend.',
-                'Free trial. The Workshop is paid for on validation — and this face is waiting for you.')}
+            {tr('Essai libre. L\'Atelier se paie au moment de valider, et ce visage-ci vous attend.',
+                'Free trial. The Workshop is paid for on validation, and this face is waiting for you.')}
           </p>
         )}
         <button
@@ -282,7 +282,7 @@ export default function AtelierOverlay({ char, essai = false, onAnnuler, onValid
           style={essai ? { background: '#F2E14C', boxShadow: '0 3px 0 #C9B62A' } : undefined}
         >
           {essai
-            ? `${tr('Le prendre', 'Take this one')} — ${prixAffiche('atelier')}`
+            ? `${tr('Le prendre', 'Take this one')} · ${prixAffiche('atelier')}`
             /* L'accord suit le personnage : « c'est lui » sur Simone se voit. */
             : char.gender === 'f'
               ? tr('C\'est elle. Commencer.', 'That\'s her. Start.')

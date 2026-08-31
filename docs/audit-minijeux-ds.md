@@ -1,4 +1,4 @@
-# Audit — ce qu'on peut voler à la Nintendo DS
+# Audit · ce qu'on peut voler à la Nintendo DS
 
 But : trouver de quoi (1) remplacer le mini-jeu de la mendicité, devenu trop
 maigre, et (2) ouvrir une nouvelle action dans la journée du personnage.
@@ -99,7 +99,7 @@ complète alors que chaque étape dure six secondes. Et on est noté sur chaque
 **Transférable** : oui, c'est le meilleur modèle pour une action « métier »
 (un petit boulot, un tri, une réparation).
 
-### New Super Mario Bros. DS — le mode « Wanted! »
+### New Super Mario Bros. DS · le mode « Wanted! »
 
 On voit un portrait, puis une foule qui bouge : il faut retrouver le bon
 visage avant la fin du temps.
@@ -108,7 +108,7 @@ visage avant la fin du temps.
 vient de la densité de la foule, pas de règles ajoutées.
 
 **Transférable** : parfait pour un jeu de rue. Retrouver quelqu'un dans une
-foule, c'est notre décor par défaut — et on a déjà un générateur de visages
+foule, c'est notre décor par défaut, et on a déjà un générateur de visages
 en carton (`CardboardAvatar`) qui produit des têtes toutes différentes.
 
 ### Kirby : Le Pinceau du Pouvoir (2005)
@@ -201,7 +201,7 @@ donne un motif différent.
 
 ## 4. Ce que je recommande comme nouvelle action
 
-**« La Récup' »** — fouiller les poubelles et les containers pour revendre.
+**« La Récup' »** : fouiller les poubelles et les containers pour revendre.
 
 Mécanique : une chaîne de gestes courts façon Cooking Mama, sur trois
 containers. On soulève, on trie ce qui tombe (consigne / ferraille /
@@ -221,7 +221,7 @@ Pourquoi celle-là plutôt qu'une autre :
   tombent, trois bacs, un score.
 
 **Second choix, si tu préfères le récit à la matière : « Les Papiers ».** La
-course au tampon dans une administration, façon Trauma Center bureaucratique —
+course au tampon dans une administration, façon Trauma Center bureaucratique,
 un guichet, un formulaire, une jauge de patience du guichetier. Excellent pour
 l'humour, très fort thématiquement, mais ça produit un statut (une adresse,
 des droits) plutôt qu'une ressource. C'est une action à conséquences longues,
@@ -253,7 +253,7 @@ Tirées de ce qui marchait sur DS, et de nos propres ratés :
 
 ---
 
-# Second passage — spécial mendicité
+# Second passage · spécial mendicité
 
 Les trois pistes du premier tour (rythme, rythme à l'oreille, retrouver un
 visage) ont été jugées trop faibles. À raison : le rythme était surtout
@@ -339,7 +339,7 @@ joueur choisir laquelle poursuivre. Chez nous : pièces contre dignité.
 Le premier pour son bloc de mini-jeux tactiles, le second pour les gestes hors
 écran (souffler dans le micro pour éteindre des bougies, crier).
 
-**À retenir :** rien pour nous côté micro — permission navigateur, jouabilité
+**À retenir :** rien pour nous côté micro, permission navigateur, jouabilité
 en public, silence obligatoire dans le bus. À écarter, mais méritait d'être
 tranché plutôt que passé sous silence.
 
@@ -356,14 +356,14 @@ s'arrête et donne. Lâché en route, tout est perdu pour celui-là.
 **Ce que ça produit, mécaniquement.**
 
 - *Se faire voir* : le remplissage de l'anneau, c'est le regard qu'on
-  accroche. La vitesse dépend de la **dignité** — bien tenu, on est vu plus
+  accroche. La vitesse dépend de la **dignité** : bien tenu, on est vu plus
   vite.
 - *Choisir qui* : ils sont plusieurs à l'écran, on ne peut en suivre qu'un.
   Abandonner quelqu'un à mi-anneau pour un meilleur passant qui arrive, c'est
   la décision qui fait le sel du jeu.
 - *Tenir* : la poursuite au pouce est une vraie compétence physique, celle de
   Pokémon Ranger. Les gens accélèrent, s'arrêtent, changent de file.
-- *Payer en dignité* : certains passants ne cèdent qu'en **insistant** —
+- *Payer en dignité* : certains passants ne cèdent qu'en **insistant**,
   maintenir au-delà de l'anneau plein donne plus, mais entame la dignité. On
   décide, personne par personne, ce qu'on est prêt à laisser.
 - *Savoir s'arrêter* : le policier traverse. Tant qu'il est là, **il faut
@@ -389,19 +389,19 @@ les traits (Charismatique élargit la tolérance, Poissard fait fuir), la mété
 
 ## Deux solutions de repli, si celle-là ne te parle pas
 
-**« Le Numéro »** — le tour de chant en chaîne de gestes, façon Cooking Mama :
+**« Le Numéro »** : le tour de chant en chaîne de gestes, façon Cooking Mama :
 sortir l'instrument, jouer, saluer, tendre le gobelet, chacun avec son geste
 propre, noté séparément. Sympathique, lisible, mais c'est une suite d'épreuves
 sans décision : le même défaut que la version actuelle, mieux habillé.
 
-**« La Foule »** — retrouver, façon *Wanted!*, la seule personne de la foule
+**« La Foule »** : retrouver, façon *Wanted!*, la seule personne de la foule
 qui vous regarde vraiment, avant qu'elle ne se ravise. Très simple à faire et
 à comprendre, joli avec nos visages générés, mais mince à long terme : c'est
 un jeu d'observation pure, il s'épuise en quelques parties.
 
 ---
 
-# Troisième passage — la DS *et* la 3DS, et pourquoi La Récup' ne tient pas
+# Troisième passage · la DS *et* la 3DS, et pourquoi La Récup' ne tient pas
 
 ## Le constat, sans complaisance
 
@@ -423,7 +423,7 @@ quelque chose**. Tant qu'aucun choix ne ferme une porte, il n'y a pas de jeu.
 
 ### 🥇 SteamWorld Dig (2013)
 
-On creuse vers le bas. Plus on descend, plus le minerai vaut cher — mais la
+On creuse vers le bas. Plus on descend, plus le minerai vaut cher, mais la
 lanterne s'épuise, les poches se remplissent, et il faut **remonter pour
 vendre**. Chaque coup de pioche est la même question : encore un, ou je rentre ?
 
@@ -442,7 +442,7 @@ nous, il existe un endroit tout désigné où l'on discute un prix : la boutique
 ### 🥉 The Legend of Zelda: A Link Between Worlds (2013)
 
 On **loue** les objets au lieu de les gagner. C'est bon marché, on a tout tout
-de suite — mais à la mort, le loueur récupère tout d'un coup.
+de suite, mais à la mort, le loueur récupère tout d'un coup.
 
 **La leçon :** un système d'équipement peut être un pari permanent. Louer une
 arme pour la journée en sachant qu'on la perd si on meurt, c'est notre jeu.
@@ -476,7 +476,7 @@ suivantes disponibles.
 
 ### Pushmo (2011), BoxBoy! (2015), Picross 3D (2009)
 
-Puzzles spatiaux excellents — et hors-sol, comme les Picross du premier
+Puzzles spatiaux excellents, et hors-sol, comme les Picross du premier
 passage. Même verdict : rien là-dedans ne raconte la rue.
 
 ### Etrian Odyssey IV (2012)
@@ -494,7 +494,7 @@ la satisfaction de revenir demain.
 **La leçon :** nos actions journalières sont la bonne structure. Ce qui
 manque, ce n'est pas le cadre, c'est la tension à l'intérieur.
 
-### StreetPass — Find Mii (2011)
+### StreetPass · Find Mii (2011)
 
 Les inconnus croisés dans la vraie vie viennent se battre pour vous.
 
@@ -507,7 +507,7 @@ Garder la fiction, jeter la mécanique. On ne trie plus une pluie d'objets : on
 **fouille en profondeur**, et on décide quand s'arrêter.
 
 **Le geste.** Le container est plein. On frotte le doigt sur les détritus pour
-déblayer — le tas s'écarte là où on passe, et ce qu'il y a dessous apparaît.
+déblayer, le tas s'écarte là où on passe, et ce qu'il y a dessous apparaît.
 C'est un geste continu, sale, et physiquement juste.
 
 **La couche.** Ce qu'on trouve dépend de la profondeur atteinte :
@@ -516,12 +516,12 @@ trouvaille (un vrai objet, parfois une arme).
 
 **La décision, toutes les quelques secondes.** Deux boutons permanents :
 
-- **Remonter** — tout ce qu'on a est acquis, définitivement.
-- **Creuser encore** — la couche suivante paie mieux, et le risque monte.
+- **Remonter** : tout ce qu'on a est acquis, définitivement.
+- **Creuser encore** : la couche suivante paie mieux, et le risque monte.
 
 **Le risque.** Une jauge unique qui grimpe à chaque couche : l'odeur, le bruit,
 le gardien de la déchetterie qui fait sa ronde, le rat qu'on finit par
-réveiller. Si elle éclate, on perd **tout ce qu'on n'a pas sécurisé** — pas la
+réveiller. Si elle éclate, on perd **tout ce qu'on n'a pas sécurisé**, pas la
 partie, juste la fouille. La punition doit rester du domaine du « zut »,
 jamais du « j'arrête de jouer ».
 
@@ -539,12 +539,12 @@ dignité pèsent sur sa patience. Ça donnerait enfin un jeu à un écran qui n'
 aujourd'hui qu'une liste de prix.
 
 **Louer plutôt qu'acheter** (A Link Between Worlds). Une arme correcte pour la
-journée, à petit prix — perdue si le personnage meurt. Un pari qui colle
+journée, à petit prix, perdue si le personnage meurt. Un pari qui colle
 parfaitement à un jeu où l'on meurt souvent.
 
 ---
 
-# Quatrième passe — les jeux où l'on pousse quelqu'un
+# Quatrième passe · les jeux où l'on pousse quelqu'un
 
 *Menée pour le chantier du marchandage.*
 
@@ -557,7 +557,7 @@ quelqu'un et où l'on appuie**. C'est exactement la matière d'un marchandage.
 ## Phoenix Wright: Ace Attorney (DS, 2005)
 
 Le témoin raconte. On dispose de **deux verbes seulement** : *Presser* et
-*Présenter*. Presser, c'est relancer sans preuve — gratuit, ça fait parler,
+*Présenter*. Presser, c'est relancer sans preuve, gratuit, ça fait parler,
 parfois ça ne donne rien. Présenter, c'est engager une preuve précise sur une
 phrase précise : juste, ça fait tout basculer ; faux, ça coûte une part de la
 barre de crédibilité.
@@ -603,7 +603,7 @@ raconte. Marchander n'est pas taper en rythme ; c'est tenir, lâcher, revenir.
 
 ## Ce que cette passe change
 
-Les trois premières passes m'avaient orienté vers des jeux d'adresse — viser,
+Les trois premières passes m'avaient orienté vers des jeux d'adresse, viser,
 frotter, esquiver. Pour la boutique, ce serait une erreur : le marchandage
 n'est pas une question d'habileté du pouce, c'est une question de **culot et de
 lecture**. Le modèle n'est donc pas SteamWorld Dig (qu'on vient d'utiliser pour

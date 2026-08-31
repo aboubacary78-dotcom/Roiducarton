@@ -6,8 +6,8 @@
  * celui qui traverse plusieurs parties et donne une raison de continuer là où
  * la partie précédente s'est arrêtée.
  *
- * Une commande est un objectif cumulatif — ramener du cuivre, encaisser des
- * coups, tenir des jours — qui ne se remet pas à zéro quand le personnage
+ * Une commande est un objectif cumulatif, ramener du cuivre, encaisser des
+ * coups, tenir des jours, qui ne se remet pas à zéro quand le personnage
  * meurt. C'est le seul compteur du jeu que la mort n'efface pas, et c'est
  * précisément ce qui le rend utile : après une fin brutale, il reste quelque
  * chose d'entamé.
@@ -106,7 +106,7 @@ export function commandeDef(s: CommandeState): CommandeDef {
 
 /**
  * Fait avancer la commande si la mesure correspond. Appelée depuis le reducer
- * à chaque fois qu'un compteur bouge — jamais depuis un composant, sinon un
+ * à chaque fois qu'un compteur bouge, jamais depuis un composant, sinon un
  * simple re-rendu compterait double.
  */
 export function progress(metric: CommandeMetric, amount = 1, now = new Date()): void {

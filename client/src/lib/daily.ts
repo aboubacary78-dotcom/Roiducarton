@@ -13,7 +13,7 @@
  *
  * 2. LA SÉRIE A UN FILET. Une série sans rattrapage produit sa propre falaise :
  *    le jour où elle casse, une bonne part des joueurs ne revient pas. Le
- *    sauvetage garde tout le poids de la perte et supprime la falaise — ce
+ *    sauvetage garde tout le poids de la perte et supprime la falaise, ce
  *    n'est pas une version adoucie, c'est celle qui retient le plus.
  *
  * 3. ON N'AFFICHE JAMAIS UNE SÉRIE À ZÉRO. Un zéro est un rappel d'échec ;
@@ -190,7 +190,7 @@ export function milestoneFor(streak: number) {
  *
  * Le cadeau tombe même quand aucune partie n'est en cours (au lancement, sur
  * l'écran-titre). Il est alors mis de côté et déposé sur le carton du prochain
- * personnage — ce qui est exactement la fiction. Si une partie est en cours,
+ * personnage, ce qui est exactement la fiction. Si une partie est en cours,
  * l'objet rejoint le sac tout de suite.
  */
 const PENDING_KEY = 'roi-du-carton-carton-attente';

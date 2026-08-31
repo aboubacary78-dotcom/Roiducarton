@@ -1,14 +1,14 @@
 /*
- * LES POINTS D'ENTRÉE — proposer la chose AU MOMENT où elle manque.
+ * LES POINTS D'ENTRÉE : proposer la chose AU MOMENT où elle manque.
  *
  * L'écran du marché noir ne convertit presque personne : pour y aller, il faut
  * avoir déjà décidé. Ce qui convertit, ce sont les quatre moments ci-dessous,
- * et ils ont tous la même fragilité — ils dépendent d'un état qu'aucun écran
+ * et ils ont tous la même fragilité, ils dépendent d'un état qu'aucun écran
  * n'affiche. Une carte qui ne s'ouvre plus ne casse rien, ne lève rien, et ne
  * se remarque jamais : il n'y a pas d'écran vide à voir, il n'y a rien du tout.
  *
  *   ① LA TRÊVE. Dix minutes sans publicité offertes au DEUXIÈME plein écran.
- *     Jamais au premier — à ce moment-là le joueur n'a pas encore de raison de
+ *     Jamais au premier, à ce moment-là le joueur n'a pas encore de raison de
  *     trouver la publicité pénible, et lui vendre la solution avant qu'il ait
  *     le problème lui apprend qu'on en a fabriqué un.
  *
@@ -22,7 +22,7 @@
  *
  * ET LE PIÈGE DE CE TEST, ÉVITÉ ICI : vérifier qu'une carte s'affiche ne prouve
  * rien si elle s'affiche TOUJOURS. Chaque contrôle vérifie donc aussi le cas où
- * elle ne DOIT PAS apparaître — après le premier plein écran, et chez qui a
+ * elle ne DOIT PAS apparaître, après le premier plein écran, et chez qui a
  * déjà payé.
  *
  *     node scripts/test-points-entree.mjs
@@ -31,7 +31,7 @@ import puppeteer from 'puppeteer-core';
 
 let echecs = 0;
 const verifier = (nom, ok, detail = '') => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -79,7 +79,7 @@ const treve = await p.evaluate(async () => {
    * ON AVANCE L'HORLOGE PLUTÔT QUE D'ATTENDRE.
    *
    * Le jeu impose quatre-vingt-dix secondes entre deux pleins écrans. Enchaîner
-   * deux appels dans la même milliseconde ne produit donc qu'UN seul écran —
+   * deux appels dans la même milliseconde ne produit donc qu'UN seul écran,
    * la première version de ce test le faisait, et concluait tranquillement que
    * la trêve ne s'ouvrait pas. Elle s'ouvrait très bien ; c'est le second écran
    * qui n'était jamais parti.
@@ -97,7 +97,7 @@ const treve = await p.evaluate(async () => {
   return { vu, t0 };
 });
 // L'appel 0 est offert (première mort de la session), l'appel 1 est le
-// PREMIER vrai plein écran, l'appel 2 le deuxième — celui qui ouvre la trêve.
+// PREMIER vrai plein écran, l'appel 2 le deuxième, celui qui ouvre la trêve.
 verifier('après le PREMIER plein écran, aucune trêve',
   treve.vu[1] && !treve.vu[1].enTreve, JSON.stringify(treve.vu[1]));
 verifier('après le DEUXIÈME, la trêve court',
@@ -115,7 +115,7 @@ verifier('  …et elle bloque les pleins écrans', pendant.montrer === false,
 
 /*
  * PIÈGE ÉVITÉ : la trêve pourrait bloquer parce qu'un AUTRE garde-fou parle en
- * premier — le délai de 90 secondes, par exemple. On vérifie donc que c'est
+ * premier, le délai de 90 secondes, par exemple. On vérifie donc que c'est
  * bien ELLE qui refuse, et pas quelque chose d'autre qui passait par là.
  */
 verifier('  …et c\'est bien la trêve qui refuse, pas un autre garde-fou',
@@ -141,7 +141,7 @@ async function nouvellePartie() {
    * AVEC L'ATELIER ACHETÉ, LE CHEMIN N'EST PAS LE MÊME.
    *
    * Choisir un candidat ouvre la composition du visage, et la partie ne
-   * démarre qu'après « C'est lui / C'est elle. Commencer. » — accordé en genre.
+   * démarre qu'après « C'est lui / C'est elle. Commencer. », accordé en genre.
    * Sans cette ligne, la seconde partie du test ne démarrait jamais, et le
    * contrôle qui suit se déclarait vide plutôt que de mentir. C'est exactement
    * ce qu'on lui demande de faire.
@@ -163,7 +163,7 @@ async function nouvellePartie() {
  * UNE SEULE NUIT NE SUFFIT PAS, et c'est ce qui a fait échouer la première
  * version : santé à 1, jauges au plancher, le personnage passait la nuit et se
  * réveillait au jour 2. Les pertes nocturnes sont modestes, et la santé ne
- * tombe pas d'un coup — c'est le jeu qui est clément, pas le test qui est
+ * tombe pas d'un coup, c'est le jeu qui est clément, pas le test qui est
  * faux. On dort donc jusqu'à ce que ça arrive, en remettant la santé à 1 à
  * chaque fois, avec une limite pour ne pas boucler sans fin si un jour le jeu
  * cessait de tuer.
@@ -212,13 +212,13 @@ verifier('à la mort, l\'Atelier est proposé',
  * ET IL DISPARAÎT POUR QUI L'A DÉJÀ PAYÉ.
  *
  * Sans ce second cas, le contrôle passerait aussi bien si la carte s'affichait
- * TOUJOURS — c'est-à-dire si elle vendait à ses propres clients ce qu'ils ont
+ * TOUJOURS : c'est-à-dire si elle vendait à ses propres clients ce qu'ils ont
  * acheté, ce qui est la façon la plus sûre de faire désinstaller un jeu.
  *
  * IL FAUT REMOURIR. La première version se contentait de poser l'achat puis de
  * recharger la page : on se retrouvait sur l'ÉCRAN-TITRE, où la carte est
- * évidemment absente. Le contrôle était vert parce qu'il ne regardait plus rien
- * — exactement le défaut qu'il était censé attraper.
+ * évidemment absente. Le contrôle était vert parce qu'il ne regardait plus rien,
+ * exactement le défaut qu'il était censé attraper.
  */
 await p.evaluate(() => localStorage.setItem('roi-du-carton-atelier', '1'));
 await nouvellePartie();

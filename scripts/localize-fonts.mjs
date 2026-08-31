@@ -40,7 +40,7 @@ for (const m of css.matchAll(blockRe)) {
 if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
 
 const slug = (s) => s.toLowerCase().replace(/\s+/g, '-');
-let outCss = '/* Polices auto-hébergées — générées par scripts/localize-fonts.mjs */\n';
+let outCss = '/* Polices auto-hébergées, générées par scripts/localize-fonts.mjs */\n';
 let n = 0;
 for (const f of faces) {
   const name = `${slug(f.family)}-${f.weight.replace(/\s+/g, '_')}${f.style === 'italic' ? '-italic' : ''}-${f.subset}.woff2`;

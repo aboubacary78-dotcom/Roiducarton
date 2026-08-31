@@ -1,6 +1,6 @@
-# Pack Nouveautés — 9 images (bricolage, solidarité, braderie)
+# Pack Nouveautés · 9 images (bricolage, solidarité, braderie)
 
-## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
+## 📦 Contexte projet (à lire en entier · tu pars de zéro, sans accès au code)
 
 Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie : un SDF
 survit jour après jour dans une ville française. Direction artistique
@@ -37,7 +37,7 @@ imite exactement ce style. Toute image qui s'en écarte sera refusée.
 
 ---
 
-### Le bricolage — les 6 objets fabriqués (le héros vient de les finir)
+### Le bricolage · les 6 objets fabriqués (le héros vient de les finir)
 
 Diorama : le héros carton, fier, présente/utilise l'objet qu'il vient de
 bricoler à partir de bric-à-brac récupéré. Objet bien lisible au premier plan.

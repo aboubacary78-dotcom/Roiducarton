@@ -102,7 +102,7 @@ export default function ShopScreen() {
 
   const handleBuy = async (item: ShopItem) => {
     // Fontaine du parc : l'eau est gratuite, mais toutes les 3 gorgées elle
-    // fait des siennes — on regarde une pub pour que ça se débloque.
+    // fait des siennes, on regarde une pub pour que ça se débloque.
     if (item.id === 'eau-fontaine' && (char.fountainUses || 0) % 3 === 2) {
       if (fountainBusy) return;
       setFountainBusy(true);

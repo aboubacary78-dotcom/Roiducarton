@@ -1,4 +1,4 @@
-# Pack 11 — Les trouvailles de La Récup' (29 vignettes)
+# Pack 11 · Les trouvailles de La Récup' (29 vignettes)
 
 ## 📦 Contexte projet
 
@@ -10,7 +10,7 @@ main**, photographié comme une maquette d'atelier.
 **« La Récup' »** est un de ses mini-jeux : on fouille le fond d'un container à
 ordures. On frotte le doigt sur un tas de détritus pour déblayer, ce qui est
 dessous apparaît, et on décide à chaque couche si on remonte avec son butin ou
-si on creuse encore — plus bas c'est plus rentable, mais le tas peut se
+si on creuse encore, plus bas c'est plus rentable, mais le tas peut se
 réveiller et on perd tout.
 
 **Le problème à régler.** Les objets qu'on déterre sont aujourd'hui affichés
@@ -27,7 +27,7 @@ Les autres packs demandaient des **scènes** en paysage. Ici on veut des
   tas de détritus sombre dans le jeu : un fond blanc ou beige le ferait
   ressortir comme un autocollant.
 - **Un seul objet par image**, centré, occupant environ 80 % du cadre.
-- **Vu de trois quarts**, légèrement en plongée — comme posé sur une table
+- **Vu de trois quarts**, légèrement en plongée, comme posé sur une table
   d'atelier et photographié de dessus.
 - **Aucun texte, aucune étiquette lisible, aucun personnage.**
 
@@ -37,14 +37,14 @@ Toujours du **carton kraft découpé** : cannelures visibles sur les tranches,
 papier plié, collages apparents. Une **ombre portée douce** sous l'objet pour
 le décoller du fond. Lumière chaude d'atelier venant du haut-gauche.
 
-**Ils seront affichés petits** — environ 40 pixels de côté dans la grille du
+**Ils seront affichés petits** : environ 40 pixels de côté dans la grille du
 jeu. Donc : silhouette nette, contraste franc, pas de détail minuscule qui
 disparaîtra. **Le test : réduis ton image à 40 px et vérifie qu'on reconnaît
 encore l'objet.** Si tu hésites, c'est raté.
 
 ## Le ton
 
-Ce sont des ordures. Elles doivent être **cabossées, tordues, sales** — mais
+Ce sont des ordures. Elles doivent être **cabossées, tordues, sales**, mais
 avec tendresse, jamais sordide. Une canette écrasée a du caractère ; une canette
 neuve n'a rien à faire ici.
 
@@ -59,7 +59,7 @@ neuve n'a rien à faire ici.
 
 ---
 
-### A. La consigne — ce qui se rapporte au kilo
+### A. La consigne · ce qui se rapporte au kilo
 
 Les déchets recyclables qu'on revend. Objets abîmés, sales, mais entiers.
 
@@ -72,7 +72,7 @@ Les déchets recyclables qu'on revend. Objets abîmés, sales, mais entiers.
 | `trouvaille-carton-plie.webp` | **Carton plié** | 📦 |
 | `trouvaille-boite-conserve.webp` | **Boîte de conserve** | 🥫 |
 
-### B. Le bazar — les bricoles
+### B. Le bazar · les bricoles
 
 De la matière brute, sans usage évident. C'est ce qui sert à bricoler.
 
@@ -97,7 +97,7 @@ Les mêmes matières, mais triées et mises de côté : un peu plus propres.
 | `trouvaille-bache-recup.webp` | **Bâche récupérée** | 🪟 |
 | `trouvaille-piece-recup.webp` | **Pièces détachées** | 🪛 |
 
-### D. Les vraies trouvailles — le fond du container
+### D. Les vraies trouvailles · le fond du container
 
 Les six objets qui font le sel du mini-jeu : ceux qu'on va chercher tout au fond, en prenant le risque de tout perdre. Ils doivent avoir l'air d'une récompense.
 

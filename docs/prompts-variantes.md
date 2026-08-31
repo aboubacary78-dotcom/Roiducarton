@@ -1,16 +1,16 @@
-# Prompts — Variantes réussite/échec par événement (pour Manus)
+# Prompts · Variantes réussite/échec par événement (pour Manus)
 
 **Vague 1 : les 30 événements d'exploration** = **60 images**.
 
 Le code est déjà câblé : à la fin d'un événement, le jeu cherche
 `result-<id>-good.webp` (issue heureuse) ou `result-<id>-bad.webp` (issue
 ratée) dans `client/public/assets/`. Si le fichier manque, il retombe sur
-l'image de la rencontre — donc tu peux livrer par petits lots, rien ne casse.
+l'image de la rencontre, donc tu peux livrer par petits lots, rien ne casse.
 
 ## Règles (identiques aux 27 précédentes)
 - DA habituelle : diorama carton kraft, personnages découpés à visage feutre,
   guirlande lumineuse, lumière chaude, humour noir.
-- **Paysage 3:2**, export **WebP** (⚠️ un vrai `.webp`, pas un PNG renommé —
+- **Paysage 3:2**, export **WebP** (⚠️ un vrai `.webp`, pas un PNG renommé,
   sinon je ré-encoderai comme la dernière fois, pas grave).
 - Même personnage SDF (barbe, manteau rapiécé) que sur les images existantes.
 - Noms de fichiers **exacts** : `result-<id>-good.webp` et `result-<id>-bad.webp`.
@@ -19,7 +19,7 @@ Chaque scène ci-dessous découle du **texte réel** de l'issue dans le jeu.
 
 ---
 
-| id | ✅ good — scène | ❌ bad — scène |
+| id | ✅ good, scène | ❌ bad, scène |
 |----|----------------|---------------|
 | `exp-jardinier` | Le SDF jardine avec le vieux jardinier clandestin, sourires, il reçoit une tomate en carton rouge. Complicité. | Le vieux jardinier méfiant le chasse d'un geste, bras croisés devant son potager caché. « Dégage. » |
 | `exp-enfant-perdu` | La mère serre son enfant retrouvé, tend 5€ et un sandwich au SDF héros, reconnaissance. | La mère récupère l'enfant en fusillant le SDF du regard, l'écarte, suspicion glaciale. |
@@ -55,10 +55,10 @@ Chaque scène ci-dessous découle du **texte réel** de l'issue dans le jeu.
 ---
 
 ## Total : 60 images
-Livre par lots si tu veux (ex. 10 par 10) — chaque image s'active dès qu'elle
+Livre par lots si tu veux (ex. 10 par 10) : chaque image s'active dès qu'elle
 arrive, le reste garde l'image de la rencontre en attendant.
 
 ## Vague 2 (sur demande)
 Les événements de **repos** (19), **voyage** et **boutique** suivent la même
-convention `result-<id>-good/bad.webp` — le code les gère déjà. Dis-moi quand
+convention `result-<id>-good/bad.webp` : le code les gère déjà. Dis-moi quand
 tu veux les prompts.

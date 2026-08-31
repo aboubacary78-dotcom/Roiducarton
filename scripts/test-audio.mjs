@@ -4,7 +4,7 @@
  * Trois règles écrites à la main méritent une preuve :
  *
  *   1. LES VARIANTES NE SE RÉPÈTENT JAMAIS D'AFFILÉE. Tirer au hasard parmi
- *      trois prises redonne la même une fois sur trois — soit exactement le
+ *      trois prises redonne la même une fois sur trois, soit exactement le
  *      métronome que les variantes devaient casser.
  *   2. LE SON DE L'ARGENT DIT LA SOMME. Deux pièces, une poignée, une liasse.
  *   3. L'ALERTE DE JAUGE NE SONNE QU'AU FRANCHISSEMENT, et se réarme quand on
@@ -64,7 +64,7 @@ Object.defineProperty(globalThis.navigator, 'language', { value: 'fr-FR', config
 
 /*
  * Le chargement répond « présent » sans réseau. Chaque tampon est étiqueté du
- * nom de son fichier — par identité d'objet, pas par taille — pour qu'on
+ * nom de son fichier (par identité d'objet, pas par taille) pour qu'on
  * sache à la lecture quel son vient de partir.
  */
 const nomDuTampon = new WeakMap();
@@ -90,7 +90,7 @@ const son = await import(out);
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 // loadAudio → decodeAudioData → playBuffer : trois promesses à laisser filer.

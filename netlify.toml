@@ -2,7 +2,7 @@
 #
 # Le jeu est entièrement statique : aucun appel serveur, tout vit dans le
 # navigateur (localStorage). `pnpm build` produit AUSSI un bundle serveur dans
-# dist/, qui ne sert qu'à l'aperçu local — ce qu'il faut publier, c'est
+# dist/, qui ne sert qu'à l'aperçu local, ce qu'il faut publier, c'est
 # uniquement dist/public.
 
 [build]
@@ -49,7 +49,7 @@
 # Les 14 Mo de sons n'avaient AUCUNE règle : chaque visite les revalidait un
 # par un, et le lit sonore du quartier arrivait après le silence. Un mois, et
 # pas un an comme les images : ces fichiers ne sont pas hachés, et la
-# bibliothèque audio est appelée à être remplacée — un cache éternel condamnerait
+# bibliothèque audio est appelée à être remplacée, un cache éternel condamnerait
 # les joueurs déjà venus à garder l'ancienne pendant douze mois.
 [[headers]]
   for = "/audio/*"

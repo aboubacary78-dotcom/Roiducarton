@@ -1,13 +1,13 @@
 /*
- * LE CULOT — l'écran de marchandage.
+ * LE CULOT : l'écran de marchandage.
  *
  * Deux boutons, jamais plus : INSISTER (gratuit, il grogne, ça grignote) et
  * UN ARGUMENT (ça engage quelque chose de vrai). Plus la poignée de main, qui
- * est disponible en permanence — c'est elle, la vraie décision.
+ * est disponible en permanence, c'est elle, la vraie décision.
  *
  * Ce que le joueur voit, et rien d'autre :
  *   - le prix de départ barré, la remise en cours en gros, le prix qu'il paiera
- *   - le visage du commerçant (cinq humeurs), pas un compteur — sauf s'il a du
+ *   - le visage du commerçant (cinq humeurs), pas un compteur, sauf s'il a du
  *     flair (nez sensible / paranoïaque), auquel cas la jauge est chiffrée
  *   - ce que chaque argument engage, écrit noir sur blanc avant de cliquer
  *
@@ -159,8 +159,8 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
           image="/assets/intro-marchandage.webp"
           onStart={() => setIntro(false)}
           lines={[
-            { emoji: '💬', fr: "INSISTER ne coûte rien et fait grignoter le prix. Mais à force d'entendre la même chose, il cesse de bouger — et il vous le dira.", en: "PUSHING is free and shaves the price. Hear the same line too often and he stops budging — and he'll tell you." },
-            { emoji: '🗣️', fr: "UN ARGUMENT engage quelque chose de vrai : un objet du sac, votre réputation, la pluie dehors, votre fierté. Ça paie gros — ou ça se retourne.", en: "AN ARGUMENT stakes something real: an item from your bag, your reputation, the rain outside, your pride. It pays big — or it backfires." },
+            { emoji: '💬', fr: "INSISTER ne coûte rien et fait grignoter le prix. Mais à force d'entendre la même chose, il cesse de bouger, et il vous le dira.", en: "PUSHING is free and shaves the price. Hear the same line too often and he stops budging, and he'll tell you." },
+            { emoji: '🗣️', fr: "UN ARGUMENT engage quelque chose de vrai : un objet du sac, votre réputation, la pluie dehors, votre fierté. Ça paie gros, ou ça se retourne.", en: "AN ARGUMENT stakes something real: an item from your bag, your reputation, the rain outside, your pride. It pays big, or it backfires." },
             { emoji: '😒', fr: "Sa patience se lit sur son visage. Plus il a déjà lâché, plus le coup suivant lui coûte cher.", en: "His patience shows on his face. The more he's already given, the dearer the next step costs him." },
             { emoji: '🤝', fr: "Serrez la main quand vous voulez : le prix affiché est acquis.", en: "Shake on it whenever you like: the shown price is yours." },
             { emoji: '🚪', fr: "S'il craque, il ne vous sert plus de la journée. Une porte qui se ferme, pas une amende.", en: "If he snaps, he won't serve you today. A door closing, not a fine." },
@@ -293,7 +293,7 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
               </button>
             </div>
             <button onClick={shake} className="btn-primary w-full py-3 text-sm">
-              🤝 {tr('Serrer la main', 'Shake on it')} — {price} €
+              🤝 {tr('Serrer la main', 'Shake on it')} · {price} €
             </button>
           </>
         ) : (
@@ -324,7 +324,7 @@ export default function HaggleMinigame({ keeper, item, asking, onClose }: {
                       <span className="text-lg shrink-0">{a.emoji}</span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-[12px] font-bold text-[#4A3B28]">
-                          {tc(a.label)}{id === 'objet' && trade ? ` — ${trade.emoji} ${tc(trade.name)}` : ''}
+                          {tc(a.label)}{id === 'objet' && trade ? ` · ${trade.emoji} ${tc(trade.name)}` : ''}
                         </span>
                         <span className="block text-[10px] text-[#A08B70]">{tc(a.cost)}</span>
                       </span>

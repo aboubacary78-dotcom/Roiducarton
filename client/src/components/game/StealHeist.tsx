@@ -302,10 +302,10 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
   const pendingRef = useRef<Pending[]>([]);
   const spawnedRef = useRef({ chaser: false, camper: false });
   /*
-   * EFFACER UN PALIER — vidéo récompensée du casse.
+   * EFFACER UN PALIER : vidéo récompensée du casse.
    *
    * La jauge est à cliquets : elle ne redescend jamais sous le palier atteint,
-   * et le joueur le sait — c'est écrit dans les règles du mini-jeu. Rendre
+   * et le joueur le sait, c'est écrit dans les règles du mini-jeu. Rendre
    * réversible ce qu'on a présenté comme irréversible est le seul cas où une
    * publicité ressemble à un cadeau plutôt qu'à un péage.
    *
@@ -402,15 +402,15 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
   }, [queueSpawn, tuning]);
 
   /*
-   * SORTIR SANS JOUER — « personne ne vous a vu ».
+   * SORTIR SANS JOUER : « personne ne vous a vu ».
    *
    * Le casse est le mini-jeu le plus exigeant du jeu : une grille, des rondes,
    * une jauge qui ne redescend pas. Certains n'y arriveront jamais, et la
    * cible qu'ils convoitaient leur restera fermée pour toujours. Ce bouton
    * leur ouvre la porte.
    *
-   * Il rend `jackpot`, comme une sortie parfaite. J'avais d'abord mis `ok` —
-   * un vol propre mais sans l'objet convoité ni le respect — pour que le gros
+   * Il rend `jackpot`, comme une sortie parfaite. J'avais d'abord mis `ok`,
+   * un vol propre mais sans l'objet convoité ni le respect, pour que le gros
    * lot reste ce qu'on va chercher soi-même. Ce n'est pas la règle retenue,
    * et la raison vaut d'être notée : ce qu'on achète, c'est de ne pas jouer le
    * mini-jeu, pas une demi-récompense. Un butin amputé sans explication se lit
@@ -419,7 +419,7 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
    * Le frein est ailleurs, et il est explicite : deux casses joués avant le
    * troisième. Même règle que l'extincteur au combat.
    *
-   * Il n'apparaît qu'avant le premier pas. Après, on est engagé — le proposer
+   * Il n'apparaît qu'avant le premier pas. Après, on est engagé, le proposer
    * au bord de la catastrophe en ferait un filet de rattrapage, et c'est déjà
    * le rôle d'« effacer un palier ».
    */
@@ -657,8 +657,8 @@ function StealHeistInner({ target }: { target: HeistTarget }) {
         </div>
 
         {/* L'avant-dernier palier : le bouclage est le cran suivant, et la
-            jauge ne redescend pas toute seule. Le bouton dit ce qu'il rend —
-            un palier — parce que c'est exactement le mot que le mini-jeu a
+            jauge ne redescend pas toute seule. Le bouton dit ce qu'il rend,
+            un palier, parce que c'est exactement le mot que le mini-jeu a
             employé pour dire qu'on ne le récupérerait jamais. */}
         {status === 'playing' && !palierEfface && tier === 2 && canOfferRewarded('vol') && (
           <motion.button

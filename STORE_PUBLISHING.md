@@ -18,8 +18,8 @@ Ce guide explique chaque étape, de zéro jusqu'à la mise en ligne.
 | Les deux | [Node.js 20+](https://nodejs.org) et `pnpm` (`npm i -g pnpm`) |
 
 Comptes nécessaires :
-- **Compte développeur Google Play** : 25 $ une fois — https://play.google.com/console
-- **Compte développeur Apple** : 99 $/an — https://developer.apple.com/programs/
+- **Compte développeur Google Play** : 25 $ une fois, https://play.google.com/console
+- **Compte développeur Apple** : 99 $/an, https://developer.apple.com/programs/
 - **Compte AdMob** (gratuit) : https://admob.google.com
 
 ---
@@ -37,13 +37,13 @@ Ce qui y a été posé à la main, et qu'un dossier régénéré n'aurait pas :
 | Réglage | Où | Pourquoi |
 |---|---|---|
 | App ID AdMob | `AndroidManifest.xml` | **Sans lui, l'application se ferme au lancement** : le SDK de Google lève une exception fatale s'il ne le trouve pas. |
-| API 35 | `variables.gradle` | Le Play Store refuse tout envoi visant moins que l'API 35. Le gabarit de Capacitor 6 en vise 34 — donc rejet au téléversement. |
+| API 35 | `variables.gradle` | Le Play Store refuse tout envoi visant moins que l'API 35. Le gabarit de Capacitor 6 en vise 34, donc rejet au téléversement. |
 | Version tirée de `package.json` | `app/build.gradle` | Le gabarit fige « 1.0 / versionCode 1 ». On aurait publié la 3.31 sous l'étiquette 1.0, et la mise à jour suivante aurait été refusée. |
 | Palette du jeu | `res/values/colors.xml` | Sans elle, Android emprunte l'indigo et le rose de Capacitor pour la barre d'état et les poignées de sélection. |
 | Icônes et écrans de démarrage | `res/mipmap-*`, `res/drawable-*` | Sinon le jeu s'installe sous le logo de Capacitor. |
 
-Ce qui est réellement jetable — le site copié (94 Mo), les sorties de
-compilation, `local.properties` — est exclu par `android/.gitignore`.
+Ce qui est réellement jetable, le site copié (94 Mo), les sorties de
+compilation, `local.properties` : est exclu par `android/.gitignore`.
 
 Pour vérifier que tout cela tient toujours, sans avoir à compiler :
 
@@ -64,7 +64,7 @@ pnpm cap:icones
 pnpm cap:add:ios          # nécessite un Mac + Xcode
 ```
 
-⚠️ Les mêmes réglages manuels seront à refaire côté iOS — voir §3.3, et pense
+⚠️ Les mêmes réglages manuels seront à refaire côté iOS, voir §3.3, et pense
 à commiter `ios/` une fois généré, pour la même raison qu'Android.
 
 ### À chaque modification du jeu
@@ -80,7 +80,7 @@ pnpm cap:sync    # copie le web dans les projets natifs
 
 ### 3.1 Créer tes blocs d'annonces
 
-Il faut **une application AdMob par plate-forme** — les blocs ne se partagent
+Il faut **une application AdMob par plate-forme**, les blocs ne se partagent
 pas entre Android et iOS.
 
 **Android : fait** (« Le Roi du Carton », compte `ca-app-pub-6336322065829631`),
@@ -110,7 +110,7 @@ sont dans `AD_UNITS.android` (`client/src/lib/ads.ts`).
 
 **iOS : à faire le jour où la plateforme existera.** Les blocs y sont encore
 ceux de démonstration. Il faudra créer une **seconde application** dans
-AdMob — les blocs ne se partagent pas entre plates-formes.
+AdMob, les blocs ne se partagent pas entre plates-formes.
 
 > Ces identifiants ne sont pas des secrets : ils partent dans chaque APK
 > distribué et s'en extraient en une commande. Google les écrit lui-même en
@@ -121,7 +121,7 @@ AdMob — les blocs ne se partagent pas entre plates-formes.
 On pourrait croire qu'installer ses vrais identifiants veut dire couper le
 mode test. C'est le contraire : la bonne façon de se relire, c'est de demander
 des annonces de **démonstration** à travers ses **vrais blocs**. On éprouve le
-vrai chemin — le bon compte, le bon bloc, le bon format — sans jamais produire
+vrai chemin (le bon compte, le bon bloc, le bon format) sans jamais produire
 d'impression réelle.
 
 > ⚠️ Voir une vraie annonce dans sa propre application, c'est finir par
@@ -153,14 +153,14 @@ exception fatale s'il ne la trouve pas.
 visible : simplement, plus rien ne se diffuse.
 `scripts/verifie-android.py` compare les deux préfixes.
 
-**iOS** — dans `ios/App/App/Info.plist` :
+**iOS** : dans `ios/App/App/Info.plist` :
 
 ```xml
 <key>GADApplicationIdentifier</key>
 <string>ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY</string>
 ```
 
-**iOS 14+ — la demande de suivi est OBLIGATOIRE**, elle n'est plus facultative
+**iOS 14+, la demande de suivi est OBLIGATOIRE**, elle n'est plus facultative
 depuis que le consentement est implémenté (`client/src/lib/ads.ts`). Sans ce
 texte, l'application plante à l'ouverture du formulaire, ou Apple la refuse en
 revue :
@@ -178,14 +178,14 @@ jeu à l'acceptation.
 
 Le code appelle le SDK UMP de Google, mais **c'est la console AdMob qui décide
 de ce qui s'affiche**. Sans ces deux messages, le formulaire ne s'ouvrira jamais
-et le consentement restera « inconnu » — donc publicité non personnalisée
+et le consentement restera « inconnu », donc publicité non personnalisée
 partout, y compris là où elle serait permise.
 
 Dans **Confidentialité et messages** :
 
-1. **Message de consentement RGPD** — à créer et publier pour l'EEE, le
+1. **Message de consentement RGPD** : à créer et publier pour l'EEE, le
    Royaume-Uni et la Suisse. C'est lui que Google exige depuis janvier 2024.
-2. **Message ATT** (iOS uniquement) — c'est lui qui déclenche la demande
+2. **Message ATT** (iOS uniquement) : c'est lui qui déclenche la demande
    d'autorisation de suivi d'Apple, avant le message RGPD.
 
 Publie les deux **pour chacune des deux applications** (Android et iOS)
@@ -212,27 +212,27 @@ formulaire depuis un pays non concerné. À retirer avant publication.
 La bannière ne s'affiche jamais pendant une journée de jeu ni pendant un
 mini-jeu, et c'est délibéré : le pouce y travaille en bas de l'écran, et une
 bannière sous le pouce ne produit pas de l'agacement mais des **clics
-accidentels** — que les régies sanctionnent et qui font désinstaller.
+accidentels** : que les régies sanctionnent et qui font désinstaller.
 
 ⚠️ Un point à éprouver sur appareil : à la mort, le joueur reçoit
 l'interstitiel plein écran **puis** arrive sur l'écran de fin qui porte la
 bannière. Deux publicités dans le même moment. Si c'est trop lourd à l'usage,
 retirer `'game-over'` de `ECRANS_DE_LECTURE` dans `pages/Home.tsx` suffit.
 
-### Les achats intégrés — branchés
+### Les achats intégrés · branchés
 
 Trois produits non consommables, tous décrits dans **`docs/design/prix.md`** :
 `noads` (2,99 €), `atelier` (4,99 €), `pack_complet` (6,99 €).
 
 La facturation passe par **`cordova-plugin-purchase` 13.18**, qui embarque la
 Google Play Billing Library 9. Elle vit dans **`client/src/lib/facturation.ts`**
-et n'est appelée que par `ads.ts` — aucun écran ne parle au magasin
+et n'est appelée que par `ads.ts` : aucun écran ne parle au magasin
 directement.
 
 Ce qui a changé, et pourquoi c'était sérieux : jusqu'à la version 3.63,
 `purchaseRemoveAds()` ouvrait le produit GRATUITEMENT, partout. C'était un
 marqueur de développement assumé tant qu'aucun magasin n'existait, mais le
-défaut ne se voyait pas — l'écran est identique, le bouton répond, le produit
+défaut ne se voyait pas, l'écran est identique, le bouton répond, le produit
 s'ouvre, et personne ne paie. `scripts/test-facturation.mjs` appuie
 maintenant sur les trois boutons d'achat **sur le build de production** et
 vérifie que rien ne s'ouvre.
@@ -244,7 +244,7 @@ Deux conséquences pour la compilation :
 - **Les achats ne se testent pas depuis Android Studio.** Google Play Billing
   ne répond qu'à une application installée depuis le Play Store. Il faut donc
   un `.aab` signé, téléversé sur le canal *Test interne*, installé par le lien
-  Play — et son compte inscrit en **testeur de licence** pour payer avec une
+  Play, et son compte inscrit en **testeur de licence** pour payer avec une
   carte de test. La marche à suivre complète est dans `docs/design/prix.md`.
 
 Avant l'application, les boutons affichent « Boutique indisponible » : c'est
@@ -265,9 +265,9 @@ une pub ailleurs, importe `showInterstitial`, `showRewarded` ou `showBanner`.
 ## 4 bis. Icône et écran de démarrage (déjà dessinés ✅)
 
 Les sources sont dans le projet, dans la DA du jeu (carton couronné) :
-- `resources/icon.png` (1024×1024) — icône pour les deux stores
-- `resources/splash.png` (2732×2732) — écran de démarrage
-- `client/public/favicon.png` + `apple-touch-icon.png` — versions web
+- `resources/icon.png` (1024×1024) : icône pour les deux stores
+- `resources/splash.png` (2732×2732) : écran de démarrage
+- `client/public/favicon.png` + `apple-touch-icon.png`, versions web
 
 Pour régénérer après modification du design : `node scripts/generate-assets.mjs`.
 
@@ -314,18 +314,18 @@ Dans Xcode :
 
 ## 6. Checklist avant soumission
 
-- [x] Icône et écran de démarrage personnalisés — Android (`pnpm cap:icones`)
-- [x] App ID AdMob déclaré côté natif — Android
-- [x] Niveau d'API exigé par le Play Store — Android (API 35)
-- [x] Numéro de version natif tiré de `package.json` — Android
+- [x] Icône et écran de démarrage personnalisés · Android (`pnpm cap:icones`)
+- [x] App ID AdMob déclaré côté natif · Android
+- [x] Niveau d'API exigé par le Play Store · Android (API 35)
+- [x] Numéro de version natif tiré de `package.json` · Android
 - [x] Vrais blocs AdMob Android en place (compte `ca-app-pub-6336322065829631`)
-- [ ] `USE_TEST_ADS = false` — **au moment de fabriquer l'AAB, pas avant**
+- [ ] `USE_TEST_ADS = false` · **au moment de fabriquer l'AAB, pas avant**
 - [ ] Messages de consentement RGPD publiés dans la console AdMob (§3.4)
-- [x] Politique de confidentialité en ligne, à une URL **absolue** —
+- [x] Politique de confidentialité en ligne, à une URL **absolue** · 
       https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html
       (dans `PRIVACY_URL`, `client/src/components/game/SettingsScreen.tsx`).
       La même adresse sert au message de consentement AdMob et à la fiche Play.
-- [ ] Licence audio — **à confirmer par l'auteur, pas un blocage établi**.
+- [ ] Licence audio · **à confirmer par l'auteur, pas un blocage établi**.
       `docs/audio/livraison-manus.md` affirme que les bruitages viennent d'un
       compte ElevenLabs *Free*, donc en usage non commercial. Cette note vient
       du prestataire qui a livré le lot, et l'auteur du jeu la considère comme
@@ -334,7 +334,7 @@ Dans Xcode :
       elle ne se vérifie que depuis le compte qui les a produits.
       Si régénération il faut : les consignes de fabrication de 382 des 405
       fichiers sont conservées dans `docs/prompts-son/`, et les noms de
-      fichiers ne changeraient pas — donc aucune ligne de code à toucher.
+      fichiers ne changeraient pas, donc aucune ligne de code à toucher.
 - [ ] Achat « Sans pub » réellement branché (voir §4)
 - [ ] Captures d'écran pour chaque taille demandée
 - [ ] Compilé et testé sur un vrai appareil

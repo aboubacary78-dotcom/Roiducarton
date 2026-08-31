@@ -1,6 +1,6 @@
-# 🎨 Manus — Images VAGUE 3 à générer (Le Roi du Carton)
+# 🎨 Manus · Images VAGUE 3 à générer (Le Roi du Carton)
 
-## ⚠️ À LIRE EN PREMIER — ce qui n'a pas marché
+## ⚠️ À LIRE EN PREMIER · ce qui n'a pas marché
 
 Les derniers envois contenaient les variantes **exploration (`result-exp-*`)** et
 **repos (`result-rest-*`)** : elles sont **déjà dans le jeu depuis début juillet**.
@@ -23,7 +23,7 @@ ls client/public/assets | grep -E "result-travel-|followup-"
 
 - **DA habituelle** : diorama carton kraft, personnage SDF découpé (barbe,
   manteau rapiécé), visage feutre, guirlande lumineuse, lumière chaude, humour noir.
-- **Format paysage 3:2**, export **vrai `.webp`** (pas un PNG renommé — sinon je
+- **Format paysage 3:2**, export **vrai `.webp`** (pas un PNG renommé, sinon je
   le ré-encode, mais autant éviter).
 - **Noms de fichiers EXACTS** (le code cherche `result-<id>-good.webp` /
   `result-<id>-bad.webp`). Une faute de nom = image ignorée.
@@ -196,4 +196,4 @@ d'abord la rencontre (`followup-<nom>.webp`), puis les variantes.
    (s'il n'a que des `result-exp-…` ou `result-rest-…`, **c'est le mauvais lot**).
 3. Vraies images WebP paysage 3:2, même DA carton kraft que les précédentes.
 
-**Total : 114 images.** Livrable par petits lots — chacune s'active dès son arrivée.
+**Total : 114 images.** Livrable par petits lots, chacune s'active dès son arrivée.

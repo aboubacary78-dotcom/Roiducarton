@@ -12,13 +12,13 @@ travail, et il est déjà là.
 
 Trois familles à produire, et elles n'obéissent pas aux mêmes règles :
 
-  · ic_launcher — l'icône carrée classique, pour les téléphones anciens.
-  · ic_launcher_round — la même, découpée en rond, pour les lanceurs ronds.
-  · ic_launcher_foreground — l'icône ADAPTATIVE (Android 8+). Le système la
+  · ic_launcher, l'icône carrée classique, pour les téléphones anciens.
+  · ic_launcher_round, la même, découpée en rond, pour les lanceurs ronds.
+  · ic_launcher_foreground, l'icône ADAPTATIVE (Android 8+). Le système la
     recadre lui-même en rond, en carré, en goutte… selon le téléphone. Le
     dessin ne doit donc occuper que les deux tiers centraux du fichier : ce
     qui déborde de cette « zone sûre » peut être rogné. C'est le piège
-    classique — livrer l'icône pleine cadre revient à se faire couper la
+    classique, livrer l'icône pleine cadre revient à se faire couper la
     couronne.
 
 Les fichiers écrasés gardent EXACTEMENT les dimensions posées par Capacitor :
@@ -68,7 +68,7 @@ def deborder(source: Image.Image, largeur: int, hauteur: int, part: float) -> Im
     Poser le carré source sur un aplat laissait une couture nette : les deux
     dessins portent un dégradé beige, et deux dégradés ne se raccordent
     jamais. Étirer la dernière rangée de pixels prolonge le dégradé par
-    lui-même — il n'y a plus de seconde couleur, donc plus rien à raccorder.
+    lui-même, il n'y a plus de seconde couleur, donc plus rien à raccorder.
 
     `part` est la fraction du plus petit côté qu'occupe le dessin : ce qui est
     dedans est garanti visible, ce qui est autour n'est que du beige.

@@ -3,7 +3,7 @@
  *
  * Un réglage de volume est le genre de contrôle qui a l'air de marcher sans
  * marcher : le curseur bouge, le pourcentage change, la valeur est bien
- * rangée dans le localStorage — et le son sort au même niveau, parce que le
+ * rangée dans le localStorage, et le son sort au même niveau, parce que le
  * facteur n'a jamais atteint le graphe audio. Rien à l'écran ne le dit.
  *
  * On mesure donc le SIGNAL, pas l'état de l'interface. Le jeu joue dans un
@@ -12,11 +12,11 @@
  *
  * Quatre choses se vérifient, et chacune correspond à un ratage possible :
  *
- *   ① À 100 % le son sort inchangé — un curseur qui atténue en position haute
+ *   ① À 100 % le son sort inchangé, un curseur qui atténue en position haute
  *     abîme le jeu de tout le monde pour rien.
  *   ② À 30 % il sort nettement plus bas.
  *   ③ À 0 % il ne sort plus rien.
- *   ④ Le FOND baisse sans emporter les effets — c'est toute la raison d'avoir
+ *   ④ Le FOND baisse sans emporter les effets, c'est toute la raison d'avoir
  *     deux curseurs plutôt qu'un, et c'est la seule chose qu'un test
  *     d'interface ne verra jamais.
  *
@@ -35,7 +35,7 @@ p.on('pageerror', e => erreurs.push(String(e).slice(0, 140)));
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -48,7 +48,7 @@ await new Promise(r => setTimeout(r, 600));
  * ON MESURE À LA SORTIE DU BUS, PAS À CELLE DE LA CARTE SON.
  *
  * Première tentative : remplacer `AudioContext.prototype.destination` par un
- * accesseur qui rend un analyseur. Élégant, et inutilisable — la sonde ne
+ * accesseur qui rend un analyseur. Élégant, et inutilisable, la sonde ne
  * s'installe qu'au moment où quelque chose LIT `destination`, c'est-à-dire
  * quand un premier son part. Le test se retrouvait à vérifier qu'il avait pu
  * poser sa sonde, et échouait là-dessus plutôt que sur le volume.
@@ -56,7 +56,7 @@ await new Promise(r => setTimeout(r, 600));
  * On prend donc le problème par l'autre bout : le jeu expose son bus d'effets,
  * et un nœud audio peut alimenter plusieurs sorties à la fois. On branche
  * l'analyseur EN PLUS de la sortie normale. Tout ce qui traverse les curseurs
- * y passe — les effets directement, le fond parce qu'il est branché sous les
+ * y passe, les effets directement, le fond parce qu'il est branché sous les
  * effets.
  */
 
@@ -121,7 +121,7 @@ const EFFET = 'jauge-rouge';
  * ⓪ LE DÉFAUT, SUR UNE INSTALLATION NEUVE.
  *
  * Ce contrôle existe parce que la première version l'a raté : `getItem` rend
- * `null` quand rien n'est mémorisé, et `Number(null)` vaut 0 — un zéro accepté
+ * `null` quand rien n'est mémorisé, et `Number(null)` vaut 0, un zéro accepté
  * comme un réglage volontaire. Les deux curseurs s'ouvraient donc à 0 %, et le
  * jeu était muet pour tout nouveau joueur, sans un mot d'explication à
  * l'écran. Le localStorage a été vidé au début de ce test : on est bien dans

@@ -130,7 +130,7 @@ export default function MainScreen() {
   const nextTitle = char.day >= 2 ? STREET_TITLES.find(t => t.day > char.day) : undefined;
   // Une action qui ferait descendre d'un palier de Dignité se signale AVANT
   // d'être touchée : c'est le moment où la mécanique centrale du jeu devient
-  // visible. Le texte dit « peut », jamais « va » — le coût exact dépend du
+  // visible. Le texte dit « peut », jamais « va », le coût exact dépend du
   // déroulement du mini-jeu, et une annonce qui promet plus qu'elle ne sait se
   // repère tout de suite.
   // Les images de résultat des actions sont demandées pendant que le joueur
@@ -140,7 +140,7 @@ export default function MainScreen() {
   /*
    * L'ÉCHÉANCE S'OUVRE TOUTE SEULE. ELLE SEULE.
    *
-   * On arrive sur le hub le jour dit, et le prêteur est déjà là — il n'y a pas
+   * On arrive sur le hub le jour dit, et le prêteur est déjà là, il n'y a pas
    * de bouton pour l'éviter, c'est tout l'intérêt d'une date qu'on a acceptée
    * trois jours plus tôt.
    *
@@ -191,7 +191,7 @@ export default function MainScreen() {
   const nextWeather = WEATHER_TYPES[nextWeatherType];
 
   /*
-   * LE PREMIER JOUR D'UNE PREMIÈRE PARTIE — voir `lib/coach`.
+   * LE PREMIER JOUR D'UNE PREMIÈRE PARTIE : voir `lib/coach`.
    *
    * Lu une seule fois, au montage : `loadHighScores` et `loadGraves` relisent
    * le stockage local à chaque appel, et cet écran se rend souvent.
@@ -307,7 +307,7 @@ export default function MainScreen() {
             {/*
               LA PORTE DU MARCHÉ NOIR, ET ELLE RESTE UNE PORTE.
               Discrète, à côté des Options : un onglet Boutique ne convertit
-              presque personne — on n'y va que si on a déjà décidé. Ce qui
+              presque personne, on n'y va que si on a déjà décidé. Ce qui
               convertit, ce sont les entrées AU MOMENT où la chose manque, et
               elles vivent ailleurs (écran de mort, après un plein écran).
               La mettre en avant ici ne ferait que salir le hub.
@@ -335,7 +335,7 @@ export default function MainScreen() {
            était rendu en 10 px, en gris, entre les pastilles et les boutons :
            le plus faible poids visuel de l'écran pour l'information la plus
            structurante. Il monte donc sous l'identité, en taille de corps, avec
-           la commande de la semaine juste dessous — deux horizons visibles à
+           la commande de la semaine juste dessous, deux horizons visibles à
            tout instant, un court et un long. */}
       <motion.div
         initial={{ y: 10, opacity: 0 }}
@@ -395,7 +395,7 @@ export default function MainScreen() {
             {commande.claimed
               ? tr('Encaissée. Nouvelle commande lundi.', 'Filled. New order on Monday.')
               : commandeFaite
-                ? tr(`Terminée — toucher pour encaisser +${commandeD.karma} 👑`, `Done — tap to collect +${commandeD.karma} 👑`)
+                ? tr(`Terminée · toucher pour encaisser +${commandeD.karma} 👑`, `Done · tap to collect +${commandeD.karma} 👑`)
                 : tr(`+${commandeD.karma} 👑 · ${daysLeft()} jour${daysLeft() > 1 ? 's' : ''} restant${daysLeft() > 1 ? 's' : ''}`,
                      `+${commandeD.karma} 👑 · ${daysLeft()} day${daysLeft() > 1 ? 's' : ''} left`)}
           </p>
@@ -492,7 +492,7 @@ export default function MainScreen() {
          * QUELQU'UN DANS LA SCÈNE, PAS UNE CARTE DE PLUS.
          *
          * La rencontre était une `craft-card` beige posée entre le contrat, la
-         * météo et les jauges — la cinquième carte identique d'une pile de
+         * météo et les jauges, la cinquième carte identique d'une pile de
          * cartes identiques. Testée en vrai : personne ne la voyait. Le défaut
          * n'était pas la mécanique, c'était qu'un événement rare portait
          * exactement le même habit que le mobilier permanent.
@@ -541,7 +541,7 @@ export default function MainScreen() {
               dès la première action faite.
 
               Et quand quelqu'un est là, c'est CE qu'il fait qu'on lit : une
-              odeur de café intéresse moins qu'une personne qui vous regarde —
+              odeur de café intéresse moins qu'une personne qui vous regarde,
               et c'est cette phrase-là qui dit s'il faut s'en méfier. */}
           {arrivee ? tr(ARRIVEE.fr, ARRIVEE.en)
             : showNpc && streetNpc ? tr(streetNpc.situationFr, streetNpc.situationEn)
@@ -565,7 +565,7 @@ export default function MainScreen() {
       {/* ---- LES JAUGES, EN VEILLE ----
            Descendues sous la météo : elles n'ont pas besoin d'être lues, mais
            d'être vues quand ça va mal. Le seuil de danger les fait pulser et
-           fait apparaître leur chiffre — c'est ce rappel-là qui compte, pas
+           fait apparaître leur chiffre, c'est ce rappel-là qui compte, pas
            leur place en haut de l'écran. */}
       <motion.div
         id="tuto-stats"
@@ -644,13 +644,13 @@ export default function MainScreen() {
           CELUI QUI VOUS A VU COMPTER VOS PIÈCES.
 
           Sa proposition s'ouvrait toute seule en plein écran, et ça se lisait
-          comme un événement forcé sorti de nulle part — c'était le retour du
+          comme un événement forcé sorti de nulle part, c'était le retour du
           premier joueur qui l'a rencontré, et il avait raison. Une dette à
           rendre n'a pas à demander la permission ; une PROPOSITION, si.
 
           La carte dit donc d'où il sort avant qu'on le rencontre : il est là
           parce qu'on est fauché, et il ne s'adresse qu'à ceux qui le sont. On
-          le touche pour aller lui parler — et là seulement, il prend l'écran.
+          le touche pour aller lui parler, et là seulement, il prend l'écran.
         */}
         {preteur && !dette && (
           <motion.button
@@ -708,7 +708,7 @@ export default function MainScreen() {
         )}
 
         {/* Action risquée : Voler. Absente du tout premier écran, comme la
-            Bagarre — ce sont les deux actions qu'un débutant ne peut pas
+            Bagarre, ce sont les deux actions qu'un débutant ne peut pas
             évaluer, et ce sont celles qui le tuent. */}
         {arsenal && (
         <motion.button
@@ -738,7 +738,7 @@ export default function MainScreen() {
 
       {/* Troisième temps : le premier soir, le bouton ne reste pas seul. La
           nuit n'est pas un écran de chargement, c'est une épreuve qu'on subit
-          sans rien pouvoir faire — autant le dire avant, pas après. */}
+          sans rien pouvoir faire, autant le dire avant, pas après. */}
       {crepuscule && (
         <motion.p
           initial={{ opacity: 0, y: 6 }}

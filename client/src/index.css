@@ -22,20 +22,20 @@
   --color-accent-gold: #B8860B;
 
   /* ═════════════════════════════════════════════════════════════════════════
-   * LA PALETTE DIÉGÉTIQUE — SIX OBJETS POSÉS SUR LE CARTON
+   * LA PALETTE DIÉGÉTIQUE : SIX OBJETS POSÉS SUR LE CARTON
    *
    * Mesuré sur les 400 déclarations de couleur du projet : le kraft occupe la
    * plage 24°–33° de la roue chromatique, et les DEUX teintes que le jeu
-   * utilisait le plus pour attirer l'œil campaient dedans — l'or à 43°, le
+   * utilisait le plus pour attirer l'œil campaient dedans, l'or à 43°, le
    * jaune à 42°. Elles ne pouvaient rien signaler : elles étaient de la même
    * famille que le décor. Les deux seules qui s'en détachaient, le vert (136°)
-   * et le bleu (205°), étaient les MOINS saturées du jeu — 35 % et 48 %, quand
+   * et le bleu (205°), étaient les MOINS saturées du jeu, 35 % et 48 %, quand
    * le carton lui-même monte à 61 %.
    *
    * D'où la grisaille dont parlent les testeurs : ce n'était pas un manque de
    * couleur, c'était un manque d'écart.
    *
-   * On ne peut pas répondre par des couleurs d'interface — un bouton vert
+   * On ne peut pas répondre par des couleurs d'interface, un bouton vert
    * brillant casserait le carton en une seconde. Chaque couleur vient donc
    * d'un OBJET que quelqu'un a posé sur le décor, et cet objet a une physique
    * qui décide de son rôle. Ce n'est pas une convention, c'est une mesure :
@@ -49,8 +49,8 @@
    * des SURFACES. Ce qui se colle par-dessus n'écrit jamais ; ce qui s'écrit
    * dessus ne se colle jamais.
    *
-   * Et aucune ne porte l'information seule : chaque objet a sa forme propre —
-   * le trait qui bave, le bord déchiré, la rayure — qui reste lisible en plein
+   * Et aucune ne porte l'information seule : chaque objet a sa forme propre,
+   * le trait qui bave, le bord déchiré, la rayure, qui reste lisible en plein
    * soleil, pour un daltonien, et sur une capture en noir et blanc.
    * ═════════════════════════════════════════════════════════════════════════ */
 
@@ -60,11 +60,11 @@
   --carton-scotch: #1B6CA8;
   /** Tampon encreur. Ce qui est définitivement acquis. */
   --carton-tampon: #2E7D46;
-  /** Post-it fluo. FOND seulement — 1,25:1 sur papier, 11,95:1 sous du noir. */
+  /** Post-it fluo. FOND seulement, 1,25:1 sur papier, 11,95:1 sous du noir. */
   --carton-postit: #F2E14C;
   /** Gaffer mat. Bloqué : c'est l'absence de couleur qui signale. */
   --carton-gaffer: #6E6A63;
-  /** Ruban de chantier. Le temps qui s'épuise — TOUJOURS rayé, jamais uni. */
+  /** Ruban de chantier. Le temps qui s'épuise, TOUJOURS rayé, jamais uni. */
   --carton-ruban: #E8A317;
 }
 
@@ -139,20 +139,20 @@
   /*
    * LE BOUTON D'ACTION EST UN MORCEAU DE SCOTCH D'ÉLECTRICIEN.
    *
-   * Il était du dégradé kraft — c'est-à-dire la couleur exacte du décor sur
+   * Il était du dégradé kraft, c'est-à-dire la couleur exacte du décor sur
    * lequel il est posé. Le bleu à 206° est l'opposé du kraft sur la roue : la
    * seule teinte que ce monde ne peut pas absorber, et la seule qu'on trouve
    * physiquement dans une rue sous forme d'adhésif.
    *
    * `clip-path` et pas `border-radius` : un adhésif se coupe aux doigts, il ne
-   * s'arrondit pas. Les bords de travers sont l'objet, pas une décoration —
+   * s'arrondit pas. Les bords de travers sont l'objet, pas une décoration,
    * c'est ce qui l'empêche de redevenir un bouton d'interface.
    *
    * `drop-shadow` et pas `box-shadow` : `clip-path` découpe l'ombre portée
    * avec le reste, et le bouton se retrouvait posé à plat sur le carton.
    *
-   * UN SEUL PAR ÉCRAN. Le dépôt le respecte déjà — une seule occurrence par
-   * composant — et c'est ce qui donne sa valeur au bleu : deux morceaux de
+   * UN SEUL PAR ÉCRAN. Le dépôt le respecte déjà, une seule occurrence par
+   * composant, et c'est ce qui donne sa valeur au bleu : deux morceaux de
    * scotch en même temps, et il n'y a plus d'action principale.
    */
   .btn-primary {
@@ -182,7 +182,7 @@
    * Un bouton grisé disparaît de l'écran, et avec lui l'information « vous
    * auriez pu faire ça ». Une bande de gaffer arrachée laisse voir ce qu'elle
    * recouvre : le choix reste lisible, il est juste hors d'atteinte. C'est le
-   * seul état de la palette qui ait le droit d'être terne — ici, l'absence de
+   * seul état de la palette qui ait le droit d'être terne, ici, l'absence de
    * couleur EST le signal.
    */
   .btn-primary:disabled,
@@ -195,7 +195,7 @@
   }
 
   /*
-   * LE TRAIT DE MARQUEUR — danger, santé critique.
+   * LE TRAIT DE MARQUEUR : danger, santé critique.
    *
    * En trait, jamais en aplat : un marqueur ne recouvre pas une surface, il la
    * raye. Le halo diffus imite l'encre qui part dans les fibres du carton, et
@@ -211,12 +211,12 @@
   }
 
   /*
-   * LE RUBAN DE CHANTIER — le temps qui s'épuise.
+   * LE RUBAN DE CHANTIER : le temps qui s'épuise.
    *
    * C'est la seule entrée de la palette où LA RAYURE porte le signal, pas la
    * teinte : seul, ce jaune est un cousin du kraft (40° contre 28°) et ne
    * contraste qu'à 2:1 sur le fond du jeu. Rayé de noir, il devient le motif
-   * le plus reconnaissable de l'écran sans rien devoir à sa couleur — ce qui
+   * le plus reconnaissable de l'écran sans rien devoir à sa couleur, ce qui
    * le rend lisible en plein soleil et pour un daltonien.
    */
   .ruban-chantier {
@@ -228,10 +228,10 @@
   }
 
   /*
-   * LE POST-IT — la trouvaille qu'on ne doit pas manquer.
+   * LE POST-IT : la trouvaille qu'on ne doit pas manquer.
    *
    * Fond, jamais texte : 1,25:1 posé sur le papier du jeu, 11,95:1 sous une
-   * écriture noire — le meilleur score de toute la palette, et le pire. Le
+   * écriture noire, le meilleur score de toute la palette, et le pire. Le
    * coin qui rebique et la rotation font le reste ; sans eux, ce serait un
    * bandeau d'alerte jaune, c'est-à-dire exactement ce qu'on évite.
    */
@@ -299,7 +299,7 @@
    * LES ZONES SÛRES, ET POURQUOI `env()` NE SUFFISAIT PAS.
    *
    * `env(safe-area-inset-*)` n'est renseigné que par la vue web d'iOS. Sur
-   * Android il vaut TOUJOURS zéro — la règle existait donc et ne protégeait
+   * Android il vaut TOUJOURS zéro, la règle existait donc et ne protégeait
    * rien. Tant que l'application démarrait sous la barre d'état, ça ne se
    * voyait pas. Depuis qu'on vise l'API 35, Android 15 impose le bord à bord :
    * le jeu dessine derrière l'heure et la batterie, et le haut de l'écran est
@@ -322,7 +322,7 @@
  * LA PLACE DU CONSEIL DU MOMENT.
  *
  * Le conseil est une barre `fixed` en bas de l'écran. Mesuré : une fois la
- * page défilée jusqu'en bas, il se posait pile sur « Jour Suivant » — les deux
+ * page défilée jusqu'en bas, il se posait pile sur « Jour Suivant », les deux
  * occupaient 780-828 px, et `elementFromPoint` au centre du bouton renvoyait
  * le texte du conseil. Un doigt sur « Jour Suivant » refermait donc le conseil
  * au lieu de finir la journée, et il fallait taper deux fois.
@@ -375,14 +375,14 @@ body.conseil-affiche {
  * clavier et la zone de toucher élargie du navigateur, on ne refait que
  * l'apparence.
  *
- * Le rail est du kraft strié — le même geste que le ruban de chantier, mais
+ * Le rail est du kraft strié, le même geste que le ruban de chantier, mais
  * sans le noir : ici la rayure n'est pas un signal, c'est de la matière. La
  * poignée est un bout de scotch bleu, la couleur d'action de la palette : le
  * même bleu que les boutons principaux, parce que c'est bien ce que c'est, un
  * contrôle qu'on manipule.
  *
  * 26 px de poignée, au-dessus des 24 px que Google exige comme cible tactile
- * minimale, et le rail seul en fait 8 — d'où le `padding` vertical qui rend
+ * minimale, et le rail seul en fait 8, d'où le `padding` vertical qui rend
  * toute la ligne attrapable, pas seulement le trait.
  */
 .curseur-carton {

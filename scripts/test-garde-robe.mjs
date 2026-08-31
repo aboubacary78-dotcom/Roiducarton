@@ -15,7 +15,7 @@
  *     avec ce qu'on a gagné.
  *
  * Le piège, en écrivant ce test : vérifier que le nouveau personnage arrive nu
- * ne prouve rien si on ne vérifie pas d'abord qu'il POUVAIT être habillé —
+ * ne prouve rien si on ne vérifie pas d'abord qu'il POUVAIT être habillé,
  * une garde-robe vide passerait le contrôle sans rien garantir.
  *
  *     node scripts/test-garde-robe.mjs
@@ -34,7 +34,7 @@ p.on('pageerror', e => erreurs.push(String(e).slice(0, 140)));
 const pause = ms => new Promise(r => setTimeout(r, ms));
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 const clic = m => p.evaluate(s => {
@@ -82,7 +82,7 @@ verifier('  …et il arrive sans rien sur le dos',
 /*
  * ON DÉBLOQUE TOUT, PUIS ON S'HABILLE.
  *
- * Les accessoires se gagnent aux succès — les obtenir en jouant demanderait
+ * Les accessoires se gagnent aux succès, les obtenir en jouant demanderait
  * des dizaines de parties. On écrit donc directement dans le profil, ce qui
  * est exactement le rôle qu'il garde : dire ce qui est ACQUIS.
  */
@@ -122,7 +122,7 @@ verifier('la garde-robe s\'ouvre', dansLaGardeRobe);
  * On enfile un accessoire DÉBLOQUÉ.
  *
  * La liste montre tout le catalogue, verrouillé compris : cliquer au hasard
- * tombait sur un accessoire non gagné, que le reducer refuse — à juste titre —
+ * tombait sur un accessoire non gagné, que le reducer refuse, à juste titre,
  * et le test concluait que s'habiller ne marchait pas. On cible donc l'un des
  * huit qu'on vient de débloquer, par son emoji.
  */
@@ -151,7 +151,7 @@ verifier('  …et le profil, lui, n\'enregistre plus de tenue',
  * LA MORT, PUIS LA VIE SUIVANTE.
  *
  * On efface la sauvegarde plutôt que de mourir pour de bon : c'est le même
- * état d'arrivée — plus de personnage, profil intact — et ça évite de faire
+ * état d'arrivée (plus de personnage, profil intact) et ça évite de faire
  * dépendre ce test-ci du déroulé d'une mort, qui a ses propres écrans.
  */
 await p.evaluate(() => { localStorage.removeItem('roi-du-carton-save'); });

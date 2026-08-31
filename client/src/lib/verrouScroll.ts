@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 /*
  * QUAND UN VOILE S'OUVRE, LA PAGE S'ARRÊTE.
  *
- * Les quatre voiles du jeu — résultat d'événement, bilan de nuit, récit
- * d'origine, rencontre de rue — se posent au-dessus de l'écran principal sans
+ * Les quatre voiles du jeu, résultat d'événement, bilan de nuit, récit
+ * d'origine, rencontre de rue, se posent au-dessus de l'écran principal sans
  * le bloquer. On lisait donc son résultat pendant que le décor continuait de
  * défiler derrière au moindre glissement de doigt : le regard partait sur le
  * contrat, la météo, les jauges, et l'information du moment se diluait.
@@ -21,7 +21,7 @@ import { useEffect } from 'react';
  *
  * On fige l'élément qui défile RÉELLEMENT. Le réflexe est de bloquer `body`,
  * et c'est ce que faisait la première version : sans effet, parce qu'ici
- * `document.scrollingElement` est `<html>` — `body` porte déjà un
+ * `document.scrollingElement` est `<html>`, `body` porte déjà un
  * `overflow: hidden auto` venu de la feuille de style et ne défile pas.
  * Mesuré : avec `body` figé, un défilement de 400 px passait toujours.
  */

@@ -75,7 +75,7 @@ export * from './data/dignity';
 /*
  * LE FILET DE LA TOUTE PREMIÈRE PARTIE.
  *
- * Mourir au jour un de sa première partie, c'est n'avoir rien vu du jeu — et
+ * Mourir au jour un de sa première partie, c'est n'avoir rien vu du jeu, et
  * les premières minutes décident de presque toute la rétention du lendemain.
  * On empêche donc cette mort-là, et uniquement celle-là : dès qu'il existe un
  * score ou une tombe, la rue reprend tous ses droits.
@@ -112,7 +112,7 @@ function withFirstDayNet(c: Character, stats: Stats): Stats {
  * Conséquences, toutes constatées : le personnage restait `alive: true` sur
  * l'écran de fin ; sa partie n'entrait jamais au tableau des scores ; et
  * surtout la sauvegarde du dernier écran principal restait en place. Rouvrir
- * l'application proposait donc « Continuer » et ramenait le mort à la vie —
+ * l'application proposait donc « Continuer » et ramenait le mort à la vie,
  * avec son jour, son sac, et ses drapeaux d'intrigue. Le joueur suivant
  * héritait des suites narratives d'un personnage qu'il n'avait jamais été.
  *
@@ -188,7 +188,7 @@ const SCORES_KEY = 'roi-du-carton-scores';
  *
  * Elle y vivait en fermeture, et n'était donc atteignable que par le chemin
  * normal : un signe joué, une manche résolue, l'ennemi à zéro. Le jour où un
- * SECOND chemin mène à la victoire — l'objet miracle acheté par vidéo — il
+ * SECOND chemin mène à la victoire (l'objet miracle acheté par vidéo) il
  * fallait ou bien recopier ces vingt lignes, ou bien les sortir. Recopier
  * aurait garanti qu'un des deux chemins oublie le butin, la couronne, ou le
  * contrat « combatif » à la première modification.
@@ -215,14 +215,14 @@ function etatDeVictoire(
   /*
    * UNE VICTOIRE EST UNE VICTOIRE, ACHETÉE OU NON.
    *
-   * J'ai essayé d'amputer le butin des combats gagnés à l'extincteur — argent
-   * oui, respect et objet non — au motif que le raccourci serait sinon
+   * J'ai essayé d'amputer le butin des combats gagnés à l'extincteur, argent
+   * oui, respect et objet non, au motif que le raccourci serait sinon
    * meilleur que de jouer. Ce n'est pas la règle retenue : ce qu'on achète,
    * c'est de ne pas jouer le mini-jeu, pas une demi-récompense.
    *
    * Et une demi-victoire se lit mal : le joueur voit « Victoire ! » puis un
    * butin plus maigre que d'habitude, sans qu'aucun texte n'explique lequel
-   * des deux est cassé. La cadence — trois combats entre deux extincteurs —
+   * des deux est cassé. La cadence, trois combats entre deux extincteurs,
    * reste le seul frein, et elle est explicite.
    */
   const lootMoney = combat.loot?.money || 0;
@@ -274,7 +274,7 @@ function loadGame(): Partial<GameState> | null {
          *
          * Elle vivait dans le profil permanent. Un joueur au milieu d'une
          * partie se serait retrouvé déshabillé d'un chargement à l'autre, sans
-         * comprendre — le changement était pour les personnages SUIVANTS, pas
+         * comprendre, le changement était pour les personnages SUIVANTS, pas
          * pour le sien. On la lui rend une fois, et elle lui appartient
          * désormais.
          */
@@ -332,7 +332,7 @@ type GameAction =
   | { type: 'PREPARE_SUCCESSOR' }
   /*
    * `traits` est un COUPLE, pas une liste : le jeu en donne exactement deux à
-   * chacun, et l'Atelier n'ouvre pas le nombre — seulement lesquels.
+   * chacun, et l'Atelier n'ouvre pas le nombre, seulement lesquels.
    */
   | { type: 'SELECT_CHARACTER'; index: number; visage?: Record<string, number>; traits?: [Trait, Trait] }
   | { type: 'EXPLORE' }
@@ -422,7 +422,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
        * dans un état à part : le personnage est fabriqué en une fois, et il
        * n'existe aucun instant où il serait à moitié personnalisé. L'écran de
        * choix ne les envoie que si l'Atelier est acheté ; le reducer n'a pas à
-       * revérifier l'achat — c'est un produit payant, pas une protection.
+       * revérifier l'achat, c'est un produit payant, pas une protection.
        */
       const char = !brut ? brut : {
         ...brut,
@@ -497,12 +497,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     /*
-     * UN APPUI, UNE ACTION — le garde-fou des cinq tuiles.
+     * UN APPUI, UNE ACTION : le garde-fou des cinq tuiles.
      *
      * `state.screen !== 'main'` n'est pas une précaution de style. Mesuré :
      * deux appuis sur « Explorer » dans le même tick JavaScript consommaient
      * DEUX actions de la journée sur trois, pour un seul événement affiché.
-     * Le budget d'actions ne suffisait pas à s'en protéger — après le premier
+     * Le budget d'actions ne suffisait pas à s'en protéger, après le premier
      * envoi il en restait deux, donc le second passait.
      *
      * Ces cinq actions quittent toutes l'écran principal. En exiger le départ
@@ -720,7 +720,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
            * La phrase des rats est le MODÈLE de toutes les piques : elle vit
            * dans le texte du résultat, sur la grande carte, avec l'image, et
            * elle reste tant qu'on lit. Les piques la rejoignent ici plutôt que
-           * de flotter en bandeau au-dessus de l'écran — c'est l'endroit, pas
+           * de flotter en bandeau au-dessus de l'écran, c'est l'endroit, pas
            * l'écriture, qui faisait qu'elles sonnaient posées là par hasard.
            */
           ? (() => {
@@ -845,8 +845,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             /*
              * La rue commente le casse raté DANS le texte du résultat, pas en
              * bandeau par-dessus. C'est le seul échec du jeu que le joueur ait
-             * intégralement choisi — il a vu les gardes et il a tenté quand
-             * même — donc le seul où la moquerie porte sans être injuste.
+             * intégralement choisi, il a vu les gardes et il a tenté quand
+             * même, donc le seul où la moquerie porte sans être injuste.
              */
             text: (() => {
               const base = rossee
@@ -941,7 +941,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'KEEP_FACE': {
       if (!state.character || !state.eventResult || state.eventResult.faceKept) return state;
       const c = state.character;
-      // On remonte au plancher du palier qu'on vient de quitter — pas plus.
+      // On remonte au plancher du palier qu'on vient de quitter, pas plus.
       // L'offre restaure une allure, elle ne fabrique pas de la fierté.
       const perdu = Math.abs(state.eventResult.statChanges?.dignity ?? 0);
       const avant = Math.min(100, c.stats.dignity + perdu);
@@ -968,7 +968,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     /*
-     * UNE HEURE DE PLUS AU CHAUD — la nuit rendue à moitié.
+     * UNE HEURE DE PLUS AU CHAUD : la nuit rendue à moitié.
      *
      * Le bilan vient d'afficher, en chiffres, ce que la nuit a coûté. C'est le
      * seul instant du jeu où la perte est à l'écran, chiffrée, et pas encore
@@ -978,7 +978,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
      * On rend la MOITIÉ de chaque jauge perdue, arrondie au supérieur, et rien
      * d'autre : ni argent, ni objet, ni action. Le bilan n'existe que si le
      * personnage a survécu à la nuit (voir NEXT_DAY), donc cette offre ne
-     * ressuscite jamais personne — elle adoucit une nuit traversée.
+     * ressuscite jamais personne, elle adoucit une nuit traversée.
      */
     case 'RECOVER_NIGHT': {
       const bilan = state.daySummary;
@@ -1005,7 +1005,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     /*
-     * UNE POCHE DE PLUS — rattraper l'objet que le sac a refusé.
+     * UNE POCHE DE PLUS : rattraper l'objet que le sac a refusé.
      *
      * Le refus est visuel et immédiat : l'objet a un nom, une image, il était
      * dans la main, et le texte vient d'écrire qu'on le laisse sur place. On
@@ -1023,14 +1023,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
      * Effet du quasi-gain : un joueur qui rate de loin hausse les épaules, un
      * joueur qui rate de deux euros ne le supporte pas. Le bilan ne propose
      * donc l'offre que sur un échec à moins de 20 % du but (voir NEXT_DAY et
-     * `SEUIL_PRESQUE`), et la récompense est exactement celle du contrat —
+     * `SEUIL_PRESQUE`), et la récompense est exactement celle du contrat,
      * rien de plus, sinon la publicité paierait mieux que le jeu.
      */
     /* ═══════════════════════════════════════════════════════════════════
      * LA DETTE
      *
-     * Le prêteur arrive au moment de la faiblesse — fauché, passé le premier
-     * jour — et propose dix euros contre quinze sous trois jours. Le joueur
+     * Le prêteur arrive au moment de la faiblesse, fauché, passé le premier
+     * jour, et propose dix euros contre quinze sous trois jours. Le joueur
      * peut refuser : c'est le seul PNJ du jeu qu'on a le droit d'envoyer
      * promener, et il fallait que ce droit existe pour que l'accepter soit un
      * choix.
@@ -1047,7 +1047,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
      *
      * Le hub appelle ça en arrivant. C'est le reducer qui décide s'il y a
      * quelque chose à ouvrir, pour que la condition vive au même endroit que
-     * la mécanique — l'écran, lui, n'a pas à savoir ce qu'est une échéance.
+     * la mécanique, l'écran, lui, n'a pas à savoir ce qu'est une échéance.
      */
     /*
      * SEULE L'ÉCHÉANCE S'IMPOSE.
@@ -1126,12 +1126,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
      * NE PAS POUVOIR PAYER.
      *
      * Deux issues, et la première est de loin la plus fréquente : il se sert.
-     * L'objet le plus cher du sac part, et la dette est éteinte — c'est un
+     * L'objet le plus cher du sac part, et la dette est éteinte, c'est un
      * remboursement en nature, pas une punition supplémentaire.
      *
      * Sac vide, en revanche, il ne reste rien à prendre. La dette n'est PAS
      * effacée : elle monte, il reviendra, et c'est au joueur d'aller
-     * chercher l'argent. On ne fabrique pas une spirale sans issue — on
+     * chercher l'argent. On ne fabrique pas une spirale sans issue, on
      * remet le problème à demain, ce qui est exactement la vie qu'on raconte.
      */
     case 'AVOUER_INSOLVABILITE': {
@@ -1168,13 +1168,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
        * RIEN À SAISIR : IL SE PAIE SUR VOTRE PEAU.
        *
        * Première version : la note montait de quatre euros et il revenait dans
-       * deux jours. C'était une non-conséquence — on empruntait, on dépensait
+       * deux jours. C'était une non-conséquence, on empruntait, on dépensait
        * tout, on encaissait un report, et le prêteur devenait une banque
        * gratuite. Rien ne dissuadait de l'ignorer.
        *
        * Il tabasse, donc. Fort. Et la dette est éteinte : il s'est payé, à sa
        * façon, ce qui est plus juste qu'une spirale sans issue et bien plus
-       * dissuasif qu'un report. Le calcul du joueur redevient sérieux —
+       * dissuasif qu'un report. Le calcul du joueur redevient sérieux,
        * emprunter en sachant qu'on ne pourra pas rendre, c'est accepter
        * d'y laisser la moitié de sa santé et son allure.
        *
@@ -1259,7 +1259,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
        * actions du jour : une trentaine d'allers-retours suffisaient à monter
        * de zéro à cent.
        *
-       * On ne met pas de péage — un plafond retire une option sans créer de
+       * On ne met pas de péage, un plafond retire une option sans créer de
        * décision. On rend simplement le trajet FATIGANT : marcher d'un bout à
        * l'autre de la ville creuse et fatigue, ce qui est vrai. Et c'est
        * exactement là qu'Orientation retrouve son sens : connaître les
@@ -1275,7 +1275,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       /*
        * LA ROUTE SE CONNAÎT. Chaque trajet tirait un événement, environ une
        * fois sur deux : une loterie relançable à volonté, hors de l'économie
-       * des actions. Un quartier déjà rejoint aujourd'hui ne donne plus rien —
+       * des actions. Un quartier déjà rejoint aujourd'hui ne donne plus rien,
        * vous avez déjà vu ce qu'il y avait à voir sur ce chemin.
        */
       const dejaVus = c.travelsToday ?? [];
@@ -1305,7 +1305,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
        * pas des probabilités. Elles ont déjà leur cas dans ce reducer, avec
        * leurs conséquences exactes et leurs images de résultat. On ferme la
        * rencontre et on leur passe la main plutôt que de réécrire quoi que ce
-       * soit — c'est ce qui permet de mettre en scène une mécanique comme une
+       * soit, c'est ce qui permet de mettre en scène une mécanique comme une
        * rencontre sans en dupliquer un octet.
        *
        * On repose l'écran sur « main » AVANT de déléguer : ces cas-là refusent
@@ -1412,7 +1412,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
        * Mesuré, pas supposé : deux `click()` sur « Jour Suivant » dans le même
        * tick JavaScript faisaient passer du jour 1 au jour 3. React groupe les
        * deux envois avant de rendre quoi que ce soit, si bien que le second
-       * arrivait sur un état où rien ne l'empêchait — et le joueur encaissait
+       * arrivait sur un état où rien ne l'empêchait, et le joueur encaissait
        * DEUX nuits de dégradation en n'en voyant qu'une. Sur des jauges déjà
        * basses, cela suffit à tuer.
        *
@@ -1492,7 +1492,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
        * ON RETIENT COMBIEN, PAS SEULEMENT QUE.
        *
        * Ces objets annulent une perte au lieu d'ajouter une jauge : le bilan
-       * du matin n'affichait donc RIEN pour eux — pas de chiffre négatif,
+       * du matin n'affichait donc RIEN pour eux, pas de chiffre négatif,
        * puisqu'il n'y avait plus de perte, et un chiffre positif aurait été
        * faux. Le joueur lisait « le matelas vous a rendu votre nuit » sans
        * jamais savoir ce que cette nuit valait. Le matériel se payait, et ne
@@ -1556,7 +1556,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
       // ---- La neige s'annonce la veille ----
       // Elle est rare et coûte cher : sans préavis, elle serait une punition
-      // tirée au sort. Avec un soir d'avance, elle devient une décision — on
+      // tirée au sort. Avec un soir d'avance, elle devient une décision, on
       // court acheter un manteau, on bricole un réchaud, on choisit son abri.
       if (meteoApres === 'snow' && nextWeather !== 'snow') {
         notes.push('❄️ Le ciel a viré au blanc sale. Demain, il neigera : trouvez de quoi tenir.');
@@ -1611,7 +1611,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
        *
        * Un compagnon sur quatre regardait vos poches, et sa phrase le disait
        * (voir SITUATIONS_LOUCHES). Il a tenu sa part du marché toute la
-       * journée — le trait prêté a bien servi — puis il s'en va avec ce qui
+       * journée (le trait prêté a bien servi) puis il s'en va avec ce qui
        * valait le plus cher dans le sac, ou à défaut quelques pièces.
        *
        * Le vol est BORNÉ et il laisse une trace : on retient qui, où et quoi,
@@ -1660,7 +1660,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
        * LE COMMENTAIRE DU MATIN REJOINT LES NOTES DE LA NUIT.
        *
        * Il flottait en bandeau au-dessus du bilan, trois secondes, avant de
-       * disparaître — une notification posée sur le jeu plutôt qu'une ligne
+       * disparaître, une notification posée sur le jeu plutôt qu'une ligne
        * du jeu. Ici, il prend sa place au milieu de ce que la nuit a fait :
        * le réchaud qui a tenu, le carton qui a lâché, et la remarque de la
        * rue. On le lit avec le reste, aussi longtemps qu'on veut.
@@ -1774,7 +1774,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         /*
          * Aller chercher son voleur ne se tente qu'une fois : la trace
          * s'efface au moment où le combat commence, pas à la victoire. Gagner
-         * rend ce qu'il avait pris — c'est le butin de l'ennemi, le code de
+         * rend ce qu'il avait pris, c'est le butin de l'ennemi, le code de
          * victoire s'en charge déjà. Perdre, c'est perdre pour de bon.
          */
         character: action.contreVoleur ? { ...state.character, vole: undefined } : state.character,
@@ -1927,7 +1927,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     /*
-     * L'OBJET MIRACLE — gagner le combat sans le jouer.
+     * L'OBJET MIRACLE : gagner le combat sans le jouer.
      *
      * Le duel de signes est le seul mini-jeu dont on ne peut pas sortir sans
      * y laisser des plumes : fuir coûte cinq points de dignité, et perdre peut
@@ -1935,8 +1935,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
      * donc à éviter les combats, c'est-à-dire une partie entière du jeu.
      *
      * L'objet trouvé dans la poche règle ça en une fois. Il donne la victoire
-     * COMPLÈTE — butin, respect, couronne si c'était le Roi, contrat
-     * « combatif » validé — parce qu'une demi-victoire serait la pire des
+     * COMPLÈTE : butin, respect, couronne si c'était le Roi, contrat
+     * « combatif » validé, parce qu'une demi-victoire serait la pire des
      * options : le joueur aurait dépensé quelque chose pour un résultat qu'il
      * n'a pas compris.
      *
@@ -1944,14 +1944,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
      * le combat, pas ce qu'il a déjà coûté.
      */
     /*
-     * S'HABILLER — et ça appartient au personnage, pas au profil.
+     * S'HABILLER, et ça appartient au personnage, pas au profil.
      *
      * La tenue vivait dans le profil permanent, à côté des accessoires
      * débloqués. Conséquence : un nouveau venu héritait du chapeau et de
      * l'écharpe du mort, et deux vies successives avaient exactement la même
      * tête. « Ça ne le rend pas unique », et c'est exact.
      *
-     * Les DÉBLOCAGES restent permanents — ils se gagnent aux succès et doivent
+     * Les DÉBLOCAGES restent permanents, ils se gagnent aux succès et doivent
      * survivre à toutes les morts, sinon les succès ne récompenseraient rien.
      * Ce qui est PORTÉ est à celui qui le porte.
      */
@@ -1971,7 +1971,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const combat = state.currentCombat;
       /*
        * La couronne ne s'achète pas. L'écran retire déjà le bouton face au
-       * Roi ; la règle est répétée ici parce que c'est ici qu'elle vit — un
+       * Roi ; la règle est répétée ici parce que c'est ici qu'elle vit, un
        * jour où un autre écran voudra ce raccourci, il trouvera la porte
        * fermée sans qu'on ait à y penser.
        */
@@ -2226,7 +2226,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'RESOLVE_HAGGLE': {
       // Suite d'un marchandage (voir HaggleMinigame). Ce qu'on a engagé est
-      // payé dans tous les cas — on a montré son jeu, gagné ou perdu.
+      // payé dans tous les cas, on a montré son jeu, gagné ou perdu.
       if (!state.character) return state;
       const c = state.character;
       const stats = clampStats(
@@ -2268,8 +2268,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'BUY_ITEM': {
-      // L'action porte l'article déjà résolu par l'écran. Si elle arrive sans —
-      // écran refondu, action rejouée, test — on ignore plutôt que de planter :
+      // L'action porte l'article déjà résolu par l'écran. Si elle arrive sans,
+      // écran refondu, action rejouée, test, on ignore plutôt que de planter :
       // un réducteur qui lève une exception fait perdre la partie en cours.
       if (!state.character || !action.shopItem) return state;
       const shopItem = action.shopItem;
@@ -2297,12 +2297,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
        * L'eau de la fontaine est gratuite, instantanée, et ne coûte pas
        * d'action : la soif cessait d'être une contrainte dès qu'on pouvait
        * atteindre le parc. Le seul frein existant était une pub récompensée
-       * toutes les trois gorgées — un frein COMMERCIAL, pas une règle du jeu :
+       * toutes les trois gorgées, un frein COMMERCIAL, pas une règle du jeu :
        * le joueur qui refuse les pubs se cogne à un mur que rien ne lui
        * explique.
        *
-       * On garde donc l'eau gratuite — mourir de soif à côté d'une fontaine
-       * serait absurde — et on met le prix sur la seule jauge que ce jeu prend
+       * On garde donc l'eau gratuite, mourir de soif à côté d'une fontaine
+       * serait absurde, et on met le prix sur la seule jauge que ce jeu prend
        * au sérieux. La première gorgée du jour ne coûte rien. À partir de la
        * deuxième, on se penche sur un robinet public devant tout le monde, et
        * ça se voit.
@@ -2364,7 +2364,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         stats = applyStatDelta(stats, { mental: 6, dignity: 2 });
         /*
          * Et on repart à deux. Le repas partagé achète une journée de
-         * compagnie, et avec elle le savoir-faire de l'autre — un seul de ses
+         * compagnie, et avec elle le savoir-faire de l'autre, un seul de ses
          * traits, et seulement ceux qui servent vraiment (voir
          * `traitPretable`). Un seul compagnon à la fois : le dernier repas
          * partagé remplace le précédent.
@@ -2565,12 +2565,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /*
-   * SAUVEGARDE AUTOMATIQUE — le hub, ET la garde-robe.
+   * SAUVEGARDE AUTOMATIQUE : le hub, ET la garde-robe.
    *
    * Elle ne s'écrivait que depuis le hub, ce qui a suffi tant que la tenue
    * vivait dans le profil permanent : s'habiller écrivait aussitôt, ailleurs.
    * Depuis qu'elle appartient au personnage, une tenue choisie dans la
-   * garde-robe n'existait qu'en mémoire — fermer le jeu depuis cet écran la
+   * garde-robe n'existait qu'en mémoire, fermer le jeu depuis cet écran la
    * perdait sans un mot. C'est un défaut introduit par le déménagement, pas
    * un oubli d'origine.
    *
@@ -2589,7 +2589,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
    * Les grimaces, les haut-le-cœur et les souffles d'effort existent en deux
    * timbres. Le genre est tiré au sort avec le personnage : entendre le
    * mauvais annulerait tout le travail que le jeu fait pour qu'on s'attache à
-   * celui-là précisément. On le pose ici plutôt qu'au point d'appel — le son
+   * celui-là précisément. On le pose ici plutôt qu'au point d'appel, le son
    * n'a pas à connaître le contexte de jeu, et une reprise de partie
    * sauvegardée doit retrouver la bonne voix sans qu'on y pense.
    */
@@ -2630,7 +2630,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   /*
    * Les rencontres se comptent au RÉSULTAT, pas à l'ouverture : c'est là que
-   * les bonus s'offrent — doubler ses gains, garder l'objet refusé, rester au
+   * les bonus s'offrent, doubler ses gains, garder l'objet refusé, rester au
    * palier qu'on vient de quitter.
    */
   const resultatVu = useRef(!!state.eventResult);

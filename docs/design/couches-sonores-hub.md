@@ -17,14 +17,14 @@ coup.
 
 | Couche | Fichiers | Depuis | État |
 |---|---|---|---|
-| Lit du quartier `amb-<lieu>` | 5 | 12 août — **d'origine** | ✅ gardé |
-| Météo `meteo-<temps>` | 5 | 12 août — **d'origine** | ✅ gardé |
-| Signature `amb-sig-<lieu>` | 5 | 25 août — **ajouté par moi** | ❌ retiré |
-| Respirations `vie-*` | 10 | 25 août — **ajouté par moi** | ❌ retiré |
+| Lit du quartier `amb-<lieu>` | 5 | 12 août, **d'origine** | ✅ gardé |
+| Météo `meteo-<temps>` | 5 | 12 août, **d'origine** | ✅ gardé |
+| Signature `amb-sig-<lieu>` | 5 | 25 août, **ajouté par moi** | ❌ retiré |
+| Respirations `vie-*` | 10 | 25 août, **ajouté par moi** | ❌ retiré |
 
 ---
 
-## Couche 1 — la signature du quartier
+## Couche 1 · la signature du quartier
 
 **Ce que c'était.** Une **deuxième boucle continue**, différente du lit, qui
 tournait par-dessus lui en permanence. Une par quartier.
@@ -50,20 +50,20 @@ première.
 
 ---
 
-## Couche 2 — les respirations
+## Couche 2 · les respirations
 
-**Ce que c'était.** Dix sons ponctuels — pigeon qui décolle, klaxon, tôle,
-**rat**, cagette, **papier kraft** — tirés au hasard **toutes les 22 à 48
+**Ce que c'était.** Dix sons ponctuels, pigeon qui décolle, klaxon, tôle,
+**rat**, cagette, **papier kraft** : tirés au hasard **toutes les 22 à 48
 secondes**, sans aucune cause dans le jeu.
 
 **Ce que je voulais.** Je pariais que « dans un endroit, il arrive des choses
 qu'on n'a pas demandées ». C'est vrai au cinéma.
 
-**Pourquoi c'était raté — et c'est la vraie leçon.** Partout ailleurs dans « Le
+**Pourquoi c'était raté, et c'est la vraie leçon.** Partout ailleurs dans « Le
 Roi du Carton », **tout son a une cause visible** : tu touches, ça répond. Le
 joueur apprend cette règle en trois minutes. Un grattement qui tombe tout seul
 sur un hub immobile ne se lit donc pas comme de l'atmosphère : il se lit comme
-un bug. C'est exactement le retour reçu — « des grattements, des bruits
+un bug. C'est exactement le retour reçu, « des grattements, des bruits
 bizarres ».
 
 Et ils n'étaient pas discrets non plus :
@@ -93,13 +93,13 @@ météo             0,42
 ```
 
 Une fois la signature retirée, il reste **une ambiance et la météo**, et la
-météo est très en dessous (−38,8 dBFS, soit 8 dB sous le lit — elle n'ajoute
+météo est très en dessous (−38,8 dBFS, soit 8 dB sous le lit, elle n'ajoute
 que 0,4 dB au total). Le fond se retrouve donc **environ 15 dB sous les
 alertes** et 7 dB sous les bruitages d'action.
 
 **C'est un écart sain, et c'est pourquoi je n'ai pas baissé le lit d'origine
 en plus.** Le problème de volume venait des couches ajoutées, pas du lit. Si
-après écoute tu le trouves encore trop fort, c'est une ligne à changer — dis-le
+après écoute tu le trouves encore trop fort, c'est une ligne à changer, dis-le
 et je le baisse.
 
 À noter : **il n'y a pas de réglage de volume dans les Options**, seulement un
@@ -115,8 +115,8 @@ rien tant qu'aucun code ne les demande.
 
 - **Les respirations `vie-*`** : je déconseille de les rebrancher telles
   quelles. Le problème n'est pas leur niveau, il est qu'aucune cause ne les
-  explique. Elles auraient un sens **attachées à un geste** — la tôle quand on
-  fouille en zone industrielle, le klaxon quand on traverse le centre-ville —
+  explique. Elles auraient un sens **attachées à un geste**, la tôle quand on
+  fouille en zone industrielle, le klaxon quand on traverse le centre-ville,
   et ça, c'est un travail de branchement, pas de réglage.
 - **La signature `amb-sig-*`** : rebranchable, mais il faudrait d'abord la
   remettre **sous** le lit pour de bon, c'est-à-dire régler son gain sur une
@@ -124,4 +124,4 @@ rien tant qu'aucun code ne les demande.
 
 Le contrôle `scripts/test-sons-branches.mjs` les liste maintenant comme
 dormants assumés. Les rebrancher sans les sortir de cette liste fera échouer le
-test — c'est voulu.
+test, c'est voulu.

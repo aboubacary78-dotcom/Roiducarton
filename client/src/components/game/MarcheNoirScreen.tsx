@@ -1,5 +1,5 @@
 /*
- * LE MARCHÉ NOIR — l'écran qui vend.
+ * LE MARCHÉ NOIR : l'écran qui vend.
  *
  * Les trois produits vivaient au fond des Options, entre le volume sonore et
  * le formulaire de consentement : l'endroit où l'on va quand quelque chose ne
@@ -44,7 +44,7 @@ const FLUO = '#F2E14C';
  * LES DEUX RÉPONSES AUX OBJECTIONS, ET UNE SEULE FOIS.
  *
  * C'est le levier le moins cher de tout le document et le plus négligé :
- * personne n'achète avec une question sans réponse. Les deux sont vraies —
+ * personne n'achète avec une question sans réponse. Les deux sont vraies,
  * les produits sont non consommables, et la possession est relue depuis le
  * compte Google au lancement.
  *
@@ -54,7 +54,7 @@ const FLUO = '#F2E14C';
  * donc posée une fois, sous les trois tuiles, là où elle se lit pour ce
  * qu'elle est : les conditions de la maison.
  *
- * La troisième objection — « et si je regrette ? » — n'a délibérément PAS de
+ * La troisième objection (« et si je regrette ? ») n'a délibérément PAS de
  * réponse. Le Play Store accorde son délai qu'on le dise ou non, celui qui se
  * pose la question trouve seul, et l'écrire introduirait le mot « regret » à
  * l'endroit précis où l'on veut qu'il n'y pense pas.
@@ -79,7 +79,7 @@ function BoutonAchat({ libelle, prix, occupe, onClick }: {
       className="w-full py-3.5 rounded-xl text-sm font-bold text-[#2A1F1A] disabled:opacity-60 active:scale-[0.98] transition-transform"
       style={{ background: FLUO, boxShadow: '0 3px 0 #C9B62A, 0 6px 14px rgba(0,0,0,0.18)' }}
     >
-      {occupe ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : `${libelle} — ${prix}`}
+      {occupe ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : `${libelle} · ${prix}`}
     </button>
   );
 }
@@ -108,7 +108,7 @@ export default function MarcheNoirScreen() {
   const [recu, setRecu] = useState(false);
 
   /*
-   * Le magasin répond une à deux secondes après le lancement — donc parfois
+   * Le magasin répond une à deux secondes après le lancement, donc parfois
    * après l'ouverture de cet écran. Sans cet abonnement, un joueur canadien
    * lirait les prix de secours en euros jusqu'à ce qu'il ressorte et revienne.
    */
@@ -129,7 +129,7 @@ export default function MarcheNoirScreen() {
    * LE PIC ET LA FIN.
    *
    * L'achat réussi n'avait aucun moment : le bouton cessait de tourner, et
-   * c'était tout. Le vendeur tend maintenant un reçu en carton — une fois,
+   * c'était tout. Le vendeur tend maintenant un reçu en carton, une fois,
    * huit dixièmes de seconde. C'est le souvenir qui restera de la transaction,
    * et il ne coûte rien.
    */
@@ -190,7 +190,7 @@ export default function MarcheNoirScreen() {
             className="w-16 h-16 rounded-xl object-cover shadow-[0_3px_10px_rgba(0,0,0,0.16)] shrink-0" />
           <p className="text-xs text-[#6B5740] leading-relaxed italic">
             {tr('« Tout est d\'occasion, ici. Sauf ce que je vends : ça, c\'est pour toujours. »',
-                '"Everything here is second-hand. Except what I sell — that\'s for good."')}
+                '"Everything here is second-hand. Except what I sell. That\'s for good."')}
           </p>
         </motion.div>
 
@@ -221,7 +221,7 @@ export default function MarcheNoirScreen() {
             {/*
               LE PRIX BARRÉ N'EST PAS UNE FAUSSE PROMOTION.
               C'est le total EXACT des deux pièces vendues juste en dessous, au
-              même instant — donc un prix réellement pratiqué, ce qu'exige
+              même instant, donc un prix réellement pratiqué, ce qu'exige
               l'article L.112-1-1. Il se calcule, et il disparaît quand le
               magasin n'a pas répondu : mieux vaut ne rien barrer que barrer un
               montant inventé.
@@ -229,7 +229,7 @@ export default function MarcheNoirScreen() {
             {/*
               LE COUPLE ANCIEN PRIX / NOUVEAU PRIX NE S'AFFICHE QUE COMPLET.
 
-              `totalBarre` rend `null` quand le magasin n'a pas répondu — sur
+              `totalBarre` rend `null` quand le magasin n'a pas répondu, sur
               le web, ou pendant la première seconde. La première version
               montrait alors l'étiquette seule ET la note qui explique le
               barré : un renvoi vers quelque chose d'absent, et un prix affiché
@@ -287,7 +287,7 @@ export default function MarcheNoirScreen() {
                     LE VISAGE VIVANT, ET PAS UNE ILLUSTRATION.
                     C'est la tête du personnage en cours, dessinée à l'instant.
                     Une image de catalogue à cet endroit contredirait la
-                    promesse — « votre tête, pas celle du tirage » — et perdrait
+                    promesse (« votre tête, pas celle du tirage ») et perdrait
                     la comparaison avec elle-même.
                   */}
                   {char && (
@@ -365,7 +365,7 @@ export default function MarcheNoirScreen() {
         {!(noAds && atelier) && <Objections />}
 
         {/* ── LA RESTAURATION ───────────────────────────────────────────────
-            Texte seul, gris, jamais mise en avant — et jamais cachée non plus :
+            Texte seul, gris, jamais mise en avant, et jamais cachée non plus :
             c'est le bouton que cherche quelqu'un qui vient de changer de
             téléphone, et c'est celui que cherche l'examinateur de Google.
 

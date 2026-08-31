@@ -7,7 +7,7 @@
  *      enregistrée (`/audio/amb-<lieu>.mp3`), et le ciel sa couche par-dessus
  *      (`/audio/meteo-<temps>.mp3`). C'est ce qu'on entend normalement.
  *   2. LA SYNTHÈSE. Si un fichier manque ou ne se décode pas, on retombe sur
- *      le petit orchestre procédural d'origine — une nappe de bruit filtré
+ *      le petit orchestre procédural d'origine, une nappe de bruit filtré
  *      plus des événements reprogrammés par minuterie. Le jeu n'est donc
  *      jamais muet, et un pack livré à moitié s'active fichier par fichier,
  *      exactement comme les images.
@@ -64,7 +64,7 @@ export function setAmbience(id: AmbienceId | null): void {
 
 // ---- Couche météo ---------------------------------------------------------
 // Elle se pose PAR-DESSUS le quartier : il peut pleuvoir au parc comme à la
-// gare. Seuls les temps qui s'entendent ont une couche — un ciel dégagé ou
+// gare. Seuls les temps qui s'entendent ont une couche, un ciel dégagé ou
 // nuageux ne fait pas de bruit.
 export type WeatherLayerId = 'pluie' | 'orage' | 'neige' | 'brouillard' | 'canicule';
 
@@ -108,13 +108,13 @@ function syncWeather(): void {
 const WEATHER_GAIN = 0.42;  // la couche météo reste sous le lit du quartier
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * LA SIGNATURE DU QUARTIER ET SES RESPIRATIONS — RETIRÉES
+ * LA SIGNATURE DU QUARTIER ET SES RESPIRATIONS : RETIRÉES
  *
  * CE QUE C'ÉTAIT. Deux couches posées par-dessus le lit `amb-<lieu>` :
  *
  *   · `amb-sig-<lieu>` : une SECONDE boucle continue par quartier, à 0,38 ;
- *   · `vie-*` : dix sons ponctuels — pigeon qui décolle, klaxon, tôle, rat,
- *     cagette, papier kraft — tirés au hasard toutes les 22 à 48 secondes,
+ *   · `vie-*` : dix sons ponctuels, pigeon qui décolle, klaxon, tôle, rat,
+ *     cagette, papier kraft, tirés au hasard toutes les 22 à 48 secondes,
  *     à 0,42.
  *
  * CE QUE JE VOULAIS. Les cinq lits se ressemblent : on ne reconnaît pas la
@@ -125,11 +125,11 @@ const WEATHER_GAIN = 0.42;  // la couche météo reste sous le lit du quartier
  * POURQUOI C'ÉTAIT FAUX. Ce pari est vrai au cinéma et faux dans un jeu.
  * Ailleurs dans « Le Roi du Carton », TOUT son a une cause visible : on
  * touche, ça répond. Un grattement qui tombe seul, sur un hub immobile, n'est
- * donc pas lu comme de l'atmosphère — il est lu comme un bug, et c'est le
+ * donc pas lu comme de l'atmosphère, il est lu comme un bug, et c'est le
  * retour qui est arrivé : « des grattements, des bruits bizarres ».
  *
  * Et la couche continue posait un second problème, silencieux celui-là : trois
- * boucles tournaient en même temps dans le hub — quartier 0,55 + signature
+ * boucles tournaient en même temps dans le hub, quartier 0,55 + signature
  * 0,38 + météo 0,42, soit 1,35 de somme. C'est ça, le fond trop fort.
  *
  * LES VINGT FICHIERS RESTENT dans `client/public/audio/`. Ils ne coûtent rien
@@ -155,7 +155,7 @@ function sync(): void {
   if (want === 'title') { running = { id: want, stop: BUILDERS[want]!(ac) }; syncWeather(); return; }
 
   // Les lits de mini-jeu : le fichier ou rien. Ils sont plus discrets que les
-  // quartiers — on joue par-dessus, la tension vient des effets.
+  // quartiers, on joue par-dessus, la tension vient des effets.
   if (want.startsWith('mg-')) {
     loadAudio(`/audio/${want}.mp3`).then(buf => {
       if (desired !== want || isMuted() || fileLoop || running) return;
@@ -168,7 +168,7 @@ function sync(): void {
   }
 
   /*
-   * La musique de mort. Elle entre LENTEMENT — quatre secondes de fondu — parce
+   * La musique de mort. Elle entre LENTEMENT (quatre secondes de fondu) parce
    * qu'elle arrive derrière la résonance du carton qui s'affaisse : surgir
    * couperait le seul silence que le jeu s'accorde. Elle reste basse, sous les
    * sons du bilan qu'on va lire par-dessus.
@@ -364,7 +364,7 @@ function every(kit: Kit, minMs: number, maxMs: number, fn: () => void): void {
 // ============ LE THÈME DU JEU ============
 // Une VRAIE chanson, pas une nappe : valse musette en la mineur, façon
 // guinguette parisienne un peu bancale. Doux, nostalgique, et juste assez
-// pataud pour faire sourire — c'est un roi en carton, après tout.
+// pataud pour faire sourire, c'est un roi en carton, après tout.
 //
 // Structure : 8 mesures à 3 temps (oum-pah-pah), jouées deux fois. La reprise
 // ajoute une voix à l'octave et une petite glissade comique en fin de phrase.
@@ -383,20 +383,20 @@ const T = {
 interface Bar { bass: number; chord: number[]; mel: [number, number, number][]; }
 
 const THEME: Bar[] = [
-  // Am — « il était une fois un type sur un carton »
+  // Am, « il était une fois un type sur un carton »
   { bass: T.A2, chord: [T.A3, T.C4, T.E4], mel: [[T.A4, 0, 0.9], [T.C5, 1, 0.9], [T.E5, 2, 0.9]] },
   { bass: T.A2, chord: [T.A3, T.C4, T.E4], mel: [[T.D5, 0, 0.9], [T.C5, 1, 0.45], [T.B4, 1.5, 0.45], [T.C5, 2, 0.9]] },
-  // Dm — la phrase s'ouvre
+  // Dm, la phrase s'ouvre
   { bass: T.D3, chord: [T.D4, T.F4, T.A4], mel: [[T.D5, 0, 0.9], [T.F5, 1, 0.9], [T.A5, 2, 0.9]] },
-  // E7 — tension
+  // E7 : tension
   { bass: T.E3, chord: [T.E4, T.GS4, T.D5], mel: [[T.GS5, 0, 0.9], [T.E5, 1, 0.9], [T.B4, 2, 0.9]] },
-  // Am — retour au thème
+  // Am, retour au thème
   { bass: T.A2, chord: [T.A3, T.C4, T.E4], mel: [[T.A4, 0, 0.9], [T.C5, 1, 0.9], [T.E5, 2, 0.9]] },
-  // F — le moment tendre
+  // F : le moment tendre
   { bass: T.F2, chord: [T.C4, T.F4, T.A4], mel: [[T.F5, 0, 0.9], [T.E5, 1, 0.9], [T.D5, 2, 0.9]] },
-  // E7 — on redescend
+  // E7 : on redescend
   { bass: T.E3, chord: [T.E4, T.GS4, T.D5], mel: [[T.E5, 0, 0.9], [T.D5, 1, 0.45], [T.C5, 1.5, 0.45], [T.B4, 2, 0.9]] },
-  // Am — la chute (tenue)
+  // Am, la chute (tenue)
   { bass: T.A2, chord: [T.A3, T.C4, T.E4], mel: [[T.A4, 0, 2.4]] },
 ];
 
@@ -536,8 +536,8 @@ function startMarche(ac: AudioContext): Stopper {
 }
 
 // Partiel à dessein : les lits de mini-jeu n'ont pas de version synthétisée.
-// Avant le pack son 2 ces écrans étaient silencieux, et c'est très bien ainsi
-// — mieux vaut le silence qu'un ersatz.
+// Avant le pack son 2 ces écrans étaient silencieux, et c'est très bien ainsi,
+// mieux vaut le silence qu'un ersatz.
 const BUILDERS: Partial<Record<AmbienceId, (ac: AudioContext) => Stopper>> = {
   'title': startTitle,
   'parc': startParc,

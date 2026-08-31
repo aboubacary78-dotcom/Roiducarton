@@ -32,7 +32,7 @@ export const HAIR = ['#2E2018', '#4A3320', '#6B4A2C', '#141414', '#7C7C7C', '#B8
  *
  * Les sept précédents tenaient dans un mouchoir : #F1E1C9, #EBD3B4, #F0DAC0…
  * sept crèmes qu'aucun œil ne sépare. Sur une planche de vingt-quatre visages,
- * les fonds paraissaient identiques — et c'est un réglage qu'on VEND dans
+ * les fonds paraissaient identiques, et c'est un réglage qu'on VEND dans
  * l'Atelier : sept boutons pour la même couleur. Ils couvrent maintenant toute
  * l'étendue du kraft, de l'ivoire au carton brun, sans quitter la matière.
  */
@@ -65,8 +65,8 @@ function melanger(a: string, b: string, t: number): string {
  * séparés que par le trait de contour : la tête disparaît, il ne reste qu'un
  * dessin flottant. Le tirage étant indépendant, ce cas arrive tout seul.
  *
- * Plutôt que d'interdire des combinaisons — ce qui trahirait le choix fait
- * dans l'Atelier — on ÉCARTE le fond du teint quand les deux se touchent :
+ * Plutôt que d'interdire des combinaisons, ce qui trahirait le choix fait
+ * dans l'Atelier, on ÉCARTE le fond du teint quand les deux se touchent :
  * teint clair, le fond fonce ; teint sombre, le fond s'éclaircit. La couleur
  * choisie reste reconnaissable, le visage se détache.
  */
@@ -114,7 +114,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
    *
    * `visage` vient de l'Atelier (lib/visage) : un sel → une valeur. Ce qui n'y
    * est pas continue d'être tiré de la graine, ce qui rend un visage
-   * PARTIELLEMENT composé parfaitement valable — on décide de la barbe et on
+   * PARTIELLEMENT composé parfaitement valable, on décide de la barbe et on
    * laisse le reste au sort.
    *
    * La clé d'un trait EST son sel : c'est tout le contrat entre ce fichier et
@@ -145,7 +145,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
    * Ce calque était le point noir du portrait, et une grille de onze crans l'a
    * montré d'un coup : de 0,00 à 0,30, quatre visages IDENTIQUES ; de 0,40 à
    * 0,70, rien du tout ; de 0,80 à 1,00, identiques encore. Trois états, pas
-   * un axe — et l'écart entre le mourant et l'homme en forme se résumait à une
+   * un axe, et l'écart entre le mourant et l'homme en forme se résumait à une
    * goutte de sueur. À quarante-quatre pixels, la taille du hub, seize
    * combinaisons donnaient seize fois la même image.
    *
@@ -158,7 +158,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
    * ② CHAQUE JAUGE A SON SIGNE. `condition` était la MOYENNE de cinq jauges :
    *    le visage pouvait dire « ça va mal », jamais « il crève de soif ». Les
    *    jauges arrivent maintenant entières, et chacune écrit sur une partie du
-   *    visage — le sommeil sur les paupières, la faim sur les joues, la soif
+   *    visage, le sommeil sur les paupières, la faim sur les joues, la soif
    *    sur les lèvres, le mental sur le TRAIT lui-même, la santé sur le teint.
    *    On lit la cause, plus seulement la gravité.
    *
@@ -176,7 +176,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   const mSoif = jauges ? manque(jauges.thirst) : moyenne;
   const mMental = jauges ? manque(jauges.mental) : moyenne;
   const mSante = jauges ? manque(jauges.health) : moyenne;
-  // La gravité générale, c'est la PIRE jauge — pas leur moyenne. Mourir de
+  // La gravité générale, c'est la PIRE jauge, pas leur moyenne. Mourir de
   // soif en pleine forme par ailleurs reste mourir.
   const mal = aEtat ? Math.max(mSommeil, mFaim, mSoif, mMental, mSante) : 0;
   // Et la belle vigueur, c'est quand la plus basse est encore haute.
@@ -197,7 +197,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   /*
    * LA DIGNITÉ, ELLE AUSSI, DEVIENT CONTINUE.
    *
-   * Elle avait trois paliers, et les trois marquaient les COINS de la carte —
+   * Elle avait trois paliers, et les trois marquaient les COINS de la carte,
    * là où il reste deux pixels à quarante-quatre. Ce qui se dégrade
    * maintenant, c'est d'abord ce qui est GRAND : le vêtement, la barbe, les
    * cheveux. Le carton s'abîme encore, mais en second, et progressivement.
@@ -210,15 +210,15 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   const peauOmbre = melanger(skin, '#5E3E24', 0.30);
 
   /*
-   * LA FORME DU CRÂNE — ce qui manquait le plus.
+   * LA FORME DU CRÂNE : ce qui manquait le plus.
    *
    * La tête était un rectangle arrondi, le MÊME pour tout le monde : deux
    * douzaines d'inconnus avaient exactement la même silhouette, et toute la
    * différence tenait aux cheveux et aux lunettes. À trente-deux pixels, où
    * rien d'autre ne se lit, ils étaient interchangeables.
    *
-   * Les tempes restent à 25/75 — c'est là-dessus que sont calés les chapeaux,
-   * les lunettes et les quarante accessoires — mais la MÂCHOIRE et le MENTON
+   * Les tempes restent à 25/75, c'est là-dessus que sont calés les chapeaux,
+   * les lunettes et les quarante accessoires, mais la MÂCHOIRE et le MENTON
    * varient. Ça suffit à séparer les silhouettes sans rien décaler.
    */
   const FORMES = [
@@ -235,7 +235,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
    * Deux ombres sur les joues restaient un maquillage : la planche montrait
    * « faim 0 » et « faim 50 » presque semblables. Un affamé n'a pas les joues
    * ombrées, il a le visage PLUS ÉTROIT. La mâchoire se resserre donc pour de
-   * bon — et comme tout le bas du visage (bouche, barbe, mâchoire) est calé
+   * bon, et comme tout le bas du visage (bouche, barbe, mâchoire) est calé
    * sur `jx`, il suit sans qu'on ait à y penser.
    */
   const jx = 25 * forme.jaw * (1 - mFaim * 0.15);   // demi-largeur de la mâchoire
@@ -341,7 +341,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
       {/* ---- LE CARTON ----
           Le fond n'est plus un aplat : c'est un morceau de carton découpé. La
           cannelure se voit par la tranche, le bord de coupe est plus sombre
-          que la face, et la tête est une seconde épaisseur posée dessus —
+          que la face, et la tête est une seconde épaisseur posée dessus,
           c'est son ombre portée qui la décolle. */}
       <rect x="0" y="0" width="100" height="100" rx="20" fill={bg} />
       <g stroke={cannelure} strokeWidth="0.9" opacity="0.26">
@@ -449,7 +449,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
 
         La tête flottait au-dessus d'un rectangle de peau coupé net par le bord
         du cadre : de loin, une sucette. Deux épaules suffisent à en faire un
-        portrait — et elles donnent enfin une assise aux accessoires de cou,
+        portrait, et elles donnent enfin une assise aux accessoires de cou,
         l'écharpe et la cravate, qui pendaient jusque-là dans le vide.
 
         Le vêtement se tire de la graine sans passer par l'Atelier : c'est la
@@ -463,7 +463,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
       <path d="M11 101 Q13 88 34 84 L66 84 Q87 88 89 101 Z" fill={melanger(VETEMENT[pick('cloth', VETEMENT.length)], '#463726', Math.pow(crasse, 0.65) * 0.55)} stroke={OUTLINE} strokeWidth="2.2" strokeLinejoin="round" />
       {/* Le col, ouvert sur le cou. */}
       <path d="M41 84.5 Q50 92 59 84.5" fill="none" stroke={OUTLINE} strokeWidth="1.8" strokeLinecap="round" opacity="0.6" />
-      {/* Un col tenu, boutonné — le seul signe POSITIF de la dignité. Le reste
+      {/* Un col tenu, boutonné, le seul signe POSITIF de la dignité. Le reste
           de l'axe ne dit que ce qui se perd ; ici, quelque chose est encore
           en place, et ça disparaît doucement quand on cesse d'y tenir. */}
       {crasse < 0.45 && (
@@ -493,7 +493,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         )}
       </g>
 
-      {/* Oreilles — dessinées AVANT la tête : le visage recouvre leur moitié
+      {/* Oreilles, dessinées AVANT la tête : le visage recouvre leur moitié
           interne et elles se rattachent au crâne. Posées par-dessus, elles
           flottaient comme deux anses. */}
       <ellipse cx="24.5" cy="50" rx="4.2" ry="5.6" fill={skin} stroke={OUTLINE} strokeWidth="2" />
@@ -596,7 +596,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
             const h = 1 + mSommeil * 6.4;
             return (
               <g key={x}>
-                {/* La paupière est un aplat de peau — sans contour en haut :
+                {/* La paupière est un aplat de peau, sans contour en haut :
                     un trait horizontal au-dessus de l'œil se lisait comme un
                     second sourcil. Seul le BORD BAS est repassé au feutre. */}
                 <path d={`M${x - 6.4} ${eyeY - 6.5} h12.8 v${h} q-6.4 2.2 -12.8 0 Z`} fill={skin} />
@@ -632,7 +632,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         </g>
       )}
 
-      {/* Nez — une petite ombre de papier plié plutôt qu'un crochet seul, et
+      {/* Nez, une petite ombre de papier plié plutôt qu'un crochet seul, et
           calé sur la bouche : il s'arrête cinq unités au-dessus d'elle. */}
       <path d={`M50 52 L${46.5} ${mY - 5} q3.5 2.2 7 0 Z`} fill={peauOmbre} opacity="0.28" />
       <path d={`M50 52 l-3.5 ${mY - 57} q3.5 2.2 7 0`} fill="none" stroke={OUTLINE} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
@@ -651,7 +651,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
       )}
 
       {/*
-        BARBE ET MOUSTACHE — AVANT la bouche, et à leur place.
+        BARBE ET MOUSTACHE : AVANT la bouche, et à leur place.
 
         Le « bouc » était dessiné de 62 à 66, la bouche de 65 à 68 : les deux
         se chevauchaient et produisaient au milieu du visage une masse noire
@@ -1006,7 +1006,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           de composant : c'est ici que se joue « on lit la cause, pas seulement
           la gravité ». `pnpm planche-etat` rend la grille qui juge ce bloc. */}
 
-      {/* LA FAIM CREUSE — joues et tempes. */}
+      {/* LA FAIM CREUSE : joues et tempes. */}
       {mFaim > 0.06 && (
         <g clipPath={`url(#${faceId})`} style={{ pointerEvents: 'none' }}>
           <path d={`M${50 - jx - 3} 50 Q${50 - jx + 4} ${mY - 4} ${50 - jx * 0.5} ${mY + 3}`} stroke={peauOmbre} strokeWidth={2 + mFaim * 3} fill="none" strokeLinecap="round" opacity={mFaim * 0.55} />
@@ -1017,7 +1017,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         </g>
       )}
 
-      {/* LE SOMMEIL CERNE — sous les paupières déjà tombées. */}
+      {/* LE SOMMEIL CERNE : sous les paupières déjà tombées. */}
       {mSommeil > 0.06 && (
         <g style={{ pointerEvents: 'none' }} clipPath={`url(#${faceId})`}>
           {[eyeL, eyeR].map(x => (
@@ -1030,12 +1030,12 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
       )}
 
       {/*
-        LA SOIF GERCE — et il en fallait bien plus que trois traits.
+        LA SOIF GERCE, et il en fallait bien plus que trois traits.
 
         La planche donnait « soif 0 » et « soif 50 » quasiment identiques :
         trois fissures d'une unité et une teinte de lèvre à peine décalée ne
         se voient pas. La soif dessèche maintenant TOUT le pourtour de la
-        bouche — la peau blanchit et se craquelle sur cinq fentes franches —
+        bouche, la peau blanchit et se craquelle sur cinq fentes franches,
         en plus de la décoloration déjà appliquée aux lèvres.
       */}
       {mSoif > 0.15 && (
@@ -1059,7 +1059,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         LE MENTAL FAIT TREMBLER LE TRAIT.
 
         Pas le visage : le DESSIN. Un second contour décalé, comme une main qui
-        ne tient plus le feutre — c'est le même parti pris que le texte qui se
+        ne tient plus le feutre, c'est le même parti pris que le texte qui se
         brouille quand le mental lâche, et ça ne dépend d'aucun des quatorze
         traits tirés, donc ça ne peut entrer en conflit avec rien.
       */}
@@ -1073,7 +1073,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         </g>
       )}
 
-      {/* LA SANTÉ MARQUE — un hématome sur la pommette. */}
+      {/* LA SANTÉ MARQUE : un hématome sur la pommette. */}
       {mSante > 0.35 && (
         <g clipPath={`url(#${faceId})`} style={{ pointerEvents: 'none' }} opacity={(mSante - 0.35) * 1.4}>
           <ellipse cx="34" cy="55" rx="6.5" ry="4.5" fill="#7A5A78" opacity="0.5" transform="rotate(-12 34 55)" />
@@ -1081,7 +1081,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         </g>
       )}
 
-      {/* LA GRAVITÉ GÉNÉRALE — les coins de la bouche, et la sueur.
+      {/* LA GRAVITÉ GÉNÉRALE : les coins de la bouche, et la sueur.
           Des coins, pas une seconde bouche : l'ancien calque en redessinait
           une par-dessus la vraie, et on en voyait deux. */}
       {mal > 0.1 && (
@@ -1094,7 +1094,7 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         <path d="M71 33 q-2.6 4.5 0 7 q2.6 -2.5 0 -7 Z" fill="#8FB8D8" stroke="#5E86A6" strokeWidth="0.6" opacity={(mal - 0.5) * 1.9} style={{ pointerEvents: 'none' }} />
       )}
 
-      {/* LA BONNE FORME — joues, et un coin de bouche qui remonte. */}
+      {/* LA BONNE FORME : joues, et un coin de bouche qui remonte. */}
       {vigueur > 0.04 && (
         <g style={{ pointerEvents: 'none' }}>
           <g clipPath={`url(#${faceId})`}>
@@ -1121,15 +1121,15 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
         L'ancien premier palier posait un petit triangle beige au bord gauche du
         visage : à la taille du hub, il ressemblait à une flèche pointant vers
         la tête, pas à un coin corné. Les trois paliers sont maintenant des
-        accidents de la MATIÈRE — un pli, une déchirure, une réparation au
-        ruban — parce que c'est ce que le joueur peut reconnaître d'un coup
+        accidents de la MATIÈRE, un pli, une déchirure, une réparation au
+        ruban, parce que c'est ce que le joueur peut reconnaître d'un coup
         d'œil sans qu'aucun texte ne le dise.
       */}
       {/*
-        LA BARBE DE TROIS JOURS — le signe qui porte le plus loin, parce qu'il
+        LA BARBE DE TROIS JOURS : le signe qui porte le plus loin, parce qu'il
         assombrit toute la mâchoire. Densité et opacité continues.
 
-        Elle démarrait à 0,2 de crasse, c'est-à-dire à 80 de dignité — et le
+        Elle démarrait à 0,2 de crasse, c'est-à-dire à 80 de dignité, et le
         contrôle a trouvé là une zone morte que l'œil ne voyait pas : entre 80
         et 100, plus rien ne bougeait, alors que c'est la plage où l'on passe
         le début de partie. Elle commence maintenant à peine la dignité

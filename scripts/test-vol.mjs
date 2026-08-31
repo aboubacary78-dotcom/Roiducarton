@@ -54,7 +54,7 @@ const voler = (c, tier, cible = BOUTIQUE) =>
 
 let echecs = 0;
 const verifier = (nom, condition, detail) => {
-  console.log(`${condition ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${condition ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!condition) echecs++;
 };
 

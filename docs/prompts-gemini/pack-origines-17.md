@@ -1,6 +1,6 @@
-# Pack Origines — 17 images « La Chute de… » (récit d'origine)
+# Pack Origines · 17 images « La Chute de… » (récit d'origine)
 
-## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
+## 📦 Contexte projet (à lire en entier · tu pars de zéro, sans accès au code)
 
 Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie : un SDF
 survit jour après jour dans une ville française. Direction artistique
@@ -21,7 +21,7 @@ saisi en plein mouvement, comme un photogramme de dessin animé.
 Pour chaque image, applique ces 4 règles comiques :
 1. **Le moment du gag, en pleine action** : la chute est en train de se
    produire MAINTENANT (l'objet s'envole, le personnage glisse, tout
-   s'effondre) — jamais figé ni « après coup ».
+   s'effondre) : jamais figé ni « après coup ».
 2. **Une expression de visage TRÈS marquée et exagérée** : effroi comique,
    fierté aveugle au désastre, extase à contretemps, dépit, panique polie…
    Le visage (dessiné au feutre) porte la blague.
@@ -35,7 +35,7 @@ Pour chaque image, applique ces 4 règles comiques :
 
 Le personnage est montré **AVANT / le jour exact de la bascule** : encore
 **présentable, dans la tenue de son ancien métier** (PAS le SDF barbu des autres
-packs). On veut le « juste avant » — avec un **petit indice de la rue qui
+packs). On veut le « juste avant », avec un **petit indice de la rue qui
 arrive** (carton de déménagement, baluchon, valise posée au sol).
 
 **Style OBLIGATOIRE pour chaque image :**
@@ -74,7 +74,7 @@ l'action en cours sont indiquées : respecte-les, c'est là qu'est la blague.
 - `origin-ouvrier.webp`
   Ahurissement total : l'ouvrier, la tasse de café figée à deux centimètres des lèvres et la mâchoire tombante, regarde son usine en carton s'éloigner sur des roulettes vers l'horizon. Baluchon abandonné à ses pieds.
 - `origin-professeur.webp`
-  Fierté déplacée : le professeur, sourcil levé et petit air satisfait, trace une grosse croix rouge sur sa propre lettre de licenciement (feuille sans texte) — sans réaliser que c'est la sienne. Cartons de livres autour, craie à la main.
+  Fierté déplacée : le professeur, sourcil levé et petit air satisfait, trace une grosse croix rouge sur sa propre lettre de licenciement (feuille sans texte), sans réaliser que c'est la sienne. Cartons de livres autour, craie à la main.
 - `origin-sommelier.webp`
   Extase à contretemps : le sommelier, yeux mi-clos et sourire béat, savoure une gorgée les joues roses, pendant que derrière lui la cave en carton est totalement VIDE, une dernière bouteille roulant au sol. Il ne voit rien. Petite valise posée.
 - `origin-cascadeur.webp`
@@ -86,7 +86,7 @@ l'action en cours sont indiquées : respecte-les, c'est là qu'est la blague.
 - `origin-infirmier.webp`
   « C'est pas possible » : l'infirmier se tape le front, dépité, devant sa propre porte fermée, ses clés bien en évidence de l'autre côté de la vitre. Valise médicale posée à côté, mine catastrophée mais digne.
 - `origin-artiste.webp`
-  Sérieux imperturbable (donc hilarant) : l'artiste en béret, main sur le cœur et menton levé avec émotion, présente une toile PARFAITEMENT blanche à une galerie en carton totalement vide — seul un pigeon en papier « admire ». Cartons d'œuvres vendues empilés.
+  Sérieux imperturbable (donc hilarant) : l'artiste en béret, main sur le cœur et menton levé avec émotion, présente une toile PARFAITEMENT blanche à une galerie en carton totalement vide, seul un pigeon en papier « admire ». Cartons d'œuvres vendues empilés.
 - `origin-militaire.webp`
   Contraste comique : le militaire au garde-à-vous impeccable, visage stoïque, salue un guichet administratif en carton fermé, enseveli sous une avalanche de paperasse qui vole partout. Barda à ses pieds, pas un cil ne bouge.
 - `origin-bibliothecaire.webp`
@@ -94,7 +94,7 @@ l'action en cours sont indiquées : respecte-les, c'est là qu'est la blague.
 - `origin-vendeur.webp`
   Décalage total : le vendeur de voitures, sourire commercial ultra-large et pouce levé, pose fièrement à côté d'une voiture en carton écrabouillée en accordéon ; une file de clients en papier fonce sur lui, furieux, tickets à la main.
 - `origin-jardinier.webp`
-  Chute imminente : le jardinier, arrosoir à la main et sourire serein, arrose tranquillement son potager luxuriant sur un toit d'immeuble en carton qui s'effondre sous ses pieds — il ne réalise pas encore. Planches qui cèdent.
+  Chute imminente : le jardinier, arrosoir à la main et sourire serein, arrose tranquillement son potager luxuriant sur un toit d'immeuble en carton qui s'effondre sous ses pieds, il ne réalise pas encore. Planches qui cèdent.
 - `origin-avocat.webp`
   Absurde : l'avocat en robe noire plaide avec une fougue théâtrale, index pointé… sur son propre reflet dans un grand miroir (son unique adversaire), tout aussi furieux. Un pigeon en papier, blasé, fait le juge. Petit tribunal en carton.
 - `origin-musicien.webp`

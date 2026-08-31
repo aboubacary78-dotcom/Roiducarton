@@ -46,11 +46,11 @@ export default function AchievementToast() {
           /*
             LE SUCCÈS DÉBLOQUÉ EST UN POST-IT.
 
-            C'était une carte blanche cerclée d'or — et l'or, mesuré à 43°, est
+            C'était une carte blanche cerclée d'or, et l'or, mesuré à 43°, est
             un cousin du kraft : le bandeau le plus important du jeu avait la
             couleur de son propre décor. Le post-it fluo ne contraste qu'à
             1,25:1 posé sur le papier, ce qui en ferait une marque invisible,
-            mais il monte à 11,95:1 sous une écriture noire — le meilleur score
+            mais il monte à 11,95:1 sous une écriture noire, le meilleur score
             de toute la palette. C'est donc un FOND, jamais un trait, et c'est
             très exactement ce qu'est un post-it.
 

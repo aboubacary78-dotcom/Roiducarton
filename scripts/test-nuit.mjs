@@ -1,5 +1,5 @@
 /*
- * LA NUIT — ce qu'elle prend, ce qu'elle épargne, et ce qu'elle propose.
+ * LA NUIT : ce qu'elle prend, ce qu'elle épargne, et ce qu'elle propose.
  *
  * Trois défauts, tous invisibles à la lecture du code.
  *
@@ -7,7 +7,7 @@
  *    perte au lieu d'ajouter une jauge. Le bilan du matin n'affichait donc
  *    rien pour eux : pas de chiffre négatif, puisqu'il n'y avait plus de
  *    perte, et un chiffre positif aurait été faux. On lisait « le matelas vous
- *    a rendu votre nuit » sans jamais savoir ce que cette nuit valait — le
+ *    a rendu votre nuit » sans jamais savoir ce que cette nuit valait, le
  *    matériel se payait et ne se voyait pas.
  *
  * ② LE SECOURS DE NUIT DEVENU INTROUVABLE. Le rattrapage du matin était compté
@@ -16,7 +16,7 @@
  *    l'as enlevé pour les personnes qui payent ». La nuit a maintenant sa
  *    propre cadence, qui ne dépend plus de la journée écoulée.
  *
- * ③ L'ATELIER DEPUIS LA MORT. C'est là qu'on pense à composer quelqu'un —
+ * ③ L'ATELIER DEPUIS LA MORT. C'est là qu'on pense à composer quelqu'un,
  *    juste après avoir enterré le précédent.
  *
  * PIÈGE ÉVITÉ ICI : constater qu'un bilan ne montre aucune perte de sommeil ne
@@ -39,7 +39,7 @@ p.on('pageerror', e => erreurs.push(String(e).slice(0, 140)));
 const pause = ms => new Promise(r => setTimeout(r, ms));
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 const clic = m => p.evaluate(s => {
@@ -112,7 +112,7 @@ verifier('avec le matelas, le bilan dit ce qu\'il a évité',
   (avecMatelas.match(/matériel vous a évité[^]{0,80}/) ?? ['absent'])[0]);
 /*
  * Et il annonce un MONTANT. Sans chiffre, la ligne ne dit rien de plus que la
- * phrase qui existait déjà — c'est justement ce qui manquait.
+ * phrase qui existait déjà, c'est justement ce qui manquait.
  */
 const montant = avecMatelas.match(/Matelas de carton[^]{0,40}?−(\d+)/);
 verifier('  …avec le nombre de points sauvés',
@@ -187,8 +187,8 @@ await clic('compris|Got it'); await pause(1500);
  */
 if (/Pas tout de suite|Not just yet/i.test(await ecran())) {
   // Le refus se fait en DEUX temps : « Non, c'est fini », puis « Laisser X
-  // partir ». C'est délibéré côté jeu — on ne renonce pas à une vie d'un
-  // pouce distrait — et le test doit suivre le même chemin que le joueur.
+  // partir ». C'est délibéré côté jeu, on ne renonce pas à une vie d'un
+  // pouce distrait, et le test doit suivre le même chemin que le joueur.
   await clic('Non, c\'est fini|No, it\'s over'); await pause(700);
   await clic('Laisser .* partir|Let .* go'); await pause(2200);
 }
@@ -200,7 +200,7 @@ const mort = await ecran();
  * Sans successeur annoncé, le bouton du bas devient « Composer une nouvelle
  * âme perdue ». Avec un successeur, c'est SON bouton que le joueur touche, et
  * la mention passe dans la ligne qui l'accompagne. Chercher la seule première
- * formulation faisait échouer le test dans le cas le plus fréquent — et le
+ * formulation faisait échouer le test dans le cas le plus fréquent, et le
  * défaut était réel : l'invitation ne s'affichait que dans le cas le plus rare.
  */
 const invite = /Composer une nouvelle âme perdue|Compose a new lost soul/i.test(mort)

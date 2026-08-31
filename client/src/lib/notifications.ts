@@ -14,7 +14,7 @@
  *
  * 2. LE VOLUME. Au-delà de deux rappels par jour, la désinstallation progresse
  *    plus vite que le retour : on perd le canal entier. Le calendrier ci-dessous
- *    est agressif et reste sous ce plafond, avec extinction à J+21 — un joueur
+ *    est agressif et reste sous ce plafond, avec extinction à J+21, un joueur
  *    qui n'est pas revenu en trois semaines ne reviendra pas, et continuer à le
  *    relancer ne produit que des désinstallations.
  *
@@ -53,7 +53,7 @@ function successorName(): string | null {
  *
  * On garde les heures des cinq dernières sessions et on prend la médiane :
  * une seule session nocturne ne doit pas déplacer tout le calendrier. Sans
- * historique, on vise 19 h — la fin de journée, quand on a du temps mort.
+ * historique, on vise 19 h, la fin de journée, quand on a du temps mort.
  */
 export function noteSessionHour(now = new Date()): void {
   try {
@@ -102,7 +102,7 @@ export function buildSchedule(opts: {
   const h = usualHour();
   const out: Planned[] = [];
 
-  // H+4 — encore dans la journée, quand la session est fraîche.
+  // H+4 : encore dans la journée, quand la session est fraîche.
   const h4 = new Date(now.getTime() + 4 * 3600_000);
   if (h4.getHours() >= 8 && h4.getHours() <= 22) {
     out.push({
@@ -113,7 +113,7 @@ export function buildSchedule(opts: {
     });
   }
 
-  // J+1 à l'heure habituelle — le carton du matin attend.
+  // J+1 à l'heure habituelle, le carton du matin attend.
   out.push({
     id: IDS.j1,
     title: fr ? 'Le carton du matin' : 'The morning cardboard',
@@ -135,7 +135,7 @@ export function buildSchedule(opts: {
     });
   }
 
-  // J+3 — le successeur nommé. C'est le meilleur texte dont on dispose.
+  // J+3 : le successeur nommé. C'est le meilleur texte dont on dispose.
   out.push({
     id: IDS.j3,
     title: fr ? 'Le Roi du Carton' : 'The Cardboard King',
@@ -145,7 +145,7 @@ export function buildSchedule(opts: {
     at: at(3, h, now),
   });
 
-  // J+7 — retour avec un cadeau, pas avec un reproche.
+  // J+7 : retour avec un cadeau, pas avec un reproche.
   out.push({
     id: IDS.j7,
     title: fr ? 'On vous a gardé quelque chose' : 'Something was kept for you',
@@ -153,7 +153,7 @@ export function buildSchedule(opts: {
     at: at(7, h, now),
   });
 
-  // J+21 — le dernier. Après, plus rien : relancer au-delà ne produit que des
+  // J+21 : le dernier. Après, plus rien : relancer au-delà ne produit que des
   // désinstallations.
   out.push({
     id: IDS.j21,

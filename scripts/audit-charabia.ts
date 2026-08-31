@@ -2,7 +2,7 @@
  * COMBIEN LE BROUILLAGE ABÎME-T-IL, ET QU'EST-CE QU'IL PRODUIT ?
  *
  * Le brouillage du mental bas s'est fait signaler comme « beaucoup de phrases
- * parasites » — capture d'écran à l'appui. Avant de le régler au jugé, on le
+ * parasites », capture d'écran à l'appui. Avant de le régler au jugé, on le
  * mesure sur les vrais textes du jeu, à plusieurs niveaux de mental :
  *
  *   · LA PART DE MOTS TOUCHÉS. « Un peu » et « un mot sur deux » ne se
@@ -11,7 +11,7 @@
  *
  *   · LES JETONS IMPOSSIBLES. Un mot brouillé doit rester un mot mal lu.
  *     « ls'iritohe » pour « l'histoire » n'est pas une lecture difficile,
- *     c'est un caractère déplacé — ça ne se lit pas comme un symptôme, ça se
+ *     c'est un caractère déplacé, ça ne se lit pas comme un symptôme, ça se
  *     lit comme un bug. On compte donc les sorties dont l'apostrophe ou le
  *     trait d'union a bougé : ce sont elles qui font passer la mécanique pour
  *     une faute de frappe.
@@ -74,8 +74,8 @@ if (exemples.length) {
  * CE QUE ÇA DONNE À LIRE.
  *
  * Les pourcentages disent combien ; ils ne disent pas si c'est LISIBLE. Un
- * échantillon au niveau où le joueur le rencontre le plus — autour de 45,
- * juste sous le seuil — tranche mieux que n'importe quel chiffre.
+ * échantillon au niveau où le joueur le rencontre le plus, autour de 45,
+ * juste sous le seuil, tranche mieux que n'importe quel chiffre.
  */
 console.log('\n  échantillon à mental 10 :');
 for (const t of textes.slice(0, 3)) {
@@ -99,8 +99,8 @@ for (const t of textes) {
   for (const m of t.matchAll(/\b([a-zà-ÿ]{2,})\s+\1\b/gi)) doublons.push(m[0]);
   for (const m of t.matchAll(/[a-zà-ÿ],[a-zà-ÿ]/gi)) collages.push(m[0]);
 }
-console.log(`\n  mots écrits deux fois de suite : ${doublons.length}${doublons.length ? ' — ' + [...new Set(doublons)].slice(0, 6).join(', ') : ''}`);
-console.log(`  virgules sans espace           : ${collages.length}${collages.length ? ' — ' + [...new Set(collages)].slice(0, 6).join(', ') : ''}`);
+console.log(`\n  mots écrits deux fois de suite : ${doublons.length}${doublons.length ? ', ' + [...new Set(doublons)].slice(0, 6).join(', ') : ''}`);
+console.log(`  virgules sans espace           : ${collages.length}${collages.length ? ', ' + [...new Set(collages)].slice(0, 6).join(', ') : ''}`);
 
 /*
  * ET C'EST UN CONTRÔLE, PAS UN RAPPORT.

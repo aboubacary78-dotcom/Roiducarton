@@ -3,7 +3,7 @@
  *
  * Un portrait généré ne se juge pas au code : il se juge à l'œil, et en
  * nombre. Un visage isolé peut être charmant pendant que la série entière se
- * ressemble — c'est justement le défaut que la lecture du fichier ne montre
+ * ressemble, c'est justement le défaut que la lecture du fichier ne montre
  * jamais.
  *
  * Ce script rend une grille de visages tirés de vraies graines, aux tailles
@@ -11,12 +11,12 @@
  * regarde à nouveau.
  *
  * Il passe par esbuild et non par `tsx` : le tsconfig du projet est en
- * `jsx: "preserve"` — c'est Vite qui transforme le JSX — et `tsx` le suit,
+ * `jsx: "preserve"` (c'est Vite qui transforme le JSX) et `tsx` le suit,
  * donc il produit du `React.createElement` sans React en portée. Une ligne
  * plutôt qu'un second tsconfig à maintenir.
  *
  * Le bundle doit rester DANS le dépôt : `--packages=external` laisse les
- * imports nus, que Node résout depuis le dossier du fichier de sortie — écrit
+ * imports nus, que Node résout depuis le dossier du fichier de sortie, écrit
  * dans /tmp, il ne trouve aucun node_modules.
  *
  *     pnpm planche [sortie.png]
@@ -62,7 +62,7 @@ const etats = [
 ].map(e => vignette(rendu({ seed: 'sdf-17', gender: 'm', size: 96, condition: e.condition, dignity: e.dignity }), e.l)).join('');
 
 /*
- * ④ Les coiffures, une par une — TÊTE NUE.
+ * ④ Les coiffures, une par une, TÊTE NUE.
  *
  * La première version de cette planche prenait une graine qui portait un
  * bonnet : les sept coiffures rendaient exactement la même image, et la
@@ -86,7 +86,7 @@ const barbes = ['rasé', 'moustache', 'bouc', 'barbe pleine'].map((l, i) =>
  *
  * Ils sont calés au pixel sur l'ancienne tête : tempes à 25/75, ligne de
  * chapeau à 33, yeux à 47, cou à partir de 70. Redessiner le crâne et poser
- * des épaules pouvait les décrocher tous à la fois — et c'est de la garde-robe
+ * des épaules pouvait les décrocher tous à la fois, et c'est de la garde-robe
  * qu'on parle, donc de ce que le joueur a gagné. On les regarde.
  */
 const HATS = ['halo', 'crown', 'tophat', 'santa', 'cap-back', 'party', 'beanie', 'cowboy', 'wizard', 'chef', 'flower-crown', 'pirate-hat', 'graduation', 'beret'];
@@ -104,22 +104,22 @@ const html = `<style>
   figure { margin: 0; text-align: center; }
   figcaption { font-size: 9px; color: #999; margin-top: 3px; }
 </style>
-${bloc('La série — 24 inconnus', serie)}
+${bloc('La série · 24 inconnus', serie)}
 ${bloc('Aux tailles du jeu', tailles)}
 ${bloc("Les deux axes d'état", etats)}
 ${bloc('Les coiffures (tête nue)', coiffures)}
 ${bloc('Les formes de crâne', formes)}
-${bloc('Barbes — chacune doit dessiner son propre nom', barbes)}
-${bloc('Garde-robe — chapeaux', acc('hat', HATS))}
-${bloc('Garde-robe — cou', acc('neck', NECKS))}
-${bloc('Garde-robe — yeux', acc('eyes', EYES))}
-${bloc('Garde-robe — visage', acc('face', FACES))}`;
+${bloc('Barbes · chacune doit dessiner son propre nom', barbes)}
+${bloc('Garde-robe · chapeaux', acc('hat', HATS))}
+${bloc('Garde-robe · cou', acc('neck', NECKS))}
+${bloc('Garde-robe · yeux', acc('eyes', EYES))}
+${bloc('Garde-robe · visage', acc('face', FACES))}`;
 
 /*
  * CE QUE LA PLANCHE NE PEUT PAS DIRE : LES PROPORTIONS.
  *
  * Vingt-quatre visages ne permettent pas de trancher « il y a trop de lunettes
- * noires » — on croit en compter neuf, il y en a peut-être cinq. On compte donc
+ * noires », on croit en compter neuf, il y en a peut-être cinq. On compte donc
  * sur quatre cents tirages, et on le fait sur le DESSIN RENDU plutôt que sur
  * une copie de la formule : une copie dériverait à la première retouche.
  */

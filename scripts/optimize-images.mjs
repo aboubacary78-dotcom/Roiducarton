@@ -2,7 +2,7 @@
  * RAMÈNE LES ILLUSTRATIONS À LA TAILLE OÙ ELLES SONT VUES.
  *
  * Le jeu s'affiche sur une largeur de 390 points. Même à trois pixels par
- * point — le maximum des téléphones actuels — il n'en montre jamais plus de
+ * point (le maximum des téléphones actuels) il n'en montre jamais plus de
  * 1170. Les sources montaient jusqu'à 2304 px de large : on expédiait quatre
  * fois trop de pixels sur chaque scène, au joueur comme dans l'APK.
  *

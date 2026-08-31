@@ -17,7 +17,7 @@ export interface PlayerProfile {
   records: ProfileRecords;
   unlocked: string[]; // ids d'accessoires débloqués
   /*
-   * ANCIEN EMPLACEMENT DE LA TENUE — conservé pour la reprise, plus alimenté.
+   * ANCIEN EMPLACEMENT DE LA TENUE : conservé pour la reprise, plus alimenté.
    *
    * Ce qui est PORTÉ appartient maintenant au personnage (voir
    * `Character.equipped`) : rangée ici, la tenue passait du mort au vivant, et

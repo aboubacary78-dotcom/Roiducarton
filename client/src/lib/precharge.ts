@@ -3,7 +3,7 @@
  *
  * Chaque illustration pèse une centaine de kilo-octets et n'était demandée
  * qu'au moment de l'afficher. Le joueur touchait une action, l'écran de
- * résultat s'ouvrait, et l'image arrivait après — plusieurs secondes sur une
+ * résultat s'ouvrait, et l'image arrivait après, plusieurs secondes sur une
  * connexion mobile, à chaque fois.
  *
  * Or on sait à l'avance ce qui va s'afficher. Depuis l'écran principal, les
@@ -13,7 +13,7 @@
  *
  * Deux précautions. Le navigateur garde ces images en cache : une URL déjà
  * réchauffée ne l'est pas deux fois. Et on ne réchauffe QUE des images que le
- * joueur va probablement voir dans la minute — précharger les mille images du
+ * joueur va probablement voir dans la minute, précharger les mille images du
  * jeu ferait exactement le mal qu'on cherche à éviter.
  */
 

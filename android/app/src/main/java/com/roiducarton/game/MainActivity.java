@@ -16,7 +16,7 @@ import java.util.Locale;
 /**
  * LES VRAIES MARGES DU TÉLÉPHONE, DONNÉES AU CSS.
  *
- * Depuis qu'on vise l'API 35 — ce que le Play Store exige — Android 15 impose
+ * Depuis qu'on vise l'API 35, ce que le Play Store exige. Android 15 impose
  * le BORD À BORD : l'application dessine derrière la barre d'état et derrière
  * la barre de navigation, au lieu de commencer en dessous. Le haut de l'écran
  * du jeu passait donc sous l'heure et la batterie.
@@ -32,8 +32,8 @@ import java.util.Locale;
  * variables n'existent pas et valent 0, donc rien ne change ; sur iOS
  * `env(...)` reprend la main ; sur Android c'est cette classe qui parle.
  *
- * L'écouteur est rappelé à chaque changement — rotation, clavier qui s'ouvre,
- * barre de navigation gestuelle qui apparaît — et non une seule fois au
+ * L'écouteur est rappelé à chaque changement, rotation, clavier qui s'ouvre,
+ * barre de navigation gestuelle qui apparaît, et non une seule fois au
  * démarrage : les marges ne sont pas constantes.
  */
 public class MainActivity extends BridgeActivity {

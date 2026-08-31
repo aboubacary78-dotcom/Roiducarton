@@ -42,7 +42,7 @@ export default function WardrobeScreen() {
     /*
      * S'habiller a son son : tissu qu'on enfile et boucle qu'on serre d'un
      * cran. Le clic générique convenait pour ouvrir un onglet, pas pour le
-     * seul geste du jeu où l'on prend soin de soi. Retirer garde le clic —
+     * seul geste du jeu où l'on prend soin de soi. Retirer garde le clic,
      * on ne fait pas une cérémonie d'un accessoire qu'on enlève.
      */
     if (wasEquipped) playClick(); else playObjetEquipe();
@@ -104,7 +104,7 @@ export default function WardrobeScreen() {
 
         On est ici en train de se regarder et de s'habiller : c'est le second
         meilleur moment du jeu pour parler de l'Atelier, après la mort. La
-        garde-robe change la TENUE ; l'Atelier change la TÊTE — la carte le dit
+        garde-robe change la TENUE ; l'Atelier change la TÊTE, la carte le dit
         comme ça, parce que c'est précisément la question qu'on se pose devant
         son propre portrait.
 

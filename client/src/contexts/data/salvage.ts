@@ -1,17 +1,17 @@
 /*
- * LA RÉCUP' — le fond du container.
+ * LA RÉCUP' : le fond du container.
  *
  * Pourquoi cette action existe : le bricolage (voir data/crafting) consomme du
  * « bazar », et aucune autre action n'en produit. La Récup' est cette source.
  *
  * POURQUOI CETTE VERSION. La première mouture faisait trier des objets qui
  * tombaient : prendre ce qui vaut, laisser le reste. Ignorer un déchet ne
- * coûtait rien, donc il n'y avait pas d'arbitrage — juste une bonne réponse
+ * coûtait rien, donc il n'y avait pas d'arbitrage, juste une bonne réponse
  * évidente et une exécution au doigt. Un test de réflexes déguisé en jeu.
  *
  * Ici, la seule vraie décision est de RENONCER. On déblaie une couche du
  * doigt, on ramasse ce qu'elle cache, puis on choisit : remonter avec le
- * butin, ou descendre d'une couche. Plus bas, ça vaut plus cher — et le tas
+ * butin, ou descendre d'une couche. Plus bas, ça vaut plus cher, et le tas
  * s'agite. S'il se réveille avant qu'on soit ressorti, on perd TOUT ce qu'on
  * n'a pas mis à l'abri. Le joueur se fait son propre malheur, et c'est ce qui
  * donne envie de recommencer.
@@ -112,7 +112,7 @@ export interface SalvageLayer {
 
 // Réglage cherché par simulation (20 000 fouilles par stratégie), pas au
 // jugé. La forme visée : l'espérance de gain culmine à la couche 4, et le
-// fond reste un PARI — on n'y descend pas pour l'argent mais pour la
+// fond reste un PARI, on n'y descend pas pour l'argent mais pour la
 // trouvaille, en acceptant une fouille sur deux perdue.
 //
 // Trois réglages testés et écartés. Un coût d'entrée fort (12/18/24/30) :
@@ -182,7 +182,7 @@ export function trouvailleById(id: string): InventoryItem | null {
 
 /**
  * Le risque annoncé AVANT de descendre : ce qu'on prend d'un coup, et ce que
- * la couche coûtera par seconde. Affiché tel quel — un pari qui cache ses
+ * la couche coûtera par seconde. Affiché tel quel, un pari qui cache ses
  * chances n'est pas un pari, c'est une loterie.
  */
 export function nextLayerRisk(depth: number): { entry: number; perS: number } | null {
@@ -252,8 +252,8 @@ export function piegeHurts(c: Character, findId: string): { health: number; hung
 /*
  * L'IMAGE DE FIN DE FOUILLE.
  *
- * La fouille se termine de trois façons — on remonte les poches pleines, on
- * remonte les mains vides, ou le tas se réveille et tout reste au fond — et
+ * La fouille se termine de trois façons, on remonte les poches pleines, on
+ * remonte les mains vides, ou le tas se réveille et tout reste au fond, et
  * chacune a son diorama. Tant que les trois images propres au mini-jeu ne sont
  * pas livrées, on retombe sur un diorama de déchetterie déjà en place plutôt
  * que sur la scène dessinée en repli : l'écran de fin d'un mini-jeu ne doit

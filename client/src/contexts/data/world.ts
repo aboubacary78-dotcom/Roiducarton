@@ -14,7 +14,7 @@ export const NAMES = [
  * QUI EST UNE FEMME, DANS TOUT LE JEU.
  *
  * Cette table ne couvrait que les vingt prénoms du JOUEUR. Les PNJ de la rue
- * en ont trente (voir data/npc), dont six femmes qui n'y figuraient pas —
+ * en ont trente (voir data/npc), dont six femmes qui n'y figuraient pas.
  * Odette, Paulette, Suzanne, Denise, Micheline, Jacqueline. Toutes étaient
  * donc traitées comme des hommes : le mauvais visage sur l'avatar, et « il »
  * dans chaque phrase.
@@ -157,7 +157,7 @@ export const STARTING_ITEMS: Record<string, InventoryItem> = {
  * LA CONTENANCE DU SAC.
  *
  * Vingt objets, sauf si l'on porte un sac à dos. Le « Sac à dos troué » est
- * vendu 4 € avec la promesse « augmente la capacité de transport » — et
+ * vendu 4 € avec la promesse « augmente la capacité de transport », et
  * jusqu'ici aucune ligne de code ne lisait sa présence : le plafond restait
  * vingt, sac ou pas. On payait une promesse, exactement comme pour le bonus
  * de défense que personne ne lisait non plus.
@@ -247,8 +247,8 @@ export function generateCharacter(evite?: { prenoms?: readonly string[]; metiers
  *
  * MÉTIERS DISTINCTS, ensuite. Mesuré sur 20 000 écrans : deux mêmes métiers
  * s'affichaient côte à côte dans **19,5 %** des cas. Le métier est ce qui
- * distingue le plus deux candidats — il donne les jauges de départ, l'objet en
- * poche et la moitié du gag — donc deux « Ancien Sommelier » sur le même écran
+ * distingue le plus deux candidats, il donne les jauges de départ, l'objet en
+ * poche et la moitié du gag, donc deux « Ancien Sommelier » sur le même écran
  * font paraître le jeu bien plus pauvre qu'il ne l'est.
  *
  * `evites` porte les prénoms du tirage précédent. Sans lui, une relance
@@ -278,7 +278,7 @@ export function generateCharacterTrio(evites: readonly string[] = []): Character
  * route avec vous jusqu'au soir, et vous PRÊTE l'un de ses deux traits.
  *
  * Aucun effet nouveau n'a été inventé pour ça : les PNJ tirent déjà leurs
- * traits dans cette table, et ces traits sont déjà branchés partout — la
+ * traits dans cette table, et ces traits sont déjà branchés partout, la
  * fouille, le combat, la manche, le voyage. Le compagnon ne fait qu'ouvrir au
  * joueur une porte qui existait déjà.
  *
@@ -290,7 +290,7 @@ export function generateCharacterTrio(evites: readonly string[] = []): Character
  * emprunte doit aider, sinon le partage devient un piège.
  *
  * « Qui fait quelque chose » ensuite. La moitié des traits positifs ne sont
- * qu'un bonus de jauge appliqué à la création du personnage — les prêter ne
+ * qu'un bonus de jauge appliqué à la création du personnage, les prêter ne
  * ferait rigoureusement rien, et le joueur croirait avoir gagné quelque chose.
  * Ne restent que ceux qu'un `hasTrait` va vraiment interroger pendant la
  * journée. `test-compagnon.mjs` relit le code source pour le vérifier : si un
@@ -340,7 +340,7 @@ export function hasTrait(c: Character, id: string): boolean {
  * bonus, et le classement n'aurait plus voulu dire grand-chose. Le multiplicateur
  * ne s'applique donc qu'à une main SUBIE. Tout le reste de la partie compte
  * normalement : on ne punit pas l'achat, on retire seulement une prime qui
- * récompensait exactement ce qu'on vient de supprimer — le hasard.
+ * récompensait exactement ce qu'on vient de supprimer, le hasard.
  */
 /**
  * Le nom du métier, accordé au personnage.

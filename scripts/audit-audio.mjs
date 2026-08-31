@@ -11,8 +11,8 @@
  *   - la deuxième ne suivait que `onClick={() => dig()}` et pas `onClick={dig}`,
  *     la référence nue ;
  *   - la troisième coupait le corps des fonctions à 900 caractères et ne
- *     descendait qu'd'un niveau, si bien que `handleBuy` — qui joue son son
- *     trente lignes plus bas — et `ouvrir` — qui délègue à `sonnerCadeau` —
+ *     descendait qu'd'un niveau, si bien que `handleBuy`, qui joue son son
+ *     trente lignes plus bas (et `ouvrir`) qui délègue à `sonnerCadeau`,
  *     passaient pour muets.
  *
  * Un chiffre faux mène à de fausses corrections : « réparer » un bouton qui
@@ -144,7 +144,7 @@ console.log(`\nGESTES SANS SON : ${gestesMuets.length}`);
 const parFichier = {};
 for (const g of gestesMuets) (parFichier[g.fichier] ??= []).push(g);
 Object.entries(parFichier).sort((a, b) => b[1].length - a[1].length).forEach(([f, l]) => {
-  console.log(`\n  ${f} — ${l.length}`);
+  console.log(`\n  ${f} · ${l.length}`);
   for (const g of l) {
     const quoi = g.libelle || g.action || g.code;
     console.log(`     ${String(g.ligne).padStart(4)}  ${quoi}`);

@@ -1,5 +1,5 @@
 /*
- * LA MANCHE — la foule, et ce qu'elle vaut.
+ * LA MANCHE : la foule, et ce qu'elle vaut.
  *
  * Le mini-jeu ne consiste plus à taper des pièces tombées du ciel mais à
  * TENIR LE REGARD de quelqu'un : on pose le pouce sur un passant et on le
@@ -9,7 +9,7 @@
  *
  * Trois règles de conception :
  *   1. On ne peut en suivre qu'un. Choisir, c'est renoncer aux autres.
- *   2. Insister rapporte plus mais coûte de la dignité — au coup par coup.
+ *   2. Insister rapporte plus mais coûte de la dignité, au coup par coup.
  *   3. Certains, si on force, ne se contentent pas de râler (voir `fight`).
  *
  * La faune change avec le quartier : la gare a ses touristes, le marché ses
@@ -27,7 +27,7 @@ export interface PasserBy {
   /**
    * Le timbre de sa voix quand on le retient trop longtemps.
    *
-   * Renseigné SEULEMENT quand le libellé le dit déjà — « la dame au cabas »,
+   * Renseigné SEULEMENT quand le libellé le dit déjà, « la dame au cabas »,
    * « l'homme qui parle seul ». Les autres archétypes sont volontairement
    * neutres (le costume, l'ouvrier, le vigile) et tirent leur voix de la
    * graine du passant : ils changent donc de personne d'une fois sur l'autre,
@@ -96,8 +96,8 @@ export const PASSERSBY: PasserBy[] = [
   // ---- Les mauvaises rencontres : elles ne donnent rien et elles cognent ----
   // Leur `holdS` est court exprès : l'anneau se remplit vite, ne rapporte
   // RIEN, et enclenche aussitôt le compte à rebours de la patience. Avec un
-  // holdS énorme, l'anneau ne se remplissait jamais et l'insistance — donc la
-  // bagarre — était tout simplement injoignable.
+  // holdS énorme, l'anneau ne se remplissait jamais et l'insistance, donc la
+  // bagarre, était tout simplement injoignable.
   {
     id: 'voyou', voix: 'm', label: 'Le gars à la casquette', tell: '🧢',
     crossS: 7, holdS: 0.8, give: 0, patienceS: 1.1, insistGive: 0, insistCost: 4,
@@ -144,7 +144,7 @@ export function rollPasserBy(location: string): PasserBy {
  *
  * Les archétypes explicitement genrés gardent leur voix ; les autres la
  * tirent de leur graine, qui est fixée à leur arrivée dans la rue. Un passant
- * ne change donc JAMAIS de voix pendant qu'on le retient — ce qui serait le
+ * ne change donc JAMAIS de voix pendant qu'on le retient, ce qui serait le
  * seul vrai bug possible ici, et le plus difficile à ne pas remarquer.
  */
 export function voixPassant(p: PasserBy, seed: string): 'm' | 'f' {

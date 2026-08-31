@@ -1161,7 +1161,7 @@ export const CONTENT_EN: Record<string, string> = {
  *
  * Même traduction que la forme masculine : l'anglais ne s'accorde pas, et
  * « Former Soldier » convient à tout le monde. Ces entrées existent parce que
- * `tc()` cherche la chaîne FRANÇAISE exacte — sans elles, Simone resterait en
+ * `tc()` cherche la chaîne FRANÇAISE exacte, sans elles, Simone resterait en
  * français au milieu d'un écran anglais.
  */
   'Ancienne Comptable': 'Former Accountant',

@@ -50,7 +50,7 @@ await build({ entryPoints: [entry], bundle: true, format: 'esm', outfile: out, p
 const { gameReducer, generateCharacter, TRAITS, HEIST_TARGETS } = await import(out);
 
 const policiers = HEIST_TARGETS.filter(t => t.catcher === 'police');
-console.log(`Cibles gardées par la police : ${policiers.length} sur ${HEIST_TARGETS.length} — ${policiers.map(t => t.id).join(', ')}`);
+console.log(`Cibles gardées par la police : ${policiers.length} sur ${HEIST_TARGETS.length} · ${policiers.map(t => t.id).join(', ')}`);
 
 const neutres = ['optimiste', 'poissard'].map(id => TRAITS.find(t => t.id === id));
 const perso = (mental) => ({
@@ -73,6 +73,6 @@ for (const mental of [4, 8, 9, 12, 20]) {
 
 console.log('\nLa mort qui suit une garde à vue est étiquetée :');
 const r = gameReducer(etat(perso(4)), { type: 'RESOLVE_STEAL', tier: 'fail', targetId: 'heist-superette-centre' });
-console.log(`  cause enregistrée : ${r.deathCause ?? '(aucune — l\'écran de fin déduit « moral à zéro »)'}`);
+console.log(`  cause enregistrée : ${r.deathCause ?? '(aucune, l\'écran de fin déduit « moral à zéro »)'}`);
 
 rmSync(out, { force: true });

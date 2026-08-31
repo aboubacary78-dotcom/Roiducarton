@@ -24,7 +24,7 @@ export default function OriginStoryOverlay() {
    *
    * Il avait été repoussé après le premier geste, pour raccourcir le chemin
    * entre le lancement et la première décharge : neuf écrans étaient devenus
-   * trois. Mais à l'essai, le décalage se remarque — on choisit un personnage,
+   * trois. Mais à l'essai, le décalage se remarque, on choisit un personnage,
    * on agit, et le jeu explique seulement ensuite qui on est. La question
    * « pourquoi je suis là ? » arrive naturellement au moment où on découvre le
    * personnage, pas une action plus tard.

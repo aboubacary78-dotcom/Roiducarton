@@ -13,7 +13,7 @@ import { playDignityLoss, playDignityTier, playGaugeLow, playTab } from '@/lib/s
  *
  * Six barres identiques ne se lisent pas : elles se comptent. Et une jauge
  * qu'il faut compter n'est pas lue. Le problème n'a jamais été le nombre de
- * jauges — six tiennent très bien dans une lecture périphérique — mais
+ * jauges (six tiennent très bien dans une lecture périphérique) mais
  * l'absence de hiérarchie entre elles, qui rangeait la Dignité au sixième rang
  * d'une liste alors qu'elle est le sujet du jeu.
  *
@@ -25,7 +25,7 @@ import { playDignityLoss, playDignityTier, playGaugeLow, playTab } from '@/lib/s
  *
  * 2. LES CHIFFRES PAR EXCEPTION. Tant que tout va, l'écran n'affiche AUCUN
  *    nombre. Dès qu'une jauge passe sous le seuil de danger, son nombre
- *    apparaît — et c'est le bon. On peut déplier le détail d'un appui.
+ *    apparaît, et c'est le bon. On peut déplier le détail d'un appui.
  */
 
 const DANGER = 25;
@@ -77,7 +77,7 @@ function useDeltas(stats: Stats) {
  * LES JAUGES QUI S'ALLUMENT EN ROUGE, À L'OREILLE.
  *
  * Le jeu demande de surveiller six jauges et n'en signalait aucune autrement
- * qu'en couleur — c'est-à-dire seulement au joueur qui regarde au bon moment.
+ * qu'en couleur, c'est-à-dire seulement au joueur qui regarde au bon moment.
  *
  * L'élastique tendu ne sonne qu'au FRANCHISSEMENT, jamais tant qu'on reste
  * dans le rouge : une alerte qui se rejoue à chaque action est une alarme, et
@@ -122,7 +122,7 @@ function useAlertesSonores(stats: Stats) {
 
       La pique était tirée au hasard dans les six : on pouvait mourir de soif
       et s'entendre parler du froid. Une remarque qui ne regarde pas l'écran
-      qu'elle commente ne rate pas de peu — elle apprend au joueur que le jeu
+      qu'elle commente ne rate pas de peu, elle apprend au joueur que le jeu
       ne regarde rien, et il cesse de les lire. On passe donc la jauge, et
       `piquer` ne tire que parmi les phrases qui parlent d'elle.
     */
@@ -139,7 +139,7 @@ function useAlertesSonores(stats: Stats) {
      * Sous 60 de mental, les mots des rencontres deviennent des signes
      * illisibles (lib/charabia). C'est la mécanique la plus visible du jeu et
      * elle était entièrement muette : rien ne reliait le texte troué à la
-     * jauge, et le joueur en concluait — capture d'écran à l'appui — que le
+     * jauge, et le joueur en concluait (capture d'écran à l'appui) que le
      * jeu était cassé. Une mécanique qu'on prend pour un bug est pire qu'une
      * mécanique absente : elle abîme la confiance dans tout le reste.
      *
@@ -155,7 +155,7 @@ function useAlertesSonores(stats: Stats) {
     teteQuiPartait.current = brouille;
 
     /*
-     * L'HUMILIATION. Aucun impact, que de l'arrachement — l'adhésif qu'on
+     * L'HUMILIATION. Aucun impact, que de l'arrachement, l'adhésif qu'on
      * décolle du carton mouillé en emportant la couche du dessus.
      *
      * Elle ne sonne qu'à partir d'une perte franche : le jeu grignote la
@@ -254,7 +254,7 @@ export default function StatBars({ stats, compact = false }: { stats: Stats; com
       className={`w-full flex flex-col text-left ${compact ? 'gap-1.5' : 'gap-2'}`}
       aria-label={tr('Voir le détail des jauges', 'Show gauge detail')}
     >
-      {/* LE CORPS — cinq segments, aucun chiffre tant que rien ne va mal. */}
+      {/* LE CORPS : cinq segments, aucun chiffre tant que rien ne va mal. */}
       <div className="flex items-end gap-1.5">
         {BODY.map(({ key, color, dangerColor }) => {
           const value = stats[key];
@@ -273,13 +273,13 @@ export default function StatBars({ stats, compact = false }: { stats: Stats; com
                   EN DANGER, C'EST UN TRAIT DE MARQUEUR.
 
                   La jauge passait à une version PLUS SOMBRE de sa propre
-                  teinte — un rouge assombri sur un rouge, un violet assombri
+                  teinte, un rouge assombri sur un rouge, un violet assombri
                   sur un violet. Assombrir une couleur ne la fait pas ressortir
                   du carton, ça l'y enfonce : c'est exactement le défaut que la
                   mesure de la palette a mis au jour. Les cinq jauges basculent
                   donc sur le même trait de marqueur, qui ne ressemble à aucune
                   d'elles. Laquelle est touchée reste lisible à sa POSITION et
-                  à son emoji, pas à sa couleur — et le corps l'a déjà dit à
+                  à son emoji, pas à sa couleur, et le corps l'a déjà dit à
                   voix haute (voir VOIX_DU_CORPS).
                 */}
                 <motion.div
@@ -295,7 +295,7 @@ export default function StatBars({ stats, compact = false }: { stats: Stats; com
         })}
       </div>
 
-      {/* LA DIGNITÉ — pleine largeur, et son palier en toutes lettres. */}
+      {/* LA DIGNITÉ : pleine largeur, et son palier en toutes lettres. */}
       <div className="relative">
         <div className="stat-bar-track">
           <motion.div

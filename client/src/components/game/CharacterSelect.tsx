@@ -43,7 +43,7 @@ function CharacterCard({ char, index, onSelect, onComposer }: {
           pour convertir les curieux.
 
           Le geste principal reste donc « je prends celui-là, on joue ». Le
-          crayon, discret, est pour qui a envie de regarder — et c'est
+          crayon, discret, est pour qui a envie de regarder, et c'est
           exactement le public que l'essai libre vise.
         */}
         {onComposer && (
@@ -105,7 +105,7 @@ export default function CharacterSelect() {
    *
    * Avant, ce chemin n'existait pas sans l'achat : le joueur ne voyait jamais
    * ce qu'il n'avait pas, et on lui vendait une fonctionnalité décrite par
-   * trois puces. Il compose maintenant d'abord — et à la validation, on ne lui
+   * trois puces. Il compose maintenant d'abord, et à la validation, on ne lui
    * vend plus une fonctionnalité, on lui vend CE personnage-là.
    *
    * `atelier` est relu après un achat réussi, d'où l'état local : la valeur
@@ -213,7 +213,7 @@ export default function CharacterSelect() {
                * Refus, fenêtre fermée d'un geste, magasin injoignable : la
                * partie démarre quand même, avec le personnage TEL QU'IL S'EST
                * PRÉSENTÉ. Bloquer quelqu'un devant un écran parce qu'il n'a pas
-               * payé transformerait un essai en otage — et il n'aurait pas
+               * payé transformerait un essai en otage, et il n'aurait pas
                * tort de le dire dans son commentaire.
                *
                * La composition est simplement perdue, ce qui est la seule

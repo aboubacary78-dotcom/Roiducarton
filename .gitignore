@@ -109,12 +109,12 @@ temp/
 .webdev/
 .project-config.json
 
-# Capacitor — LES DOSSIERS NATIFS SONT SUIVIS, ET C'EST VOULU.
+# Capacitor, LES DOSSIERS NATIFS SONT SUIVIS, ET C'EST VOULU.
 #
 # Ils l'étaient « parce qu'ils se régénèrent ». Ce n'est vrai que du gabarit.
-# Tout ce qu'on y ajoute à la main — l'App ID AdMob sans lequel l'application
+# Tout ce qu'on y ajoute à la main, l'App ID AdMob sans lequel l'application
 # se ferme au lancement, le niveau d'API exigé par le Play Store, le numéro de
-# version, la configuration de signature, les icônes — ne se régénère PAS.
+# version, la configuration de signature, les icônes, ne se régénère PAS.
 # Ignorer le dossier, c'est perdre tout cela au premier clonage, et publier
 # depuis une machine ne donnerait pas le même paquet que depuis une autre.
 #

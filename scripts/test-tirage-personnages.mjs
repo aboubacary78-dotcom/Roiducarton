@@ -3,13 +3,13 @@
  *
  * Trois collisions se voient, et une seule était corrigée :
  *
- *   · deux fois le même PRÉNOM sur l'écran — on ne sait plus lequel on
+ *   · deux fois le même PRÉNOM sur l'écran, on ne sait plus lequel on
  *     choisit. Déjà réglé de longue date, on le garde sous surveillance ;
- *   · deux fois le même MÉTIER — mesuré à 19,5 % des écrans avant correction.
+ *   · deux fois le même MÉTIER, mesuré à 19,5 % des écrans avant correction.
  *     Le métier donne les jauges de départ, l'objet en poche et la moitié du
  *     gag : deux « Ancien Sommelier » côte à côte font paraître le jeu bien
  *     plus pauvre qu'il ne l'est ;
- *   · une RELANCE qui rejoue un prénom de l'écran précédent — 40 % des
+ *   · une RELANCE qui rejoue un prénom de l'écran précédent, 40 % des
  *     relances. Le hasard était correct, il n'en avait simplement pas l'air.
  *
  * Le témoin en fin de fichier compte autant que le reste : la solution
@@ -57,7 +57,7 @@ const NAMES = bloc.slice(0, bloc.indexOf('];')).match(/'[^']+'/g).map(x => x.sli
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -86,7 +86,7 @@ verifier('une relance ne rejoue aucun prénom du tirage précédent',
 /*
  * Écarter des prénoms ne doit pas en privilégier d'autres : si le filtre
  * biaisait le tirage, quelques prénoms deviendraient rares et le joueur
- * verrait toujours les mêmes — soit exactement le défaut qu'on corrige.
+ * verrait toujours les mêmes, soit exactement le défaut qu'on corrige.
  */
 const tirages = [...freq.values()];
 const attendu = (N * 3) / NAMES.length;
@@ -104,8 +104,8 @@ verifier('un tirage sans aucun choix libre rend quand même un personnage',
   !!acculé?.name && !!acculé?.job?.id, `${acculé?.name} · ${acculé?.job?.id}`);
 
 /*
- * L'écran de mort annonce le successeur par son nom. Reprendre celui du mort
- * — « Marcel est mort, Marcel vous attend » — se lit comme un bug, alors on
+ * L'écran de mort annonce le successeur par son nom. Reprendre celui du mort,
+ * « Marcel est mort, Marcel vous attend », se lit comme un bug, alors on
  * l'écarte comme un prénom d'écran précédent (voir PREPARE_SUCCESSOR).
  */
 let successeurHomonyme = 0;

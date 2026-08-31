@@ -1,7 +1,7 @@
 /*
  * Capture d'écran du jeu pour le travail UX/UI.
  *
- * Prérequis (une fois) — télécharge Chrome for Testing dans ./chrome :
+ * Prérequis (une fois), télécharge Chrome for Testing dans ./chrome :
  *   pnpm dlx @puppeteer/browsers install chrome@130.0.6723.116
  *
  * Lancement :
@@ -67,4 +67,4 @@ try {
 }
 
 await browser.close();
-console.log('OK — captures dans', OUT);
+console.log('OK, captures dans', OUT);

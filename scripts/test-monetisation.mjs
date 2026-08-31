@@ -4,14 +4,14 @@
  * Deux choses se vérifient ici, et ce sont les deux seules du plan qui
  * décident quelque chose toutes seules :
  *
- *   · `verdictInterstitiel()` — qui a le droit de prendre un plein écran, et
+ *   · `verdictInterstitiel()`, qui a le droit de prendre un plein écran, et
  *     surtout qui ne l'a pas : le nouveau venu, celui qui vient de mourir pour
  *     la première fois de la session, et celui qui en a déjà eu un il y a
  *     moins de quatre-vingt-dix secondes. Ces trois refus protègent la
  *     rétention à sept jours, c'est-à-dire le revenu ; un test qui les laisse
  *     filer coûte de l'argent, pas de la vertu.
  *
- *   · `RECOVER_NIGHT` — l'offre du bilan de nuit. Elle rend la moitié de ce
+ *   · `RECOVER_NIGHT` : l'offre du bilan de nuit. Elle rend la moitié de ce
  *     que la nuit a pris. La moitié, pas plus, jamais au-delà de cent, et une
  *     seule fois. Une pub qui rend trop casse l'équilibre du jeu ; une pub
  *     qu'on peut regarder deux fois n'est plus une limite.
@@ -59,14 +59,14 @@ const {
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. L'interstitiel
 // ═══════════════════════════════════════════════════════════════════════════
-console.log("\nL'interstitiel — trois refus, dans l'ordre\n");
+console.log("\nL'interstitiel, trois refus, dans l'ordre\n");
 
 const CLE_PARTIES = 'roi-du-carton-parties-finies';
 const parties = (n) => memoire.set(CLE_PARTIES, String(n));
@@ -91,7 +91,7 @@ verifier('la première mort de la session reste offerte',
 
 /*
  * `showInterstitial` fait tomber le drapeau de première mort même quand rien
- * ne part — sinon un joueur en période de grâce garderait son laissez-passer
+ * ne part, sinon un joueur en période de grâce garderait son laissez-passer
  * pour toujours. Sur le web aucune publicité n'existe : c'est exactement ce
  * qu'on veut éprouver ici, l'effet de bord seul.
  */
@@ -120,7 +120,7 @@ verifier('un nouveau lancement rend sa mort offerte au joueur',
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. « Dormir une heure de plus »
 // ═══════════════════════════════════════════════════════════════════════════
-console.log('\nLe bilan de nuit — la moitié rendue, et rien de plus\n');
+console.log('\nLe bilan de nuit, la moitié rendue, et rien de plus\n');
 
 const JAUGES = { health: 60, mental: 60, hunger: 6, thirst: 4, sleep: 10, dignity: 50 };
 const etat = (stats, deltas, recovered) => ({
@@ -136,7 +136,7 @@ verifier('la soif aussi', apres.character.stats.thirst === 15, `4 → ${apres.ch
 verifier('la dignité aussi', apres.character.stats.dignity === 52, `50 → ${apres.character.stats.dignity}`);
 /*
  * On compare sans tenir compte de l'ordre des clés : il suit l'ordre du bilan,
- * pas celui des jauges, et ce détail n'engage rien — l'affichage lit ce qu'on
+ * pas celui des jauges, et ce détail n'engage rien, l'affichage lit ce qu'on
  * lui donne.
  */
 const memeContenu = (a, b) => {
@@ -169,7 +169,7 @@ verifier('sans bilan, l’action ne fait rien',
 // ═══════════════════════════════════════════════════════════════════════════
 // 3. Le contrat raté de peu
 // ═══════════════════════════════════════════════════════════════════════════
-console.log('\nLe contrat — la récompense du contrat, et pas un centime de plus\n');
+console.log('\nLe contrat, la récompense du contrat, et pas un centime de plus\n');
 
 /*
  * Le « presque » se mesure : sans `progress`, un contrat ne peut pas être raté
@@ -210,7 +210,7 @@ verifier('la récompense annoncée est celle du contrat',
   getContract('contrat-pecule').reward.respect === 2);
 
 /*
- * Le premier matin d'une première partie n'a pas encore de bouton « Bagarre » —
+ * Le premier matin d'une première partie n'a pas encore de bouton « Bagarre »,
  * il revient après la première action. Un contrat qui demanderait un combat à
  * cet instant tomberait une fois sur cinq, et donnerait un objectif sans en
  * donner le moyen.
@@ -226,7 +226,7 @@ verifier('les parties suivantes gardent le paquet entier',
 // ═══════════════════════════════════════════════════════════════════════════
 // 4. L'objet que le sac a refusé
 // ═══════════════════════════════════════════════════════════════════════════
-console.log('\nLe sac plein — l’objet nommé, et lui seul\n');
+console.log('\nLe sac plein, l’objet nommé, et lui seul\n');
 
 const chaise = { id: 'chaise', name: 'Chaise', emoji: '🪑', type: 'junk', value: 3 };
 const avecRefus = (refusedItem, itemKept) => ({

@@ -4,7 +4,7 @@
  * ① L'ACCORD DES MÉTIERS. Les dix-sept métiers étaient écrits au masculin et
  *    rien d'autre : Simone s'affichait « Ancien Militaire » au choix du
  *    personnage, sur le hub, au cimetière et à l'écran de fin. Une partie sur
- *    deux, donc — et ça se lisait comme une faute de frappe.
+ *    deux, donc, et ça se lisait comme une faute de frappe.
  *
  *    Le piège en le corrigeant : chaque nom de métier est aussi une CLÉ DE
  *    TRADUCTION. Une forme féminine sans son entrée anglaise laisse « Ancienne
@@ -24,7 +24,7 @@ import { readFileSync } from 'node:fs';
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -42,7 +42,7 @@ verifier(`les ${metiers.length} métiers ont une forme féminine`,
   metiers.length === 17 && sansFeminin.length === 0,
   sansFeminin.length ? `sans féminin : ${sansFeminin.join(', ')}` : '');
 
-// Le masculin ne doit pas se glisser dans le féminin — « Ancien Ouvrière ».
+// Le masculin ne doit pas se glisser dans le féminin, « Ancien Ouvrière ».
 const malAccordes = metiers.filter(j => !j.f.startsWith('Ancienne '));
 verifier('  …et toutes commencent par « Ancienne »',
   malAccordes.length === 0, malAccordes.map(j => j.f).join(', '));

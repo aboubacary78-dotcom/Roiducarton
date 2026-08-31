@@ -1,4 +1,4 @@
-# Feuille de route DLC — Le Roi du Carton
+# Feuille de route DLC · Le Roi du Carton
 
 > Validée le 21/07 : à lancer APRÈS la sortie du jeu de base. Règle d'or
 > intangible : le DLC ajoute du gameplay latéral, jamais de la puissance.
@@ -8,7 +8,7 @@
 
 ---
 
-## 🐾 DLC 1 — « Mon Compagnon » (~2,99 €) — PRIORITAIRE
+## 🐾 DLC 1 · « Mon Compagnon » (~2,99 €) · PRIORITAIRE
 
 Un onglet **Personnaliser** dédié : on choisit son animal avant la partie
 (ou on l'adopte en cours de run via un événement). Jauge de loyauté propre,
@@ -39,7 +39,7 @@ fugue, exploit, deuil) + accessoires de garde-robe assortis.
 
 ---
 
-## 🎭 DLC 2 — « Les Cinq Fins » (~4,99 €) — LE VAISSEAU AMIRAL
+## 🎭 DLC 2 · « Les Cinq Fins » (~4,99 €) · LE VAISSEAU AMIRAL
 
 Le jeu de base n'a que des morts ; ce DLC ajoute **5 fins rocambolesques**,
 chacune verrouillée par des critères à découvrir et accomplir. Chaque fin a
@@ -55,11 +55,11 @@ son écran illustré, son épilogue, une entrée au Registre (nouvelle collectio
 | 🎰 **Le 12 d'Esperanza** | la prophétie était vraie : le 12, un mercredi, en partageant. Jackpot absurde, interview au 20h, il paie un kebab à tout le quartier. | suite Esperanza vue + jouer le 12 un mercredi (in-game) + partager 3 fois ses gains |
 
 Principe : les critères s'appuient sur des systèmes EXISTANTS (titres,
-respect, suites, contrats) — le DLC tisse, il ne réinvente pas.
+respect, suites, contrats) : le DLC tisse, il ne réinvente pas.
 
 ---
 
-## 🎩 DLC 3 — « Le Quartier Chic » (~2,99 €)
+## 🎩 DLC 3 · « Le Quartier Chic » (~2,99 €)
 
 6e quartier : concierges hostiles, poubelles de luxe, galeries, dignité en
 montagnes russes. = 1 lieu + ~30 événements + 2 boutiques (traiteur fin,
@@ -72,7 +72,7 @@ Variante ultérieure possible : « Les Docks » (conteneurs, marins, brume).
 
 ---
 
-## 🎄 DLC 4 — Saisons & cosmétiques (~0,99-1,99 €)
+## 🎄 DLC 4 · Saisons & cosmétiques (~0,99-1,99 €)
 
 - « Noël dans la Rue » : arc saisonnier scénarisé (le Père Noël rival en
   personnage récurrent, le réveillon des invisibles).
@@ -81,7 +81,7 @@ Variante ultérieure possible : « Les Docks » (conteneurs, marins, brume).
 
 ---
 
-## 🧪 En réflexion — pack activités (« Petits Boulots » v2)
+## 🧪 En réflexion · pack activités (« Petits Boulots » v2)
 
 Le concept mini-jeux est validé sur le principe mais le gameplay doit être
 plus cool avant d'être retenu. Pistes à creuser :

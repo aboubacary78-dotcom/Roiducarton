@@ -3,20 +3,20 @@
 > images de mort existantes avec un fil conducteur comique. Ne pas
 > générer ce pack-ci séparément.
 
-# Pack 10 — Les fins de partie (4 images)
+# Pack 10 · Les fins de partie (4 images)
 
-## 📦 Contexte projet (à lire en entier — tu pars de zéro, sans accès au code)
+## 📦 Contexte projet (à lire en entier · tu pars de zéro, sans accès au code)
 
 Tu travailles sur **« Le Roi du Carton »**, un jeu mobile de survie : un SDF
 survit jour après jour dans une ville française. Direction artistique
 **« Carton Craft »** : chaque illustration est un **diorama miniature en carton
 kraft fait main**, comme une maquette artisanale photographiée.
 
-## ⚠️ RÈGLE N°1 — L'HUMOUR EST LA SIGNATURE DU JEU
+## ⚠️ RÈGLE N°1 · L'HUMOUR EST LA SIGNATURE DU JEU
 
 « Le Roi du Carton » est une COMÉDIE noire, et TOUTE sa direction artistique
 repose là-dessus : on rit de la misère avec tendresse, on ne s'y vautre jamais.
-**CHAQUE image doit faire sourire** — une situation absurde, un gag visuel, une
+**CHAQUE image doit faire sourire** : une situation absurde, un gag visuel, une
 expression comique du personnage. Une image simplement triste, plate ou
 déprimante est HORS SUJET et sera refusée, même si elle est techniquement
 réussie.
@@ -49,7 +49,7 @@ personnage). Toute image qui s'en écarte sera refusée.
 ## 🎯 Ce pack
 
 Quand un personnage meurt, le jeu affiche une **une de journal** : gros titre,
-photo, nécrologie. La photo est choisie selon ce qui a tué le personnage —
+photo, nécrologie. La photo est choisie selon ce qui a tué le personnage,
 la faim, le froid, l'épuisement… Six causes ont déjà la leur, plus une pour la
 mort au combat.
 
@@ -61,14 +61,14 @@ savoureux. Les voici.
 **Le ton est particulier ici.** Ce sont des morts, mais le jeu est une comédie
 noire : on rit de la fin comme d'une dernière blague, jamais du malheur. Le
 personnage doit garder sa dignité de héros dérisoire. **Ni gore, ni sang, ni
-cadavre explicite** — la mort en carton se raconte par la mise en scène, pas
+cadavre explicite** : la mort en carton se raconte par la mise en scène, pas
 par l'anatomie.
 
 Format : **paysage 3:2**.
 
 ---
 
-### 1. `death-jour-1.webp` — « Le Speedrun »
+### 1. `death-jour-1.webp` · « Le Speedrun »
 
 *Épitaphe affichée : « Mort le premier jour. Un record, dans un sens. »*
 
@@ -79,35 +79,35 @@ chronomètre et le regarde avec une consternation polie.
 
 **Le gag :** tout est encore neuf. L'étiquette du carton n'a pas été enlevée.
 
-### 2. `death-riche.webp` — « Riche et Mort Quand Même »
+### 2. `death-riche.webp` · « Riche et Mort Quand Même »
 
 *Épitaphe : « Parti avec plus de 30 € en poche. L'argent ne fait pas la survie. »*
 
 Le personnage est assis contre un mur, entouré de pièces en carton étalées
-partout — un vrai petit trésor. Il en tient une poignée. Autour de lui, rien
+partout, un vrai petit trésor. Il en tient une poignée. Autour de lui, rien
 d'autre : pas de nourriture, pas de couverture. Il a économisé pour rien.
 
 **Le gag :** une pièce roule encore, en équilibre, sur la tranche. Le seul
 mouvement de l'image.
 
-### 3. `death-canicule.webp` — « Cuit par la Canicule »
+### 3. `death-canicule.webp` · « Cuit par la Canicule »
 
 *Épitaphe : « Le bitume était une plancha. Vous étiez dessus. »*
 
 Plein soleil, l'air qui tremble, un bitume en carton qui ondule de chaleur. Le
 personnage est étendu à l'ombre ridiculement fine d'un panneau de
-signalisation — une bande d'ombre de dix centimètres, dans laquelle il essaie
+signalisation, une bande d'ombre de dix centimètres, dans laquelle il essaie
 de rentrer tout entier. Un œuf en carton cuit sur le trottoir à côté.
 
 **Le gag :** il a réussi à mettre exactement sa tête à l'ombre. Le reste cuit.
 
-### 4. `death-doyen.webp` — « Le Doyen »
+### 4. `death-doyen.webp` · « Le Doyen »
 
 *Épitaphe : « Tombé après 10 jours de règne. Les légendes aussi finissent en carton. »*
 
 **La seule des quatre qui ne fait pas rire.** C'est une fin honorable : le
 personnage a tenu dix jours, ce qui est long. On veut de la solennité de
-pacotille — un vieil homme en carton assis sur son carton comme sur un trône,
+pacotille, un vieil homme en carton assis sur son carton comme sur un trône,
 une couverture sur les genoux, entouré de **pigeons alignés en rang**, silencieux,
 comme une garde d'honneur. La lumière tombe sur lui seul.
 

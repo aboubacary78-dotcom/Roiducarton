@@ -1,4 +1,4 @@
-# Les prix — et pourquoi ceux-là
+# Les prix · et pourquoi ceux-là
 
 Trois produits, tous **non consommables** : achetés une fois, acquis pour
 toujours, restaurables sur un nouveau téléphone.
@@ -17,7 +17,7 @@ automatiquement).
 
 ## Pourquoi 6,99 € et pas 8 €
 
-C'était la proposition de départ — « le pack à 7 ou 8 » — et **8 € ne peut pas
+C'était la proposition de départ (« le pack à 7 ou 8 ») et **8 € ne peut pas
 marcher** :
 
 ```
@@ -25,7 +25,7 @@ Sans pub 2,99 €  +  Atelier 4,99 €  =  7,98 €
 Pack à 8,00 €                       =  2 centimes de PLUS
 ```
 
-Un lot plus cher que ses parties n'est pas une offre, c'est un piège — et
+Un lot plus cher que ses parties n'est pas une offre, c'est un piège, et
 c'est le genre de détail qui se retrouve dans les commentaires du store.
 
 **6,99 € économise 0,99 €**, soit 12 %. C'est visible sans calculer, et c'est
@@ -43,16 +43,16 @@ Ce n'est pas la quantité de travail, c'est ce que ça change pour le joueur :
 
 - **Sans pub** retire une gêne. La valeur est plafonnée par la gêne elle-même.
 - **L'Atelier** ajoute quelque chose qui n'existe pas autrement, et il touche
-  au moment le plus investi du jeu — celui où l'on se choisit un personnage.
+  au moment le plus investi du jeu, celui où l'on se choisit un personnage.
 
 ## La règle d'affichage, et elle compte
 
 **Le Pack ne s'affiche qu'à qui ne possède RIEN.** Le proposer à quelqu'un qui
-a déjà « Sans pub » lui ferait racheter ce qu'il a — Google rembourserait, et à
+a déjà « Sans pub » lui ferait racheter ce qu'il a. Google rembourserait, et à
 raison. `packUtile()` tranche, et les Options n'affichent alors que la pièce
 manquante, à son prix.
 
-## C'est branché — ce qui reste à faire dans la Play Console
+## C'est branché · ce qui reste à faire dans la Play Console
 
 La facturation est en place côté application (`client/src/lib/facturation.ts`,
 greffon `cordova-plugin-purchase`, Google Play Billing Library 9). Ce qui suit
@@ -65,19 +65,19 @@ l'application** → *Créer un produit*. Un par ligne du tableau ci-dessus.
 
 | Champ | Valeur |
 |---|---|
-| ID du produit | `noads`, `atelier`, `pack_complet` — **exactement**, en minuscules |
+| ID du produit | `noads`, `atelier`, `pack_complet` : **exactement**, en minuscules |
 | Nom | « Sans pub », « L'Atelier », « Le Pack » |
-| Prix | 2,99 € / 4,99 € / 6,99 € — Google convertit pour les autres pays |
+| Prix | 2,99 € / 4,99 € / 6,99 €. Google convertit pour les autres pays |
 | État | **Actif** (un produit inactif reste invisible du jeu) |
 
 ⚠️ **L'ID ne se change jamais.** Il est gravé dans les achats déjà faits :
 le renommer ferait perdre son produit à chaque acheteur.
 
-Ces produits sont non consommables par nature — la Play Console ne demande pas
+Ces produits sont non consommables par nature, la Play Console ne demande pas
 de choisir : tout produit intégré qui n'est pas consommé par l'application
 reste acquis. L'application ne les consomme jamais.
 
-### 2. Téléverser un premier paquet — avant de pouvoir tester
+### 2. Téléverser un premier paquet · avant de pouvoir tester
 
 **C'est le point qui surprend tout le monde :** on ne peut PAS essayer un achat
 avec un build lancé depuis Android Studio. Google Play Billing refuse de
@@ -89,7 +89,7 @@ répondre à une application qui ne vient pas du Play Store. Il faut donc :
    lien Play Store** que la console fournit.
 
 Tant que l'application vient d'ailleurs, les boutons d'achat afficheront
-« Boutique indisponible » — ce qui est le comportement correct, pas une panne.
+« Boutique indisponible », ce qui est le comportement correct, pas une panne.
 
 ### 3. S'inscrire comme testeur de licence
 
@@ -107,7 +107,7 @@ Pour recommencer un achat déjà fait : Play Store → *Paiements et abonnements
 
 | | Pourquoi |
 |---|---|
-| Le prix s'affiche sur le bouton | Preuve que le magasin a répondu — s'il vient des chaînes de secours, il serait identique mais le magasin serait muet |
+| Le prix s'affiche sur le bouton | Preuve que le magasin a répondu, s'il vient des chaînes de secours, il serait identique mais le magasin serait muet |
 | L'achat ouvre bien le produit | Le parcours complet |
 | **Désinstaller, réinstaller, puis « ♻️ Restaurer mes achats »** | Le motif de rejet n° 1 des applications à achats non consommables |
 | L'achat survit à un simple redémarrage | La possession est relue au lancement |

@@ -1,4 +1,4 @@
-# Second lot audio — Le Roi du Carton
+# Second lot audio · Le Roi du Carton
 ## Une musique, 18 sons, et pourquoi ceux-là
 
 ---
@@ -20,8 +20,8 @@ Le manque n'est donc pas une question de quantité. Il est ailleurs, et il est
 net : **le jeu sonne quand on le touche, et se tait quand il vous fait quelque
 chose.**
 
-Trois mécaniques centrales montent en tension pendant qu'on joue — la jauge
-d'alerte du casse, le risque de la Récup', le minuteur de la manche — et les
+Trois mécaniques centrales montent en tension pendant qu'on joue, la jauge
+d'alerte du casse, le risque de la Récup', le minuteur de la manche, et les
 trois sont **entièrement muettes**. Vérifié dans le code : zéro appel de son.
 C'est ce vide-là qu'on entend, plus que l'absence d'un bruitage de plus.
 
@@ -45,12 +45,12 @@ L'écran de fin n'a jamais eu de musique. Ce n'était pas un choix : la
 résonance du carton qui s'affaisse tenait la place, et rien ne venait après.
 
 Elle entre **en fondu de quatre secondes**, derrière cette résonance : surgir
-couperait le seul silence que le jeu s'accorde. Elle boucle, elle reste basse —
+couperait le seul silence que le jeu s'accorde. Elle boucle, elle reste basse,
 on lit le bilan par-dessus.
 
 | Fichier | Durée | Prompt à coller | Intention |
 |---|---|---|---|
-| `musique-mort.mp3` | 45–60 s, **bouclable** | `Slow melancholic solo accordion, single sustained melody, no percussion, no bass, French street music feel, sparse and unresolved, recorded in a small dry room, lo-fi, seamless loop` | La mort. **Un accordéon seul, jamais un orchestre** : le jeu se moque des grands sentiments. La mélodie ne doit pas se résoudre — on ne referme pas une vie ratée sur un bel accord |
+| `musique-mort.mp3` | 45–60 s, **bouclable** | `Slow melancholic solo accordion, single sustained melody, no percussion, no bass, French street music feel, sparse and unresolved, recorded in a small dry room, lo-fi, seamless loop` | La mort. **Un accordéon seul, jamais un orchestre** : le jeu se moque des grands sentiments. La mélodie ne doit pas se résoudre, on ne referme pas une vie ratée sur un bel accord |
 
 Deux consignes qui comptent plus que le reste :
 
@@ -60,11 +60,11 @@ Deux consignes qui comptent plus que le reste :
   un fond. Si elle attire l'attention, elle a raté.
 
 Le format diffère du reste du lot : **stéréo, 96 kbit/s**. C'est le seul
-fichier musical, il a le droit d'être large — les bruitages, eux, restent mono.
+fichier musical, il a le droit d'être large, les bruitages, eux, restent mono.
 
 ---
 
-# ① LA TENSION (5) — le manque le plus lourd
+# ① LA TENSION (5) · le manque le plus lourd
 
 Ces cinq-là ne ponctuent pas : ils **durent**. C'est ce qui change le plus la
 sensation de jeu, parce qu'aujourd'hui on regarde une jauge monter sans rien
@@ -76,10 +76,10 @@ sirène.
 
 | Fichier | Durée | Prompt à coller | Intention |
 |---|---|---|---|
-| `tension-alerte-1.mp3` | 0,5 s | `A sheet of corrugated cardboard bent slowly until the flutes creak once, single soft creak, close-miked handmade foley, dry room` | Premier palier d'alerte. **À peine audible** — on doit le sentir plus que l'entendre |
+| `tension-alerte-1.mp3` | 0,5 s | `A sheet of corrugated cardboard bent slowly until the flutes creak once, single soft creak, close-miked handmade foley, dry room` | Premier palier d'alerte. **À peine audible** : on doit le sentir plus que l'entendre |
 | `tension-alerte-2.mp3` | 0,7 s | `Thick cardboard bent further, fibres popping in a short irregular sequence, close-miked handmade foley, dry room` | Deuxième palier. Le même geste, plus serré |
 | `tension-alerte-3.mp3` | 1,1 s | `Cardboard tearing along a fold, then a metal shutter dropping shut once in the distance, close-miked handmade foley, dry room` | Bouclage. **Le rideau au loin dit que c'est fini** |
-| `tension-risque.mp3` | 0,8 s | `A leaning stack of cardboard boxes shifting and settling, one box sliding a few centimetres, no collapse, close-miked handmade foley` | Le tas de la Récup' qui prévient. Se rejoue à chaque cran — **il ne doit jamais faire sursauter** |
+| `tension-risque.mp3` | 0,8 s | `A leaning stack of cardboard boxes shifting and settling, one box sliding a few centimetres, no collapse, close-miked handmade foley` | Le tas de la Récup' qui prévient. Se rejoue à chaque cran, **il ne doit jamais faire sursauter** |
 | `tension-compte.mp3` | 0,25 s | `A wind-up kitchen timer ticking one single tick, dry mechanical click, close-miked, no reverb` | Un tic par seconde sur les dernières. **Un seul tic dans le fichier**, le jeu le répète |
 
 ---
@@ -119,7 +119,7 @@ muet : esquiver parfaitement n'affiche qu'un message.
 | Fichier | Durée | Prompt à coller | Intention |
 |---|---|---|---|
 | `objet-equipe.mp3` | 0,6 s | `A coat pulled on and a belt buckle tightened one notch, fabric and metal, close-miked handmade foley, dry room` | S'équiper |
-| `objet-casse.mp3` | 0,7 s | `Dry cardboard snapping in two along a crease, one clean break, close-miked handmade foley, no reverb` | Un objet perdu pour de bon. **Sec — c'est fini, pas triste** |
+| `objet-casse.mp3` | 0,7 s | `Dry cardboard snapping in two along a crease, one clean break, close-miked handmade foley, no reverb` | Un objet perdu pour de bon. **Sec, c'est fini, pas triste** |
 | `objet-plein.mp3` | 0,5 s | `A stuffed canvas bag pressed down, seams straining, zip refusing to close, close-miked handmade foley` | Le sac est plein, on refuse l'objet |
 
 ---
@@ -152,7 +152,7 @@ travail**, et il vaut mieux le savoir avant de les générer :
 
 - **Les trois paliers d'alerte** : la jauge du casse est à cliquets, elle ne
   redescend jamais sous le palier atteint. Le son doit suivre le cliquet, pas
-  la valeur — sinon il se rejoue à chaque frôlement.
+  la valeur, sinon il se rejoue à chaque frôlement.
 - **Le risque de la Récup'** monte en continu. Il faudra le découper en crans,
   comme l'alerte, sinon c'est un grincement permanent.
 - **Le tic du minuteur** doit être cadencé par le jeu, pas par le fichier.

@@ -6,8 +6,8 @@
  * signalé avoir reçu une SUITE narrative dès sa deuxième vie, alors qu'il
  * n'avait jamais rencontré le personnage dont c'était la suite.
  *
- * On rejoue donc le chemin complet — poser un drapeau, mourir, recommencer,
- * choisir un nouveau personnage — et on regarde ce qui a survécu.
+ * On rejoue donc le chemin complet, poser un drapeau, mourir, recommencer,
+ * choisir un nouveau personnage, et on regarde ce qui a survécu.
  */
 import { build } from 'esbuild';
 import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';
@@ -47,7 +47,7 @@ const { gameReducer, generateCharacterTrio, FOLLOW_UP_EVENTS, generateEvents } =
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 

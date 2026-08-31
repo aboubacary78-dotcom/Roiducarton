@@ -299,7 +299,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/monet-zt3gdg/cap.js
+// ../../../tmp/monet-7IyJUu/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -846,6 +846,13 @@ var playVerrou = withFile("ui-verrou", 0.6, () => {
 });
 var playGaugeFilled = withFile("jauge-remplie", 0.85, playSuccessSynth);
 
+// client/src/lib/facturation.ts
+var indisponible = !Capacitor.isNativePlatform();
+var livrer = () => false;
+function brancherLivraison(f) {
+  livrer = f;
+}
+
 // client/src/lib/ads.ts
 var NOADS_KEY = "roi-du-carton-noads";
 var adsRemoved = (() => {
@@ -865,6 +872,23 @@ function setAdsRemoved(v) {
   } catch {
   }
 }
+function livrer2(p) {
+  let nouveau = false;
+  if (p === "noads" || p === "pack_complet") {
+    if (!adsRemoved) {
+      setAdsRemoved(true);
+      nouveau = true;
+    }
+  }
+  if (p === "atelier" || p === "pack_complet") {
+    if (!atelierOwned) {
+      setAtelierOwned(true);
+      nouveau = true;
+    }
+  }
+  return nouveau;
+}
+brancherLivraison(livrer2);
 var ATELIER_KEY = "roi-du-carton-atelier";
 var atelierOwned = (() => {
   try {
@@ -922,6 +946,23 @@ var PARTIES_DE_GRACE = 3;
 var CLE_PARTIES = "roi-du-carton-parties-finies";
 var dernierInterstitiel = 0;
 var premiereMortDeLaSession = true;
+var TREVE_MS = 10 * 6e4;
+var TREVE_APRES = 2;
+var interstitielsDeLaSession = 0;
+var treveJusqua = 0;
+var treveDejaOfferte = false;
+function enTreve(maintenant = Date.now()) {
+  return maintenant < treveJusqua;
+}
+function resteDeTreve(maintenant = Date.now()) {
+  return Math.max(0, treveJusqua - maintenant);
+}
+var auditeurs = /* @__PURE__ */ new Set();
+function reinitialiserTreve() {
+  interstitielsDeLaSession = 0;
+  treveJusqua = 0;
+  treveDejaOfferte = false;
+}
 function partiesFinies() {
   try {
     return Number(localStorage.getItem(CLE_PARTIES) || "0");
@@ -940,6 +981,7 @@ function partieTerminee() {
 }
 function verdictInterstitiel(maintenant = Date.now()) {
   if (adsRemoved) return { montrer: false, raison: "sans-pub achet\xE9" };
+  if (enTreve(maintenant)) return { montrer: false, raison: "tr\xEAve en cours" };
   if (partiesFinies() <= PARTIES_DE_GRACE) {
     return { montrer: false, raison: `p\xE9riode de gr\xE2ce (${partiesFinies()}/${PARTIES_DE_GRACE} parties)` };
   }
@@ -954,11 +996,25 @@ function reinitialiserInterstitiel() {
   dernierInterstitiel = 0;
   premiereMortDeLaSession = true;
 }
-async function showInterstitial() {
-  const verdict = verdictInterstitiel();
+async function showInterstitial(maintenant = Date.now()) {
+  const verdict = verdictInterstitiel(maintenant);
   premiereMortDeLaSession = false;
-  if (!verdict.montrer || !isNative()) return;
-  dernierInterstitiel = Date.now();
+  if (!verdict.montrer) return;
+  dernierInterstitiel = maintenant;
+  interstitielsDeLaSession++;
+  const offrirLaTreve = interstitielsDeLaSession === TREVE_APRES && !treveDejaOfferte;
+  if (offrirLaTreve) {
+    treveDejaOfferte = true;
+    treveJusqua = maintenant + TREVE_MS;
+  }
+  const signal = { n: interstitielsDeLaSession, treveOfferte: offrirLaTreve };
+  auditeurs.forEach((cb) => {
+    try {
+      cb(signal);
+    } catch {
+    }
+  });
+  if (!isNative()) return;
   try {
     const { AdMob } = await import("@capacitor-community/admob");
     await AdMob.prepareInterstitial({
@@ -979,13 +1035,29 @@ var CADENCE = {
   combat: 3,
   vol: 3,
   recup: 3,
-  evenement: 2
+  evenement: 2,
+  /*
+   * LA NUIT A SA PROPRE CADENCE, ET C'EST UNE CORRECTION.
+   *
+   * Le bilan du matin, rattraper un contrat raté, dormir une heure de plus,
+   * était compté avec les rencontres. Mais une nuit n'est pas une rencontre :
+   * elle arrive UNE fois, à heure fixe, et son secours ne sert qu'à ce
+   * moment-là. Un joueur qui dormait sans avoir déclenché deux résultats de
+   * rencontre dans la journée trouvait le bouton absent, sans comprendre,
+   * « tu l'as enlevé pour les personnes qui payent », et c'était vrai en
+   * pratique.
+   *
+   * Deux nuits, donc : une nuit sur deux, ce qui se compte tout seul et ne
+   * dépend plus de ce qu'on a fait dans la journée.
+   */
+  nuit: 2
 };
 var engagements = {
   combat: 0,
   vol: 0,
   recup: 0,
-  evenement: 0
+  evenement: 0,
+  nuit: 0
 };
 function noterEngagement(f) {
   engagements[f] += 1;
@@ -1047,7 +1119,12 @@ if (typeof window !== "undefined") {
     engagementsAvantBonus,
     isAtelierOwned,
     setAtelierOwned,
-    packUtile
+    packUtile,
+    verdictInterstitiel,
+    showInterstitial,
+    enTreve,
+    resteDeTreve,
+    reinitialiserTreve
   };
 }
 
@@ -2248,10 +2325,56 @@ var DIGNITY_TIERS = [
 
 // client/src/contexts/data/piques.ts
 var PIQUES = {
+  /* ── ⓪ LA TÊTE QUI PART ───────────────────────────────────────────────────
+   * LA SEULE CATÉGORIE QUI DOIT EXPLIQUER QUELQUE CHOSE.
+   *
+   * Sous 60 de mental, les mots des rencontres se remplacent par des signes
+   * illisibles (voir lib/charabia). C'est la mécanique la plus forte du jeu et
+   * c'était la plus muette : rien ne reliait le texte troué à la jauge, et le
+   * joueur concluait (capture d'écran à l'appui) que le jeu était cassé.
+   *
+   * Ces phrases-là ont donc un travail que les autres n'ont pas : faire le
+   * lien. Chacune nomme LA TÊTE et LA LECTURE dans la même phrase, sans jamais
+   * prendre le ton du mode d'emploi. « Les lettres se barrent » dit tout ce
+   * qu'un tutoriel dirait, et le dit dans la voix du jeu.
+   *
+   * Elles ne sonnent qu'au FRANCHISSEMENT du seuil, pas tant qu'on reste
+   * dessous : une explication répétée devient un reproche.
+   */
+  "tete-qui-part": [
+    {
+      fr: "Les lettres se barrent avant vous. Elles ont eu raison.",
+      en: "The letters are leaving before you. They were right to."
+    },
+    {
+      fr: "Vous relisez trois fois. Ce n'est pas le panneau, c'est vous.",
+      en: "You read it three times. It's not the sign, it's you."
+    },
+    {
+      fr: "La fatigue a mang\xE9 les mots. Elle commence toujours par le milieu.",
+      en: "Exhaustion ate the words. It always starts in the middle."
+    },
+    {
+      fr: "Dormez, ou apprenez \xE0 lire les trous.",
+      en: "Sleep, or learn to read the gaps."
+    },
+    {
+      fr: "Votre t\xEAte a rendu son tablier. Le monde devient illisible.",
+      en: "Your head handed in its notice. The world goes unreadable."
+    },
+    {
+      fr: "Ce ne sont pas des fautes. C'est vous qui d\xE9crochez.",
+      en: "Those aren't typos. You're the one slipping."
+    },
+    {
+      fr: "Le texte tient debout. C'est votre lecture qui titube.",
+      en: "The text is fine. It's your reading that's staggering."
+    }
+  ],
   /* ── ① SANTÉ CRITIQUE ────────────────────────────────────────────────────
    * Chaque phrase nomme LA jauge qui lâche. C'est ce qui manquait le plus :
    * mourir de soif et s'entendre parler du froid, c'est le jeu qui ne regarde
-   * pas son propre écran. Le rire vient du décalage de registre — un corps qui
+   * pas son propre écran. Le rire vient du décalage de registre, un corps qui
    * meurt décrit avec le vocabulaire d'un huissier ou d'un pigeon poli.
    */
   "sante-critique": [
@@ -2307,7 +2430,7 @@ var PIQUES = {
     }
   ],
   /* ── ② DIGNITÉ À ZÉRO ────────────────────────────────────────────────────
-   * Elles se déclenchent au franchissement d'un palier — donc juste après un
+   * Elles se déclenchent au franchissement d'un palier, donc juste après un
    * geste que le joueur vient de faire. Pas de condition : le palier EST la
    * situation, et elles frappent toutes sur un geste précis plutôt que sur
    * l'idée générale d'avoir honte.
@@ -2341,7 +2464,7 @@ var PIQUES = {
   /* ── ③ ÉCHEC TOTAL AU VOL ────────────────────────────────────────────────
    * Le seul moment où le jeu a le droit d'être franchement moqueur : le
    * joueur a pris un risque en connaissance de cause. On tape sur
-   * l'exécution, jamais sur l'intention. Pas de condition — se faire prendre
+   * l'exécution, jamais sur l'intention. Pas de condition, se faire prendre
    * est déjà la situation la plus précise du jeu.
    */
   "vol-rate": [
@@ -2422,7 +2545,7 @@ var PIQUES = {
     }
   ],
   /* ── ⑤ GAINS MISÉRABLES ──────────────────────────────────────────────────
-   * Déjà causales par nature — elles ne sortent que sur une récolte nulle. On
+   * Déjà causales par nature, elles ne sortent que sur une récolte nulle. On
    * distingue quand même le ZÉRO du PRESQUE RIEN : « encadrez-le » n'a aucun
    * sens quand on est reparti les mains vides, et c'est le genre de décalage
    * d'un cran qui fait passer une vanne pour un tirage au sort.
@@ -3356,7 +3479,7 @@ var REST_EVENTS_2 = [
     choices: [
       { text: "Se glisser dans la salle", risk: "normal", emoji: "\u{1F3AC}", outcomes: [
         { probability: 0.6, text: "Vous dormez \xE0 travers trois chefs-d'\u0153uvre du mauvais go\xFBt. Les explosions font office de berceuse. R\xE9veil au g\xE9n\xE9rique, repos\xE9 et culturellement enrichi.", statChanges: { sleep: 20, mental: 6 } },
-        { probability: 0.4, text: "Expuls\xE9 au deuxi\xE8me film \u2014 mais QUEL film. Un requin-tornade contre des cosmonautes. \xC7a valait la sortie escort\xE9e.", statChanges: { sleep: 8, mental: 3, dignity: -3 } }
+        { probability: 0.4, text: "Expuls\xE9 au deuxi\xE8me film, mais QUEL film. Un requin-tornade contre des cosmonautes. \xC7a valait la sortie escort\xE9e.", statChanges: { sleep: 8, mental: 3, dignity: -3 } }
       ] },
       { text: "Fouiller sous les si\xE8ges d'abord", risk: "normal", emoji: "\u{1F37F}", outcomes: [
         { probability: 0.5, text: "R\xE9colte : un demi-paquet de popcorn, de la monnaie tomb\xE9e et un gant. Puis dodo au fond de la salle. La totale.", statChanges: { hunger: 10, sleep: 10 }, moneyChange: 3 },
@@ -4640,7 +4763,7 @@ var STEAL_EVENTS_2 = [
       { text: "La rouler jusqu'au ferrailleur", risk: "risky", emoji: "\u{1F573}\uFE0F", outcomes: [
         { probability: 0.35, text: "Six cents m\xE8tres de roulage de plaque, un chef-d'\u0153uvre d'endurance et de discr\xE9tion nulle. Le ferrailleur paie sans regarder ni la plaque ni vous. Votre dos d\xE9pose un pr\xE9avis de gr\xE8ve.", moneyChange: 14, statChanges: { health: -9, dignity: -4, mental: 2 } },
         { probability: 0.4, text: "La plaque vous \xE9chappe au premier dos-d'\xE2ne et d\xE9vale la rue en sonnant comme une cloche de cath\xE9drale. Le quartier entier sort. Vous applaudissez avec les autres, l'air de rien.", statChanges: { health: -4, mental: -4, dignity: -3 } },
-        { probability: 0.25, text: "L'\xE9goutier \u2014 VOTRE \xE9goutier \u2014 remonte pile de ce trou-l\xE0. Il regarde la plaque, puis vous : \xAB repose \xE7a, ou je raconte au quartier ce qui vit l\xE0-dessous. \xBB Vous reposez tr\xE8s vite.", statChanges: { mental: -3, dignity: -2 } }
+        { probability: 0.25, text: "L'\xE9goutier, VOTRE \xE9goutier, remonte pile de ce trou-l\xE0. Il regarde la plaque, puis vous : \xAB repose \xE7a, ou je raconte au quartier ce qui vit l\xE0-dessous. \xBB Vous reposez tr\xE8s vite.", statChanges: { mental: -3, dignity: -2 } }
       ] },
       { text: "Renoncer : voler l'infrastructure, c'est trop", risk: "safe", emoji: "\u{1F9E0}", outcomes: [
         { probability: 1, text: "Vous laissez la ville enti\xE8re sous vos pieds. Il y a des limites, et cinquante kilos en est une excellente.", statChanges: { mental: 4, dignity: 2 } }
@@ -8683,12 +8806,12 @@ function gameReducer(state, action) {
       return state;
     }
     /*
-     * UN APPUI, UNE ACTION — le garde-fou des cinq tuiles.
+     * UN APPUI, UNE ACTION : le garde-fou des cinq tuiles.
      *
      * `state.screen !== 'main'` n'est pas une précaution de style. Mesuré :
      * deux appuis sur « Explorer » dans le même tick JavaScript consommaient
      * DEUX actions de la journée sur trois, pour un seul événement affiché.
-     * Le budget d'actions ne suffisait pas à s'en protéger — après le premier
+     * Le budget d'actions ne suffisait pas à s'en protéger, après le premier
      * envoi il en restait deux, donc le second passait.
      *
      * Ces cinq actions quittent toutes l'écran principal. En exiger le départ
@@ -8980,8 +9103,8 @@ function gameReducer(state, action) {
             /*
              * La rue commente le casse raté DANS le texte du résultat, pas en
              * bandeau par-dessus. C'est le seul échec du jeu que le joueur ait
-             * intégralement choisi — il a vu les gardes et il a tenté quand
-             * même — donc le seul où la moquerie porte sans être injuste.
+             * intégralement choisi, il a vu les gardes et il a tenté quand
+             * même, donc le seul où la moquerie porte sans être injuste.
              */
             text: (() => {
               const base = rossee ? {
@@ -9086,7 +9209,7 @@ function gameReducer(state, action) {
       };
     }
     /*
-     * UNE HEURE DE PLUS AU CHAUD — la nuit rendue à moitié.
+     * UNE HEURE DE PLUS AU CHAUD : la nuit rendue à moitié.
      *
      * Le bilan vient d'afficher, en chiffres, ce que la nuit a coûté. C'est le
      * seul instant du jeu où la perte est à l'écran, chiffrée, et pas encore
@@ -9096,7 +9219,7 @@ function gameReducer(state, action) {
      * On rend la MOITIÉ de chaque jauge perdue, arrondie au supérieur, et rien
      * d'autre : ni argent, ni objet, ni action. Le bilan n'existe que si le
      * personnage a survécu à la nuit (voir NEXT_DAY), donc cette offre ne
-     * ressuscite jamais personne — elle adoucit une nuit traversée.
+     * ressuscite jamais personne, elle adoucit une nuit traversée.
      */
     case "RECOVER_NIGHT": {
       const bilan = state.daySummary;
@@ -9120,7 +9243,7 @@ function gameReducer(state, action) {
       };
     }
     /*
-     * UNE POCHE DE PLUS — rattraper l'objet que le sac a refusé.
+     * UNE POCHE DE PLUS : rattraper l'objet que le sac a refusé.
      *
      * Le refus est visuel et immédiat : l'objet a un nom, une image, il était
      * dans la main, et le texte vient d'écrire qu'on le laisse sur place. On
@@ -9138,14 +9261,14 @@ function gameReducer(state, action) {
      * Effet du quasi-gain : un joueur qui rate de loin hausse les épaules, un
      * joueur qui rate de deux euros ne le supporte pas. Le bilan ne propose
      * donc l'offre que sur un échec à moins de 20 % du but (voir NEXT_DAY et
-     * `SEUIL_PRESQUE`), et la récompense est exactement celle du contrat —
+     * `SEUIL_PRESQUE`), et la récompense est exactement celle du contrat,
      * rien de plus, sinon la publicité paierait mieux que le jeu.
      */
     /* ═══════════════════════════════════════════════════════════════════
      * LA DETTE
      *
-     * Le prêteur arrive au moment de la faiblesse — fauché, passé le premier
-     * jour — et propose dix euros contre quinze sous trois jours. Le joueur
+     * Le prêteur arrive au moment de la faiblesse, fauché, passé le premier
+     * jour, et propose dix euros contre quinze sous trois jours. Le joueur
      * peut refuser : c'est le seul PNJ du jeu qu'on a le droit d'envoyer
      * promener, et il fallait que ce droit existe pour que l'accepter soit un
      * choix.
@@ -9162,7 +9285,7 @@ function gameReducer(state, action) {
      *
      * Le hub appelle ça en arrivant. C'est le reducer qui décide s'il y a
      * quelque chose à ouvrir, pour que la condition vive au même endroit que
-     * la mécanique — l'écran, lui, n'a pas à savoir ce qu'est une échéance.
+     * la mécanique, l'écran, lui, n'a pas à savoir ce qu'est une échéance.
      */
     /*
      * SEULE L'ÉCHÉANCE S'IMPOSE.
@@ -9235,12 +9358,12 @@ function gameReducer(state, action) {
      * NE PAS POUVOIR PAYER.
      *
      * Deux issues, et la première est de loin la plus fréquente : il se sert.
-     * L'objet le plus cher du sac part, et la dette est éteinte — c'est un
+     * L'objet le plus cher du sac part, et la dette est éteinte, c'est un
      * remboursement en nature, pas une punition supplémentaire.
      *
      * Sac vide, en revanche, il ne reste rien à prendre. La dette n'est PAS
      * effacée : elle monte, il reviendra, et c'est au joueur d'aller
-     * chercher l'argent. On ne fabrique pas une spirale sans issue — on
+     * chercher l'argent. On ne fabrique pas une spirale sans issue, on
      * remet le problème à demain, ce qui est exactement la vie qu'on raconte.
      */
     case "AVOUER_INSOLVABILITE": {
@@ -9487,6 +9610,7 @@ function gameReducer(state, action) {
         }
       }
       const usesEtabli = [];
+      const epargnes = [];
       if (cold && ch.inventory.some((i) => i.id === "craft-rechaud")) {
         const perdu = Math.min(Math.abs(weatherPenalty.health || 0), Math.max(0, ch.stats.health - s.health));
         if (perdu > 0) {
@@ -9494,6 +9618,7 @@ function gameReducer(state, action) {
           notes.push("\u{1F525} Le r\xE9chaud a tenu toute la nuit : le froid ne vous a rien pris.");
           notesEn.push("\u{1F525} The stove burned all night: the cold took nothing from you.");
           usesEtabli.push("craft-rechaud");
+          epargnes.push({ emoji: "\u{1F525}", fr: "R\xE9chaud de fortune", en: "Makeshift stove", jauge: "health", montant: perdu });
         }
       }
       if (ch.inventory.some((i) => i.id === "craft-matelas")) {
@@ -9503,6 +9628,7 @@ function gameReducer(state, action) {
           notes.push("\u{1F6CF}\uFE0F Le matelas de carton vous a rendu votre nuit enti\xE8re.");
           notesEn.push("\u{1F6CF}\uFE0F The cardboard mattress gave you your whole night back.");
           usesEtabli.push("craft-matelas");
+          epargnes.push({ emoji: "\u{1F6CF}\uFE0F", fr: "Matelas de carton", en: "Cardboard mattress", jauge: "sleep", montant: perdu });
         }
       }
       for (const id of usesEtabli) {
@@ -9621,7 +9747,7 @@ function gameReducer(state, action) {
         weather: nextWeather,
         nextWeather: meteoApres,
         contract: isAlive ? nextContract : null,
-        daySummary: isAlive ? { day: ch.day + 1, weather: nextWeather, deltas, moneyChange: bonusMoney, notes, notesEn, contratRate } : null
+        daySummary: isAlive ? { day: ch.day + 1, weather: nextWeather, deltas, moneyChange: bonusMoney, notes, notesEn, contratRate, epargnes } : null
       };
     }
     case "SET_SCREEN":
@@ -9703,7 +9829,7 @@ function gameReducer(state, action) {
         /*
          * Aller chercher son voleur ne se tente qu'une fois : la trace
          * s'efface au moment où le combat commence, pas à la victoire. Gagner
-         * rend ce qu'il avait pris — c'est le butin de l'ennemi, le code de
+         * rend ce qu'il avait pris, c'est le butin de l'ennemi, le code de
          * victoire s'en charge déjà. Perdre, c'est perdre pour de bon.
          */
         character: action.contreVoleur ? { ...state.character, vole: void 0 } : state.character,
@@ -9835,7 +9961,7 @@ function gameReducer(state, action) {
       return { ...state, currentCombat: { ...combat, trapRounds: trapAfter, phase: "dodge", hand: [] }, combatLog: logs };
     }
     /*
-     * L'OBJET MIRACLE — gagner le combat sans le jouer.
+     * L'OBJET MIRACLE : gagner le combat sans le jouer.
      *
      * Le duel de signes est le seul mini-jeu dont on ne peut pas sortir sans
      * y laisser des plumes : fuir coûte cinq points de dignité, et perdre peut
@@ -9843,8 +9969,8 @@ function gameReducer(state, action) {
      * donc à éviter les combats, c'est-à-dire une partie entière du jeu.
      *
      * L'objet trouvé dans la poche règle ça en une fois. Il donne la victoire
-     * COMPLÈTE — butin, respect, couronne si c'était le Roi, contrat
-     * « combatif » validé — parce qu'une demi-victoire serait la pire des
+     * COMPLÈTE : butin, respect, couronne si c'était le Roi, contrat
+     * « combatif » validé, parce qu'une demi-victoire serait la pire des
      * options : le joueur aurait dépensé quelque chose pour un résultat qu'il
      * n'a pas compris.
      *
@@ -9852,14 +9978,14 @@ function gameReducer(state, action) {
      * le combat, pas ce qu'il a déjà coûté.
      */
     /*
-     * S'HABILLER — et ça appartient au personnage, pas au profil.
+     * S'HABILLER, et ça appartient au personnage, pas au profil.
      *
      * La tenue vivait dans le profil permanent, à côté des accessoires
      * débloqués. Conséquence : un nouveau venu héritait du chapeau et de
      * l'écharpe du mort, et deux vies successives avaient exactement la même
      * tête. « Ça ne le rend pas unique », et c'est exact.
      *
-     * Les DÉBLOCAGES restent permanents — ils se gagnent aux succès et doivent
+     * Les DÉBLOCAGES restent permanents, ils se gagnent aux succès et doivent
      * survivre à toutes les morts, sinon les succès ne récompenseraient rien.
      * Ce qui est PORTÉ est à celui qui le porte.
      */

@@ -15,7 +15,7 @@ Incarnez un SDF dans une ville française et survivez en gérant vos stats vital
 - **Combat au tour par tour** contre 8 types d'ennemis
 - **3 personnages jouables** : Colette Artiste, Albert Bibliothécaire, Jean-Claude Militaire
 - **5 zones de la ville** à explorer
-- **Difficulté élevée** — aucune condition de victoire, seulement la survie
+- **Difficulté élevée** : aucune condition de victoire, seulement la survie
 
 ## Stack technique
 

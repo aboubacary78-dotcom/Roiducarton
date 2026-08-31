@@ -1,9 +1,9 @@
 /*
- * MOURIR, PUIS REPRENDRE LA RUE — SANS QUE LE JEU S'EFFONDRE.
+ * MOURIR, PUIS REPRENDRE LA RUE : SANS QUE LE JEU S'EFFONDRE.
  *
  * Ce parcours a planté en production. Un hook ajouté sous le
  * `if (!char) return null` de l'écran de mort disparaissait du rendu à
- * l'instant précis où le personnage passe à null — c'est-à-dire quand on
+ * l'instant précis où le personnage passe à null, c'est-à-dire quand on
  * repart pour une nouvelle vie. React refuse de rendre un composant qui compte
  * soudain un hook de moins, et l'application affichait « Le carton s'est
  * effondré » (erreur React #300).
@@ -46,7 +46,7 @@ const effondre = () => p.evaluate(() =>
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -88,7 +88,7 @@ await pause(500);
 let atteinte = false;
 /*
  * Le bilan de la nuit se referme par « Nouvelle journée », et par rien
- * d'autre. Ce motif manquait, et le test avançait quand même — parce qu'une
+ * d'autre. Ce motif manquait, et le test avançait quand même, parce qu'une
  * seconde nuit partait sur un bilan resté ouvert. Ce défaut-là est corrigé
  * (voir le garde-fou de NEXT_DAY) : la boucle doit désormais refermer ce
  * qu'elle ouvre, comme un joueur.
@@ -113,7 +113,7 @@ verifier('le personnage meurt', atteinte);
 
 /*
  * On refuse la seconde chance : c'est le chemin vers l'écran de fin. Le refus
- * demande deux gestes depuis que l'offre au pic a été durcie — un appui
+ * demande deux gestes depuis que l'offre au pic a été durcie, un appui
  * réflexe ne referme plus rien. Le second bouton nomme le personnage, d'où le
  * motif large.
  */

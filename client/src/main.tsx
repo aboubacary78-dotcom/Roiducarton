@@ -6,7 +6,7 @@ import { initFacturation } from "./lib/facturation";
 import { getLang, chargerTraductions } from "./lib/lang";
 
 /*
- * Un anglophone attend son dictionnaire avant le premier rendu — c'est
+ * Un anglophone attend son dictionnaire avant le premier rendu, c'est
  * exactement ce qui se passait avant, quand il était dans le paquet principal,
  * donc il n'y perd rien et ne voit aucun texte français clignoter.
  *
@@ -22,7 +22,7 @@ pret.then(() => {
 initAds();
 
 /*
- * Et le magasin, dans la foulée — mais SÉPARÉMENT.
+ * Et le magasin, dans la foulée, mais SÉPARÉMENT.
  *
  * Les deux sont indépendants : un joueur qui a coupé la publicité doit quand
  * même pouvoir restaurer ses achats, et une panne d'AdMob ne doit pas laisser

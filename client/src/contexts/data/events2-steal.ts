@@ -201,7 +201,7 @@ export const STEAL_EVENTS_2: GameEvent[] = [
       { text: 'La rouler jusqu\'au ferrailleur', risk: 'risky', emoji: '🕳️', outcomes: [
         { probability: 0.35, text: 'Six cents mètres de roulage de plaque, un chef-d\'œuvre d\'endurance et de discrétion nulle. Le ferrailleur paie sans regarder ni la plaque ni vous. Votre dos dépose un préavis de grève.', moneyChange: 14, statChanges: { health: -9, dignity: -4, mental: 2 } },
         { probability: 0.4, text: 'La plaque vous échappe au premier dos-d\'âne et dévale la rue en sonnant comme une cloche de cathédrale. Le quartier entier sort. Vous applaudissez avec les autres, l\'air de rien.', statChanges: { health: -4, mental: -4, dignity: -3 } },
-        { probability: 0.25, text: 'L\'égoutier — VOTRE égoutier — remonte pile de ce trou-là. Il regarde la plaque, puis vous : « repose ça, ou je raconte au quartier ce qui vit là-dessous. » Vous reposez très vite.', statChanges: { mental: -3, dignity: -2 } },
+        { probability: 0.25, text: 'L\'égoutier, VOTRE égoutier, remonte pile de ce trou-là. Il regarde la plaque, puis vous : « repose ça, ou je raconte au quartier ce qui vit là-dessous. » Vous reposez très vite.', statChanges: { mental: -3, dignity: -2 } },
       ]},
       { text: 'Renoncer : voler l\'infrastructure, c\'est trop', risk: 'safe', emoji: '🧠', outcomes: [
         { probability: 1, text: 'Vous laissez la ville entière sous vos pieds. Il y a des limites, et cinquante kilos en est une excellente.', statChanges: { mental: 4, dignity: 2 } },

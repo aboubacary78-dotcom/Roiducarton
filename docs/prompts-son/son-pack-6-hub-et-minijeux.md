@@ -1,11 +1,11 @@
-# Pack son 6 — Les quartiers et les mini-jeux
+# Pack son 6 · Les quartiers et les mini-jeux
 
 **60 sons. 30 pour le hub, 30 pour les mini-jeux.**
 Foley intégral, matières précaires : carton kraft, scotch, tôle rouillée, eau.
 
 ---
 
-# ÉTAPE 1 — Le diagnostic
+# ÉTAPE 1 · Le diagnostic
 
 ## Ce que la bande-son fait déjà, en chiffres
 
@@ -23,7 +23,7 @@ ils ne montent jamais.
 
 C'est le trou, et il est structurel : **le jeu sonne quand on le touche, et se
 tait quand il nous fait quelque chose.** Un roguelite de survie se joue
-pourtant dans l'autre sens — ce qui fait peur, c'est ce qui arrive sans qu'on
+pourtant dans l'autre sens, ce qui fait peur, c'est ce qui arrive sans qu'on
 l'ait demandé.
 
 ## Le trou dans le trou : dix-huit sons déjà spécifiés, jamais livrés
@@ -44,7 +44,7 @@ Sur un téléphone tenu à une main, **l'œil du joueur est sur le bouton d'acti
 jamais sur les jauges.** Il n'y a pas de place pour un regard périphérique :
 l'écran fait dix centimètres et le pouce en masque le tiers. Le son est donc le
 seul canal capable de désigner une jauge sans ouvrir une fenêtre par-dessus le
-jeu — et une fenêtre, ici, c'est une interruption de plus dans un jeu qui en
+jeu, et une fenêtre, ici, c'est une interruption de plus dans un jeu qui en
 compte déjà beaucoup.
 
 D'où la règle de ce pack : **un son qui dure désigne, un son bref confirme.**
@@ -57,7 +57,7 @@ seule.
 ## Comment le son va désamorcer la frustration de la mort
 
 Mourir dans un roguelite est acceptable **à une condition : avoir été
-prévenu.** La colère ne vient pas de la mort, elle vient de la surprise — de
+prévenu.** La colère ne vient pas de la mort, elle vient de la surprise, de
 l'impression que le jeu a triché pendant qu'on regardait ailleurs.
 
 Aujourd'hui, le jeu passe de « ça va » à l'écran de fin sans que le corps ait
@@ -73,7 +73,7 @@ pas la même partie.
 Et la comédie noire tient à un seul principe technique : **l'échec doit
 dégonfler, jamais punir.** Un carton qui s'affaisse, un couinement de scotch,
 un objet qui roule bêtement hors champ. Aucun buzzer, aucun accord mineur
-appuyé — le jeu se moque de la situation, jamais du joueur. C'est la différence
+appuyé, le jeu se moque de la situation, jamais du joueur. C'est la différence
 entre rire de sa misère et se sentir sanctionné par une machine.
 
 ---
@@ -92,7 +92,7 @@ Suffixe de style à coller à la fin de **chaque** description :
 
 ---
 
-# ÉTAPE 2 — Le hub des cinq quartiers (30)
+# ÉTAPE 2 · Le hub des cinq quartiers (30)
 
 Chaque quartier reçoit **une couche de signature, deux respirations, trois
 retours d'action**.
@@ -101,9 +101,9 @@ retours d'action**.
 > dessus.** Les cinq lits existants tiennent le fond correctement ; ce qui leur
 > manque, c'est un caractère reconnaissable en deux secondes. Une couche
 > séparée, plus creuse et plus rare, se mixe au-dessus sans qu'on jette
-> quatorze méga-octets déjà en place — et se coupe indépendamment si elle fatigue.
+> quatorze méga-octets déjà en place, et se coupe indépendamment si elle fatigue.
 
-## 🌳 Le Parc — papier, souffle, plumes
+## 🌳 Le Parc · papier, souffle, plumes
 
 Le seul quartier où l'on peut respirer. Tout y est **sec et léger** : ce sont
 les matières les plus fines de la boîte à outils.
@@ -117,7 +117,7 @@ les matières les plus fines de la boîte à outils.
 | `act-mendier-parc.mp3` | Deux pièces jaunes remuées **lentement** au fond d'un gobelet en plastique, sans les faire sonner fort | La manche au parc : des promeneurs, pas des pressés. Le geste est patient |
 | `act-fouiller-parc.mp3` | Main qui plonge dans un sac plastique fin à moitié rempli de papier froissé, trois brassages, un objet léger heurté | La corbeille du parc. Rien de lourd n'y traîne jamais |
 
-## 🏙️ Le Centre-Ville — frottement, foule, verre
+## 🏙️ Le Centre-Ville · frottement, foule, verre
 
 Du monde, des vitrines, une patrouille. La matière dominante est le **carton
 ondulé frotté** : c'est la voiture, la ville, le mouvement continu.
@@ -131,7 +131,7 @@ ondulé frotté** : c'est la voiture, la ville, le mouvement continu.
 | `act-voler-cv.mp3` | Tissu tiré d'un coup sec sur un plan de carton, suivi d'un frottement de semelle qui pivote | On prend et on tourne les talons. Deux gestes, aucune hésitation entre les deux |
 | `act-fouiller-cv.mp3` | Couvercle de corbeille métallique soulevé de 5 cm et reposé, puis brassage rapide et nerveux de papiers | On fouille en ville en surveillant autour. Le rythme est pressé, pas curieux |
 
-## 🚂 La Gare — résonance, métal, annonce
+## 🚂 La Gare · résonance, métal, annonce
 
 Un toit, du chauffage jusqu'à minuit, des vigiles. C'est le seul lieu qui
 **résonne** : la grande plaque de carton agitée à distance du micro donne le
@@ -146,7 +146,7 @@ volume de la halle.
 | `act-voler-gare.mp3` | Fermeture éclair ouverte **lentement**, dent par dent, sur 3 secondes, arrêtée deux fois | Ouvrir un sac qui n'est pas le sien. Les deux arrêts sont le cœur du son |
 | `act-mendier-gare.mp3` | Gobelet posé sur du carrelage (une assiette retournée), puis silence de 2 s, puis une seule pièce qui tombe | La manche assise. Le silence entre les deux est ce qui fait mal |
 
-## 🛒 Le Marché — bois, plastique, kraft
+## 🛒 Le Marché · bois, plastique, kraft
 
 De la nourriture partout, des cagettes pleines à la fermeture. Matières :
 **cagette en bois, sac plastique, papier kraft**.
@@ -156,11 +156,11 @@ De la nourriture partout, des cagettes pleines à la fermeture. Matières :
 | `amb-sig-marche.mp3` | Cinq personnes qui froissent des sacs plastique fins en continu, à distances variées. Toutes les 7 s, une main frappe deux fois le bord d'une cagette en bois | Le brouhaha et les marchands. La cagette frappée est le geste de vendeur : ça claque, ça appelle |
 | `vie-marche-cagette.mp3` | Une cagette en bois vide posée sur une autre, puis glissée de 20 cm | On range, on empile. Le marché vit de ce bruit-là |
 | `vie-marche-kraft.mp3` | Grande feuille de papier kraft arrachée d'un rouleau d'un geste, puis froissée en boule en 2 s | On emballe. C'est le son de ce qu'on ne peut pas s'offrir |
-| `act-voler-marche.mp3` | Un fruit (pomme) soulevé d'une pile — léger roulement des voisins — puis glissé dans un tissu | Le larcin le plus simple du jeu. Le roulement des autres fruits est ce qui trahit |
+| `act-voler-marche.mp3` | Un fruit (pomme) soulevé d'une pile (léger roulement des voisins) puis glissé dans un tissu | Le larcin le plus simple du jeu. Le roulement des autres fruits est ce qui trahit |
 | `act-fouiller-marche.mp3` | Cagettes retournées l'une après l'autre sur du gravier, trois fois, avec un temps d'arrêt à la deuxième | La fin de marché. L'arrêt à la deuxième cagette est celui où l'on trouve |
 | `act-marchander-marche.mp3` | Raclement de gorge, puis pièces comptées une à une dans une paume, quatre pièces | On négocie. Le raclement de gorge avant les pièces raconte tout du rapport de force |
 
-## 🏭 La Zone Industrielle — tôle, rouille, vapeur
+## 🏭 La Zone Industrielle · tôle, rouille, vapeur
 
 De la rouille, des rats, ce que les entreprises jettent. C'est le quartier le
 plus dangereux, et le seul où la matière est **lourde**.
@@ -170,26 +170,26 @@ plus dangereux, et le seul où la matière est **lourde**.
 | `amb-sig-zone-industrielle.mp3` | Bourdon obtenu en soufflant en continu dans le goulot d'une grande bouteille en plastique, doublé une octave plus bas. Toutes les 9 s, un clang : une boîte de conserve vide frappée du bout d'une clé, laissée résonner | Les machines et le métal. Le clang irrégulier est ce qui empêche de s'endormir ici |
 | `vie-zi-tole.mp3` | Feuille de tôle fine (ou plaque à pâtisserie) fléchie lentement puis relâchée d'un coup | La tôle qui travaille. Un son laid, et c'est voulu |
 | `vie-zi-rat.mp3` | Ongles qui grattent le fond d'une boîte en carton, quatre coups rapides, puis fuite | Un rat. Court, jamais appuyé : c'est un frisson, pas un jump scare |
-| `act-recup-zi.mp3` | Ferraille remuée dans une caisse — clés, boulons, couvercle de conserve — puis un objet lourd soulevé à deux mains | La Récup' dans son quartier de prédilection. Le poids se sent |
+| `act-recup-zi.mp3` | Ferraille remuée dans une caisse (clés, boulons, couvercle de conserve) puis un objet lourd soulevé à deux mains | La Récup' dans son quartier de prédilection. Le poids se sent |
 | `act-fouiller-zi.mp3` | Palette en bois soulevée, écartée, et un raclement de gravier dessous | On cherche sous les choses. Le gravier dit qu'on est dehors, sur du sol qui n'est à personne |
 | `act-dormir-zi.mp3` | Carton déplié à même le sol, corps qui s'allonge, puis le bourdon de fond qui **ne s'arrête pas** | Dormir ici, c'est dormir dans le bruit. Le refus du silence est le sens du son |
 
 ---
 
-# ÉTAPE 3 — Les cinq mini-jeux (30)
+# ÉTAPE 3 · Les cinq mini-jeux (30)
 
 > **Correction de brief, et elle compte.** La commande listait « La Fouille »
 > comme cinquième mini-jeu. **Elle n'existe pas** : la fouille est un *geste*
 > (`geste-fouille-1..3.mp3`), joué à l'intérieur de La Récup'. Le cinquième
-> mini-jeu réellement présent dans le jeu — écran dédié, lit sonore déjà livré
-> (`mg-manche.mp3`), boucle de jeu complète — est **La Manche**. C'est donc
+> mini-jeu réellement présent dans le jeu, écran dédié, lit sonore déjà livré
+> (`mg-manche.mp3`), boucle de jeu complète, est **La Manche**. C'est donc
 > elle qui est traitée ici. Écrire six sons pour un écran qui n'existe pas
 > aurait coûté six sons.
 
 Chaque mini-jeu reçoit les six rôles demandés. Le nommage suit le lit existant :
 `mg-<jeu>-<rôle>`.
 
-## ♻️ La Récup' — fouiller une benne
+## ♻️ La Récup' · fouiller une benne
 
 | Rôle | Fichier | Recette Foley |
 |---|---|---|
@@ -202,9 +202,9 @@ Chaque mini-jeu reçoit les six rôles demandés. Le nommage suit le lit existan
 
 *Le mou est le meilleur avertissement du jeu : il ne menace de rien, il dégoûte.
 Et la comédie de l'échec est entière dans l'objet qui roule tout seul après la
-cascade — le temps de trop.*
+cascade, le temps de trop.*
 
-## 🕵️ Le Vol — le casse
+## 🕵️ Le Vol · le casse
 
 | Rôle | Fichier | Recette Foley |
 |---|---|---|
@@ -212,12 +212,12 @@ cascade — le temps de trop.*
 | **Manipulation** | `mg-vol-pas.mp3` | Pas feutrés sur du carton : deux doigts qui pressent et relâchent une boîte à chaussures. **Bouclable**, quatre pas |
 | **Validation** | `mg-vol-poche.mp3` | Fermeture éclair fermée d'un geste court et sec, suivie d'un tapotement sur le tissu |
 | **Avertissement** | `mg-vol-alerte.mp3` | Un ongle raclé une fois sur une dent de peigne, très haut, très bref. **Doit pouvoir se répéter de plus en plus vite sans fatiguer** |
-| **Échec** | `mg-vol-repere.mp3` | Souffle strident dans un sifflet bouché de papier — un sifflet qui ne marche pas bien — puis une chute de cartons |
+| **Échec** | `mg-vol-repere.mp3` | Souffle strident dans un sifflet bouché de papier (un sifflet qui ne marche pas bien) puis une chute de cartons |
 | **Clôture** | `mg-vol-sortie.mp3` | Une porte de carton refermée, et deux pas qui s'éloignent vite |
 
 *L'avertissement est le son le plus important des trente : c'est lui qui porte
-la jauge d'alerte, aujourd'hui muette. Il doit être **pauvre en fréquences** —
-un seul pic aigu — pour pouvoir être répété vingt fois en dix secondes sans
+la jauge d'alerte, aujourd'hui muette. Il doit être **pauvre en fréquences**,
+un seul pic aigu, pour pouvoir être répété vingt fois en dix secondes sans
 devenir insupportable.*
 
 ## 🥊 La Bagarre
@@ -243,7 +243,7 @@ que le corps.*
 | **Manipulation** | `mg-marchandage-compte.mp3` | Pièces comptées une à une dans une paume, six pièces, rythme régulier. **Bouclable** |
 | **Validation** | `mg-marchandage-accord.mp3` | Deux mains qui se tapent une fois, puis un tissu qu'on tend |
 | **Avertissement** | `mg-marchandage-agace.mp3` | Un soupir par le nez, et des doigts qui tambourinent trois fois sur du bois |
-| **Échec** | `mg-marchandage-refus.mp3` | Rideau métallique tiré d'un coup — règle en métal glissée le long d'une grille — et une pièce qui tombe au sol et roule |
+| **Échec** | `mg-marchandage-refus.mp3` | Rideau métallique tiré d'un coup (règle en métal glissée le long d'une grille) et une pièce qui tombe au sol et roule |
 | **Clôture** | `mg-marchandage-sac.mp3` | Sac en papier kraft ouvert d'un geste et posé sur le comptoir |
 
 *L'avertissement ne dit pas « attention », il dit **« tu m'ennuies »**. C'est
@@ -256,7 +256,7 @@ la seule mécanique du jeu où le danger est social et pas physique : le son doi
 |---|---|---|
 | **Amorce** | `mg-manche-amorce.mp3` | Gobelet en plastique posé sur le sol, puis un tissu qu'on étale, puis on s'assoit |
 | **Manipulation** | `mg-manche-gobelet.mp3` | Trois pièces jaunes secouées dans un gobelet en plastique, deux salves. **Bouclable**, ne doit jamais sonner joyeux |
-| **Validation** | `mg-manche-piece.mp3` | Une pièce lâchée de 30 cm dans le gobelet — le rebond compte autant que l'impact |
+| **Validation** | `mg-manche-piece.mp3` | Une pièce lâchée de 30 cm dans le gobelet, le rebond compte autant que l'impact |
 | **Avertissement** | `mg-manche-uniforme.mp3` | Pas réguliers et lents en semelle dure, qui **ne changent pas de rythme** en approchant |
 | **Échec** | `mg-manche-renverse.mp3` | Gobelet renversé d'un coup de pied, pièces éparpillées sur le sol pendant 3 s, et une qui roule loin |
 | **Clôture** | `mg-manche-ramasse.mp3` | Pièces ramassées une à une, quatre, et le gobelet remis debout |

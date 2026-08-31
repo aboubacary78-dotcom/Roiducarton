@@ -3,14 +3,14 @@
  *
  * La Dignité est la seule jauge qui ne tue pas, la seule qui décide du regard
  * des autres, et la seule que le joueur détruit VOLONTAIREMENT à chaque action
- * rentable. C'est donc elle qui porte la tension du jeu — sauf qu'affichée en
+ * rentable. C'est donc elle qui porte la tension du jeu, sauf qu'affichée en
  * nombre, elle ne la portait pas : passer de 62 à 56 n'est pas une perte, c'est
  * une transaction. On ne défend que ce qu'on possède, et on ne possède pas un
  * nombre.
  *
  * D'où ces quatre paliers NOMMÉS. Le joueur ne défend plus « 62 », il défend le
- * fait d'être encore présentable. Descendre d'un cran devient un événement — un
- * mot qui change sur son écran — au lieu d'une barre qui raccourcit de trois
+ * fait d'être encore présentable. Descendre d'un cran devient un événement, un
+ * mot qui change sur son écran, au lieu d'une barre qui raccourcit de trois
  * pixels.
  */
 

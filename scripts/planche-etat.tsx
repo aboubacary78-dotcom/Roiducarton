@@ -1,9 +1,9 @@
 /*
- * LA PLANCHE DES ÉTATS — ce que le visage dit de ce qui se passe.
+ * LA PLANCHE DES ÉTATS : ce que le visage dit de ce qui se passe.
  *
  * Les deux axes d'état (la condition, tirée des jauges ; la dignité) sont ce
  * que le joueur regarde le plus souvent : le portrait est en haut de l'écran
- * tout le temps. Quatre vignettes n'ont pas suffi à les juger — un axe
+ * tout le temps. Quatre vignettes n'ont pas suffi à les juger, un axe
  * CONTINU se juge sur toute son étendue, et surtout aux tailles réelles.
  *
  * Trois choses qu'une grille montre et qu'une paire d'exemples cache :
@@ -12,7 +12,7 @@
  *     de la course ne disent rien, et le joueur croit le portrait figé.
  *   · LES MARCHES. Un signe qui apparaît d'un coup à un seuil se lit comme un
  *     bug, pas comme une dégradation.
- *   · LA TAILLE. Ce qui se lit à 96 px peut n'être qu'un pixel sale à 40 —
+ *   · LA TAILLE. Ce qui se lit à 96 px peut n'être qu'un pixel sale à 40,
  *     et 40, c'est la taille du hub.
  *
  *     pnpm planche-etat [sortie.png]
@@ -54,7 +54,7 @@ const condition = CRANS.map(v =>
  * ①bis CHAQUE JAUGE SEULE, LES QUATRE AUTRES AU MAXIMUM.
  *
  * C'est LE contrôle du nouveau calque : si les cinq colonnes se ressemblent,
- * le visage dit la gravité et rien d'autre — exactement ce qu'on reprochait à
+ * le visage dit la gravité et rien d'autre, exactement ce qu'on reprochait à
  * la moyenne. Elles doivent se distinguer d'un coup d'œil.
  */
 const JAUGES = ['sleep', 'hunger', 'thirst', 'mental', 'health'] as const;
@@ -70,7 +70,7 @@ const dignite = CRANS.map(d =>
   vignette(rendu({ seed: GRAINE, gender: 'm', size: 88, visage: NEUTRE, jauges: toutes(85), dignity: d }), String(d))
 ).join('');
 
-// ③ Les deux ensemble, à la taille du hub — là où ça se joue vraiment.
+// ③ Les deux ensemble, à la taille du hub, là où ça se joue vraiment.
 const croix = [10, 40, 70, 100].map(c =>
   [10, 40, 70, 100].map(d =>
     vignette(rendu({ seed: GRAINE, gender: 'm', size: 44, visage: NEUTRE, jauges: toutes(c), dignity: d }), `${c}/${d}`)
@@ -89,10 +89,10 @@ const html = `<style>
   figure { margin: 0; text-align: center; }
   figcaption { font-size: 9px; color: #999; margin-top: 3px; }
 </style>
-${bloc('Les cinq jauges ensemble — 0 → 100 (dignité 80)', condition)}
+${bloc('Les cinq jauges ensemble · 0 → 100 (dignité 80)', condition)}
 ${bloc('Chaque jauge seule, les autres au maximum', isolees)}
-${bloc('Dignité — 0 → 100 (jauges à 85)', dignite)}
-${bloc('Jauges × dignité, à 44 px (taille du hub)', croix)}
+${bloc('Dignité · 0 → 100 (jauges à 85)', dignite)}
+${bloc('Jauges × dignité · à 44 px (taille du hub)', croix)}
 ${bloc('Le pire état, à toutes les tailles', tailles)}`;
 
 const page = '/tmp/planche-etat.html';

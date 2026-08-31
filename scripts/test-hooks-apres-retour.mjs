@@ -5,7 +5,7 @@
  * hooks, dans le même ordre. Un `useEffect` placé APRÈS un `if (…) return`
  * disparaît dès que la condition bascule, et React refuse alors de rendre un
  * composant qui compte soudain un hook de moins : c'est l'erreur #300, et elle
- * ne se voit pas au typage, pas au build, pas à l'exécution normale — seulement
+ * ne se voit pas au typage, pas au build, pas à l'exécution normale, seulement
  * le jour où la condition devient vraie.
  *
  * Elle a planté le jeu en vrai : un hook ajouté sous le `if (!char) return
@@ -35,7 +35,7 @@ const HOOK = /^\s*(?:const|let|var)?\s*\w*\s*=?\s*\b(use[A-Z]\w*)\s*\(/;
  * On repère le niveau par comptage d'accolades, pas par indentation.
  *
  * Une première version se fiait aux espaces en tête de ligne et signalait deux
- * `return null` qui vivent À L'INTÉRIEUR de callbacks `useMemo` — ils sont
+ * `return null` qui vivent À L'INTÉRIEUR de callbacks `useMemo`, ils sont
  * parfaitement légitimes, ils sortent de la fonction de calcul, pas du
  * composant. Un détecteur qui crie au loup sur du code sain finit ignoré.
  *
@@ -94,7 +94,7 @@ if (fautes.length) {
   console.log(`${fautes.length} hook(s) placé(s) après un retour anticipé :\n`);
   for (const f of fautes) {
     console.log(`  ${f.fichier}:${f.ligne}  ${f.hook}()`);
-    console.log(`     le retour anticipé est ligne ${f.retour} — le hook disparaît dès qu'il se déclenche`);
+    console.log(`     le retour anticipé est ligne ${f.retour}, le hook disparaît dès qu'il se déclenche`);
   }
   console.log('\nDéplacer ces hooks AU-DESSUS du retour.');
 } else {

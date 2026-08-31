@@ -2,7 +2,7 @@
  * QUELS SONS MANQUENT ENCORE AU JEU ?
  *
  * L'audit précédent (audit-audio.mjs) ne regarde qu'une chose : ce que le
- * joueur TOUCHE. Il dit 100 %, et c'est vrai — mais un jeu ne sonne pas
+ * joueur TOUCHE. Il dit 100 %, et c'est vrai, mais un jeu ne sonne pas
  * seulement quand on appuie. Il sonne aussi quand il vous fait quelque chose :
  * la nuit qui passe, la pluie qui tombe, l'ennemi qui charge, la faim qui
  * s'installe.
@@ -63,7 +63,7 @@ const barre = (n, total) => {
 };
 
 // ─── 1. LES RENCONTRES ──────────────────────────────────────────────────────
-titre('① LES RENCONTRES — un bruitage écrit pour chacune');
+titre('① LES RENCONTRES, un bruitage écrit pour chacune');
 const tousEvts = [
   ...jeu.EXPLORE_EVENTS, ...jeu.BEG_EVENTS, ...jeu.REST_EVENTS,
   ...jeu.TRAVEL_EVENTS, ...Object.values(jeu.FOLLOW_UP_EVENTS),
@@ -79,7 +79,7 @@ if (sansSfx.length) {
 }
 
 // ─── 2. LES ENNEMIS ─────────────────────────────────────────────────────────
-titre('② LES ENNEMIS — un cri chacun');
+titre('② LES ENNEMIS, un cri chacun');
 /*
  * Le fichier d'un ennemi porte le SLUG de son nom français, pas son
  * identifiant : `Commerçant Furieux` → `cry-commercant-furieux`. Chercher sur
@@ -95,13 +95,13 @@ for (const id of sansCri.slice(0, 10)) console.log(`     · ${id}`);
 if (sansCri.length > 10) console.log(`     … et ${sansCri.length - 10} autres`);
 
 // ─── 3. LES LIEUX ET LA MÉTÉO ───────────────────────────────────────────────
-titre('③ LES LIEUX — une ambiance par quartier');
+titre('③ LES LIEUX, une ambiance par quartier');
 const lieux = Object.keys(jeu.LOCATIONS);
 const avecAmb = lieux.filter(id => surDisque.has(`amb-${id}`));
 console.log(`  ${barre(avecAmb.length, lieux.length)}`);
 for (const id of lieux.filter(l => !surDisque.has(`amb-${l}`))) console.log(`     · ${id}`);
 
-titre('④ LA MÉTÉO — un lit sonore par temps');
+titre('④ LA MÉTÉO, un lit sonore par temps');
 /*
  * Deux temps n'ont volontairement PAS de couche : le beau temps et les nuages
  * ne font pas de bruit, et en inventer un donnerait un bourdonnement permanent
@@ -126,7 +126,7 @@ const MOMENTS = [
   // ── ① LA TENSION. Trois mécaniques centrales montent en silence. C'est le
   //    manque le plus lourd : elles durent pendant qu'on joue, au lieu de
   //    ponctuer. Vérifié : zéro appel de son dans les trois.
-  ['tension-alerte-1', 1, 'Un palier d\'alerte franchi — premier cran', 'la jauge du casse monte de 0 à 100 sans un bruit'],
+  ['tension-alerte-1', 1, 'Un palier d\'alerte franchi, premier cran', 'la jauge du casse monte de 0 à 100 sans un bruit'],
   ['tension-alerte-2', 1, 'Deuxième cran, plus proche', 'idem'],
   ['tension-alerte-3', 1, 'Bouclage : on est repéré pour de bon', 'idem'],
   ['tension-risque', 1, 'Le tas de la Récup\' qui grince avant de céder', 'le risque monte en continu, en silence'],
@@ -145,7 +145,7 @@ const MOMENTS = [
   ['combat-esquive', 3, 'Un coup qui frôle', 'esquiver à moitié ne s\'entend pas'],
   ['combat-charge', 3, 'L\'ennemi qui prend son élan', 'on ne l\'entend pas venir'],
 
-  // ── ④ LES OBJETS. Ils s\'usent, se cassent, s\'équipent — sans un bruit.
+  // ── ④ LES OBJETS. Ils s\'usent, se cassent, s\'équipent, sans un bruit.
   ['objet-equipe', 4, 'Un vêtement enfilé, une boucle serrée', 's\'équiper est muet'],
   ['objet-casse', 4, 'Quelque chose qui cède pour de bon', 'perdre un objet est muet'],
   ['objet-plein', 4, 'Un sac trop plein qu\'on force', 'refuser faute de place est muet'],

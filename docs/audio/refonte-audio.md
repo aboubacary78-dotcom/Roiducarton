@@ -1,4 +1,4 @@
-# Refonte audio — Le Roi du Carton
+# Refonte audio · Le Roi du Carton
 ## 49 bruitages, prêts à générer
 
 ---
@@ -25,7 +25,7 @@ ce lot). Vérifier que l'offre souscrite couvre l'usage commercial.
 | Fréquence | 48 kHz |
 | Niveau | Normaliser à **−16 LUFS**, crête à −1 dBTP |
 | Format final | **MP3 40 kbit/s mono** (c'est le format du reste du jeu) |
-| Silence | Couper le silence de tête à **moins de 10 ms** — sinon le son arrive après le geste |
+| Silence | Couper le silence de tête à **moins de 10 ms** : sinon le son arrive après le geste |
 
 ### La limite qui change tout
 
@@ -48,11 +48,11 @@ livrer un bruitage de film d'action.
 Cinq familles. La règle interne à chacune : **la matière change avec l'ampleur,
 jamais le volume seul.**
 
-- **① L'argent** — l'entrée et la sortie doivent être opposées à l'oreille.
-- **② L'effort** — creuser, ramasser, bricoler : que du frottement, jamais de percussion.
-- **③ Le corps** — la seule famille percussive du jeu, donc immédiatement lisible.
-- **④ Les autres** — rare, donc marquant.
-- **⑤ La perte** — plus c'est irréversible, plus le son est mou.
+- **① L'argent** : l'entrée et la sortie doivent être opposées à l'oreille.
+- **② L'effort** : creuser, ramasser, bricoler : que du frottement, jamais de percussion.
+- **③ Le corps** : la seule famille percussive du jeu, donc immédiatement lisible.
+- **④ Les autres** : rare, donc marquant.
+- **⑤ La perte** : plus c'est irréversible, plus le son est mou.
 
 Plus l'interface, qui doit disparaître : du carton manipulé, rien d'autre.
 
@@ -65,10 +65,10 @@ l'argent qui sort.** Vendre son manteau et l'acheter s'entendent pareil.
 
 | Fichier | Durée | Prompt à coller | Intention |
 |---|---|---|---|
-| `argent-piece-entree.mp3` | 0,5 s | `Two small coins dropped into a soft empty plastic cup held in the hand, the cup flexing, close-miked handmade foley, dry room, no reverb` | 1 à 3 € reçus. Le gobelet doit sonner **presque vide** — jamais une caisse enregistreuse |
+| `argent-piece-entree.mp3` | 0,5 s | `Two small coins dropped into a soft empty plastic cup held in the hand, the cup flexing, close-miked handmade foley, dry room, no reverb` | 1 à 3 € reçus. Le gobelet doit sonner **presque vide**, jamais une caisse enregistreuse |
 | `argent-poignee-entree.mp3` | 0,8 s | `A handful of loose coins poured into a soft plastic cup, dull and cheap, no ring or shimmer, close-miked handmade foley, dry room` | 4 à 15 € reçus |
 | `argent-liasse.mp3` | 1,1 s | `Four crumpled paper banknotes counted quickly with a thumb, dry paper friction, close-miked handmade foley, no reverb` | Plus de 15 €. **Un billet ne tinte jamais** |
-| `argent-sortie.mp3` | 0,6 s | `Coins scraped off a wooden counter and taken away by a hand, dragging then lifting, close-miked handmade foley, dry room` | Acheter, payer une amende, donner. Timbre **descendant** — l'inverse de l'entrée |
+| `argent-sortie.mp3` | 0,6 s | `Coins scraped off a wooden counter and taken away by a hand, dragging then lifting, close-miked handmade foley, dry room` | Acheter, payer une amende, donner. Timbre **descendant**, l'inverse de l'entrée |
 | `moment-piece.mp3` *(existe)* | 0,35 s | `A single coin landing in a soft plastic cup, single hit, close-miked handmade foley, dry, no reverb` | La pièce attrapée dans le mini-jeu de la manche |
 
 ---
@@ -109,11 +109,11 @@ deviennent lisibles instantanément.
 # ④ LES AUTRES (4)
 
 Quatre sons dans toute la partie. Ils doivent être reconnaissables du premier
-coup — c'est le seul lien social du jeu.
+coup, c'est le seul lien social du jeu.
 
 | Fichier | Durée | Prompt à coller | Intention |
 |---|---|---|---|
-| `social-partage.mp3` | 0,7 s | `A crusty bread loaf torn in half by hand, crust cracking then crumb tearing, close-miked handmade foley, dry room` | Partager à manger. **Le geste le plus digne du jeu** — le son doit être généreux |
+| `social-partage.mp3` | 0,7 s | `A crusty bread loaf torn in half by hand, crust cracking then crumb tearing, close-miked handmade foley, dry room` | Partager à manger. **Le geste le plus digne du jeu**, le son doit être généreux |
 | `moment-poignee-main.mp3` *(existe)* | 0,6 s | `Two dry hands clapping together once then gripping, with sleeve fabric rustling, close-miked handmade foley, dry room` | Serrer la main, conclure un troc |
 | `social-econduit.mp3` | 0,8 s | `Three footsteps walking away on gravel, cut off abruptly on the third, close-miked handmade foley, dry room` | On vous éconduit, ou vous passez votre chemin |
 | `geste-troc.mp3` *(existe)* | 0,5 s | `An object passed from one hand to another over a cardboard surface, brief slide and settle, close-miked handmade foley` | Troquer un objet |
@@ -127,11 +127,11 @@ léger claque, l'échec grave s'affaisse.
 
 | Fichier | Durée | Prompt à coller | Intention |
 |---|---|---|---|
-| `perte-rate.mp3` | 0,25 s | `A rubber band snapping loose with nothing at the end of it, short dry twang, close-miked handmade foley` | **Degré 1** — le raté sans conséquence. Entendu cent fois par partie : ne doit jamais faire sursauter |
-| `moment-attrape.mp3` *(existe)* | 0,5 s | `A metal chair scraped once across a tiled floor behind you, single sharp drag, close-miked handmade foley, dry room` | **Degré 2** — repéré. Le moment où quelqu'un a levé la tête |
-| `moment-craquement.mp3` *(existe)* | 1,4 s | `A stack of empty cardboard boxes toppling onto a tiled floor, ending with one box rolling two turns and stopping, single take, close-miked handmade foley` | **Degré 3** — l'écroulement. **Le petit rebond final fait toute la blague** |
-| `perte-dignite.mp3` | 0,9 s | `Packing tape peeled slowly off damp cardboard, tearing the top layer away with it, soft and gritty, no snap, close-miked handmade foley` | **Degré 4** — l'humiliation. Aucun impact, que de l'arrachement. Le son le plus important du jeu |
-| `perte-palier.mp3` | 1,3 s | `Damp cardboard tearing then a layer giving way at once, followed by a faint metallic object hitting the ground far behind, close-miked handmade foley, dry room` | **Degré 5** — un palier de Dignité franchi. Jamais joué autrement : c'est la signature de la chute |
+| `perte-rate.mp3` | 0,25 s | `A rubber band snapping loose with nothing at the end of it, short dry twang, close-miked handmade foley` | **Degré 1** : le raté sans conséquence. Entendu cent fois par partie : ne doit jamais faire sursauter |
+| `moment-attrape.mp3` *(existe)* | 0,5 s | `A metal chair scraped once across a tiled floor behind you, single sharp drag, close-miked handmade foley, dry room` | **Degré 2** : repéré. Le moment où quelqu'un a levé la tête |
+| `moment-craquement.mp3` *(existe)* | 1,4 s | `A stack of empty cardboard boxes toppling onto a tiled floor, ending with one box rolling two turns and stopping, single take, close-miked handmade foley` | **Degré 3** : l'écroulement. **Le petit rebond final fait toute la blague** |
+| `perte-dignite.mp3` | 0,9 s | `Packing tape peeled slowly off damp cardboard, tearing the top layer away with it, soft and gritty, no snap, close-miked handmade foley` | **Degré 4** : l'humiliation. Aucun impact, que de l'arrachement. Le son le plus important du jeu |
+| `perte-palier.mp3` | 1,3 s | `Damp cardboard tearing then a layer giving way at once, followed by a faint metallic object hitting the ground far behind, close-miked handmade foley, dry room` | **Degré 5** : un palier de Dignité franchi. Jamais joué autrement : c'est la signature de la chute |
 
 ---
 
@@ -145,7 +145,7 @@ léger claque, l'échec grave s'affaisse.
 | `moment-page.mp3` | 0,6 s | `A folded sheet of paper unfolded once and smoothed flat with the palm, dry paper friction, close-miked handmade foley, dry room` | L'histoire du personnage s'ouvre, une page de texte apparaît. **Doit passer inaperçu** : c'est le son de la lecture qui commence |
 | `moment-registre.mp3` | 0,7 s | `A lever arch file binder snapped open, metal mechanism clacking, close-miked handmade foley, dry room` | Ouvrir le Registre ou le Cimetière |
 | `moment-fin-inedite.mp3` | 0,9 s | `A rubber stamp pressed hard onto paper on a wooden desk, single firm hit, close-miked handmade foley, dry room` | Une fin de mort découverte. Le son de la collection qui avance |
-| `moment-mort.mp3` *(existe)* | 1,6 s | `A large cardboard box slowly collapsing in on itself, no crash, ending in complete silence, close-miked handmade foley, dry room, no music` | La mort. **Un son trop petit pour l'événement** — c'est là qu'est la comédie noire |
+| `moment-mort.mp3` *(existe)* | 1,6 s | `A large cardboard box slowly collapsing in on itself, no crash, ending in complete silence, close-miked handmade foley, dry room, no music` | La mort. **Un son trop petit pour l'événement** : c'est là qu'est la comédie noire |
 | `moment-sacre.mp3` *(existe)* | 1,8 s | `A cardboard crown set on a head, then a broom handle tapped twice on a concrete floor like a sceptre, close-miked handmade foley, dry room` | Sacré Roi du Carton |
 
 ---
@@ -166,11 +166,11 @@ léger claque, l'échec grave s'affaisse.
 # ⑧ L'INTERFACE (6)
 
 Elle doit disparaître. **Que du carton manipulé.** Et surtout pas le même clic
-pour toucher « Voler » et pour changer d'onglet — c'est le défaut actuel.
+pour toucher « Voler » et pour changer d'onglet, c'est le défaut actuel.
 
 | Fichier | Durée | Prompt à coller | Intention |
 |---|---|---|---|
-| `geste-clic.mp3` *(existe)* | 0,12 s | `A fingernail pushing a corrugated cardboard flap until the flute clicks, very close-miked, dry, no reverb` | Toucher une action. **Le son le plus entendu du jeu** — livrer 3 variantes |
+| `geste-clic.mp3` *(existe)* | 0,12 s | `A fingernail pushing a corrugated cardboard flap until the flute clicks, very close-miked, dry, no reverb` | Toucher une action. **Le son le plus entendu du jeu**, livrer 3 variantes |
 | `geste-retour.mp3` | 0,2 s | `A cardboard card dropped back onto a stack, low and soft, close-miked handmade foley, dry room` | Retour, fermer. Plus grave que le clic d'action |
 | `geste-onglet.mp3` | 0,15 s | `A stiff paper tab flicked with a fingernail, single light tick, close-miked handmade foley, dry` | Changer d'onglet, sélectionner sur la carte |
 | `geste-reglage.mp3` | 0,2 s | `A metal toggle switch on an electrical panel flipped once, dry mechanical clack, close-miked, no reverb` | Basculer un réglage |
@@ -185,7 +185,7 @@ Le jeu demande de surveiller six jauges et n'en signale aucune à l'oreille.
 
 | Fichier | Durée | Prompt à coller | Intention |
 |---|---|---|---|
-| `jauge-rouge.mp3` | 0,6 s | `A rubber band stretched slowly until it creaks under tension, single creak, close-miked handmade foley, dry room` | Une jauge passe sous 25. **Ne se rejoue pas tant qu'on n'est pas remonté** — sinon c'est une alarme, et on coupe le son |
+| `jauge-rouge.mp3` | 0,6 s | `A rubber band stretched slowly until it creaks under tension, single creak, close-miked handmade foley, dry room` | Une jauge passe sous 25. **Ne se rejoue pas tant qu'on n'est pas remonté**, sinon c'est une alarme, et on coupe le son |
 | `jauge-remplie.mp3` | 0,7 s | `A long gulp drunk from a plastic bottle, ending with the bottle popping back into shape, close-miked handmade foley, dry room` | Manger, boire, se soigner |
 
 ---
@@ -194,7 +194,7 @@ Le jeu demande de surveiller six jauges et n'en signale aucune à l'oreille.
 
 Le jeu compte aujourd'hui 25 sons. Vingt sont repris ci-dessus sous leur nom
 actuel. **Les cinq derniers sont supprimés**, leur rôle étant repris par un son
-plus précis — rien à générer pour eux, c'est du travail de code :
+plus précis, rien à générer pour eux, c'est du travail de code :
 
 | Son actuel | Ce qui le remplace | Pourquoi |
 |---|---|---|
@@ -202,7 +202,7 @@ plus précis — rien à générer pour eux, c'est du travail de code :
 | `geste-echec` | `perte-rate` | Même rôle, mais rangé dans l'échelle de la perte au lieu de flotter seul |
 | `geste-reussite` | `moment-resultat-bon` (événement), `jauge-remplie` (utiliser un objet) | Un seul son servait deux choses très différentes |
 | `geste-papier` | `moment-page` | Le nom restait, l'intention se précise |
-| `moment-porte-claque` | `social-econduit` | La négociation qui échoue, c'est quelqu'un qui s'en va — pas une porte |
+| `moment-porte-claque` | `social-econduit` | La négociation qui échoue, c'est quelqu'un qui s'en va, pas une porte |
 
 ---
 

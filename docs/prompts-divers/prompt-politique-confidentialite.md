@@ -19,14 +19,14 @@ te paraît manquer, **signale-le en commentaire à la fin** plutôt que de combl
 le trou par une formule passe-partout.
 
 En particulier : **ne parle pas de comptes utilisateurs, de serveurs, de
-newsletters, de cookies analytiques ni de partage avec des partenaires** — il
+newsletters, de cookies analytiques ni de partage avec des partenaires**, il
 n'y en a aucun.
 
 ---
 
 ## L'application
 
-**Le Roi du Carton** — jeu de survie en solo. Le joueur incarne un sans-abri
+**Le Roi du Carton** : jeu de survie en solo. Le joueur incarne un sans-abri
 qui survit jour après jour dans une ville française. Humour noir, direction
 artistique en carton découpé.
 
@@ -76,7 +76,7 @@ Aucune copie n'existe ailleurs, donc l'effacement est définitif et total.
 
 - Aucun outil de mesure d'audience, aucun traceur, aucun service d'analyse.
   Vérifié : ni Google Analytics, ni Firebase, ni Sentry, ni réseau social.
-- Aucun appel réseau vers un serveur de l'éditeur — il n'en existe pas.
+- Aucun appel réseau vers un serveur de l'éditeur, il n'en existe pas.
 - Le jeu ne télécharge que ses propres images et sons, depuis l'endroit d'où il
   a été installé.
 
@@ -112,7 +112,7 @@ depuis les réglages de son téléphone (identifiant publicitaire Android,
 4. Ce qui sort de l'appareil, et vers qui.
 5. La publicité, avec le lien vers la politique de Google.
 6. Les droits du joueur (accès, effacement) et **comment les exercer
-   concrètement** — ici, en vidant les données de l'application, sans avoir à
+   concrètement** : ici, en vidant les données de l'application, sans avoir à
    écrire à qui que ce soit.
 7. Les enfants : le jeu ne leur est pas destiné, aucune donnée n'est
    sciemment collectée les concernant.

@@ -1,5 +1,5 @@
 /*
- * LES PIQUES, DANS LE JEU — ET PAS SEULEMENT DANS LE FICHIER.
+ * LES PIQUES, DANS LE JEU : ET PAS SEULEMENT DANS LE FICHIER.
  *
  * `test-piques.ts` vérifie les trente phrases et le débit. Il ne peut pas dire
  * si elles ARRIVENT : une pique parfaitement écrite, correctement bridée, et
@@ -8,7 +8,7 @@
  *
  * Deux moments se testent d'un bout à l'autre sans tricher :
  *
- *   · LE RÉVEIL, qui est l'écran le plus vu du jeu — une fois par nuit ;
+ *   · LE RÉVEIL, qui est l'écran le plus vu du jeu, une fois par nuit ;
  *   · L'AGONIE, quand une jauge du corps passe sous dix.
  *
  * Le vol raté et les gains misérables demandent de jouer un mini-jeu entier
@@ -49,7 +49,7 @@ const clic = m => p.evaluate(s => {
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -58,8 +58,8 @@ const verifier = (nom, ok, detail) => {
  *
  * Les piques flottaient en bandeau au-dessus du jeu et disparaissaient en
  * trois secondes ; ce test les guettait donc à la volée. Elles sont
- * maintenant écrites DANS le texte que le jeu produit — le résultat d'une
- * action, les notes de la nuit — exactement là où vivait déjà « Même les rats
+ * maintenant écrites DANS le texte que le jeu produit, le résultat d'une
+ * action, les notes de la nuit, exactement là où vivait déjà « Même les rats
  * vous ont regardé avec pitié ». On lit donc simplement la page, et elles y
  * restent aussi longtemps que le joueur.
  */
@@ -152,9 +152,9 @@ verifier(`le ventre à 4, la rue commente (${AGONIE.length} phrases possibles)`,
  *
  * Ce n'est pas de la commodité : avec un ventre à 4, la nuit fait replonger
  * les jauges sous le seuil d'agonie, la pique de santé part la première, et le
- * verrou de trente secondes avale celle du matin. Le jeu a raison — quelqu'un
+ * verrou de trente secondes avale celle du matin. Le jeu a raison, quelqu'un
  * qui est en train de mourir doit l'entendre plutôt que d'entendre parler de
- * carton humide — mais le test, lui, mesurait alors deux choses à la fois.
+ * carton humide, mais le test, lui, mesurait alors deux choses à la fois.
  *
  * Même raison pour la dignité : à 60 on est à dix points du palier suivant, et
  * une nuit dehors coûte plus que ça. On part à 95, loin de toute frontière.
@@ -172,7 +172,7 @@ await pause(1100);
 await clic('Continuer la partie|Continue'); await pause(1400);
 await clic('compris|Got it'); await pause(400);
 verifier('la nuit se lance', await clic('Jour Suivant|Next Day'));
-// Le matin, la remarque est une NOTE du bilan de nuit — au milieu du réchaud
+// Le matin, la remarque est une NOTE du bilan de nuit, au milieu du réchaud
 // qui a tenu et du carton qui a lâché, et elle y reste tant qu'on lit.
 const ecranMatin = await lireEcran(4000);
 const piqueMatin = REVEIL.find(r => ecranMatin.includes(r.slice(0, 24)));

@@ -1,4 +1,4 @@
-# Direction sonore du « Roi du Carton » — note commune aux trois packs
+# Direction sonore du « Roi du Carton » · note commune aux trois packs
 
 *Ce document est le socle. Chaque pack le répète en tête, pour être remis seul
 à qui fabrique les sons.*
@@ -25,7 +25,7 @@ son établi, micro à vingt centimètres :
 | le vent | un souffle contre une feuille de papier calque |
 
 C'est cette matière-là qui donne son unité au jeu. Un son trop propre, trop
-« vrai », trop cinématographique sonnera faux — même s'il est techniquement
+« vrai », trop cinématographique sonnera faux, même s'il est techniquement
 parfait. **Petit, proche, sec, fait main.**
 
 ## Le ton : comédie douce-amère
@@ -39,7 +39,7 @@ percussion de bande-annonce.
 
 1. **Aucune parole intelligible.** Le jeu existe en français et en anglais ;
    un mot compréhensible casserait la traduction. Un brouhaha de foule doit
-   rester un brouhaha — des voyelles, du murmure, jamais de phrase.
+   rester un brouhaha, des voyelles, du murmure, jamais de phrase.
 2. **Aucune mélodie reconnaissable** ni citation d'une musique existante.
 3. **Aucune stridence.** Le jeu se joue au casque dans le métro. Rien
    au-dessus de 8 kHz qui pique, pas de sifflement continu.
@@ -52,7 +52,7 @@ le navigateur : c'est fonctionnel mais sans matière. C'est ça qu'on remplace.
 
 ## Contraintes techniques (les mêmes pour les trois packs)
 
-- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps —
+- **Format : WAV, 48 kHz, 16 bits.** Si ce n'est pas possible, MP3 320 kbps,
   la conversion finale sera faite à l'intégration.
 - **Boucles : stéréo. Bruitages courts : mono.**
 - **Les boucles doivent boucler.** La dernière milliseconde doit s'enchaîner

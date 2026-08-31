@@ -24,8 +24,8 @@ import { pushToast } from '@/lib/toast';
  * que jouer et remonter le choix.
  */
 
-const DURATION = 3900;      // durée d'une esquive de rattrapage (ms) — un peu plus longue
-const IFRAME = 440;         // invulnérabilité après une touche (ms) — moins clémente
+const DURATION = 3900;      // durée d'une esquive de rattrapage (ms), un peu plus longue
+const IFRAME = 440;         // invulnérabilité après une touche (ms), moins clémente
 
 type Dir = 'up' | 'down' | 'left' | 'right';
 
@@ -115,7 +115,7 @@ function CombatScreenInner() {
   }, [intro, isKing]);
   // Le coup qui porte. Il n'avait AUCUN son : on lançait la carte (un souffle),
   // puis les dégâts tombaient en silence. Or c'est le retour le plus important
-  // d'une bagarre — savoir qu'on a touché. On surveille donc la santé de
+  // d'une bagarre, savoir qu'on a touché. On surveille donc la santé de
   // l'adversaire, et on distingue le coup franc du coup décisif.
   // On mémorise AUSSI de qui il s'agissait : un nouvel adversaire moins
   // vaillant que le précédent aurait sinon déclenché un bruit de coup dès son
@@ -135,7 +135,7 @@ function CombatScreenInner() {
     const big = dmg >= Math.max(6, (currentCombat?.enemyMaxHealth ?? 30) * 0.2);
     if (big) playCrit(); else playHit();
     // Le souffle qui sort tout seul, sur le gros coup uniquement. Sur chaque
-    // coup, on entendrait l'échantillon plutôt que le personnage — et un
+    // coup, on entendrait l'échantillon plutôt que le personnage, et un
     // combat, c'est dix coups à la minute.
     if (big) playVoix('effort');
   }, [currentCombat?.enemyHealth, currentCombat?.enemyMaxHealth, currentCombat?.enemyName]);
@@ -418,7 +418,7 @@ function SignPhase({ combat, character, onPick, onFlee, onCoupDeGrace }: {
    * L'extincteur ouvre tous les combats sauf un. Battre le Roi en place est la
    * seule fin du jeu : c'est ce vers quoi tendent les jauges, le respect, la
    * dette, tout. Le laisser tomber contre une vidéo ne raccourcirait pas un
-   * mini-jeu pénible — ça viderait la partie de son terme.
+   * mini-jeu pénible, ça viderait la partie de son terme.
    *
    * On ne grise pas le bouton, on le retire : un bouton barré est une
    * frustration affichée, une absence est une règle.
@@ -674,7 +674,7 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
      * L'ADVERSAIRE PREND SON ÉLAN, ET ON L'ENTEND.
      *
      * La volée arrivait en silence : on la voyait ou on la prenait. Le son
-     * part À L'APPARITION de la vague, donc avant qu'elle traverse — c'est ce
+     * part À L'APPARITION de la vague, donc avant qu'elle traverse, c'est ce
      * qui en fait une information et non un commentaire. Le nez sensible et le
      * paranoïaque ont en plus leurs 420 ms d'avance visuelle ; les autres ont
      * au moins l'oreille.
@@ -717,7 +717,7 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
       );
 
       /*
-       * LE FRÔLEMENT — la récompense de l'esquive serrée.
+       * LE FRÔLEMENT : la récompense de l'esquive serrée.
        *
        * Passer à un cheveu d'un projectile ne produisait rien : esquiver de
        * justesse et esquiver largement se ressemblaient. Le souffle du tissu
@@ -821,7 +821,7 @@ function DodgeArena({ combat, character, onDone }: { combat: CombatState; charac
         onPointerCancel={() => { dragRef.current = null; }}
       >
         {/* Le sol de l'arène : diorama s'il existe, dégradé sinon. Volontairement
-            en retrait — les projectiles doivent rester lisibles par-dessus. */}
+            en retrait, les projectiles doivent rester lisibles par-dessus. */}
         <SafeImg src="/assets/arene-esquive.webp" className="absolute inset-0 w-full h-full object-cover opacity-45" />
 
         {/* jauge de temps */}

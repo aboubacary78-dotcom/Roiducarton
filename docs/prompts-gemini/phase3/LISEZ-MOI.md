@@ -1,13 +1,13 @@
-# Phase 3 — six packs d'images
+# Phase 3 · six packs d'images
 
-## `pack-10-fins.md` — 4 images ⚠️ REMPLACÉ PAR LE PACK 14
+## `pack-10-fins.md` · 4 images ⚠️ REMPLACÉ PAR LE PACK 14
 
 Quand un personnage meurt, le jeu affiche une une de journal avec une photo
 choisie selon ce qui l'a tué. Six causes ont la leur, plus une pour la mort au
 combat.
 
-Mais le jeu reconnaît **quatre fins particulières** — mort le premier jour,
-mort riche, cuit par la canicule, tombé après dix jours de règne — qui n'ont
+Mais le jeu reconnaît **quatre fins particulières**, mort le premier jour,
+mort riche, cuit par la canicule, tombé après dix jours de règne, qui n'ont
 pas d'image et retombent sur la photo générique. Ce sont pourtant les plus
 savoureuses, et celles qu'on a envie de montrer.
 
@@ -15,7 +15,7 @@ Ces quatre-là sont demandées ici. **Le travail de code suit à l'intégration*
 aujourd'hui l'image est choisie sur la cause de mort, il faudra qu'elle
 préfère la fin particulière quand il y en a une.
 
-## `pack-11-trouvailles.md` — 29 vignettes
+## `pack-11-trouvailles.md` · 29 vignettes
 
 Dans La Récup', les objets qu'on déterre sont affichés avec de simples emoji.
 Tout le reste du jeu est illustré ; eux détonnent, et ce sont pourtant les
@@ -29,16 +29,16 @@ l'objet.
 
 **Le travail de code suit aussi** : le mini-jeu affiche actuellement
 `{find.emoji}` dans une balise texte ; il faudra passer à une image, avec repli
-sur l'emoji tant qu'une vignette manque — le même principe que pour les sons.
+sur l'emoji tant qu'une vignette manque, le même principe que pour les sons.
 
-## `pack-12-derniers-svg.md` — 8 images ✅ LIVRÉ
+## `pack-12-derniers-svg.md` · 8 images ✅ LIVRÉ
 
 Quand le jeu n'a pas d'illustration pour un écran, il en dessine une à la
 volée. Ce filet de sécurité se voit : c'est un tracé vectoriel gris au milieu
 de dioramas photographiés.
 
 Après audit, il ne restait que **huit endroits** où il se déclenchait encore.
-Trois sont l'écran de fin de La Récup' — le plus visible, celui qui a motivé
+Trois sont l'écran de fin de La Récup', le plus visible, celui qui a motivé
 ce pack. Les cinq autres sont de petites cartes de résultat très fréquentes :
 utiliser un objet, en manger un, en revendre un, le cadeau laissé sur le
 carton, la seconde chance.
@@ -47,12 +47,12 @@ carton, la seconde chance.
 de La Récup' montre bien `result-recup-good` / `-vide` / `-bust` selon l'issue,
 et non plus le diorama de déchetterie qui servait de repli.
 
-## `pack-13-vols-classiques.md` — 6 images
+## `pack-13-vols-classiques.md` · 6 images
 
 Le jeu compte 292 rencontres. **286 avaient leur diorama, six ne l'avaient
 jamais eu** : les six plus anciens vols, écrits avant que la direction
 artistique n'existe. Ils passaient sous le radar de l'audit précédent, qui
-comparait « images réclamées » et « fichiers présents » — or ces six-là ne
+comparait « images réclamées » et « fichiers présents », or ces six-là ne
 réclamaient rien du tout.
 
 Ce sont pourtant les vols que le joueur croise le plus souvent : L'Étal du
@@ -68,11 +68,11 @@ prendront le relais toutes seules au dépôt des fichiers.
 **Attention à la consigne propre à ce pack** : ces images s'affichent AVANT le
 choix du joueur. Elles montrent la tentation, jamais le résultat.
 
-## `pack-14-morts-comiques.md` — 11 images
+## `pack-14-morts-comiques.md` · 11 images
 
 Les sept images de mort existantes sont refusées : elles sont techniquement
 superbes et complètement à côté. Un homme la tête dans les mains sous un
-panneau « personne ne regarde », un corps effondré sur un trottoir — c'est du
+panneau « personne ne regarde », un corps effondré sur un trottoir, c'est du
 misérabilisme, et deux d'entre elles portent en plus du texte peint dans le
 décor, ce que le protocole interdit.
 
@@ -82,14 +82,14 @@ absorbe. Onze images en tout.
 Il introduit surtout **deux personnages récurrents** qui portent la comédie :
 le fantôme en carton du héros, qui flotte au-dessus de son propre corps et
 commente ce qui vient d'arriver, et le pigeon, témoin impassible. Le corps peut
-alors être franchement mort sans que l'image devienne glauque — c'est le
+alors être franchement mort sans que l'image devienne glauque, c'est le
 mécanisme du dessin animé, et c'est exactement ce qui manquait.
 
 **Le code est prêt** : la une choisit désormais la fin particulière avant la
 cause générique, et descend la chaîne image par image, ce qui laisse les onze
 s'activer une à une à la livraison.
 
-## `pack-15-nettoyage.md` — 142 images + un protocole
+## `pack-15-nettoyage.md` · 142 images + un protocole
 
 Un audit vient d'être passé sur **la totalité des 989 images**, par
 reconnaissance de caractères pour la partie mesurable.
@@ -116,13 +116,13 @@ intégrées), et le pack 10 est absorbé par le 14.
 
 Le **pack 16** est le plus court et le plus vite rentable : cinq images qui
 complètent la collection des morts. Vingt-huit adversaires ont leur mort
-illustrée, cinq retombent sur une image générique — dont le Roi Déchu, qui est
+illustrée, cinq retombent sur une image générique, dont le Roi Déchu, qui est
 la fin la plus rare du jeu et mériterait la plus belle image.
 
 Le **pack 15** vient après, en commençant par ses quarante images à texte
 anglais : c'est le défaut le plus large et le seul qui soit mesuré. Puis le
 **pack 13** : six cartes très fréquentes,
 aujourd'hui illustrées par des scènes voisines qui font l'affaire sans être
-justes. Le **pack 11** en dernier, parce qu'il est long — mais c'est lui qui
+justes. Le **pack 11** en dernier, parce qu'il est long, mais c'est lui qui
 change le plus l'allure du jeu : La Récup' est le seul écran où il reste des
 emoji à la place d'illustrations.

@@ -1,11 +1,11 @@
 /*
- * LES SONS QUI ANNONCENT — CEUX QUI NE PONCTUENT PAS UN GESTE.
+ * LES SONS QUI ANNONCENT : CEUX QUI NE PONCTUENT PAS UN GESTE.
  *
  * Toute la bande-son du jeu répondait au doigt du joueur. Ces sons-ci sont les
  * premiers à parler quand le JEU fait quelque chose : une jauge qui passe sous
  * le seuil, une alerte qui monte, un compte à rebours, une ronde qui entre.
  *
- * On ne peut pas les vérifier à l'appui d'un bouton — ils n'en ont pas. On
+ * On ne peut pas les vérifier à l'appui d'un bouton, ils n'en ont pas. On
  * espionne donc les requêtes de fichiers audio, et on regarde LEQUEL part au
  * moment où l'état du jeu bascule. C'est la seule preuve qui vaille : un
  * fichier demandé au bon instant.
@@ -38,7 +38,7 @@ const clic = (m) => p.evaluate((s) => {
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -72,11 +72,11 @@ async function jauges(patch) {
  * ── CHAQUE JAUGE A SON BRUIT, ET C'EST LE DEUXIÈME ESSAI ──────────────────
  *
  * Ce test a dit l'inverse pendant un temps. Le premier lot était des voix de
- * synthèse, renvoyé à l'écoute — « un cri bouillie » — et les cinq jauges
+ * synthèse, renvoyé à l'écoute (« un cri bouillie ») et les cinq jauges
  * retombaient sur `jauge-rouge`, l'alerte neutre : on savait qu'une jauge
  * lâchait, jamais laquelle.
  *
- * Le lot refait est du foley — liquide dans une bouteille, liège sec, carton
+ * Le lot refait est du foley, liquide dans une bouteille, liège sec, carton
  * qui s'affaisse, dominos, note au bord d'un verre. Chaque jauge retrouve donc
  * SON bruit, et c'est ce que ce bloc vérifie à nouveau.
  *

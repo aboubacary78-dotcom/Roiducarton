@@ -33,7 +33,7 @@ for (const f of readdirSync(DATA).filter(x => x.endsWith('.ts'))) {
   if (n >= 10) { lignes.push([f, ok, n]); tt += n; tr += ok; }
 }
 lignes.sort((a, b) => a[1] / a[2] - b[1] / b[2]);
-console.log(`Textes français repérés : ${tt} — traduits : ${tr} (${((tr / tt) * 100).toFixed(0)} %)\n`);
+console.log(`Textes français repérés : ${tt} · traduits : ${tr} (${((tr / tt) * 100).toFixed(0)} %)\n`);
 for (const [f, ok, n] of lignes) {
   const p = (ok / n) * 100;
   console.log(`  ${p.toFixed(0).padStart(3)} %  ${String(ok).padStart(4)}/${String(n).padEnd(4)}  ${f}`);

@@ -9,7 +9,7 @@ Ce qu'il vérifie, et pourquoi chaque point a déjà causé un incident dans ce
 projet :
 
   · LES NOMS, à la lettre près. Le jeu charge `/audio/<nom>.mp3` en dur ; un
-    tiret de travers et le son n'existe pas, sans erreur visible — le repli
+    tiret de travers et le son n'existe pas, sans erreur visible, le repli
     prend la main et personne ne s'en aperçoit.
   · LE FORMAT. Un lot livré en AAC s'était déjà chargé sans se décoder sur les
     navigateurs sans codecs propriétaires : « se charger » n'est pas « se
@@ -45,11 +45,11 @@ echecs, avertis = [], []
 
 
 def rate(quoi, detail=''):
-    echecs.append(f'{quoi}{f" — {detail}" if detail else ""}')
+    echecs.append(f'{quoi}{f" · {detail}" if detail else ""}')
 
 
 def note(quoi, detail=''):
-    avertis.append(f'{quoi}{f" — {detail}" if detail else ""}')
+    avertis.append(f'{quoi}{f" · {detail}" if detail else ""}')
 
 
 # ── Mesures ────────────────────────────────────────────────────────────────
@@ -75,13 +75,13 @@ print(f'{len(fichiers)} fichiers MP3 dans {dossier}\n')
 # ── Le format ──────────────────────────────────────────────────────────────
 mauvais_hz = [n for n, m in mesures.items() if m['hz'] != 48000]
 print(f"  {'ok  ' if not mauvais_hz else 'RATÉ'}  48 kHz partout"
-      + (f" — {len(mauvais_hz)} écart(s) : {mauvais_hz[:3]}" if mauvais_hz else ''))
+      + (f" · {len(mauvais_hz)} écart(s) : {mauvais_hz[:3]}" if mauvais_hz else ''))
 if mauvais_hz:
     rate('fréquence', f'{len(mauvais_hz)} fichier(s)')
 
 # Un seuil en octets ABSOLU ne veut rien dire : un son de 0,2 s à 40 kbit/s
 # pèse mille octets et c'est normal. On compare donc chaque fichier à la taille
-# que sa durée et son débit impliquent — ce qui attrape le vrai défaut, un
+# que sa durée et son débit impliquent, ce qui attrape le vrai défaut, un
 # fichier tronqué à l'export.
 minus = []
 for n, m in mesures.items():
@@ -89,14 +89,14 @@ for n, m in mesures.items():
     if m['octets'] < 300 or (theorique and m['octets'] < theorique * 0.6):
         minus.append(f"{n} ({m['octets']} o pour {theorique:.0f} attendus)")
 print(f"  {'ok  ' if not minus else 'RATÉ'}  aucun fichier tronqué"
-      + (f' — {minus}' if minus else ''))
+      + (f' · {minus}' if minus else ''))
 if minus:
     rate('fichiers tronqués', str(minus))
 
 # ── Les doublons ───────────────────────────────────────────────────────────
 paires = [v for v in empreintes.values() if len(v) > 1]
 print(f"  {'ok  ' if not paires else 'RATÉ'}  aucun doublon bit-à-bit"
-      + (f' — {paires}' if paires else ''))
+      + (f' · {paires}' if paires else ''))
 if paires:
     rate('doublons', str(paires))
 
@@ -104,7 +104,7 @@ if paires:
 stereo = sorted(n for n, m in mesures.items() if m['canaux'] == 2)
 mono = sorted(n for n, m in mesures.items() if m['canaux'] == 1)
 print(f'  ok    {len(mono)} en mono, {len(stereo)} en stéréo')
-print(f'        stéréo : {", ".join(s[:-4] for s in stereo) or "—"}')
+print(f'        stéréo : {", ".join(s[:-4] for s in stereo) or "aucun"}')
 
 # ── Comparaison à la commande ──────────────────────────────────────────────
 if commande and commande.exists():
@@ -113,8 +113,8 @@ if commande and commande.exists():
     LES NOMS DE FICHIERS, QUEL QUE SOIT LE FORMAT DE LA COMMANDE.
 
     La première version exigeait `nom.mp3` SUIVI d'une durée sur la même ligne.
-    Une commande écrite autrement — noms sans extension, durée donnée une fois
-    pour tout le lot dans les réglages de sortie — ne produisait donc aucun
+    Une commande écrite autrement, noms sans extension, durée donnée une fois
+    pour tout le lot dans les réglages de sortie, ne produisait donc aucun
     attendu, et le script annonçait « 0 commandés, 0 livrés » avec un `ok`
     tranquille. Le contrôle le plus important du script était désactivé sans
     que rien ne le signale, ce qui est pire que de ne pas l'avoir.
@@ -143,7 +143,7 @@ if commande and commande.exists():
     else:
         print(f'  {"ok  " if not manquants else "RATÉ"}  {len(attendus)} commandés, '
               f'{len(attendus) - len(manquants)} livrés'
-              + (f' — MANQUE : {manquants}' if manquants else ''))
+              + (f' · MANQUE : {manquants}' if manquants else ''))
     if manquants:
         rate('fichiers manquants', str(manquants))
     if en_plus:
@@ -163,7 +163,7 @@ if commande and commande.exists():
         if d < lo * 0.5 or d > hi * 2.5 + 1:
             ecarts.append(f'{nom[:-4]} : {d:.1f}s pour {spec}s')
     print(f'  {"ok  " if not ecarts else "note"}  durées dans l\'ordre de grandeur demandé'
-          + (f' — {len(ecarts)} écart(s)' if ecarts else ''))
+          + (f' · {len(ecarts)} écart(s)' if ecarts else ''))
     for e in ecarts[:8]:
         print(f'        {e}')
     if ecarts:

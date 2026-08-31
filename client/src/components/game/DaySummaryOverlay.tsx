@@ -6,7 +6,7 @@ import { useLang, tr } from '@/lib/lang';
 import { bonusEn, bonusFr, canOfferRewarded, showRewarded } from '@/lib/ads';
 import { playWakeUp, playWear, playBack, playGaugeFilled, playUnlock } from '@/lib/sound';
 
-/** Sous ce niveau une jauge est en danger — le même seuil que l'alerte sonore. */
+/** Sous ce niveau une jauge est en danger, le même seuil que l'alerte sonore. */
 const SEUIL_ALERTE = 25;
 
 /*
@@ -26,7 +26,7 @@ export default function DaySummaryOverlay() {
    * montrer. Accroché au montage, le son partait une fois au lancement du jeu,
    * dans le vide.
    *
-   * Un objet bricolé qui a cédé pendant la nuit a son propre son — du carton
+   * Un objet bricolé qui a cédé pendant la nuit a son propre son, du carton
    * mouillé qui se déchire. Le réducteur le signale par une note en 💔.
    */
   const jour = s?.day;
@@ -38,8 +38,8 @@ export default function DaySummaryOverlay() {
      * LE COMMENTAIRE DU MATIN.
      *
      * C'est l'écran le plus vu du jeu : une fois par nuit, toutes les parties.
-     * D'où le débit bridé de `piquer` — trente secondes minimum entre deux
-     * piques, toutes catégories confondues — et six phrases qui se contentent
+     * D'où le débit bridé de `piquer`, trente secondes minimum entre deux
+     * piques, toutes catégories confondues, et six phrases qui se contentent
      * d'un détail exact plutôt que de pousser la blague. Une vanne qu'on relit
      * chaque matin doit pouvoir se relire cent fois.
      *
@@ -50,7 +50,7 @@ export default function DaySummaryOverlay() {
       LE COMMENTAIRE DU MATIN N'EST PLUS ICI.
 
       Il partait en bandeau flottant au-dessus de ce bilan et disparaissait en
-      trois secondes — une notification posée sur le jeu, pas une ligne du
+      trois secondes, une notification posée sur le jeu, pas une ligne du
       jeu. Il est maintenant écrit dans les NOTES de la nuit (voir le reducer,
       cas NEXT_DAY), au milieu du réchaud qui a tenu et du carton qui a lâché.
       On le lit avec le reste, et aussi longtemps qu'on veut.
@@ -73,7 +73,7 @@ export default function DaySummaryOverlay() {
   const notes = lang === 'en' ? s.notesEn : s.notes;
 
   /*
-   * UNE HEURE DE PLUS AU CHAUD — vidéo récompensée du bilan de nuit.
+   * UNE HEURE DE PLUS AU CHAUD : vidéo récompensée du bilan de nuit.
    *
    * L'offre ne se montre PAS toutes les nuits, et c'est délibéré. Elle attend
    * que la nuit vienne de pousser une jauge sous le seuil d'alerte : la perte
@@ -106,7 +106,7 @@ export default function DaySummaryOverlay() {
    * Deux boutons de publicité côte à côte sur le même écran ne doublent pas
    * les impressions : ils apprennent au joueur que cet écran est un panneau
    * d'affichage, et il cesse de le lire. Le contrat passe devant quand les
-   * deux sont possibles — il est plus rare, et rater de deux euros pique plus
+   * deux sont possibles, il est plus rare, et rater de deux euros pique plus
    * qu'une jauge basse de plus.
    */
   const peutRattraper = !peutRattraperContrat && !s.recovered
@@ -194,7 +194,7 @@ export default function DaySummaryOverlay() {
             * CE QUE LE MATÉRIEL A ÉPARGNÉ.
             *
             * Le matelas et le réchaud annulent une perte au lieu d'ajouter une
-            * jauge : le bilan n'affichait donc RIEN pour eux — pas de chiffre
+            * jauge : le bilan n'affichait donc RIEN pour eux, pas de chiffre
             * négatif puisqu'il n'y avait plus de perte, et un chiffre positif
             * aurait été faux. On lisait « le matelas vous a rendu votre nuit »
             * sans jamais savoir ce que cette nuit valait, et le matériel se

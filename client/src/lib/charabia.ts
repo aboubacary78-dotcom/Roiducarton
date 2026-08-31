@@ -4,18 +4,18 @@
  *
  * Le Mental ne faisait que deux choses : descendre, et à zéro tuer. C'était
  * une seconde barre de vie déguisée, et rien ne rendait sa perte
- * INTÉRESSANTE — juste inquiétante.
+ * INTÉRESSANTE : juste inquiétante.
  *
- * Désormais il tient la lisibilité du monde. Sous 20 — et pas avant — les mots
+ * Désormais il tient la lisibilité du monde. Sous 20 (et pas avant) les mots
  * des rencontres commencent à s'effacer ; plus bas, certains se remplacent
  * carrément par d'autres. Le joueur ne perd pas des points : il perd le fil de ce qu'on lui
- * raconte, ce qui est autrement plus désagréable et — c'est le sujet du jeu —
+ * raconte, ce qui est autrement plus désagréable et, c'est le sujet du jeu,
  * autrement plus juste.
  *
  * TROIS RÈGLES QUI EMPÊCHENT QUE ÇA PASSE POUR UN BUG :
  *
  *   1. UN MOT QUI LÂCHE DEVIENT DES SIGNES, PAS UN MOT MAL ÉCRIT. Mélanger
- *      les lettres — « accepte » → « acpetce » — produisait exactement
+ *      les lettres (« accepte » → « acpetce ») produisait exactement
  *      l'aspect d'une faute de frappe, et se faisait signaler comme telle.
  *      Des formes géométriques à la place du mot ne se confondent avec rien :
  *      c'est un trou dans la lecture, pas une coquille.
@@ -29,7 +29,7 @@
  *      ne peut plus lire « 15 € » ne joue plus, il subit.
  *
  * Et le remplacement de mots reste rare et TOUJOURS ABSURDE plutôt que
- * menaçant — un pigeon à la place d'un policier fait rire, l'inverse
+ * menaçant, un pigeon à la place d'un policier fait rire, l'inverse
  * angoisserait. C'est une comédie noire : la tête qui part doit être drôle
  * avant d'être triste.
  * ═══════════════════════════════════════════════════════════════════════════
@@ -45,14 +45,14 @@
  * critique : « on n'est même pas à 20 % ». Un symptôme qui arrive avant la
  * maladie ne se rattache à rien.
  *
- * Vingt est le territoire où les autres jauges commencent à faire mal — le
+ * Vingt est le territoire où les autres jauges commencent à faire mal, le
  * corps crie sous 10, la tête décroche sous 20. La lecture qui se troue devient
  * alors ce qu'elle doit être : le signe qu'on va mal, pas un effet de style.
  *
  * EXPORTÉ, et pas seulement utilisé ici : la pique qui prévient le joueur doit
  * tomber exactement quand l'écriture commence à lâcher. Recopier le nombre
  * dans la barre de jauges aurait marché le premier jour et dérivé au premier
- * réglage — la remarque arrivant trop tôt ou trop tard, sans que rien ne le
+ * réglage, la remarque arrivant trop tôt ou trop tard, sans que rien ne le
  * signale.
  */
 export const SEUIL_LISIBLE = 20;
@@ -62,7 +62,7 @@ const SEUIL_LUCIDE = SEUIL_LISIBLE;
  * Mots de remplacement. Volontairement bêtes et concrets : ce sont ceux qui
  * traversent la tête de quelqu'un qui n'a pas dormi, pas des hallucinations
  * de film. Le carton et le pigeon sont là parce qu'ils sont partout dans le
- * jeu — l'esprit qui déraille recycle ce qu'il a sous les yeux.
+ * jeu, l'esprit qui déraille recycle ce qu'il a sous les yeux.
  */
 const MOTS_QUI_PASSENT = [
   'pigeon', 'carton', 'soupe', 'chaussure', 'lundi', 'dimanche', 'fromage',
@@ -95,7 +95,7 @@ function semer(texte: string, tranche: number): () => number {
 }
 
 /**
- * Un mot qu'on laisse tranquille : trop court, chiffré, nom propre — ou
+ * Un mot qu'on laisse tranquille : trop court, chiffré, nom propre, ou
  * PORTEUR D'UNE APOSTROPHE OU D'UN TRAIT D'UNION.
  *
  * Cette dernière règle est une correction, et elle vient d'une mesure. Le
@@ -129,8 +129,8 @@ function intouchable(mot: string): boolean {
  * UN MOT QUI LÂCHE DEVIENT DES SIGNES, PAS UN MOT MAL ÉCRIT
  *
  * Pendant longtemps, un mot touché voyait ses lettres intérieures mélangées :
- * « accepte » → « acpetce ». L'idée était bonne — le mot reste devinable, on
- * SENT qu'on lit mal — mais elle a un défaut fatal, et il a fallu une capture
+ * « accepte » → « acpetce ». L'idée était bonne, le mot reste devinable, on
+ * SENT qu'on lit mal, mais elle a un défaut fatal, et il a fallu une capture
  * d'écran pour le voir : un mot aux lettres mélangées, c'est exactement à quoi
  * ressemble une faute de frappe. Le joueur ne lit pas « ma tête part », il lit
  * « le développeur a mal écrit ». Toute la mécanique se faisait signaler comme
@@ -138,12 +138,12 @@ function intouchable(mot: string): boolean {
  *
  * Le mot touché devient donc ILLISIBLE : une suite de signes géométriques, de
  * la même longueur, à la place des lettres. On ne peut pas confondre ça avec
- * une coquille — c'est visiblement un trou dans la lecture, et c'est
+ * une coquille, c'est visiblement un trou dans la lecture, et c'est
  * exactement ce que le Mental est censé produire.
  *
  * POURQUOI DES SIGNES UNICODE ET PAS WINGDINGS. Wingdings est une police
  * Microsoft : elle n'existe ni sur Android ni sur iOS, et un texte qui la
- * demande retombe silencieusement sur la police du système — c'est-à-dire sur
+ * demande retombe silencieusement sur la police du système, c'est-à-dire sur
  * les lettres d'origine, parfaitement lisibles. Le bloc « Formes
  * géométriques » (U+25xx) est, lui, servi par les polices système partout, et
  * ne demande aucun téléchargement dans l'APK.
@@ -160,7 +160,7 @@ const SIGNES = ['■', '□', '▲', '△', '▼', '▽', '◆', '◇', '●', '
  *
  * La longueur compte : un mot remplacé par trois symboles ferait sauter la
  * mise en page et se lirait comme une troncature. Là, le texte garde sa
- * forme — on voit qu'il manque un mot précis, à sa place exacte.
+ * forme, on voit qu'il manque un mot précis, à sa place exacte.
  */
 function illisible(mot: string, rng: () => number): string {
   let sortie = '';
@@ -171,7 +171,7 @@ function illisible(mot: string, rng: () => number): string {
 /**
  * Ce que la tête fait au texte.
  *
- * `mental` de 0 à 100. Au-dessus de 60 le texte revient intact — même objet,
+ * `mental` de 0 à 100. Au-dessus de 60 le texte revient intact, même objet,
  * donc aucun redessin inutile.
  */
 export function charabia(texte: string, mental: number, en = false): string {
@@ -180,7 +180,7 @@ export function charabia(texte: string, mental: number, en = false): string {
   /*
    * Par tranches de dix, et non en continu. Un texte qui se dégrade d'un
    * cheveu à chaque point de mental perdu se réécrirait sous les yeux du
-   * joueur pendant qu'il lit — et le tirage doit rester stable tant que la
+   * joueur pendant qu'il lit, et le tirage doit rester stable tant que la
    * situation ne change pas vraiment.
    */
   const tranche = Math.floor(mental / 10);

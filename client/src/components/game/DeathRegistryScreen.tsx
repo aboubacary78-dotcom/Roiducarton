@@ -7,7 +7,7 @@ import { playLedger, playBack } from '@/lib/sound';
 import { DEATH_DEFS, loadDeathBook, loadKarma } from '@/lib/necrology';
 
 /*
- * LE REGISTRE DES MORTS — le catalogue à trous qui donne envie de mourir
+ * LE REGISTRE DES MORTS : le catalogue à trous qui donne envie de mourir
  * autrement.
  *
  * Deux principes gouvernent cet écran, et ils tirent tous les deux dans le
@@ -16,7 +16,7 @@ import { DEATH_DEFS, loadDeathBook, loadKarma } from '@/lib/necrology';
  * 1. UNE CASE VIDE NE RETIENT RIEN. Les fins pas encore trouvées affichaient
  *    « ❓ », « ??? » et « Fin non découverte » : trois façons de ne rien dire.
  *    Or on ne reste en tension que sur une tâche dont on a déjà une
- *    représentation — une absence, on la range. Chaque fin verrouillée montre
+ *    représentation, une absence, on la range. Chaque fin verrouillée montre
  *    donc son AMORCE : la condition, jamais la chute. Le joueur sait quoi
  *    tenter en sortant d'ici.
  *
@@ -75,7 +75,7 @@ export default function DeathRegistryScreen() {
         </div>
       </div>
 
-      {/* Jauge de collection — sur les fins seules : un dénominateur à 10 est
+      {/* Jauge de collection, sur les fins seules : un dénominateur à 10 est
           atteignable, à 36 il décourage. */}
       <div className="h-1.5 rounded-full bg-black/40 overflow-hidden">
         <motion.div

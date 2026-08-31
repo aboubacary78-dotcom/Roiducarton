@@ -3,7 +3,7 @@
  *
  * Deux choses à prouver : que le `defenseBonus` promis par vingt-cinq objets
  * change enfin les dégâts encaissés, et que le matériel de l'établi rend
- * exactement la nuit qu'il annonce — ni plus (pas de sommeil créé de rien),
+ * exactement la nuit qu'il annonce, ni plus (pas de sommeil créé de rien),
  * ni moins.
  */
 import { build } from 'esbuild';
@@ -46,7 +46,7 @@ const { gameReducer, generateCharacter, TRAITS, RECIPES, soakDamage, bestArmorBo
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 const objet = (extra) => ({ id: 'x', name: 'Truc', emoji: '🔩', type: 'junk', value: 2, ...extra });

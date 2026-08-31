@@ -39,7 +39,7 @@ const bas = (s: Stats) => Math.min(s.health, s.mental, s.hunger, s.thirst, s.sle
 
 /*
  * L'ordre compte : on affiche le premier conseil éligible et pas encore vu.
- * Les plus urgents d'abord — un joueur dont la santé s'effondre n'a pas besoin
+ * Les plus urgents d'abord, un joueur dont la santé s'effondre n'a pas besoin
  * qu'on lui parle de la garde-robe.
  */
 export const COACHES: Coach[] = [
@@ -50,7 +50,7 @@ export const COACHES: Coach[] = [
     when: ({ char, actionsLeft }) => char.day === 1 && actionsLeft === 3,
   },
   /*
-   * LA RÉVÉLATION — deuxième temps du premier jour.
+   * LA RÉVÉLATION : deuxième temps du premier jour.
    *
    * Elle tombe au retour de la première action, à l'instant où Bagarre et Vol
    * apparaissent dans la grille (voir `arsenalVisible`). Ce n'est pas un
@@ -70,7 +70,7 @@ export const COACHES: Coach[] = [
     when: ({ char }) => bas(char.stats) <= 30,
   },
   /*
-   * LA TÊTE QUI PART — et il faut le DIRE, une fois.
+   * LA TÊTE QUI PART, et il faut le DIRE, une fois.
    *
    * Sous 60 de mental, les mots des rencontres commencent à se mélanger (voir
    * lib/charabia). Sans cette phrase, le joueur croit à un bug d'affichage et
@@ -87,7 +87,7 @@ export const COACHES: Coach[] = [
     when: ({ char }) => char.stats.mental < 60,
   },
   /*
-   * LE RÉVEIL — quatrième et dernier temps.
+   * LE RÉVEIL : quatrième et dernier temps.
    *
    * La nuit vient de prendre quinze points de sommeil sans rien demander. On
    * ne l'explique qu'APRÈS coup, une fois la perte au compteur : dire la
@@ -96,7 +96,7 @@ export const COACHES: Coach[] = [
   {
     id: 'sommeil', emoji: '😴', targetId: 'tuto-actions',
     fr: 'Le carton ondulé n\'est pas un matelas, quelle surprise. Dormir ne répare rien, ça permet juste de tenir debout.',
-    en: 'Corrugated cardboard is not a mattress, what a shock. Sleeping mends nothing — it just keeps you upright.',
+    en: 'Corrugated cardboard is not a mattress, what a shock. Sleeping mends nothing. It just keeps you upright.',
     when: ({ char }) => char.day >= 2 && char.stats.sleep <= 70,
   },
   {
@@ -113,14 +113,14 @@ export const COACHES: Coach[] = [
   },
   {
     id: 'meteo', emoji: '🌦️', targetId: 'tuto-weather',
-    fr: 'Le temps tourne mal. La nuit va coûter plus cher — préparez-vous avant.',
-    en: 'The weather is turning. The night will cost more — get ready first.',
+    fr: 'Le temps tourne mal. La nuit va coûter plus cher : préparez-vous avant.',
+    en: 'The weather is turning. The night will cost more. Get ready first.',
     when: ({ weather }) => weather === 'storm' || weather === 'snow' || weather === 'heatwave',
   },
   /*
    * Ce conseil se tait le premier soir : le crépuscule du jour un a déjà sa
    * phrase, posée au-dessus du bouton (voir `CREPUSCULE`). Deux textes qui
-   * disent la même chose au même moment, c'est un texte de trop — et la
+   * disent la même chose au même moment, c'est un texte de trop, et la
    * première nuit ne peut de toute façon pas tuer (voir `withFirstDayNet`),
    * donc le conseil ne perd rien à attendre le lendemain, où il servira.
    */
@@ -177,7 +177,7 @@ export function allCoachesSeen(): boolean {
  * et un joueur qui meurt au premier jour de sa première partie n'a rien vu du
  * jeu. On lui met donc le vent dans le dos : pas de mort le jour un, et une
  * fouille garantie de rapporter quelque chose. C'est une pratique universelle
- * du secteur, et elle est invisible — le joueur croit simplement avoir eu de
+ * du secteur, et elle est invisible, le joueur croit simplement avoir eu de
  * la chance, ce qui est le but.
  *
  * Une seule partie est concernée : dès qu'il y a une tombe ou un score, la
@@ -192,7 +192,7 @@ export function isFirstEverRun(scoreCount: number, graveCount: number): boolean 
  *
  * Neuf actions d'un coup au premier écran, dont deux qu'un débutant ne peut
  * pas évaluer et qui sont précisément celles qui le tuent. On en retire donc
- * deux — Bagarre et Vol — le temps d'une action.
+ * deux (Bagarre et Vol) le temps d'une action.
  *
  * Mais une option qui manque sans raison est un bug, pas une intention. Les
  * quatre textes ci-dessous sont là pour ça : ils donnent au masquage une cause
@@ -201,8 +201,8 @@ export function isFirstEverRun(scoreCount: number, graveCount: number): boolean 
  *
  * Deux règles d'écriture, tenues sur les quatre :
  *   · on vouvoie, comme partout ailleurs dans le jeu ;
- *   · aucun texte ne nomme le lieu. Le quartier de départ est tiré au sort —
- *     gare, marché, parc, centre-ville — et une phrase qui parle de la gare
+ *   · aucun texte ne nomme le lieu. Le quartier de départ est tiré au sort,
+ *     gare, marché, parc, centre-ville, et une phrase qui parle de la gare
  *     est fausse trois fois sur quatre.
  * ═══════════════════════════════════════════════════════════════════════════ */
 

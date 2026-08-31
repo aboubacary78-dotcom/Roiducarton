@@ -1,5 +1,5 @@
 /*
- * LECTURE DE FICHIERS AUDIO — le pendant sonore de SafeImg.
+ * LECTURE DE FICHIERS AUDIO : le pendant sonore de SafeImg.
  *
  * Le jeu a toujours su fabriquer ses sons tout seul (voir ambience.ts et
  * sound.ts, entièrement en Web Audio). On lui ajoute ici la possibilité de
@@ -29,7 +29,7 @@ const cache = new Map<string, AudioBuffer | null>();
 const pending = new Map<string, Promise<AudioBuffer | null>>();
 
 /**
- * Charge et décode un fichier. Renvoie `null` — sans bruit dans la console —
+ * Charge et décode un fichier. Renvoie `null`, sans bruit dans la console,
  * si le fichier est absent : c'est le cas normal tant qu'un pack n'est pas
  * livré, pas une erreur.
  */
@@ -83,7 +83,7 @@ export function playBuffer(buffer: AudioBuffer, gain = 1): void {
 
 /**
  * Joue un fichier une fois, s'il existe. Renvoie `true` si le son a pu être
- * lancé — l'appelant sait ainsi s'il doit déclencher son repli synthétisé.
+ * lancé, l'appelant sait ainsi s'il doit déclencher son repli synthétisé.
  * Le premier appel décode le fichier, les suivants sont immédiats.
  */
 export function playFile(url: string, gain = 1): Promise<boolean> {
@@ -111,7 +111,7 @@ export interface Loop {
  * saut se réentend à chaque tour, en clac ou en à-coup de niveau. Mesuré sur
  * le lot livré : trois boucles sur neuf décrochaient, jusqu'à 6,7 dB d'écart
  * entre la queue et la tête, et un saut d'échantillon de 0,177 sur la zone
- * industrielle — parfaitement audible.
+ * industrielle, parfaitement audible.
  *
  * On ne renvoie pas le lot pour ça. La queue est repliée sur la tête en
  * FONDU CROISÉ À ÉGALE PUISSANCE : le tampon raccourcit de la durée du fondu,
@@ -125,7 +125,7 @@ export interface Loop {
  *
  * ET LE FONDU N'EST GARDÉ QUE S'IL AMÉLIORE. Mesuré sur le lot : il divise
  * par six le saut de la zone industrielle, mais il DÉGRADE deux boucles dont
- * la fin rejoignait déjà le début — sur `mg-marchandage-compte`, 0,002 devenu
+ * la fin rejoignait déjà le début, sur `mg-marchandage-compte`, 0,002 devenu
  * 0,035. Recoudre ce qui n'est pas déchiré fait un pli. On fabrique donc les
  * deux versions, on compare le saut, et on joue la meilleure.
  * ═══════════════════════════════════════════════════════════════════════════
@@ -163,7 +163,7 @@ function preparerBoucle(ac: BaseAudioContext, brut: AudioBuffer): AudioBuffer {
 }
 
 /**
- * L'écart entre le dernier échantillon et le premier — ce que l'oreille
+ * L'écart entre le dernier échantillon et le premier, ce que l'oreille
  * entend comme un clac au moment où la boucle repart.
  */
 function sautAuRaccord(buf: AudioBuffer): number {

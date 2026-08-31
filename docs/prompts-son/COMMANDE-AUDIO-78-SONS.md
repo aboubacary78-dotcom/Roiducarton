@@ -1,4 +1,4 @@
-# Commande audio — « Le Roi du Carton » — 78 sons
+# Commande audio · « Le Roi du Carton » · 78 sons
 
 **Ce document est la commande complète. Tout ce qu'il faut est dedans : aucun
 autre fichier n'est nécessaire.**
@@ -9,7 +9,7 @@ autre fichier n'est nécessaire.**
 
 Roguelite de survie mobile, comédie noire. On y joue quelqu'un qui dort dehors
 et qui essaie de tenir un jour de plus. Direction artistique : **dioramas en
-carton kraft photographiés** — les voitures sont en carton, les pigeons sont en
+carton kraft photographiés** : les voitures sont en carton, les pigeons sont en
 carton, la ville entière tient sur une table d'atelier.
 
 ## La règle qui commande tout le reste
@@ -31,7 +31,7 @@ micro à vingt centimètres.
 | des pas | des doigts sur une boîte à chaussures |
 | le vent | un souffle contre une feuille de papier calque |
 
-Un son trop propre, trop « vrai », trop cinématographique sonnera faux — même
+Un son trop propre, trop « vrai », trop cinématographique sonnera faux, même
 s'il est techniquement parfait. **Petit, proche, sec, fait main.**
 
 ## Deux principes de conception
@@ -67,7 +67,7 @@ processing, cardboard and paper materials, lo-fi domestic recording.
 
 ---
 
-# PARTIE A — Les 18 sons en retard ⚠️ PRIORITÉ ABSOLUE
+# PARTIE A · Les 18 sons en retard ⚠️ PRIORITÉ ABSOLUE
 
 Ces dix-huit ont été spécifiés dans un lot précédent et **n'ont jamais été
 livrés**. Ils couvrent les mécaniques centrales du jeu, aujourd'hui totalement
@@ -76,20 +76,20 @@ et les quatre signaux du corps qui préviennent de la mort.
 
 **Sans eux, le reste est de la décoration sur une maison sans porte.**
 
-## A1 · La tension (5) — le manque le plus lourd
+## A1 · La tension (5) · le manque le plus lourd
 
 Ces cinq-là ne ponctuent pas : ils **durent** et se **répètent**, de plus en
 plus vite. C'est ce qui change le plus la sensation de jeu.
 
 | Fichier | Durée | Prompt | Intention |
 |---|---|---|---|
-| `tension-alerte-1.mp3` | 0,5 s | `A sheet of corrugated cardboard bent slowly until the flutes creak once, single soft creak` | Premier palier d'alerte. **À peine audible** — on doit le sentir plus que l'entendre |
+| `tension-alerte-1.mp3` | 0,5 s | `A sheet of corrugated cardboard bent slowly until the flutes creak once, single soft creak` | Premier palier d'alerte. **À peine audible** : on doit le sentir plus que l'entendre |
 | `tension-alerte-2.mp3` | 0,7 s | `Thick cardboard bent further, fibres popping in a short irregular sequence` | Deuxième palier. Le même geste, plus serré |
 | `tension-alerte-3.mp3` | 1,1 s | `Cardboard tearing along a fold, then a metal shutter dropping shut once in the distance` | Bouclage. **Le rideau au loin dit que c'est fini** |
 | `tension-risque.mp3` | 0,8 s | `A leaning stack of cardboard boxes shifting and settling, one box sliding a few centimetres, no collapse` | Le tas de la Récup' qui prévient. **Il ne doit jamais faire sursauter** |
-| `tension-compte.mp3` | 0,25 s | `A wind-up kitchen timer ticking one single tick, dry mechanical click` | **Un seul tic dans le fichier** — le jeu le répète lui-même, de plus en plus vite |
+| `tension-compte.mp3` | 0,25 s | `A wind-up kitchen timer ticking one single tick, dry mechanical click` | **Un seul tic dans le fichier** : le jeu le répète lui-même, de plus en plus vite |
 
-## A2 · Le corps (4) — ce qui désamorce la frustration de la mort
+## A2 · Le corps (4) · ce qui désamorce la frustration de la mort
 
 Mourir est acceptable **à une condition : avoir été prévenu.** Aujourd'hui le
 jeu passe de « ça va » à l'écran de fin sans que le corps ait dit un mot. Ces
@@ -115,7 +115,7 @@ quatre sons transforment « c'est injuste » en « j'aurais dû dormir ».
 | Fichier | Durée | Prompt | Intention |
 |---|---|---|---|
 | `objet-equipe.mp3` | 0,6 s | `A coat pulled on and a belt buckle tightened one notch, fabric and metal` | S'équiper |
-| `objet-casse.mp3` | 0,7 s | `Dry cardboard snapping in two along a crease, one clean break` | Un objet perdu pour de bon. **Sec — c'est fini, pas triste** |
+| `objet-casse.mp3` | 0,7 s | `Dry cardboard snapping in two along a crease, one clean break` | Un objet perdu pour de bon. **Sec, c'est fini, pas triste** |
 | `objet-plein.mp3` | 0,5 s | `A stuffed canvas bag pressed down, seams straining, zip refusing to close` | Le sac est plein, on refuse l'objet |
 
 ## A5 · L'interface (3)
@@ -128,7 +128,7 @@ quatre sons transforment « c'est injuste » en « j'aurais dû dormir ».
 
 ---
 
-# PARTIE B — Le hub des cinq quartiers (30)
+# PARTIE B · Le hub des cinq quartiers (30)
 
 Chaque quartier reçoit **une couche de signature 🔁, deux respirations, trois
 retours d'action**.
@@ -137,9 +137,9 @@ retours d'action**.
 > existent déjà (`amb-parc.mp3` etc.) et restent en place. Ces nouvelles
 > couches se **mixent par-dessus** : plus creuses, plus rares, elles donnent au
 > quartier un caractère reconnaissable en deux secondes. Elles doivent donc
-> être **peu denses** — beaucoup de vide entre les événements.
+> être **peu denses** : beaucoup de vide entre les événements.
 
-## 🌳 Le Parc — papier, souffle, plumes
+## 🌳 Le Parc · papier, souffle, plumes
 
 Le seul quartier où l'on peut respirer. Matières les plus fines de la boîte à
 outils : tout y est **sec et léger**.
@@ -153,7 +153,7 @@ outils : tout y est **sec et léger**.
 | `act-mendier-parc.mp3` | 1,0 s | `Two coins stirred slowly at the bottom of a plastic cup, never ringing loudly` | Des promeneurs, pas des pressés. Le geste est patient |
 | `act-fouiller-parc.mp3` | 1,2 s | `A hand plunging into a thin plastic bag half full of crumpled paper, three sweeps, one light object knocked` | La corbeille du parc. Rien de lourd n'y traîne |
 
-## 🏙️ Le Centre-Ville — frottement, foule, verre
+## 🏙️ Le Centre-Ville · frottement, foule, verre
 
 Du monde, des vitrines, une patrouille. Matière dominante : le **carton ondulé
 frotté**.
@@ -167,7 +167,7 @@ frotté**.
 | `act-voler-cv.mp3` | 0,8 s | `Fabric pulled sharply off a cardboard surface, followed immediately by a shoe sole pivoting` | On prend et on tourne les talons. Aucune hésitation entre les deux |
 | `act-fouiller-cv.mp3` | 1,4 s | `A metal bin lid lifted five centimetres and set back down, then quick nervous paper rummaging` | Rythme pressé, pas curieux : on surveille autour |
 
-## 🚂 La Gare — résonance, métal, annonce
+## 🚂 La Gare · résonance, métal, annonce
 
 Un toit, du chauffage jusqu'à minuit, des vigiles. **Le seul lieu qui résonne.**
 
@@ -180,7 +180,7 @@ Un toit, du chauffage jusqu'à minuit, des vigiles. **Le seul lieu qui résonne.
 | `act-voler-gare.mp3` | 3,0 s | `A zip opened very slowly tooth by tooth over three seconds, stopping twice` | **Les deux arrêts sont le cœur du son** |
 | `act-mendier-gare.mp3` | 3,0 s | `A plastic cup set down on tiles, then two full seconds of silence, then a single coin dropping in` | Le silence entre les deux est ce qui fait mal |
 
-## 🛒 Le Marché — bois, plastique, kraft
+## 🛒 Le Marché · bois, plastique, kraft
 
 De la nourriture partout, des cagettes pleines à la fermeture.
 
@@ -193,7 +193,7 @@ De la nourriture partout, des cagettes pleines à la fermeture.
 | `act-fouiller-marche.mp3` | 2,2 s | `Wooden crates turned over one after another on gravel, three times, with a pause on the second` | La fin de marché. L'arrêt à la deuxième est celui où l'on trouve |
 | `act-marchander-marche.mp3` | 1,8 s | `A throat cleared, then four coins counted one by one into a palm` | Le raclement de gorge avant les pièces raconte le rapport de force |
 
-## 🏭 La Zone Industrielle — tôle, rouille, vapeur
+## 🏭 La Zone Industrielle · tôle, rouille, vapeur
 
 Le quartier le plus dangereux, et le seul où la matière est **lourde**.
 
@@ -202,18 +202,18 @@ Le quartier le plus dangereux, et le seul où la matière est **lourde**.
 | `amb-sig-zone-industrielle.mp3` 🔁 | 30–45 s | `A drone made by blowing continuously across the neck of a large plastic bottle, doubled one octave lower; every 9 seconds one clang: an empty tin can struck with the tip of a key and left to ring out, seamless loop` | Le clang irrégulier est ce qui empêche de s'endormir ici |
 | `vie-zi-tole.mp3` | 1,0 s | `A thin metal sheet flexed slowly then released sharply` | La tôle qui travaille. **Un son laid, et c'est voulu** |
 | `vie-zi-rat.mp3` | 0,7 s | `Fingernails scratching the bottom of a cardboard box, four quick strokes, then scurrying away` | Un frisson, **pas un jump scare** |
-| `act-recup-zi.mp3` | 1,6 s | `Scrap stirred in a crate — keys, bolts, a tin lid — then a heavy object lifted with both hands` | Le poids se sent |
+| `act-recup-zi.mp3` | 1,6 s | `Scrap stirred in a crate (keys, bolts, a tin lid) then a heavy object lifted with both hands` | Le poids se sent |
 | `act-fouiller-zi.mp3` | 1,5 s | `A wooden pallet lifted, moved aside, and gravel scraping underneath` | Le gravier dit qu'on est dehors, sur du sol qui n'est à personne |
 | `act-dormir-zi.mp3` | 2,0 s | `Cardboard unfolded flat on the ground, a body lying down, and the machine drone continuing unchanged underneath` | **Le refus du silence est le sens du son** |
 
 ---
 
-# PARTIE C — Les cinq mini-jeux (30)
+# PARTIE C · Les cinq mini-jeux (30)
 
 Six rôles chacun : **amorce, manipulation, validation, avertissement, échec,
 clôture.**
 
-## ♻️ La Récup' — fouiller une benne
+## ♻️ La Récup' · fouiller une benne
 
 | Rôle | Fichier | Durée | Prompt |
 |---|---|---|---|
@@ -226,9 +226,9 @@ clôture.**
 
 > Le mou est le meilleur avertissement du jeu : **il ne menace de rien, il
 > dégoûte.** Et toute la comédie de l'échec tient dans l'objet qui roule seul
-> après la cascade — le temps de trop.
+> après la cascade, le temps de trop.
 
-## 🕵️ Le Vol — le casse
+## 🕵️ Le Vol · le casse
 
 | Rôle | Fichier | Durée | Prompt |
 |---|---|---|---|
@@ -241,7 +241,7 @@ clôture.**
 
 > ⚠️ **`mg-vol-alerte.mp3` est le son le plus important des soixante.** C'est
 > lui qui porte la jauge d'alerte du casse. Il doit être **pauvre en fréquences
-> — un seul pic aigu, aucun corps** — pour pouvoir être répété vingt fois en
+> (un seul pic aigu, aucun corps**) pour pouvoir être répété vingt fois en
 > dix secondes sans devenir insupportable.
 
 ## 🥊 La Bagarre
@@ -267,7 +267,7 @@ clôture.**
 | Manipulation | `mg-marchandage-compte.mp3` 🔁 | 3,0 s | `Six coins counted one by one into a palm, steady rhythm, seamless loop` |
 | Validation | `mg-marchandage-accord.mp3` | 0,8 s | `Two hands clapping together once, then cloth being handed over` |
 | Avertissement | `mg-marchandage-agace.mp3` | 1,2 s | `A sigh through the nose, and fingers drumming three times on wood` |
-| Échec | `mg-marchandage-refus.mp3` | 2,5 s | `A metal shutter pulled down in one motion — a steel ruler dragged along a grille — and a coin falling to the floor and rolling` |
+| Échec | `mg-marchandage-refus.mp3` | 2,5 s | `A metal shutter pulled down in one motion (a steel ruler dragged along a grille) and a coin falling to the floor and rolling` |
 | Clôture | `mg-marchandage-sac.mp3` | 1,0 s | `A kraft paper bag snapped open and set down on a counter` |
 
 > L'avertissement ne dit pas « attention », il dit **« tu m'ennuies »**. C'est
@@ -299,7 +299,7 @@ Si le lot doit être livré en plusieurs fois, **cet ordre-là** :
 | 1 | **A1 + A2** (9 sons) | La tension et le corps. Ce sont eux qui rendent la mort juste et le danger lisible |
 | 2 | **A3 + A4 + A5** (9 sons) | Le reste du retard |
 | 3 | Les 30 mini-jeux (partie C) | Ils font exister les cinq boucles de jeu |
-| 4 | Les 30 du hub (partie B) | Ils enrichissent — ils ne réparent rien |
+| 4 | Les 30 du hub (partie B) | Ils enrichissent, ils ne réparent rien |
 
 ---
 
@@ -308,8 +308,8 @@ Si le lot doit être livré en plusieurs fois, **cet ordre-là** :
 1. **78 fichiers MP3**, nommés exactement comme dans les tableaux.
 2. Un **rapport de contrôle** : durée mesurée, niveau intégré, crête, silence
    de tête, pour chaque fichier.
-3. Pour les **9 boucles** 🔁 — les 5 couches de quartier et les 4 lits de
-   manipulation des mini-jeux — confirmation que le raccord a été **écouté en
+3. Pour les **9 boucles** 🔁, les 5 couches de quartier et les 4 lits de
+   manipulation des mini-jeux, confirmation que le raccord a été **écouté en
    lecture continue**, pas seulement mesuré.
 4. **Aucun fichier bit-à-bit identique** à un autre.
 5. ⚠️ **La licence d'usage commercial** de l'outil ou de la banque employée,
@@ -321,4 +321,4 @@ Si le lot doit être livré en plusieurs fois, **cet ordre-là** :
 Aucun contrôle automatique ne remplace l'écoute. **Écouter chaque fichier sur
 le haut-parleur d'un téléphone**, pas au casque : c'est là que le jeu se joue.
 On y vérifie la lisibilité de l'attaque, l'absence d'artefacts, et surtout la
-conformité au brief — **foley proche, sec, sans musique ni réverbération.**
+conformité au brief, **foley proche, sec, sans musique ni réverbération.**

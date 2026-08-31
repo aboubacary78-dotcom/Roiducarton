@@ -22,7 +22,7 @@ export interface Job {
    * cimetière et à l'écran de fin. Ça ne cassait rien, et ça se lisait comme
    * une faute de frappe à chaque partie sur deux.
    *
-   * L'anglais n'en a pas besoin — « Former Soldier » ne s'accorde pas — d'où
+   * L'anglais n'en a pas besoin (« Former Soldier » ne s'accorde pas) d'où
    * un champ optionnel plutôt qu'une seconde table.
    */
   nameF?: string;
@@ -93,7 +93,7 @@ export interface Character {
   fountainToday?: number;
   fountainDay?: number;
   /*
-   * CE QU'IL PORTE — sa tenue à lui, et pas celle du précédent.
+   * CE QU'IL PORTE : sa tenue à lui, et pas celle du précédent.
    *
    * Les accessoires DÉBLOQUÉS restent dans le profil permanent : ils se
    * gagnent aux succès et doivent survivre à toutes les morts, sans quoi les
@@ -106,7 +106,7 @@ export interface Character {
    */
   equipped?: Partial<Record<AccessorySlot, string>>;
   /*
-   * LE VISAGE COMPOSÉ — ce qui a été choisi plutôt que tiré.
+   * LE VISAGE COMPOSÉ : ce qui a été choisi plutôt que tiré.
    *
    * Un sel de tirage → la valeur retenue (voir lib/visage). Ce qui n'y figure
    * pas reste dérivé de la graine, donc un visage à moitié composé est normal.
@@ -118,7 +118,7 @@ export interface Character {
    * SES TRAITS ONT-ILS ÉTÉ CHOISIS PLUTÔT QUE SUBIS ?
    *
    * Sert au seul endroit où ça change quelque chose : le score. Voir
-   * `poissardMerite` — le ×2 récompense d'avoir accepté une mauvaise main,
+   * `poissardMerite`, le ×2 récompense d'avoir accepté une mauvaise main,
    * pas de se l'être composée.
    */
   traitsChoisis?: boolean;
@@ -145,11 +145,11 @@ export interface Character {
    */
   vole?: { nom: string; seed: string; gender: 'm' | 'f'; quartier: string; jour: number; objet?: InventoryItem; argent?: number };
   /*
-   * LA DETTE — le seul rendez-vous que le joueur emporte dans sa tête.
+   * LA DETTE : le seul rendez-vous que le joueur emporte dans sa tête.
    *
    * Le jeu n'avait aucune raison de le faire revenir à un jour PRÉCIS : les
    * suites d'événements arrivent, elles ne s'attendent pas. Une échéance
-   * inscrite dans l'en-tête change ça — on ne ferme pas une application à un
+   * inscrite dans l'en-tête change ça, on ne ferme pas une application à un
    * jour d'un remboursement.
    *
    * `refusee` retient qu'on a déjà dit non au prêteur : il ne repropose pas
@@ -203,7 +203,7 @@ export interface GameEvent {
    * RENCONTRE DONT ON NE SORT PAS.
    *
    * Toutes les rencontres du jeu ont un bouton « Retour » : on peut passer son
-   * chemin, et c'est juste — la rue ne vous force à rien. L'échéance d'une
+   * chemin, et c'est juste, la rue ne vous force à rien. L'échéance d'une
    * dette, si. Le prêteur ne vous propose pas de le rencontrer, il est déjà
    * devant vous, et un bouton pour l'éviter viderait de son sens les trois
    * jours qu'on vient de passer à compter ses euros.
@@ -224,8 +224,8 @@ export interface EventChoice {
    * dix euros, rembourser, ou avouer qu'on ne peut pas ne se tirent pas au
    * sort : ce sont des règles du jeu, écrites dans le reducer, avec leurs
    * conséquences exactes. Ce champ les branche sur l'écran de rencontre pour
-   * qu'elles aient la même mise en scène — la grande image, le nom, le visage
-   * — sans dupliquer une ligne de leur logique.
+   * qu'elles aient la même mise en scène, la grande image, le nom, le visage,
+   * sans dupliquer une ligne de leur logique.
    */
   action?: 'ACCEPTER_PRET' | 'REFUSER_PRET' | 'REMBOURSER_DETTE' | 'AVOUER_INSOLVABILITE';
   /** Verrou explicite, quand la condition ne tient pas dans `requirements`. */
@@ -479,7 +479,7 @@ export interface Contract {
    *
    * `check` ne dit que oui ou non, et rater de deux euros n'est pas rater de
    * vingt. Les contrats à seuil savent le mesurer ; « gagner un combat » ne le
-   * sait pas, et n'a donc pas de `progress` — on ne rate pas un combat de peu.
+   * sait pas, et n'a donc pas de `progress`, on ne rate pas un combat de peu.
    */
   progress?: (c: Character) => { valeur: number; cible: number };
   reward: { stats?: Partial<Stats>; money?: number; respect?: number };
@@ -499,13 +499,13 @@ export interface GameState {
    *
    * La garde à vue coupe la journée net. Elle le disait dans sa phrase, au
    * milieu du reste, et s'affichait ensuite comme n'importe quel résultat
-   * mineur : trois pastilles grises. La perte la plus lourde du jeu — deux
-   * actions sur trois, parfois — passait inaperçue. Ce champ permet à la
+   * mineur : trois pastilles grises. La perte la plus lourde du jeu, deux
+   * actions sur trois, parfois, passait inaperçue. Ce champ permet à la
    * fenêtre de résultat de la traiter à part.
    */
   /*
    * `refusedItem` : l'objet qu'on a dû laisser sur place parce que le sac
-   * débordait. Il est nommé, il était à portée, et il vient de disparaître —
+   * débordait. Il est nommé, il était à portée, et il vient de disparaître,
    * c'est ce qui permet de proposer de le garder au lieu de proposer « une
    * place de plus », qui ne veut rien dire. `itemKept` retombe une fois
    * l'offre honorée, pour qu'elle ne se rejoue pas.
@@ -518,10 +518,10 @@ export interface GameState {
    * jauge par jauge. Il sert de drapeau ET de contenu : sa présence interdit
    * une seconde offre, ses valeurs s'affichent au joueur. Le bilan n'existant
    * qu'une fois par jour et disparaissant à sa fermeture, le plafond d'une
-   * offre par journée n'a besoin d'aucun compteur — il est structurel.
+   * offre par journée n'a besoin d'aucun compteur, il est structurel.
    */
   /*
-   * `contratRate` n'est renseigné que sur un échec DE PEU — moins de 20 % du
+   * `contratRate` n'est renseigné que sur un échec DE PEU, moins de 20 % du
    * but manquant. Rater de loin fait hausser les épaules ; rater de peu ne se
    * supporte pas, et c'est la seule des deux situations qui vaut une offre.
    */
@@ -533,7 +533,7 @@ export interface GameState {
      *
      * Le matelas et le réchaud n'ajoutent pas de jauge : ils ANNULENT une
      * perte. Résultat, un joueur bien équipé voyait un bilan sans rien de
-     * négatif et une phrase disant que le matelas avait « rendu la nuit » —
+     * négatif et une phrase disant que le matelas avait « rendu la nuit »,
      * sans jamais savoir ce qu'il aurait perdu sans lui. Le matériel se payait
      * et ne se voyait pas.
      *
@@ -569,7 +569,7 @@ export interface GameState {
    *
    * L'écran de fin devine la catégorie à partir des jauges du cadavre, et il a
    * raison la plupart du temps : un ventre à zéro raconte la faim. Mais
-   * certaines fins ne se lisent pas dans les chiffres — on meurt sous les
+   * certaines fins ne se lisent pas dans les chiffres, on meurt sous les
    * coups du prêteur avec une santé négative, ce qui donne « trop de coups »
    * et efface exactement ce qui vient de se passer.
    *

@@ -95,14 +95,14 @@ const WEATHER_TRANSITIONS: Record<WeatherType, { type: WeatherType; weight: numb
 /*
  * LA NEIGE ÉTAIT DU CONTENU MORT.
  *
- * Elle avait sa fiche, ses pénalités, son image, et un trait entier — Résistant
- * au Froid — construit pour elle. Mais la table ci-dessus ne contient aucune
+ * Elle avait sa fiche, ses pénalités, son image, et un trait entier. Résistant
+ * au Froid, construit pour elle. Mais la table ci-dessus ne contient aucune
  * flèche VERS `snow` : seule la ligne `snow` en parle, et rien ne peut y
  * entrer. Cent chaînes de 365 jours simulées donnent zéro jour de neige. Le
  * manteau d'hiver, le briquet, le réchaud de l'établi et le trait de résistance
  * répondaient donc à une menace que personne ne pouvait rencontrer.
  *
- * On l'ouvre par temps déjà maussade — nuageux, pluie, brouillard — et
+ * On l'ouvre par temps déjà maussade (nuageux, pluie, brouillard) et
  * seulement à partir du sixième jour : la neige doit tomber sur un joueur
  * installé, qui a de quoi s'y préparer, pas sur celui du premier matin.
  */

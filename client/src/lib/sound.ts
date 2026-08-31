@@ -2,8 +2,8 @@
  * Effets sonores du jeu : quarante-neuf bruitages de foley, plus un repli
  * synthétisé pour chacun.
  *
- * Les fichiers sont la voix du jeu — du carton, du papier, des pièces dans un
- * gobelet — mais rien n'en dépend : si un fichier manque ou refuse de se
+ * Les fichiers sont la voix du jeu, du carton, du papier, des pièces dans un
+ * gobelet, mais rien n'en dépend : si un fichier manque ou refuse de se
  * décoder, l'appelant retombe sur sa version fabriquée en Web Audio. Un pack
  * son livré à moitié s'active donc son par son, et le jeu ne devient jamais
  * muet.
@@ -30,13 +30,13 @@ let ctx: AudioContext | null = null;
  *
  * Constaté sur téléphone : en passant l'application en arrière-plan, la boucle
  * d'ambiance du quartier continuait de tourner. Le navigateur ne coupe rien
- * tout seul, et la vue web d'une application native encore moins — elle reste
+ * tout seul, et la vue web d'une application native encore moins, elle reste
  * vivante tant que le système ne la tue pas. On se retrouvait donc avec le
  * marché ou la gare qui bruissaient par-dessus la musique de quelqu'un.
  *
  * Tout le son du jeu passe par CE contexte-ci : ambiances, boucles météo,
  * bruitages, gestes, tout. Le suspendre les arrête donc d'un bloc, sans avoir
- * à tenir la liste de ce qui joue — et le reprendre les relance là où ils en
+ * à tenir la liste de ce qui joue, et le reprendre les relance là où ils en
  * étaient, ce qui est exactement le comportement attendu quand on revient.
  *
  * `pageEnVeille` sert de verrou : `audio()` réveille le contexte à chaque
@@ -87,7 +87,7 @@ export function getAudio(): AudioContext | null {
  *
  * Ils pèsent 84 Ko à eux treize, et ce sont les plus entendus du jeu : sans
  * ça, le tout premier clic attendrait son téléchargement et se sentirait comme
- * une latence de l'interface. Les autres familles n'en ont pas besoin — un cri
+ * une latence de l'interface. Les autres familles n'en ont pas besoin, un cri
  * d'ennemi ou un bruitage de rencontre a toujours une animation devant lui.
  */
 const GESTURES = [
@@ -128,19 +128,19 @@ export function setMuted(v: boolean): void {
  * LES DEUX VOLUMES
  *
  * Il n'y avait qu'un bouton sourdine : tout ou rien. Ça ne répondait à aucune
- * des deux plaintes reçues — « le son du jeu est trop fort » et « le fond du
+ * des deux plaintes reçues, « le son du jeu est trop fort » et « le fond du
  * hub est trop fort », qui ne sont PAS la même. Baisser tout à cause du fond
  * fait disparaître les alertes de survie, et c'est précisément ce qu'il ne
  * faut pas.
  *
  * D'où deux curseurs et pas un :
  *
- *   · VOLUME  — tout le jeu, effets compris.
- *   · FOND    — les ambiances et les lits de mini-jeu seuls. Il se multiplie
+ *   · VOLUME : tout le jeu, effets compris.
+ *   · FOND : les ambiances et les lits de mini-jeu seuls. Il se multiplie
  *               au précédent, donc le fond ne peut jamais passer devant.
  *
  * Tout passe désormais par ces deux nœuds : plus rien ne se branche
- * directement sur `destination`. C'est ce qui rend le réglage instantané —
+ * directement sur `destination`. C'est ce qui rend le réglage instantané,
  * changer un gain de nœud agit sur ce qui joue DÉJÀ, alors qu'un facteur
  * appliqué à l'appel n'agirait qu'au son suivant, et jamais sur une boucle
  * d'ambiance qui tourne depuis dix minutes.
@@ -154,7 +154,7 @@ const VOL_FOND_KEY = 'roi-du-carton-volume-fond';
  *
  * Le `=== null` n'est pas de la prudence décorative, c'est la correction d'un
  * bug qui rendait le jeu MUET à la première installation : `getItem` rend
- * `null` quand la clé n'existe pas, et `Number(null)` vaut 0 — un zéro
+ * `null` quand la clé n'existe pas, et `Number(null)` vaut 0, un zéro
  * parfaitement fini, parfaitement dans [0, 1], donc accepté comme un réglage
  * volontaire. Chaque nouveau joueur aurait lancé le jeu avec les deux
  * curseurs à zéro, et rien à l'écran n'aurait expliqué le silence.
@@ -215,7 +215,7 @@ export function setVolumeFond(v: number): void {
 }
 
 /*
- * PRISE DE MESURE — et pourquoi elle n'est pas conditionnée au mode debug.
+ * PRISE DE MESURE, et pourquoi elle n'est pas conditionnée au mode debug.
  *
  * Un réglage de volume est le contrôle qui a l'air de marcher sans marcher :
  * le curseur bouge, le pourcentage change, la valeur part dans le
@@ -223,7 +223,7 @@ export function setVolumeFond(v: number): void {
  * atteint le graphe audio. Rien à l'écran ne le dirait.
  *
  * `scripts/test-volume.mjs` mesure donc le signal réel en sortie. Il tourne
- * sur le BUILD DE PRODUCTION — c'est le seul qui prouve quelque chose — donc
+ * sur le BUILD DE PRODUCTION (c'est le seul qui prouve quelque chose) donc
  * une prise réservée au développement ne lui servirait à rien.
  *
  * Ce qui est exposé ici ne fait rien qu'un joueur ne puisse déjà faire depuis
@@ -439,8 +439,8 @@ export function enemySlug(name: string): string {
 /**
  * Le cri de l'ennemi qui entre en scène.
  *
- * On tente d'abord SON fichier (pack son 4). S'il n'existe pas — c'est le cas
- * d'un roi hérité, qui porte le nom du personnage mort du joueur — on retombe
+ * On tente d'abord SON fichier (pack son 4). S'il n'existe pas, c'est le cas
+ * d'un roi hérité, qui porte le nom du personnage mort du joueur, on retombe
  * sur la synthèse par famille. Jamais les deux : le repli n'est déclenché que
  * lorsque le chargement a échoué.
  */
@@ -599,7 +599,7 @@ function playPaperSynth(): void {
 /*
  * Vibration haptique. Déléguée à lib/haptics : elle a son propre réglage,
  * indépendant de la sourdine (couper le son est justement le moment où le
- * retour tactile devient le seul canal), et elle passe par le pont natif —
+ * retour tactile devient le seul canal), et elle passe par le pont natif,
  * `navigator.vibrate` n'existe pas dans le WKWebView d'iOS.
  */
 export function vibrate(pattern: number | number[]): void {
@@ -615,11 +615,11 @@ export function vibrate(pattern: number | number[]): void {
  * Quarante-neuf bruitages de foley, rangés en neuf familles. Chaque famille
  * suit une règle qui la rend reconnaissable sans qu'on y pense :
  *
- *   ① L'ARGENT  — ce qui entre et ce qui sort s'opposent à l'oreille.
- *   ② L'EFFORT  — que du frottement, jamais de percussion.
- *   ③ LE CORPS  — la seule famille percussive, donc lisible d'emblée.
- *   ④ LES AUTRES— rares, donc marquants.
- *   ⑤ LA PERTE  — plus c'est irréversible, plus le son est mou.
+ *   ① L'ARGENT : ce qui entre et ce qui sort s'opposent à l'oreille.
+ *   ② L'EFFORT : que du frottement, jamais de percussion.
+ *   ③ LE CORPS : la seule famille percussive, donc lisible d'emblée.
+ *   ④ LES AUTRES : rares, donc marquants.
+ *   ⑤ LA PERTE : plus c'est irréversible, plus le son est mou.
  *   ⑥ L'IDENTITÉ, ⑦ LE RYTHME DU JOUR, ⑧ L'INTERFACE, ⑨ LES JAUGES.
  *
  * Chaque son garde un repli synthétisé : si le fichier manque, on entend
@@ -631,7 +631,7 @@ export function vibrate(pattern: number | number[]): void {
  *
  * Huit sons sont entendus des dizaines de fois par partie. Joués à l'identique
  * ils deviennent un métronome, et c'est ce métronome qui fait couper le son.
- * Chacun existe donc en trois prises, tirées au hasard — mais jamais deux fois
+ * Chacun existe donc en trois prises, tirées au hasard, mais jamais deux fois
  * la même d'affilée, sinon la répétition qu'on cherchait à casser réapparaît
  * une fois sur trois.
  */
@@ -681,7 +681,7 @@ export const playCoin = withFile('moment-piece', 0.85, playCoinSynth);
 
 // ─── ② L'EFFORT ─────────────────────────────────────────────────────────────
 
-/** Creuser d'un cran dans la benne. Du frottement — surtout pas un coup. */
+/** Creuser d'un cran dans la benne. Du frottement, surtout pas un coup. */
 export const playDig = withVariants('geste-fouille', 3, 0.8, playHitSynth);
 /** Ramasser le butin : un objet décollé du carton. */
 export const playPickUp = withFile('geste-ramasse', 0.8, playHitSynth);
@@ -704,7 +704,7 @@ export const playTravel = withFile('moment-trajet', 0.8, playStepSynth);
 export const playHit = withVariants('geste-coup', 3, 0.85, playHitSynth);
 /** Coup critique. */
 export const playCrit = withFile('geste-coup-fort', 0.9, playCritSynth);
-/** Coup reçu — le son vient d'autour, pas de devant. */
+/** Coup reçu, le son vient d'autour, pas de devant. */
 export const playHurt = withFile('geste-encaisse', 0.9, playHurtSynth);
 /** Un pas. */
 export const playStep = withVariants('geste-pas', 3, 0.8, playStepSynth);
@@ -727,15 +727,15 @@ export const playShare = withFile('geste-troc', 0.85, playShareSynth);
 // irréversible, plus le son est MOU. L'échec léger claque, l'échec grave
 // s'affaisse.
 
-/** Degré 1 — le raté sans conséquence. Entendu cent fois : ne fait jamais sursauter. */
+/** Degré 1, le raté sans conséquence. Entendu cent fois : ne fait jamais sursauter. */
 export const playMiss = withVariants('perte-rate', 3, 0.75, playFailSynth);
-/** Degré 2 — repéré. Le moment où quelqu'un a levé la tête. */
+/** Degré 2, repéré. Le moment où quelqu'un a levé la tête. */
 export const playSpotted = withFile('moment-attrape', 0.9, playSpottedSynth);
-/** Degré 3 — l'écroulement. Le petit rebond final fait toute la blague. */
+/** Degré 3, l'écroulement. Le petit rebond final fait toute la blague. */
 export const playCollapse = withFile('moment-craquement', 0.9, playFailSynth);
-/** Degré 4 — l'humiliation. Aucun impact, que de l'arrachement. */
+/** Degré 4, l'humiliation. Aucun impact, que de l'arrachement. */
 export const playDignityLoss = withFile('perte-dignite', 0.9, playFailSynth);
-/** Degré 5 — un palier de Dignité franchi. La signature de la chute. */
+/** Degré 5, un palier de Dignité franchi. La signature de la chute. */
 export const playDignityTier = withFile('perte-palier', 0.95, playFailSynth);
 
 // ─── ⑥ L'IDENTITÉ ───────────────────────────────────────────────────────────
@@ -750,7 +750,7 @@ export const playBequeath = withFile('moment-legs', 0.85, playPaperSynth);
 export const playLedger = withFile('moment-registre', 0.85, playPaperSynth);
 /** Une fin de mort découverte : le son de la collection qui avance. */
 export const playNewEnding = withFile('moment-fin-inedite', 0.9, playUnlockSynth);
-/** La mort. Un son trop petit pour l'événement — c'est là qu'est la comédie. */
+/** La mort. Un son trop petit pour l'événement, c'est là qu'est la comédie. */
 export const playDeath = withFile('moment-mort', 0.95, playFailSynth);
 /** Sacré Roi du Carton. */
 export const playKingArrival = withFile('moment-sacre', 0.9, playKingArrivalSynth);
@@ -790,10 +790,10 @@ export const playCard = withVariants('geste-carte', 3, 0.7, playWhooshSynth);
 export const playUnlock = withFile('geste-succes', 0.85, playUnlockSynth);
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * ⑩ LA VOIX — LE SEUL SON QUI SORT D'UN CORPS
+ * ⑩ LA VOIX : LE SEUL SON QUI SORT D'UN CORPS
  *
  * Tout le reste du jeu est du carton manipulé : c'est la règle, et elle tient.
- * Mais il manquait ce qu'un corps fait entendre malgré lui — la grimace quand
+ * Mais il manquait ce qu'un corps fait entendre malgré lui, la grimace quand
  * on se coupe, le haut-le-cœur devant ce qu'on vient de sortir du tas, le
  * souffle qu'on lâche en frappant.
  *
@@ -883,7 +883,7 @@ const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
  *
  * Le franchissement sonnait, mais toutes les jauges du même son : le joueur
  * savait que quelque chose allait mal, jamais quoi. Or son œil est sur le
- * bouton d'action, pas sur les jauges — l'écran fait dix centimètres et le
+ * bouton d'action, pas sur les jauges, l'écran fait dix centimètres et le
  * pouce en masque le tiers. Un son générique l'oblige à chercher ; un
  * gargouillis lui dit « mange » sans qu'il ait rien à lire.
  *
@@ -894,21 +894,21 @@ const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
  * pas, au motif qu'il ne se soigne pas d'un geste : c'était vrai tant qu'il ne
  * faisait que descendre. Depuis que la tête qui part brouille le texte des
  * rencontres (lib/charabia), le joueur VOIT quelque chose d'anormal sans
- * savoir d'où ça vient — et il peut y remédier, en dormant. Un symptôme
+ * savoir d'où ça vient, et il peut y remédier, en dormant. Un symptôme
  * visible plus un remède connu, c'est exactement la définition d'une jauge qui
  * mérite sa voix. Sans elle, le brouillage passe pour un bug d'affichage.
  *
  * Ce n'est pas un cri : c'est une respiration qui s'emballe et un acouphène
- * très bas. La dignité, elle, garde l'alerte neutre — elle ne se répare par
+ * très bas. La dignité, elle, garde l'alerte neutre, elle ne se répare par
  * aucun geste, et lui prêter un corps serait un contresens.
  * ═══════════════════════════════════════════════════════════════════════════
  */
 /*
- * DEUXIÈME LOT — DU FOLEY, APRÈS DES VOIX RENVOYÉES.
+ * DEUXIÈME LOT : DU FOLEY, APRÈS DES VOIX RENVOYÉES.
  *
  * Le premier lot était constitué de voix de synthèse et s'est fait couper :
  * « un cri bouillie, on ne comprend rien du tout », en visant nommément la
- * faim et le sommeil. La faute était dans ma commande, pas dans la livraison —
+ * faim et le sommeil. La faute était dans ma commande, pas dans la livraison,
  * un gargouillis d'estomac ou un bâillement sont du FOLEY, on les fabrique
  * avec une bouteille d'eau et une boîte à chaussures, et ça n'avait jamais
  * rien à faire dans une cabine. Ce lot-ci est refait sur cette base : liquide
@@ -922,7 +922,7 @@ const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
  * téléphone ne restitue plus rien. Sur les 528 sons que le jeu embarque déjà
  * et que personne n'a renvoyés, le 10ᵉ centile est à 24,6 %. Les deux seuls
  * fichiers du lot refusé à passer sous ce plancher étaient `corps-faim` (22 %)
- * et `corps-epuise` (24 %) — exactement les deux nommés à l'écoute. Le
+ * et `corps-epuise` (24 %), exactement les deux nommés à l'écoute. Le
  * nouveau lot les remonte à 35 % et 39 %, et les cinq passent.
  *
  * C'est un rapprochement après coup sur deux fichiers, pas une preuve. Et le
@@ -934,7 +934,7 @@ const playGaugeLowFile = withFile('jauge-rouge', 0.85, playFailSynth);
  *
  * Le mental change de nom au passage : `corps-tete` et non `voix-*-tete`. Il
  * rejoint la famille du corps parce qu'il n'est plus une voix, et il cesse
- * d'être genré — un verre qu'on frotte n'a pas de sexe.
+ * d'être genré, un verre qu'on frotte n'a pas de sexe.
  *
  * Pour recouper en cas de nouveau doute : remettre `playGaugeLowFile` à la
  * place des cinq `withFile(...)`, le jeu retombe sur l'alerte neutre.
@@ -952,13 +952,13 @@ const VOIX_DU_CORPS: Record<string, () => void> = {
  *
  * Ne sonner qu'au franchissement évitait l'alarme, et c'était juste : une
  * alerte qui se rejoue à chaque action se fait couper. Mais entre 24 et 1, le
- * jeu redevenait muet — on mourait donc en silence, et une mort silencieuse
+ * jeu redevenait muet, on mourait donc en silence, et une mort silencieuse
  * passe pour une injustice alors qu'elle était lisible dans les chiffres.
  *
  * Sous 10, le corps se rappelle donc au souvenir toutes les vingt secondes.
  * Pas plus vite : à ce rythme on ne peut pas confondre ça avec une alarme, et
  * une partie tient rarement plus de deux ou trois rappels avant qu'on
- * réagisse — ou qu'on meure en sachant pourquoi.
+ * réagisse, ou qu'on meure en sachant pourquoi.
  */
 const SEUIL_CRITIQUE = 10;
 const RAPPEL_MS = 20000;
@@ -994,7 +994,7 @@ export function resetGaugeAlerts(): void {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
- * ⑩ LA TENSION — CE QUI MONTE PENDANT QU'ON JOUE
+ * ⑩ LA TENSION : CE QUI MONTE PENDANT QU'ON JOUE
  *
  * Trois mécaniques centrales montaient en tension SANS UN BRUIT : la jauge
  * d'alerte du casse, le risque de la Récup', le minuteur de la manche. On
@@ -1007,7 +1007,7 @@ export function resetGaugeAlerts(): void {
 /**
  * Le casse franchit un palier d'alerte : méfiance, alerte, bouclage.
  *
- * Trois sons distincts et non trois fois le même de plus en plus fort — le
+ * Trois sons distincts et non trois fois le même de plus en plus fort, le
  * joueur doit savoir OÙ il en est sans regarder la barre, et le troisième
  * porte le rideau métallique au loin qui dit que c'est fini.
  */
@@ -1026,7 +1026,7 @@ export function playTensionPalier(palier: number): void {
  * Le tas de la Récup' qui bouge : un cran de risque de plus.
  *
  * Volontairement discret. Ce son se rejoue plusieurs fois par partie et son
- * rôle est d'inquiéter, jamais de faire sursauter — un joueur qui sursaute
+ * rôle est d'inquiéter, jamais de faire sursauter, un joueur qui sursaute
  * lâche la manette et perd pour la mauvaise raison.
  */
 export const playTensionRisque = withFile('tension-risque', 0.55, () => { /* muet avant livraison */ });
@@ -1046,12 +1046,12 @@ export const playTensionTic = withFile('tension-compte', 0.6, () => { /* muet av
  * La Récup' cache six saletés, et toutes sonnaient pareil : un `playHurt`,
  * c'est-à-dire un coup encaissé. Un rat qui détale et un yaourt devenu
  * autonome ne font pourtant PAS le même bruit, et surtout ils ne font pas le
- * même effet — l'un fait sursauter, l'autre soulève le cœur. Le joueur a le
+ * même effet, l'un fait sursauter, l'autre soulève le cœur. Le joueur a le
  * doigt sur la grille et l'œil sur la case qu'il vient d'ouvrir : l'oreille
  * est le canal le plus rapide pour lui dire ce qu'il a touché.
  *
  * Chaque saleté est donc un couple : la CHOSE, puis la RÉACTION du personnage
- * juste derrière. La chose n'est pas genrée — un rat est un rat ; la réaction
+ * juste derrière. La chose n'est pas genrée, un rat est un rat ; la réaction
  * l'est toujours, c'est le corps qu'on joue qui répond.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -1088,7 +1088,7 @@ export function playSaleteRecup(id: string): void {
  * LES PASSANTS QU'ON RETIENT TROP LONGTEMPS
  *
  * La manche a une seule décision : lâcher, ou insister. Insister rapporte
- * davantage et coûte de la dignité — et jusqu'ici cette bascule ne s'entendait
+ * davantage et coûte de la dignité, et jusqu'ici cette bascule ne s'entendait
  * pas. L'anneau devenait rouge, c'est tout, et le joueur regardait l'anneau
  * plutôt que la rue.
  *
@@ -1116,12 +1116,12 @@ export function playPassantRefus(g: Genre): void { REFUS[g](); }
  *
  * Mendier au parc, c'est deux pièces remuées lentement devant des promeneurs ;
  * mendier en ville, c'est secouer vite et entendre les pas continuer sans
- * ralentir. Le geste est le même, la situation ne l'est pas — et c'est
+ * ralentir. Le geste est le même, la situation ne l'est pas, et c'est
  * exactement ce qu'un jeu sur la rue doit faire entendre.
  *
  * Quinze combinaisons sont enregistrées, pas les trente possibles : on a écrit
  * celles qui racontent quelque chose. Quand il n'y en a pas pour le couple
- * (geste, quartier), il ne se passe rien de plus — le son générique de
+ * (geste, quartier), il ne se passe rien de plus, le son générique de
  * l'action a déjà été joué, et cette couche-ci ne fait que l'habiller.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -1150,7 +1150,7 @@ export function playActionLieu(geste: GesteDeLieu, lieu: string | undefined): vo
  * Trois signaux livrés en plus de la commande, et le jeu avait exactement
  * trois moments pour eux : la ronde qu'on sent venir, celle qui passe, et
  * celle qui vous cueille. La manche se jouait jusqu'ici à l'œil seul, et le
- * policier arrive par le bord de l'écran — c'est-à-dire là où le joueur ne
+ * policier arrive par le bord de l'écran, c'est-à-dire là où le joueur ne
  * regarde pas, puisqu'il suit un passant du doigt.
  */
 
@@ -1161,7 +1161,7 @@ export const playPolicePresence = withFile('police-presence', 0.75, () => { /* m
 /** Elle vous a vu la main tendue. */
 export const playPoliceIntervention = withFile('police-intervention', 0.85, playSpottedSynth);
 
-/* ─── ⑪ LE COMBAT — ce qui se joue AVANT le coup ────────────────────────── */
+/* ─── ⑪ LE COMBAT : ce qui se joue AVANT le coup ────────────────────────── */
 
 /** L'ennemi prend son élan. Se joue avant l'attaque, pour qu'on puisse réagir. */
 export const playCombatCharge = withFile('combat-charge', 0.8, () => { /* muet avant livraison */ });
@@ -1174,7 +1174,7 @@ export const playCombatEsquiveParfaite = withFile('combat-esquive-parfaite', 0.8
 
 /** S'équiper : tissu et boucle de ceinture. */
 export const playObjetEquipe = withFile('objet-equipe', 0.8, playSuccessSynth);
-/** Un objet perdu pour de bon. Sec — c'est fini, pas triste. */
+/** Un objet perdu pour de bon. Sec, c'est fini, pas triste. */
 export const playObjetCasse = withFile('objet-casse', 0.85, playFailSynth);
 /** Le sac est plein, on refuse l'objet. */
 export const playObjetPlein = withFile('objet-plein', 0.75, playFailSynth);
@@ -1196,7 +1196,7 @@ export const playGaugeFilled = withFile('jauge-remplie', 0.85, playSuccessSynth)
  * LE FILET : AUCUN APPUI NE DOIT ÊTRE MUET.
  *
  * Le jeu compte plus de cent vingt boutons. Les brancher un par un laisse
- * forcément des trous — l'audit en comptait 77 sans son — et chaque bouton
+ * forcément des trous (l'audit en comptait 77 sans son) et chaque bouton
  * ajouté plus tard rouvre le problème.
  *
  * On écoute donc les clics au niveau du document, APRÈS les gestionnaires de
@@ -1206,7 +1206,7 @@ export const playGaugeFilled = withFile('jauge-remplie', 0.85, playSuccessSynth)
  *
  * Trois exceptions, marquées dans le HTML par `data-sans-son` : les boutons
  * dont le silence est voulu, ceux qui sont désactivés, et ceux qui coupent le
- * son — claquer au moment où l'on demande le silence serait une farce.
+ * son, claquer au moment où l'on demande le silence serait une farce.
  * ═══════════════════════════════════════════════════════════════════════════ */
 let clicInstalle = false;
 
@@ -1224,7 +1224,7 @@ export function installerClicParDefaut(): void {
     /*
      * UN BOUTON DÉSACTIVÉ NE SE TAIT PLUS : IL REFUSE.
      *
-     * Le filet passait son chemin, et l'appui restait sans réponse — ce qui se
+     * Le filet passait son chemin, et l'appui restait sans réponse, ce qui se
      * lit comme une interface qui n'a pas entendu, pas comme une action
      * interdite. Le joueur réappuie, plus fort, puis croit à un bug. Le loquet
      * qui résiste dit « non » en un dixième de seconde, et il le dit sans

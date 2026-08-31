@@ -1,14 +1,14 @@
 /*
- * L'ATELIER EN ESSAI LIBRE — composer d'abord, payer à la validation.
+ * L'ATELIER EN ESSAI LIBRE : composer d'abord, payer à la validation.
  *
  * L'écran ne s'ouvrait pas sans l'achat : le joueur ne voyait jamais ce qu'il
  * n'avait pas, et on lui vendait une fonctionnalité décrite par trois puces.
- * Il compose maintenant d'abord, et le péage tombe au moment de valider — là
+ * Il compose maintenant d'abord, et le péage tombe au moment de valider, là
  * où on ne lui vend plus une fonctionnalité mais CE personnage-là.
  *
  * Ce changement crée exactement un risque, et il est grave : **l'essai peut
  * devenir gratuit pour tout le monde**. Il suffit que la garde du paiement
- * saute pour que composer et valider suffise. Rien ne le signalerait — l'écran
+ * saute pour que composer et valider suffise. Rien ne le signalerait, l'écran
  * serait identique, le bouton répondrait, le personnage partirait avec son
  * visage composé, et personne ne paierait.
  *
@@ -33,7 +33,7 @@ import puppeteer from 'puppeteer-core';
 
 let echecs = 0;
 const verifier = (nom, ok, detail = '') => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -72,7 +72,7 @@ verifier('on part bien SANS l\'Atelier', possede === false, `possédé : ${posse
  *
  * La première version faisait ouvrir l'Atelier en touchant la carte, pour
  * TOUT LE MONDE. Ça mettait une boutique sur le trajet de chaque joueur, y
- * compris de ceux qui n'achèteront jamais — et ça a cassé d'un coup les cinq
+ * compris de ceux qui n'achèteront jamais, et ça a cassé d'un coup les cinq
  * suites qui démarrent une partie, ce qui était le jeu en train de dire que le
  * chemin normal n'existait plus.
  *

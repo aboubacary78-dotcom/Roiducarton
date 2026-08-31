@@ -64,7 +64,7 @@ export function getContract(id: string): Contract | undefined {
  * À la toute première partie, la Bagarre et le Vol ne sont pas encore à
  * l'écran : ils reviennent dès la première action (voir `arsenalVisible`).
  * Tirer « Gagner un combat aujourd'hui » à cet instant donnerait au joueur un
- * objectif sans lui donner le moyen — une fois sur cinq. On retire donc cette
+ * objectif sans lui donner le moyen, une fois sur cinq. On retire donc cette
  * carte du paquet, et pour cette seule partie.
  */
 export function paquetDuPremierMatin(debutant: boolean): Contract[] {

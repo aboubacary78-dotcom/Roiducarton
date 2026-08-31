@@ -2,12 +2,12 @@
  * LA CAISSE EST-ELLE VRAIMENT FERMÉE ?
  *
  * Pendant toute la construction du jeu, « Acheter » voulait dire
- * `setAdsRemoved(true); return true` — les trois produits s'ouvraient
+ * `setAdsRemoved(true); return true`, les trois produits s'ouvraient
  * gratuitement à qui appuyait sur le bouton. C'était assumé tant qu'aucun
  * magasin n'existait. Ça ne l'est plus.
  *
  * Ce défaut-là a une propriété désagréable : il ne se voit pas. L'écran est
- * identique, le bouton répond, le produit s'ouvre — tout marche, simplement
+ * identique, le bouton répond, le produit s'ouvre, tout marche, simplement
  * personne ne paie. Aucune erreur, aucun avertissement, rien à lire dans un
  * journal. On ne s'en apercevrait qu'au relevé de compte.
  *
@@ -29,7 +29,7 @@
  *     donc le code au tarif écrit dans docs/design/prix.md.
  *
  *   ④ LE SOCLE ANDROID SUIT. La Billing Library 9 exige minSdkVersion 23 ;
- *     laissé à 22, le projet ne compile plus — mais seulement sur la machine
+ *     laissé à 22, le projet ne compile plus, mais seulement sur la machine
  *     de quelqu'un qui a Android Studio, c'est-à-dire tard.
  *
  *     node scripts/test-facturation.mjs
@@ -39,7 +39,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 let echecs = 0;
 const verifier = (nom, ok, detail = '') => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -116,7 +116,7 @@ await p.reload({ waitUntil: 'networkidle2' }); await pause(800);
  *
  * L'écran des Options ne vend plus rien depuis que la boutique a le sien : le
  * test cliquait sur des boutons qui n'existaient plus et se contentait de ne
- * rien trouver — c'est-à-dire qu'il passait au vert pour la mauvaise raison.
+ * rien trouver, c'est-à-dire qu'il passait au vert pour la mauvaise raison.
  * D'où le contrôle explicite, deux lignes plus bas, que les trois boutons
  * d'achat sont bien LÀ avant de vérifier qu'ils n'ouvrent rien.
  *
@@ -138,7 +138,7 @@ const boutons = await p.evaluate(() =>
  *
  * Sans ce contrôle, tout ce qui suit passerait au vert sur un écran VIDE :
  * « appuyer n'ouvre rien » est trivialement vrai quand il n'y a rien sur quoi
- * appuyer. C'est le piège exact de ce test, et il s'est refermé une fois — au
+ * appuyer. C'est le piège exact de ce test, et il s'est refermé une fois, au
  * déménagement des cartes vers l'écran du marché noir.
  */
 const ATTENDUS = [/JE PRENDS TOUT|TAKE IT ALL/i, /ME FAIRE UNE TÊTE|GIVE ME A FACE/i, /FICHE LA PAIX|LEAVE ME ALONE/i];
@@ -152,7 +152,7 @@ verifier('le marché noir s\'ouvre et propose les trois achats',
  *
  * Il ne l'était pas : les cartes vantaient le produit sans jamais dire
  * combien. Le prix venait de la feuille de paiement de Google, c'est-à-dire
- * APRÈS le clic — on demandait au joueur de s'engager avant de savoir.
+ * APRÈS le clic, on demandait au joueur de s'engager avant de savoir.
  */
 verifier('  …avec le prix écrit sur le bouton',
   boutons.some(t => /\d[,.]\d\d\s*€/.test(t)),
@@ -162,7 +162,7 @@ verifier('  …avec le prix écrit sur le bouton',
  * CE QUE L'ÉCRAN DISAIT AVANT DE CLIQUER.
  *
  * Le contrôle du message d'échec, plus bas, cherche un mot dans la page. Or
- * « indisponible » apparaît déjà ailleurs dans les Options — dans le
+ * « indisponible » apparaît déjà ailleurs dans les Options, dans le
  * formulaire de consentement. Chercher le mot seul aurait donné un contrôle
  * VIDE : vert quoi qu'il arrive, y compris si le message d'échec n'existait
  * pas. On garde donc l'état d'avant, et on exige que le message soit NOUVEAU.

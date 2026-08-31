@@ -1,7 +1,7 @@
 /*
  * LA FINITION QUE LA LIVRAISON N'A PAS FAITE.
  *
- * Les 65 fichiers arrivent au bon format — mono, 48 kHz, 40 kbit/s — mais
+ * Les 65 fichiers arrivent au bon format (mono, 48 kHz, 40 kbit/s) mais
  * trois défauts mesurés les rendent inutilisables tels quels :
  *
  *   1. DU SILENCE EN TÊTE. 37 fichiers sur 65 commencent par 20 à 84 ms de
@@ -85,7 +85,7 @@ for (const nom of fichiers) {
    *
    * On mesure le niveau sur la partie SONNANTE du fichier, pas sur toute sa
    * durée. La moyenne globale est tirée vers le bas par les silences internes :
-   * un son épars comme le classeur qui s'ouvre — un claquement, puis rien —
+   * un son épars comme le classeur qui s'ouvre, un claquement, puis rien,
    * paraît faible à la mesure alors qu'il claque à l'oreille. Normalisé sur sa
    * moyenne globale, il ressortait 11 dB sous les autres.
    */

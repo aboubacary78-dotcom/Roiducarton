@@ -34,8 +34,8 @@ const res = await p.evaluate(async () => {
         return Math.sqrt(s / Math.max(1, n1 - n0));
       };
       /*
-       * La moyenne ne suffit pas : une note qui s'éteint — une boîte à musique,
-       * un harmonica qui respire — a une moyenne basse mais des crêtes bien
+       * La moyenne ne suffit pas : une note qui s'éteint, une boîte à musique,
+       * un harmonica qui respire, a une moyenne basse mais des crêtes bien
        * présentes. Le silence, lui, n'a ni l'une ni les autres. On mesure donc
        * la CRÊTE, qui seule distingue « ça décroît » de « il n'y a rien ».
        */

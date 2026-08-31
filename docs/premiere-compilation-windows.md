@@ -1,8 +1,8 @@
-# Fabriquer l'application Android — guide pas à pas (Windows)
+# Fabriquer l'application Android · guide pas à pas (Windows)
 
 *Écrit pour quelqu'un qui n'a jamais rien installé de tout ça. Aucune étape
 n'est sous-entendue. Si une ligne te paraît évidente, saute-la ; si une ligne
-ne marche pas, c'est normal et c'est prévu — chaque étape a sa section
+ne marche pas, c'est normal et c'est prévu, chaque étape a sa section
 « si ça coince ».*
 
 ---
@@ -10,7 +10,7 @@ ne marche pas, c'est normal et c'est prévu — chaque étape a sa section
 ## Ce qu'on fabrique, et pourquoi il faut tout ça
 
 Ton jeu est un **site web**. Il tourne dans un navigateur, il est fini, il
-marche. Ce qu'on veut, c'est une **application** — une icône sur l'écran
+marche. Ce qu'on veut, c'est une **application** : une icône sur l'écran
 d'accueil, installable depuis le Play Store.
 
 Trois pièces, et chacune a un rôle précis :
@@ -21,7 +21,7 @@ Trois pièces, et chacune a un rôle précis :
 | **Git** | Va chercher le code sur GitHub et le pose sur ton PC. |
 | **Android Studio** | L'atelier. Prend le site construit, l'emballe, et sort le fichier que Google Play accepte. |
 
-Le dossier `android/` du projet est déjà prêt — icône, publicités, numéro de
+Le dossier `android/` du projet est déjà prêt, icône, publicités, numéro de
 version, tout est dedans. **Il ne manque que l'atelier pour fermer la boîte.**
 
 ## Avant de commencer : ce que ça demande
@@ -36,7 +36,7 @@ version, tout est dedans. **Il ne manque que l'atelier pour fermer la boîte.**
 
 ---
 
-# Étape 1 — Node.js
+# Étape 1 · Node.js
 
 ## Installer
 
@@ -63,7 +63,7 @@ node -v
 ```
 
 Tu dois voir un numéro, par exemple `v24.19.0`. **N'importe quelle version
-donnée par le bouton LTS convient** — le projet demande 22.12 au minimum, et
+donnée par le bouton LTS convient** : le projet demande 22.12 au minimum, et
 le bouton LTS ne descend jamais en dessous. Ne cherche pas à obtenir un
 numéro précis.
 
@@ -90,7 +90,7 @@ Aucun message ne s'affiche si ça marche. C'est bon signe.
 
 ---
 
-# Étape 2 — Git
+# Étape 2 · Git
 
 ## Installer
 
@@ -113,7 +113,7 @@ Tu dois voir `git version 2.x.x`.
 
 ---
 
-# Étape 3 — Récupérer le projet
+# Étape 3 · Récupérer le projet
 
 Toujours dans PowerShell :
 
@@ -133,7 +133,7 @@ Ce que font ces quatre lignes, dans l'ordre :
    versions successives de chaque image et de chaque son depuis le début.
    Git les rapporte toutes. Ce n'est pas une anomalie ;
 3. **entrer** dans le dossier fraîchement créé ;
-4. se placer sur la **branche de travail** — celle où se trouve tout ce qu'on
+4. se placer sur la **branche de travail** : celle où se trouve tout ce qu'on
    a fait ensemble. Sans cette ligne, tu aurais une version plus ancienne,
    sans le dossier Android.
 
@@ -150,7 +150,7 @@ Doit afficher : `claude/game-improvement-review-qpa9u1`
 
 ---
 
-# Étape 4 — Construire le jeu
+# Étape 4 · Construire le jeu
 
 C'est ici qu'on transforme le code source en site jouable, puis qu'on le
 glisse dans la boîte Android.
@@ -208,7 +208,7 @@ Tape **`Y`** puis `Entrée`. C'est corepack qui va chercher la version exacte
 de pnpm que le projet demande (elle est inscrite dans `package.json`, pour que
 tout le monde construise avec la même). Ça n'arrive qu'une fois.
 
-Ensuite, compte 2 à 5 minutes. Beaucoup de texte défile — ce sont les
+Ensuite, compte 2 à 5 minutes. Beaucoup de texte défile, ce sont les
 bibliothèques qui se téléchargent.
 
 > **Des lignes jaunes `WARN` sont normales** et ne demandent aucune action.
@@ -236,7 +236,7 @@ l'application serait vide. Tu dois voir `Sync finished`.
 
 Capacitor demande s'il peut collecter des statistiques d'usage anonymes. Ça
 ne change **rien** au projet, ni à la compilation, ni au jeu. Réponds ce que
-tu veux — `n` si tu préfères ne rien partager. Ça se change plus tard avec
+tu veux, `n` si tu préfères ne rien partager. Ça se change plus tard avec
 `npx cap telemetry`.
 
 ## Vérifier que la configuration est intacte
@@ -246,12 +246,12 @@ python scripts\verifie-android.py
 ```
 
 Tu dois lire **8 vérifications au vert**. Si Windows te répond que `python`
-n'existe pas, saute cette vérification — elle est utile, pas indispensable,
+n'existe pas, saute cette vérification, elle est utile, pas indispensable,
 et installer Python juste pour ça n'en vaut pas la peine.
 
 ---
 
-# Étape 5 — Android Studio
+# Étape 5 · Android Studio
 
 ## Installer
 
@@ -298,8 +298,8 @@ least 8 and at most 19.
 **Clique « Use JVM 17 ».** C'est la bonne réponse, et Android Studio la
 propose lui-même.
 
-Android Studio est livré avec un Java tout neuf (25), mais Gradle 8.2.1 — la
-version que Capacitor 6 emploie — ne sait travailler qu'avec Java 8 à 19.
+Android Studio est livré avec un Java tout neuf (25), mais Gradle 8.2.1, la
+version que Capacitor 6 emploie, ne sait travailler qu'avec Java 8 à 19.
 Java 17 est la seule valeur qui satisfait les deux bouts de la chaîne :
 
 | Contrainte | Exige |
@@ -319,7 +319,7 @@ avant de toucher à quoi que ce soit.
 
 ---
 
-# Étape 6 — Lancer sur ton téléphone
+# Étape 6 · Lancer sur ton téléphone
 
 ## Préparer le téléphone
 
@@ -342,7 +342,7 @@ Numéro de version**. Ce sous-menu manque sur tous les tutos génériques.
 apparaissent directement **tout en bas de la liste principale** des
 Paramètres.
 
-### ⚠️ « Débogage USB — Bloqué(e) par le bloqueur automatique »
+### ⚠️ « Débogage USB · Bloqué(e) par le bloqueur automatique »
 
 Sur Samsung, l'interrupteur peut être **grisé**, avec cette mention. Ce n'est
 pas le projet : c'est **Auto Blocker**, une sécurité Samsung qui interdit à un
@@ -355,7 +355,7 @@ l'option qui parle de **commandes USB** : elle seule suffit.
 L'interrupteur du débogage redevient alors actif.
 
 > **Remets Auto Blocker en marche** une fois les tests finis. Il protège
-> contre les commandes envoyées par un ordinateur inconnu — le risque des
+> contre les commandes envoyées par un ordinateur inconnu, le risque des
 > bornes de recharge publiques. Tu n'as besoin de le couper que pendant le
 > développement.
 
@@ -388,13 +388,13 @@ Première compilation : 2 à 5 minutes.
 |---|---|
 | `SDK Platform 35 not found` | Android Studio → menu **Tools** → **SDK Manager** → coche **Android 15 (API 35)** → **Apply** |
 | `compileSdk 35 not tested` | Normalement déjà neutralisé dans `android/gradle.properties`. Si le message revient quand même, signale-le. |
-| Le téléphone n'apparaît pas | Débranche/rebranche ; vérifie « Débogage USB » ; certains câbles ne servent qu'à charger — essaies-en un autre |
+| Le téléphone n'apparaît pas | Débranche/rebranche ; vérifie « Débogage USB » ; certains câbles ne servent qu'à charger, essaies-en un autre |
 | `pnpm : n'est pas reconnu` | `corepack enable` n'a pas été fait, ou pas en administrateur (étape 1) |
 | Gradle tourne sans fin | Laisse finir la première fois. Si ça dépasse 30 min, **File → Invalidate Caches → Restart** |
 
 **Et surtout :** copie-colle le message d'erreur complet et envoie-le. Un
 message d'erreur Android Studio est long et effrayant, mais il dit
-précisément ce qui manque — c'est une information, pas un échec.
+précisément ce qui manque, c'est une information, pas un échec.
 
 ---
 
@@ -404,7 +404,7 @@ Tout ce qui précède, c'est l'installation : elle ne se fait qu'une fois. Pour
 récupérer les changements, il n'y a plus que **quatre lignes**, et deux d'entre
 elles sont des vérifications.
 
-### 0. Se mettre dans le bon dossier — la moitié des ratés viennent de là
+### 0. Se mettre dans le bon dossier · la moitié des ratés viennent de là
 
 Le projet est ici :
 
@@ -414,7 +414,7 @@ C:\Users\aboub\Documents\Roiducarton
 
 PowerShell s'ouvre par défaut dans `C:\Users\aboub`, où il n'y a rien. Toutes
 les commandes qui suivent échouent alors avec `not a git repository` ou
-`ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND` — c'est le même problème dit deux fois,
+`ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND` : c'est le même problème dit deux fois,
 et il ne veut pas dire que quelque chose est cassé.
 
 ```powershell
@@ -438,7 +438,7 @@ git status
 Si ça répond **`nothing to commit, working tree clean`**, parfait, continue.
 
 Si ça liste des fichiers en rouge, c'est qu'Android Studio a touché quelque
-chose. Range-les avant de continuer — cette commande met tes modifications de
+chose. Range-les avant de continuer, cette commande met tes modifications de
 côté sans les perdre :
 
 ```powershell
@@ -477,7 +477,7 @@ et ta partie en cours est conservée.
 
 ## Faut-il refaire `pnpm install` ?
 
-**Seulement si les dépendances ont changé** — c'est-à-dire si le fichier
+**Seulement si les dépendances ont changé** : c'est-à-dire si le fichier
 `package.json` a bougé ailleurs que sur son numéro de version. Dans le doute,
 le faire ne casse rien, ça prend juste deux minutes de plus :
 
@@ -503,13 +503,13 @@ fallait faire.
 
 Une fois que le jeu tourne sur ton téléphone, il restera :
 
-1. **Créer une clé de signature** — l'empreinte qui prouve que l'application
+1. **Créer une clé de signature** : l'empreinte qui prouve que l'application
    vient de toi. ⚠️ Elle est **irremplaçable** : perdue, tu ne peux plus
    jamais mettre à jour ton jeu sur le Play Store. On la fabriquera ensemble,
    et je te dirai où la garder.
-2. **Fabriquer le fichier `.aab`** — le colis pour Google Play.
-3. **Compte développeur Google Play** — 25 $, une seule fois.
-4. **La fiche du store** — captures d'écran, description, classification.
+2. **Fabriquer le fichier `.aab`** : le colis pour Google Play.
+3. **Compte développeur Google Play** : 25 $, une seule fois.
+4. **La fiche du store** : captures d'écran, description, classification.
 
 Rien de tout ça n'est aussi long que ce guide. Le plus dur, c'est
 l'installation ; elle ne se fait qu'une fois.

@@ -5,8 +5,8 @@
  * ici cassé de deux façons, et les deux privaient de vibration une bonne part
  * des joueurs :
  *
- * 1. IL ÉTAIT COUPÉ PAR LA SOURDINE. Le joueur qui coupe le son — c'est-à-dire
- *    la plupart des gens en public, exactement le contexte d'un jeu mobile —
+ * 1. IL ÉTAIT COUPÉ PAR LA SOURDINE. Le joueur qui coupe le son, c'est-à-dire
+ *    la plupart des gens en public, exactement le contexte d'un jeu mobile,
  *    perdait aussi tout retour tactile. Or couper le son est précisément le
  *    moment où l'haptique devient le SEUL canal de retour. Les deux réglages
  *    sont donc séparés, et les vibrations sont actives par défaut.

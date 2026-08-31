@@ -1,6 +1,6 @@
-# Commande audio — « Le Roi du Carton » — 42 sons : la voix et les saletés
+# Commande audio · « Le Roi du Carton » · 42 sons : la voix et les saletés
 
-> ## ✅ LIVRÉ ET INSTALLÉ — 25 août 2026
+> ## ✅ LIVRÉ ET INSTALLÉ, 25 août 2026
 >
 > Les 42 fichiers sont dans `client/public/audio/` et se jouent en jeu.
 > Contrôles indépendants passés : 42/42 présents, aucun doublon bit-à-bit,
@@ -11,18 +11,18 @@
 >
 > 1. **Voix de synthèse, pas deux interprètes** (règle ③). Le prestataire l'a
 >    signalé de lui-même. Mesuré : à contenu égal, les deux timbres sont à
->    0,548 l'un de l'autre — plus loin que deux sons sans aucun rapport
+>    0,548 l'un de l'autre, plus loin que deux sons sans aucun rapport
 >    (0,486). Ce ne sont pas les mêmes prises re-pitchées.
 > 2. **9 des 34 vocalisations ne transcrivent pas à vide** (règle ①), contre
 >    « 34 transcriptions vides » annoncées. Le rapport ne comptait que la
->    dernière des trois passes. Tout ce qui sort est de l'interjection —
->    うん, ああ, Ah!, Oh — c'est-à-dire ce qu'une transcription automatique
+>    dernière des trois passes. Tout ce qui sort est de l'interjection,
+>    うん, ああ, Ah!, Oh, c'est-à-dire ce qu'une transcription automatique
 >    produit forcément quand on lui donne un souffle. **Deux fichiers valent
 >    une écoute** : `voix-f-degout-1` (transcrit « Nie ») et `voix-f-degout-2`
 >    (transcrit « Ja »), les seuls dont la sortie soit un mot d'une vraie
 >    langue.
 >
-> **Licence :** ElevenLabs Sound Effects API, compte Starter payant — les
+> **Licence :** ElevenLabs Sound Effects API, compte Starter payant, les
 > abonnements payants incluent la licence commerciale.
 
 **Ce document est la commande complète. Tout ce qu'il faut est dedans : aucun
@@ -34,7 +34,7 @@ autre fichier n'est nécessaire.**
 
 Roguelite de survie mobile, comédie noire. On y joue quelqu'un qui dort dehors
 et qui essaie de tenir un jour de plus. Direction artistique : **dioramas en
-carton kraft photographiés** — les voitures sont en carton, les pigeons sont en
+carton kraft photographiés** : les voitures sont en carton, les pigeons sont en
 carton, la ville entière tient sur une table d'atelier.
 
 Les lots précédents ont posé toute la bande-son en **bruitage de carton** : la
@@ -67,7 +67,7 @@ Trois raisons, et elles sont toutes rédhibitoires : le jeu existe en français
 et en anglais et ne doublera pas ses voix ; un mot enregistré s'use en trois
 écoutes alors que ces sons se rejouent des dizaines de fois par partie ; et un
 « aïe » articulé casserait le carton d'un coup. Un « tsss » entre les dents ne
-se traduit pas — c'est exactement pour ça qu'il tient.
+se traduit pas, c'est exactement pour ça qu'il tient.
 
 ### ② PETIT. TRÈS PETIT.
 
@@ -87,7 +87,7 @@ différents**, pas un seul traité au pitch : une voix transposée s'entend
 immédiatement et donnerait l'impression d'un bug.
 
 Les deux ne doivent pas jouer la même chose plus grave ou plus aiguë. Ce sont
-deux personnes différentes qui réagissent à leur manière — l'une souffle,
+deux personnes différentes qui réagissent à leur manière, l'une souffle,
 l'autre siffle entre ses dents. C'est ce qui rendra deux parties différentes.
 
 ### ④ LA COMÉDIE EST DANS LA RETENUE
@@ -104,9 +104,9 @@ appuyé ne l'est pas, il est juste désagréable.
 | | |
 |---|---|
 | Format | **MP3, mono, 48 kHz, 40 kbit/s** |
-| Durée | **0,3 s à 1,2 s** — ce sont des réactions, pas des performances |
+| Durée | **0,3 s à 1,2 s** : ce sont des réactions, pas des performances |
 | Niveau | normalisé sur la partie sonnante, crête à **−1,5 dB** |
-| Silence de tête | **moins de 10 ms** — le son doit tomber pile sur le geste |
+| Silence de tête | **moins de 10 ms** : le son doit tomber pile sur le geste |
 | Noms de fichiers | **exactement** ceux des tableaux, à la lettre près |
 | Dépôt | `client/public/audio/` |
 
@@ -126,7 +126,7 @@ processing, cardboard and paper materials, lo-fi domestic recording.
 
 ---
 
-# PARTIE A — La tête qui lâche (4 sons)
+# PARTIE A · La tête qui lâche (4 sons)
 
 Le Mental est la jauge la plus abstraite du jeu. Depuis peu, quand il tombe
 bas, **le texte des rencontres se met à se brouiller** : les mots se mélangent
@@ -149,13 +149,13 @@ avertissement qu'il reçoit.
 
 ---
 
-# PARTIE B — Ce que le corps répond (18 sons)
+# PARTIE B · Ce que le corps répond (18 sons)
 
 Trois réactions, trois prises chacune, deux timbres. Les trois prises servent à
 casser la répétition : **elles doivent être audiblement différentes entre
 elles**, pas trois fois la même avec un léger décalage.
 
-## B1 · La douleur (6) — on se coupe, une guêpe pique, un coup passe
+## B1 · La douleur (6) · on se coupe, une guêpe pique, un coup passe
 
 Bref, rentré, **jamais un cri**. Le son de quelqu'un qui se fait mal et qui
 préfère que ça ne se voie pas.
@@ -169,7 +169,7 @@ préfère que ça ne se voie pas.
 | `voix-f-douleur-2` | A short low grunt from a woman, mouth closed, more surprise than pain, followed by a quick breath out. |
 | `voix-f-douleur-3` | A woman's quiet hiss through the nose, one syllable of held-back sound, then silence. |
 
-## B2 · Le dégoût (6) — ce qu'on vient de sortir du tas
+## B2 · Le dégoût (6) · ce qu'on vient de sortir du tas
 
 Le haut-le-cœur, **pas le vomissement**. Une personne polie qui vient de mettre
 la main dans quelque chose de tiède et de mou, et qui se retient parce qu'il y
@@ -184,7 +184,7 @@ a du monde autour.
 | `voix-f-degout-2` | A woman's suppressed gag, one beat only, immediately swallowed back down. Not a retch. |
 | `voix-f-degout-3` | A woman breathing out sharply through pursed lips, turning her head away, a small "hff" of revulsion. |
 
-## B3 · L'effort (6) — le souffle qui sort tout seul en frappant
+## B3 · L'effort (6) · le souffle qui sort tout seul en frappant
 
 Se déclenche sur les **gros coups** en combat, pas sur tous. C'est l'expiration
 involontaire de quelqu'un qui met du poids dans un geste.
@@ -200,17 +200,17 @@ involontaire de quelqu'un qui met du poids dans un geste.
 
 ---
 
-# PARTIE C — Les passants qu'on retient (12 sons)
+# PARTIE C · Les passants qu'on retient (12 sons)
 
 Le mini-jeu de la manche a **une seule vraie décision** : lâcher quelqu'un, ou
-continuer à le retenir. Continuer rapporte davantage et coûte de la dignité —
+continuer à le retenir. Continuer rapporte davantage et coûte de la dignité,
 et jusqu'ici cette bascule ne s'entendait pas du tout.
 
 Ces douze prises sont la voix **du passant**, pas du personnage joué. C'est la
 seule voix du jeu qui ne suit pas le joueur : la rue est pleine de gens, et
 ils n'ont pas tous le même timbre.
 
-## C1 · L'agacement (6) — pendant qu'on le retient
+## C1 · L'agacement (6) · pendant qu'on le retient
 
 Se rejoue **toutes les 0,9 seconde** tant que le joueur insiste. Ce sont donc
 les sons les plus répétés du lot, et le piège est là : **au troisième
@@ -226,9 +226,9 @@ qui monte. Quelqu'un qui voudrait juste s'en aller.
 | `passant-f-agace-2` | A woman clicking her tongue once, dismissive, followed by a small exhale. |
 | `passant-f-agace-3` | A woman's low uncomfortable throat-clear, embarrassed rather than angry. |
 
-## C2 · Le refus (6) — sa patience est finie
+## C2 · Le refus (6) · sa patience est finie
 
-Une seule fois, quand le passant se braque et s'en va — ou se retourne pour
+Une seule fois, quand le passant se braque et s'en va, ou se retourne pour
 cogner. Plus net que l'agacement, **mais toujours sans un mot** : le jeu écrit
 « Lâchez-moi ! » à l'écran, le son ne doit pas le dire aussi.
 
@@ -243,14 +243,14 @@ cogner. Plus net que l'agacement, **mais toujours sans un mot** : le jeu écrit
 
 ---
 
-# PARTIE D — Ce qu'on réveille au fond du tas (8 sons)
+# PARTIE D · Ce qu'on réveille au fond du tas (8 sons)
 
 ⚠️ **Ces huit-là repassent en carton.** Ce sont des objets et des bêtes, pas
 des gens : le suffixe de style à utiliser est celui du bruitage, pas celui des
 voix.
 
 Le mini-jeu de la Récup' cache six saletés sous les détritus. Elles sonnaient
-**toutes pareil** — un coup encaissé, alors que personne ne vous frappe. Un rat
+**toutes pareil** : un coup encaissé, alors que personne ne vous frappe. Un rat
 qui détale et un yaourt devenu autonome ne font pas le même bruit, et surtout
 ils ne font pas le même effet : l'un fait sursauter, l'autre soulève le cœur.
 
@@ -269,7 +269,7 @@ Le joueur a le doigt sur la grille et l'œil sur la case qu'il vient d'ouvrir.
 | `recup-pourri-3` | 🐟 🩲 🦠 mou et tiède | A soft heavy sludge shifting, a low wet slump, one small bubble popping at the end. |
 
 ⚠️ **`recup-guepes` est le seul son de tout le jeu qui a le droit de faire
-sursauter.** Tous les autres — y compris le rat — doivent inquiéter sans
+sursauter.** Tous les autres (y compris le rat) doivent inquiéter sans
 provoquer de sursaut : un joueur qui sursaute lâche le téléphone et perd pour
 la mauvaise raison.
 
@@ -279,10 +279,10 @@ la mauvaise raison.
 
 | Partie | Sons | Ce que ça débloque |
 |---|---|---|
-| A — la tête qui lâche | 4 | Le brouillage du texte cesse de passer pour un bug |
-| B — ce que le corps répond | 18 | Se couper, se dégoûter, forcer : trois réactions × 2 timbres |
-| C — les passants | 12 | La seule décision de la manche s'entend enfin |
-| D — les saletés | 8 | Six pièges qui sonnaient tous pareil |
+| A, la tête qui lâche | 4 | Le brouillage du texte cesse de passer pour un bug |
+| B, ce que le corps répond | 18 | Se couper, se dégoûter, forcer : trois réactions × 2 timbres |
+| C, les passants | 12 | La seule décision de la manche s'entend enfin |
+| D, les saletés | 8 | Six pièges qui sonnaient tous pareil |
 | **Total** | **42** | |
 
 # Livraison attendue
@@ -290,7 +290,7 @@ la mauvaise raison.
 1. **42 fichiers MP3**, nommés exactement comme dans les tableaux.
 2. Confirmation qu'**aucun fichier ne contient de mot, dans aucune langue**.
 3. Confirmation que **deux interprètes différents** ont enregistré les voix
-   `h` et `f` — et non un seul transposé.
+   `h` et `f`, et non un seul transposé.
 4. ⚠️ **La licence d'usage commercial** de l'outil ou de la banque employée,
    nommément. Le jeu est monétisé par la publicité : une licence non
    commerciale rendrait le lot inutilisable.
@@ -303,16 +303,16 @@ Rien de grave, et c'est voulu :
 - la **tête qui lâche** retombe sur l'alerte de jauge générique ;
 - le **refus d'un passant** retombe sur le son d'échec du jeu ;
 - l'**agacement**, la **douleur**, le **dégoût** et l'**effort** ne jouent rien
-  du tout — une voix humaine fabriquée à l'oscillateur ne ressemblerait à rien
+  du tout, une voix humaine fabriquée à l'oscillateur ne ressemblerait à rien
   d'autre qu'à une erreur, et le geste qui les accompagne a déjà son son.
 
 On peut donc livrer les 42 d'un coup, partie par partie, ou fichier par
-fichier — **chacun s'active tout seul à l'arrivée**, sans rien changer au code.
+fichier, **chacun s'active tout seul à l'arrivée**, sans rien changer au code.
 
 ## Dans quel ordre livrer, si le lot doit être découpé
 
-1. **Partie A** (4) — la mécanique la plus récente et la moins lisible.
-2. **Partie D** (8) — huit fichiers, et six pièges qui redeviennent distincts.
-3. **Partie C** (12) — la manche est le mini-jeu le plus joué.
-4. **Partie B** (18) — le plus gros volume, et celui qui supporte le mieux
+1. **Partie A** (4) : la mécanique la plus récente et la moins lisible.
+2. **Partie D** (8) : huit fichiers, et six pièges qui redeviennent distincts.
+3. **Partie C** (12) : la manche est le mini-jeu le plus joué.
+4. **Partie B** (18) : le plus gros volume, et celui qui supporte le mieux
    l'attente : le jeu reste parfaitement jouable sans lui.

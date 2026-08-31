@@ -1,8 +1,8 @@
 /*
  * LE SON S'ARRÊTE QUAND ON QUITTE L'APPLICATION.
  *
- * On capture l'AudioContext que le jeu fabrique — en enveloppant le
- * constructeur AVANT que la page ne charge — puis on bascule la visibilité de
+ * On capture l'AudioContext que le jeu fabrique, en enveloppant le
+ * constructeur AVANT que la page ne charge, puis on bascule la visibilité de
  * la page par CDP, exactement comme Android le fait en passant l'application
  * en arrière-plan. Ce que l'on regarde est l'état réel du contexte : c'est lui
  * qui décide si le haut-parleur produit quelque chose.
@@ -38,7 +38,7 @@ const etat = () => p.evaluate(() => (window.__ctxs || []).map(c => c.state).join
  * `Emulation.setPageVisibilityOverride` n'existe pas dans ce Chromium : on
  * force donc `document.visibilityState` et on émet l'événement à la main.
  * C'est exactement ce que le système envoie à la vue web quand l'application
- * passe en arrière-plan — et c'est précisément ce que le correctif écoute.
+ * passe en arrière-plan, et c'est précisément ce que le correctif écoute.
  */
 const visibilite = async (v) => {
   await p.evaluate((etat) => {
@@ -52,7 +52,7 @@ const visibilite = async (v) => {
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 

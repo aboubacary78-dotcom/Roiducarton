@@ -1,5 +1,5 @@
 /*
- * L'ATELIER — le visage composé et les traits choisis arrivent-ils vraiment ?
+ * L'ATELIER : le visage composé et les traits choisis arrivent-ils vraiment ?
  *
  * Deux dangers, et le premier est invisible.
  *
@@ -7,7 +7,7 @@
  *    son tirage dans `CardboardAvatar`. Rien dans TypeScript ne relie les
  *    deux : ce sont deux chaînes de caractères qui se ressemblent. Renommer
  *    l'une sans l'autre ne casse pas la compilation, ne lève aucune erreur, et
- *    donne un réglage qui ne fait plus rien — l'écran propose un choix, le
+ *    donne un réglage qui ne fait plus rien, l'écran propose un choix, le
  *    visage l'ignore. On relit donc les deux fichiers et on compare.
  *
  * ② LE CHOIX QUI N'ARRIVE PAS. Composer un visage puis le voir revenir au
@@ -26,7 +26,7 @@ import { readFileSync } from 'node:fs';
 
 let echecs = 0;
 const verifier = (nom, ok, detail) => {
-  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` — ${detail}` : ''}`);
+  console.log(`${ok ? '  ok  ' : ' RATÉ '} ${nom}${detail ? ` · ${detail}` : ''}`);
   if (!ok) echecs++;
 };
 
@@ -39,7 +39,7 @@ const CLES = [...cat.matchAll(/cle: '([a-z]+)'/g)].map(m => m[1]);
  * Les sels réellement consultés : `choisir('x', n)` pour les traits à
  * plusieurs valeurs, `oui('x', n)` pour ceux qui sont à deux états. Un sel
  * encore lu par `pick` n'est PAS ouvert au choix, et c'est ce qu'on veut
- * attraper — un réglage affiché qui ne change rien.
+ * attraper, un réglage affiché qui ne change rien.
  */
 const SELS = new Set([
   ...[...avatar.matchAll(/choisir\('([a-z]+)'/g)].map(m => m[1]),
@@ -58,7 +58,7 @@ verifier('chaque réglage du catalogue est branché sur le dessin',
  * On découpe sur `cle: '` et non sur `{ cle:` : le catalogue écrit ses entrées
  * tantôt sur une ligne, tantôt sur plusieurs, et le second motif ne coupait
  * donc qu'une entrée sur deux. Les blocs débordaient les uns sur les autres, et
- * `hair` — une couleur, sans libellés — héritait de ceux de `eyes`. Le test
+ * `hair` (une couleur, sans libellés) héritait de ceux de `eyes`. Le test
  * accusait le catalogue d'une faute qui était dans sa propre lecture.
  */
 const trop = [];
@@ -107,20 +107,20 @@ await p.reload({ waitUntil: 'networkidle2' }); await pause(600);
 /*
  * SANS L'ACHAT : L'ATELIER S'OUVRE, EN ESSAI.
  *
- * Ce contrôle affirmait le contraire — « sans l'achat, l'Atelier ne s'ouvre
- * pas » — et c'était vrai jusqu'à l'essai libre. Le joueur compose maintenant
+ * Ce contrôle affirmait le contraire, « sans l'achat, l'Atelier ne s'ouvre
+ * pas », et c'était vrai jusqu'à l'essai libre. Le joueur compose maintenant
  * d'abord et paie au moment de valider : l'écran DOIT s'ouvrir, et il doit
  * dire qu'il se paiera.
  *
- * Ce que l'ancienne assertion protégeait — ne pas donner gratuitement ce qu'on
- * vend — n'a pas disparu pour autant : c'est `scripts/test-atelier-essai.mjs`
+ * Ce que l'ancienne assertion protégeait, ne pas donner gratuitement ce qu'on
+ * vend, n'a pas disparu pour autant : c'est `scripts/test-atelier-essai.mjs`
  * qui s'en charge, en validant sans payer et en vérifiant que le personnage
  * part sans le visage composé. On ne le redit pas ici : deux contrôles de la
  * même règle finissent par diverger, et c'est le plus laxiste qui gagne.
  */
 await clic('Nouvelle|New Game'); await pause(900);
 // Par le CRAYON : toucher la carte démarre la partie, comme pour tout le
-// monde. C'est la correction du jour — on ne met pas la boutique sur le
+// monde. C'est la correction du jour, on ne met pas la boutique sur le
 // trajet de quelqu'un qui veut juste jouer.
 await p.evaluate(() => {
   [...document.querySelectorAll('button')]
@@ -179,7 +179,7 @@ verifier('on peut composer le visage et prendre un trait précis',
 
 /*
  * « C'est lui » OU « C'est elle » : le bouton s'accorde au personnage, et ce
- * test ne cherchait que le masculin. Il échouait donc une fois sur trois —
+ * test ne cherchait que le masculin. Il échouait donc une fois sur trois,
  * exactement quand le tirage donnait une femme, c'est-à-dire précisément dans
  * le cas que la correction d'accord venait d'ajouter.
  */

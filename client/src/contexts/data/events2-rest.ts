@@ -30,7 +30,7 @@ export const REST_EVENTS_2: GameEvent[] = [
     choices: [
       { text: 'Se glisser dans la salle', risk: 'normal', emoji: '🎬', outcomes: [
         { probability: 0.6, text: 'Vous dormez à travers trois chefs-d\'œuvre du mauvais goût. Les explosions font office de berceuse. Réveil au générique, reposé et culturellement enrichi.', statChanges: { sleep: 20, mental: 6 } },
-        { probability: 0.4, text: 'Expulsé au deuxième film — mais QUEL film. Un requin-tornade contre des cosmonautes. Ça valait la sortie escortée.', statChanges: { sleep: 8, mental: 3, dignity: -3 } },
+        { probability: 0.4, text: 'Expulsé au deuxième film, mais QUEL film. Un requin-tornade contre des cosmonautes. Ça valait la sortie escortée.', statChanges: { sleep: 8, mental: 3, dignity: -3 } },
       ]},
       { text: 'Fouiller sous les sièges d\'abord', risk: 'normal', emoji: '🍿', outcomes: [
         { probability: 0.5, text: 'Récolte : un demi-paquet de popcorn, de la monnaie tombée et un gant. Puis dodo au fond de la salle. La totale.', statChanges: { hunger: 10, sleep: 10 }, moneyChange: 3 },

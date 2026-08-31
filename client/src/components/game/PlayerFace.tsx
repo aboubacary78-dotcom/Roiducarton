@@ -4,7 +4,7 @@
  * Le portrait carton dépend de trois choses : la graine du personnage, les
  * accessoires équipés dans la garde-robe, et son état (dérivé des jauges).
  * Quand un écran en oubliait une, le joueur voyait soudain une autre tête que
- * la sienne — sans casquette en plein combat, par exemple — et croyait
+ * la sienne (sans casquette en plein combat, par exemple) et croyait
  * retrouver un ancien personnage. Un seul composant, plus de dérive possible.
  */
 import type { Character } from '@/contexts/types';
@@ -38,8 +38,8 @@ export default function PlayerFace({
       /*
        * LES CINQ JAUGES ENTIÈRES, PAS LEUR MOYENNE.
        *
-       * `faceCondition` reste exportée — d'autres écrans s'en servent pour
-       * autre chose — mais le portrait ne la reçoit plus : une moyenne ne
+       * `faceCondition` reste exportée, d'autres écrans s'en servent pour
+       * autre chose, mais le portrait ne la reçoit plus : une moyenne ne
        * peut dire que la gravité, jamais la cause. Avec les jauges séparées,
        * le sommeil tombe sur les paupières, la faim creuse les joues, la soif
        * gerce les lèvres. On lit CE QUI manque.
