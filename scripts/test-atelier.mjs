@@ -105,22 +105,32 @@ await p.evaluate(() => { localStorage.clear(); localStorage.setItem('roi-du-cart
 await p.reload({ waitUntil: 'networkidle2' }); await pause(600);
 
 /*
- * SANS L'ACHAT : le chemin n'existe pas.
+ * SANS L'ACHAT : L'ATELIER S'OUVRE, EN ESSAI.
  *
- * Sans ce contrôle, tout ce qui suit passerait aussi bien si l'Atelier était
- * ouvert à tout le monde — et on vendrait quelque chose que chacun a déjà.
+ * Ce contrôle affirmait le contraire — « sans l'achat, l'Atelier ne s'ouvre
+ * pas » — et c'était vrai jusqu'à l'essai libre. Le joueur compose maintenant
+ * d'abord et paie au moment de valider : l'écran DOIT s'ouvrir, et il doit
+ * dire qu'il se paiera.
+ *
+ * Ce que l'ancienne assertion protégeait — ne pas donner gratuitement ce qu'on
+ * vend — n'a pas disparu pour autant : c'est `scripts/test-atelier-essai.mjs`
+ * qui s'en charge, en validant sans payer et en vérifiant que le personnage
+ * part sans le visage composé. On ne le redit pas ici : deux contrôles de la
+ * même règle finissent par diverger, et c'est le plus laxiste qui gagne.
  */
 await clic('Nouvelle|New Game'); await pause(900);
-await choisirCandidat(); await pause(1400);
-const sansAchat = await p.evaluate(() =>
-  /Atelier|Workshop|Visage|Face/i.test(document.body.innerText)
-  && !!document.querySelector('button[aria-label*="atelier"], button[aria-label*="workshop"]'));
-verifier('sans l\'achat, l\'Atelier ne s\'ouvre pas', !sansAchat);
-await clic('Commencer|Start'); await pause(900);
-const brut = await perso();
-verifier('  …et le personnage est entièrement tiré au sort',
-  !!brut && brut.visage === undefined && brut.traitsChoisis === undefined,
-  brut ? `visage ${JSON.stringify(brut.visage)}` : 'pas de personnage');
+// Par le CRAYON : toucher la carte démarre la partie, comme pour tout le
+// monde. C'est la correction du jour — on ne met pas la boutique sur le
+// trajet de quelqu'un qui veut juste jouer.
+await p.evaluate(() => {
+  [...document.querySelectorAll('button')]
+    .find(x => /Composer son visage|Compose their face/i.test(x.getAttribute('aria-label') || ''))?.click();
+});
+await pause(1400);
+const enEssai = await p.evaluate(() => document.body.innerText.replace(/\s+/g, ' '));
+verifier('sans l\'achat, l\'Atelier s\'ouvre en ESSAI',
+  /Visage|Traits/i.test(enEssai) && /Essai libre|Free trial/i.test(enEssai),
+  /Visage|Traits/i.test(enEssai) ? '' : enEssai.slice(0, 110));
 
 // ── Avec l'achat ──────────────────────────────────────────────────────────
 await p.evaluate(() => {

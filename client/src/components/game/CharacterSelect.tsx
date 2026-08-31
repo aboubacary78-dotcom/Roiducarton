@@ -4,10 +4,15 @@ import { useState } from 'react';
 import PlayerFace from './PlayerFace';
 import { useLang, tr, tc } from '@/lib/lang';
 import { playBack, playCard, playPickCharacter, playReroll } from '@/lib/sound';
-import { bonusEn, bonusFr, isAdsRemoved, isAtelierOwned, showRewarded } from '@/lib/ads';
+import { bonusEn, bonusFr, isAdsRemoved, isAtelierOwned, purchaseAtelier, showRewarded } from '@/lib/ads';
 import AtelierOverlay from './AtelierOverlay';
+import { pushToast } from '@/lib/toast';
 
-function CharacterCard({ char, index, onSelect }: { char: Character; index: number; onSelect: () => void }) {
+function CharacterCard({ char, index, onSelect, onComposer }: {
+  char: Character; index: number; onSelect: () => void;
+  /** Ouvre l'Atelier en essai. Absent pour qui l'a acheté : choisir suffit. */
+  onComposer?: () => void;
+}) {
   return (
     <motion.div
       initial={{ y: 30, opacity: 0 }}
@@ -27,6 +32,29 @@ function CharacterCard({ char, index, onSelect }: { char: Character; index: numb
           <h3 className="text-xl text-[#2A1F1A]">{char.name}</h3>
           <p className="text-xs text-[#8B6B4A]">{char.job.emoji} {tc(nomMetier(char.job, char.gender))}</p>
         </div>
+        {/*
+          LE CRAYON, ET POURQUOI IL EST À CÔTÉ ET NON À LA PLACE.
+
+          La première version faisait ouvrir l'Atelier à TOUT LE MONDE en
+          touchant un candidat. C'était le chemin le plus direct vers l'effet
+          recherché, et une faute : le joueur qui ne veut rien acheter se
+          retrouvait avec un écran de composition et un péage entre lui et sa
+          partie. On ne met pas une boutique sur le trajet de tout le monde
+          pour convertir les curieux.
+
+          Le geste principal reste donc « je prends celui-là, on joue ». Le
+          crayon, discret, est pour qui a envie de regarder — et c'est
+          exactement le public que l'essai libre vise.
+        */}
+        {onComposer && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onComposer(); }}
+            className="ml-auto self-start w-9 h-9 rounded-xl flex items-center justify-center text-sm text-[#B8860B] bg-[#B8860B]/10 active:scale-95 shrink-0"
+            aria-label={tr('Composer son visage', 'Compose their face')}
+          >
+            ✎
+          </button>
+        )}
       </div>
 
       {/* Job description */}
@@ -72,10 +100,20 @@ export default function CharacterSelect() {
   // pub récompensée (gratuits si le joueur a acheté « Sans pub »).
   const [rerolls, setRerolls] = useState(0);
   const [loadingAd, setLoadingAd] = useState(false);
-  // Index du candidat en cours de retouche, ou null. L'Atelier est un achat :
-  // sans lui, ce chemin n'existe simplement pas.
+  /*
+   * L'ATELIER S'OUVRE POUR TOUT LE MONDE, ET SE PAIE À LA VALIDATION.
+   *
+   * Avant, ce chemin n'existait pas sans l'achat : le joueur ne voyait jamais
+   * ce qu'il n'avait pas, et on lui vendait une fonctionnalité décrite par
+   * trois puces. Il compose maintenant d'abord — et à la validation, on ne lui
+   * vend plus une fonctionnalité, on lui vend CE personnage-là.
+   *
+   * `atelier` est relu après un achat réussi, d'où l'état local : la valeur
+   * vit dans `ads.ts` et change sous nos pieds pendant que l'écran est ouvert.
+   */
   const [retouche, setRetouche] = useState<number | null>(null);
-  const atelier = isAtelierOwned();
+  const [atelier, setAtelier] = useState(isAtelierOwned());
+  const [enPaiement, setEnPaiement] = useState(false);
   const freeReroll = rerolls === 0 || isAdsRemoved();
 
   async function handleReroll() {
@@ -118,16 +156,21 @@ export default function CharacterSelect() {
             char={char}
             index={i}
             /*
-             * AVEC L'ATELIER, CHOISIR OUVRE LA RETOUCHE ; SANS LUI, ÇA PART.
+             * DEUX GESTES DISTINCTS, ET C'EST UNE CORRECTION.
              *
-             * Le même geste, deux suites différentes — et pas un second bouton
-             * « personnaliser » à côté du premier, qui obligerait tout le monde
-             * à lire une option que la plupart n'ont pas.
+             *   · Toucher la carte : on part avec, tout de suite. C'est le
+             *     chemin de l'immense majorité, et rien ne doit s'y mettre.
+             *   · Le crayon : on ouvre l'Atelier. Acheté, il compose et valide ;
+             *     sinon, il compose en essai et paie à la validation.
+             *
+             * Pour qui possède l'Atelier, toucher la carte ouvre directement la
+             * composition : il l'a payée, il n'a pas à chercher un crayon.
              */
             onSelect={() => {
               if (atelier) { playCard(); setRetouche(i); return; }
               dispatch({ type: 'SELECT_CHARACTER', index: i });
             }}
+            onComposer={atelier ? undefined : () => { playCard(); setRetouche(i); }}
           />
         ))}
       </div>
@@ -148,21 +191,51 @@ export default function CharacterSelect() {
             : tr(bonusFr('Relancer les dés'), bonusEn('Reroll'))}
       </motion.button>
 
-      {/* Bandeau discret : ce que l'Atelier change, pour qui ne l'a pas. */}
-      {!atelier && (
-        <p className="text-[11px] text-[#A08B70] text-center leading-snug px-4">
-          {tr('L\'Atelier (Options) permet de composer le visage et de choisir les deux traits.',
-              'The Workshop (Settings) lets you compose the face and pick both traits.')}
-        </p>
-      )}
+      {/* Le bandeau qui renvoyait vers les Options n'a plus lieu d'être :
+          l'Atelier s'ouvre en touchant un candidat, et il dit lui-même ce
+          qu'il coûte au moment de valider. */}
 
       <AnimatePresence>
         {retouche !== null && state.characterChoices[retouche] && (
           <AtelierOverlay
             char={state.characterChoices[retouche]}
+            essai={!atelier}
             onAnnuler={() => { playBack(); setRetouche(null); }}
-            onValider={(visage, traits) =>
-              dispatch({ type: 'SELECT_CHARACTER', index: retouche, visage, traits })}
+            onValider={async (visage, traits) => {
+              const i = retouche;
+              if (atelier) {
+                dispatch({ type: 'SELECT_CHARACTER', index: i, visage, traits });
+                return;
+              }
+              /*
+               * LE PAIEMENT, ET CE QUI SE PASSE S'IL ÉCHOUE.
+               *
+               * Refus, fenêtre fermée d'un geste, magasin injoignable : la
+               * partie démarre quand même, avec le personnage TEL QU'IL S'EST
+               * PRÉSENTÉ. Bloquer quelqu'un devant un écran parce qu'il n'a pas
+               * payé transformerait un essai en otage — et il n'aurait pas
+               * tort de le dire dans son commentaire.
+               *
+               * La composition est simplement perdue, ce qui est la seule
+               * chose honnête : c'est elle qu'on vendait.
+               */
+              if (enPaiement) return;
+              setEnPaiement(true);
+              const ok = await purchaseAtelier();
+              setEnPaiement(false);
+              if (ok) {
+                setAtelier(true);
+                dispatch({ type: 'SELECT_CHARACTER', index: i, visage, traits });
+                return;
+              }
+              pushToast(
+                tr('Le vendeur n\'est pas à son carton. On part avec celui-là.',
+                   'Nobody at the stall. We go with this one.'),
+                { emoji: 'ℹ️', tone: 'info' },
+              );
+              setRetouche(null);
+              dispatch({ type: 'SELECT_CHARACTER', index: i });
+            }}
           />
         )}
       </AnimatePresence>

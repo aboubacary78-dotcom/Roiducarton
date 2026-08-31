@@ -80,6 +80,19 @@ L'effet IKEA (Norton, Mochon & Ariely, 2011) : on surévalue nettement ce qu'on
 a assemblé soi-même. Il ne se déclenche pas en décrivant l'Atelier — il se
 déclenche en **le faisant utiliser**.
 
+> **✅ FAIT.** Un crayon discret sur chaque carte de candidat ouvre l'Atelier ;
+> le bandeau annonce l'essai, et le bouton porte le prix. Si le paiement
+> échoue, la partie démarre quand même avec le personnage tel qu'il s'est
+> présenté.
+>
+> **Une faute corrigée en chemin :** la première version faisait ouvrir
+> l'Atelier en touchant la carte, pour TOUT LE MONDE. Ça mettait une boutique
+> sur le trajet de chaque joueur, y compris de ceux qui n'achèteront jamais —
+> et ça a cassé d'un coup les cinq suites qui démarrent une partie, ce qui
+> était le jeu en train de dire que le chemin normal n'existait plus. On ne
+> détourne pas le geste principal pour convertir les curieux : on leur donne
+> un crayon.
+
 **Recommandation principale : l'Atelier s'ouvre en essai libre.** Le joueur
 compose son visage, choisit ses deux traits, voit le résultat — et le paywall
 tombe au moment de **valider**. À cet instant, on ne lui vend plus une

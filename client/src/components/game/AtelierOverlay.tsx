@@ -17,6 +17,29 @@
  *
  * Rien n'est appliqué tant qu'on n'a pas validé : la croix rend le candidat
  * intact, et c'est ce qui permet d'essayer sans s'engager.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * L'ESSAI LIBRE, ET POURQUOI IL EST ANNONCÉ
+ *
+ * L'écran ne s'ouvrait pas sans l'achat : le joueur ne voyait jamais ce qu'il
+ * n'avait pas. On lui vendait donc une fonctionnalité décrite par trois puces.
+ *
+ * Il compose maintenant d'abord, et le paiement tombe au moment de VALIDER. À
+ * cet instant on ne lui vend plus une fonctionnalité, on lui vend CE
+ * PERSONNAGE-LÀ, celui qu'il vient de fabriquer et qui le regarde depuis
+ * l'écran. On surévalue nettement ce qu'on a assemblé soi-même, et ça ne se
+ * déclenche que par le faire.
+ *
+ * MAIS C'EST ÉCRIT DÈS L'OUVERTURE. Un péage qui tombe à la fin sans prévenir
+ * se lit comme un traquenard : quarante secondes de composition, et la
+ * découverte qu'on vous a fait perdre votre temps. Pour un jeu dont tout le
+ * ton repose sur « on ne vous ment pas », ce serait cher payé — et le bandeau
+ * n'enlève rien au levier, puisqu'on compose quand même.
+ *
+ * Le bouton dit aussi ce qui va se passer : « Le prendre — 4,99 € », pas
+ * « Commencer ». Un bouton qui annonce autre chose que ce qu'il fait est la
+ * définition du piège, quelle que soit la note en petit.
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,9 +49,12 @@ import CardboardAvatar, { SKIN, HAIR, BG, HAT_COLORS } from './CardboardAvatar';
 import { traitsPour, nbChoix, nomValeur, type Visage } from '@/lib/visage';
 import { playCard, playClick, playObjetEquipe, playToggle } from '@/lib/sound';
 import { tc, tr, useLang } from '@/lib/lang';
+import { prixAffiche } from '@/lib/facturation';
 
-export default function AtelierOverlay({ char, onAnnuler, onValider }: {
+export default function AtelierOverlay({ char, essai = false, onAnnuler, onValider }: {
   char: Character;
+  /** L'Atelier n'est pas acheté : on compose, et on paie à la validation. */
+  essai?: boolean;
   onAnnuler: () => void;
   onValider: (visage: Visage, traits: [Trait, Trait]) => void;
 }) {
@@ -239,11 +265,28 @@ export default function AtelierOverlay({ char, onAnnuler, onValider }: {
           </AnimatePresence>
         </div>
 
-        <button onClick={valider} className="btn-primary w-full py-3 font-semibold shrink-0">
-          {/* L'accord suit le personnage : « c'est lui » sur Simone se voit. */}
-          {char.gender === 'f'
-            ? tr('C\'est elle. Commencer.', 'That\'s her. Start.')
-            : tr('C\'est lui. Commencer.', 'That\'s him. Start.')}
+        {essai && (
+          /*
+           * Posé JUSTE au-dessus du bouton, pas en tête d'écran : c'est là
+           * qu'on regarde au moment de décider, et une mention lue au début
+           * puis oubliée ne prévient personne.
+           */
+          <p className="text-[11px] text-[#8B6B4A] text-center leading-snug shrink-0 -mb-1">
+            {tr('Essai libre. L\'Atelier se paie au moment de valider — et ce visage-ci vous attend.',
+                'Free trial. The Workshop is paid for on validation — and this face is waiting for you.')}
+          </p>
+        )}
+        <button
+          onClick={valider}
+          className={`w-full py-3 font-semibold shrink-0 rounded-xl ${essai ? 'text-[#2A1F1A]' : 'btn-primary'}`}
+          style={essai ? { background: '#F2E14C', boxShadow: '0 3px 0 #C9B62A' } : undefined}
+        >
+          {essai
+            ? `${tr('Le prendre', 'Take this one')} — ${prixAffiche('atelier')}`
+            /* L'accord suit le personnage : « c'est lui » sur Simone se voit. */
+            : char.gender === 'f'
+              ? tr('C\'est elle. Commencer.', 'That\'s her. Start.')
+              : tr('C\'est lui. Commencer.', 'That\'s him. Start.')}
         </button>
       </motion.div>
     </motion.div>
