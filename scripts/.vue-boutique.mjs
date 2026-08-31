@@ -1,0 +1,34 @@
+import puppeteer from 'puppeteer-core';
+const b = await puppeteer.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+const p = await b.newPage();
+await p.setViewport({ width: 390, height: 844, deviceScaleFactor: 2 });
+const err = []; p.on('pageerror', e => err.push(String(e).slice(0,160)));
+const pause = ms => new Promise(r => setTimeout(r, ms));
+const clic = m => p.evaluate(s => { const r = new RegExp(s,'i');
+  const e = [...document.querySelectorAll('button')].find(x => r.test((x.textContent||'') + ' ' + (x.getAttribute('aria-label')||'')) && x.offsetWidth);
+  if (e) { e.click(); return true; } return false; }, m);
+const rideau = async () => { for (let i=0;i<9;i++){ let f=false;
+  for (const m of ['Continuer|Continue','Commencer à survivre|Start surviving','Regarder|Take a look','Merci|Thanks','compris|Got it']) if (await clic(m)) { f=true; await pause(420);} if(!f) break; } };
+await p.goto(process.env.URL || 'http://localhost:8099/', { waitUntil: 'networkidle2' });
+await p.evaluate(() => { localStorage.clear(); localStorage.setItem('roi-du-carton-lang','fr'); });
+await p.reload({ waitUntil: 'networkidle2' }); await pause(900);
+await clic('Regarder|Take a look'); await pause(300); await clic('Merci|Thanks'); await pause(300);
+await clic('Nouvelle|New Game'); await pause(1100);
+await p.evaluate(() => { [...document.querySelectorAll('[class*="cursor-pointer"]')][0]?.click(); });
+await pause(1300); await clic('Commencer|Start'); await pause(1100); await rideau(); await pause(5500);
+const ok = await clic('marché noir|black market');
+await pause(1400);
+if (process.argv[3] === '--acheter') {
+  await clic('JE PRENDS TOUT|TAKE IT ALL');
+  await pause(500);
+  await p.screenshot({ path: process.argv[2] + '-recu.png' });
+  await pause(1800);
+  await p.screenshot({ path: process.argv[2] + '-apres.png' });
+}
+console.log('porte trouvée :', ok, '| erreurs :', err.length ? err[0] : 'aucune');
+await p.screenshot({ path: process.argv[2] + '-haut.png' });
+await p.evaluate(() => window.scrollTo(0, 620)); await pause(600);
+await p.screenshot({ path: process.argv[2] + '-bas.png' });
+await p.evaluate(() => window.scrollTo(0, 1400)); await pause(600);
+await p.screenshot({ path: process.argv[2] + '-fin.png' });
+await b.close();

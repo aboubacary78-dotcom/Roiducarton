@@ -304,6 +304,21 @@ export default function MainScreen() {
                 </div>
               )}
             </div>
+            {/*
+              LA PORTE DU MARCHÉ NOIR, ET ELLE RESTE UNE PORTE.
+              Discrète, à côté des Options : un onglet Boutique ne convertit
+              presque personne — on n'y va que si on a déjà décidé. Ce qui
+              convertit, ce sont les entrées AU MOMENT où la chose manque, et
+              elles vivent ailleurs (écran de mort, après un plein écran).
+              La mettre en avant ici ne ferait que salir le hub.
+            */}
+            <button
+              onClick={() => { playTab(); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm text-[#8B6B4A] hover:bg-[#F5EDE4] transition-colors"
+              aria-label={tr('Le marché noir', 'The black market')}
+            >
+              🏷️
+            </button>
             <button
               onClick={() => { playTab(); dispatch({ type: 'SET_SCREEN', screen: 'settings' }); }}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-sm text-[#8B6B4A] hover:bg-[#F5EDE4] transition-colors"

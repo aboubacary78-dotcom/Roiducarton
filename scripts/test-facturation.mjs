@@ -112,20 +112,40 @@ await p.evaluate(() => { localStorage.clear(); localStorage.setItem('roi-du-cart
 await p.reload({ waitUntil: 'networkidle2' }); await pause(800);
 
 /*
- * On passe par l'écran des Options du TITRE : il n'exige aucune partie en
- * cours, donc rien de ce qui précède l'achat ne peut faire échouer le test
- * pour une autre raison que celle qu'on mesure.
+ * ON PASSE PAR LES OPTIONS DU TITRE, PUIS PAR LA PORTE DU MARCHÉ NOIR.
+ *
+ * L'écran des Options ne vend plus rien depuis que la boutique a le sien : le
+ * test cliquait sur des boutons qui n'existaient plus et se contentait de ne
+ * rien trouver — c'est-à-dire qu'il passait au vert pour la mauvaise raison.
+ * D'où le contrôle explicite, deux lignes plus bas, que les trois boutons
+ * d'achat sont bien LÀ avant de vérifier qu'ils n'ouvrent rien.
+ *
+ * Le chemin par le titre n'exige aucune partie en cours : rien de ce qui
+ * précède l'achat ne peut faire échouer le test pour une autre raison que
+ * celle qu'on mesure.
  */
 await clic('Options|Settings') || await p.evaluate(() => {
   [...document.querySelectorAll('button')].find(x => /⚙/.test(x.textContent || ''))?.click();
 });
-await pause(900);
+await pause(700);
+await clic('marché noir|black market');
+await pause(1000);
 
 const boutons = await p.evaluate(() =>
   [...document.querySelectorAll('button')].map(b => (b.textContent || '').trim()).filter(Boolean));
-verifier('l\'écran des Options s\'ouvre et propose d\'acheter',
-  boutons.some(t => /Acheter|Buy|Atelier|Workshop|Pack|Bundle/i.test(t)),
-  boutons.slice(0, 6).join(' · '));
+/*
+ * LES TROIS BOUTONS SONT BIEN LÀ.
+ *
+ * Sans ce contrôle, tout ce qui suit passerait au vert sur un écran VIDE :
+ * « appuyer n'ouvre rien » est trivialement vrai quand il n'y a rien sur quoi
+ * appuyer. C'est le piège exact de ce test, et il s'est refermé une fois — au
+ * déménagement des cartes vers l'écran du marché noir.
+ */
+const ATTENDUS = [/JE PRENDS TOUT|TAKE IT ALL/i, /ME FAIRE UNE TÊTE|GIVE ME A FACE/i, /FICHE LA PAIX|LEAVE ME ALONE/i];
+const manquants = ATTENDUS.filter(r => !boutons.some(t => r.test(t)));
+verifier('le marché noir s\'ouvre et propose les trois achats',
+  manquants.length === 0,
+  manquants.length ? `absents : ${manquants.join(', ')}` : boutons.slice(0, 4).join(' · '));
 
 /*
  * LE PRIX EST AFFICHÉ SUR LE BOUTON.
@@ -136,7 +156,7 @@ verifier('l\'écran des Options s\'ouvre et propose d\'acheter',
  */
 verifier('  …avec le prix écrit sur le bouton',
   boutons.some(t => /\d[,.]\d\d\s*€/.test(t)),
-  boutons.find(t => /Acheter|Buy/i.test(t)) ?? '');
+  boutons.find(t => /PRENDS|TÊTE|PAIX|TAKE|FACE|ALONE/i.test(t)) ?? '');
 
 /*
  * CE QUE L'ÉCRAN DISAIT AVANT DE CLIQUER.
@@ -150,9 +170,9 @@ verifier('  …avec le prix écrit sur le bouton',
 const avantClic = await p.evaluate(() => document.body.innerText);
 
 for (const [nom, motif, cle] of [
-  ['Sans pub', 'Acheter « Sans pub »|Buy "Ad-free"', 'roi-du-carton-noads'],
-  ['l\'Atelier', 'Ouvrir l\'Atelier|Open the Workshop', 'roi-du-carton-atelier'],
-  ['le Pack', 'Prendre le Pack|Get the Bundle', null],
+  ['La paix', 'FICHE LA PAIX|LEAVE ME ALONE', 'roi-du-carton-noads'],
+  ['l\'Atelier', 'ME FAIRE UNE TÊTE|GIVE ME A FACE', 'roi-du-carton-atelier'],
+  ['Tout le carton', 'JE PRENDS TOUT|TAKE IT ALL', null],
 ]) {
   const trouve = await clic(motif);
   await pause(700);
@@ -173,7 +193,7 @@ for (const [nom, motif, cle] of [
  * avoir, puisqu'il ne pouvait pas échouer.
  */
 const dit = await p.evaluate(() => document.body.innerText);
-const MESSAGE = /Boutique indisponible|Store unavailable|Achat non abouti|Purchase not completed/i;
+const MESSAGE = /pas à son carton|Nobody at the stall|fait la sourde|isn't listening/i;
 verifier('  …et le dit au joueur',
   MESSAGE.test(dit) && !MESSAGE.test(avantClic),
   MESSAGE.test(avantClic) ? 'le message était déjà là : contrôle vide'

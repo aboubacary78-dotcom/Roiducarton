@@ -55,6 +55,7 @@ const charge = {
   penderie: () => import('@/components/game/WardrobeScreen'),
   registre: () => import('@/components/game/DeathRegistryScreen'),
   cimetiere: () => import('@/components/game/CimetiereScreen'),
+  marcheNoir: () => import('@/components/game/MarcheNoirScreen'),
 };
 
 const CombatScreen = lazy(charge.combat);
@@ -67,6 +68,7 @@ const SettingsScreen = lazy(charge.options);
 const WardrobeScreen = lazy(charge.penderie);
 const DeathRegistryScreen = lazy(charge.registre);
 const CimetiereScreen = lazy(charge.cimetiere);
+const MarcheNoirScreen = lazy(charge.marcheNoir);
 
 /**
  * Va chercher tous les écrans découpés pendant que le joueur lit l'écran-titre.
@@ -116,6 +118,7 @@ function renderScreen(screen: string) {
     case 'game-over': return <GameOverScreen />;
     case 'registre': return <DeathRegistryScreen />;
     case 'cimetiere': return <CimetiereScreen />;
+    case 'marche-noir': return <MarcheNoirScreen />;
     default: return <MainScreen />;
   }
 }
@@ -190,6 +193,11 @@ export default function Home() {
    * accidentels — que les régies sanctionnent, et qui font désinstaller.
    */
   useEffect(() => {
+    /*
+     * Le marché noir n'est PAS dans cette liste, et c'est délibéré : poser une
+     * bannière publicitaire sur l'écran qui vend « plus de publicité » serait
+     * la meilleure démonstration qu'on ne croit pas à ce qu'on vend.
+     */
     const ECRANS_DE_LECTURE = ['registre', 'cimetiere', 'shop', 'game-over'];
     if (ECRANS_DE_LECTURE.includes(state.screen)) showBanner();
     else hideBanner();

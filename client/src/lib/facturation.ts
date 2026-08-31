@@ -97,6 +97,56 @@ export function prixAffiche(p: Produit): string {
 }
 
 /*
+ * LE TOTAL DES DEUX PIÈCES, POUR LE PRIX BARRÉ DU LOT.
+ *
+ * Il ne s'écrit pas en dur : c'est LE chiffre que la loi regarde. Un prix
+ * barré doit correspondre à un prix réellement pratiqué, et celui-ci l'est —
+ * les deux pièces sont vendues juste en dessous, au même instant.
+ *
+ * Deux prix localisés ne s'additionnent pas comme des chaînes : « 2,99 € » et
+ * « 4,99 € » donneraient « 2,99 €4,99 € ». On additionne donc les micro-unités
+ * rendues par le magasin, puis on formate dans SA devise.
+ *
+ * Et on rend `null` quand le magasin n'a pas répondu — sur le web, ou avant
+ * son premier message. Un total calculé sur les prix de secours serait juste
+ * en euros et faux partout ailleurs ; mieux vaut ne rien barrer du tout que
+ * barrer un montant inventé.
+ */
+export function totalBarre(a: Produit, b: Produit): string | null {
+  const store = magasin();
+  /*
+   * EN DÉVELOPPEMENT SEULEMENT : un total de démonstration.
+   *
+   * Sans magasin, cette fonction rend `null`, et le couple « ancien prix barré
+   * / nouveau prix » ne s'affiche donc JAMAIS dans un navigateur. Résultat :
+   * deux éléments de l'écran le plus important du jeu — le trait de marqueur
+   * et l'étiquette pendue — ne pouvaient être vus qu'une fois l'application
+   * installée depuis le Play Store, c'est-à-dire beaucoup trop tard pour les
+   * corriger.
+   *
+   * `import.meta.env.DEV` est remplacé par `false` à la compilation : ce bloc
+   * n'existe ni dans l'APK, ni dans un site construit. Le contrôle
+   * `scripts/test-facturation.mjs` vérifie d'ailleurs qu'aucun raccourci de
+   * développement ne survit au build.
+   */
+  if (!store && import.meta.env.DEV) {
+    const n = (p: Produit) => Number(PRIX_DE_SECOURS[p].replace(/[^\d,]/g, '').replace(',', '.'));
+    return `${(n(a) + n(b)).toFixed(2).replace('.', ',')} €`;
+  }
+  if (!store) return null;
+  const pa = store.get(a)?.pricing;
+  const pb = store.get(b)?.pricing;
+  if (!pa?.priceMicros || !pb?.priceMicros || !pa.currency) return null;
+  try {
+    return new Intl.NumberFormat(navigator.language, {
+      style: 'currency', currency: pa.currency,
+    }).format((pa.priceMicros + pb.priceMicros) / 1e6);
+  } catch {
+    return null;
+  }
+}
+
+/*
  * LE MAGASIN RÉPOND APRÈS L'ÉCRAN.
  *
  * Les prix arrivent de Google une à deux secondes après le lancement. Un

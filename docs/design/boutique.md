@@ -109,7 +109,20 @@ déjà, et lui vendre le lot lui ferait racheter ce qu'il a.
 
 ## 2. Architecture visuelle
 
-Écran dédié, `BoutiqueScreen.tsx`, 390 × 844 de référence.
+> **✅ FAIT — `client/src/components/game/MarcheNoirScreen.tsx`.** L'écran
+> existe, avec les sept images. Le nom `boutique` était déjà pris par le
+> magasin en jeu, celui où l'on dépense l'argent du personnage : deux écrans
+> nommés pareil auraient fini par se croiser.
+>
+> Deux écarts assumés avec ce qui suit. **Le couple prix barré / étiquette ne
+> s'affiche que si le magasin a répondu** : `totalBarre` rend `null` sans lui,
+> et montrer l'étiquette seule ferait un renvoi vers un barré absent et un prix
+> écrit deux fois. **Et les réponses aux objections sont posées une seule fois**,
+> sous les trois tuiles : deux phrases identiques à trois centimètres d'écart se
+> lisent comme un copier-coller, et une règle de boutique énoncée une fois
+> inspire plus confiance que répétée trois.
+
+Écran dédié, 390 × 844 de référence.
 
 ### Le squelette
 

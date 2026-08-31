@@ -5,8 +5,8 @@ import { getVolume, getVolumeFond, isMuted, playBack, playDignityTier, playMoney
 import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
-import { isAdsRemoved, isAtelierOwned, packUtile, purchaseAtelier, purchasePack, purchaseRemoveAds, reopenConsentForm, restaurerAchats } from '@/lib/ads';
-import { etatMagasin, prixAffiche, surMagasinChange } from '@/lib/facturation';
+import { isAdsRemoved, isAtelierOwned, reopenConsentForm, restaurerAchats } from '@/lib/ads';
+import { surMagasinChange } from '@/lib/facturation';
 import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
 import { resetCoaches } from '@/lib/coach';
@@ -32,7 +32,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.63.0';
+const APP_VERSION = '3.64.0';
 
 /*
  * UN CURSEUR EN CARTON.
@@ -86,71 +86,18 @@ export default function SettingsScreen() {
   const [volFond, setVolFond] = useState(getVolumeFond());
   const [vibre, setVibre] = useState(hapticsEnabled());
   const [rappels, setRappels] = useState(notificationsEnabled());
-  const [noAds, setNoAds] = useState(isAdsRemoved());
-  const [buying, setBuying] = useState(false);
-  const [atelier, setAtelier] = useState(isAtelierOwned());
-  const [buyingAtelier, setBuyingAtelier] = useState(false);
-  // Le pack ne s'affiche que pour qui ne possède ni l'un ni l'autre : le
-  // proposer à qui a déjà une moitié lui ferait racheter ce qu'il a.
-  const [pack, setPack] = useState(packUtile());
-  const [buyingPack, setBuyingPack] = useState(false);
   const [restaurant, setRestaurant] = useState(false);
   const [consentBusy, setConsentBusy] = useState(false);
 
   /*
-   * LES PRIX VIENNENT DU MAGASIN, ET IL RÉPOND APRÈS NOUS.
-   *
-   * Google convertit dans la monnaie du joueur, taxes locales comprises : un
-   * Canadien ne doit pas lire « 2,99 € ». Sa réponse arrive une à deux
-   * secondes après le lancement, donc éventuellement APRÈS l'ouverture de cet
-   * écran — d'où l'abonnement, sans lequel les prix de secours resteraient
-   * affichés pour toujours.
+   * L'écran ne vend plus rien — les trois achats ont leur propre écran — mais
+   * il montre encore ce qu'on POSSÈDE, et il propose la restauration. Il doit
+   * donc se redessiner quand le magasin finit par répondre : sans ça, un
+   * joueur qui restaure verrait la porte du marché noir rester ouverte alors
+   * qu'il vient de tout retrouver.
    */
   const [, redessiner] = useState(0);
   useEffect(() => surMagasinChange(() => redessiner(n => n + 1)), []);
-  const magasinMuet = etatMagasin().indisponible;
-
-  /*
-   * UN ACHAT QUI ÉCHOUE DOIT LE DIRE.
-   *
-   * Tant que « acheter » voulait dire « ouvrir gratuitement », il ne pouvait
-   * pas échouer : le bouton n'avait aucun cas négatif à traiter. Maintenant
-   * qu'un vrai paiement est au bout, il y en a trois — refus de la banque,
-   * fenêtre fermée d'un geste, magasin injoignable — et sans ce message le
-   * joueur verrait le bouton cesser de tourner sans rien lui dire.
-   */
-  function echecAchat() {
-    pushToast(
-      magasinMuet
-        ? tr('Boutique indisponible pour l\'instant.', 'Store unavailable right now.')
-        : tr('Achat non abouti.', 'Purchase not completed.'),
-      { emoji: 'ℹ️', tone: 'info' },
-    );
-  }
-
-  async function handleBuyPack() {
-    if (buyingPack) return;
-    setBuyingPack(true);
-    const ok = await purchasePack();
-    if (ok) { setNoAds(true); setAtelier(true); setPack(false); } else echecAchat();
-    setBuyingPack(false);
-  }
-
-  async function handleBuyAtelier() {
-    if (buyingAtelier || atelier) return;
-    setBuyingAtelier(true);
-    const ok = await purchaseAtelier();
-    if (ok) { setAtelier(true); setPack(false); } else echecAchat();
-    setBuyingAtelier(false);
-  }
-
-  async function handleBuyNoAds() {
-    if (buying || noAds) return;
-    setBuying(true);
-    const ok = await purchaseRemoveAds();
-    if (ok) { setNoAds(true); setPack(false); } else echecAchat();
-    setBuying(false);
-  }
 
   return (
     <div className="min-h-screen bg-texture p-5 flex flex-col gap-4">
@@ -318,110 +265,41 @@ export default function SettingsScreen() {
         </button>
       </motion.section>
 
-      {/* Le pack — seulement pour qui ne possède encore rien */}
-      {pack && (
+      {/*
+        LES TROIS ACHATS ONT DÉMÉNAGÉ.
+
+        Ils vivaient ici, entre le volume sonore et le formulaire de
+        consentement — l'endroit où l'on va quand quelque chose ne va pas, pas
+        quand on a envie de quelque chose. Ils ont maintenant leur écran, avec
+        des images et de la place pour dire ce qu'ils font.
+
+        Il reste une PORTE, et rien d'autre : dupliquer les cartes ici
+        obligerait à maintenir deux fois les mêmes textes, et l'une des deux
+        finirait par mentir.
+      */}
+      {!(isAdsRemoved() && isAtelierOwned()) && (
         <motion.section
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.085 }}
           className="craft-card p-4"
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-base font-semibold text-[#2A1F1A]">🎁 {tr('Le Pack', 'The Bundle')}</span>
-            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#B8860B]/15 text-[#8B6B4A]">
-              {tr('1 € économisé', 'Save €1')}
-            </span>
-          </div>
-          <p className="text-xs text-[#6B5740] mb-3 leading-relaxed">
-            {tr(
-              'Sans pub et l\'Atelier réunis : plus d\'écrans de publicité, et le visage comme les traits de chaque personnage entre vos mains.',
-              'Ad-free and the Workshop together: no more full-screen ads, and every character\'s face and traits in your hands.',
-            )}
-          </p>
           <button
-            onClick={() => { playMoneyOut(); handleBuyPack(); }}
-            disabled={buyingPack}
-            className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg, #B8860B, #8B6B0A)', boxShadow: '0 4px 12px rgba(184,134,11,0.28)' }}
+            onClick={() => { playPage(); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
+            className="w-full flex items-center justify-between"
           >
-            {buyingPack ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : `${tr('Prendre le Pack', 'Get the Bundle')} — ${prixAffiche('pack_complet')}`}
+            <span className="text-left">
+              <span className="block text-base font-semibold text-[#2A1F1A]">
+                🏷️ {tr('Le marché noir', 'The black market')}
+              </span>
+              <span className="block text-xs text-[#8B6B4A] mt-0.5">
+                {tr('La paix, et une tête à vous.', 'Peace, and a face of your own.')}
+              </span>
+            </span>
+            <span className="text-[#A08B70] shrink-0">→</span>
           </button>
         </motion.section>
       )}
-
-      {/* Sans pub */}
-      <motion.section
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.09 }}
-        className="craft-card p-4"
-      >
-        {noAds ? (
-          <div className="flex items-center justify-between">
-            <span className="text-base font-semibold text-[#2A1F1A]">🚫 {tr('Sans pub', 'Ad-free')}</span>
-            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#4A9B5F]/15 text-[#3d8b4f]">
-              {tr('✅ Actif, merci !', '✅ Active, thanks!')}
-            </span>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-base font-semibold text-[#2A1F1A]">🚫 {tr('Supprimer les pubs', 'Remove ads')}</span>
-            </div>
-            <p className="text-xs text-[#8B6B4A] mb-3">
-              {tr(
-                'Supprime les publicités imposées (plein écran). Les bonus vidéo facultatifs (seconde chance, gains doublés…) restent disponibles.',
-                'Removes forced full-screen ads. Optional reward videos (second chance, doubled gains…) stay available.',
-              )}
-            </p>
-            <button
-              onClick={() => { playMoneyOut(); handleBuyNoAds(); }}
-              disabled={buying}
-              className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
-              style={{ background: 'linear-gradient(135deg, #7B68EE, #5A4ABB)', boxShadow: '0 4px 12px rgba(123,104,238,0.25)' }}
-            >
-              {buying ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : `${tr('Acheter « Sans pub »', 'Buy "Ad-free"')} — ${prixAffiche('noads')}`}
-            </button>
-          </>
-        )}
-      </motion.section>
-
-      {/* L'Atelier — le second achat, indépendant du premier */}
-      <motion.section
-        initial={{ y: 10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="craft-card p-4"
-      >
-        {atelier ? (
-          <div className="flex items-center justify-between">
-            <span className="text-base font-semibold text-[#2A1F1A]">🎨 {tr('L\'Atelier', 'The Workshop')}</span>
-            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-[#4A9B5F]/15 text-[#3d8b4f]">
-              {tr('✅ Ouvert', '✅ Open')}
-            </span>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-base font-semibold text-[#2A1F1A]">🎨 {tr('L\'Atelier', 'The Workshop')}</span>
-            </div>
-            <p className="text-xs text-[#6B5740] mb-3 leading-relaxed">
-              {tr(
-                'Composez le visage de votre personnage — teint, coiffure, regard, barbe, cicatrice — et choisissez ses deux traits de départ au lieu de les subir. Ce que vous ne touchez pas reste tiré au sort.',
-                'Compose your character\'s face — skin, hair, eyes, beard, scar — and pick their two starting traits instead of taking what you\'re given. Anything you leave alone stays randomly drawn.',
-              )}
-            </p>
-            <button
-              onClick={() => { playMoneyOut(); handleBuyAtelier(); }}
-              disabled={buyingAtelier}
-              className="w-full py-3 text-sm font-semibold text-white rounded-xl disabled:opacity-60"
-              style={{ background: 'linear-gradient(135deg, #C4723A, #9B5B3A)', boxShadow: '0 4px 12px rgba(196,114,58,0.25)' }}
-            >
-              {buyingAtelier ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : `${tr('Ouvrir l\'Atelier', 'Open the Workshop')} — ${prixAffiche('atelier')}`}
-            </button>
-          </>
-        )}
-      </motion.section>
 
       {/*
         * RESTAURER — visible en permanence, y compris pour qui possède déjà.
@@ -444,9 +322,10 @@ export default function SettingsScreen() {
             setRestaurant(true);
             const r = await restaurerAchats();
             setRestaurant(false);
-            setNoAds(isAdsRemoved());
-            setAtelier(isAtelierOwned());
-            setPack(packUtile());
+            // La possession vit dans `ads.ts`, pas ici : on redessine, et
+            // l'écran relit. Trois copies locales de la même vérité, c'était
+            // trois occasions de la laisser diverger.
+            redessiner(n => n + 1);
             pushToast(
               r.retrouve
                 ? tr('Achats restaurés !', 'Purchases restored!')
