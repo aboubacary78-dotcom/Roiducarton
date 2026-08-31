@@ -326,6 +326,18 @@ moment où il cherche ce bouton. On écrit la sienne.
 
 ## 4. Les points d'entrée — c'est là que se joue la conversion
 
+> **✅ FAIT.** La mort (`GameOverScreen`), la garde-robe (`WardrobeScreen`), et
+> l'après-publicité avec la trêve (`OffreDeLaRue` + `enTreve` dans `ads.ts`).
+> `scripts/test-points-entree.mjs` les garde — et il vérifie surtout le cas
+> INVERSE : que rien ne s'affiche après le premier plein écran, ni chez qui a
+> déjà payé. Vérifier qu'une carte apparaît ne prouve rien si elle apparaît
+> toujours.
+>
+> Une limite connue : la carte « c'était ça, tout le temps » part d'un minuteur
+> de dix minutes. Application fermée entre-temps, elle ne part pas. La rattraper
+> au lancement suivant ferait arriver une fin de cadeau sans cadeau — pire que
+> de la rater.
+
 Un onglet Boutique ne convertit presque personne : on n'y va que si on a déjà
 décidé. Ce qui convertit, c'est de proposer la chose **au moment où elle
 manque**.

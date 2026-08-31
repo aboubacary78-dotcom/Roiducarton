@@ -1,6 +1,6 @@
 {
   "name": "roi-du-carton",
-  "version": "3.64.0",
+  "version": "3.65.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -18,7 +18,8 @@
     "cap:open:ios": "cap open ios",
     "planche-etat": "esbuild scripts/planche-etat.tsx --bundle --format=esm --platform=node --jsx=automatic --packages=external --outfile=scripts/.planche-etat.mjs --log-level=error && node scripts/.planche-etat.mjs",
     "test-etat": "esbuild scripts/test-etat-visage.tsx --bundle --format=esm --platform=node --jsx=automatic --packages=external --outfile=scripts/.test-etat.mjs --log-level=error && node scripts/.test-etat.mjs",
-    "test-facturation": "node scripts/test-facturation.mjs"
+    "test-facturation": "node scripts/test-facturation.mjs",
+    "test-points-entree": "node scripts/test-points-entree.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^6",

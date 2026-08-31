@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import CardboardAvatar from './CardboardAvatar';
+import SafeImg from './SafeImg';
+import { isAtelierOwned } from '@/lib/ads';
 import { playBack, playClick, playObjetEquipe, playTab } from '@/lib/sound';
 import {
   ACCESSORIES,
@@ -96,6 +98,40 @@ export default function WardrobeScreen() {
           </p>
         </div>
       </motion.div>
+
+      {/*
+        LE CONTEXTE D'IDENTITÉ.
+
+        On est ici en train de se regarder et de s'habiller : c'est le second
+        meilleur moment du jeu pour parler de l'Atelier, après la mort. La
+        garde-robe change la TENUE ; l'Atelier change la TÊTE — la carte le dit
+        comme ça, parce que c'est précisément la question qu'on se pose devant
+        son propre portrait.
+
+        Elle disparaît pour qui l'a déjà : rien de plus agaçant qu'une boutique
+        qui vend ce qu'on a payé.
+      */}
+      {!isAtelierOwned() && (
+        <motion.button
+          initial={{ y: 8, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.06 }}
+          onClick={() => { playTab(); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
+          className="craft-card overflow-hidden flex items-stretch gap-3 text-left"
+        >
+          <SafeImg src="/assets/boutique-atelier.webp" alt="" className="w-24 object-cover shrink-0" />
+          <span className="py-3 pr-3 min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-[#2A1F1A] leading-tight">
+              {tr('La tenue, oui. Et la tête ?', 'The outfit, sure. And the face?')}
+            </span>
+            <span className="block text-[11px] text-[#8B6B4A] leading-tight mt-0.5">
+              {tr('L\'Atelier compose le visage et choisit les traits de départ.',
+                  'The Workshop composes the face and picks the starting traits.')}
+            </span>
+          </span>
+          <span className="self-center pr-3 text-[#A08B70]">→</span>
+        </motion.button>
+      )}
 
       {/* Onglets */}
       <div className="flex gap-2">

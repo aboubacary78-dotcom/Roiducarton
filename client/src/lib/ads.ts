@@ -448,6 +448,67 @@ const CLE_PARTIES = 'roi-du-carton-parties-finies';
 let dernierInterstitiel = 0;
 let premiereMortDeLaSession = true;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LA TRÊVE — dix minutes offertes, et c'est le meilleur argument de vente
+ *
+ * On ne vend pas « la paix » en la décrivant : on la fait ESSAYER. Après le
+ * deuxième plein écran d'une session, le jeu offre dix minutes sans aucune
+ * publicité, annoncées comme un cadeau. À l'expiration, il le dit — et c'est
+ * ce moment-là, pas la carte d'ouverture, qui vend.
+ *
+ * Une chose possédée puis retirée pèse environ le double d'une chose jamais
+ * eue : c'est le seul levier de tout le dossier qui passe par l'expérience et
+ * non par un texte. Ce qu'il coûte est connu et minuscule — deux impressions
+ * chez quelqu'un qui n'achètera jamais.
+ *
+ * Et il ne se déclenche qu'UNE FOIS par session : le répéter en ferait une
+ * mécanique de jeu, donc quelque chose qu'on attend au lieu de quelque chose
+ * qu'on regrette.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+const TREVE_MS = 10 * 60_000;
+/** Après combien de pleins écrans la trêve est offerte. */
+const TREVE_APRES = 2;
+
+let interstitielsDeLaSession = 0;
+let treveJusqua = 0;
+let treveDejaOfferte = false;
+
+/** La trêve court-elle en ce moment ? */
+export function enTreve(maintenant = Date.now()): boolean {
+  return maintenant < treveJusqua;
+}
+
+/** Ce qu'il reste de trêve, en millisecondes. Zéro si elle est finie. */
+export function resteDeTreve(maintenant = Date.now()): number {
+  return Math.max(0, treveJusqua - maintenant);
+}
+
+/*
+ * CE QUI ÉCOUTE LES PLEINS ÉCRANS.
+ *
+ * Les deux propositions qui suivent une publicité — l'offre de trêve, puis la
+ * carte « c'était ça, tout le temps » — n'ont rien à faire dans ce module :
+ * elles sont visuelles. Il rend donc un signal, et l'interface s'y abonne.
+ *
+ * `n` est le rang du plein écran dans la session. C'est lui qui décide : on ne
+ * propose jamais rien après le PREMIER, parce qu'à ce moment-là le joueur n'a
+ * pas encore de raison de trouver ça pénible.
+ */
+export type SignalPub = { n: number; treveOfferte: boolean };
+const auditeurs = new Set<(s: SignalPub) => void>();
+export function surInterstitiel(cb: (s: SignalPub) => void): () => void {
+  auditeurs.add(cb);
+  return () => auditeurs.delete(cb);
+}
+
+/** Remet la session à zéro. Sert aux tests. */
+export function reinitialiserTreve(): void {
+  interstitielsDeLaSession = 0;
+  treveJusqua = 0;
+  treveDejaOfferte = false;
+}
+
 /** Combien de parties ce joueur a-t-il terminées, toutes sessions confondues ? */
 function partiesFinies(): number {
   try { return Number(localStorage.getItem(CLE_PARTIES) || '0'); } catch { return 0; }
@@ -474,6 +535,11 @@ export function partieTerminee(): void {
  */
 export function verdictInterstitiel(maintenant = Date.now()): { montrer: boolean; raison: string } {
   if (adsRemoved) return { montrer: false, raison: 'sans-pub acheté' };
+  /*
+   * La trêve passe avant tout le reste : une publicité pendant les dix minutes
+   * offertes annulerait le cadeau, et surtout la démonstration.
+   */
+  if (enTreve(maintenant)) return { montrer: false, raison: 'trêve en cours' };
   if (partiesFinies() <= PARTIES_DE_GRACE) {
     return { montrer: false, raison: `période de grâce (${partiesFinies()}/${PARTIES_DE_GRACE} parties)` };
   }
@@ -491,8 +557,15 @@ export function reinitialiserInterstitiel(): void {
   premiereMortDeLaSession = true;
 }
 
-export async function showInterstitial(): Promise<void> {
-  const verdict = verdictInterstitiel();
+/*
+ * `maintenant` n'est pas un caprice de test : c'est la MÊME couture que celle
+ * de `verdictInterstitiel`, et pour la même raison. Le jeu impose quatre-vingt
+ * -dix secondes entre deux pleins écrans ; sans pouvoir avancer l'horloge, la
+ * seule façon d'observer le deuxième — donc la trêve, donc tout ce qui en
+ * dépend — serait d'attendre une minute et demie par vérification.
+ */
+export async function showInterstitial(maintenant = Date.now()): Promise<void> {
+  const verdict = verdictInterstitiel(maintenant);
 
   /*
    * Le drapeau de première mort tombe même quand rien ne part : c'est la
@@ -502,8 +575,29 @@ export async function showInterstitial(): Promise<void> {
    */
   premiereMortDeLaSession = false;
 
-  if (!verdict.montrer || !isNative()) return;
-  dernierInterstitiel = Date.now();
+  if (!verdict.montrer) return;
+
+  /*
+   * LE COMPTEUR MONTE MÊME SUR LE WEB.
+   *
+   * `isNative()` gardait autrefois toute la suite, donc le rang du plein écran
+   * ne s'incrémentait jamais dans un navigateur : la trêve et la proposition
+   * qui la suit étaient invisibles en développement comme en test, c'est-à-dire
+   * partout où on aurait pu les voir. La publicité elle-même reste, elle, bien
+   * réservée à l'application.
+   */
+  dernierInterstitiel = maintenant;
+  interstitielsDeLaSession++;
+
+  const offrirLaTreve = interstitielsDeLaSession === TREVE_APRES && !treveDejaOfferte;
+  if (offrirLaTreve) {
+    treveDejaOfferte = true;
+    treveJusqua = maintenant + TREVE_MS;
+  }
+  const signal: SignalPub = { n: interstitielsDeLaSession, treveOfferte: offrirLaTreve };
+  auditeurs.forEach(cb => { try { cb(signal); } catch { /* un écran démonté */ } });
+
+  if (!isNative()) return;
 
   try {
     const { AdMob } = await import('@capacitor-community/admob');
@@ -732,5 +826,6 @@ if (typeof window !== 'undefined') {
     canOfferRewarded, showRewarded, bonusFr, bonusEn, bonusOffert,
     isAdsRemoved, setAdsRemoved, noterEngagement, engagementsAvantBonus,
     isAtelierOwned, setAtelierOwned, packUtile,
+    verdictInterstitiel, showInterstitial, enTreve, resteDeTreve, reinitialiserTreve,
   };
 }

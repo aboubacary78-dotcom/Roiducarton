@@ -12,6 +12,7 @@ import { screenIn } from '@/lib/anim';
 import { tapOrigin } from '@/lib/tapOrigin';
 import { setAmbience, setWeatherLayer, weatherLayerFor, type AmbienceId } from '@/lib/ambience';
 import TitleScreen from '@/components/game/TitleScreen';
+import OffreDeLaRue from '@/components/game/OffreDeLaRue';
 import CharacterSelect from '@/components/game/CharacterSelect';
 import MainScreen from '@/components/game/MainScreen';
 import EventScreen from '@/components/game/EventScreen';
@@ -259,6 +260,16 @@ export default function Home() {
             au-dessus de tout, y compris de l'écran-titre — c'est le rendez-vous
             quotidien, il ne dépend pas d'une partie en cours. */}
         <CartonMatinOverlay />
+
+        {/*
+          CE QU'ON PROPOSE APRÈS UNE PUBLICITÉ.
+
+          Posé ici et pas dans un écran : l'interstitiel part de l'écran de
+          fin, mais la trêve qu'il ouvre dure dix minutes et se termine
+          n'importe où. Accroché à un écran, le cadeau se serait annoncé et
+          n'aurait jamais eu de fin.
+        */}
+        <OffreDeLaRue />
 
         {/* Notification de succès (accessoire débloqué), au-dessus de tout écran */}
         <AchievementToast />

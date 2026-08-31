@@ -3,6 +3,7 @@ import type { InventoryItem } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { bonusEn, bonusFr, isAtelierOwned, partieTerminee, showInterstitial, showRewarded } from '@/lib/ads';
+import SafeImg from './SafeImg';
 import PlayerFace from './PlayerFace';
 import KenBurnsImage from './KenBurnsImage';
 import { useLang, tr, tc } from '@/lib/lang';
@@ -898,6 +899,42 @@ export default function GameOverScreen() {
           }}
         >
           {reviving ? tr('⏳ Chargement…', '⏳ Loading…') : tr(bonusFr('Seconde chance'), bonusEn('Second chance'))}
+        </motion.button>
+      )}
+
+      {/*
+        LE SEUL MOMENT OÙ L'ATELIER VAUT SON PRIX.
+        ────────────────────────────────────────────────────────────────────
+        Le personnage vient de mourir, et le suivant sera tiré au sort comme
+        celui-là. C'est le seul instant du jeu où « je recommence » est actif
+        dans la tête du joueur, et c'est exactement ce que l'Atelier vend.
+
+        Ailleurs, la même carte serait de la réclame. Ici, elle répond à la
+        question qu'il est déjà en train de se poser — et c'est toute la
+        différence entre proposer et harceler.
+
+        Pour qui l'a déjà acheté, rien ne s'affiche : le bouton de reprise, un
+        peu plus bas, dit déjà « Composer une nouvelle âme perdue ».
+      */}
+      {!atelier && (
+        <motion.button
+          initial={{ y: 15, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => { playCard(); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
+          className="w-full max-w-sm rounded-xl overflow-hidden text-left flex items-stretch gap-3 bg-[#2A1A2E]/60 border border-[#4A3048]"
+        >
+          <SafeImg src="/assets/boutique-atelier.webp" alt="" className="w-20 object-cover shrink-0" />
+          <span className="py-2.5 pr-3 min-w-0">
+            <span className="block text-[13px] font-semibold text-[#E8A87C] leading-tight">
+              {tr('Le prochain, c\'est vous qui le faites.', 'The next one, you make yourself.')}
+            </span>
+            <span className="block text-[11px] text-[#A88FA8] leading-tight mt-0.5">
+              {tr('Son visage, et deux atouts choisis au lieu d\'être subis.',
+                  'Their face, and two traits chosen instead of dealt.')}
+            </span>
+          </span>
         </motion.button>
       )}
 
