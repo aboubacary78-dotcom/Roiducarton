@@ -335,7 +335,11 @@ Dans Xcode :
       Si régénération il faut : les consignes de fabrication de 382 des 405
       fichiers sont conservées dans `docs/prompts-son/`, et les noms de
       fichiers ne changeraient pas, donc aucune ligne de code à toucher.
-- [ ] Achat « Sans pub » réellement branché (voir §4)
+- [x] Achat « Sans pub » réellement branché (voir §4) · `lib/facturation.ts`
+      sur cordova-plugin-purchase, les trois produits déclarés côté code. Il
+      reste à les **créer dans la Play Console** sous les mêmes identifiants
+      (`noads`, `atelier`, `pack_complet`), sans quoi le magasin répondra
+      « produit inconnu » et l'écran affichera ses prix de secours.
 - [ ] Captures d'écran pour chaque taille demandée
 - [ ] Compilé et testé sur un vrai appareil
 - [ ] iOS : plateforme générée sur un Mac, puis les mêmes réglages qu'Android
