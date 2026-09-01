@@ -48,6 +48,26 @@ var ACCESSORIES = [
   { id: "cape", name: "Cape de h\xE9ros", slot: "neck", emoji: "\u{1F9B8}" },
   { id: "pearls", name: "Collier de perles", slot: "neck", emoji: "\u{1F4FF}" },
   { id: "whistle", name: "Sifflet d'arbitre", slot: "neck", emoji: "\u{1F4EF}" },
+  /*
+   * LE SEUL ACCESSOIRE QU'AUCUN SUCCÈS NE DONNE.
+   *
+   * Le vendeur du marché noir en met un au cou de qui pousse sa porte la
+   * première fois, sans rien demander et sans le rappeler ensuite. Un cadeau
+   * conditionné à un achat n'est pas un cadeau, c'est une réclame, et ça se
+   * lit en une seconde.
+   *
+   * Il fallait qu'il n'appartienne à personne d'autre : offrir la récompense
+   * d'un succès aurait retiré au joueur la raison d'aller le chercher, et
+   * laissé dans la liste un succès dont le lot est déjà au cou.
+   */
+  {
+    id: "jeton-marche",
+    name: "Jeton du march\xE9",
+    slot: "neck",
+    emoji: "\u{1F39F}\uFE0F",
+    source: "Le vendeur du march\xE9 noir",
+    sourceEn: "The black-market seller"
+  },
   // Fonds (9)
   { id: "gold-bg", name: "Aura dor\xE9e", slot: "bg", emoji: "\u2728" },
   { id: "rainbow-bg", name: "Fond arc-en-ciel", slot: "bg", emoji: "\u{1F308}" },
@@ -299,7 +319,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/monet-7IyJUu/cap.js
+// ../../../tmp/monet-K7ymxB/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -9997,6 +10017,25 @@ function gameReducer(state, action) {
       if (tenue[action.slot] === action.id) delete tenue[action.slot];
       else tenue[action.slot] = action.id;
       return { ...state, character: { ...c, equipped: tenue } };
+    }
+    /*
+     * LE VISAGE QUI SÉCHAIT SUR L'ÉTABLI, RENDU À SON PERSONNAGE.
+     *
+     * Composé pendant l'essai libre, jamais payé, gardé de côté (voir
+     * `lib/etabli`). L'Atelier acheté plus tard le repose sur le personnage
+     * VIVANT, à condition que ce soit bien le même : la graine est vérifiée
+     * par l'appelant, et re-vérifiée ici, parce qu'un visage posé sur la
+     * mauvaise tête serait pire que pas de visage du tout.
+     *
+     * Les traits ne passent pas par là. Ils touchent aux règles, et les
+     * changer au milieu d'une partie entamée réécrirait sa difficulté après
+     * coup. On rend la tête, qui est ce qu'on vendait.
+     */
+    case "POSER_VISAGE": {
+      const c = state.character;
+      if (!c || c.seed !== action.seed) return state;
+      if (!action.visage || Object.keys(action.visage).length === 0) return state;
+      return { ...state, character: { ...c, visage: action.visage } };
     }
     case "COUP_DE_GRACE": {
       if (!state.character || !state.currentCombat) return state;

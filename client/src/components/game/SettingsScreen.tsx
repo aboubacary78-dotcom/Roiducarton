@@ -6,6 +6,7 @@ import { hapticsEnabled, setHapticsEnabled, haptic } from '@/lib/haptics';
 import { notificationsEnabled, setNotificationsEnabled, requestPermission, rescheduleAll } from '@/lib/notifications';
 import { loadDaily } from '@/lib/daily';
 import { isAdsRemoved, isAtelierOwned, reopenConsentForm, restaurerAchats } from '@/lib/ads';
+import { versLaBoutique } from '@/lib/mesures';
 import { surMagasinChange } from '@/lib/facturation';
 import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
@@ -32,7 +33,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.67.0';
+const APP_VERSION = '3.68.0';
 
 /*
  * UN CURSEUR EN CARTON.
@@ -285,7 +286,7 @@ export default function SettingsScreen() {
           className="craft-card p-4"
         >
           <button
-            onClick={() => { playPage(); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
+            onClick={() => { playPage(); versLaBoutique('options'); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
             className="w-full flex items-center justify-between"
           >
             <span className="text-left">

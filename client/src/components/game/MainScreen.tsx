@@ -38,6 +38,8 @@ import { loadHighScores } from '@/contexts/GameContext';
 import { loadGraves } from '@/lib/necrology';
 import { noteTap } from '@/lib/tapOrigin';
 import { prechargerActions } from '@/lib/precharge';
+import EtiquetteEtabli from './EtiquetteEtabli';
+import { versLaBoutique } from '@/lib/mesures';
 
 // Couleur du voile de lumière selon l'avancement de la journée : or du matin,
 // plein jour transparent, orange du soir, bleu de nuit. Interpolation linéaire
@@ -313,7 +315,7 @@ export default function MainScreen() {
               La mettre en avant ici ne ferait que salir le hub.
             */}
             <button
-              onClick={() => { playTab(); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
+              onClick={() => { playTab(); versLaBoutique('hub'); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-sm text-[#8B6B4A] hover:bg-[#F5EDE4] transition-colors"
               aria-label={tr('Le marché noir', 'The black market')}
             >
@@ -329,6 +331,11 @@ export default function MainScreen() {
           </div>
         </div>
       </motion.div>
+
+      {/* Ce qui sèche sur l'établi, une seule fois, et seulement si quelqu'un
+           y sèche vraiment. Posée sous l'identité parce que c'est du même
+           ordre : c'est une tête, pas une action de la journée. */}
+      <EtiquetteEtabli />
 
       {/* ---- LES DEUX BUTS, EN TÊTE ----
            Le contrat du jour donne sa direction à la journée entière, et il

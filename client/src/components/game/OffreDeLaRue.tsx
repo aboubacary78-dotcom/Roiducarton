@@ -29,6 +29,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import { isAdsRemoved, surInterstitiel, resteDeTreve } from '@/lib/ads';
 import { prixAffiche } from '@/lib/facturation';
+import { noterDegustation, versLaBoutique } from '@/lib/mesures';
 import { playCard, playToggle } from '@/lib/sound';
 import { tr } from '@/lib/lang';
 import SafeImg from './SafeImg';
@@ -49,6 +50,9 @@ export default function OffreDeLaRue() {
     if (isAdsRemoved()) return;
     if (treveOfferte) {
       playCard();
+      /* On date le cadeau : le seul chiffre qui vaille pour la dégustation
+         est l'achat qui tombe DANS la fenêtre, pas le nombre de trêves. */
+      noterDegustation();
       setCarte('cadeau');
       /*
        * LA FIN DE LA TRÊVE S'ANNONCE TOUTE SEULE.
@@ -77,9 +81,10 @@ export default function OffreDeLaRue() {
   if (!carte) return null;
 
   const fermer = () => { playToggle(); setCarte(null); };
-  const versLaBoutique = () => {
+  const ouvrirLaBoutique = () => {
     playToggle();
     setCarte(null);
+    versLaBoutique('interstitiel');
     dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' });
   };
 
@@ -137,7 +142,7 @@ export default function OffreDeLaRue() {
                   {contenu.fermeture}
                 </button>
                 <button
-                  onClick={versLaBoutique}
+                  onClick={ouvrirLaBoutique}
                   className="flex-[1.6] py-3 rounded-xl text-sm font-bold text-[#2A1F1A] active:scale-[0.98]"
                   style={{ background: '#F2E14C', boxShadow: '0 3px 0 #C9B62A' }}
                 >

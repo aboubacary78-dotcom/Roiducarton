@@ -780,6 +780,31 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
           </g>
         </g>
       )}
+      {/*
+        LE JETON DU MARCHÉ, et il est en carton comme le reste.
+
+        Les neuf autres pièces de cou sont des objets du monde, écharpe,
+        cravate, perles. Celle-ci est un morceau du décor : un rond découpé
+        dans une cannelure, une ficelle, une croix au feutre. Elle se
+        reconnaît à sa MATIÈRE avant sa forme, ce qui est la seule façon de
+        rendre lisible à 38 px un objet dont personne ne connaît le nom.
+      */}
+      {accNeck === 'jeton-marche' && (
+        <g stroke={OUTLINE} strokeWidth="1.1" strokeLinejoin="round">
+          <path d="M38 75 Q50 90 62 75" fill="none" stroke="#B99A6B" strokeWidth="1.4" />
+          <circle cx="50" cy="88" r="6.2" fill="#C9A97E" />
+          {/* La cannelure du carton, deux traits, pas une texture. */}
+          <g stroke="#A8895F" strokeWidth="0.9" opacity="0.85">
+            <line x1="45" y1="86" x2="55" y2="86" />
+            <line x1="45" y1="90" x2="55" y2="90" />
+          </g>
+          {/* La marque du vendeur, au feutre, jamais droite. */}
+          <g stroke="#2A1F1A" strokeWidth="1.5" strokeLinecap="round" opacity="0.9">
+            <line x1="47.2" y1="85.4" x2="52.6" y2="90.8" />
+            <line x1="52.8" y1="85.6" x2="47.4" y2="90.6" />
+          </g>
+        </g>
+      )}
 
       {/* Visage */}
       {accFace === 'blush' && (

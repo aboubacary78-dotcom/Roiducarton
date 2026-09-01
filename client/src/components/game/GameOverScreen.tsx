@@ -3,6 +3,7 @@ import type { InventoryItem } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { bonusEn, bonusFr, isAtelierOwned, partieTerminee, showInterstitial, showRewarded } from '@/lib/ads';
+import { versLaBoutique } from '@/lib/mesures';
 import SafeImg from './SafeImg';
 import PlayerFace from './PlayerFace';
 import KenBurnsImage from './KenBurnsImage';
@@ -922,7 +923,7 @@ export default function GameOverScreen() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.8 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => { playCard(); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
+          onClick={() => { playCard(); versLaBoutique('mort'); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
           className="w-full max-w-sm rounded-xl overflow-hidden text-left flex items-stretch gap-3 bg-[#2A1A2E]/60 border border-[#4A3048]"
         >
           <SafeImg src="/assets/boutique-atelier.webp" alt="" className="w-20 object-cover shrink-0" />

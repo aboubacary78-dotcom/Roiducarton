@@ -302,6 +302,8 @@ lit sa propre phrase, pas une injonction. « Achetez » place le vendeur devant 
 
 ### §3bis · L'étiquette de la tête inachevée
 
+> **FAIT.** `components/game/EtiquetteEtabli.tsx`, alimentée par `lib/etabli.ts`.
+
 Elle n'a rien à voir avec les tuiles : elle apparaît sur le **hub**, quand un
 visage a été composé dans l'Atelier sans être payé.
 
@@ -421,15 +423,33 @@ tuile du Pack **n'affiche pas de barré du tout** plutôt qu'un barré faux.
 
 ### Ce qu'il faut instrumenter
 
+> **FAIT.** `client/src/lib/mesures.ts`, et les points d'appel sont posés dans
+> les cinq portes, la boutique et l'essai libre.
+
 Sans mesure, tout ce document n'est qu'une opinion bien écrite.
 
 | Événement | Ce qu'il tranche |
 |---|---|
-| `boutique_vue` (+ provenance : hub / mort / interstitiel / garde-robe) | Quelle porte travaille |
+| `boutique_vue` (+ provenance : hub / mort / interstitiel / garde-robe / options) | Quelle porte travaille |
 | `tuile_vue` par produit | Ce qui est regardé sans être acheté |
 | `achat_lance` / `achat_abouti` par produit | L'abandon dans la feuille Google |
 | `atelier_essai_valide` | Si l'effet IKEA fonctionne |
 | `degustation_offerte` / `achat_dans_les_10_min` | Le seul chiffre qui vaut pour la dégustation |
+| `etabli_pose` / `etabli_suivi` | Si l'étiquette de la tête inachevée sert à quelque chose |
+| `cadeau_vendeur` | Combien de joueurs ont poussé la porte au moins une fois |
+
+**Et rien ne sort de l'appareil.** Les compteurs vivent dans le `localStorage`
+du joueur. Le jeu déclare dans sa politique de confidentialité qu'il n'embarque
+ni Analytics, ni Firebase, ni Sentry : brancher un envoi démentirait ce texte,
+obligerait à repasser par le formulaire de consentement, et changerait la
+déclaration de sécurité des données du Play Store. `brancherMesures()` existe
+pour le jour où on le voudra vraiment, et ce jour-là les trois documents
+passent avant la première ligne de code.
+
+La partie chère était de poser les points d'appel au moment où l'on écrit le
+code qu'ils observent. Retrouver plus tard les douze endroits exacts où il
+fallait compter demande de relire tout l'écran de vente ; le collecteur, lui,
+se remplace en une fonction.
 
 ---
 
@@ -447,12 +467,12 @@ intention.
 | **Effet IKEA** : on surévalue ce qu'on a fabriqué | Atelier en essai libre, paywall au clic de **valider**. On ne vend plus une fonction, on vend ce personnage-là, déjà fait, qui attend. |
 | **Engagement et cohérence** (pied dans la porte) | Le même essai libre fait passer le joueur de « je regarde » à « j'ai composé quarante secondes ». Il a déjà investi avant qu'on parle d'argent. |
 | **Aversion à la perte** | Le point de vente n° 2 est l'**écran de mort**, pas le hub : c'est le seul moment où « je recommence » est actif et où ce qu'on vient de perdre est encore chaud. |
-| **Effet Zeigarnik** : une tâche inachevée occupe l'esprit | Un visage composé mais non payé reste en attente. L'étiquette du hub est écrite au §3bis : elle apparaît **une fois**, et ne revient pas si on l'écarte, au-delà, ce n'est plus un rappel, c'est du harcèlement. |
+| **Effet Zeigarnik** : une tâche inachevée occupe l'esprit ✅ | Un visage composé mais non payé reste sur l'établi. L'étiquette du hub est écrite au §3bis : elle apparaît **une fois** dans la vie du jeu, et ne revient jamais si on l'écarte, au-delà ce n'est plus un rappel, c'est du harcèlement. Et ce n'est pas un appât : l'Atelier acheté plus tard **repose ce visage-là sur le personnage vivant**, la graine étant la même. Les traits, eux, ne suivent pas : ils touchent aux règles, et les changer au milieu d'une partie entamée en réécrirait la difficulté après coup. |
 | **Ancrage** | Le Pack en haut. Le premier prix lu sert de référence à tous les suivants, et fait lire l'Atelier seul comme un repli raisonnable. |
-| **Réciprocité** | À la première ouverture de la boutique, le vendeur donne un accessoire de garde-robe. Gratuitement, sans condition, sans le rappeler ensuite. Ce qui déclenche la réciprocité, c'est le don sans contrepartie, un « cadeau » conditionné à un achat n'en est pas un et se lit immédiatement. |
+| **Réciprocité** ✅ | À la première ouverture de la boutique, le vendeur met le **jeton du marché** au cou du joueur. Gratuitement, sans condition, sans le rappeler ensuite, et avant même qu'il ait regardé un prix. Ce qui déclenche la réciprocité, c'est le don sans contrepartie, un « cadeau » conditionné à un achat n'en est pas un et se lit immédiatement. C'est le **seul des cinquante et un accessoires qu'aucun succès ne donne** : offrir la récompense d'un succès aurait retiré au joueur la raison d'aller la chercher, et laissé dans la liste un succès dont le lot est déjà au cou. |
 | **Effet von Restorff** : ce qui tranche se retient | Un seul accent chaud sur tout l'écran, §2. C'est la même règle vue sous un autre nom : le fluo n'existe que sur les boutons. |
 | **Effet d'unité / complétion** | Qui possède une moitié voit l'autre présentée comme un manque, pas comme un produit : « **Il vous manque encore la paix.** » `packUtile()` masque déjà le lot dans ce cas. |
-| **Règle du pic et de la fin** | L'achat réussi n'a aujourd'hui aucun moment. Le vendeur tend un **reçu en carton**, petite animation, 800 ms, une fois. C'est le souvenir qui restera de la transaction, et il ne coûte rien. |
+| **Règle du pic et de la fin** ✅ | Le vendeur tend un **reçu en carton**, une fois, moins de deux secondes. C'est le souvenir qui restera de la transaction, et il ne coûte rien. Quand une tête séchait sur l'établi, le reçu dit en plus qu'elle est sortie : une livraison qui ne se voit pas n'a pas eu lieu. |
 
 ### Les trois objections, qui valent la moitié des biais réunis
 
@@ -477,6 +497,9 @@ l'endroit précis où l'on veut qu'il n'y pense pas. On laisse Google le dire.
 
 ### La preuve sociale · sans inventer personne
 
+> **FAIT.** `LigneDuCimetiere` dans `MarcheNoirScreen`, sous les puces de
+> l'Atelier, et muette sous deux morts.
+
 Un compteur « 12 483 joueurs ont acheté » est un mensonge s'il est faux, et
 une donnée qu'on n'a pas. Mais le jeu détient une preuve bien meilleure, parce
 qu'elle est **personnelle et vérifiable par le joueur lui-même** : son
@@ -484,9 +507,15 @@ cimetière.
 
 > *« Onze morts. Onze visages tirés au sort. »*
 
-Le nombre vient de `profile.records` / de l'écran Cimetière. Il ne prouve rien
-sur les autres, il rappelle au joueur ce que **lui** a subi, et c'est
-strictement plus fort qu'une statistique inventée sur des inconnus.
+Le nombre vient de `loadGraves()`, la même source que l'écran Cimetière. Il ne
+prouve rien sur les autres, il rappelle au joueur ce que **lui** a subi, et
+c'est strictement plus fort qu'une statistique inventée sur des inconnus.
+
+Deux détails qui font tout : le nombre est écrit **en toutes lettres**, parce
+que « Onze morts » se lit comme une phrase et « 11 morts » comme un relevé de
+compteur ; et **sous deux morts la ligne se tait**. « Une mort. Un visage tiré
+au sort. » ne pèse rien, et le joueur qui vient de commencer n'a pas encore de
+raison de trouver le tirage pesant : le lui apprendre serait le lui vendre.
 
 ### Ce qu'on n'active pas, et ce que ça coûterait
 
@@ -552,6 +581,13 @@ seule façon de savoir laquelle a marché.
 | 5 | **Les points d'entrée** 2 et 3 (mort, après-interstitiel) | ½ journée | On propose la chose au moment où elle manque. |
 | 6 | **Le reçu en carton** et la ligne du cimetière | 2 h | Le pic de fin, et la seule preuve sociale honnête. |
 | 7 | **L'écran Boutique** lui-même (§2) + les images (§7) | 2 jours | Le plus long, et le moins déterminant. |
+| 8 | **L'établi** (§3bis), le **cadeau du vendeur** et les **mesures** | 1 journée | Zeigarnik, réciprocité, et de quoi savoir laquelle des sept lignes précédentes a marché. |
+
+**Les huit lignes sont faites.** Ce qui reste n'est plus du dessin ni du
+texte : ce sont les portes du Play Store, listées dans `STORE_PUBLISHING.md`.
+Les contrôles vivent dans `pnpm test-etabli-atelier` (les règles, sur le vrai
+réducteur) et `pnpm test-boutique-cadeau` (ce que le joueur voit, sur le build
+de production).
 
 Un désaccord assumé avec l'intuition habituelle : le bel écran arrive en
 dernier. Il rend l'offre présentable ; ce sont les six premières lignes qui la

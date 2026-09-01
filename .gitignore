@@ -109,6 +109,11 @@ temp/
 .webdev/
 .project-config.json
 
+# Les paquets fabriqués par les suites de test (esbuild) : ils se régénèrent à
+# chaque exécution. Trois d'entre eux ont été suivis par accident avant cette
+# ligne et le restent, git n'ignorant que ce qu'il ne suit pas déjà.
+.bundle-test-*.mjs
+
 # Capacitor, LES DOSSIERS NATIFS SONT SUIVIS, ET C'EST VOULU.
 #
 # Ils l'étaient « parce qu'ils se régénèrent ». Ce n'est vrai que du gabarit.

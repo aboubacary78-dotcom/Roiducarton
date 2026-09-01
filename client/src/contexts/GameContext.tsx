@@ -335,6 +335,7 @@ type GameAction =
    * chacun, et l'Atelier n'ouvre pas le nombre, seulement lesquels.
    */
   | { type: 'SELECT_CHARACTER'; index: number; visage?: Record<string, number>; traits?: [Trait, Trait] }
+  | { type: 'POSER_VISAGE'; seed: string; visage: Record<string, number> }
   | { type: 'EXPLORE' }
   | { type: 'BEG' }
   | { type: 'STEAL' }
@@ -1963,6 +1964,26 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (tenue[action.slot] === action.id) delete tenue[action.slot];
       else tenue[action.slot] = action.id;
       return { ...state, character: { ...c, equipped: tenue } };
+    }
+
+    /*
+     * LE VISAGE QUI SÉCHAIT SUR L'ÉTABLI, RENDU À SON PERSONNAGE.
+     *
+     * Composé pendant l'essai libre, jamais payé, gardé de côté (voir
+     * `lib/etabli`). L'Atelier acheté plus tard le repose sur le personnage
+     * VIVANT, à condition que ce soit bien le même : la graine est vérifiée
+     * par l'appelant, et re-vérifiée ici, parce qu'un visage posé sur la
+     * mauvaise tête serait pire que pas de visage du tout.
+     *
+     * Les traits ne passent pas par là. Ils touchent aux règles, et les
+     * changer au milieu d'une partie entamée réécrirait sa difficulté après
+     * coup. On rend la tête, qui est ce qu'on vendait.
+     */
+    case 'POSER_VISAGE': {
+      const c = state.character;
+      if (!c || c.seed !== action.seed) return state;
+      if (!action.visage || Object.keys(action.visage).length === 0) return state;
+      return { ...state, character: { ...c, visage: action.visage } };
     }
 
     case 'COUP_DE_GRACE': {

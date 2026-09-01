@@ -21,6 +21,7 @@ import {
 import { loadProfile, type PlayerProfile } from '@/lib/profile';
 import { useLang, tr } from '@/lib/lang';
 import { pushToast } from '@/lib/toast';
+import { versLaBoutique } from '@/lib/mesures';
 
 export default function WardrobeScreen() {
   const { state, dispatch } = useGame();
@@ -116,7 +117,7 @@ export default function WardrobeScreen() {
           initial={{ y: 8, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.06 }}
-          onClick={() => { playTab(); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
+          onClick={() => { playTab(); versLaBoutique('garde-robe'); dispatch({ type: 'SET_SCREEN', screen: 'marche-noir' }); }}
           className="craft-card overflow-hidden flex items-stretch gap-3 text-left"
         >
           <SafeImg src="/assets/boutique-atelier.webp" alt="" className="w-24 object-cover shrink-0" />
@@ -182,8 +183,12 @@ export default function WardrobeScreen() {
                         ) : unlocked ? (
                           <span className="text-[9px] text-[#A08B70]">{tr('Toucher', 'Tap')}</span>
                         ) : (
+                          /* Ce qu'il faut faire pour l'avoir : le succès qui le
+                             donne, ou, pour la seule pièce qui n'en a pas, la
+                             main qui la donne. Une case verrouillée muette
+                             n'apprend rien. */
                           <span className="text-[9px] text-[#B84A3A] leading-tight line-clamp-2">
-                            {ach ? achievementName(ach, en) : ''}
+                            {ach ? achievementName(ach, en) : (en ? acc.sourceEn : acc.source) ?? ''}
                           </span>
                         )}
                       </button>

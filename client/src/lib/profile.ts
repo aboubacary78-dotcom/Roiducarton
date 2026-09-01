@@ -96,6 +96,22 @@ export function syncRecords(partial: Partial<ProfileRecords>): string[] {
   return newly;
 }
 
+/**
+ * Débloque un accessoire à la main, sans passer par un succès. Rend `true`
+ * seulement si c'est nouveau, ce qui est exactement la condition pour dire
+ * quelque chose au joueur : annoncer deux fois le même cadeau le retire.
+ *
+ * Réservé à ce que le jeu DONNE. Rien ici ne doit servir de raccourci à un
+ * succès, sans quoi la garde-robe cesse d'être la trace de ce qu'on a fait.
+ */
+export function offrirAccessoire(id: string): boolean {
+  const p = loadProfile();
+  if (p.unlocked.includes(id)) return false;
+  p.unlocked.push(id);
+  saveProfile(p);
+  return true;
+}
+
 // À appeler une fois par fin de partie : incrémente le compteur de parties,
 // cumule les jours survécus, puis réévalue les succès.
 export function recordGameEnd(days: number): string[] {

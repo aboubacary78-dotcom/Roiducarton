@@ -466,7 +466,13 @@ let premiereMortDeLaSession = true;
  * qu'on regrette.
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-const TREVE_MS = 10 * 60_000;
+/**
+ * La durée de la trêve, exportée parce que c'est aussi la FENÊTRE DE MESURE
+ * de la dégustation : un achat qui tombe dedans vient de l'effet de dotation,
+ * un achat trois jours plus tard n'en vient pas. Deux constantes séparées se
+ * seraient désynchronisées à la première retouche.
+ */
+export const TREVE_MS = 10 * 60_000;
 /** Après combien de pleins écrans la trêve est offerte. */
 const TREVE_APRES = 2;
 

@@ -21,6 +21,17 @@ export interface Accessory {
   name: string;
   slot: AccessorySlot;
   emoji: string; // aperçu dans la liste de la garde-robe
+  /*
+   * D'OÙ IL VIENT, QUAND CE N'EST PAS D'UN SUCCÈS.
+   *
+   * Les cinquante autres sont la récompense d'un succès, et la garde-robe
+   * affiche ce succès sous le cadenas : le joueur sait toujours quoi faire
+   * pour l'avoir. Un accessoire donné à la main n'a pas de succès à nommer,
+   * et une case verrouillée sans explication est la seule chose que cet
+   * écran ne fait nulle part ailleurs.
+   */
+  source?: string;
+  sourceEn?: string;
 }
 
 export interface ProfileRecords {
@@ -103,6 +114,20 @@ export const ACCESSORIES: Accessory[] = [
   { id: 'cape', name: 'Cape de héros', slot: 'neck', emoji: '🦸' },
   { id: 'pearls', name: 'Collier de perles', slot: 'neck', emoji: '📿' },
   { id: 'whistle', name: 'Sifflet d\'arbitre', slot: 'neck', emoji: '📯' },
+  /*
+   * LE SEUL ACCESSOIRE QU'AUCUN SUCCÈS NE DONNE.
+   *
+   * Le vendeur du marché noir en met un au cou de qui pousse sa porte la
+   * première fois, sans rien demander et sans le rappeler ensuite. Un cadeau
+   * conditionné à un achat n'est pas un cadeau, c'est une réclame, et ça se
+   * lit en une seconde.
+   *
+   * Il fallait qu'il n'appartienne à personne d'autre : offrir la récompense
+   * d'un succès aurait retiré au joueur la raison d'aller le chercher, et
+   * laissé dans la liste un succès dont le lot est déjà au cou.
+   */
+  { id: 'jeton-marche', name: 'Jeton du marché', slot: 'neck', emoji: '🎟️',
+    source: 'Le vendeur du marché noir', sourceEn: 'The black-market seller' },
   // Fonds (9)
   { id: 'gold-bg', name: 'Aura dorée', slot: 'bg', emoji: '✨' },
   { id: 'rainbow-bg', name: 'Fond arc-en-ciel', slot: 'bg', emoji: '🌈' },
@@ -208,6 +233,7 @@ const ACCESSORY_NAME_EN: Record<string, string> = {
   'face-tattoo': 'Teardrop Tattoo', goatee: 'Goatee', unibrow: 'Unibrow', 'star-cheeks': 'Star Cheeks',
   scarf: 'Striped Scarf', 'gold-medal': 'Gold Medal', bowtie: 'Bow Tie', 'gold-chain': 'Gold Chain', tie: 'Necktie',
   bandana: 'Bandana', cape: 'Hero Cape', pearls: 'Pearl Necklace', whistle: 'Referee Whistle',
+  'jeton-marche': 'Market Token',
   'gold-bg': 'Golden Aura', 'rainbow-bg': 'Rainbow', 'stars-bg': 'Starry Night', 'flames-bg': 'Flames', 'hearts-bg': 'Hearts',
   'confetti-bg': 'Confetti', 'royal-bg': 'Royal', 'spotlight-bg': 'Spotlight', 'sunset-bg': 'Sunset',
 };

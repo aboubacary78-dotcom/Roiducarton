@@ -27,18 +27,69 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import {
-  isAdsRemoved, isAtelierOwned, packUtile,
+  isAdsRemoved, isAtelierOwned, packUtile, TREVE_MS,
   purchaseAtelier, purchasePack, purchaseRemoveAds, restaurerAchats,
 } from '@/lib/ads';
+import { cequiSechePour, viderEtabli } from '@/lib/etabli';
+import { loadGraves } from '@/lib/necrology';
+import { offrirAccessoire } from '@/lib/profile';
+import { mesurer, noterAchatApresDegustation, porteEmpruntee } from '@/lib/mesures';
 import { etatMagasin, prixAffiche, surMagasinChange, totalBarre } from '@/lib/facturation';
 import { playBack, playMoneyOut, playToggle, playCard } from '@/lib/sound';
 import { tr } from '@/lib/lang';
 import { pushToast } from '@/lib/toast';
 import SafeImg from './SafeImg';
 import PlayerFace from './PlayerFace';
+import CardboardAvatar from './CardboardAvatar';
 import { Barre, Scotch, Etiquette, RubanAngle } from './boutique/textures';
 
 const FLUO = '#F2E14C';
+
+/** Le cadeau du vendeur : l'unique accessoire qu'aucun succès ne donne. */
+const CADEAU = 'jeton-marche';
+const CLE_CADEAU = 'roi-du-carton-cadeau-vendeur';
+
+/*
+ * LA PREUVE SOCIALE, SANS INVENTER PERSONNE.
+ *
+ * « 12 483 joueurs ont acheté » est un mensonge quand c'est faux, et c'est
+ * une donnée qu'on n'a pas. Le jeu en détient une meilleure, parce qu'elle est
+ * PERSONNELLE et vérifiable par le joueur lui-même : son cimetière. Elle ne
+ * prouve rien sur les autres, elle lui rappelle ce que LUI a subi, et c'est
+ * strictement plus fort qu'une statistique inventée sur des inconnus.
+ *
+ * Les nombres sont écrits en toutes lettres jusqu'à quarante, ce qui est le
+ * plafond du cimetière. « Onze morts » se lit comme une phrase, « 11 morts »
+ * comme un relevé de compteur, et l'un des deux vend.
+ */
+const LETTRES_FR = ['zéro', 'une', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix',
+  'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf', 'vingt',
+  'vingt et une', 'vingt-deux', 'vingt-trois', 'vingt-quatre', 'vingt-cinq', 'vingt-six', 'vingt-sept',
+  'vingt-huit', 'vingt-neuf', 'trente', 'trente et une', 'trente-deux', 'trente-trois', 'trente-quatre',
+  'trente-cinq', 'trente-six', 'trente-sept', 'trente-huit', 'trente-neuf', 'quarante'];
+const LETTRES_EN = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+  'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen',
+  'twenty', 'twenty-one', 'twenty-two', 'twenty-three', 'twenty-four', 'twenty-five', 'twenty-six',
+  'twenty-seven', 'twenty-eight', 'twenty-nine', 'thirty', 'thirty-one', 'thirty-two', 'thirty-three',
+  'thirty-four', 'thirty-five', 'thirty-six', 'thirty-seven', 'thirty-eight', 'thirty-nine', 'forty'];
+
+function LigneDuCimetiere({ morts }: { morts: number }) {
+  /*
+   * Sous deux morts, on se tait. « Une mort. Un visage tiré au sort. » ne pèse
+   * rien, et le joueur qui vient de commencer n'a pas encore de quoi trouver
+   * le tirage pesant : lui dire qu'il devrait serait le lui apprendre.
+   */
+  if (morts < 2) return null;
+  const fr = LETTRES_FR[Math.min(morts, 40)];
+  const en = LETTRES_EN[Math.min(morts, 40)];
+  const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+  return (
+    <p className="text-[11px] text-[#8B6B4A] italic leading-snug mt-2">
+      {tr(`${cap(fr)} morts. ${cap(fr)} visages tirés au sort.`,
+          `${cap(en)} deaths. ${cap(en)} faces dealt by the draw.`)}
+    </p>
+  );
+}
 
 /*
  * LES DEUX RÉPONSES AUX OBJECTIONS, ET UNE SEULE FOIS.
@@ -106,6 +157,42 @@ export default function MarcheNoirScreen() {
   const [occupe, setOccupe] = useState<string | null>(null);
   const [restaurant, setRestaurant] = useState(false);
   const [recu, setRecu] = useState(false);
+  const [cadeau, setCadeau] = useState(false);
+  const [rendu, setRendu] = useState(false);
+
+  const morts = loadGraves().length;
+  /* Le visage qui sèche, s'il appartient encore au personnage vivant. */
+  const etabli = char && !atelier ? cequiSechePour(char.seed) : null;
+
+  /*
+   * LA RÉCIPROCITÉ, ET POURQUOI LE CADEAU N'EST ASSORTI DE RIEN.
+   *
+   * À la première ouverture de la boutique, le vendeur met un jeton au cou du
+   * joueur. Gratuitement, sans condition, et sans le rappeler ensuite. Ce qui
+   * déclenche la réciprocité, c'est le don SANS contrepartie : un cadeau
+   * conditionné à un achat n'en est pas un, et ça se lit en une seconde.
+   *
+   * Il est donné au montage, avant même que le joueur ait regardé un prix.
+   * L'attendre au premier scroll ou au premier renoncement en ferait une
+   * monnaie d'échange, ce qui est exactement le contraire de l'intention.
+   */
+  useEffect(() => {
+    mesurer('boutique_vue', porteEmpruntee());
+    if (!noAds) mesurer('tuile_vue', 'noads');
+    if (!atelier) mesurer('tuile_vue', 'atelier');
+    if (packUtile()) mesurer('tuile_vue', 'pack_complet');
+    try {
+      if (localStorage.getItem(CLE_CADEAU) === '1') return;
+      localStorage.setItem(CLE_CADEAU, '1');
+      if (offrirAccessoire(CADEAU)) {
+        mesurer('cadeau_vendeur');
+        setCadeau(true);
+        playCard();
+      }
+    } catch { /* stockage refusé : pas de cadeau, pas de plantage */ }
+    // Volontairement au montage seulement : le cadeau se donne une fois.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /*
    * Le magasin répond une à deux secondes après le lancement, donc parfois
@@ -135,13 +222,33 @@ export default function MarcheNoirScreen() {
    */
   async function acheter(quoi: 'pack' | 'atelier' | 'noads') {
     if (occupe) return;
+    const produit = quoi === 'pack' ? 'pack_complet' : quoi;
     setOccupe(quoi);
+    mesurer('achat_lance', produit);
     const ok = await (quoi === 'pack' ? purchasePack() : quoi === 'atelier' ? purchaseAtelier() : purchaseRemoveAds());
     setOccupe(null);
     if (!ok) { echec(); return; }
+    mesurer('achat_abouti', produit);
+    noterAchatApresDegustation(TREVE_MS);
     setNoAds(isAdsRemoved());
     setAtelier(isAtelierOwned());
     setPack(packUtile());
+
+    /*
+     * CE QUI SÉCHAIT SUR L'ÉTABLI EST RENDU ICI, ET TOUT DE SUITE.
+     *
+     * Le joueur a composé ce visage pendant l'essai libre et n'a pas payé ce
+     * jour-là. Il vient de payer. Le rendre plus tard, ou lui demander de
+     * rouvrir quelque chose, transformerait une livraison en démarche : ce
+     * qu'il a acheté était CETTE tête, elle se pose sur son personnage avant
+     * même qu'il ait refermé l'écran.
+     */
+    if (etabli && char && (quoi === 'atelier' || quoi === 'pack')) {
+      dispatch({ type: 'POSER_VISAGE', seed: etabli.seed, visage: etabli.visage });
+      viderEtabli();
+      setRendu(true);
+    }
+
     playCard();
     setRecu(true);
     setTimeout(() => setRecu(false), 1800);
@@ -193,6 +300,36 @@ export default function MarcheNoirScreen() {
                 '"Everything here is second-hand. Except what I sell. That\'s for good."')}
           </p>
         </motion.div>
+
+        {/* ── LE CADEAU DU VENDEUR ──────────────────────────────────────────
+            Il n'a pas de bouton, pas de prix, et ne renvoie vers rien. Un
+            présent assorti d'une offre n'est pas un présent. */}
+        {cadeau && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="craft-card p-3 flex items-center gap-3"
+          >
+            <div className="rounded-xl overflow-hidden shadow-sm shrink-0">
+              <CardboardAvatar
+                seed={char?.seed ?? 'apercu'}
+                gender={char?.gender}
+                size={44}
+                accessories={{ neck: CADEAU }}
+                jauges={{ health: 100, mental: 100, hunger: 100, thirst: 100, sleep: 100 }}
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[#2A1F1A] leading-tight">
+                {tr('« Tenez. C\'est la maison. »', '"Here. On the house."')}
+              </p>
+              <p className="text-[11px] text-[#8B6B4A] leading-snug mt-0.5">
+                {tr('Un jeton du marché, à votre cou. Il est dans la garde-robe.',
+                    'A market token, round your neck. It\'s in the wardrobe.')}
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {/* ── LE LOT ────────────────────────────────────────────────────────
             En premier parce qu'il ANCRE : le premier prix lu sert de référence
@@ -290,7 +427,30 @@ export default function MarcheNoirScreen() {
                     promesse (« votre tête, pas celle du tirage ») et perdrait
                     la comparaison avec elle-même.
                   */}
-                  {char && (
+                  {/*
+                    QUAND UNE TÊTE SÈCHE SUR L'ÉTABLI, C'EST ELLE QU'ON MONTRE.
+                    La comparaison devient alors la bonne : à gauche celle que
+                    le joueur a faite, et qu'il n'a pas eue ; le portrait du
+                    tirage ne sert plus à rien, il l'a déjà sous les yeux dans
+                    tout le reste du jeu.
+                  */}
+                  {etabli ? (
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="rounded-lg overflow-hidden shadow-sm shrink-0">
+                        <CardboardAvatar
+                          seed={etabli.seed}
+                          gender={etabli.genre}
+                          size={38}
+                          visage={etabli.visage}
+                          jauges={{ health: 100, mental: 100, hunger: 100, thirst: 100, sleep: 100 }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-[#A08B70] leading-tight">
+                        {tr('Celle-ci, c\'est vous qui l\'avez faite. Elle sèche encore.',
+                            'This one you made yourself. It\'s still drying.')}
+                      </span>
+                    </div>
+                  ) : char && (
                     <div className="flex items-center gap-2 mt-2">
                       <div className="rounded-lg overflow-hidden shadow-sm shrink-0">
                         <PlayerFace char={char} size={38} />
@@ -308,6 +468,8 @@ export default function MarcheNoirScreen() {
                 <li>🪪 {tr('Votre tête. Pas celle du tirage.', 'Your face. Not the draw\'s.')}</li>
                 <li>⚰️ {tr('Ça survit à vos morts. Le personnage, non.', 'It outlives your deaths. The character doesn\'t.')}</li>
               </ul>
+
+              <LigneDuCimetiere morts={morts} />
 
               <BoutonAchat
                 libelle={tr('ME FAIRE UNE TÊTE', 'GIVE ME A FACE')}
@@ -415,6 +577,17 @@ export default function MarcheNoirScreen() {
               <SafeImg src="/assets/boutique-recu.webp" alt=""
                 className="w-56 h-56 object-cover rounded-2xl shadow-2xl" />
               <p className="mt-3 text-base font-bold text-[#FBF6F0]">{tr('C\'est à vous.', 'It\'s yours.')}</p>
+              {/* La livraison de l'établi se dit, sinon elle passe inaperçue :
+                  le joueur a payé une tête, il doit savoir qu'il l'a. */}
+              {rendu && (
+                <p className="mt-1 text-xs text-[#E8DCC8]">
+                  {char?.gender === 'f'
+                    ? tr('Elle est sortie de l\'établi. Elle vous attend dehors.',
+                         'She\'s off the bench. Waiting for you outside.')
+                    : tr('Il est sorti de l\'établi. Il vous attend dehors.',
+                         'He\'s off the bench. Waiting for you outside.')}
+                </p>
+              )}
             </motion.div>
           </motion.div>
         )}

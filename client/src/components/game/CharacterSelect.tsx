@@ -6,6 +6,8 @@ import { useLang, tr, tc } from '@/lib/lang';
 import { playBack, playCard, playPickCharacter, playReroll } from '@/lib/sound';
 import { bonusEn, bonusFr, isAdsRemoved, isAtelierOwned, purchaseAtelier, showRewarded } from '@/lib/ads';
 import AtelierOverlay from './AtelierOverlay';
+import { poserSurEtabli, viderEtabli } from '@/lib/etabli';
+import { mesurer } from '@/lib/mesures';
 import { pushToast } from '@/lib/toast';
 
 function CharacterCard({ char, index, onSelect, onComposer }: {
@@ -216,18 +218,25 @@ export default function CharacterSelect() {
                * payé transformerait un essai en otage, et il n'aurait pas
                * tort de le dire dans son commentaire.
                *
-               * La composition est simplement perdue, ce qui est la seule
-               * chose honnête : c'est elle qu'on vendait.
+               * La composition n'est plus jetée pour autant : elle reste sur
+               * l'établi (voir `lib/etabli`), et l'Atelier acheté plus tard la
+               * repose sur ce personnage-là, qui sera encore vivant. Ce n'est
+               * pas un appât, c'est la chose vendue, livrée en retard.
                */
               if (enPaiement) return;
               setEnPaiement(true);
               const ok = await purchaseAtelier();
               setEnPaiement(false);
               if (ok) {
+                mesurer('atelier_essai_valide');
+                viderEtabli();
                 setAtelier(true);
                 dispatch({ type: 'SELECT_CHARACTER', index: i, visage, traits });
                 return;
               }
+              const perso = state.characterChoices[i];
+              poserSurEtabli({ seed: perso.seed, nom: perso.name, genre: perso.gender, visage });
+              mesurer('etabli_pose');
               pushToast(
                 tr('Le vendeur n\'est pas à son carton. On part avec celui-là.',
                    'Nobody at the stall. We go with this one.'),
