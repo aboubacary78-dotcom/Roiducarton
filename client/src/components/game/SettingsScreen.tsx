@@ -33,7 +33,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.68.0';
+const APP_VERSION = '3.69.0';
 
 /*
  * UN CURSEUR EN CARTON.

@@ -54,6 +54,29 @@ export default function EventResultOverlay() {
   // pendant que le contrat, la météo et les jauges glissaient au moindre doigt.
   useVerrouScroll(!!result);
 
+  /*
+   * LE SAC QUI CRAQUE, ET POURQUOI CE HOOK EST REMONTÉ ICI.
+   *
+   * Il vivait cent lignes plus bas, APRÈS le `return null` qui suit. React
+   * comptait donc un hook de plus quand un résultat était affiché que quand il
+   * n'y en avait pas, et le passage de l'un à l'autre, c'est-à-dire la
+   * fermeture de ce voile, levait « Rendered fewer hooks than expected » et
+   * emportait l'arbre entier.
+   *
+   * Ça ne se voyait presque jamais, et c'est bien le problème : trois suites
+   * échouaient une fois sur cinq sans qu'on sache pourquoi, dont
+   * `test-premier-jour`, qui referme précisément ce voile avant de vérifier que
+   * la Bagarre est apparue. `scripts/test-hooks-apres-retour.mjs` le signalait
+   * depuis le début ; personne ne l'avait fait tourner en même temps que les
+   * autres.
+   *
+   * Le refus était écrit dans un paragraphe que personne ne lit en entier :
+   * une couture qui force et une fermeture qui renonce disent la même chose en
+   * un demi-tour de main.
+   */
+  const objetRefuse = result && !result.itemKept ? result.refusedItem : undefined;
+  useEffect(() => { if (objetRefuse) playObjetPlein(); }, [objetRefuse?.id]);
+
   if (!result) return null;
 
   const canDouble = !!result.moneyChange && result.moneyChange > 0 && !result.doubled && canOfferRewarded('evenement');
@@ -105,14 +128,6 @@ export default function EventResultOverlay() {
    * qu'on a tenu une seconde se défend deux fois plus fort qu'un objet qu'on
    * n'a jamais eu. On vend donc cet objet-là, jamais « de la place ».
    */
-  const objetRefuse = !result.itemKept ? result.refusedItem : undefined;
-  /*
-   * Le sac qui craque s'entend. Le refus était écrit dans un paragraphe que
-   * personne ne lit en entier : une couture qui force et une fermeture qui
-   * renonce disent la même chose en un demi-tour de main, et donnent envie
-   * d'aller voir le bouton juste en dessous.
-   */
-  useEffect(() => { if (objetRefuse) playObjetPlein(); }, [objetRefuse?.id]);
   const canGarderObjet = !!objetRefuse && canOfferRewarded('evenement');
 
   async function handleGarderObjet() {

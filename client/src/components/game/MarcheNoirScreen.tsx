@@ -119,16 +119,39 @@ function Objections() {
   );
 }
 
-/** Le bouton d'achat : le point le plus contrasté de sa tuile, partout. */
-function BoutonAchat({ libelle, prix, occupe, onClick }: {
+/*
+ * LE BOUTON D'ACHAT, ET POURQUOI ILS NE SONT PLUS TOUS PAREILS.
+ *
+ * Les trois étaient identiques : même jaune, même hauteur, même graisse. Trois
+ * appels visuels de force égale ne hiérarchisent rien, ils se concurrencent, et
+ * l'ancrage voulu par le document (le premier prix lu sert de référence aux
+ * suivants) ne se voyait nulle part.
+ *
+ * La couleur, elle, ne change pas : le fluo reste le seul accent chaud de
+ * l'écran, et chaque bouton reste le point le plus contrasté DE SA TUILE, ce
+ * qui est une règle par tuile et non par écran. Ce qui change, c'est le POIDS :
+ * la tuile de tête est plus haute et sa lettre plus grande. On hiérarchise par
+ * la taille, pas en éteignant deux boutons sur trois, ce qui aurait fait payer
+ * la lisibilité de l'offre pour un effet de mise en page.
+ */
+function BoutonAchat({ libelle, prix, occupe, onClick, tete = false }: {
   libelle: string; prix: string; occupe: boolean; onClick: () => void;
+  /** Tuile de tête : celle que le joueur lit en premier sur cet écran-ci. */
+  tete?: boolean;
 }) {
   return (
     <button
       onClick={() => { if (!occupe) { playMoneyOut(); onClick(); } }}
       disabled={occupe}
-      className="w-full py-3.5 rounded-xl text-sm font-bold text-[#2A1F1A] disabled:opacity-60 active:scale-[0.98] transition-transform"
-      style={{ background: FLUO, boxShadow: '0 3px 0 #C9B62A, 0 6px 14px rgba(0,0,0,0.18)' }}
+      className={`w-full rounded-xl font-bold text-[#2A1F1A] disabled:opacity-60 active:scale-[0.98] transition-transform ${
+        tete ? 'py-4 text-base' : 'py-3 text-sm'
+      }`}
+      style={{
+        background: FLUO,
+        boxShadow: tete
+          ? '0 4px 0 #C9B62A, 0 8px 18px rgba(0,0,0,0.20)'
+          : '0 2px 0 #C9B62A, 0 4px 10px rgba(0,0,0,0.14)',
+      }}
     >
       {occupe ? tr('⏳ Achat en cours…', '⏳ Purchasing…') : `${libelle} · ${prix}`}
     </button>
@@ -160,6 +183,27 @@ export default function MarcheNoirScreen() {
   const [cadeau, setCadeau] = useState(false);
   const [rendu, setRendu] = useState(false);
 
+  /*
+   * PAR OÙ LE JOUEUR EST ENTRÉ, ET CE QUE ÇA CHANGE À L'ORDRE DES TUILES.
+   *
+   * La provenance se consomme à la lecture : on la retient donc une fois, au
+   * montage, plutôt que de la relire à chaque rendu, où elle vaudrait déjà
+   * « inconnue ».
+   *
+   * L'ordre par défaut met le LOT en tête, parce qu'il ancre : le premier prix
+   * lu sert de référence à tous les suivants, et fait lire l'Atelier seul comme
+   * un repli raisonnable. C'est juste pour quelqu'un qui furète.
+   *
+   * Mais celui qui arrive APRÈS UNE PUBLICITÉ n'est pas en train de furèter :
+   * il vient de toucher « qu'on me fiche la paix », et la mesure disait que
+   * cette tuile-là se trouvait à 269 px sous la ligne de flottaison. On lui
+   * faisait défiler un écran pour retrouver la chose qu'il venait chercher.
+   * L'ancrage est un effet ; l'intention déclarée en est un plus fort.
+   */
+  const [porte] = useState(() => porteEmpruntee());
+  const ordre: ('pack' | 'atelier' | 'paix')[] =
+    porte === 'interstitiel' ? ['paix', 'pack', 'atelier'] : ['pack', 'atelier', 'paix'];
+
   const morts = loadGraves().length;
   /* Le visage qui sèche, s'il appartient encore au personnage vivant. */
   const etabli = char && !atelier ? cequiSechePour(char.seed) : null;
@@ -177,7 +221,7 @@ export default function MarcheNoirScreen() {
    * monnaie d'échange, ce qui est exactement le contraire de l'intention.
    */
   useEffect(() => {
-    mesurer('boutique_vue', porteEmpruntee());
+    mesurer('boutique_vue', porte);
     if (!noAds) mesurer('tuile_vue', 'noads');
     if (!atelier) mesurer('tuile_vue', 'atelier');
     if (packUtile()) mesurer('tuile_vue', 'pack_complet');
@@ -264,7 +308,7 @@ export default function MarcheNoirScreen() {
           par-dessus, dans la police du jeu. */}
       <div className="relative">
         <SafeImg src="/assets/boutique-enseigne.webp" alt="" priority
-          className="w-full h-28 object-cover" />
+          className="w-full h-24 object-cover" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-10"
           style={{ background: 'linear-gradient(180deg, rgba(26,18,12,0.10) 0%, rgba(26,18,12,0.55) 100%)' }}>
           <h1 className="text-2xl font-bold tracking-wide text-[#FBF6F0] drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
@@ -284,7 +328,7 @@ export default function MarcheNoirScreen() {
         </button>
       </div>
 
-      <div className="p-4 flex flex-col gap-4">
+      <div className="p-4 flex flex-col gap-3">
         {/* ── LE VENDEUR ────────────────────────────────────────────────────
             Un visage vend mieux qu'un étal, et le regard caméra est tout le
             levier : on n'achète pas à un comptoir, on achète à quelqu'un. */}
@@ -331,196 +375,219 @@ export default function MarcheNoirScreen() {
           </motion.div>
         )}
 
-        {/* ── LE LOT ────────────────────────────────────────────────────────
-            En premier parce qu'il ANCRE : le premier prix lu sert de référence
-            à tous les suivants, et fait lire l'Atelier seul comme un repli
-            raisonnable plutôt que comme une dépense. */}
-        {pack && (
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative rounded-2xl p-4 overflow-hidden"
-            style={{ background: '#C9A97E', boxShadow: '0 4px 16px rgba(58,42,30,0.22)' }}
-          >
-            <RubanAngle>{tr('LES DEUX', 'BOTH')}</RubanAngle>
-            <Scotch cote="gauche" />
+        {/*
+          LES TROIS TUILES, RENDUES DANS L'ORDRE DÉCIDÉ PLUS HAUT.
 
-            <SafeImg src="/assets/boutique-lot.webp" alt=""
-              className="w-full h-32 object-cover rounded-xl mb-3" />
+          Elles étaient écrites en dur les unes sous les autres. Les sortir en
+          variables était la seule façon de changer l'ordre sans dupliquer deux
+          cents lignes, et donc sans qu'une retouche finisse un jour appliquée
+          à une seule des deux copies.
 
-            <h2 className="text-lg font-bold text-[#2A1F1A]">{tr('TOUT LE CARTON', 'THE WHOLE BOX')}</h2>
-            <p className="text-xs text-[#4A3728] mb-2">{tr('La paix, et une tête à vous.', 'Peace, and a face of your own.')}</p>
-            <p className="text-xs text-[#4A3728] mb-3">
-              ✦ {tr('Moins cher que les deux séparément. Regardez en dessous.',
-                    'Cheaper than the two apart. Look below.')}
-            </p>
+          La première de la liste porte le bouton de tête. Ce n'est pas
+          toujours le lot : ça dépend d'où l'on vient.
+        */}
+        {ordre.map((quoi, rang) => {
+          const tete = rang === 0;
+          const delai = rang * 0.05;
 
-            {/*
-              LE PRIX BARRÉ N'EST PAS UNE FAUSSE PROMOTION.
-              C'est le total EXACT des deux pièces vendues juste en dessous, au
-              même instant, donc un prix réellement pratiqué, ce qu'exige
-              l'article L.112-1-1. Il se calcule, et il disparaît quand le
-              magasin n'a pas répondu : mieux vaut ne rien barrer que barrer un
-              montant inventé.
-            */}
-            {/*
-              LE COUPLE ANCIEN PRIX / NOUVEAU PRIX NE S'AFFICHE QUE COMPLET.
+          // ── LE LOT ─────────────────────────────────────────────────────────
+          if (quoi === 'pack') {
+            if (!pack) return null;
+            return (
+              <motion.section
+                key="pack"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: delai }}
+                className="relative rounded-2xl p-3.5 overflow-hidden"
+                style={{ background: '#C9A97E', boxShadow: '0 4px 16px rgba(58,42,30,0.22)' }}
+              >
+                <RubanAngle>{tr('LES DEUX', 'BOTH')}</RubanAngle>
+                <Scotch cote="gauche" />
 
-              `totalBarre` rend `null` quand le magasin n'a pas répondu, sur
-              le web, ou pendant la première seconde. La première version
-              montrait alors l'étiquette seule ET la note qui explique le
-              barré : un renvoi vers quelque chose d'absent, et un prix affiché
-              deux fois à trois centimètres d'écart, puisque le bouton le porte
-              déjà. Sans barré, il n'y a rien à montrer ici.
-            */}
-            {barre && (
-              <div className="flex items-baseline gap-3 mb-3">
-                <span className="relative inline-block text-sm font-mono text-[#6B5740]">
-                  {barre}
-                  <Barre />
-                </span>
-                <Etiquette>{prixAffiche('pack_complet')}</Etiquette>
-              </div>
-            )}
+                <SafeImg src="/assets/boutique-lot.webp" alt=""
+                  className="w-full h-24 object-cover rounded-xl mb-2.5" />
 
-            <BoutonAchat
-              libelle={tr('JE PRENDS TOUT', 'I\'LL TAKE IT ALL')}
-              prix={prixAffiche('pack_complet')}
-              occupe={occupe === 'pack'}
-              onClick={() => acheter('pack')}
-            />
-            {barre && (
-              <p className="mt-2 text-[10px] leading-snug text-[#5E4A38]">
-                {tr('Le prix barré, c\'est le total des deux pièces vendues plus bas. On ne vous invente pas de réduction.',
-                    'The struck-out price is the total of the two items sold below. We don\'t make up discounts.')}
-              </p>
-            )}
-          </motion.section>
-        )}
+                <h2 className="text-lg font-bold text-[#2A1F1A]">{tr('TOUT LE CARTON', 'THE WHOLE BOX')}</h2>
+                <p className="text-xs text-[#4A3728] mb-2">{tr('La paix, et une tête à vous.', 'Peace, and a face of your own.')}</p>
 
-        {/* ── L'ATELIER ─────────────────────────────────────────────────────
-            L'argument de tête n'est pas cosmétique : deux traits CHOISIS. On
-            paie plus volontiers pour décider que pour décorer. */}
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="craft-card p-4"
-        >
-          {atelier ? (
-            <DejaPaye titre={tr('🎨 L\'Atelier', '🎨 The Workshop')} />
-          ) : (
-            <>
-              <div className="flex gap-3 mb-3">
-                <SafeImg src="/assets/boutique-atelier.webp" alt=""
-                  className="w-28 h-24 object-cover rounded-xl shrink-0" />
-                <div className="min-w-0">
-                  <h2 className="text-lg font-bold text-[#2A1F1A] leading-tight">{tr('L\'ATELIER', 'THE WORKSHOP')}</h2>
-                  <p className="text-xs text-[#6B5740] leading-snug mt-0.5">
-                    {tr('On ne choisit pas où on tombe. On peut choisir avec quoi.',
-                        'You don\'t choose where you land. You can choose what with.')}
+                {/*
+                  LE PRIX BARRÉ N'EST PAS UNE FAUSSE PROMOTION.
+                  C'est le total EXACT des deux pièces vendues à côté, au même
+                  instant, donc un prix réellement pratiqué, ce qu'exige
+                  l'article L.112-1-1. Il se calcule, et il disparaît quand le
+                  magasin n'a pas répondu : mieux vaut ne rien barrer que
+                  barrer un montant inventé.
+
+                  Il ne s'affiche que COMPLET. `totalBarre` rend `null` sur le
+                  web ou pendant la première seconde, et l'étiquette seule
+                  renverrait alors vers quelque chose d'absent.
+                */}
+                {barre ? (
+                  <div className="flex items-baseline gap-3 mb-2.5">
+                    <span className="relative inline-block text-sm font-mono text-[#6B5740]">
+                      {barre}
+                      <Barre />
+                    </span>
+                    <Etiquette>{prixAffiche('pack_complet')}</Etiquette>
+                  </div>
+                ) : (
+                  /* Sans barré, l'argument du lot doit être dit en toutes
+                     lettres, sinon plus rien ne le distingue d'une troisième
+                     offre posée là. */
+                  <p className="text-xs text-[#4A3728] mb-2.5">
+                    ✦ {tr('Moins cher que les deux séparément.', 'Cheaper than the two apart.')}
                   </p>
-                  {/*
-                    LE VISAGE VIVANT, ET PAS UNE ILLUSTRATION.
-                    C'est la tête du personnage en cours, dessinée à l'instant.
-                    Une image de catalogue à cet endroit contredirait la
-                    promesse (« votre tête, pas celle du tirage ») et perdrait
-                    la comparaison avec elle-même.
-                  */}
-                  {/*
-                    QUAND UNE TÊTE SÈCHE SUR L'ÉTABLI, C'EST ELLE QU'ON MONTRE.
-                    La comparaison devient alors la bonne : à gauche celle que
-                    le joueur a faite, et qu'il n'a pas eue ; le portrait du
-                    tirage ne sert plus à rien, il l'a déjà sous les yeux dans
-                    tout le reste du jeu.
-                  */}
-                  {etabli ? (
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="rounded-lg overflow-hidden shadow-sm shrink-0">
-                        <CardboardAvatar
-                          seed={etabli.seed}
-                          gender={etabli.genre}
-                          size={38}
-                          visage={etabli.visage}
-                          jauges={{ health: 100, mental: 100, hunger: 100, thirst: 100, sleep: 100 }}
-                        />
+                )}
+
+                <BoutonAchat
+                  libelle={tr('JE PRENDS TOUT', 'I\'LL TAKE IT ALL')}
+                  prix={prixAffiche('pack_complet')}
+                  occupe={occupe === 'pack'}
+                  onClick={() => acheter('pack')}
+                  tete={tete}
+                />
+                {barre && (
+                  <p className="mt-2 text-[10px] leading-snug text-[#5E4A38]">
+                    {tr('Le prix barré, c\'est le total des deux pièces vendues à part. On ne vous invente pas de réduction.',
+                        'The struck-out price is the total of the two items sold separately. We don\'t make up discounts.')}
+                  </p>
+                )}
+              </motion.section>
+            );
+          }
+
+          // ── L'ATELIER ──────────────────────────────────────────────────────
+          // L'argument de tête n'est pas cosmétique : deux traits CHOISIS. On
+          // paie plus volontiers pour décider que pour décorer.
+          if (quoi === 'atelier') {
+            return (
+              <motion.section
+                key="atelier"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: delai }}
+                className="craft-card p-3.5"
+              >
+                {atelier ? (
+                  <DejaPaye titre={tr('🎨 L\'Atelier', '🎨 The Workshop')} />
+                ) : (
+                  <>
+                    <div className="flex gap-3 mb-2.5">
+                      <SafeImg src="/assets/boutique-atelier.webp" alt=""
+                        className="w-24 h-20 object-cover rounded-xl shrink-0" />
+                      <div className="min-w-0">
+                        <h2 className="text-lg font-bold text-[#2A1F1A] leading-tight">{tr('L\'ATELIER', 'THE WORKSHOP')}</h2>
+                        <p className="text-xs text-[#6B5740] leading-snug mt-0.5">
+                          {tr('On ne choisit pas où on tombe. On peut choisir avec quoi.',
+                              'You don\'t choose where you land. You can choose what with.')}
+                        </p>
+                        {/*
+                          LE VISAGE VIVANT, ET PAS UNE ILLUSTRATION. C'est la
+                          tête du personnage en cours, dessinée à l'instant.
+                          Une image de catalogue contredirait la promesse
+                          (« votre tête, pas celle du tirage »).
+
+                          ET QUAND UNE TÊTE SÈCHE SUR L'ÉTABLI, C'EST ELLE
+                          qu'on montre : celle que le joueur a faite, et qu'il
+                          n'a pas eue.
+                        */}
+                        {etabli ? (
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <div className="rounded-lg overflow-hidden shadow-sm shrink-0">
+                              <CardboardAvatar
+                                seed={etabli.seed}
+                                gender={etabli.genre}
+                                size={34}
+                                visage={etabli.visage}
+                                jauges={{ health: 100, mental: 100, hunger: 100, thirst: 100, sleep: 100 }}
+                              />
+                            </div>
+                            <span className="text-[10px] text-[#A08B70] leading-tight">
+                              {tr('Celle-ci, c\'est vous qui l\'avez faite. Elle sèche encore.',
+                                  'This one you made yourself. It\'s still drying.')}
+                            </span>
+                          </div>
+                        ) : char && (
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <div className="rounded-lg overflow-hidden shadow-sm shrink-0">
+                              <PlayerFace char={char} size={34} />
+                            </div>
+                            <span className="text-[10px] text-[#A08B70] leading-tight">
+                              {tr('Celle-ci, c\'est la rue qui l\'a faite.', 'This one, the street made.')}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <span className="text-[10px] text-[#A08B70] leading-tight">
-                        {tr('Celle-ci, c\'est vous qui l\'avez faite. Elle sèche encore.',
-                            'This one you made yourself. It\'s still drying.')}
-                      </span>
                     </div>
-                  ) : char && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="rounded-lg overflow-hidden shadow-sm shrink-0">
-                        <PlayerFace char={char} size={38} />
-                      </div>
-                      <span className="text-[10px] text-[#A08B70] leading-tight">
-                        {tr('Celle-ci, c\'est la rue qui l\'a faite.', 'This one, the street made.')}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              <ul className="text-xs text-[#4A3728] space-y-1 mb-3">
-                <li>🎯 {tr('Deux traits choisis, pas subis.', 'Two traits chosen, not dealt.')}</li>
-                <li>🪪 {tr('Votre tête. Pas celle du tirage.', 'Your face. Not the draw\'s.')}</li>
-                <li>⚰️ {tr('Ça survit à vos morts. Le personnage, non.', 'It outlives your deaths. The character doesn\'t.')}</li>
-              </ul>
+                    <ul className="text-xs text-[#4A3728] space-y-0.5 mb-2.5">
+                      <li>🎯 {tr('Deux traits choisis, pas subis.', 'Two traits chosen, not dealt.')}</li>
+                      <li>🪪 {tr('Votre tête. Pas celle du tirage.', 'Your face. Not the draw\'s.')}</li>
+                      <li>⚰️ {tr('Ça survit à vos morts. Le personnage, non.', 'It outlives your deaths. The character doesn\'t.')}</li>
+                    </ul>
 
-              <LigneDuCimetiere morts={morts} />
+                    <LigneDuCimetiere morts={morts} />
 
-              <BoutonAchat
-                libelle={tr('ME FAIRE UNE TÊTE', 'GIVE ME A FACE')}
-                prix={prixAffiche('atelier')}
-                occupe={occupe === 'atelier'}
-                onClick={() => acheter('atelier')}
-              />
-            </>
-          )}
-        </motion.section>
+                    <BoutonAchat
+                      libelle={tr('ME FAIRE UNE TÊTE', 'GIVE ME A FACE')}
+                      prix={prixAffiche('atelier')}
+                      occupe={occupe === 'atelier'}
+                      onClick={() => acheter('atelier')}
+                      tete={tete}
+                    />
+                  </>
+                )}
+              </motion.section>
+            );
+          }
 
-        {/* ── LA PAIX ───────────────────────────────────────────────────────
-            Ton FROID, volontairement : les deux tuiles du haut vendent de
-            l'identité, celle-ci vend un outil. Sans cette séparation, trois
-            offres se lisent comme trois cartes interchangeables.
-
-            Et le titre ne dit plus ce qu'on RETIRE : « Sans pub » vend une
-            absence, « La paix » vend un état. */}
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl p-4"
-          style={{ background: '#EDE9F7', boxShadow: '0 3px 12px rgba(90,74,187,0.14)' }}
-        >
-          {noAds ? (
-            <DejaPaye titre={tr('🕯️ La paix', '🕯️ Peace')} />
-          ) : (
-            <>
-              <SafeImg src="/assets/boutique-paix.webp" alt=""
-                className="w-full h-32 object-cover rounded-xl mb-3" />
-              <h2 className="text-lg font-bold text-[#2A1F1A]">{tr('LA PAIX', 'PEACE')}</h2>
-              <p className="text-xs text-[#5A4ABB] mb-2">
-                {tr('Tout le monde vous prend quelque chose. Eux aussi.',
-                    'Everyone takes something from you. Them too.')}
-              </p>
-              <ul className="text-xs text-[#4A3728] space-y-1 mb-3">
-                <li>🚫 {tr('Plus rien qui se met en travers.', 'Nothing gets in the way any more.')}</li>
-                {/* Tout le bénéfice ADDITIF du produit, sans nommer une seule
-                    pièce du moteur. Le joueur n'achète pas un système. */}
-                <li>✨ {tr('Les coups de main viennent tout seuls.', 'The helping hands come on their own.')}</li>
-              </ul>
-              <BoutonAchat
-                libelle={tr('QU\'ON ME FICHE LA PAIX', 'LEAVE ME ALONE')}
-                prix={prixAffiche('noads')}
-                occupe={occupe === 'noads'}
-                onClick={() => acheter('noads')}
-              />
-            </>
-          )}
-        </motion.section>
+          // ── LA PAIX ────────────────────────────────────────────────────────
+          // Ton FROID, volontairement : les deux autres tuiles vendent de
+          // l'identité, celle-ci vend un outil. Sans cette séparation, trois
+          // offres se lisent comme trois cartes interchangeables.
+          //
+          // Et le titre ne dit pas ce qu'on RETIRE : « Sans pub » vend une
+          // absence, « La paix » vend un état.
+          return (
+            <motion.section
+              key="paix"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: delai }}
+              className="rounded-2xl p-3.5"
+              style={{ background: '#EDE9F7', boxShadow: '0 3px 12px rgba(90,74,187,0.14)' }}
+            >
+              {noAds ? (
+                <DejaPaye titre={tr('🕯️ La paix', '🕯️ Peace')} />
+              ) : (
+                <>
+                  <SafeImg src="/assets/boutique-paix.webp" alt=""
+                    className="w-full h-24 object-cover rounded-xl mb-2.5" />
+                  <h2 className="text-lg font-bold text-[#2A1F1A]">{tr('LA PAIX', 'PEACE')}</h2>
+                  <p className="text-xs text-[#5A4ABB] mb-2">
+                    {tr('Tout le monde vous prend quelque chose. Eux aussi.',
+                        'Everyone takes something from you. Them too.')}
+                  </p>
+                  <ul className="text-xs text-[#4A3728] space-y-0.5 mb-2.5">
+                    <li>🚫 {tr('Plus rien qui se met en travers.', 'Nothing gets in the way any more.')}</li>
+                    {/* Tout le bénéfice ADDITIF du produit, sans nommer une
+                        seule pièce du moteur. Le joueur n'achète pas un
+                        système. */}
+                    <li>✨ {tr('Les coups de main viennent tout seuls.', 'The helping hands come on their own.')}</li>
+                  </ul>
+                  <BoutonAchat
+                    libelle={tr('QU\'ON ME FICHE LA PAIX', 'LEAVE ME ALONE')}
+                    prix={prixAffiche('noads')}
+                    occupe={occupe === 'noads'}
+                    onClick={() => acheter('noads')}
+                    tete={tete}
+                  />
+                </>
+              )}
+            </motion.section>
+          );
+        })}
 
         {/* Les conditions de la maison n'ont plus rien à rassurer quand tout
             est déjà payé : elles ne s'adressent qu'à qui hésite encore. */}

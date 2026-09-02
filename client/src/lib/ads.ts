@@ -824,7 +824,31 @@ export async function showRewarded(opts?: { exempt?: boolean; famille?: FamilleB
  * `scripts/test-bonus-pub.mjs` interroge donc la règle elle-même, sur le
  * BUILD DE PRODUCTION, seul état qui prouve quelque chose.
  *
- * Rien ici ne fait ce qu'un joueur ne peut déjà faire : lire son propre
+ * CE QUE CETTE SURFACE EXPOSE, ET JUSQU'OÙ.
+ *
+ * Deux fonctions ouvrent ici des produits payants, `setAdsRemoved` et
+ * `setAtelierOwned`. Écrit comme ça, ça ressemble à une porte grande ouverte.
+ * Ça n'en est pas une sur l'application, et ça en est une petite sur le web.
+ *
+ *   · SUR ANDROID, elle est inatteignable. Capacitor n'allume le débogage de
+ *     la WebView que si l'application est elle-même déboguable, ce que le
+ *     paquet signé pour le Play Store n'est pas. Ni `android:debuggable` ni
+ *     `setWebContentsDebuggingEnabled(true)` ne figurent dans le projet natif,
+ *     donc aucune console ne s'attache au binaire distribué.
+ *
+ *   · SUR LE WEB, elle est atteignable par n'importe quelle console. Mais il
+ *     n'y a rien à voler : la facturation ne répond qu'à une application
+ *     installée depuis le Play Store, et la version web ne vend rien. Ce qui
+ *     s'y « débloque » n'a jamais été payé par personne.
+ *
+ * Ce qui protège vraiment le produit sur Android n'est donc pas l'absence de
+ * cette surface, c'est le fait que la possession soit RELUE depuis le compte
+ * Google au lancement (voir `facturation.ts`). Avec, à côté, une règle
+ * délibérément asymétrique : on n'ouvre jamais un accès sans le magasin, et on
+ * ne referme jamais un accès déjà ouvert, pour ne pas punir un acheteur
+ * légitime le jour où Google est injoignable.
+ *
+ * Le reste ne fait rien qu'un joueur ne puisse déjà faire : lire son propre
  * réglage, ou consommer une offre qu'il aurait de toute façon consommée.
  */
 if (typeof window !== 'undefined') {

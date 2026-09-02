@@ -119,6 +119,10 @@ temp/
 # les images.
 captures-store/
 
+# Les sorties gardées par `pnpm suites` : elles servent à comprendre un échec
+# intermittent sur la machine où il s'est produit, pas à voyager.
+journal-tests/
+
 # Capacitor, LES DOSSIERS NATIFS SONT SUIVIS, ET C'EST VOULU.
 #
 # Ils l'étaient « parce qu'ils se régénèrent ». Ce n'est vrai que du gabarit.

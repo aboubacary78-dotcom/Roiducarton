@@ -248,11 +248,50 @@ async function journeeNeuve() {
  * Le clic sur « Reprendre » est un vrai clic de souris : il débloque au passage
  * le moteur audio, que le rechargement remet en sommeil.
  */
+/*
+ * QUAND LE PERSONNAGE EST MORT ENTRE-TEMPS.
+ *
+ * Ce test joue vraiment : il enchaîne les actions, et il arrive que le
+ * personnage y laisse la vie. La sauvegarde est alors effacée, le rechargement
+ * ne trouve plus de partie à reprendre, et on retombe sur l'écran de choix.
+ * La première version comptait ça comme un échec du filet sonore, ce qui est
+ * faux : rien du son n'était en cause, c'est le décor du test qui avait
+ * disparu sous ses pieds.
+ *
+ * On repart donc d'une partie neuve, ce qui est exactement ce qu'un joueur
+ * ferait. Et si MÊME ÇA ne ramène pas à l'écran principal, l'échec est réel et
+ * il est déclaré : ne pas pouvoir mesurer n'est jamais une raison de sauter la
+ * mesure en silence.
+ */
+const surLeChoix = () => p.evaluate(() =>
+  /Choisissez votre Destin|Choose Your Fate/i.test(document.body.innerText));
+const surLeTitre = () => p.evaluate(() =>
+  /Une Épopée Urbaine|An Urban Epic/i.test(document.body.innerText));
+
 async function repartirDuPrincipal() {
   await p.reload({ waitUntil: 'networkidle2' });
   await new Promise(r => setTimeout(r, 1200));
   await sonsDe('Continue|Reprendre', 900);
   await new Promise(r => setTimeout(r, 900));
+  if (await surLePrincipal()) return true;
+
+  /*
+   * Mort, la sauvegarde est effacée : le rechargement rend l'ÉCRAN-TITRE, pas
+   * l'écran de choix. La première tentative de reprise ne guettait que le
+   * second et ne se déclenchait donc jamais ; c'est la boucle générique qui
+   * finissait par cliquer « Nouvelle partie » toute seule, sans jamais choisir
+   * de personnage, et le test se déclarait perdu devant trois candidats.
+   */
+  if (await surLeTitre()) {
+    await sonsDe('Nouvelle|New Game', 900);
+    await new Promise(r => setTimeout(r, 1200));
+  }
+  if (await surLeChoix()) {
+    await p.evaluate(() => { [...document.querySelectorAll('[class*="cursor-pointer"]')][0]?.click(); });
+    await new Promise(r => setTimeout(r, 1400));
+    await sonsDe('Commencer à survivre|Start surviving', 900);
+    await new Promise(r => setTimeout(r, 1200));
+  }
   return revenirAuPrincipal();
 }
 

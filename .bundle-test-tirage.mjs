@@ -48,6 +48,26 @@ var ACCESSORIES = [
   { id: "cape", name: "Cape de h\xE9ros", slot: "neck", emoji: "\u{1F9B8}" },
   { id: "pearls", name: "Collier de perles", slot: "neck", emoji: "\u{1F4FF}" },
   { id: "whistle", name: "Sifflet d'arbitre", slot: "neck", emoji: "\u{1F4EF}" },
+  /*
+   * LE SEUL ACCESSOIRE QU'AUCUN SUCCÈS NE DONNE.
+   *
+   * Le vendeur du marché noir en met un au cou de qui pousse sa porte la
+   * première fois, sans rien demander et sans le rappeler ensuite. Un cadeau
+   * conditionné à un achat n'est pas un cadeau, c'est une réclame, et ça se
+   * lit en une seconde.
+   *
+   * Il fallait qu'il n'appartienne à personne d'autre : offrir la récompense
+   * d'un succès aurait retiré au joueur la raison d'aller le chercher, et
+   * laissé dans la liste un succès dont le lot est déjà au cou.
+   */
+  {
+    id: "jeton-marche",
+    name: "Jeton du march\xE9",
+    slot: "neck",
+    emoji: "\u{1F39F}\uFE0F",
+    source: "Le vendeur du march\xE9 noir",
+    sourceEn: "The black-market seller"
+  },
   // Fonds (9)
   { id: "gold-bg", name: "Aura dor\xE9e", slot: "bg", emoji: "\u2728" },
   { id: "rainbow-bg", name: "Fond arc-en-ciel", slot: "bg", emoji: "\u{1F308}" },
@@ -196,7 +216,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/tirage-EFSLQm/cap.js
+// ../../../tmp/tirage-zCeLN2/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts
@@ -743,6 +763,13 @@ var playVerrou = withFile("ui-verrou", 0.6, () => {
 });
 var playGaugeFilled = withFile("jauge-remplie", 0.85, playSuccessSynth);
 
+// client/src/lib/facturation.ts
+var indisponible = !Capacitor.isNativePlatform();
+var livrer = () => false;
+function brancherLivraison(f) {
+  livrer = f;
+}
+
 // client/src/lib/ads.ts
 var NOADS_KEY = "roi-du-carton-noads";
 var adsRemoved = (() => {
@@ -762,6 +789,23 @@ function setAdsRemoved(v) {
   } catch {
   }
 }
+function livrer2(p) {
+  let nouveau = false;
+  if (p === "noads" || p === "pack_complet") {
+    if (!adsRemoved) {
+      setAdsRemoved(true);
+      nouveau = true;
+    }
+  }
+  if (p === "atelier" || p === "pack_complet") {
+    if (!atelierOwned) {
+      setAtelierOwned(true);
+      nouveau = true;
+    }
+  }
+  return nouveau;
+}
+brancherLivraison(livrer2);
 var ATELIER_KEY = "roi-du-carton-atelier";
 var atelierOwned = (() => {
   try {
@@ -779,6 +823,9 @@ function setAtelierOwned(v) {
     localStorage.setItem(ATELIER_KEY, v ? "1" : "0");
   } catch {
   }
+}
+function packUtile() {
+  return !adsRemoved && !atelierOwned;
 }
 var AD_UNITS = {
   android: {
@@ -811,19 +858,110 @@ var consentStatus = null;
 function personalizedAdsAllowed() {
   return consentStatus === "OBTAINED" || consentStatus === "NOT_REQUIRED";
 }
+var DELAI_INTERSTITIEL_MS = 9e4;
+var PARTIES_DE_GRACE = 3;
+var CLE_PARTIES = "roi-du-carton-parties-finies";
+var dernierInterstitiel = 0;
+var premiereMortDeLaSession = true;
+var TREVE_MS = 10 * 6e4;
+var TREVE_APRES = 2;
+var interstitielsDeLaSession = 0;
+var treveJusqua = 0;
+var treveDejaOfferte = false;
+function enTreve(maintenant = Date.now()) {
+  return maintenant < treveJusqua;
+}
+function resteDeTreve(maintenant = Date.now()) {
+  return Math.max(0, treveJusqua - maintenant);
+}
+var auditeurs = /* @__PURE__ */ new Set();
+function reinitialiserTreve() {
+  interstitielsDeLaSession = 0;
+  treveJusqua = 0;
+  treveDejaOfferte = false;
+}
+function partiesFinies() {
+  try {
+    return Number(localStorage.getItem(CLE_PARTIES) || "0");
+  } catch {
+    return 0;
+  }
+}
+function verdictInterstitiel(maintenant = Date.now()) {
+  if (adsRemoved) return { montrer: false, raison: "sans-pub achet\xE9" };
+  if (enTreve(maintenant)) return { montrer: false, raison: "tr\xEAve en cours" };
+  if (partiesFinies() <= PARTIES_DE_GRACE) {
+    return { montrer: false, raison: `p\xE9riode de gr\xE2ce (${partiesFinies()}/${PARTIES_DE_GRACE} parties)` };
+  }
+  if (premiereMortDeLaSession) return { montrer: false, raison: "premi\xE8re mort de la session" };
+  const attente = maintenant - dernierInterstitiel;
+  if (attente < DELAI_INTERSTITIEL_MS) {
+    return { montrer: false, raison: `trop t\xF4t (${Math.round(attente / 1e3)} s sur ${DELAI_INTERSTITIEL_MS / 1e3})` };
+  }
+  return { montrer: true, raison: "ok" };
+}
+async function showInterstitial(maintenant = Date.now()) {
+  const verdict = verdictInterstitiel(maintenant);
+  premiereMortDeLaSession = false;
+  if (!verdict.montrer) return;
+  dernierInterstitiel = maintenant;
+  interstitielsDeLaSession++;
+  const offrirLaTreve = interstitielsDeLaSession === TREVE_APRES && !treveDejaOfferte;
+  if (offrirLaTreve) {
+    treveDejaOfferte = true;
+    treveJusqua = maintenant + TREVE_MS;
+  }
+  const signal = { n: interstitielsDeLaSession, treveOfferte: offrirLaTreve };
+  auditeurs.forEach((cb) => {
+    try {
+      cb(signal);
+    } catch {
+    }
+  });
+  if (!isNative()) return;
+  try {
+    const { AdMob } = await import("@capacitor-community/admob");
+    await AdMob.prepareInterstitial({
+      adId: unit("interstitial"),
+      isTesting: USE_TEST_ADS,
+      // Refus, ou consentement inconnu : publicité NON personnalisée.
+      // Sans cette ligne, le formulaire de consentement ne servirait à rien.
+      npa: !personalizedAdsAllowed()
+    });
+    await AdMob.showInterstitial();
+  } catch (e) {
+    console.warn("[ads] showInterstitial:", e);
+  }
+}
 var MAX_OFFRES_PAR_SESSION = 3;
 var offresFaites = 0;
 var CADENCE = {
   combat: 3,
   vol: 3,
   recup: 3,
-  evenement: 2
+  evenement: 2,
+  /*
+   * LA NUIT A SA PROPRE CADENCE, ET C'EST UNE CORRECTION.
+   *
+   * Le bilan du matin, rattraper un contrat raté, dormir une heure de plus,
+   * était compté avec les rencontres. Mais une nuit n'est pas une rencontre :
+   * elle arrive UNE fois, à heure fixe, et son secours ne sert qu'à ce
+   * moment-là. Un joueur qui dormait sans avoir déclenché deux résultats de
+   * rencontre dans la journée trouvait le bouton absent, sans comprendre,
+   * « tu l'as enlevé pour les personnes qui payent », et c'était vrai en
+   * pratique.
+   *
+   * Deux nuits, donc : une nuit sur deux, ce qui se compte tout seul et ne
+   * dépend plus de ce qu'on a fait dans la journée.
+   */
+  nuit: 2
 };
 var engagements = {
   combat: 0,
   vol: 0,
   recup: 0,
-  evenement: 0
+  evenement: 0,
+  nuit: 0
 };
 function noterEngagement(f) {
   engagements[f] += 1;
@@ -884,7 +1022,13 @@ if (typeof window !== "undefined") {
     noterEngagement,
     engagementsAvantBonus,
     isAtelierOwned,
-    setAtelierOwned
+    setAtelierOwned,
+    packUtile,
+    verdictInterstitiel,
+    showInterstitial,
+    enTreve,
+    resteDeTreve,
+    reinitialiserTreve
   };
 }
 
@@ -937,23 +1081,23 @@ function genderFromName(name) {
   return FEMALE_NAMES.has(name) ? "f" : "m";
 }
 var JOBS = [
-  { id: "comptable", name: "Ancien Comptable", description: "Les chiffres, \xE7a le conna\xEEt. Les poubelles, un peu moins.", bonusStats: { dignity: 10 }, startingItems: ["calculatrice"], emoji: "\u{1F9EE}" },
-  { id: "ouvrier", name: "Ancien Ouvrier", description: "Des mains en or et un dos en compote.", bonusStats: { health: 10 }, startingItems: ["cle-molette"], emoji: "\u{1F527}" },
-  { id: "professeur", name: "Ancien Professeur", description: "Il corrige encore les fautes sur les panneaux.", bonusStats: { mental: 15 }, startingItems: ["livre"], emoji: "\u{1F4DA}" },
-  { id: "sommelier", name: "Ancien Sommelier", description: "Peut distinguer un Bordeaux d'un jus de poubelle. Parfois.", bonusStats: { hunger: 10 }, startingItems: ["tire-bouchon"], emoji: "\u{1F377}" },
-  { id: "cascadeur", name: "Ancien Cascadeur", description: "Tombe de haut. Litt\xE9ralement et figurativement.", bonusStats: { health: 5 }, startingItems: ["genouillere"], emoji: "\u{1F938}" },
-  { id: "informaticien", name: "Ancien Informaticien", description: "Cherche encore le WiFi gratuit.", bonusStats: { mental: 10 }, startingItems: ["cable-usb"], emoji: "\u{1F4BB}" },
-  { id: "cuisinier", name: "Ancien Cuisinier", description: "Transforme un rat en ratatouille.", bonusStats: { hunger: 15 }, startingItems: ["couteau-suisse"], emoji: "\u{1F468}\u200D\u{1F373}" },
-  { id: "infirmier", name: "Ancien Infirmier", description: "Se soigne avec des feuilles de journal.", bonusStats: { health: 15 }, startingItems: ["bandage"], emoji: "\u{1F3E5}" },
-  { id: "artiste", name: "Ancien Artiste", description: "Son art n'a jamais \xE9t\xE9 compris. M\xEAme par lui.", bonusStats: { dignity: 15 }, startingItems: ["crayon"], emoji: "\u{1F3A8}" },
-  { id: "militaire", name: "Ancien Militaire", description: "Dort debout et mange n'importe quoi.", bonusStats: { health: 10 }, startingItems: ["couverture-survie"], emoji: "\u{1F396}\uFE0F" },
-  { id: "bibliothecaire", name: "Ancien Biblioth\xE9caire", description: "Conna\xEEt tous les recoins de la ville.", bonusStats: { mental: 10 }, startingItems: ["carte-ville"], emoji: "\u{1F4D6}" },
-  { id: "vendeur", name: "Ancien Vendeur de Voitures", description: "Peut vendre un carton mouill\xE9 comme un loft.", bonusStats: { dignity: 5 }, startingItems: ["cravate"], emoji: "\u{1F697}" },
-  { id: "jardinier", name: "Ancien Jardinier", description: "Fait pousser des tomates dans une chaussure.", bonusStats: { hunger: 10 }, startingItems: ["graines"], emoji: "\u{1F331}" },
-  { id: "avocat", name: "Ancien Avocat", description: "Conna\xEEt ses droits. Et ceux des pigeons.", bonusStats: { dignity: 10, mental: 5 }, startingItems: ["code-civil"], emoji: "\u2696\uFE0F" },
-  { id: "musicien", name: "Ancien Musicien", description: "Son harmonica a connu des jours meilleurs.", bonusStats: { mental: 10, dignity: 5 }, startingItems: ["harmonica-casse"], emoji: "\u{1F3B5}" },
-  { id: "boxeur", name: "Ancien Boxeur", description: "Les poings se souviennent. Le reste a un peu oubli\xE9.", bonusStats: { health: 10 }, startingItems: ["gants-boxe"], emoji: "\u{1F94A}", locked: true },
-  { id: "poete", name: "Ancien Po\xE8te", description: "Des vers plein la t\xEAte, des trous plein les poches.", bonusStats: { mental: 15 }, startingItems: ["carnet-poemes"], emoji: "\u{1F58B}\uFE0F", locked: true }
+  { id: "comptable", name: "Ancien Comptable", nameF: "Ancienne Comptable", description: "Les chiffres, \xE7a le conna\xEEt. Les poubelles, un peu moins.", bonusStats: { dignity: 10 }, startingItems: ["calculatrice"], emoji: "\u{1F9EE}" },
+  { id: "ouvrier", name: "Ancien Ouvrier", nameF: "Ancienne Ouvri\xE8re", description: "Des mains en or et un dos en compote.", bonusStats: { health: 10 }, startingItems: ["cle-molette"], emoji: "\u{1F527}" },
+  { id: "professeur", name: "Ancien Professeur", nameF: "Ancienne Professeure", description: "Il corrige encore les fautes sur les panneaux.", bonusStats: { mental: 15 }, startingItems: ["livre"], emoji: "\u{1F4DA}" },
+  { id: "sommelier", name: "Ancien Sommelier", nameF: "Ancienne Sommeli\xE8re", description: "Peut distinguer un Bordeaux d'un jus de poubelle. Parfois.", bonusStats: { hunger: 10 }, startingItems: ["tire-bouchon"], emoji: "\u{1F377}" },
+  { id: "cascadeur", name: "Ancien Cascadeur", nameF: "Ancienne Cascadeuse", description: "Tombe de haut. Litt\xE9ralement et figurativement.", bonusStats: { health: 5 }, startingItems: ["genouillere"], emoji: "\u{1F938}" },
+  { id: "informaticien", name: "Ancien Informaticien", nameF: "Ancienne Informaticienne", description: "Cherche encore le WiFi gratuit.", bonusStats: { mental: 10 }, startingItems: ["cable-usb"], emoji: "\u{1F4BB}" },
+  { id: "cuisinier", name: "Ancien Cuisinier", nameF: "Ancienne Cuisini\xE8re", description: "Transforme un rat en ratatouille.", bonusStats: { hunger: 15 }, startingItems: ["couteau-suisse"], emoji: "\u{1F468}\u200D\u{1F373}" },
+  { id: "infirmier", name: "Ancien Infirmier", nameF: "Ancienne Infirmi\xE8re", description: "Se soigne avec des feuilles de journal.", bonusStats: { health: 15 }, startingItems: ["bandage"], emoji: "\u{1F3E5}" },
+  { id: "artiste", name: "Ancien Artiste", nameF: "Ancienne Artiste", description: "Son art n'a jamais \xE9t\xE9 compris. M\xEAme par lui.", bonusStats: { dignity: 15 }, startingItems: ["crayon"], emoji: "\u{1F3A8}" },
+  { id: "militaire", name: "Ancien Militaire", nameF: "Ancienne Militaire", description: "Dort debout et mange n'importe quoi.", bonusStats: { health: 10 }, startingItems: ["couverture-survie"], emoji: "\u{1F396}\uFE0F" },
+  { id: "bibliothecaire", name: "Ancien Biblioth\xE9caire", nameF: "Ancienne Biblioth\xE9caire", description: "Conna\xEEt tous les recoins de la ville.", bonusStats: { mental: 10 }, startingItems: ["carte-ville"], emoji: "\u{1F4D6}" },
+  { id: "vendeur", name: "Ancien Vendeur de Voitures", nameF: "Ancienne Vendeuse de Voitures", description: "Peut vendre un carton mouill\xE9 comme un loft.", bonusStats: { dignity: 5 }, startingItems: ["cravate"], emoji: "\u{1F697}" },
+  { id: "jardinier", name: "Ancien Jardinier", nameF: "Ancienne Jardini\xE8re", description: "Fait pousser des tomates dans une chaussure.", bonusStats: { hunger: 10 }, startingItems: ["graines"], emoji: "\u{1F331}" },
+  { id: "avocat", name: "Ancien Avocat", nameF: "Ancienne Avocate", description: "Conna\xEEt ses droits. Et ceux des pigeons.", bonusStats: { dignity: 10, mental: 5 }, startingItems: ["code-civil"], emoji: "\u2696\uFE0F" },
+  { id: "musicien", name: "Ancien Musicien", nameF: "Ancienne Musicienne", description: "Son harmonica a connu des jours meilleurs.", bonusStats: { mental: 10, dignity: 5 }, startingItems: ["harmonica-casse"], emoji: "\u{1F3B5}" },
+  { id: "boxeur", name: "Ancien Boxeur", nameF: "Ancienne Boxeuse", description: "Les poings se souviennent. Le reste a un peu oubli\xE9.", bonusStats: { health: 10 }, startingItems: ["gants-boxe"], emoji: "\u{1F94A}", locked: true },
+  { id: "poete", name: "Ancien Po\xE8te", nameF: "Ancienne Po\xE9tesse", description: "Des vers plein la t\xEAte, des trous plein les poches.", bonusStats: { mental: 15 }, startingItems: ["carnet-poemes"], emoji: "\u{1F58B}\uFE0F", locked: true }
 ];
 var TRAITS = [
   { id: "estomac-acier", name: "Estomac d'Acier", description: "Dig\xE8re tout : la faim vient plus lentement", positive: true, effects: { hunger: 5 }, emoji: "\u{1F9BE}" },
@@ -1969,7 +2113,7 @@ var REST_EVENTS_2 = [
     choices: [
       { text: "Se glisser dans la salle", risk: "normal", emoji: "\u{1F3AC}", outcomes: [
         { probability: 0.6, text: "Vous dormez \xE0 travers trois chefs-d'\u0153uvre du mauvais go\xFBt. Les explosions font office de berceuse. R\xE9veil au g\xE9n\xE9rique, repos\xE9 et culturellement enrichi.", statChanges: { sleep: 20, mental: 6 } },
-        { probability: 0.4, text: "Expuls\xE9 au deuxi\xE8me film \u2014 mais QUEL film. Un requin-tornade contre des cosmonautes. \xC7a valait la sortie escort\xE9e.", statChanges: { sleep: 8, mental: 3, dignity: -3 } }
+        { probability: 0.4, text: "Expuls\xE9 au deuxi\xE8me film, mais QUEL film. Un requin-tornade contre des cosmonautes. \xC7a valait la sortie escort\xE9e.", statChanges: { sleep: 8, mental: 3, dignity: -3 } }
       ] },
       { text: "Fouiller sous les si\xE8ges d'abord", risk: "normal", emoji: "\u{1F37F}", outcomes: [
         { probability: 0.5, text: "R\xE9colte : un demi-paquet de popcorn, de la monnaie tomb\xE9e et un gant. Puis dodo au fond de la salle. La totale.", statChanges: { hunger: 10, sleep: 10 }, moneyChange: 3 },
@@ -3253,7 +3397,7 @@ var STEAL_EVENTS_2 = [
       { text: "La rouler jusqu'au ferrailleur", risk: "risky", emoji: "\u{1F573}\uFE0F", outcomes: [
         { probability: 0.35, text: "Six cents m\xE8tres de roulage de plaque, un chef-d'\u0153uvre d'endurance et de discr\xE9tion nulle. Le ferrailleur paie sans regarder ni la plaque ni vous. Votre dos d\xE9pose un pr\xE9avis de gr\xE8ve.", moneyChange: 14, statChanges: { health: -9, dignity: -4, mental: 2 } },
         { probability: 0.4, text: "La plaque vous \xE9chappe au premier dos-d'\xE2ne et d\xE9vale la rue en sonnant comme une cloche de cath\xE9drale. Le quartier entier sort. Vous applaudissez avec les autres, l'air de rien.", statChanges: { health: -4, mental: -4, dignity: -3 } },
-        { probability: 0.25, text: "L'\xE9goutier \u2014 VOTRE \xE9goutier \u2014 remonte pile de ce trou-l\xE0. Il regarde la plaque, puis vous : \xAB repose \xE7a, ou je raconte au quartier ce qui vit l\xE0-dessous. \xBB Vous reposez tr\xE8s vite.", statChanges: { mental: -3, dignity: -2 } }
+        { probability: 0.25, text: "L'\xE9goutier, VOTRE \xE9goutier, remonte pile de ce trou-l\xE0. Il regarde la plaque, puis vous : \xAB repose \xE7a, ou je raconte au quartier ce qui vit l\xE0-dessous. \xBB Vous reposez tr\xE8s vite.", statChanges: { mental: -3, dignity: -2 } }
       ] },
       { text: "Renoncer : voler l'infrastructure, c'est trop", risk: "safe", emoji: "\u{1F9E0}", outcomes: [
         { probability: 1, text: "Vous laissez la ville enti\xE8re sous vos pieds. Il y a des limites, et cinquante kilos en est une excellente.", statChanges: { mental: 4, dignity: 2 } }
