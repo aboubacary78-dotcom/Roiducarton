@@ -22,7 +22,8 @@
     "test-points-entree": "node scripts/test-points-entree.mjs",
     "test-atelier-essai": "node scripts/test-atelier-essai.mjs",
     "test-etabli-atelier": "node scripts/test-etabli-atelier.mjs",
-    "test-boutique-cadeau": "node scripts/test-boutique-cadeau.mjs"
+    "test-boutique-cadeau": "node scripts/test-boutique-cadeau.mjs",
+    "captures-store": "node scripts/captures-store.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^6",

@@ -341,7 +341,13 @@ Dans Xcode :
       reste à les **créer dans la Play Console** sous les mêmes identifiants
       (`noads`, `atelier`, `pack_complet`), sans quoi le magasin répondra
       « produit inconnu » et l'écran affichera ses prix de secours.
-- [ ] Captures d'écran pour chaque taille demandée
+- [ ] Captures d'écran pour chaque taille demandée · `pnpm captures-store`
+      produit sept captures du jeu réel en 1080 × 2160, déjà au bon rapport.
+      Le brief à remettre au graphiste est dans
+      `docs/prompts-images/COMMANDE-FICHE-PLAY-STORE.md`, avec le piège du
+      rapport d'aspect : le côté long ne doit pas dépasser deux fois le court,
+      et l'écran du jeu (390 × 844, rapport 2,16) est hors norme à sa taille
+      naturelle.
 - [ ] Compilé et testé sur un vrai appareil
 - [ ] iOS : plateforme générée sur un Mac, puis les mêmes réglages qu'Android
 
