@@ -40,27 +40,43 @@ finale doit rester dans la règle, pas la capture d'origine.
 
 ## 2. La matière première fournie
 
-Sept captures du jeu réel, en 1080 × 2160, produites par
-`node scripts/captures-store.mjs` (dossier `captures-store/`) :
+Neuf captures du jeu réel, en 1080 × 2160, produites par `pnpm captures-store`
+(dossier `captures-store/`). **Le Play Store en accepte huit au plus : il y en
+a une de trop, à choisir.**
 
 | Fichier | Ce qu'il montre | Pourquoi il est là |
 |---|---|---|
-| `01-titre` | L'écran d'accueil | L'identité, en une image |
+| `01-titre` | L'écran d'accueil | L'identité. Le plus dispensable des neuf : la page du store dit déjà le nom |
 | `02-choix-personnage` | Les trois candidats | On comprend le jeu sans un mot : on choisit quelqu'un |
 | `03-origine` | « La Chute de Patrick » | Le ton, la comédie noire, la promesse narrative |
 | `04-hub` | Le contrat, la météo, les jauges | La boucle de jeu |
-| `05-mendier` | Un mini-jeu en cours | Il se passe quelque chose, ce n'est pas un menu |
-| `06-marche-noir` | La boutique | Honnêteté : on montre ce qu'on vend |
-| `07-garde-robe` | Les accessoires et le portrait | La collection, ce qui fait revenir |
+| `05-mendier` | La manche, un passant suivi du doigt | Le décor de carton, et un geste en cours |
+| `06-recup` | Le tas fouillé, trois trouvailles | Un mini-jeu vraiment joué, pas un écran de départ |
+| `07-rencontre` | « Le Roi du Cuivre » et ses choix | La plus belle image du lot, et une décision à prendre |
+| `08-bagarre` | Chat Sauvage, châtaigne / feinte / garde | L'action, et la règle lisible d'un coup d'œil |
+| `09-garde-robe` | Les accessoires et le portrait | La collection, ce qui fait revenir |
 
 **Elles viennent du jeu, pas d'une maquette.** Une fiche qui promet autre chose
 que ce qui s'installe est le premier motif de désinstallation dans l'heure, et
 ça se paie ensuite en note moyenne, longtemps.
 
-Le prestataire les habille : légendes, cadres, fonds. **Il ne redessine pas
-l'interface.**
+### Ce qui n'est PAS montré, et pourquoi
 
----
+**La boutique.** Une fiche de store qui montre un écran de paiement apprend au
+visiteur qu'il devra payer avant même de lui avoir donné une raison
+d'installer. On montre ce qui se joue ; la boutique se découvre dans le jeu.
+
+### Deux réserves sur les fichiers livrés
+
+- `05-mendier` a ses compteurs à zéro : la partie vient de commencer, l'anneau
+  de progression est en train de se remplir autour du passant. C'est honnête,
+  mais ce n'est pas un moment de gloire.
+- `07-rencontre` et `08-bagarre` portent un bouton qui contient le mot
+  « (pub) ». Rien ne l'interdit, mais un cadrage un peu plus haut l'évite.
+
+Le prestataire habille ces images : légendes, cadres, fonds. **Il ne redessine
+pas l'interface**, et il ne retire pas de la capture une mention qui existe
+dans le jeu.
 
 ## 3. La direction artistique, en une page
 
