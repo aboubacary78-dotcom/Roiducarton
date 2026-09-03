@@ -62,10 +62,23 @@ const CLE_CADEAU = 'roi-du-carton-cadeau-vendeur';
  * plafond du cimetière. « Onze morts » se lit comme une phrase, « 11 morts »
  * comme un relevé de compteur, et l'un des deux vend.
  */
-const LETTRES_FR = ['zéro', 'une', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix',
+/*
+ * AU MASCULIN, ET CE N'EST PAS UN DÉTAIL.
+ *
+ * La première version écrivait « vingt et une » et « trente et une », au
+ * féminin, parce qu'on pense d'abord à « la mort ». Mais la ligne compte des
+ * MORTS, c'est-à-dire des personnes, et elle compte ensuite des VISAGES : deux
+ * noms masculins. Un joueur arrivé à sa vingt et unième partie lisait donc
+ * « Vingt et une morts. Vingt et une visages tirés au sort. », faux deux fois
+ * dans la même phrase, sur le seul écran du jeu qui vende quelque chose.
+ *
+ * Vingt et un et trente et un sont les deux seuls rangs où l'accord se voit.
+ * Le cimetière en garde quarante au plus, d'où l'arrêt de la table.
+ */
+const LETTRES_FR = ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix',
   'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf', 'vingt',
-  'vingt et une', 'vingt-deux', 'vingt-trois', 'vingt-quatre', 'vingt-cinq', 'vingt-six', 'vingt-sept',
-  'vingt-huit', 'vingt-neuf', 'trente', 'trente et une', 'trente-deux', 'trente-trois', 'trente-quatre',
+  'vingt et un', 'vingt-deux', 'vingt-trois', 'vingt-quatre', 'vingt-cinq', 'vingt-six', 'vingt-sept',
+  'vingt-huit', 'vingt-neuf', 'trente', 'trente et un', 'trente-deux', 'trente-trois', 'trente-quatre',
   'trente-cinq', 'trente-six', 'trente-sept', 'trente-huit', 'trente-neuf', 'quarante'];
 const LETTRES_EN = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
   'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen',

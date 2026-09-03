@@ -136,6 +136,32 @@ verifier('trois morts, et la ligne le dit en toutes lettres',
   /Trois morts\. Trois visages tirés au sort\./i.test(avecMorts),
   (avecMorts.match(/[\wÀ-ÿ-]+ morts\. [\wÀ-ÿ-]+ visages tirés au sort\./i) || ['ligne absente'])[0]);
 
+/*
+ * L'ACCORD, AUX DEUX SEULS RANGS OÙ IL SE VOIT.
+ *
+ * La ligne compte des MORTS puis des VISAGES, deux noms masculins. La première
+ * version écrivait la table des nombres au féminin, parce qu'on pense d'abord
+ * à « la mort » : à la vingt et unième partie, le joueur lisait « Vingt et une
+ * morts. Vingt et une visages tirés au sort. », faux deux fois dans la même
+ * phrase, sur le seul écran du jeu qui vende quelque chose.
+ *
+ * Vingt et un et trente et un sont les deux seuls rangs où l'accord se voit :
+ * partout ailleurs le mot est invariable, et le défaut restait invisible.
+ */
+for (const [tombes, attendu] of [[21, 'Vingt et un morts. Vingt et un visages'],
+                                 [31, 'Trente et un morts. Trente et un visages']]) {
+  await p.evaluate(n => {
+    localStorage.setItem('roi-du-carton-cimetiere', JSON.stringify(
+      Array.from({ length: n }, (_, i) => ({ seed: 'x' + i, name: 'Feu', day: i + 1 }))));
+  }, tombes);
+  await demarrer();
+  await clic('Le marché noir|The black market'); await pause(1000);
+  const vu = await ecran();
+  verifier(`à ${tombes} morts, l'accord est au masculin`, vu.includes(attendu),
+    (vu.match(/[\wÀ-ÿ- ]+ morts\. [\wÀ-ÿ- ]+ visages/i) || ['ligne absente'])[0]);
+  await clic('Retour|Back'); await pause(500);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ③ L'étiquette de l'établi
 // ═══════════════════════════════════════════════════════════════════════════

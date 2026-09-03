@@ -162,20 +162,50 @@ await clic('Reprendre|Continue'); await pause(1100);
 for (const m of ['compris|Got it', 'Regarder|Take a look', 'Merci|Thanks']) {
   if (await clic(m)) await pause(350);
 }
-// On force la mort par la nuit : santé à 1, une nuit dehors suffit.
-await p.evaluate(() => {
-  const s = JSON.parse(localStorage.getItem('roi-du-carton-save'));
-  s.dayActions = 3;
-  s.character.stats = { health: 1, mental: 40, hunger: 5, thirst: 5, sleep: 5, dignity: 20 };
-  localStorage.setItem('roi-du-carton-save', JSON.stringify(s));
-});
-await p.reload({ waitUntil: 'networkidle2' }); await pause(1000);
-await clic('Reprendre|Continue'); await pause(1100);
-for (const m of ['compris|Got it', 'Regarder|Take a look', 'Merci|Thanks']) {
-  if (await clic(m)) await pause(350);
+/*
+ * ON FORCE LA MORT PAR LA NUIT, ET UNE SEULE NUIT NE SUFFISAIT PAS TOUJOURS.
+ *
+ * La version d'avant posait la santé à 1 en laissant faim, soif et sommeil à
+ * 5, puis comptait sur une nuit unique. C'est trop juste : la nuit doit à la
+ * fois vider ces trois jauges ET appliquer la pénalité de privation dans le
+ * même passage pour retirer le dernier point. Quand l'ordre ne tombait pas
+ * bien, le personnage se réveillait vivant, le contrôle suivant lisait l'écran
+ * du village au lieu de l'écran de fin, et l'échec accusait le message de mort
+ * d'avoir disparu alors que personne n'était mort.
+ *
+ * On met donc les trois jauges au plancher, ce qui rend la privation certaine,
+ * et on s'autorise trois nuits. Le compte rendu dit la santé relue à chaque
+ * nuit, pour qu'une prochaine occurrence se lise au lieu de se deviner.
+ */
+const nuitsMortelles = [];
+for (let nuit = 0; nuit < 3; nuit++) {
+  await p.evaluate(() => {
+    const s = JSON.parse(localStorage.getItem('roi-du-carton-save') || 'null');
+    if (!s?.character) return;
+    s.dayActions = 3;
+    s.character.stats = { health: 1, mental: 40, hunger: 0, thirst: 0, sleep: 0, dignity: 20 };
+    s.character.inventory = [];
+    // « Métabolisme » rend 6 points de santé par nuit : un personnage tiré
+    // avec lui se relève indéfiniment, et le test n'atteignait jamais l'écran
+    // de mort. On retire ce seul trait, le sujet est le bilan de la nuit.
+    s.character.traits = (s.character.traits || []).filter(t => t.id !== 'metabolisme');
+    localStorage.setItem('roi-du-carton-save', JSON.stringify(s));
+  });
+  await p.reload({ waitUntil: 'networkidle2' }); await pause(1000);
+  if (!(await clic('Reprendre|Continue'))) { nuitsMortelles.push(`n${nuit + 1} plus de reprise`); break; }
+  await pause(1100);
+  for (const m of ['compris|Got it', 'Regarder|Take a look', 'Merci|Thanks']) {
+    if (await clic(m)) await pause(350);
+  }
+  await clic('Jour Suivant|Next Day'); await pause(2500);
+  await clic('compris|Got it'); await pause(1500);
+  const reste = await p.evaluate(() => {
+    const s = JSON.parse(localStorage.getItem('roi-du-carton-save') || 'null');
+    return s?.character?.stats?.health ?? 'personnage effacé';
+  });
+  nuitsMortelles.push(`n${nuit + 1} santé ${reste}`);
+  if (/Pas tout de suite|Not just yet|Recommencer|Play Again|Reprendre la rue|Take the street/i.test(await ecran())) break;
 }
-await clic('Jour Suivant|Next Day'); await pause(2500);
-await clic('compris|Got it'); await pause(1500);
 
 /*
  * LA SECONDE CHANCE S'INTERPOSE, ET C'EST NORMAL.
@@ -206,7 +236,7 @@ const mort = await ecran();
 const invite = /Composer une nouvelle âme perdue|Compose a new lost soul/i.test(mort)
   || /composer son visage|compose their face/i.test(mort);
 verifier('à la mort, on propose de composer une nouvelle âme perdue', invite,
-  invite ? '' : mort.slice(0, 130));
+  invite ? '' : `${nuitsMortelles.join(' · ')} · écran ${mort.slice(0, 100)}`);
 
 verifier('aucune erreur de page', erreurs.length === 0, erreurs[0] || '');
 

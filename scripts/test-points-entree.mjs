@@ -179,25 +179,75 @@ async function mourir() {
    * l'échec dit maintenant combien de nuits ont été dépensées et sur quel
    * écran on s'est arrêté, pour que la prochaine occurrence se lise au lieu de
    * se deviner.
+   *
+   * ET DOUZE NE SUFFISENT PAS NON PLUS, une fois sur deux. Le message d'échec
+   * disait alors « douze nuits sans mourir » et l'écran du jour 13, ce qui
+   * laisse le choix entre deux explications opposées : ou bien l'écriture
+   * forcée n'a jamais pris, et le personnage a simplement vécu douze journées
+   * normales ; ou bien elle a pris et la nuit ne coûte pas toujours de la
+   * santé. Un message qui n'arbitre pas entre les deux ne sert à rien : on
+   * relit donc la santé DANS L'ÉCRITURE ELLE-MÊME, sans tour de page
+   * supplémentaire, et on la garde pour le rapport. Le compte rendu dit
+   * maintenant laquelle des deux s'est produite.
    */
+  /*
+   * ON DÉSARME D'ABORD LE FILET DU PREMIER JOUR.
+   *
+   * `survivesFirstDay` (GameContext) empêche toute mort au jour 1 de la
+   * TOUTE PREMIÈRE partie : tant qu'il n'existe ni score ni tombe, les jauges
+   * vitales ne descendent pas sous 1. C'est voulu, et c'est bien, mourir avant
+   * d'avoir rien vu du jeu ne donne envie de rien.
+   *
+   * Mais `nouvellePartie()` vide le stockage, donc chaque appel de `mourir()`
+   * repart en « toute première partie » : mesuré, la première nuit ne tue
+   * JAMAIS, dix fois sur dix, la santé reste bloquée à 1. Le test dépensait
+   * ainsi sa première nuit à coup sûr, et le reste de sa marge à la merci du
+   * hasard. On pose une tombe, le filet se retire, et la nuit reprend ses
+   * droits dès la première.
+   */
+  await p.evaluate(() => {
+    if (!JSON.parse(localStorage.getItem('roi-du-carton-cimetiere') || '[]').length)
+      localStorage.setItem('roi-du-carton-cimetiere',
+        JSON.stringify([{ seed: 'filet-desarme', name: 'Anonyme', day: 1 }]));
+  });
+  const journal = [];
   for (let nuit = 0; nuit < 12; nuit++) {
-    await p.evaluate(() => {
-      const s = JSON.parse(localStorage.getItem('roi-du-carton-save'));
-      if (!s?.character) return;
+    const pose = await p.evaluate(() => {
+      const s = JSON.parse(localStorage.getItem('roi-du-carton-save') || 'null');
+      if (!s?.character) return 'aucune sauvegarde à forcer';
+      const avant = s.character.stats?.health;
       s.dayActions = 3;
       s.character.stats = { health: 1, mental: 40, hunger: 0, thirst: 0, sleep: 0, dignity: 20 };
       s.character.inventory = [];
+      /*
+       * ET ON RETIRE « MÉTABOLISME », QUI RENDAIT CE TEST IMMORTEL.
+       *
+       * Le trait rend 6 points de santé chaque nuit (NEXT_DAY, effets passifs).
+       * Un personnage tiré avec lui se couchait à 1 et se relevait à 6, douze
+       * nuits de suite : le compte rendu le montre noir sur blanc, « n3 santé
+       * 6→1 · n4 santé 6→1 … ». Ce n'était donc ni le hasard de la nuit ni une
+       * écriture perdue, c'était un trait qui fait exactement son travail, et
+       * le test échouait une fois sur deux selon le tirage.
+       *
+       * On ne retire que celui-là : le sujet ici est l'écran de mort, pas
+       * l'équilibrage des traits, et vider la liste entière changerait un
+       * personnage en fiche vide.
+       */
+      s.character.traits = (s.character.traits || []).filter(t => t.id !== 'metabolisme');
       localStorage.setItem('roi-du-carton-save', JSON.stringify(s));
+      const relu = JSON.parse(localStorage.getItem('roi-du-carton-save')).character.stats.health;
+      return relu === 1 ? `santé ${avant}→1` : `ÉCRITURE PERDUE (relu ${relu})`;
     });
+    journal.push(`n${nuit + 1} ${pose}`);
     await p.reload({ waitUntil: 'networkidle2' }); await pause(800);
-    if (!(await clic('Reprendre|Continue'))) break;
+    if (!(await clic('Reprendre|Continue'))) { journal.push('plus de bouton de reprise'); break; }
     await pause(900);
     for (const m of ['compris|Got it', 'Regarder|Take a look', 'Merci|Thanks']) { if (await clic(m)) await pause(280); }
     await clic('Jour Suivant|Next Day'); await pause(2200);
     await clic('compris|Got it'); await pause(1200);
 
     const vu = await ecran();
-    dernierEcran = `nuit ${nuit + 1} · ${vu.slice(0, 90)}`;
+    dernierEcran = `${journal.join(' · ')} · écran ${vu.slice(0, 70)}`;
     /*
      * La seconde chance s'interpose, et c'est normal : tomber à zéro n'ouvre
      * pas l'écran de fin. Le refus se fait en DEUX temps, comme pour un joueur.
@@ -241,7 +291,7 @@ const mortPaye = await ecran();
 verifier('  …et il disparaît pour qui l\'a déjà payé',
   remort && /Composer une nouvelle âme perdue|Compose a new lost soul|Reprendre la rue|Take the street/i.test(mortPaye)
     && !/c'est vous qui le faites|you make yourself/i.test(mortPaye),
-  remort ? '' : 'la seconde mort n\'a pas abouti : contrôle vide');
+  remort ? '' : `la seconde mort n'a pas abouti · ${dernierEcran}`);
 
 // ── ④ LA GARDE-ROBE ──────────────────────────────────────────────────────
 await p.evaluate(() => { localStorage.setItem('roi-du-carton-atelier', '0'); });

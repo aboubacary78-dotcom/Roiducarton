@@ -1,6 +1,6 @@
 {
   "name": "roi-du-carton",
-  "version": "3.70.0",
+  "version": "3.71.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -25,7 +25,9 @@
     "test-boutique-cadeau": "node scripts/test-boutique-cadeau.mjs",
     "captures-store": "node scripts/captures-store.mjs",
     "suites": "node scripts/suites.mjs",
-    "test-ouverture": "node scripts/test-ouverture.mjs"
+    "test-ouverture": "node scripts/test-ouverture.mjs",
+    "audit-console": "node scripts/audit-console.mjs",
+    "audit-donnees": "node scripts/audit-donnees.mjs"
   },
   "dependencies": {
     "@capacitor-community/admob": "^6",

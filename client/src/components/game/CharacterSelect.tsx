@@ -234,9 +234,21 @@ export default function CharacterSelect() {
                 dispatch({ type: 'SELECT_CHARACTER', index: i, visage, traits });
                 return;
               }
+              /*
+               * LE CANDIDAT PEUT AVOIR DISPARU PENDANT L'ATTENTE.
+               *
+               * `purchaseAtelier()` ouvre la fenêtre de Google et rend la main
+               * plusieurs secondes plus tard. Rien ne garantit que la liste
+               * des candidats soit encore la même à ce moment-là, et lire
+               * `.seed` sur une case vide ferait tomber l'écran, précisément
+               * sur le chemin d'un paiement qui vient d'échouer : le pire
+               * endroit du jeu pour planter.
+               */
               const perso = state.characterChoices[i];
-              poserSurEtabli({ seed: perso.seed, nom: perso.name, genre: perso.gender, visage });
-              mesurer('etabli_pose');
+              if (perso) {
+                poserSurEtabli({ seed: perso.seed, nom: perso.name, genre: perso.gender, visage });
+                mesurer('etabli_pose');
+              }
               pushToast(
                 tr('Le vendeur n\'est pas à son carton. On part avec celui-là.',
                    'Nobody at the stall. We go with this one.'),
