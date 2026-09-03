@@ -30,7 +30,18 @@ production tant qu'il n'a pas fait tourner un **test fermé** avec au moins
 **douze testeurs inscrits sans interruption pendant quatorze jours**. Ce n'est
 qu'ensuite qu'on demande l'accès à la production.
 
-Trois pièges dans cette phrase :
+**Et c'est PAR APPLICATION, pas une fois pour toutes.** Chaque nouveau jeu
+publié sous ce compte refait ses quatorze jours avec ses douze testeurs. Les
+mêmes personnes peuvent servir, mais elles doivent s'inscrire de nouveau et le
+compteur repart de zéro. Seules les MISES À JOUR d'une application qui a déjà
+l'accès à la production en sont dispensées.
+
+C'est le point qui rend le compte d'organisation intéressant pour qui compte
+publier plusieurs jeux : il est dispensé de la règle, pour toutes ses
+applications, définitivement. Le D-U-N-S se paie une fois en délai, la règle
+des quatorze jours se paie à chaque titre.
+
+Trois pièges dans la phrase de départ :
 
 1. **Le test INTERNE ne compte pas.** Il est instantané, jusqu'à cent
    personnes, sans examen, et c'est celui qu'il faut pour éprouver la
