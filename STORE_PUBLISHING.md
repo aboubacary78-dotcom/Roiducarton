@@ -56,8 +56,36 @@ sur un profil de paiement existant : il faut en créer un nouveau, le faire
 vérifier, puis le rattacher. Ce n'est pas irréversible, c'est simplement long
 et pénible. Autant choisir en connaissance de cause au premier écran.
 
-Un point à trancher hors de ce document : vendre des produits payants produit
-un revenu, et le faire en nom propre n'a pas les mêmes conséquences
+### Le compte personnel publie une adresse, et ce jeu vend
+
+**À vérifier avant de payer les 25 $.** Sur un compte personnel, ce que Google
+Play affiche publiquement dépend de ce qu'on vend :
+
+| Ce qu'on publie | Ce qui devient public |
+|---|---|
+| Une application gratuite, sans achat | Le nom légal, le pays, l'adresse e-mail |
+| Une application **avec des achats intégrés** | Le nom légal **et l'adresse postale complète** |
+
+Or ce jeu vend trois produits. Sur un compte personnel, l'adresse déclarée au
+profil de paiement, c'est-à-dire le domicile, se retrouve donc sur la fiche
+publique du développeur. La logique vient des obligations de transparence
+faites aux vendeurs, pas d'un réglage qu'on peut décocher.
+
+> Cette information vient de sources secondaires : la page officielle de Google
+> est inaccessible depuis l'environnement où ce document a été écrit. **Le
+> formulaire d'inscription le dit lui-même au moment de saisir l'adresse : c'est
+> là qu'il faut le lire, avant de payer.**
+
+Trois façons de s'en accommoder, par ordre de simplicité :
+
+1. **L'assumer.** Beaucoup d'auteurs indépendants le font.
+2. **Une adresse qui n'est pas le domicile** : une domiciliation, une boîte
+   postale professionnelle, selon ce que Google accepte comme justificatif.
+3. **Un compte d'organisation**, qui publie l'adresse de la structure. Il
+   demande le D-U-N-S, donc du délai, mais règle la question.
+
+Un dernier point, hors de ce document : vendre des produits payants produit un
+revenu, et le faire en nom propre n'a pas les mêmes conséquences
 administratives que via une structure. Ça se vérifie avant, pas après le
 premier euro encaissé.
 
