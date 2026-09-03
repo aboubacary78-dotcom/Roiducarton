@@ -7,6 +7,7 @@ import { notificationsEnabled, setNotificationsEnabled, requestPermission, resch
 import { loadDaily } from '@/lib/daily';
 import { isAdsRemoved, isAtelierOwned, reopenConsentForm, restaurerAchats } from '@/lib/ads';
 import { versLaBoutique } from '@/lib/mesures';
+import { Avertissement } from './Ouverture';
 import { surMagasinChange } from '@/lib/facturation';
 import { Capacitor } from '@capacitor/core';
 import { TUTORIAL_KEY } from './TutorialOverlay';
@@ -33,7 +34,7 @@ import { pushToast } from '@/lib/toast';
  * chacune une copie.
  */
 const PRIVACY_URL = 'https://beautiful-chaja-c8af8f.netlify.app/confidentialite.html';
-const APP_VERSION = '3.69.0';
+const APP_VERSION = '3.70.0';
 
 /*
  * UN CURSEUR EN CARTON.
@@ -82,6 +83,7 @@ export default function SettingsScreen() {
   const { state, dispatch } = useGame();
   const lang = useLang();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [avertissement, setAvertissement] = useState(false);
   const [muted, setMutedState] = useState(isMuted());
   const [vol, setVol] = useState(getVolume());
   const [volFond, setVolFond] = useState(getVolumeFond());
@@ -411,6 +413,27 @@ export default function SettingsScreen() {
           <span>🔒 {tr('Politique de confidentialité', 'Privacy policy')}</span>
           <span className="text-[#A08B70]">↗</span>
         </a>
+
+        {/*
+          L'AVERTISSEMENT RESTE LISIBLE, ET C'EST LA CONTREPARTIE.
+
+          Il ne s'affiche qu'une fois, à la première ouverture : le remontrer à
+          chaque lancement apprendrait à le sauter des yeux. En échange, il ne
+          disparaît pas pour autant, il vient se ranger ici, à côté de la
+          politique de confidentialité, là où on va chercher ce genre de texte.
+        */}
+        <button
+          onClick={() => { playPage(); setAvertissement(v => !v); }}
+          className="action-btn p-3 text-sm text-[#3D3020] flex items-center justify-between"
+        >
+          <span>📄 {tr('Une fiction', 'A work of fiction')}</span>
+          <span className="text-[#A08B70]">{avertissement ? '▴' : '▾'}</span>
+        </button>
+        {avertissement && (
+          <div className="craft-card p-4 text-left">
+            <Avertissement />
+          </div>
+        )}
 
         {!confirmReset ? (
           <button

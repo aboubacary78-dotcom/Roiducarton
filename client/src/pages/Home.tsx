@@ -29,6 +29,7 @@ import CartonMatinOverlay from '@/components/game/CartonMatinOverlay';
 import { noteSessionHour, rescheduleAll } from '@/lib/notifications';
 import { bumpSession } from '@/components/game/MinigameIntro';
 import { loadDaily } from '@/lib/daily';
+import Ouverture from '@/components/game/Ouverture';
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * CE QU'ON NE VOIT PAS AU LANCEMENT NE DOIT PAS RETARDER LE LANCEMENT.
@@ -281,6 +282,16 @@ export default function Home() {
 
         {/* Bilan de la nuit (pop-up après « Jour suivant ») */}
         {state.daySummary && state.screen === 'main' && <DaySummaryOverlay />}
+
+        {/*
+          L'OUVERTURE : la signature du studio, puis l'avertissement.
+
+          Posée en tout dernier et au z le plus haut : elle passe par-dessus
+          absolument tout, y compris le carton du matin, qui a pourtant le
+          droit de passer par-dessus le reste. Elle ne retarde rien pour
+          autant, l'écran-titre est monté dessous pendant qu'elle joue.
+        */}
+        <Ouverture />
       </div>
     </div>
   );
