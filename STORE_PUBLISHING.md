@@ -18,7 +18,39 @@ Ce guide explique chaque étape, de zéro jusqu'à la mise en ligne.
 | Les deux | [Node.js 20+](https://nodejs.org) et `pnpm` (`npm i -g pnpm`) |
 
 Comptes nécessaires :
-- **Compte développeur Google Play** : 25 $ une fois, https://play.google.com/console
+- **Compte développeur Google Play** : 25 $ une fois,
+  inscription sur https://play.google.com/console/signup
+
+### Le délai que personne ne voit venir : douze testeurs, quatorze jours
+
+**À lire avant de payer les 25 $, parce que ça décide du calendrier entier.**
+
+Un compte **personnel** créé après le 13 novembre 2023 ne peut pas publier en
+production tant qu'il n'a pas fait tourner un **test fermé** avec au moins
+**douze testeurs inscrits sans interruption pendant quatorze jours**. Ce n'est
+qu'ensuite qu'on demande l'accès à la production.
+
+Trois pièges dans cette phrase :
+
+1. **Le test INTERNE ne compte pas.** Il est instantané, jusqu'à cent
+   personnes, sans examen, et c'est celui qu'il faut pour éprouver la
+   facturation. Mais il ne fait pas avancer d'un jour le compteur des quatorze.
+   Seul le canal **test fermé** compte.
+2. **Quatorze jours CONTINUS.** Un testeur qui se désinscrit remet son compteur
+   à zéro. Il en faut donc douze qui restent.
+3. **Google regarde s'ils ont joué.** L'inscription est la condition écrite ;
+   l'usage réel est examiné au moment de la demande d'accès.
+
+**Les comptes d'organisation en sont dispensés**, mais ils demandent une entité
+légale enregistrée et un numéro D-U-N-S, ce qui a son propre délai. À arbitrer
+selon qu'une structure existe déjà ou non.
+
+Conséquence pratique : **le compte se crée maintenant, pas le jour où le jeu
+est prêt.** Les quatorze jours courent pendant qu'on finit le reste, et douze
+personnes qui installent et jouent, ça se rassemble aussi.
+
+Le détail officiel :
+https://support.google.com/googleplay/android-developer/answer/14151465
 - **Compte développeur Apple** : 99 $/an, https://developer.apple.com/programs/
 - **Compte AdMob** (gratuit) : https://admob.google.com
 
@@ -349,6 +381,11 @@ Dans Xcode :
       et l'écran du jeu (390 × 844, rapport 2,16) est hors norme à sa taille
       naturelle.
 - [ ] Compilé et testé sur un vrai appareil
+- [ ] Compte développeur créé, et le **test fermé lancé tôt** : douze testeurs
+      inscrits sans interruption pendant quatorze jours avant de pouvoir
+      demander l'accès à la production (compte personnel créé après le
+      13/11/2023). Le test *interne*, celui qui sert à éprouver la
+      facturation, ne compte PAS pour ce délai.
 - [ ] iOS : plateforme générée sur un Mac, puis les mêmes réglages qu'Android
 
 ---
