@@ -41,9 +41,25 @@ Trois pièges dans cette phrase :
 3. **Google regarde s'ils ont joué.** L'inscription est la condition écrite ;
    l'usage réel est examiné au moment de la demande d'accès.
 
-**Les comptes d'organisation en sont dispensés**, mais ils demandent une entité
-légale enregistrée et un numéro D-U-N-S, ce qui a son propre délai. À arbitrer
-selon qu'une structure existe déjà ou non.
+**Les comptes d'organisation en sont dispensés**, et c'est le premier écran de
+l'inscription qui demande de choisir. Le numéro **D-U-N-S est obligatoire**
+pour ce type de compte : sans entité légale enregistrée, la question ne se pose
+pas, c'est compte personnel. Avec une structure (une micro-entreprise suffit),
+le D-U-N-S se demande gratuitement chez Dun & Bradstreet, mais il se fait
+attendre, parfois jusqu'à un mois : on troque quatorze jours de test contre un
+délai administratif qu'on ne maîtrise pas, et il faut encore de vrais joueurs
+pour la suite de toute façon.
+
+**Le type de compte se change mal.** Play Console propose bien « Modifier le
+type de compte », mais le pays, le type et le D-U-N-S ne sont pas modifiables
+sur un profil de paiement existant : il faut en créer un nouveau, le faire
+vérifier, puis le rattacher. Ce n'est pas irréversible, c'est simplement long
+et pénible. Autant choisir en connaissance de cause au premier écran.
+
+Un point à trancher hors de ce document : vendre des produits payants produit
+un revenu, et le faire en nom propre n'a pas les mêmes conséquences
+administratives que via une structure. Ça se vérifie avant, pas après le
+premier euro encaissé.
 
 Conséquence pratique : **le compte se crée maintenant, pas le jour où le jeu
 est prêt.** Les quatorze jours courent pendant qu'on finit le reste, et douze
