@@ -11,6 +11,14 @@
     <!-- Polices auto-hébergées (voir scripts/localize-fonts.mjs) : typographie
          identique partout, même hors-ligne, sans dépendance à Google Fonts. -->
     <link rel="stylesheet" href="/fonts/fonts.css" />
+    <!-- LE LOGO DU STUDIO, DEMANDÉ AVANT QUE REACT EXISTE.
+         L'ouverture le frappe à 300 ms du montage. Attendre que le composant
+         soit rendu pour commencer à le télécharger, c'est risquer un tampon
+         qui s'écrase sur rien, et le seul appareil où ça se verrait est le
+         plus lent, c'est-à-dire celui d'un vrai joueur. Ces deux lignes
+         lancent la requête pendant la lecture du HTML. -->
+    <link rel="preload" as="image" href="/assets/studio-embleme.webp" />
+    <link rel="preload" as="image" href="/assets/studio-mot.webp" />
   </head>
   <body>
     <div id="root"></div>

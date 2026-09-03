@@ -33,11 +33,27 @@
  *     déchiré aux deux bouts, posé de travers, avec la phrase écrite au
  *     marqueur dessus. Il s'écrase sous le doigt, puis se décolle.
  *
- * PAS DE LOGO, ET PAS D'IMAGE. Le studio n'en a pas, on n'en invente pas un, et
- * tout ce qui suit est dessiné en code : rien à charger, rien à décliner par
- * résolution, et l'ouverture ne peut pas se retrouver un jour à attendre un
- * fichier. Le nom est écrit exactement comme il est déposé, jeu de mots
- * compris ; on ne l'explique pas et on ne le corrige pas.
+ * LE LOGO EST ARRIVÉ, ET IL CHANGE LA FRAPPE EN DEUX FRAPPES.
+ *
+ * Cette page disait « pas de logo, pas d'image : le studio n'en a pas ». Il en
+ * a un maintenant, et il est en deux parties évidentes : un raton qui tient un
+ * A et un T à bout de bras, et « DEUX MAIN » écrit dessous. Le prendre comme
+ * un seul bloc qui tombe aurait gâché ce que le dessin raconte déjà.
+ *
+ * On frappe donc DEUX FOIS. Le raton et ses lettres s'écrasent les premiers,
+ * l'écran encaisse, la poussière saute. Puis, 340 ms plus tard, « DEUX MAIN »
+ * claque dessous, d'un coup plus sec et venu de moins haut : la deuxième
+ * frappe de la même main. Une seule chute aurait posé une image ; deux temps
+ * font une signature.
+ *
+ * CE QUE ÇA COÛTE, ET COMMENT ON LE PAIE. Une image peut manquer à l'appel, et
+ * un tampon qui s'écrase sur rien serait pire que pas de tampon du tout. Trois
+ * garde-fous : `index.html` demande les deux fichiers pendant la lecture du
+ * HTML, l'horloge de la séquence n'est lancée qu'une fois les deux décodées
+ * (avec un plafond, on ne bloque pas une ouverture derrière un réseau mort), et
+ * si l'une d'elles manque vraiment, le nom écrit reprend sa place. Les deux
+ * pèsent 91 ko à elles deux, et le nom reste écrit exactement comme il est
+ * déposé, jeu de mots compris : on ne l'explique pas, on ne le corrige pas.
  *
  * TOUT SE SAUTE D'UN DOIGT, et le voile est posé PAR-DESSUS l'écran-titre déjà
  * monté : quand il se lève, le jeu est là, sans chargement ajouté.
@@ -80,6 +96,23 @@ function ouvertureSautee(): boolean {
 const STUDIO = 'AT DEUX MAIN';
 
 /*
+ * LES DEUX MORCEAUX DU LOGO.
+ *
+ * Découpés du fichier maître par `scripts/detourer-logo.py`, qui détoure le
+ * fond crème sans crever les yeux du raton et ajoure les contre-poinçons des
+ * lettres, pour que le carton se voie à travers le A plutôt qu'un aplat clair.
+ *
+ * Les proportions viennent du logo d'origine et ne sont pas décidées ici : le
+ * mot fait toute la largeur de référence, l'emblème en fait 80,9 %, et l'espace
+ * qui les sépare vaut la fente mesurée entre eux dans le fichier. Poser deux
+ * images « à peu près » aurait redessiné la composition du logo au jugé.
+ */
+const EMBLEME = '/assets/studio-embleme.webp';
+const MOT = '/assets/studio-mot.webp';
+const PART_EMBLEME = '80.9%';
+const ECART = '1.4%';
+
+/*
  * ═══════════════════════════════════════════════════════════════════════════
  * LA TABLE DES TEMPS, ET C'EST LA SEULE.
  *
@@ -88,30 +121,36 @@ const STUDIO = 'AT DEUX MAIN';
  * lit ces valeurs, y compris les retards passés au CSS : le plan EST le code.
  *
  *      0 ms   le carton, vide, son grain qui respire
- *    140 ms   l'ombre du tampon grossit : quelque chose approche par-dessus
- *    300 ms   IMPACT. Le nom s'écrase, l'écran encaisse, la poussière saute
+ *    140 ms   l'ombre du raton grossit : quelque chose approche par-dessus
+ *    300 ms   IMPACT ①. Le raton et ses lettres s'écrasent, l'écran encaisse,
+ *             la poussière saute
  *    360 ms   l'encre commence à partir dans la fibre
- *    620 ms   le trait de marqueur se tire sous le nom
- *   1900 ms   ARRACHAGE. Les deux moitiés partent, le texte est dessous
- *   2120 ms   les lignes de l'avertissement remontent, l'une après l'autre
- *   2500 ms   le scotch claque en travers
- *   2960 ms   on peut appuyer
+ *    640 ms   IMPACT ②. « DEUX MAIN » claque dessous, plus sec, moins haut
+ *    900 ms   le trait de marqueur se tire sous le mot
+ *   2150 ms   ARRACHAGE. Les deux moitiés partent, le texte est dessous
+ *   2370 ms   les lignes de l'avertissement remontent, l'une après l'autre
+ *   2750 ms   le scotch claque en travers
+ *   3210 ms   on peut appuyer
+ *
+ * ENTRE 900 ET 2150 MS, RIEN NE BOUGE, ET C'EST VOULU. Le logo complet tient
+ * l'écran une seconde et quart avant d'être déchiré. Sans ce temps mort, on
+ * n'aurait jamais vu le logo, seulement son arrivée et son départ.
  *
  * Quand l'avertissement a déjà été lu, la séquence s'arrête à l'arrachage et
- * rend la main au jeu : 2 520 ms en tout, dont la moitié est sautable d'un
- * doigt.
+ * rend la main au jeu : 2 770 ms en tout, sautables d'un doigt à tout instant.
  * ═══════════════════════════════════════════════════════════════════════════
  */
 const T = {
   approche: 140,
   impact: 300,
   encre: 360,
-  trait: 620,
-  arrachage: 1900,
+  mot: 640,
+  trait: 900,
+  arrachage: 2150,
   dureeArrachage: 620,
-  texte: 2120,
-  scotch: 2500,
-  jouable: 2960,
+  texte: 2370,
+  scotch: 2750,
+  jouable: 3210,
 } as const;
 
 /**
@@ -229,9 +268,46 @@ export default function Ouverture() {
   };
   const [aLire] = useState(() => !avertissementLu());
 
-  // L'horloge de la séquence. Une seule, remise à zéro au montage.
+  /*
+   * ON N'OUVRE PAS L'HORLOGE AVANT D'AVOIR LE LOGO EN MAIN.
+   *
+   * Le tampon tombe à 300 ms. Si les deux fichiers ne sont pas décodés à cet
+   * instant, l'écran encaisse un choc et la poussière saute pour RIEN : on aura
+   * dépensé toute la mise en scène sur un vide, et l'appareil où ça se produit
+   * est le plus lent, donc celui d'un vrai joueur.
+   *
+   * `decode()` attend le décodage, pas seulement le téléchargement : une image
+   * reçue mais pas encore décodée s'affiche quand même une image trop tard, et
+   * c'est exactement l'image de l'impact.
+   *
+   * LE PLAFOND EST LA PARTIE IMPORTANTE. Un réseau mort, un fichier absent, un
+   * `decode()` qui n'aboutit jamais : la course contre 700 ms garantit que
+   * l'ouverture démarre de toute façon. Une animation d'accueil qui attend
+   * indéfiniment un ornement transformerait un ornement en panne.
+   */
+  const [logoPret, setLogoPret] = useState(false);
+  const [logoManque, setLogoManque] = useState(false);
   useEffect(() => {
     if (!vivante) return;
+    let vif = true;
+    const charger = (src: string) => {
+      const i = new Image();
+      i.src = src;
+      return i.decode().then(() => true).catch(() => false);
+    };
+    const plafond = new Promise<null>(r => window.setTimeout(() => r(null), 700));
+    Promise.race([Promise.all([charger(EMBLEME), charger(MOT)]), plafond])
+      .then(res => {
+        if (!vif) return;
+        if (Array.isArray(res) && !res.every(Boolean)) setLogoManque(true);
+        setLogoPret(true);
+      });
+    return () => { vif = false; };
+  }, [vivante]);
+
+  // L'horloge de la séquence. Une seule, lancée dès que le logo est là.
+  useEffect(() => {
+    if (!vivante || !logoPret) return;
     const debut = performance.now();
     let brut = 0;
     const battre = () => {
@@ -240,7 +316,7 @@ export default function Ouverture() {
     };
     brut = requestAnimationFrame(battre);
     return () => cancelAnimationFrame(brut);
-  }, [vivante]);
+  }, [vivante, logoPret]);
 
   /*
    * L'ARRACHAGE part tout seul. Il découvre soit l'avertissement, soit le jeu :
@@ -248,14 +324,16 @@ export default function Ouverture() {
    * chose à faire.
    */
   useEffect(() => {
-    if (!vivante || arrache) return;
+    // Il part de l'INSTANT OÙ L'HORLOGE PART, pas du montage : sans cette
+    // condition, une image lente ferait arracher un carton encore vierge.
+    if (!vivante || arrache || !logoPret) return;
     const id = window.setTimeout(() => {
       setArrache(true);
       window.setTimeout(() => setParties(true), T.dureeArrachage);
       if (!aLire) window.setTimeout(() => setVivante(false), T.dureeArrachage);
     }, T.arrachage);
     return () => window.clearTimeout(id);
-  }, [vivante, arrache, aLire]);
+  }, [vivante, arrache, aLire, logoPret]);
 
   const sauter = () => {
     if (arrache) return;
@@ -342,7 +420,6 @@ export default function Ouverture() {
       {!parties && ['haut', 'bas'].map(cote => (
         <div
           key={cote}
-          onClick={sauter}
           className={`absolute inset-0 ${arrache ? (cote === 'haut' ? 'ouv-haut' : 'ouv-bas') : ''}`}
           style={{
             clipPath: cote === 'haut'
@@ -352,10 +429,48 @@ export default function Ouverture() {
         >
           <Carton />
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <Signature t={t} frappe={frappe} />
+            <Signature t={t} frappe={frappe} manque={logoManque} />
           </div>
         </div>
       ))}
+
+      {/*
+        LE NOM DU STUDIO, DIT UNE FOIS ET UNE SEULE.
+
+        Il était écrit en toutes lettres à l'écran, donc lisible par tout le
+        monde. Le logo l'a remplacé par une image, et une image ne se lit pas
+        toute seule. Deux `alt` auraient réglé la question et créé la suivante :
+        la signature est dessinée DEUX FOIS, une par moitié de déchirure, et
+        une synthèse vocale aurait annoncé le studio en double.
+
+        Les deux moitiés sont donc muettes, et le nom vit ici, hors du découpage,
+        énoncé une seule fois. Il disparaît avec elles : une signature qui reste
+        dans la page après avoir été arrachée n'est plus une signature.
+      */}
+      {!parties && <h1 className="sr-only">{STUDIO}</h1>}
+
+      {/*
+        PASSER : UN VRAI BOUTON, ET PAS DEUX MOITIÉS DE CARTON.
+
+        Le geste était porté par les deux moitiés arrachables, qui sont des
+        `div`. Ça marche au doigt et nulle part ailleurs : ni au clavier, ni à
+        la synthèse vocale, alors qu'on demande précisément au joueur d'appuyer
+        pour passer. Et comme ces `div` n'ont aucune identité propre, la seule
+        façon de les désigner était le texte qu'elles contenaient — le nom du
+        studio. Le jour où ce nom est devenu une image, le geste est devenu
+        introuvable, pour un observateur comme pour une aide technique.
+
+        Un seul bouton transparent, posé par-dessus, réglé les deux : il porte
+        le nom de ce qu'il fait, il se déclenche à l'entrée comme au doigt, et
+        il se retire dès l'arrachage pour rendre l'écran au scotch qui suit.
+      */}
+      {!arrache && (
+        <button
+          onClick={sauter}
+          aria-label={tr('Passer l\'introduction', 'Skip the intro')}
+          className="absolute inset-0 w-full h-full cursor-default"
+        />
+      )}
 
       {/* LA SECOUSSE. Un voile transparent qui porte l'animation et fait bouger
           tout ce qu'il contient : le choc se sent sur l'écran entier, pas sur
@@ -367,76 +482,153 @@ export default function Ouverture() {
   );
 }
 
-/** Le nom frappé, avec son ombre d'approche, sa bave et sa poussière. */
-function Signature({ t, frappe }: { t: number; frappe: boolean }) {
-  return (
-    <div className="relative">
-      {/* L'OMBRE QUI APPROCHE : le tampon vu de dessous, avant qu'il touche. */}
-      {t >= T.approche && !frappe && (
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{
-            opacity: Math.min(0.36, (t - T.approche) / (T.impact - T.approche) * 0.36),
-            transform: `scale(${1.9 - (t - T.approche) / (T.impact - T.approche) * 0.55})`,
-            filter: 'blur(12px)',
-          }}
-        >
-          <span className="text-3xl font-bold tracking-[0.16em] text-[#1A120C] whitespace-nowrap">{STUDIO}</span>
-        </div>
-      )}
+/*
+ * LA SIGNATURE FRAPPÉE, EN DEUX TEMPS.
+ *
+ * L'emblème d'abord, le mot ensuite. Chacun porte son ombre d'approche, son
+ * encre qui bave et, pour le premier seulement, la poussière du choc : le
+ * second coup est plus léger, lui donner la même poussière ferait deux fois le
+ * même événement.
+ *
+ * `brightness(0)` sert deux fois et mérite son mot : il écrase toutes les
+ * couleurs de l'image sur le noir en gardant sa transparence. C'est ce qui
+ * transforme un logo en couleurs en une SILHOUETTE, donc en ombre portée puis
+ * en tache d'encre, sans avoir à livrer deux fichiers de plus.
+ */
+function Signature({ t, frappe, manque }: { t: number; frappe: boolean; manque: boolean }) {
+  const avance = Math.min(1, Math.max(0, (t - T.approche) / (T.impact - T.approche)));
+  const motFrappe = t >= T.mot;
 
-      {frappe && (
-        <>
-          {/* L'encre qui part dans la fibre : le même mot, flou, derrière. */}
-          <span
-            className="ouv-bave absolute inset-0 flex items-center justify-center text-3xl font-bold tracking-[0.16em] text-[#2A1F1A] whitespace-nowrap pointer-events-none"
-            style={{ animationDelay: `${T.encre - T.impact}ms`, filter: 'blur(3px)' }}
-            aria-hidden
-          >
-            {STUDIO}
-          </span>
-          {/* Le nom net. Le filtre est posé ici, sur un élément que RIEN
-              n'anime : c'est le parent qui porte la chute. */}
+  /*
+   * LE REPLI, QUI N'EST PAS DÉCORATIF.
+   *
+   * Si les fichiers manquent vraiment, l'ouverture retombe sur le nom écrit,
+   * c'est-à-dire sur ce qu'elle faisait avant d'avoir un logo. Un studio dont
+   * la signature ne s'affiche pas est un studio qui n'a pas signé.
+   */
+  if (manque) {
+    return (
+      <div className="relative">
+        {frappe && (
           <div className="ouv-tampon">
-            <span
-              className="block text-3xl font-bold tracking-[0.16em] text-[#241A12] whitespace-nowrap"
-              style={{ filter: 'url(#ouv-bave)', textShadow: '0 1px 0 rgba(255,255,255,0.16)' }}
-            >
+            <span className="block text-3xl font-bold tracking-[0.16em] text-[#241A12] whitespace-nowrap"
+              style={{ filter: 'url(#ouv-bave)', textShadow: '0 1px 0 rgba(255,255,255,0.16)' }}>
               {STUDIO}
             </span>
           </div>
+        )}
+      </div>
+    );
+  }
 
-          {/* LE TRAIT DE MARQUEUR, tiré une fois, jamais droit. */}
-          <svg width="196" height="14" viewBox="0 0 196 14"
-            className="mx-auto mt-3 overflow-visible block" aria-hidden>
-            <path
-              d="M5 8 Q50 3 99 7 T191 5"
-              fill="none" stroke="#241A12" strokeWidth="2.8" strokeLinecap="round"
+  /*
+   * TOUT EST DANS LE DOCUMENT DÈS LA PREMIÈRE IMAGE, ET RIEN NE BOUGE ENSUITE.
+   *
+   * La première version montait chaque morceau au moment de sa frappe. La boîte
+   * grandissait donc à chaque arrivée, et comme elle est centrée, L'EMBLÈME
+   * REMONTAIT : la planche de contrôle le montre à 25 % de la hauteur quand il
+   * est seul, puis à 45 % une fois le mot et le trait posés. Un tampon qui
+   * dérive après avoir frappé annule tout ce que la chute vient de raconter.
+   *
+   * On réserve donc la place tout de suite et on ne joue que sur la visibilité :
+   * la hauteur est définitive dès l'image zéro, et ce qui s'écrase reste où il
+   * s'est écrasé.
+   */
+  const cache = (visible: boolean) => ({ visibility: visible ? 'visible' : 'hidden' } as const);
+
+  return (
+    <div className="relative w-[68%] max-w-[300px]" aria-hidden>
+      {/* L'OMBRE QUI APPROCHE : l'emblème vu de dessous, avant qu'il touche. */}
+      {t >= T.approche && !frappe && (
+        <div
+          className="absolute inset-0 flex items-start justify-center pointer-events-none"
+          style={{
+            opacity: avance * 0.36,
+            transform: `scale(${1.9 - avance * 0.55})`,
+            filter: 'blur(12px) brightness(0)',
+          }}
+        >
+          <img src={EMBLEME} alt="" style={{ width: PART_EMBLEME }} />
+        </div>
+      )}
+
+      {/*
+        ── ① L'EMBLÈME ────────────────────────────────────────────────────────
+
+        L'ENCRE EST IMBRIQUÉE DANS LA CHUTE, ET C'EST UNE CORRECTION.
+
+        Elle était posée à côté du tampon, en frère. Or `carton-tampon` finit sur
+        `rotate(-1.2deg)` : la tache restait donc droite pendant que la forme
+        nette penchait, et le décalage se lisait comme un DÉFAUT DE REPÉRAGE,
+        une impression ratée sur deux passages, plutôt que comme de l'encre qui
+        s'étale. En la mettant DANS le tampon, elle subit exactement la même
+        chute, la même inclinaison, et ne se distingue plus que par son flou.
+
+        Elle vaut aussi 55 % de sa valeur d'origine : `carton-bave` a été réglée
+        pour du TEXTE, où elle ne déborde que d'un contour de lettre. Derrière
+        une image pleine, la même opacité cernait le raton d'un halo continu.
+      */}
+      <div className="relative flex justify-center" style={cache(frappe)}>
+        <div className="ouv-tampon w-full flex justify-center relative">
+          <span className="absolute inset-0 flex justify-center pointer-events-none" style={{ opacity: 0.55 }}>
+            <img
+              src={EMBLEME} alt="" className="ouv-bave"
+              style={{ width: PART_EMBLEME, animationDelay: `${T.encre - T.impact}ms`, filter: 'blur(3px) brightness(0)' }}
+            />
+          </span>
+          {/* L'emblème net. Le filtre de bave est posé ICI, sur un élément que
+              rien n'anime : c'est le parent qui porte la chute. */}
+          <img
+            src={EMBLEME} alt=""
+            style={{ width: PART_EMBLEME, filter: 'url(#ouv-bave) drop-shadow(0 2px 3px rgba(40,26,14,0.34))' }}
+          />
+        </div>
+      </div>
+
+      {/* ── ② LE MOT, 340 ms plus tard ────────────────────────────────────── */}
+      <div className="relative flex justify-center" style={{ marginTop: ECART, ...cache(motFrappe) }}>
+        <div className="ouv-tampon-mot w-full relative">
+          <span className="absolute inset-0 pointer-events-none" style={{ opacity: 0.55 }}>
+            <img src={MOT} alt="" className="ouv-bave w-full"
+              style={{ animationDelay: '60ms', filter: 'blur(3px) brightness(0)' }} />
+          </span>
+          <img src={MOT} alt="" className="w-full"
+            style={{ filter: 'url(#ouv-bave) drop-shadow(0 2px 3px rgba(40,26,14,0.34))' }} />
+        </div>
+      </div>
+
+      {/* LE TRAIT DE MARQUEUR, tiré une fois, jamais droit. */}
+      <svg viewBox="0 0 196 14" className="mx-auto mt-3 overflow-visible block w-3/4">
+        <path
+          d="M5 8 Q50 3 99 7 T191 5"
+          fill="none" stroke="#241A12" strokeWidth="2.8" strokeLinecap="round"
+          style={{
+            filter: 'url(#ouv-bave)',
+            strokeDasharray: 200,
+            strokeDashoffset: t >= T.trait ? Math.max(0, 200 - (t - T.trait) * 0.6) : 200,
+            opacity: 0.82,
+          }}
+        />
+      </svg>
+
+      {/* LA POUSSIÈRE soulevée par le premier coup, et par lui seul : le second
+          est plus léger, lui donner la même poussière ferait deux fois le même
+          événement. Absolue, donc sans effet sur la hauteur de la boîte. */}
+      {frappe && (
+        <div className="absolute inset-x-0 top-1/2 pointer-events-none">
+          {[-64, -41, -19, 4, 26, 48, 70].map((x, i) => (
+            <span
+              key={x}
+              className="ouv-poussiere absolute block rounded-full bg-[#6B5033]"
               style={{
-                filter: 'url(#ouv-bave)',
-                strokeDasharray: 200,
-                strokeDashoffset: t >= T.trait ? Math.max(0, 200 - (t - T.trait) * 0.6) : 200,
-                opacity: 0.82,
+                left: `calc(50% + ${x}px)`,
+                width: 2 + (i % 3), height: 2 + (i % 3),
+                ['--dx' as string]: `${x * 0.22}px`,
+                animationDelay: `${(i % 4) * 26}ms`,
               }}
             />
-          </svg>
-
-          {/* LA POUSSIÈRE soulevée par le coup. Sept grains, sept trajets. */}
-          <div className="absolute inset-x-0 top-1/2 pointer-events-none" aria-hidden>
-            {[-64, -41, -19, 4, 26, 48, 70].map((x, i) => (
-              <span
-                key={x}
-                className="ouv-poussiere absolute block rounded-full bg-[#6B5033]"
-                style={{
-                  left: `calc(50% + ${x}px)`,
-                  width: 2 + (i % 3), height: 2 + (i % 3),
-                  ['--dx' as string]: `${x * 0.22}px`,
-                  animationDelay: `${(i % 4) * 26}ms`,
-                }}
-              />
-            ))}
-          </div>
-        </>
+          ))}
+        </div>
       )}
     </div>
   );

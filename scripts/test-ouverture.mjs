@@ -137,26 +137,28 @@ await p.reload({ waitUntil: 'networkidle2' });
 await pause(400);
 verifier('la signature est bien là avant qu\'on la touche', SIGNATURE.test(await ecran()));
 /*
- * ON CHERCHE SANS LES ESPACES, ET C'EST UNE CORRECTION.
+ * ON APPUIE SUR LE BOUTON QUI DIT CE QU'IL FAIT.
  *
- * Le nom est rendu en trois `<span>` séparés. `textContent` les recolle sans
- * séparateur, « ATDEUXMAIN », alors que `innerText` respecte le rendu et rend
- * « AT DEUX MAIN ». La première version de ce clic cherchait donc une chaîne
- * qui n'existe nulle part dans le DOM, ne trouvait rien, et concluait que
- * l'ouverture ne se sautait pas. Elle se sautait très bien.
+ * Deux versions de ce clic ont échoué avant celle-ci, et toutes les deux pour
+ * la même raison : elles désignaient la cible par ce qu'elle CONTENAIT plutôt
+ * que par ce qu'elle EST. D'abord le nom du studio collé sans espaces
+ * (« ATDEUXMAIN », qui n'existe dans aucun rendu), puis le même nom en
+ * `textContent` sur une moitié de carton — jusqu'au jour où ce nom est devenu
+ * une image et où le geste est devenu introuvable.
+ *
+ * L'ouverture porte maintenant un vrai bouton nommé, et on le cherche par son
+ * nom. Si ce contrôle échoue encore, c'est que le joueur non plus ne peut plus
+ * passer l'introduction : le test dit enfin la même chose que l'écran.
  */
-await p.evaluate(() => {
-  /*
-   * ON APPUIE SUR UNE MOITIÉ DU CARTON, PAS SUR LA RACINE.
-   *
-   * Le geste est porté par les deux moitiés arrachables, pas par le voile qui
-   * les contient : viser la racine cliquait un élément sans gestionnaire, et
-   * concluait que l'ouverture ne se sautait pas. Elle se sautait très bien.
-   */
-  const v = [...document.querySelectorAll('div')]
-    .find(e => /AT\s*DEUX\s*MAIN/.test(e.textContent || '') && String(e.className).includes('absolute inset-0'));
-  v?.click();
+const passe = await p.evaluate(() => {
+  const b = [...document.querySelectorAll('button')]
+    .find(e => /Passer l'introduction|Skip the intro/i.test(e.getAttribute('aria-label') || ''));
+  if (!b) return false;
+  b.click();
+  return true;
 });
+verifier('  le bouton « passer » existe et porte son nom', passe,
+  passe ? '' : 'aucun bouton nommé : ni le doigt ni le clavier n\'ont de prise');
 // La déchirure dure 620 ms : on lui laisse finir avant de constater.
 await pause(900);
 const saute = await ecran();
