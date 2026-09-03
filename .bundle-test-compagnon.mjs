@@ -319,7 +319,7 @@ function playBuffer(buffer, gain = 1) {
   };
 }
 
-// ../../../tmp/compagnon-kyUtsx/cap.js
+// ../../../tmp/compagnon-0h65PM/cap.js
 var Capacitor = { isNativePlatform: () => false, getPlatform: () => "web" };
 
 // client/src/lib/haptics.ts

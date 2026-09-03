@@ -429,3 +429,131 @@ body.conseil-affiche {
 
 .curseur-carton:focus-visible::-webkit-slider-thumb { outline: 2px solid #2A1F1A; outline-offset: 2px; }
 .curseur-carton:focus-visible::-moz-range-thumb { outline: 2px solid #2A1F1A; outline-offset: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * L'OUVERTURE : le tampon, l'arrachage, le scotch.
+ *
+ * Tout est ici plutôt qu'en ligne dans le composant, pour une raison de coût :
+ * une animation déclarée en CSS tourne sur le fil de composition du navigateur
+ * et survit à un fil principal occupé, ce qui est exactement l'état de
+ * l'application pendant son propre démarrage. Le composant ne fait que
+ * l'orchestration, c'est-à-dire le QUAND ; le CSS fait le COMMENT.
+ *
+ * Deux règles tenues partout dans ce bloc :
+ *
+ *   · ON N'ANIME QUE `transform` ET `opacity`. Aucune propriété qui déclenche
+ *     une remise en page, et surtout aucun filtre SVG animé : un
+ *     `feDisplacementMap` dont le paramètre bouge se recalcule à chaque image
+ *     et met un téléphone d'entrée de gamme à genoux. Les filtres sont donc
+ *     posés sur des éléments IMMOBILES, et ce sont leurs parents qui bougent.
+ *
+ *   · RIEN N'EST SYMÉTRIQUE. Un tampon posé à la main ne tombe pas droit, une
+ *     déchirure ne suit pas une règle, un bout de scotch n'est jamais
+ *     d'équerre. Chaque valeur porte donc un décalage impair et volontaire.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* LE TAMPON QUI TOMBE.
+   Le nom arrive de trop haut, trop gros et flou, comme un tampon vu de dessous
+   qui approche. La courbe est le sujet : une entrée lente puis un écrasement
+   brutal sur la fin, ce qui donne le POIDS. Une courbe régulière donnerait un
+   objet en mousse. */
+@keyframes carton-tampon {
+  0%   { opacity: 0; transform: scale(1.9) translate3d(0, -14px, 0) rotate(-3.5deg); filter: blur(7px); }
+  55%  { opacity: 0.85; }
+  100% { opacity: 1; transform: scale(1) translate3d(0, 0, 0) rotate(-1.2deg); filter: blur(0); }
+}
+
+/* LA SECOUSSE. Trois oscillations qui décroissent, sur les deux axes, avec une
+   rotation minuscule : un écran qui ne tremble que de gauche à droite ressemble
+   à un bug, pas à un choc. */
+@keyframes carton-secousse {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+  12%  { transform: translate3d(-9px, 6px, 0) rotate(-0.55deg); }
+  26%  { transform: translate3d(7px, -5px, 0) rotate(0.42deg); }
+  42%  { transform: translate3d(-5px, 3px, 0) rotate(-0.3deg); }
+  60%  { transform: translate3d(3px, -2px, 0) rotate(0.18deg); }
+  78%  { transform: translate3d(-1.5px, 1px, 0) rotate(-0.08deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+}
+
+/* L'ENCRE QUI BAVE.
+   Un second exemplaire du nom, flou et sombre, posé derrière le net. Il
+   grandit d'un rien et s'estompe : l'encre part dans la fibre du carton et s'y
+   dilue. C'est le seul endroit où l'on triche, et ça coûte une opacité. */
+@keyframes carton-bave {
+  0%   { opacity: 0; transform: scale(1); }
+  18%  { opacity: 0.5; }
+  100% { opacity: 0.16; transform: scale(1.045); }
+}
+
+/* LA POUSSIÈRE. Ce que le coup soulève : des particules qui montent et
+   retombent, chacune avec son propre retard posé en ligne. */
+@keyframes carton-poussiere {
+  0%   { opacity: 0; transform: translate3d(0, 0, 0) scale(0.6); }
+  20%  { opacity: 0.7; }
+  100% { opacity: 0; transform: translate3d(var(--dx, 0px), -46px, 0) scale(1.1); }
+}
+
+/* L'ARRACHAGE. Les deux moitiés du carton partent de part et d'autre de la
+   déchirure, en tournant, comme deux morceaux qu'on écarte des deux mains. */
+@keyframes carton-arrache-haut {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+  100% { transform: translate3d(-16%, -122%, 0) rotate(-13deg); }
+}
+@keyframes carton-arrache-bas {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+  100% { transform: translate3d(13%, 124%, 0) rotate(9deg); }
+}
+
+/* LE SCOTCH QU'ON CLAQUE. Il arrive de trop haut, dépasse sa place, revient.
+   Le dépassement est ce qui donne l'adhérence : sans lui, il se pose. */
+@keyframes carton-scotch {
+  0%   { opacity: 0; transform: translate3d(0, -70px, 0) rotate(-7deg) scaleY(1.25); }
+  60%  { opacity: 1; transform: translate3d(0, 5px, 0) rotate(-1.4deg) scaleY(0.94); }
+  80%  { transform: translate3d(0, -2px, 0) rotate(-2.4deg) scaleY(1.02); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) rotate(-2deg) scaleY(1); }
+}
+
+/* Le texte du dessous qui remonte, une ligne après l'autre. */
+@keyframes carton-remonte {
+  0%   { opacity: 0; transform: translate3d(0, 16px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Le grain qui respire : deux pour cent d'échelle, très lentement. Sans lui la
+   texture est un autocollant ; avec, c'est une matière. */
+@keyframes carton-grain {
+  0%   { transform: scale(1) translate3d(0, 0, 0); }
+  50%  { transform: scale(1.02) translate3d(-4px, 3px, 0); }
+  100% { transform: scale(1) translate3d(0, 0, 0); }
+}
+
+/* LES COURBES.
+   `--choc` : entrée molle, écrasement final. C'est elle qui porte le poids.
+   `--dechire` : départ sec, sans rebond, une déchirure ne rebondit pas. */
+:root {
+  --choc: cubic-bezier(0.7, 0.02, 0.2, 1.6);
+  --dechire: cubic-bezier(0.36, 0, 0.12, 1);
+}
+
+.ouv-tampon    { animation: carton-tampon 260ms var(--choc) both; }
+.ouv-secousse  { animation: carton-secousse 380ms cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+.ouv-bave      { animation: carton-bave 620ms ease-out both; }
+.ouv-poussiere { animation: carton-poussiere 620ms ease-out both; }
+.ouv-haut      { animation: carton-arrache-haut 620ms var(--dechire) both; }
+.ouv-bas       { animation: carton-arrache-bas 620ms var(--dechire) both; }
+.ouv-scotch    { animation: carton-scotch 460ms var(--choc) both; }
+.ouv-remonte   { animation: carton-remonte 380ms ease-out both; }
+.ouv-grain     { animation: carton-grain 14s ease-in-out infinite; }
+
+/* MOUVEMENT RÉDUIT : on garde la séquence et on retire la violence. Le joueur
+   qui a demandé moins d'animation veut voir la même chose, pas moins de
+   choses. */
+@media (prefers-reduced-motion: reduce) {
+  .ouv-tampon, .ouv-bave, .ouv-scotch, .ouv-remonte {
+    animation-duration: 200ms;
+    animation-timing-function: ease-out;
+  }
+  .ouv-secousse, .ouv-poussiere, .ouv-grain { animation: none; }
+  .ouv-haut, .ouv-bas { animation-duration: 260ms; }
+}

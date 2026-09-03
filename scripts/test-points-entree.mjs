@@ -168,8 +168,19 @@ async function nouvellePartie() {
  * chaque fois, avec une limite pour ne pas boucler sans fin si un jour le jeu
  * cessait de tuer.
  */
+let dernierEcran = '';
 async function mourir() {
-  for (let nuit = 0; nuit < 6; nuit++) {
+  /*
+   * SIX NUITS NE SUFFISAIENT PAS TOUJOURS.
+   *
+   * Deux passages complets ont vu le personnage arriver VIVANT au jour 7,
+   * santé forcée à 1 et jauges à zéro à chaque nuit. Le jeu est plus clément
+   * que prévu par endroits, et la marge était trop juste : on double, et
+   * l'échec dit maintenant combien de nuits ont été dépensées et sur quel
+   * écran on s'est arrêté, pour que la prochaine occurrence se lise au lieu de
+   * se deviner.
+   */
+  for (let nuit = 0; nuit < 12; nuit++) {
     await p.evaluate(() => {
       const s = JSON.parse(localStorage.getItem('roi-du-carton-save'));
       if (!s?.character) return;
@@ -186,6 +197,7 @@ async function mourir() {
     await clic('compris|Got it'); await pause(1200);
 
     const vu = await ecran();
+    dernierEcran = `nuit ${nuit + 1} · ${vu.slice(0, 90)}`;
     /*
      * La seconde chance s'interpose, et c'est normal : tomber à zéro n'ouvre
      * pas l'écran de fin. Le refus se fait en DEUX temps, comme pour un joueur.
@@ -202,7 +214,8 @@ async function mourir() {
 
 await nouvellePartie();
 const bienMort = await mourir();
-verifier('le personnage meurt et l\'écran de fin s\'ouvre', bienMort);
+verifier('le personnage meurt et l\'écran de fin s\'ouvre', bienMort,
+  bienMort ? '' : `douze nuits sans mourir · ${dernierEcran}`);
 const mort = await ecran();
 verifier('à la mort, l\'Atelier est proposé',
   /c'est vous qui le faites|you make yourself/i.test(mort),

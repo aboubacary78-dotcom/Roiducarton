@@ -146,11 +146,19 @@ verifier('la signature est bien là avant qu\'on la touche', SIGNATURE.test(awai
  * l'ouverture ne se sautait pas. Elle se sautait très bien.
  */
 await p.evaluate(() => {
+  /*
+   * ON APPUIE SUR UNE MOITIÉ DU CARTON, PAS SUR LA RACINE.
+   *
+   * Le geste est porté par les deux moitiés arrachables, pas par le voile qui
+   * les contient : viser la racine cliquait un élément sans gestionnaire, et
+   * concluait que l'ouverture ne se sautait pas. Elle se sautait très bien.
+   */
   const v = [...document.querySelectorAll('div')]
-    .find(e => /AT\s*DEUX\s*MAIN/.test(e.textContent || '') && String(e.className).includes('fixed'));
+    .find(e => /AT\s*DEUX\s*MAIN/.test(e.textContent || '') && String(e.className).includes('absolute inset-0'));
   v?.click();
 });
-await pause(500);
+// La déchirure dure 620 ms : on lui laisse finir avant de constater.
+await pause(900);
 const saute = await ecran();
 verifier('un doigt la passe sans attendre', !SIGNATURE.test(saute) && FICTION.test(saute),
   'une ouverture qu\'on ne peut pas passer est la chose la plus détestée d\'un jeu mobile');
