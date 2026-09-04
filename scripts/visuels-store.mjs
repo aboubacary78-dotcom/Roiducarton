@@ -70,34 +70,45 @@ mkdirSync(SORTIE, { recursive: true });
  */
 const PLANCHES = [
   {
+    /*
+     * ① LA COUVERTURE, SEULE SUR SA PLANCHE.
+     *
+     * Elle portait aussi l'accroche « Trois âmes perdues », et les deux se
+     * gênaient : une couverture dit le NOM et l'univers, une accroche dit la
+     * règle du jeu. Les mettre ensemble obligeait à réduire l'image pour caser
+     * du texte sous elle, et on perdait les deux. L'accroche descend donc d'un
+     * cran, sur la planche qui la montre — l'écran de choix des candidats.
+     */
+    couverture: true,
+    fond: 'scene-gare.webp',
+    fr: [], en: [],
+  },
+  {
+    // ② L'ACCROCHE, avec l'écran qu'elle décrit.
     fichier: '02-choix-personnage',
     fr: ['Trois âmes perdues.', 'Un seul survivant.'],
     en: ['Three lost souls.', 'Only one survivor.'],
-    // La première porte le NOM DU JEU en plus de son accroche : c'est la seule
-    // que tout le monde voit, et une fiche sans marque ne se retient pas.
-    couverture: true,    // pas d'écran : la key art, le nom, et les visages
-    depart: 0.10,
+    depart: 0.10,        // à partir du premier candidat, traits compris
+    fond: 'exp-terrain-vague-cuw8m9fnHsQZS3zjSQE96n.webp',
   },
   {
     /*
-     * LA RÉPLIQUE, ET POURQUOI ELLE ARRIVE EN DEUXIÈME.
+     * ③ LA RÉPLIQUE, QUI GAGNE UN TITRE.
      *
-     * Le différenciateur de ce jeu est son écriture : un humour sec, jamais aux
-     * dépens de ses personnages. Il était invisible sur la fiche — enfoui dans
-     * des textes d'interface de dix pixels, c'est-à-dire nulle part. Une fiche
-     * qui ne montre pas ce qui distingue le produit vend un produit ordinaire.
+     * Elle n'en portait aucun : un visage et une phrase, à charge au visiteur
+     * de comprendre pourquoi on la lui montre. La phrase est drôle, mais elle
+     * ne VEND rien toute seule — elle prouve quelque chose qui n'a pas été
+     * annoncé. Le titre annonce, la réplique prouve.
      *
-     * Cette planche ne montre donc AUCUN écran : un visage, une phrase du jeu
-     * en grand, et le nom de qui la porte. Elle rompt aussi le gabarit des
-     * autres, ce qui donne une raison de faire défiler : six images bâties
-     * pareil apprennent au visiteur que la suivante ne dira rien de neuf.
-     *
-     * En deuxième position, c'est-à-dire au premier balayage : la première
-     * planche doit encore dire de quoi il s'agit.
+     * « Chacun avait une vie avant » dit la promesse du jeu en cinq mots, et
+     * elle est vraie au pied de la lettre : tous les métiers commencent par
+     * « Ancien ». C'est aussi ce qui fait le ton — on ne rit pas de la rue, on
+     * rit de ce que les gens y traînent de leur ancienne vie.
      */
     replique: true,
     fond: 'scene-centre-ville.webp',
-    fr: [], en: [],
+    fr: ['Chacun avait', 'une vie avant.'],
+    en: ['They all had', 'a life before.'],
   },
   {
     fichier: '04-hub',
@@ -355,7 +366,7 @@ function choisirReplique(gensDispo) {
  * l'image. Le visiteur voit un décor, un titre et des gens : de quoi savoir en
  * une seconde à quoi ressemble ce jeu.
  */
-function pageCouverture(lignes, heroData, gens, fondData) {
+function pageCouverture(heroData, gens, fondData) {
   /*
    * LA KEY ART EST UNE BANDE, ET C'EST UNE CONTRAINTE, PAS UN CHOIX.
    *
@@ -379,7 +390,7 @@ function pageCouverture(lignes, heroData, gens, fondData) {
    * On lui met donc un décor de rue sous le carton, comme aux autres planches,
    * et on remonte les visages jusqu'à toucher l'accroche.
    */
-  const ART = 1340;
+  const ART = 1620;
   return `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="http://localhost:8099/fonts/fonts.css">
 <style>
@@ -394,34 +405,29 @@ function pageCouverture(lignes, heroData, gens, fondData) {
   .couture{position:absolute;left:-20px;right:-20px;top:${ART - 30}px;height:64px;
     background:linear-gradient(180deg, rgba(26,18,12,.92) 0%, rgba(150,120,84,0) 100%);
     clip-path:polygon(0 0,7% 42%,14% 8%,22% 50%,31% 14%,39% 54%,48% 12%,57% 48%,66% 10%,75% 52%,84% 16%,92% 46%,100% 6%,100% 100%,0 100%)}
-  .titre{position:absolute;left:60px;right:60px;top:${ART - 340}px;text-align:center;
-    font-family:'Fredoka',system-ui,sans-serif;font-weight:600;font-size:162px;
+  .titre{position:absolute;left:50px;right:50px;top:${ART - 400}px;text-align:center;
+    font-family:'Fredoka',system-ui,sans-serif;font-weight:600;font-size:184px;
     color:#F7EBDB;line-height:1;letter-spacing:-.025em;
     text-shadow:0 8px 30px rgba(0,0,0,.8), 0 2px 0 rgba(0,0,0,.45)}
-  .accroche{position:absolute;left:70px;right:70px;top:${ART + 150}px;text-align:center;
-    font-family:'Fredoka',system-ui,sans-serif;font-weight:600;font-size:118px;
-    color:#2A1F1A;line-height:1.05;text-shadow:0 2px 0 rgba(255,255,255,.18)}
-  .accroche em{display:block;font-style:normal;font-size:86px;color:#4A3728;margin-top:14px}
   .gens img{position:absolute;filter:drop-shadow(0 -8px 26px rgba(38,26,16,.45)) drop-shadow(0 14px 26px rgba(38,26,16,.5))}
 </style></head><body>
   ${scene(fondData)}
   ${COUCHES}
   <div class="art"></div><div class="voile"></div><div class="couture"></div>
   <div class="titre">${LANG === 'en' ? 'Cardboard King' : 'Le Roi du Carton'}</div>
-  <svg width="700" height="30" viewBox="0 0 196 14" style="position:absolute;top:${ART - 132}px;left:50%;margin-left:-350px" aria-hidden>
+  <svg width="780" height="34" viewBox="0 0 196 14" style="position:absolute;top:${ART - 158}px;left:50%;margin-left:-390px" aria-hidden>
     <path d="M5 8 Q50 3 99 7 T191 5" fill="none" stroke="#E8D2A8" stroke-width="2.6"
       stroke-linecap="round" opacity=".85"/>
   </svg>
-  <div class="accroche">${lignes[0]}<em>${lignes[1]}</em></div>
   <div class="gens">
-    <img src="data:image/png;base64,${gens[0].data}" style="left:-36px;bottom:20px;width:660px;transform:rotate(-8deg)">
-    <img src="data:image/png;base64,${gens[1].data}" style="left:50%;margin-left:-355px;bottom:-40px;width:710px;transform:rotate(3deg)">
-    <img src="data:image/png;base64,${gens[2].data}" style="right:-42px;bottom:8px;width:650px;transform:rotate(7deg)">
+    <img src="data:image/png;base64,${gens[0].data}" style="left:-56px;bottom:210px;width:700px;transform:rotate(-8deg)">
+    <img src="data:image/png;base64,${gens[1].data}" style="left:50%;margin-left:-375px;bottom:130px;width:750px;transform:rotate(3deg)">
+    <img src="data:image/png;base64,${gens[2].data}" style="right:-62px;bottom:194px;width:690px;transform:rotate(7deg)">
   </div>
 </body></html>`;
 }
 
-function pageReplique(g, fondData) {
+function pageReplique(g, fondData, lignes) {
   /*
    * LE VISAGE D'ABORD, LA PHRASE ENSUITE, et c'est une correction.
    *
@@ -440,8 +446,15 @@ function pageReplique(g, fondData) {
   *{margin:0;padding:0;box-sizing:border-box}
   body{width:${L}px;height:${H}px;overflow:hidden;position:relative;${CARTON}}
   .c{position:absolute;inset:0}
-  .qui{position:absolute;left:0;right:0;top:360px;text-align:center}
-  .qui img{width:660px;filter:drop-shadow(0 18px 34px rgba(38,26,16,.55))}
+  /* LE TITRE ANNONCE, LA RÉPLIQUE PROUVE. Sans lui, on montrait une preuve
+     sans avoir énoncé ce qu'elle prouvait. */
+  .titre{position:absolute;left:60px;right:60px;top:120px;text-align:center;
+    font-family:'Fredoka',system-ui,sans-serif;font-weight:600;color:#2A1F1A;
+    line-height:1.04;letter-spacing:-.015em;text-shadow:0 2px 0 rgba(255,255,255,.18)}
+  .t1{font-size:${taille(lignes[0], 148, 126, 108)}px}
+  .t2{font-size:${taille(lignes[1], 148, 126, 108)}px;color:#4A3728}
+  .qui{position:absolute;left:0;right:0;top:600px;text-align:center}
+  .qui img{width:600px;filter:drop-shadow(0 18px 34px rgba(38,26,16,.55))}
   .nom{margin-top:26px;font-family:'Fredoka',system-ui,sans-serif;font-weight:600;
     font-size:92px;color:#2A1F1A;line-height:1.04;
     text-shadow:0 2px 0 rgba(255,255,255,.18)}
@@ -450,7 +463,7 @@ function pageReplique(g, fondData) {
   /* LES GUILLEMETS : ils disent « quelqu'un parle » avant qu'on ait lu un mot. */
   .guillemet{position:absolute;font-family:'DM Serif Display',Georgia,serif;
     font-size:480px;color:#8A6C48;opacity:.30;line-height:.8}
-  .phrase{position:absolute;left:104px;right:104px;top:1330px;text-align:center;
+  .phrase{position:absolute;left:104px;right:104px;top:1720px;text-align:center;
     font-family:'DM Serif Display',Georgia,serif;font-style:italic;
     font-size:${longue ? 116 : 132}px;line-height:1.18;color:#241A12;
     text-shadow:0 2px 0 rgba(255,255,255,.18)}
@@ -460,13 +473,14 @@ function pageReplique(g, fondData) {
     opacity:.55;filter:saturate(.66) contrast(1.08) brightness(.88)"></div>
   <div class="c" style="background:linear-gradient(178deg, rgba(196,162,119,.32) 0%, rgba(176,143,99,.58) 44%, rgba(120,94,62,.82) 100%)"></div>` : ''}
   ${COUCHES}
+  <div class="titre"><div class="t1">${lignes[0]}</div><div class="t2">${lignes[1]}</div></div>
   <div class="qui">
     <img src="data:image/png;base64,${g.data}">
     <div class="nom">${g.nom}</div>
     <div class="metier">${g.metier}</div>
   </div>
-  <div class="guillemet" style="left:40px;top:1190px">&ldquo;</div>
-  <div class="guillemet" style="right:40px;bottom:400px">&rdquo;</div>
+  <div class="guillemet" style="left:38px;top:1580px">&ldquo;</div>
+  <div class="guillemet" style="right:38px;bottom:110px">&rdquo;</div>
   <div class="phrase">${g.citation}</div>
 </body></html>`;
 }
@@ -566,27 +580,27 @@ const HERO = readFileSync('client/public/assets/hero-cardboard-city.png').toStri
 for (const pl of PLANCHES) {
   if (pl.couverture) {
     const trois = [0, 1, 2].map(k => gensDispo[k % gensDispo.length]);
-    await p.setContent(pageCouverture(pl[LANG], HERO, trois, lireFond('scene-gare.webp')), { waitUntil: 'load' });
+    await p.setContent(pageCouverture(HERO, trois, lireFond(pl.fond)), { waitUntil: 'load' });
     await p.evaluate(async () => {
       await document.fonts.ready;
       await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
     });
     const nom = `${String(faites.length + 1).padStart(2, '0')}-couverture.png`;
     await p.screenshot({ path: join(SORTIE, nom) });
-    console.log(`  ok   ${nom.padEnd(28)} couverture        « ${pl[LANG][0]} ${pl[LANG][1]} »`);
+    console.log(`  ok   ${nom.padEnd(28)} couverture        le nom du jeu, seul`);
     faites.push(nom);
     continue;
   }
   if (pl.replique) {
     const g = choisirReplique(gensDispo);
-    await p.setContent(pageReplique(g, lireFond(pl.fond)), { waitUntil: 'load' });
+    await p.setContent(pageReplique(g, lireFond(pl.fond), pl[LANG]), { waitUntil: 'load' });
     await p.evaluate(async () => {
       await document.fonts.ready;
       await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
     });
     const nom = `${String(faites.length + 1).padStart(2, '0')}-replique.png`;
     await p.screenshot({ path: join(SORTIE, nom) });
-    console.log(`  ok   ${nom.padEnd(28)} réplique          « ${g.citation} » — ${g.nom}`);
+    console.log(`  ok   ${nom.padEnd(28)} réplique  « ${pl[LANG].join(' ')} » · « ${g.citation} » — ${g.nom}`);
     faites.push(nom);
     continue;
   }

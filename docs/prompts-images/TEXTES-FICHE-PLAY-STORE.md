@@ -130,16 +130,23 @@ images : les recopier ici les ferait diverger au premier changement.
 
 | # | Français | English |
 |---|---|---|
-| 1 | *Enseigne* « Le Roi du Carton » + Trois âmes perdues. Un seul survivant. | *Masthead* « Cardboard King » + Three lost souls. Only one survivor. |
-| 2 | **Réplique du jeu**, tirée des candidats · pas de titre | **In-game line**, taken from the candidates · no headline |
-| 3 | Manger, boire, dormir. Chaque jour se paie. | Eat, drink, sleep. Every day has a price. |
-| 4 | Plus de 250 rencontres écrites à la main. | Over 250 encounters, every one hand-written. |
-| 5 | La rue négocie rarement. | The street rarely negotiates. |
-| 6 | Tendre la main, et voir qui s'arrête. | Hold out your hand, and see who stops. |
-| 7 | 51 accessoires à gagner. Aucun à acheter. | 51 accessories to earn. None for sale. |
+| 1 | **Couverture** · key art + « Le Roi du Carton » | **Cover** · key art + « Cardboard King » |
+| 2 | Trois âmes perdues. Un seul survivant. | Three lost souls. Only one survivor. |
+| 3 | Chacun avait une vie avant. *(+ une réplique du jeu)* | They all had a life before. *(+ an in-game line)* |
+| 4 | Manger, boire, dormir. Chaque jour se paie. | Eat, drink, sleep. Every day has a price. |
+| 5 | Plus de 250 rencontres écrites à la main. | Over 250 encounters, every one hand-written. |
+| 6 | La rue négocie rarement. | The street rarely negotiates. |
+| 7 | Tendre la main, et voir qui s'arrête. | Hold out your hand, and see who stops. |
+| 8 | 51 accessoires à gagner. Aucun à acheter. | 51 accessories to earn. None for sale. |
 
-**La planche 2 ne porte aucune accroche écrite pour la boutique** : elle montre
-un visage et une phrase du JEU (« Peut vendre un carton mouillé comme un loft. »).
-C'est le seul endroit de la fiche où l'humour du jeu se lit avant l'installation,
-et la seule planche dont le gabarit diffère — les six autres se ressemblant,
-rien n'incitait à faire défiler.
+Huit planches, c'est le maximum que le Play Store accepte.
+
+**La planche 1 ne porte que le nom du jeu.** Une couverture dit le NOM et
+l'univers ; une accroche dit la règle. Les mettre ensemble obligeait à réduire
+l'image pour caser du texte sous elle, et on perdait les deux.
+
+**La planche 3 annonce, puis prouve.** Le titre dit la promesse, et dessous une
+vraie phrase du jeu la tient — « Peut vendre un carton mouillé comme un loft. »
+C'est le seul endroit de la fiche où l'humour se lit avant l'installation, et
+la seule planche dont le gabarit diffère : huit images bâties pareil
+apprendraient au visiteur que la suivante ne dira rien de neuf.
