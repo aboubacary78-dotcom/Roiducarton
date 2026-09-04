@@ -1,4 +1,4 @@
-import { useGame, nomMetier, type Character } from '@/contexts/GameContext';
+import { useGame, nomMetier, phraseMetier, type Character } from '@/contexts/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import PlayerFace from './PlayerFace';
@@ -61,7 +61,7 @@ function CharacterCard({ char, index, onSelect, onComposer }: {
 
       {/* Job description */}
       <p className="text-xs text-[#6B5740] italic mb-3 pb-2 border-b border-[#E8D5C0]">
-        "{tc(char.job.description)}"
+        "{tc(phraseMetier(char.job, char.gender))}"
       </p>
 
       {/* Traits */}

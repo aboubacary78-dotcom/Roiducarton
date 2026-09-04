@@ -130,9 +130,16 @@ images : les recopier ici les ferait diverger au premier changement.
 
 | # | Français | English |
 |---|---|---|
-| 1 | Trois âmes perdues. Un seul survivant. | Three lost souls. Only one survivor. |
-| 2 | Manger, boire, dormir. Chaque jour se paie. | Eat, drink, sleep. Every day has a price. |
-| 3 | Plus de 250 rencontres écrites à la main. | Over 250 encounters, every one hand-written. |
-| 4 | La rue négocie rarement. | The street rarely negotiates. |
-| 5 | Tendre la main, et voir qui s'arrête. | Hold out your hand, and see who stops. |
-| 6 | 51 accessoires à gagner. Aucun à acheter. | 51 accessories to earn. None for sale. |
+| 1 | *Enseigne* « Le Roi du Carton » + Trois âmes perdues. Un seul survivant. | *Masthead* « Cardboard King » + Three lost souls. Only one survivor. |
+| 2 | **Réplique du jeu**, tirée des candidats · pas de titre | **In-game line**, taken from the candidates · no headline |
+| 3 | Manger, boire, dormir. Chaque jour se paie. | Eat, drink, sleep. Every day has a price. |
+| 4 | Plus de 250 rencontres écrites à la main. | Over 250 encounters, every one hand-written. |
+| 5 | La rue négocie rarement. | The street rarely negotiates. |
+| 6 | Tendre la main, et voir qui s'arrête. | Hold out your hand, and see who stops. |
+| 7 | 51 accessoires à gagner. Aucun à acheter. | 51 accessories to earn. None for sale. |
+
+**La planche 2 ne porte aucune accroche écrite pour la boutique** : elle montre
+un visage et une phrase du JEU (« Peut vendre un carton mouillé comme un loft. »).
+C'est le seul endroit de la fiche où l'humour du jeu se lit avant l'installation,
+et la seule planche dont le gabarit diffère — les six autres se ressemblant,
+rien n'incitait à faire défiler.

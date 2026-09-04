@@ -27,6 +27,21 @@ export interface Job {
    */
   nameF?: string;
   description: string;
+  /*
+   * ET LA DESCRIPTION AUSSI S'ACCORDE, ce qui avait été oublié.
+   *
+   * Le NOM du métier avait sa forme féminine depuis le début ; la phrase qui
+   * l'accompagne, non. Deux d'entre elles portent un pronom masculin, et une
+   * candidate tirée sur ces métiers se présentait donc ainsi :
+   *
+   *     Josette · Ancienne Artiste
+   *     « Son art n'a jamais été compris. Même par lui. »
+   *
+   * Accordée au titre, fausse à la ligne suivante, sur la première carte que
+   * voit un joueur. Comme pour `nameF`, le champ est optionnel : la plupart
+   * des descriptions ne contiennent aucun pronom et n'ont rien à accorder.
+   */
+  descriptionF?: string;
   bonusStats: Partial<Stats>;
   startingItems: string[];
   emoji: string;

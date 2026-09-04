@@ -102,11 +102,26 @@ for (let tour = 0; tour < TOURS; tour++) {
   const lot = await p.evaluate(() => {
     const svgs = [...document.querySelectorAll('svg[role="img"]')];
     const titres = [...document.querySelectorAll('h3')];
-    return svgs.map((s, i) => ({
-      svg: s.outerHTML,
-      nom: (titres[i]?.textContent || '').trim(),
-      metier: (titres[i]?.parentElement?.querySelector('p')?.textContent || '').trim(),
-    }));
+    return svgs.map((s, i) => {
+      const h = titres[i];
+      /*
+       * ON RÉCOLTE AUSSI LA RÉPLIQUE, et c'est elle qui compte le plus.
+       * Chaque candidat porte une ligne de description de son ancien métier,
+       * écrite au ton du jeu — « Peut distinguer un Bordeaux d'un jus de
+       * poubelle. Parfois. » C'est l'humour noir du jeu en une phrase, et il
+       * n'apparaissait nulle part sur la fiche.
+       */
+      const carte = h?.closest('.craft-card');
+      const italique = carte
+        ? [...carte.querySelectorAll('p')].find(x => /italic/.test(x.className))
+        : null;
+      return {
+        svg: s.outerHTML,
+        nom: (h?.textContent || '').trim(),
+        metier: (h?.parentElement?.querySelector('p')?.textContent || '').trim(),
+        citation: (italique?.textContent || '').trim().replace(/^"|"$/g, ''),
+      };
+    });
   });
   if (!lot.length) break;
   recoltes.push(...lot);
@@ -126,8 +141,8 @@ for (const r of recoltes) {
     svg{display:block;width:${TAILLE}px;height:${TAILLE}px}
   </style></head><body>${r.svg}</body></html>`, { waitUntil: 'load' });
   await p.screenshot({ path: join(SORTIE, n), omitBackground: true });
-  fiches.push({ fichier: n, nom: r.nom, metier: r.metier });
-  console.log(`  ok   ${n}   ${r.nom.padEnd(14)} ${r.metier}`);
+  fiches.push({ fichier: n, nom: r.nom, metier: r.metier, citation: r.citation });
+  console.log(`  ok   ${n}   ${r.nom.padEnd(13)} ${r.metier.padEnd(28)} « ${r.citation} »`);
 }
 
 writeFileSync(join(SORTIE, 'fiches.json'), JSON.stringify(fiches, null, 2));

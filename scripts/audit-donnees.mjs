@@ -131,5 +131,46 @@ titre('Images citées dans le code');
   }
 }
 
+// ═══ ④ Les phrases de métier qui ne s'accordent pas ═════════════════════════
+titre('Accord des descriptions de métier');
+{
+  /*
+   * LE NOM DU MÉTIER S'ACCORDE DEPUIS TOUJOURS, LA PHRASE NON.
+   *
+   * `nameF` existe depuis le début ; `descriptionF` a été ajouté après coup,
+   * parce qu'une candidate tirée sur « Ancienne Artiste » se présentait avec
+   * « Son art n'a jamais été compris. Même par lui. » — accordée au titre,
+   * fausse à la ligne suivante, sur la toute première carte que voit un joueur.
+   *
+   * Le défaut ne se voit que sur les métiers dont la phrase porte un pronom, et
+   * rien n'empêche le prochain d'être écrit de la même façon. On les cherche
+   * donc à la source : toute description contenant un pronom masculin DOIT
+   * avoir sa variante féminine, et les deux doivent être traduites.
+   */
+  const monde = readFileSync('client/src/contexts/data/world.ts', 'utf8');
+  const en = fichiers('client/src/lib', /^content-en.*\.ts$/).map(f => readFileSync(f, 'utf8')).join('\n');
+  const PRONOM = /(^|[^A-Za-zÀ-ÿ])(il|lui|celui)([^A-Za-zÀ-ÿ]|$)/i;
+  let n = 0, verifies = 0;
+  for (const m of monde.matchAll(/\{ id: '([a-z-]+)',[^\n]*?description: ("[^"]*"|'[^']*')([^\n]*)\}/g)) {
+    const [, id, brut, reste] = m;
+    const phrase = brut.slice(1, -1);
+    if (!PRONOM.test(phrase)) continue;
+    verifies++;
+    const fem = reste.match(/descriptionF: ("[^"]*"|'[^']*')/);
+    if (!fem) {
+      n++; defauts++;
+      console.log(`  SANS FÉMININ : ${id}\n      « ${phrase} »`);
+      continue;
+    }
+    // Traduite ? La clé anglaise EST la chaîne française.
+    const cle = fem[1].slice(1, -1).replace(/\\'/g, "'");
+    if (!en.includes(cle.replace(/'/g, "\\'")) && !en.includes(cle)) {
+      n++; defauts++;
+      console.log(`  FÉMININ NON TRADUIT : ${id}\n      « ${cle} »`);
+    }
+  }
+  if (!n) console.log(`  aucun : ${verifies} phrase(s) à pronom, toutes accordées et traduites.`);
+}
+
 console.log(defauts ? `\n${defauts} défaut(s) à traiter.` : '\nRien à signaler.');
 process.exit(defauts ? 1 : 0);

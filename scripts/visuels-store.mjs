@@ -79,6 +79,26 @@ const PLANCHES = [
     depart: 0.10,        // à partir du premier candidat, traits compris
   },
   {
+    /*
+     * LA RÉPLIQUE, ET POURQUOI ELLE ARRIVE EN DEUXIÈME.
+     *
+     * Le différenciateur de ce jeu est son écriture : un humour sec, jamais aux
+     * dépens de ses personnages. Il était invisible sur la fiche — enfoui dans
+     * des textes d'interface de dix pixels, c'est-à-dire nulle part. Une fiche
+     * qui ne montre pas ce qui distingue le produit vend un produit ordinaire.
+     *
+     * Cette planche ne montre donc AUCUN écran : un visage, une phrase du jeu
+     * en grand, et le nom de qui la porte. Elle rompt aussi le gabarit des
+     * autres, ce qui donne une raison de faire défiler : six images bâties
+     * pareil apprennent au visiteur que la suivante ne dira rien de neuf.
+     *
+     * En deuxième position, c'est-à-dire au premier balayage : la première
+     * planche doit encore dire de quoi il s'agit.
+     */
+    replique: true,
+    fr: [], en: [],
+  },
+  {
     fichier: '04-hub',
     fr: ['Manger, boire, dormir.', 'Chaque jour se paie.'],
     en: ['Eat, drink, sleep.', 'Every day has a price.'],
@@ -119,6 +139,7 @@ const PLANCHES = [
 ];
 
 for (const pl of PLANCHES) {
+  if (pl.replique) continue;                 // celle-ci ne montre aucun écran
   const src = join(BRUTES, `${pl.fichier}.png`);
   if (!existsSync(src)) {
     console.log(`ARRÊT : ${src} manque. Lancer d'abord : PX=1440 pnpm captures-store`);
@@ -276,6 +297,70 @@ function cadre(depart, haut) {
 const taille = (texte, grand, moyen, petit) =>
   texte.length <= 20 ? grand : texte.length <= 23 ? moyen : petit;
 
+/*
+ * ON CHOISIT LA RÉPLIQUE PAR L'ÉMOJI DU MÉTIER, ET NON PAR SON TEXTE.
+ *
+ * Le tirage des candidats est aléatoire : demander une phrase par son libellé
+ * français la rendrait introuvable une fois sur deux, et introuvable en anglais
+ * toujours. L'émoji, lui, est le même dans les deux langues et identifie le
+ * métier — on classe donc par émoji, du plus mordant au moins, et on prend le
+ * premier des douze portraits qui tombe dessus.
+ */
+const REPLIQUES_PREFEREES = ['👨‍🍳', '🚗', '🍷', '🌱', '🧮', '💻'];
+function choisirReplique(gensDispo) {
+  for (const emoji of REPLIQUES_PREFEREES) {
+    const t = gensDispo.find(g => g.metier.includes(emoji) && g.citation);
+    if (t) return t;
+  }
+  return gensDispo.find(g => g.citation) || gensDispo[0];
+}
+
+function pageReplique(g) {
+  /*
+   * LE VISAGE D'ABORD, LA PHRASE ENSUITE, et c'est une correction.
+   *
+   * La première version posait la citation en haut et le portrait tout en bas :
+   * mille pixels de carton vide entre les deux, et l'ordre de lecture à
+   * l'envers. On voit quelqu'un, PUIS on lit ce qu'il dit — c'est comme ça
+   * qu'une réplique s'attribue, et ça remplit la planche par la même occasion.
+   *
+   * La phrase est en serif italique quand tout le reste de la fiche est en
+   * Fredoka : le changement de voix se voit avant d'être lu.
+   */
+  const longue = g.citation.length > 48;
+  return `<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="http://localhost:8099/fonts/fonts.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:${L}px;height:${H}px;overflow:hidden;position:relative;${CARTON}}
+  .c{position:absolute;inset:0}
+  .qui{position:absolute;left:0;right:0;top:360px;text-align:center}
+  .qui img{width:560px;filter:drop-shadow(0 18px 34px rgba(38,26,16,.55))}
+  .nom{margin-top:26px;font-family:'Fredoka',system-ui,sans-serif;font-weight:600;
+    font-size:92px;color:#2A1F1A;line-height:1.04;
+    text-shadow:0 2px 0 rgba(255,255,255,.18)}
+  .metier{font-family:'Fredoka',system-ui,sans-serif;font-weight:400;
+    font-size:50px;color:#5A4632;margin-top:6px}
+  /* LES GUILLEMETS : ils disent « quelqu'un parle » avant qu'on ait lu un mot. */
+  .guillemet{position:absolute;font-family:'DM Serif Display',Georgia,serif;
+    font-size:480px;color:#8A6C48;opacity:.30;line-height:.8}
+  .phrase{position:absolute;left:104px;right:104px;top:1500px;text-align:center;
+    font-family:'DM Serif Display',Georgia,serif;font-style:italic;
+    font-size:${longue ? 116 : 132}px;line-height:1.18;color:#241A12;
+    text-shadow:0 2px 0 rgba(255,255,255,.18)}
+</style></head><body>
+  ${COUCHES}
+  <div class="qui">
+    <img src="data:image/png;base64,${g.data}">
+    <div class="nom">${g.nom}</div>
+    <div class="metier">${g.metier}</div>
+  </div>
+  <div class="guillemet" style="left:44px;top:1360px">&ldquo;</div>
+  <div class="guillemet" style="right:44px;bottom:210px">&rdquo;</div>
+  <div class="phrase">${g.citation}</div>
+</body></html>`;
+}
+
 function page(lignes, imageDataURI, gens, pl) {
   const haut = pl.enseigne ? 700 : 560;
   const c = cadre(pl.depart, haut);
@@ -370,6 +455,19 @@ console.log(`  ${gensDispo.length} portraits chargés depuis ${PORTRAITS}`);
 
 const faites = [];
 for (const pl of PLANCHES) {
+  if (pl.replique) {
+    const g = choisirReplique(gensDispo);
+    await p.setContent(pageReplique(g), { waitUntil: 'load' });
+    await p.evaluate(async () => {
+      await document.fonts.ready;
+      await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+    });
+    const nom = `${String(faites.length + 1).padStart(2, '0')}-replique.png`;
+    await p.screenshot({ path: join(SORTIE, nom) });
+    console.log(`  ok   ${nom.padEnd(28)} réplique          « ${g.citation} » — ${g.nom}`);
+    faites.push(nom);
+    continue;
+  }
   const brut = readFileSync(join(BRUTES, `${pl.fichier}.png`)).toString('base64');
   const uri = `data:image/png;base64,${brut}`;
   const contenu = await hauteurDuContenu(uri);

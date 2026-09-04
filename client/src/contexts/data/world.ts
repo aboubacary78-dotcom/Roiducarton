@@ -59,13 +59,13 @@ export function prenomsNonClasses(noms: string[]): string[] {
 export const JOBS: Job[] = [
   { id: 'comptable', name: 'Ancien Comptable', nameF: 'Ancienne Comptable', description: 'Les chiffres, ça le connaît. Les poubelles, un peu moins.', bonusStats: { dignity: 10 }, startingItems: ['calculatrice'], emoji: '🧮' },
   { id: 'ouvrier', name: 'Ancien Ouvrier', nameF: 'Ancienne Ouvrière', description: 'Des mains en or et un dos en compote.', bonusStats: { health: 10 }, startingItems: ['cle-molette'], emoji: '🔧' },
-  { id: 'professeur', name: 'Ancien Professeur', nameF: 'Ancienne Professeure', description: 'Il corrige encore les fautes sur les panneaux.', bonusStats: { mental: 15 }, startingItems: ['livre'], emoji: '📚' },
+  { id: 'professeur', name: 'Ancien Professeur', nameF: 'Ancienne Professeure', description: 'Il corrige encore les fautes sur les panneaux.', descriptionF: 'Elle corrige encore les fautes sur les panneaux.', bonusStats: { mental: 15 }, startingItems: ['livre'], emoji: '📚' },
   { id: 'sommelier', name: 'Ancien Sommelier', nameF: 'Ancienne Sommelière', description: "Peut distinguer un Bordeaux d'un jus de poubelle. Parfois.", bonusStats: { hunger: 10 }, startingItems: ['tire-bouchon'], emoji: '🍷' },
   { id: 'cascadeur', name: 'Ancien Cascadeur', nameF: 'Ancienne Cascadeuse', description: 'Tombe de haut. Littéralement et figurativement.', bonusStats: { health: 5 }, startingItems: ['genouillere'], emoji: '🤸' },
   { id: 'informaticien', name: 'Ancien Informaticien', nameF: 'Ancienne Informaticienne', description: 'Cherche encore le WiFi gratuit.', bonusStats: { mental: 10 }, startingItems: ['cable-usb'], emoji: '💻' },
   { id: 'cuisinier', name: 'Ancien Cuisinier', nameF: 'Ancienne Cuisinière', description: 'Transforme un rat en ratatouille.', bonusStats: { hunger: 15 }, startingItems: ['couteau-suisse'], emoji: '👨‍🍳' },
   { id: 'infirmier', name: 'Ancien Infirmier', nameF: 'Ancienne Infirmière', description: 'Se soigne avec des feuilles de journal.', bonusStats: { health: 15 }, startingItems: ['bandage'], emoji: '🏥' },
-  { id: 'artiste', name: 'Ancien Artiste', nameF: 'Ancienne Artiste', description: "Son art n'a jamais été compris. Même par lui.", bonusStats: { dignity: 15 }, startingItems: ['crayon'], emoji: '🎨' },
+  { id: 'artiste', name: 'Ancien Artiste', nameF: 'Ancienne Artiste', description: "Son art n'a jamais été compris. Même par lui.", descriptionF: "Son art n'a jamais été compris. Même par elle.", bonusStats: { dignity: 15 }, startingItems: ['crayon'], emoji: '🎨' },
   { id: 'militaire', name: 'Ancien Militaire', nameF: 'Ancienne Militaire', description: "Dort debout et mange n'importe quoi.", bonusStats: { health: 10 }, startingItems: ['couverture-survie'], emoji: '🎖️' },
   { id: 'bibliothecaire', name: 'Ancien Bibliothécaire', nameF: 'Ancienne Bibliothécaire', description: 'Connaît tous les recoins de la ville.', bonusStats: { mental: 10 }, startingItems: ['carte-ville'], emoji: '📖' },
   { id: 'vendeur', name: 'Ancien Vendeur de Voitures', nameF: 'Ancienne Vendeuse de Voitures', description: 'Peut vendre un carton mouillé comme un loft.', bonusStats: { dignity: 5 }, startingItems: ['cravate'], emoji: '🚗' },
@@ -351,6 +351,18 @@ export function hasTrait(c: Character, id: string): boolean {
  */
 export function nomMetier(job: Job, gender?: 'm' | 'f'): string {
   return gender === 'f' && job.nameF ? job.nameF : job.name;
+}
+
+/**
+ * La phrase du métier, accordée elle aussi.
+ *
+ * Elle est passée à `tc()` comme avant : la clé de traduction EST la chaîne
+ * française, donc la variante féminine a sa propre entrée anglaise. L'anglais
+ * ne s'accorde pas, mais « his » et « her » si — et c'est le même défaut, dans
+ * l'autre langue.
+ */
+export function phraseMetier(job: Job, gender?: 'm' | 'f'): string {
+  return gender === 'f' && job.descriptionF ? job.descriptionF : job.description;
 }
 
 export function poissardMerite(c: Character): boolean {
