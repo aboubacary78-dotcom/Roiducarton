@@ -41,6 +41,7 @@ import { join } from 'node:path';
 const L = 1440, H = 2880;                       // rapport 2:1, dans les clous
 const LANG = process.env.LANG_FICHE || 'fr';
 const BRUTES = process.env.BRUTES || join(process.cwd(), 'captures-brutes');
+const PORTRAITS = process.env.PORTRAITS || join(process.cwd(), `portraits-store/${LANG === 'en' ? 'en' : 'fr'}`);
 const SORTIE = process.env.OUT || join(process.cwd(), `visuels-store/${LANG}`);
 /*
  * ON VIDE LE DOSSIER AVANT D'ÉCRIRE, ET C'EST UNE CORRECTION.
@@ -148,6 +149,55 @@ const COUCHES = `
       radial-gradient(44% 28% at 82% 72%, rgba(104,74,44,.42) 0%, transparent 66%)"></div>
   <div class="c" style="background:radial-gradient(128% 84% at 50% 46%, transparent 52%, rgba(58,42,30,.42) 100%)"></div>`;
 
+/*
+ * LES HABITANTS, ET POURQUOI ILS MANQUAIENT.
+ *
+ * Les six visuels ne montraient qu'un écran de téléphone posé sur du carton.
+ * C'était propre, exact, et mort : rien n'y regardait le visiteur. Or le jeu
+ * parle de GENS — un ancien bibliothécaire, une ancienne avocate, un musicien
+ * qui a connu de meilleurs jours — et aucun n'apparaissait sur la fiche censée
+ * les vendre.
+ *
+ * Deux portraits par visuel, posés de travers en bas, débordant du cadre comme
+ * des photos qu'on aurait laissées là. Ils viennent du jeu lui-même
+ * (`pnpm portraits-store`), avec leur nom et leur ancien métier : c'est la
+ * phrase la plus courte qui dise ce qu'est ce jeu — quelqu'un qui avait une vie
+ * avant.
+ *
+ * ILS SONT DIFFÉRENTS D'UN VISUEL À L'AUTRE. Deux fois la même tête sur six
+ * images donnerait l'impression d'un jeu à trois personnages ; le décalage par
+ * l'index de la planche garantit douze visages pour six visuels.
+ */
+/*
+ * L'ATTROUPEMENT, ET POURQUOI IL EST EN BAS ET COUPÉ.
+ *
+ * Premier essai : deux portraits posés de travers, avec leur nom et leur ancien
+ * métier. Ils ont apporté de la vie et deux défauts. Ils tombaient AU MILIEU de
+ * l'écran du téléphone, cachant une carte de personnage ici, un bouton là —
+ * c'est-à-dire ce que le visuel est censé montrer. Et leurs noms, écrits à 34 px
+ * sur 1440, disparaissaient de toute façon dès la vignette, tout en coûtant la
+ * place qui les faisait déborder du cadre.
+ *
+ * Deuxième parti, celui-ci : TROIS figures alignées au bas de l'image, qui se
+ * chevauchent un peu et que le bord coupe à mi-hauteur. On ne les lit plus une
+ * par une, on lit un attroupement — des gens devant l'écran plutôt que des
+ * autocollants dessus. Le rognage par le bas est VOULU, ce qui règle du même
+ * coup le problème des noms coupés : il n'y a plus de nom à couper.
+ *
+ * Ils gardent leur ombre portée, qui est ce qui les décolle du téléphone.
+ */
+function attroupement(gens) {
+  const poses = [
+    { g: 0, style: 'left:38px;bottom:-118px;transform:rotate(-7deg)', cote: 430, z: 3 },
+    { g: 1, style: 'left:50%;margin-left:-230px;bottom:-150px;transform:rotate(3deg)', cote: 460, z: 2 },
+    { g: 2, style: 'right:34px;bottom:-126px;transform:rotate(6deg)', cote: 420, z: 3 },
+  ];
+  return poses.map(({ g, style, cote, z }) => `
+  <img src="data:image/png;base64,${gens[g].data}"
+    style="position:absolute;${style};width:${cote}px;z-index:${z};
+      filter:drop-shadow(0 -6px 22px rgba(38,26,16,.42)) drop-shadow(0 10px 20px rgba(38,26,16,.5))">`).join('');
+}
+
 /** Deux bouts de gaffer, découpés en dents inégales, jamais d'équerre. */
 const scotch = (style) => `
   <div style="position:absolute;${style};width:230px;height:74px;
@@ -182,7 +232,7 @@ const scotch = (style) => `
  *     Le vide devient alors du carton, c'est-à-dire de la matière du jeu, au
  *     lieu d'être du blanc d'application.
  */
-function page(lignes, imageDataURI, contenu) {
+function page(lignes, imageDataURI, contenu, gens) {
   const deborde = contenu >= 0.85;
   const largeur = 1240;
   /*
@@ -217,6 +267,7 @@ function page(lignes, imageDataURI, contenu) {
   <div class="ecran"><img src="${imageDataURI}"></div>
   ${scotch(`left:96px;top:${haut - 46}px;transform:rotate(-7deg)`)}
   ${scotch(`right:90px;top:${haut - 22}px;transform:rotate(5deg)`)}
+  ${attroupement(gens)}
 </body></html>`;
 }
 
@@ -255,12 +306,27 @@ async function hauteurDuContenu(dataURI) {
   }, dataURI);
 }
 
+/*
+ * On charge les portraits une fois : douze images de 1280 px encodées à chaque
+ * planche coûteraient six fois le même travail pour le même résultat.
+ */
+if (!existsSync(join(PORTRAITS, 'fiches.json'))) {
+  console.log(`ARRÊT : ${PORTRAITS}/fiches.json manque. Lancer d'abord : pnpm portraits-store`);
+  process.exit(1);
+}
+const gensDispo = JSON.parse(readFileSync(join(PORTRAITS, 'fiches.json'), 'utf8'))
+  .map(f => ({ ...f, data: readFileSync(join(PORTRAITS, f.fichier)).toString('base64') }));
+console.log(`  ${gensDispo.length} portraits chargés depuis ${PORTRAITS}`);
+
 const faites = [];
 for (const pl of PLANCHES) {
   const brut = readFileSync(join(BRUTES, `${pl.fichier}.png`)).toString('base64');
   const uri = `data:image/png;base64,${brut}`;
   const contenu = await hauteurDuContenu(uri);
-  await p.setContent(page(pl[LANG], uri, contenu), { waitUntil: 'load' });
+  // Trois par planche, six planches : les douze visages tournent sans qu'aucun
+  // ne revienne deux fois côte à côte.
+  const gens = [0, 1, 2].map(k => gensDispo[(faites.length * 3 + k) % gensDispo.length]);
+  await p.setContent(page(pl[LANG], uri, contenu, gens), { waitUntil: 'load' });
   // Les polices ET l'image, décodées : capturer avant, c'est photographier
   // une police de repli et un cadre vide.
   await p.evaluate(async () => {

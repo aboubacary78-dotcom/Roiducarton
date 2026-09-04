@@ -1,6 +1,6 @@
 {
   "name": "roi-du-carton",
-  "version": "3.73.0",
+  "version": "3.74.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -24,6 +24,7 @@
     "test-etabli-atelier": "node scripts/test-etabli-atelier.mjs",
     "test-boutique-cadeau": "node scripts/test-boutique-cadeau.mjs",
     "captures-store": "node scripts/captures-store.mjs",
+    "portraits-store": "node scripts/portraits-store.mjs",
     "visuels-store": "node scripts/visuels-store.mjs",
     "icone-store": "python3 scripts/icone-store.py",
     "suites": "node scripts/suites.mjs",

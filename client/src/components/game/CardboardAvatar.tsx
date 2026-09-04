@@ -6,6 +6,7 @@
  */
 
 import type { AccessorySlot } from '@/lib/cosmetics';
+import { tr } from '@/lib/lang';
 
 const OUTLINE = '#3A2A1E';
 
@@ -325,7 +326,11 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   });
 
   return (
-    <svg viewBox="0 0 100 100" width={size} height={size} className={className} role="img" aria-label="Visage du personnage">
+    <svg viewBox="0 0 100 100" width={size} height={size} className={className} role="img"
+      /* Comme le bouton de personnalisation avant lui, ce libellé était écrit
+         en dur en français : le seul texte d'un écran traduit qu'un lecteur
+         d'écran anglophone entendait dans la mauvaise langue. */
+      aria-label={tr('Visage du personnage', 'Character face')}>
       <defs>
         {/* Découpe des cheveux sous la ligne du chapeau (voir hairLine) */}
         {hairLine !== null && (

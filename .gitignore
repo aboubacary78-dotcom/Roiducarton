@@ -121,6 +121,7 @@ temp/
 captures-store/
 captures-brutes/
 captures-brutes-en/
+portraits-store/
 visuels-store/
 
 # Les sorties gardées par `pnpm suites` : elles servent à comprendre un échec
