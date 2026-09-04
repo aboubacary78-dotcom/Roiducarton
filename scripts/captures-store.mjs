@@ -34,7 +34,34 @@ import puppeteer from 'puppeteer-core';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const LARGE = 390, HAUT = 780, ECHELLE = 1080 / LARGE;   // 1080 × 2160
+/*
+ * LA LARGEUR EST RÉGLABLE, ET ELLE A UNE RAISON DE L'ÊTRE.
+ *
+ * 1080 suffit pour téléverser tel quel dans la Play Console. Mais ces captures
+ * servent aussi de MATIÈRE aux visuels habillés (`scripts/visuels-store.mjs`),
+ * où elles sont posées dans un cadre plus grand : les agrandir après coup les
+ * rendrait molles exactement là où le joueur les regarde. On les prend donc à
+ * la taille du visuel, une bonne fois.
+ *
+ *     PX=1440 pnpm captures-store
+ */
+const LARGE = 390, HAUT = 780;
+const CIBLE = Number(process.env.PX) || 1080;
+const ECHELLE = CIBLE / LARGE;                            // par défaut 1080 × 2160
+/*
+ * LA LANGUE DES CAPTURES, ET POURQUOI ELLE NE PEUT PAS RESTER FIGÉE.
+ *
+ * La fiche du Play Store se remplit PAR LANGUE. Une fiche anglaise illustrée de
+ * captures françaises ne se contente pas d'être négligée : elle donne au joueur
+ * anglophone la preuve, avant d'installer, que le jeu ne sera pas dans sa
+ * langue. C'est exactement l'inverse de ce qu'une fiche doit faire.
+ *
+ *     LANG_JEU=en pnpm captures-store
+ *
+ * `LANG_JEU` et non `LANG` : `LANG` est la variable du système, et l'écraser
+ * change le comportement de tout ce que le script lance.
+ */
+const LANGUE = process.env.LANG_JEU === 'en' ? 'en' : 'fr';
 const SORTIE = process.env.OUT || join(process.cwd(), 'captures-store');
 mkdirSync(SORTIE, { recursive: true });
 
@@ -65,6 +92,17 @@ const clic = m => p.evaluate(s => {
 const texte = () => p.evaluate(() => document.body.innerText.replace(/\s+/g, ' '));
 
 const prises = [];
+/*
+ * CHAQUE CAPTURE A UN TEXTE ATTENDU, ET C'EST UNE CORRECTION.
+ *
+ * Quatre d'entre elles n'en avaient pas : `attendu` valant `undefined`, le
+ * contrôle passait toujours. Tant que le script tournait en français, personne
+ * ne l'a vu. À la première exécution en anglais, les libellés cliqués ne
+ * correspondaient plus à rien, les mini-jeux ne s'ouvraient pas — et le script
+ * a annoncé neuf captures « ok » dont deux photographiaient le hub sous les
+ * étiquettes « bagarre » et « manche ». Un contrôle sans attente ne contrôle
+ * rien, il rassure.
+ */
 async function prendre(nom, attendu) {
   const vu = await texte();
   const ok = !attendu || new RegExp(attendu, 'i').test(vu);
@@ -92,9 +130,9 @@ async function prendre(nom, attendu) {
  *     cimetière garni dit au jeu qu'on n'en est plus là.
  */
 async function partirDeZero() {
-  await p.evaluate(() => {
+  await p.evaluate((langue) => {
     localStorage.clear();
-    localStorage.setItem('roi-du-carton-lang', 'fr');
+    localStorage.setItem('roi-du-carton-lang', langue);
     const j = new Date();
     const d = n => String(n).padStart(2, '0');
     localStorage.setItem('roi-du-carton-carton-matin', JSON.stringify({
@@ -103,17 +141,20 @@ async function partirDeZero() {
     }));
     localStorage.setItem('roi-du-carton-cimetiere', JSON.stringify(
       Array.from({ length: 11 }, (_, i) => ({ seed: 'g' + i, name: 'Anonyme', day: i + 1 }))));
-  });
+  }, LANGUE);
   await p.reload({ waitUntil: 'networkidle2' }); await pause(1100);
-  for (const m of ['Regarder', 'Merci']) { if (await clic(m)) await pause(350); }
+  // Les libellés sont donnés dans LES DEUX LANGUES : en anglais, « Nouvelle »
+  // ne correspond à aucun bouton, et le script photographierait l'écran-titre
+  // neuf fois en croyant parcourir le jeu.
+  for (const m of ['Regarder|Take a look', 'Merci|Thanks']) { if (await clic(m)) await pause(350); }
 }
 
 async function nouvellePartie() {
   await partirDeZero();
-  await clic('Nouvelle'); await pause(1100);
+  await clic('Nouvelle|New Game'); await pause(1100);
   await p.evaluate(() => { [...document.querySelectorAll('[class*="cursor-pointer"]')][0]?.click(); });
   await pause(1300);
-  await clic('Commencer à survivre'); await pause(1500);
+  await clic('Commencer à survivre|Start surviving'); await pause(1500);
   // Le conseil du premier jour se pose par-dessus le hub : la photo doit
   // montrer l'écran de jeu, pas son tutoriel.
   for (const m of ['Compris|Got it|OK|D\'accord']) { if (await clic(m)) await pause(500); }
@@ -126,20 +167,20 @@ await p.goto('http://localhost:8099/', { waitUntil: 'networkidle2' });
 // nettoyait le stockage à la main, sans neutraliser le carton du matin, et le
 // récit d'origine se retrouvait caché derrière lui deux fois sur trois.
 await partirDeZero();
-await prendre('01-titre', 'Roi du Carton');
+await prendre('01-titre', 'Roi du Carton|Cardboard King');
 
 // ── 2. Le choix du personnage ───────────────────────────────────────────────
-await clic('Nouvelle'); await pause(1200);
-await prendre('02-choix-personnage', 'Destin|Choisissez');
+await clic('Nouvelle|New Game'); await pause(1200);
+await prendre('02-choix-personnage', 'Destin|Choisissez|Choose Your Fate');
 
 // ── 3. Le récit d'origine ───────────────────────────────────────────────────
 await p.evaluate(() => { [...document.querySelectorAll('[class*="cursor-pointer"]')][0]?.click(); });
 await pause(1400);
-await prendre('03-origine', 'La Chute de');
+await prendre('03-origine', 'La Chute de|The Fall of');
 
 // ── 4. Le hub ───────────────────────────────────────────────────────────────
 await nouvellePartie();
-await prendre('04-hub', 'CONTRAT DU JOUR');
+await prendre('04-hub', "CONTRAT DU JOUR|TODAY'S CONTRACT|DAILY CONTRACT");
 
 /*
  * ON PASSE LES RÈGLES, ET C'EST TOUT LE SUJET DE CES QUATRE CAPTURES.
@@ -166,7 +207,7 @@ async function jouer(action, attente = 2200) {
  * instants, exactement comme un joueur.
  */
 await nouvellePartie();
-await jouer('Mendier', 700);
+await jouer('Mendier|Beg', 700);
 const passant = await p.evaluate(() => {
   const e = [...document.querySelectorAll('div,button,span')]
     .map(x => ({ x, b: x.getBoundingClientRect() }))
@@ -186,7 +227,7 @@ if (passant) {
   await p.mouse.up();
   await pause(600);
 }
-await prendre('05-mendier');
+await prendre('05-mendier', 'La manche|Begging|Posez le doigt|Hold your finger');
 
 // ── 6. La Récup' ────────────────────────────────────────────────────────────
 /*
@@ -199,7 +240,7 @@ await prendre('05-mendier');
  * a dessous, ce qui EST le mini-jeu.
  */
 await nouvellePartie();
-await jouer("La Récup'", 900);
+await jouer("La Récup'|Salvage", 900);
 const tas = await p.$('[class*="grid"], canvas, svg');
 if (tas) {
   const r = await p.evaluate(() => {
@@ -223,27 +264,31 @@ if (tas) {
     await pause(700);
   }
 }
-await prendre('06-recup');
+await prendre('06-recup', 'Creuser|Remonter|Dig|Climb back');
 
 // ── 7. Une rencontre ────────────────────────────────────────────────────────
 // Pas de panneau de règles ici : une rencontre se lit, elle ne se joue pas.
 await nouvellePartie();
-await clic('Explorer'); await pause(2100);
-await prendre('07-rencontre');
+await clic('Explorer|Explore'); await pause(2100);
+await prendre('07-rencontre', 'Retour|Back');
 
 // ── 8. La bagarre ───────────────────────────────────────────────────────────
 await nouvellePartie();
-await jouer('Bagarre', 2600);
-await prendre('08-bagarre');
+await jouer('Bagarre|Fight', 2600);
+await prendre('08-bagarre', 'VOTRE SANTÉ|YOUR HEALTH|Tenter de fuir|Try to flee');
 
 // ── 9. La garde-robe ────────────────────────────────────────────────────────
 await nouvellePartie();
-await clic('Personnaliser mon personnage'); await pause(1500);
-await prendre('09-garde-robe', 'Garde-robe');
+await clic('Personnaliser mon personnage|Customise my character'); await pause(1500);
+await prendre('09-garde-robe', 'Garde-robe|Wardrobe');
 
 await b.close();
 const rates = prises.filter(x => !x.ok);
-console.log(`\n${prises.length} capture(s) dans ${SORTIE}, en 1080 × 2160 (rapport 2:1, dans les clous).`);
+// La taille est ANNONCÉE, pas récitée : elle se règle par `PX`, et un message
+// figé à 1080 mentirait dès le premier réglage.
+console.log(`\n${prises.length} capture(s) dans ${SORTIE}, en ${CIBLE} × ${CIBLE * 2} (rapport 2:1, dans les clous).`);
 console.log('Le Play Store en accepte huit au plus : il y en a une de trop, à choisir.');
-if (rates.length) console.log(`${rates.length} n'ont pas montré l'écran attendu : à revoir avant de les envoyer.`);
+// Le script sortait déjà en erreur sur une capture ratée : c'est ce qui empêche
+// une chaîne d'habiller joliment des écrans qui ne sont pas les bons.
+if (rates.length) console.log(`${rates.length} n'ont pas montré l'écran attendu : ${rates.map(x => x.nom).join(', ')}`);
 process.exit(rates.length ? 1 : 0);

@@ -258,7 +258,11 @@ export default function MainScreen() {
               onClick={() => { playClick(); dispatch({ type: 'SET_SCREEN', screen: 'wardrobe' }); }}
               className="relative w-10 h-10 rounded-xl overflow-hidden shadow-sm active:scale-95 transition-transform"
               style={{ border: `2px solid ${conditionColor(condition)}`, transition: 'border-color 0.6s' }}
-              aria-label="Personnaliser mon personnage"
+              /* Ce libellé était écrit en dur, en français, alors que tout le
+                 reste de l'écran est traduit : un joueur anglophone au lecteur
+                 d'écran entendait une phrase française sur un bouton anglais.
+                 Un libellé d'accessibilité est du texte comme un autre. */
+              aria-label={tr('Personnaliser mon personnage', 'Customise my character')}
             >
               <PlayerFace char={char} size={40} />
               <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#B8860B] text-white text-[9px] flex items-center justify-center shadow">✎</span>

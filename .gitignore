@@ -114,10 +114,14 @@ temp/
 # ligne et le restent, git n'ignorant que ce qu'il ne suit pas déjà.
 .bundle-test-*.mjs
 
-# Les captures pour la fiche du store : régénérables par
-# `node scripts/captures-store.mjs`, et lourdes. Le script est la source, pas
-# les images.
+# Les images de la fiche du store : régénérables par `pnpm captures-store`,
+# `pnpm visuels-store` et `pnpm icone-store`, et lourdes. Les SCRIPTS sont la
+# source, pas les images — eux seuls disent pourquoi une capture est cadrée
+# ainsi et pourquoi telle phrase est écrite dessus.
 captures-store/
+captures-brutes/
+captures-brutes-en/
+visuels-store/
 
 # Les sorties gardées par `pnpm suites` : elles servent à comprendre un échec
 # intermittent sur la machine où il s'est produit, pas à voyager.
