@@ -75,8 +75,8 @@ const PLANCHES = [
     en: ['Three lost souls.', 'Only one survivor.'],
     // La première porte le NOM DU JEU en plus de son accroche : c'est la seule
     // que tout le monde voit, et une fiche sans marque ne se retient pas.
-    enseigne: true,
-    depart: 0.10,        // à partir du premier candidat, traits compris
+    couverture: true,    // pas d'écran : la key art, le nom, et les visages
+    depart: 0.10,
   },
   {
     /*
@@ -96,6 +96,7 @@ const PLANCHES = [
      * planche doit encore dire de quoi il s'agit.
      */
     replique: true,
+    fond: 'scene-centre-ville.webp',
     fr: [], en: [],
   },
   {
@@ -103,18 +104,21 @@ const PLANCHES = [
     fr: ['Manger, boire, dormir.', 'Chaque jour se paie.'],
     en: ['Eat, drink, sleep.', 'Every day has a price.'],
     depart: 0.37,        // à partir des six jauges, jusqu'aux quatre actions
+    fond: 'scene-parc.webp',
   },
   {
     fichier: '07-rencontre',
     fr: ['Plus de 250 rencontres', 'écrites à la main.'],
     en: ['Over 250 encounters,', 'every one hand-written.'],
     depart: 0.22,        // à partir du titre de la rencontre
+    fond: 'exp-cinema-sauvage.webp',
   },
   {
     fichier: '08-bagarre',
     fr: ['La rue négocie', 'rarement.'],
     en: ['The street rarely', 'negotiates.'],
     depart: 0.00,        // à partir de l'adversaire
+    fond: 'scene-zone-industrielle.webp',
   },
   {
     /*
@@ -129,17 +133,20 @@ const PLANCHES = [
     fr: ['Tendre la main,', 'et voir qui s\'arrête.'],
     en: ['Hold out your hand,', 'and see who stops.'],
     depart: 0.02,        // à partir du titre du mini-jeu
+    fond: 'exp-metro-oXzk6PRiafCRXLVLnLSSVq.webp',
   },
   {
     fichier: '09-garde-robe',
     fr: ['51 accessoires à gagner.', 'Aucun à acheter.'],
     en: ['51 accessories to earn.', 'None for sale.'],
     depart: 0.37,        // à partir de la grille d'accessoires
+    fond: 'exp-vide-grenier.webp',
   },
 ];
 
 for (const pl of PLANCHES) {
-  if (pl.replique) continue;                 // celle-ci ne montre aucun écran
+  // Ni la réplique ni la couverture ne montrent d'écran : rien à vérifier.
+  if (pl.replique || pl.couverture) continue;
   const src = join(BRUTES, `${pl.fichier}.png`);
   if (!existsSync(src)) {
     console.log(`ARRÊT : ${src} manque. Lancer d'abord : PX=1440 pnpm captures-store`);
@@ -172,12 +179,31 @@ await p.goto('http://localhost:8099/', { waitUntil: 'domcontentloaded' });
  */
 const CARTON = `
   background: linear-gradient(163deg, #D2B187 0%, #C4A277 46%, #B08F63 100%);`;
+/*
+ * LA SCÈNE SOUS LE CARTON, ET POURQUOI ELLE MANQUAIT.
+ *
+ * Le kraft seul faisait des planches propres et plates : « trop simple, trop
+ * fade », et le mot est juste. Un aplat, même texturé, ne raconte pas où se
+ * passe le jeu — or ce jeu a quatre-vingt-six décors photographiés en carton,
+ * qui ne servaient qu'à l'intérieur.
+ *
+ * Chacun s'installe donc derrière sa planche, choisi pour ce qu'elle dit : un
+ * parc pour les jauges du quotidien, une zone industrielle pour la bagarre, le
+ * métro pour la manche. Désaturé, assombri et laissé à 34 % pour qu'il donne
+ * de la PROFONDEUR sans jamais concurrencer l'écran posé dessus : on doit le
+ * sentir plus que le regarder.
+ */
+const scene = (data) => data ? `
+  <div class="c" style="background:url(data:image/webp;base64,${data}) center/cover no-repeat;
+    opacity:.34;filter:saturate(.62) contrast(1.06) brightness(.92)"></div>
+  <div class="c" style="background:linear-gradient(178deg, rgba(196,162,119,.42) 0%, rgba(176,143,99,.70) 62%, rgba(140,110,74,.86) 100%)"></div>` : '';
+
 const COUCHES = `
   <div class="c" style="opacity:.22;background-image:repeating-linear-gradient(97deg,rgba(88,62,38,.5) 0 2px,transparent 2px 14px)"></div>
   <div class="c" style="opacity:.30;background:
       radial-gradient(58% 34% at 22% 26%, rgba(120,86,52,.55) 0%, transparent 62%),
       radial-gradient(44% 28% at 82% 72%, rgba(104,74,44,.42) 0%, transparent 66%)"></div>
-  <div class="c" style="background:radial-gradient(128% 84% at 50% 46%, transparent 52%, rgba(58,42,30,.42) 100%)"></div>`;
+  <div class="c" style="background:radial-gradient(122% 80% at 50% 44%, transparent 44%, rgba(48,34,22,.56) 100%)"></div>`;
 
 /*
  * LES HABITANTS, ET POURQUOI ILS MANQUAIENT.
@@ -315,7 +341,87 @@ function choisirReplique(gensDispo) {
   return gensDispo.find(g => g.citation) || gensDispo[0];
 }
 
-function pageReplique(g) {
+/*
+ * LA COUVERTURE, ET POURQUOI CE N'EST PLUS UN TITRE POSÉ SUR DU CARTON.
+ *
+ * La première planche portait le nom du jeu écrit en Fredoka sur le kraft, au-
+ * dessus d'une capture. C'était lisible et sans valeur : un nom en caractères
+ * ordinaires sur un fond uni ne dit rien de ce qu'on achète, et c'est la seule
+ * image que TOUT LE MONDE voit.
+ *
+ * Elle reprend donc la key art du jeu — la ville en carton photographiée, celle
+ * de l'écran-titre et du visuel de mise en avant — en plein cadre. Le nom se
+ * pose dessus sur un voile sombre monté du bas, et trois habitants ferment
+ * l'image. Le visiteur voit un décor, un titre et des gens : de quoi savoir en
+ * une seconde à quoi ressemble ce jeu.
+ */
+function pageCouverture(lignes, heroData, gens, fondData) {
+  /*
+   * LA KEY ART EST UNE BANDE, ET C'EST UNE CONTRAINTE, PAS UN CHOIX.
+   *
+   * Elle mesure 1200 × 670, très large. La première version l'a étirée sur
+   * 1560 px de haut puis laissée mourir dans un aplat noir : un tiers de
+   * l'image ne contenait rien du tout. Et la faire couvrir toute la hauteur
+   * demanderait de l'agrandir trois fois pour n'en montrer qu'une tranche de
+   * 480 px — on vendrait une image floue de deux immeubles.
+   *
+   * Elle occupe donc le haut à une échelle raisonnable et se fond dans le
+   * carton par une déchirure. Le nom du jeu se pose SUR elle, en clair sur le
+   * voile sombre : c'est le geste du visuel de mise en avant, celui qui
+   * marchait. Le carton reprend dessous pour l'accroche et les habitants.
+   */
+  /*
+   * LA BANDE MONTE UN PEU, ET LE RESTE SE REMPLIT DE MATIÈRE, PAS DE PIXELS.
+   *
+   * Le creux entre l'accroche et les habitants demandait soit une image plus
+   * haute, soit autre chose dedans. Plus haute, il faudrait l'agrandir 2,2 fois
+   * depuis une source de 1200 px : molle exactement là où elle doit convaincre.
+   * On lui met donc un décor de rue sous le carton, comme aux autres planches,
+   * et on remonte les visages jusqu'à toucher l'accroche.
+   */
+  const ART = 1340;
+  return `<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="http://localhost:8099/fonts/fonts.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:${L}px;height:${H}px;overflow:hidden;position:relative;${CARTON}}
+  .c{position:absolute;inset:0}
+  .art{position:absolute;left:0;right:0;top:0;height:${ART}px;
+    background:url(data:image/png;base64,${heroData}) center 38%/cover no-repeat}
+  .voile{position:absolute;left:0;right:0;top:${ART - 620}px;height:620px;
+    background:linear-gradient(180deg, rgba(24,16,10,0) 0%, rgba(24,16,10,.56) 46%, rgba(24,16,10,.88) 100%)}
+  /* La couture entre la photo et le carton : une déchirure, pas un trait net. */
+  .couture{position:absolute;left:-20px;right:-20px;top:${ART - 30}px;height:64px;
+    background:linear-gradient(180deg, rgba(26,18,12,.92) 0%, rgba(150,120,84,0) 100%);
+    clip-path:polygon(0 0,7% 42%,14% 8%,22% 50%,31% 14%,39% 54%,48% 12%,57% 48%,66% 10%,75% 52%,84% 16%,92% 46%,100% 6%,100% 100%,0 100%)}
+  .titre{position:absolute;left:60px;right:60px;top:${ART - 340}px;text-align:center;
+    font-family:'Fredoka',system-ui,sans-serif;font-weight:600;font-size:162px;
+    color:#F7EBDB;line-height:1;letter-spacing:-.025em;
+    text-shadow:0 8px 30px rgba(0,0,0,.8), 0 2px 0 rgba(0,0,0,.45)}
+  .accroche{position:absolute;left:70px;right:70px;top:${ART + 150}px;text-align:center;
+    font-family:'Fredoka',system-ui,sans-serif;font-weight:600;font-size:118px;
+    color:#2A1F1A;line-height:1.05;text-shadow:0 2px 0 rgba(255,255,255,.18)}
+  .accroche em{display:block;font-style:normal;font-size:86px;color:#4A3728;margin-top:14px}
+  .gens img{position:absolute;filter:drop-shadow(0 -8px 26px rgba(38,26,16,.45)) drop-shadow(0 14px 26px rgba(38,26,16,.5))}
+</style></head><body>
+  ${scene(fondData)}
+  ${COUCHES}
+  <div class="art"></div><div class="voile"></div><div class="couture"></div>
+  <div class="titre">${LANG === 'en' ? 'Cardboard King' : 'Le Roi du Carton'}</div>
+  <svg width="700" height="30" viewBox="0 0 196 14" style="position:absolute;top:${ART - 132}px;left:50%;margin-left:-350px" aria-hidden>
+    <path d="M5 8 Q50 3 99 7 T191 5" fill="none" stroke="#E8D2A8" stroke-width="2.6"
+      stroke-linecap="round" opacity=".85"/>
+  </svg>
+  <div class="accroche">${lignes[0]}<em>${lignes[1]}</em></div>
+  <div class="gens">
+    <img src="data:image/png;base64,${gens[0].data}" style="left:-36px;bottom:20px;width:660px;transform:rotate(-8deg)">
+    <img src="data:image/png;base64,${gens[1].data}" style="left:50%;margin-left:-355px;bottom:-40px;width:710px;transform:rotate(3deg)">
+    <img src="data:image/png;base64,${gens[2].data}" style="right:-42px;bottom:8px;width:650px;transform:rotate(7deg)">
+  </div>
+</body></html>`;
+}
+
+function pageReplique(g, fondData) {
   /*
    * LE VISAGE D'ABORD, LA PHRASE ENSUITE, et c'est une correction.
    *
@@ -335,7 +441,7 @@ function pageReplique(g) {
   body{width:${L}px;height:${H}px;overflow:hidden;position:relative;${CARTON}}
   .c{position:absolute;inset:0}
   .qui{position:absolute;left:0;right:0;top:360px;text-align:center}
-  .qui img{width:560px;filter:drop-shadow(0 18px 34px rgba(38,26,16,.55))}
+  .qui img{width:660px;filter:drop-shadow(0 18px 34px rgba(38,26,16,.55))}
   .nom{margin-top:26px;font-family:'Fredoka',system-ui,sans-serif;font-weight:600;
     font-size:92px;color:#2A1F1A;line-height:1.04;
     text-shadow:0 2px 0 rgba(255,255,255,.18)}
@@ -344,25 +450,31 @@ function pageReplique(g) {
   /* LES GUILLEMETS : ils disent « quelqu'un parle » avant qu'on ait lu un mot. */
   .guillemet{position:absolute;font-family:'DM Serif Display',Georgia,serif;
     font-size:480px;color:#8A6C48;opacity:.30;line-height:.8}
-  .phrase{position:absolute;left:104px;right:104px;top:1500px;text-align:center;
+  .phrase{position:absolute;left:104px;right:104px;top:1330px;text-align:center;
     font-family:'DM Serif Display',Georgia,serif;font-style:italic;
     font-size:${longue ? 116 : 132}px;line-height:1.18;color:#241A12;
     text-shadow:0 2px 0 rgba(255,255,255,.18)}
 </style></head><body>
+  ${fondData ? `
+  <div class="c" style="background:url(data:image/webp;base64,${fondData}) center/cover no-repeat;
+    opacity:.55;filter:saturate(.66) contrast(1.08) brightness(.88)"></div>
+  <div class="c" style="background:linear-gradient(178deg, rgba(196,162,119,.32) 0%, rgba(176,143,99,.58) 44%, rgba(120,94,62,.82) 100%)"></div>` : ''}
   ${COUCHES}
   <div class="qui">
     <img src="data:image/png;base64,${g.data}">
     <div class="nom">${g.nom}</div>
     <div class="metier">${g.metier}</div>
   </div>
-  <div class="guillemet" style="left:44px;top:1360px">&ldquo;</div>
-  <div class="guillemet" style="right:44px;bottom:210px">&rdquo;</div>
+  <div class="guillemet" style="left:40px;top:1190px">&ldquo;</div>
+  <div class="guillemet" style="right:40px;bottom:400px">&rdquo;</div>
   <div class="phrase">${g.citation}</div>
 </body></html>`;
 }
 
-function page(lignes, imageDataURI, gens, pl) {
-  const haut = pl.enseigne ? 700 : 560;
+function page(lignes, imageDataURI, gens, pl, fondData) {
+  // L'enseigne a disparu d'ici : le nom du jeu vit maintenant sur la
+  // couverture, sur la key art, où il vaut autre chose qu'un mot posé.
+  const haut = 560;
   const c = cadre(pl.depart, haut);
   return `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="http://localhost:8099/fonts/fonts.css">
@@ -376,27 +488,15 @@ function page(lignes, imageDataURI, gens, pl) {
     text-shadow:0 2px 0 rgba(255,255,255,.16)}
   .l1{font-size:${taille(lignes[0], 148, 126, 108)}px}
   .l2{font-size:${taille(lignes[1], 104, 92, 82)}px;color:#4A3728;margin-top:8px}
-  /* L'ENSEIGNE : le nom du jeu, sur la seule planche que tout le monde voit.
-     C'est « Le Roi du Carton » et rien d'autre : une accroche n'est pas une
-     marque, et rebaptiser un jeu pour une fiche casserait le titre déposé,
-     l'icône, et les mots sur lesquels on est trouvé. */
-  .enseigne{position:absolute;top:76px;left:0;right:0;text-align:center;
-    font-family:'Fredoka',system-ui,sans-serif;font-weight:600;font-size:118px;
-    color:#241A12;letter-spacing:-.02em;
-    text-shadow:0 3px 0 rgba(255,255,255,.20), 0 6px 18px rgba(58,42,30,.28)}
   .ecran{position:absolute;left:50%;top:${haut}px;width:${c.largeur}px;height:${c.hauteur}px;
     transform:translateX(-50%) rotate(-1.2deg);
     border-radius:30px;overflow:hidden;
     box-shadow:0 34px 70px rgba(38,26,16,.5), 0 0 0 10px rgba(58,42,30,.30)}
   .ecran img{position:absolute;left:0;top:${-c.decalage}px;width:100%;height:${c.hauteurImage}px}
 </style></head><body>
+  ${scene(fondData)}
   ${COUCHES}
-  ${pl.enseigne ? `<div class="enseigne">${LANG === 'en' ? 'Cardboard King' : 'Le Roi du Carton'}</div>
-  <svg width="620" height="26" viewBox="0 0 196 14" style="position:absolute;top:212px;left:50%;margin-left:-310px" aria-hidden>
-    <path d="M5 8 Q50 3 99 7 T191 5" fill="none" stroke="#241A12" stroke-width="2.4"
-      stroke-linecap="round" opacity=".78"/>
-  </svg>` : ''}
-  <div class="titre" style="top:${pl.enseigne ? 288 : 116}px">
+  <div class="titre" style="top:116px">
     <div class="l1">${lignes[0]}</div><div class="l2">${lignes[1]}</div>
   </div>
   <div class="ecran"><img src="${imageDataURI}"></div>
@@ -454,10 +554,32 @@ const gensDispo = JSON.parse(readFileSync(join(PORTRAITS, 'fiches.json'), 'utf8'
 console.log(`  ${gensDispo.length} portraits chargés depuis ${PORTRAITS}`);
 
 const faites = [];
+/* Les décors sont lus une fois chacun, pas une fois par planche. */
+const fonds = new Map();
+const lireFond = (nom) => {
+  if (!nom) return null;
+  if (!fonds.has(nom)) fonds.set(nom, readFileSync(join('client/public/assets', nom)).toString('base64'));
+  return fonds.get(nom);
+};
+const HERO = readFileSync('client/public/assets/hero-cardboard-city.png').toString('base64');
+
 for (const pl of PLANCHES) {
+  if (pl.couverture) {
+    const trois = [0, 1, 2].map(k => gensDispo[k % gensDispo.length]);
+    await p.setContent(pageCouverture(pl[LANG], HERO, trois, lireFond('scene-gare.webp')), { waitUntil: 'load' });
+    await p.evaluate(async () => {
+      await document.fonts.ready;
+      await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+    });
+    const nom = `${String(faites.length + 1).padStart(2, '0')}-couverture.png`;
+    await p.screenshot({ path: join(SORTIE, nom) });
+    console.log(`  ok   ${nom.padEnd(28)} couverture        « ${pl[LANG][0]} ${pl[LANG][1]} »`);
+    faites.push(nom);
+    continue;
+  }
   if (pl.replique) {
     const g = choisirReplique(gensDispo);
-    await p.setContent(pageReplique(g), { waitUntil: 'load' });
+    await p.setContent(pageReplique(g, lireFond(pl.fond)), { waitUntil: 'load' });
     await p.evaluate(async () => {
       await document.fonts.ready;
       await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
@@ -474,7 +596,7 @@ for (const pl of PLANCHES) {
   // Trois par planche, six planches : les douze visages tournent sans qu'aucun
   // ne revienne deux fois côte à côte.
   const gens = [0, 1, 2].map(k => gensDispo[(faites.length * 3 + k) % gensDispo.length]);
-  await p.setContent(page(pl[LANG], uri, gens, pl), { waitUntil: 'load' });
+  await p.setContent(page(pl[LANG], uri, gens, pl, lireFond(pl.fond)), { waitUntil: 'load' });
   // Les polices ET l'image, décodées : capturer avant, c'est photographier
   // une police de repli et un cadre vide.
   await p.evaluate(async () => {
@@ -483,7 +605,7 @@ for (const pl of PLANCHES) {
   });
   const nom = `${String(faites.length + 1).padStart(2, '0')}-${pl.fichier.replace(/^\d+-/, '')}.png`;
   await p.screenshot({ path: join(SORTIE, nom) });
-  const c = cadre(pl.depart, pl.enseigne ? 700 : 560);
+  const c = cadre(pl.depart, 560);
   console.log(`  ok   ${nom.padEnd(28)} fenêtre ${(c.y0 * 100).toFixed(0).padStart(3)}–${((c.y0 + c.fenetre) * 100).toFixed(0)} %  « ${pl[LANG][0]} ${pl[LANG][1]} »`);
   faites.push(nom);
 }

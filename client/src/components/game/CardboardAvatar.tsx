@@ -253,17 +253,6 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   // lèvre, et un menton court une bouche posée sur le bord.
   const mY = 65 + (chin - 77) * 0.5;
 
-  // Coiffure : les femmes ont toujours des cheveux (pas chauve/dégarni).
-  let hairStyle = choisir('hairstyle', 7);   // 0 chauve, 1 court, 2 touffe, 3 raie, 4 volume, 5 dégarni, 6 longs
-  /*
-   * Le biais féminin ne s'applique qu'au TIRAGE. Choisir explicitement une
-   * coiffure la donne telle quelle : une table de pondération est là pour que
-   * le hasard tombe juste, pas pour corriger quelqu'un qui a décidé.
-   */
-  if (female && typeof visage?.hairstyle !== 'number') {
-    const femaleHair = [1, 2, 3, 4, 6, 6];   // biais vers volume/longs
-    hairStyle = femaleHair[pick('fhair', femaleHair.length)];
-  }
   const eyeStyle = choisir('eyes', 4);       // 0 points, 1 ronds, 2 traits, 3 fatigué
   const browStyle = choisir('brow', 3);      // 0 aucun, 1 droit, 2 relevé
   const mouthStyle = choisir('mouth', 5);    // 0 neutre, 1 sourire, 2 grimace, 3 "o", 4 rictus
@@ -272,12 +261,54 @@ export default function CardboardAvatar({ seed, gender, size = 40, className = '
   const glasses = choisir('glasses', 5);     // 0/1 aucun, 2 rondes, 3 carrées, 4 solaires
   const hasFreckles = oui('freckles', 4);
   const hasScar = !female && oui('scar', 7);
-  const earrings = female && oui('earring', 3);
   // Lèvres colorées pour les femmes ; la soif les décolore, chez tout le monde.
   const mouthColor = melanger(female ? '#B85763' : OUTLINE, '#A98E80', mSoif * 0.65);
 
   // Accessoires cosmétiques équipés (voir lib/cosmetics + garde-robe).
   const accHat = accessories?.hat;
+
+  // Coiffure : les femmes ont toujours des cheveux (pas chauve/dégarni).
+  let hairStyle = choisir('hairstyle', 7);   // 0 chauve, 1 court, 2 touffe, 3 raie, 4 volume, 5 dégarni, 6 longs
+  /*
+   * Le biais féminin ne s'applique qu'au TIRAGE. Choisir explicitement une
+   * coiffure la donne telle quelle : une table de pondération est là pour que
+   * le hasard tombe juste, pas pour corriger quelqu'un qui a décidé.
+   */
+  /*
+   * SOUS UN CHAPEAU, LE BIAIS NE SUFFIT PLUS, ET C'EST MESURÉ.
+   *
+   * Le genre agit sur quatre choses : la coiffure, l'absence de barbe, la
+   * couleur des lèvres et les boucles d'oreilles. Trois sur quatre sont
+   * discrètes à la taille où l'avatar est vu ; la coiffure fait presque tout
+   * le travail — et un chapeau la coupe à la ligne 33.
+   *
+   * Sur dix-huit candidates tirées au hasard, dix portaient un couvre-chef, et
+   * six se lisaient franchement comme des hommes : « Colette », « Monique »,
+   * « Lucienne » sous une casquette, cheveux courts invisibles, sans boucles.
+   * Un joueur ne voit pas une pondération, il voit un prénom féminin sur un
+   * visage d'homme, sur la première carte du jeu.
+   *
+   * Quand la tête est couverte, on ne tire donc plus que des coiffures qui
+   * DÉBORDENT sous la ligne du chapeau — volume et longs — et les boucles
+   * passent d'une chance sur trois à une sur deux. Le hasard garde ses droits
+   * partout ailleurs, et un choix explicite de l'Atelier reste intouché : la
+   * table est là pour que le tirage tombe juste, pas pour corriger quelqu'un
+   * qui a décidé.
+   *
+   * `pick` hache chaque sel séparément, donc lire le chapeau avant la coiffure
+   * ne décale aucun autre tirage : les visages déjà en jeu ne changent pas,
+   * sauf ceux que ce défaut abîmait.
+   */
+  const teteCouverte = !accHat ? (hat === 1 || hat === 2)
+    : accHat !== 'halo' && accHat !== 'flower-crown';
+  if (female && typeof visage?.hairstyle !== 'number') {
+    const femaleHair = teteCouverte ? [4, 6, 6, 6] : [1, 2, 3, 4, 6, 6];
+    hairStyle = femaleHair[pick('fhair', femaleHair.length)];
+  }
+  // Les boucles suivent la même logique : une chance sur deux quand la tête est
+  // couverte, une sur trois sinon. C'est le second signal, il compte double
+  // quand le premier est caché.
+  const earrings = female && oui('earring', teteCouverte ? 2 : 3);
   const accEyes = accessories?.eyes;
   const accFace = accessories?.face;
   const accNeck = accessories?.neck;
