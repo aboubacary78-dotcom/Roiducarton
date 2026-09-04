@@ -73,21 +73,28 @@ const PLANCHES = [
     fichier: '02-choix-personnage',
     fr: ['Trois âmes perdues.', 'Un seul survivant.'],
     en: ['Three lost souls.', 'Only one survivor.'],
+    // La première porte le NOM DU JEU en plus de son accroche : c'est la seule
+    // que tout le monde voit, et une fiche sans marque ne se retient pas.
+    enseigne: true,
+    depart: 0.10,        // à partir du premier candidat, traits compris
   },
   {
     fichier: '04-hub',
     fr: ['Manger, boire, dormir.', 'Chaque jour se paie.'],
     en: ['Eat, drink, sleep.', 'Every day has a price.'],
+    depart: 0.37,        // à partir des six jauges, jusqu'aux quatre actions
   },
   {
     fichier: '07-rencontre',
     fr: ['Plus de 250 rencontres', 'écrites à la main.'],
     en: ['Over 250 encounters,', 'every one hand-written.'],
+    depart: 0.22,        // à partir du titre de la rencontre
   },
   {
     fichier: '08-bagarre',
     fr: ['La rue négocie', 'rarement.'],
     en: ['The street rarely', 'negotiates.'],
+    depart: 0.00,        // à partir de l'adversaire
   },
   {
     /*
@@ -101,11 +108,13 @@ const PLANCHES = [
     fichier: '05-mendier',
     fr: ['Tendre la main,', 'et voir qui s\'arrête.'],
     en: ['Hold out your hand,', 'and see who stops.'],
+    depart: 0.02,        // à partir du titre du mini-jeu
   },
   {
     fichier: '09-garde-robe',
     fr: ['51 accessoires à gagner.', 'Aucun à acheter.'],
     en: ['51 accessories to earn.', 'None for sale.'],
+    depart: 0.37,        // à partir de la grille d'accessoires
   },
 ];
 
@@ -210,63 +219,104 @@ const scotch = (style) => `
   </div>`;
 
 /*
- * DEUX MISES EN PAGE, CHOISIES PAR LA MESURE ET NON AU JUGÉ.
+ * ON NE MONTRE PLUS L'ÉCRAN ENTIER : ON CADRE SUR CE QUE LA PHRASE ANNONCE.
  *
- * Toutes les captures ne remplissent pas leur écran. `hauteurDuContenu` plus bas
- * mesure jusqu'où descend celui de chacune, et les chiffres sont nets :
- * le choix des personnages occupe 100 % de la hauteur, la garde-robe 99 %,
- * mais l'écran de combat s'arrête à 54 % et la manche à 58 %. Le reste est du
- * fond, parce que c'est un écran de téléphone dont le contenu tient en haut.
+ * Le reproche est juste et il est mesurable. Un visuel du Play Store est vu
+ * pour la première fois à 112 px de large dans la grille de résultats. À cette
+ * taille, un écran de téléphone entier — six jauges, quatre tuiles, deux
+ * bandeaux, une carte météo — devient une texture grise. Le visiteur n'y voit
+ * pas ce qu'on fait dans ce jeu, il y voit « une application avec des menus ».
  *
- * Étalées dans un cadre qui déborde, ces trois-là donnaient un tiers d'image
- * vide, et ça se lisait comme un bug de composition. Les zoomer aurait rogné
- * les côtés, où passent justement les boutons d'action : mesuré, il n'y a que
- * 4,1 % de marge, soit un zoom maximal de 1,09 qui ne récupère presque rien.
+ * Chaque planche déclare donc le MORCEAU qui correspond à sa phrase, mesuré
+ * sur la capture : les six jauges et les quatre actions pour « chaque jour se
+ * paie », les trois coups et la barre de santé pour « la rue négocie rarement ».
+ * Le cadre est plus large (1380 au lieu de 1240) et ne contient plus que la
+ * moitié de l'écran : l'élément à lire occupe environ deux fois plus de
+ * surface, ce qui est exactement ce qu'on veut dire par « zoomer ».
  *
- *   · CONTENU ≥ 85 % → LE CADRE DÉBORDE PAR LE BAS. Le jeu continue hors de
- *     l'image, et on ne dépense pas 300 px à dessiner un téléphone que le
- *     joueur tient déjà dans la main.
- *
- *   · CONTENU < 85 % → UNE CARTE SCOTCHÉE. On coupe la capture à la hauteur de
- *     son contenu et on la pose sur le carton, entière, avec sa marge autour.
- *     Le vide devient alors du carton, c'est-à-dire de la matière du jeu, au
- *     lieu d'être du blanc d'application.
+ * ET LA PLACE LIBÉRÉE VA AU TITRE. C'est l'autre moitié de la correction : la
+ * ligne d'accroche passe de 106 à 148 px, parce qu'elle est la seule chose
+ * qu'on peut lire sans cliquer. Elle ne partage plus l'image avec un écran
+ * qui la remplissait de haut en bas.
  */
-function page(lignes, imageDataURI, contenu, gens) {
-  const deborde = contenu >= 0.85;
-  const largeur = 1240;
-  /*
-   * TROIS POUR CENT DE MARGE SOUS LE CONTENU, et ce n'est pas de l'esthétique.
-   * Coupée pile à la dernière ligne, la carte donnait un texte collé au bord,
-   * qu'on lit comme une image tronquée plutôt que comme une carte posée.
-   */
-  const hautCadre = deborde ? H - 500 + 60 : Math.round(largeur * 2 * Math.min(contenu + 0.03, 1));
-  const haut = deborde ? 500 : 560;
+/*
+ * LE CADRE A UNE HAUTEUR FIXE, ET LA PLANCHE NE DIT QUE PAR OÙ COMMENCER.
+ *
+ * Première version : chaque planche déclarait un début ET une fin. Les six
+ * fenêtres ont donc fini de six hauteurs différentes, et sous les plus courtes
+ * s'ouvrait une plage de carton vide de six cents pixels — le défaut qu'on
+ * venait justement de corriger sur les captures au bas creux, réintroduit par
+ * la main gauche.
+ *
+ * Le cadre va maintenant du titre à l'attroupement, toujours. La planche dit
+ * seulement OÙ commencer à regarder, et la fenêtre qui suit est la même pour
+ * tout le monde : environ 60 % de l'écran au lieu de 100 %, ce qui double la
+ * surface qu'occupe l'élément à lire. On borne le départ pour ne jamais
+ * demander une fenêtre qui dépasse le bas de la capture.
+ */
+const BAS_CADRE = 2300;
+function cadre(depart, haut) {
+  const largeur = 1380;
+  const echelle = largeur / L;                   // la capture fait L de large
+  const hauteur = BAS_CADRE - haut;
+  const fenetre = hauteur / echelle / H;         // en fraction de la capture
+  const y0 = Math.min(Math.max(depart ?? 0, 0), Math.max(0, 1 - fenetre));
+  return { largeur, hauteur, y0, fenetre,
+           decalage: Math.round(H * y0 * echelle), hauteurImage: Math.round(H * echelle) };
+}
+
+/*
+ * LA FONTE SUIT LA LONGUEUR DE LA PHRASE.
+ *
+ * À 148 px, « 51 accessoires à gagner. » passait à la ligne et le titre
+ * mangeait le cadre. Agrandir un titre n'a d'intérêt que s'il tient sur sa
+ * ligne : au-delà, la seconde ligne coûte plus de lisibilité que les pixels
+ * n'en gagnent.
+ */
+const taille = (texte, grand, moyen, petit) =>
+  texte.length <= 20 ? grand : texte.length <= 23 ? moyen : petit;
+
+function page(lignes, imageDataURI, gens, pl) {
+  const haut = pl.enseigne ? 700 : 560;
+  const c = cadre(pl.depart, haut);
   return `<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="http://localhost:8099/fonts/fonts.css">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{width:${L}px;height:${H}px;overflow:hidden;position:relative;${CARTON}}
   .c{position:absolute;inset:0}
-  /* LE TITRE. Fredoka, la police des titres du jeu. Assez gros pour tenir en
-     vignette : c'est la seule chose qui doit rester lisible à 2 cm de haut. */
-  .titre{position:absolute;top:96px;left:0;right:0;text-align:center;
+  .titre{position:absolute;left:0;right:0;text-align:center;
     font-family:'Fredoka',system-ui,sans-serif;font-weight:600;color:#2A1F1A;
-    line-height:1.06;letter-spacing:-.01em;
-    text-shadow:0 2px 0 rgba(255,255,255,.14)}
-  .l1{font-size:106px}
-  .l2{font-size:78px;color:#4A3728;margin-top:12px}
-  .ecran{position:absolute;left:50%;top:${haut}px;width:${largeur}px;height:${hautCadre}px;
-    transform:translateX(-50%) rotate(-1.4deg);
-    border-radius:${deborde ? '34px 34px 0 0' : '34px'};overflow:hidden;
-    box-shadow:0 34px 70px rgba(38,26,16,.5), 0 0 0 10px rgba(58,42,30,.30);}
-  .ecran img{display:block;width:100%}
+    line-height:1.04;letter-spacing:-.015em;
+    text-shadow:0 2px 0 rgba(255,255,255,.16)}
+  .l1{font-size:${taille(lignes[0], 148, 126, 108)}px}
+  .l2{font-size:${taille(lignes[1], 104, 92, 82)}px;color:#4A3728;margin-top:8px}
+  /* L'ENSEIGNE : le nom du jeu, sur la seule planche que tout le monde voit.
+     C'est « Le Roi du Carton » et rien d'autre : une accroche n'est pas une
+     marque, et rebaptiser un jeu pour une fiche casserait le titre déposé,
+     l'icône, et les mots sur lesquels on est trouvé. */
+  .enseigne{position:absolute;top:76px;left:0;right:0;text-align:center;
+    font-family:'Fredoka',system-ui,sans-serif;font-weight:600;font-size:118px;
+    color:#241A12;letter-spacing:-.02em;
+    text-shadow:0 3px 0 rgba(255,255,255,.20), 0 6px 18px rgba(58,42,30,.28)}
+  .ecran{position:absolute;left:50%;top:${haut}px;width:${c.largeur}px;height:${c.hauteur}px;
+    transform:translateX(-50%) rotate(-1.2deg);
+    border-radius:30px;overflow:hidden;
+    box-shadow:0 34px 70px rgba(38,26,16,.5), 0 0 0 10px rgba(58,42,30,.30)}
+  .ecran img{position:absolute;left:0;top:${-c.decalage}px;width:100%;height:${c.hauteurImage}px}
 </style></head><body>
   ${COUCHES}
-  <div class="titre"><div class="l1">${lignes[0]}</div><div class="l2">${lignes[1]}</div></div>
+  ${pl.enseigne ? `<div class="enseigne">${LANG === 'en' ? 'Cardboard King' : 'Le Roi du Carton'}</div>
+  <svg width="620" height="26" viewBox="0 0 196 14" style="position:absolute;top:212px;left:50%;margin-left:-310px" aria-hidden>
+    <path d="M5 8 Q50 3 99 7 T191 5" fill="none" stroke="#241A12" stroke-width="2.4"
+      stroke-linecap="round" opacity=".78"/>
+  </svg>` : ''}
+  <div class="titre" style="top:${pl.enseigne ? 288 : 116}px">
+    <div class="l1">${lignes[0]}</div><div class="l2">${lignes[1]}</div>
+  </div>
   <div class="ecran"><img src="${imageDataURI}"></div>
-  ${scotch(`left:96px;top:${haut - 46}px;transform:rotate(-7deg)`)}
-  ${scotch(`right:90px;top:${haut - 22}px;transform:rotate(5deg)`)}
+  ${scotch(`left:118px;top:${haut - 46}px;transform:rotate(-7deg)`)}
+  ${scotch(`right:112px;top:${haut - 22}px;transform:rotate(5deg)`)}
   ${attroupement(gens)}
 </body></html>`;
 }
@@ -326,7 +376,7 @@ for (const pl of PLANCHES) {
   // Trois par planche, six planches : les douze visages tournent sans qu'aucun
   // ne revienne deux fois côte à côte.
   const gens = [0, 1, 2].map(k => gensDispo[(faites.length * 3 + k) % gensDispo.length]);
-  await p.setContent(page(pl[LANG], uri, contenu, gens), { waitUntil: 'load' });
+  await p.setContent(page(pl[LANG], uri, gens, pl), { waitUntil: 'load' });
   // Les polices ET l'image, décodées : capturer avant, c'est photographier
   // une police de repli et un cadre vide.
   await p.evaluate(async () => {
@@ -335,7 +385,8 @@ for (const pl of PLANCHES) {
   });
   const nom = `${String(faites.length + 1).padStart(2, '0')}-${pl.fichier.replace(/^\d+-/, '')}.png`;
   await p.screenshot({ path: join(SORTIE, nom) });
-  console.log(`  ok   ${nom.padEnd(28)} contenu ${(contenu * 100).toFixed(0).padStart(3)} %  ${contenu >= 0.85 ? 'débordant' : 'carte    '}  « ${pl[LANG][0]} ${pl[LANG][1]} »`);
+  const c = cadre(pl.depart, pl.enseigne ? 700 : 560);
+  console.log(`  ok   ${nom.padEnd(28)} fenêtre ${(c.y0 * 100).toFixed(0).padStart(3)}–${((c.y0 + c.fenetre) * 100).toFixed(0)} %  « ${pl[LANG][0]} ${pl[LANG][1]} »`);
   faites.push(nom);
 }
 
